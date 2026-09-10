@@ -1,0 +1,211 @@
+{
+ "catalog": {
+  "name": "entity:mrp.workcenter.capacity",
+  "description": "Complete definition of entity Work Center Capacity (mrp.workcenter.capacity).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mrp.workcenter.capacity",
+  "storage_name": "mrp_workcenter_capacity",
+  "full_name": "Work Center Capacity",
+  "kind": "persistent",
+  "description": "Work Center Capacity",
+  "defined_by_package": "mrp",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "workcenter_id",
+    "type": "Many2one",
+    "comodel": "mrp.workcenter",
+    "string": "Work Center",
+    "required": true,
+    "index": true,
+    "defined_in_package": "mrp",
+    "full_name": "Work Center",
+    "target_entity": "mrp.workcenter"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "defined_in_package": "mrp",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "compute": "_compute_product_uom_id",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "mrp",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "capacity",
+    "type": "Float",
+    "string": "Capacity",
+    "help": "Number of pieces that can be produced in parallel for this product or for all, depending on the unit.",
+    "defined_in_package": "mrp",
+    "full_name": "Capacity"
+   },
+   {
+    "name": "time_start",
+    "type": "Float",
+    "string": "Setup Time (minutes)",
+    "default": {
+     "dynamic": "_default_time_start"
+    },
+    "help": "Time in minutes for the setup.",
+    "defined_in_package": "mrp",
+    "full_name": "Setup Time (minutes)"
+   },
+   {
+    "name": "time_stop",
+    "type": "Float",
+    "string": "Cleanup Time (minutes)",
+    "default": {
+     "dynamic": "_default_time_stop"
+    },
+    "help": "Time in minutes for the cleaning.",
+    "defined_in_package": "mrp",
+    "full_name": "Cleanup Time (minutes)"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_positive_capacity",
+    "kind": "Constraint",
+    "definition": "CHECK(capacity >= 0)",
+    "message": "Capacity should be a non-negative number.",
+    "defined_in_package": "mrp"
+   },
+   {
+    "name": "_workcenter_product_product_uom_unique",
+    "kind": "UniqueIndex",
+    "definition": "(workcenter_id, COALESCE(product_id, 0), product_uom_id)",
+    "message": "Product/Unit capacity should be unique for each workcenter.",
+    "defined_in_package": "mrp"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_default_time_start",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_time_stop",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_mrp_workcenter_capacity_manager",
+    "package": "mrp",
+    "name": "mrp.workcenter.capacity.manager",
+    "entity": "mrp.workcenter.capacity",
+    "group": "mrp.group_mrp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mrp.access_mrp_workcenter_capacity_group_user",
+    "package": "mrp",
+    "name": "mrp.workcenter.capacity",
+    "entity": "mrp.workcenter.capacity",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,559 @@
+{
+ "catalog": {
+  "name": "entity:survey.question.answer",
+  "description": "Complete definition of entity Survey Label (survey.question.answer).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "survey.question.answer",
+  "storage_name": "survey_question_answer",
+  "full_name": "Survey Label",
+  "kind": "persistent",
+  "description": "Survey Label",
+  "defined_by_package": "survey",
+  "extended_by_packages": [
+   "survey_crm"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "question_id, sequence, id",
+  "display_name_field": "value",
+  "display_name_search_fields": [
+   "question_id.title",
+   "value"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "question_id",
+    "type": "Many2one",
+    "comodel": "survey.question",
+    "string": "Question",
+    "ondelete": "cascade",
+    "index": "btree_not_null",
+    "defined_in_package": "survey",
+    "full_name": "Question",
+    "target_entity": "survey.question"
+   },
+   {
+    "name": "matrix_question_id",
+    "type": "Many2one",
+    "comodel": "survey.question",
+    "string": "Question (as matrix row)",
+    "ondelete": "cascade",
+    "index": "btree_not_null",
+    "defined_in_package": "survey",
+    "full_name": "Question (as matrix row)",
+    "target_entity": "survey.question"
+   },
+   {
+    "name": "question_type",
+    "type": "Selection",
+    "related": "question_id.question_type",
+    "defined_in_package": "survey",
+    "string": "Question Type",
+    "full_name": "Question Type"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Label Sequence order",
+    "default": 10,
+    "defined_in_package": "survey",
+    "full_name": "Label Sequence order"
+   },
+   {
+    "name": "scoring_type",
+    "type": "Selection",
+    "related": "question_id.scoring_type",
+    "defined_in_package": "survey",
+    "string": "Scoring Type",
+    "full_name": "Scoring Type"
+   },
+   {
+    "name": "value",
+    "type": "Char",
+    "string": "Suggested value",
+    "translate": true,
+    "defined_in_package": "survey",
+    "full_name": "Suggested value"
+   },
+   {
+    "name": "value_image",
+    "type": "Image",
+    "string": "Image",
+    "max_width": 1024,
+    "max_height": 1024,
+    "defined_in_package": "survey",
+    "full_name": "Image"
+   },
+   {
+    "name": "value_image_filename",
+    "type": "Char",
+    "string": "Image Filename",
+    "defined_in_package": "survey",
+    "full_name": "Image Filename"
+   },
+   {
+    "name": "value_label",
+    "type": "Char",
+    "string": "Value Label",
+    "compute": "_compute_value_label",
+    "help": "Answer label as either the value itself if not empty or a letter representing the index of the answer otherwise.",
+    "defined_in_package": "survey",
+    "full_name": "Value Label"
+   },
+   {
+    "name": "is_correct",
+    "type": "Boolean",
+    "string": "Correct",
+    "defined_in_package": "survey",
+    "full_name": "Correct"
+   },
+   {
+    "name": "answer_score",
+    "type": "Float",
+    "string": "Score",
+    "help": "A positive score indicates a correct choice; a negative or null score indicates a wrong answer",
+    "defined_in_package": "survey",
+    "full_name": "Score"
+   },
+   {
+    "name": "generate_lead",
+    "type": "Boolean",
+    "string": "Lead creation",
+    "help": "Creates a lead when participants choose this answer",
+    "defined_in_package": "survey_crm",
+    "full_name": "Lead creation"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_value_not_empty",
+    "kind": "Constraint",
+    "definition": "CHECK (value IS NOT NULL OR value_image_filename IS NOT NULL)",
+    "message": "Suggested answer value must not be empty (a text and/or an image must be provided).",
+    "defined_in_package": "survey"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "value_label",
+         "question_id.question_type",
+         "question_id.title",
+         "matrix_question_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Render an answer name as \"Question title : Answer label value\", making sure it is not too long.\n\nUnless the answer is part of a matrix-type question, this implementation makes sure we have\nat least 30 characters for the question title, then we elide it, leaving the rest of the\nspace for the answer.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_value_label",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "question_id.suggested_answer_ids",
+         "sequence",
+         "value"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the label as the value if not empty or a letter representing the index of the answer otherwise. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_question_not_empty",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "question_id",
+         "matrix_question_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure that field question_id XOR field matrix_question_id is not null",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A label must be attached to only one question.",
+        "line": 913
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_answer_matching_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "row_id"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_question_not_empty",
+    "package": "survey",
+    "kind": "ValidationError",
+    "message": "A label must be attached to only one question."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_recruitment_survey.access_survey_question_answer_recruitment_manager",
+    "package": "hr_recruitment_survey",
+    "name": "survey.question.answer.recruitment.manager",
+    "entity": "survey.question.answer",
+    "group": "hr_recruitment.group_hr_recruitment_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "survey.access_survey_question_answer_all",
+    "package": "survey",
+    "name": "survey.question.answer.all",
+    "entity": "survey.question.answer",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "survey.access_survey_question_answer_user",
+    "package": "survey",
+    "name": "survey.question.answer.user",
+    "entity": "survey.question.answer",
+    "group": "base.group_user",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "survey.access_survey_question_answer_survey_user",
+    "package": "survey",
+    "name": "survey.question.answer.survey.user",
+    "entity": "survey.question.answer",
+    "group": "group_survey_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "survey.access_survey_question_answer_survey_manager",
+    "package": "survey",
+    "name": "survey.question.answer.survey.manager",
+    "entity": "survey.question.answer",
+    "group": "group_survey_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_slides_survey.access_survey_question_answer_slides_officer",
+    "package": "website_slides_survey",
+    "name": "survey.question.answer.slides.officer",
+    "entity": "survey.question.answer",
+    "group": "website_slides.group_website_slides_officer",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_recruitment_survey.survey_question_answer_rule_recruitment_manager",
+    "package": "hr_recruitment_survey",
+    "name": "Survey question answer: recruitment manager: all recruitment",
+    "entity": "survey.question.answer",
+    "domain": "['|', ('question_id.survey_id.survey_type', '=', 'recruitment'),\n                ('matrix_question_id.survey_id.survey_type', '=', 'recruitment')]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "survey.survey_question_answer_rule_survey_manager",
+    "package": "survey",
+    "name": "Survey question answer: manager: all",
+    "entity": "survey.question.answer",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_survey_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "survey.survey_question_answer_rule_survey_user",
+    "package": "survey",
+    "name": "Survey question answer: officer: unrestricted survey or in restricted users",
+    "entity": "survey.question.answer",
+    "domain": "[\n                '|',\n                    '|', ('question_id.survey_id.restrict_user_ids', 'in', user.id), ('matrix_question_id.survey_id.restrict_user_ids', 'in', user.id),\n                    '|', ('question_id.survey_id.restrict_user_ids', '=', False), ('matrix_question_id.survey_id.restrict_user_ids', '=', False)]",
+    "groups": "[(4, ref('group_survey_user'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "website_slides_survey.survey_question_answer_slide_channel_officer",
+    "package": "website_slides_survey",
+    "name": "Survey question answer: slide channel officer on certification: read",
+    "entity": "survey.question.answer",
+    "domain": "[\n            '|',\n                '&',\n                    '&', ('question_id.survey_id.certification', '=', True), ('question_id.survey_id.survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),\n                    '|', ('question_id.survey_id.restrict_user_ids', '=', False), ('question_id.survey_id.restrict_user_ids', 'in', user.id),\n                '&',\n                    '&', ('matrix_question_id.survey_id.certification', '=', True), ('matrix_question_id.survey_id.survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),\n                    '|', ('matrix_question_id.survey_id.restrict_user_ids', '=', False), ('matrix_question_id.survey_id.restrict_user_ids', 'in', user.id),\n        ]",
+    "groups": "[(4, ref('website_slides.group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "survey.survey_question_answer_view_tree",
+    "package": "survey",
+    "name": "survey.question.answer.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Survey Label",
+      "create": "false",
+      "default_order": "question_id"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "question_id"
+      },
+      {
+       "name": "value",
+       "string": "Answer"
+      },
+      {
+       "name": "answer_score",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "survey.survey_question_answer_view_form",
+    "package": "survey",
+    "name": "survey.question.answer.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Question Answer Form",
+      "create": "False"
+     },
+     "fields": [
+      {
+       "name": "question_type",
+       "invisible": "1"
+      },
+      {
+       "name": "scoring_type",
+       "invisible": "1"
+      },
+      {
+       "name": "question_id"
+      },
+      {
+       "name": "is_correct",
+       "invisible": "scoring_type == 'no_scoring'"
+      },
+      {
+       "name": "answer_score",
+       "invisible": "scoring_type == 'no_scoring' or question_type == 'matrix'"
+      },
+      {
+       "name": "value_image"
+      },
+      {
+       "name": "value"
+      },
+      {
+       "name": "matrix_question_id",
+       "invisible": "question_type != 'matrix'"
+      },
+      {
+       "name": "sequence"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "survey.survey_question_answer_view_search",
+    "package": "survey",
+    "name": "survey.question.answer.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Label"
+     },
+     "fields": [
+      {
+       "name": "question_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "group_by_question",
+       "string": "Question",
+       "domain": "[]",
+       "context": "{'group_by':'question_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "survey.survey_question_answer_action",
+    "package": "survey",
+    "name": "Suggested Values",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "survey_question_answer_view_search",
+    "domain": null,
+    "context": "{'search_default_group_by_question': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_empty_folder\">\n            No survey labels found\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "survey.question.answer"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

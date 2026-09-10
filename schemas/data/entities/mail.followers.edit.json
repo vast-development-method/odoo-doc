@@ -1,0 +1,389 @@
+{
+ "catalog": {
+  "name": "entity:mail.followers.edit",
+  "description": "Complete definition of entity Followers edit wizard (mail.followers.edit).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.followers.edit",
+  "storage_name": "mail_followers_edit",
+  "full_name": "Followers edit wizard",
+  "kind": "transient",
+  "description": "Followers edit wizard",
+  "defined_by_package": "mail",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "res_model",
+    "type": "Char",
+    "string": "Related Document Model",
+    "required": true,
+    "help": "Model of the followed resource",
+    "defined_in_package": "mail",
+    "full_name": "Related Document Model"
+   },
+   {
+    "name": "res_ids",
+    "type": "Char",
+    "string": "Related Document IDs",
+    "help": "Ids of the followed resources",
+    "defined_in_package": "mail",
+    "full_name": "Related Document identifiers"
+   },
+   {
+    "name": "operation",
+    "type": "Selection",
+    "selection": [
+     [
+      "add",
+      "Add"
+     ],
+     [
+      "remove",
+      "Remove"
+     ]
+    ],
+    "string": "Operation",
+    "required": true,
+    "default": "add",
+    "defined_in_package": "mail",
+    "full_name": "Operation"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "required": true,
+    "string": "Followers",
+    "defined_in_package": "mail",
+    "full_name": "Followers",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "message",
+    "type": "Html",
+    "string": "Message",
+    "defined_in_package": "mail",
+    "full_name": "Message"
+   },
+   {
+    "name": "notify",
+    "type": "Boolean",
+    "string": "Notify Recipients",
+    "default": false,
+    "defined_in_package": "mail",
+    "full_name": "Notify Recipients"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "edit_followers",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No documents found for the selected records.",
+        "line": 34
+       },
+       {
+        "kind": "UserError",
+        "message": "Unable to post message, please configure the sender's email address.",
+        "line": 39
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_message_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "documents",
+     "model_name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "edit_followers",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "No documents found for the selected records."
+   },
+   {
+    "operation": "edit_followers",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Unable to post message, please configure the sender's email address."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_followers_edit",
+    "package": "mail",
+    "name": "access.mail.followers.edit",
+    "entity": "mail.followers.edit",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mail.mail_followers_edit_form",
+    "package": "mail",
+    "name": "mail.followers.edit.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Add/Remove Followers"
+     },
+     "fields": [
+      {
+       "name": "res_model",
+       "invisible": "1"
+      },
+      {
+       "name": "res_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "operation",
+       "widget": "radio",
+       "options": "{'horizontal': true}"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags_email",
+       "context": "{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form', 'force_email': True}",
+       "options": "{'warn_future': True, 'edit_tags': True}",
+       "placeholder": "Add contacts"
+      },
+      {
+       "name": "notify",
+       "widget": "boolean_toggle",
+       "invisible": "operation == 'remove'",
+       "options": "{'autosave': False}"
+      },
+      {
+       "name": "message",
+       "widget": "html_mail",
+       "invisible": "not notify or operation == 'remove'",
+       "options": "{'no-attachment': true}",
+       "placeholder": "Extra Comments ..."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "edit_followers",
+       "string": "Update Followers",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1,
+      "many2many_tags_email": 1,
+      "boolean_toggle": 1,
+      "html_mail": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_followers_list_edit_form",
+    "package": "mail",
+    "name": "mail.followers.list.edit.form",
+    "view_type": "data",
+    "inherits_view": "mail_followers_edit_form",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "operation",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "edit_followers",
+       "position": "attributes"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "crm.mail_followers_edit_action_from_lead",
+    "package": "crm",
+    "name": "Add/Remove Followers",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_res_model': 'crm.lead', 'default_res_ids': active_ids}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_crm_lead",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.followers.edit"
+   },
+   {
+    "external_identifier": "hr_recruitment.mail_followers_edit_action_from_hr_recruitment",
+    "package": "hr_recruitment",
+    "name": "Add/Remove Followers",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_res_model': 'hr.applicant', 'default_res_ids': active_ids}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "hr_recruitment.model_hr_applicant",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.followers.edit"
+   },
+   {
+    "external_identifier": "project.mail_followers_edit_action_from_task",
+    "package": "project",
+    "name": "Add/Remove Followers",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_res_model': 'project.task', 'default_res_ids': active_ids}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "project.model_project_task",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.followers.edit"
+   },
+   {
+    "external_identifier": "purchase.mail_followers_edit_action_from_purchase",
+    "package": "purchase",
+    "name": "Add/Remove Followers",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_res_model': 'purchase.order', 'default_res_ids': active_ids}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "purchase.model_purchase_order",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.followers.edit"
+   },
+   {
+    "external_identifier": "sale.mail_followers_edit_action_from_sale",
+    "package": "sale",
+    "name": "Add/Remove Followers",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_res_model': 'sale.order', 'default_res_ids': active_ids}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "sale.model_sale_order",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "mail.followers.edit"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

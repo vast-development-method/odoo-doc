@@ -1,0 +1,1465 @@
+{
+ "catalog": {
+  "name": "entity:hr.department",
+  "description": "Complete definition of entity Department (hr.department).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.department",
+  "storage_name": "hr_department",
+  "full_name": "Department",
+  "kind": "persistent",
+  "description": "Department",
+  "defined_by_package": "hr",
+  "extended_by_packages": [
+   "hr_expense",
+   "hr_holidays",
+   "hr_recruitment",
+   "website_hr_recruitment"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "name",
+  "display_name_field": "complete_name",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": true,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Department Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "hr",
+    "full_name": "Department Name"
+   },
+   {
+    "name": "complete_name",
+    "type": "Char",
+    "string": "Complete Name",
+    "compute": "_compute_complete_name",
+    "recursive": true,
+    "search": "_search_complete_name",
+    "defined_in_package": "hr",
+    "full_name": "Complete Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "hr",
+    "full_name": "Active"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "compute": "_compute_company_id",
+    "store": true,
+    "recursive": true,
+    "index": true,
+    "readonly": false,
+    "tracking": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "hr",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "string": "Parent Department",
+    "index": true,
+    "check_company": true,
+    "defined_in_package": "hr",
+    "full_name": "Parent Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "child_ids",
+    "type": "One2many",
+    "comodel": "hr.department",
+    "inverse_name": "parent_id",
+    "string": "Child Departments",
+    "defined_in_package": "hr",
+    "full_name": "Child Departments",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Manager",
+    "tracking": true,
+    "domain": "['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]",
+    "defined_in_package": "hr",
+    "full_name": "Manager",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "member_ids",
+    "type": "One2many",
+    "comodel": "hr.employee",
+    "inverse_name": "department_id",
+    "string": "Members",
+    "readonly": true,
+    "defined_in_package": "hr",
+    "full_name": "Members",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "has_read_access",
+    "type": "Boolean",
+    "search": "_search_has_read_access",
+    "store": false,
+    "export_string_translation": false,
+    "defined_in_package": "hr",
+    "string": "Has Read Access",
+    "full_name": "Has Read Access"
+   },
+   {
+    "name": "total_employee",
+    "type": "Integer",
+    "compute": "_compute_total_employee",
+    "string": "Total Employee",
+    "export_string_translation": false,
+    "defined_in_package": "hr",
+    "full_name": "Total Employee"
+   },
+   {
+    "name": "jobs_ids",
+    "type": "One2many",
+    "comodel": "hr.job",
+    "inverse_name": "department_id",
+    "string": "Jobs",
+    "defined_in_package": "hr",
+    "full_name": "Jobs",
+    "target_entity": "hr.job"
+   },
+   {
+    "name": "plan_ids",
+    "type": "One2many",
+    "comodel": "mail.activity.plan",
+    "inverse_name": "department_id",
+    "defined_in_package": "hr",
+    "string": "Plan",
+    "full_name": "Plan",
+    "target_entity": "mail.activity.plan"
+   },
+   {
+    "name": "plans_count",
+    "type": "Integer",
+    "compute": "_compute_plan_count",
+    "defined_in_package": "hr",
+    "string": "Plans Count",
+    "full_name": "Plans Count"
+   },
+   {
+    "name": "note",
+    "type": "Text",
+    "string": "Note",
+    "defined_in_package": "hr",
+    "full_name": "Note"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color Index",
+    "defined_in_package": "hr",
+    "full_name": "Color Index"
+   },
+   {
+    "name": "parent_path",
+    "type": "Char",
+    "index": true,
+    "defined_in_package": "hr",
+    "string": "Parent Path",
+    "full_name": "Parent Path"
+   },
+   {
+    "name": "master_department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "string": "Master Department",
+    "compute": "_compute_master_department_id",
+    "store": true,
+    "defined_in_package": "hr",
+    "full_name": "Master Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "expenses_to_approve_count",
+    "type": "Integer",
+    "compute": "_compute_expenses_to_approve_count",
+    "string": "Expenses to Approve",
+    "defined_in_package": "hr_expense",
+    "full_name": "Expenses to Approve"
+   },
+   {
+    "name": "absence_of_today",
+    "type": "Integer",
+    "compute": "_compute_leave_count",
+    "string": "Absence by Today",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Absence by Today"
+   },
+   {
+    "name": "leave_to_approve_count",
+    "type": "Integer",
+    "compute": "_compute_leave_count",
+    "string": "Time Off to Approve",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off to Approve"
+   },
+   {
+    "name": "allocation_to_approve_count",
+    "type": "Integer",
+    "compute": "_compute_leave_count",
+    "string": "Allocation to Approve",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocation to Approve"
+   },
+   {
+    "name": "new_applicant_count",
+    "type": "Integer",
+    "compute": "_compute_new_applicant_count",
+    "string": "New Applicant",
+    "compute_sudo": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "New Applicant"
+   },
+   {
+    "name": "new_hired_employee",
+    "type": "Integer",
+    "compute": "_compute_recruitment_stats",
+    "string": "New Hired Employee",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "New Hired Employee"
+   },
+   {
+    "name": "expected_employee",
+    "type": "Integer",
+    "compute": "_compute_recruitment_stats",
+    "string": "Expected Employee",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Expected Employee"
+   },
+   {
+    "name": "display_name",
+    "type": "Char",
+    "compute_sudo": true,
+    "defined_in_package": "website_hr_recruitment",
+    "string": "Display Name",
+    "full_name": "Display Name"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "hierarchical_naming"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_has_read_access",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_complete_name",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "name_create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_complete_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "parent_id.complete_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_master_department_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_path"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_employee",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_plan_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_parent_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot create recursive departments.",
+        "line": 118
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_id",
+         "parent_id.company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": "If updating manager of a department, we need to update all the employees\nof department hierarchy, and subscribe the new manager.",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_employee_manager",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "manager_id"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_formview_action",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "access_uid"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_plan_from_department",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_employee_from_department",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_children_department_ids",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_view_child_departments",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_department_hierarchy",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_expenses_to_approve_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_leave_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_action_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_leave_department",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_allocation_department",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_new_applicant_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_recruitment_stats",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_parent_id",
+    "package": "hr",
+    "kind": "ValidationError",
+    "message": "You cannot create recursive departments."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr.access_hr_department_user",
+    "package": "hr",
+    "name": "hr.department.user",
+    "entity": "hr.department",
+    "group": "group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr.access_hr_department_employee",
+    "package": "hr",
+    "name": "hr.department.employee",
+    "entity": "hr.department",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_hr_recruitment.access_hr_department_public",
+    "package": "website_hr_recruitment",
+    "name": "hr.department.public",
+    "entity": "hr.department",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr.hr_dept_comp_rule",
+    "package": "hr",
+    "name": "Department multi company rule",
+    "entity": "hr.department",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_hr_recruitment.hr_department_public",
+    "package": "website_hr_recruitment",
+    "name": "Job department: Public",
+    "entity": "hr.department",
+    "domain": "['|', ('jobs_ids.website_published', '=', True), ('child_ids', 'not in', [])]",
+    "groups": "[(4, ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr.view_department_form",
+    "package": "hr",
+    "name": "hr.department.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "department"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "total_employee",
+       "widget": "statinfo",
+       "string": "Employees"
+      },
+      {
+       "name": "plans_count",
+       "widget": "statinfo",
+       "string": "Plans"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "name",
+       "invisible": "1"
+      },
+      {
+       "name": "manager_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "parent_id"
+      },
+      {
+       "name": "child_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker",
+       "string": "Color"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_employee_from_department",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-users"
+      },
+      {
+       "name": "action_plan_from_department",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-list-ul"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 2,
+      "many2one_avatar_employee": 1,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "action_employee_from_department",
+       "type": "object",
+       "icon": "fa-users"
+      },
+      {
+       "class": "oe_stat_button",
+       "type": "object",
+       "name": "action_plan_from_department",
+       "icon": "fa-list-ul"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr.view_department_tree",
+    "package": "hr",
+    "name": "hr.department.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Companies",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "manager_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "total_employee",
+       "string": "Employees"
+      },
+      {
+       "name": "parent_id"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker",
+       "string": "Color"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr.view_department_filter",
+    "package": "hr",
+    "name": "hr.department.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Departments"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Department"
+      },
+      {
+       "name": "manager_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "message_needaction",
+       "string": "Unread Messages",
+       "domain": "[('message_needaction','=',True)]",
+       "groups": "mail.group_mail_notification_type_inbox"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr.hr_department_view_kanban",
+    "package": "hr",
+    "name": "hr.department.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "highlight_color": "color",
+      "class": "o_hr_department_kanban o_kanban_small_column",
+      "can_open": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "active"
+      },
+      {
+       "name": "color",
+       "widget": "kanban_color_picker"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "manager_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "1",
+       "options": "{'display_avatar_name': True}"
+      },
+      {
+       "name": "company_id"
+      },
+      {
+       "name": "total_employee"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_employee_from_department",
+       "type": "object",
+       "class": "btn btn-primary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "kanban_color_picker": 1,
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_department_view_kanban",
+    "package": "hr_attendance",
+    "name": "hr.department.kanban.inherit",
+    "view_type": "data",
+    "inherits_view": "hr.hr_department_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('o_kanban_manage_reports')]",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_department_view_kanban",
+    "package": "hr_expense",
+    "name": "hr.department.kanban.inherit",
+    "view_type": "data",
+    "inherits_view": "hr.hr_department_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "expenses_to_approve_count",
+       "groups": "hr_expense.group_hr_expense_team_approver"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='kanban_primary_right']",
+       "position": "inside"
+      },
+      {
+       "expr": "//div[hasclass('o_kanban_manage_reports')]",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.hr_department_view_kanban",
+    "package": "hr_holidays",
+    "name": "hr.department.kanban.inherit",
+    "view_type": "data",
+    "inherits_view": "hr.hr_department_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "total_employee"
+      },
+      {
+       "name": "absence_of_today"
+      },
+      {
+       "name": "leave_to_approve_count",
+       "groups": "hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "allocation_to_approve_count",
+       "groups": "hr_holidays.group_hr_holidays_user"
+      },
+      {
+       "name": "absence_of_today",
+       "widget": "progressbar",
+       "options": "{'current_value': 'absence_of_today', 'max_value': 'total_employee', 'editable': false}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "progressbar": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//templates",
+       "position": "before"
+      },
+      {
+       "expr": "//div[@name='kanban_primary_right']",
+       "position": "inside"
+      },
+      {
+       "expr": "//div[@name='kanban_card_lower_content']",
+       "position": "inside"
+      },
+      {
+       "expr": "//div[hasclass('o_kanban_manage_reports')]",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_org_chart.hr_department_hierarchy_view",
+    "package": "hr_org_chart",
+    "name": "hr.departmnent.view.hierarchy",
+    "view_type": "hierarchy",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "hierarchy",
+     "root_attributes": {
+      "child_field": "child_ids",
+      "draggable": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "color"
+      },
+      {
+       "name": "total_employee"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "manager_id",
+       "widget": "many2one_avatar_employee"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_employee_from_department",
+       "type": "object",
+       "class": "btn btn-link"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_department_view_kanban",
+    "package": "hr_recruitment",
+    "name": "hr.department.kanban.inherit",
+    "view_type": "data",
+    "inherits_view": "hr.hr_department_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "new_applicant_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='kanban_primary_right']",
+       "position": "inside"
+      },
+      {
+       "expr": "//div[hasclass('o_kanban_manage_reports')]",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills.hr_department_view_kanban",
+    "package": "hr_skills",
+    "name": "hr.department.kanban.inherit.hr.skills",
+    "view_type": "xpath",
+    "inherits_view": "hr.hr_department_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('o_kanban_manage_reports')]",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('o_kanban_manage_reports')]",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_timesheet.hr_department_view_kanban",
+    "package": "hr_timesheet",
+    "name": "hr.department.kanban.inherit",
+    "view_type": "data",
+    "inherits_view": "hr.hr_department_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('o_kanban_manage_reports')]",
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr.hr_department_tree_action",
+    "package": "hr",
+    "name": "Departments",
+    "view_mode": "list,form,kanban",
+    "view_id": null,
+    "search_view_id": "view_department_filter",
+    "domain": "[(\"has_read_access\", \"=\", True)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a new department\n                </p><p>\n                    Structure Employees per department and have an overview of e.g.\n                    expenses, timesheets, time off, recruitment, etc.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.department"
+   },
+   {
+    "external_identifier": "hr.hr_department_kanban_action",
+    "package": "hr",
+    "name": "Departments",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": "view_department_filter",
+    "domain": "[(\"has_read_access\", \"=\", True)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a new department\n                </p><p>\n                    Structure Employees per department and have an overview of e.g.\n                    expenses, timesheets, time off, recruitment, etc.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.department"
+   },
+   {
+    "external_identifier": "hr_recruitment.action_hr_department",
+    "package": "hr_recruitment",
+    "name": "Departments",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.department"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "hr_skills.action_open_skills_log_department",
+    "package": "hr_skills",
+    "name": "Skill History Report",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

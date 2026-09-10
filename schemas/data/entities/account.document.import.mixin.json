@@ -1,0 +1,448 @@
+{
+ "catalog": {
+  "name": "entity:account.document.import.mixin",
+  "description": "Complete definition of entity Business document import mixin (account.document.import.mixin).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.document.import.mixin",
+  "storage_name": "account_document_import_mixin",
+  "full_name": "Business document import mixin",
+  "kind": "abstract",
+  "description": "Business document import mixin",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_create_records_from_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attachments",
+     "grouping_method"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "For each attachment, create a corresponding record, and attempt to decode the\nattachment on the record.\n\nSome attachments (e.g. in some EDI formats) may contain multiple business\ndocuments; in that case, we attempt to separate them and create a new record for\neach business document.\n\n⚠️ Because this method commits the cursor, try to:\n(1) do as much work as possible before calling this method, and\n(2) avoid triggering a SerializationError later in the request. If a SerializationError happens,\n    `retrying` will cause the whole request to be retried, which may cause some things\n    to be duplicated. That may be more or less undesirable, depending on what you're doing.",
+      "size_in_lines": 46,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_group_files_data_by_origin_attachment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "files_data"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "A naive grouping method which does the following:\n\n- if a file_data has an 'origin_attachment', it is assigned to the same group as the 'origin_attachment'.\n- otherwise, it is assigned to a new group.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_group_files_data_into_groups_of_mixed_types",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "files_data"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "A grouping method with a heuristic that enables it to dispatch files of the same type to\ndifferent groups, but files of different types to the same group.\n\nThis makes it suitable for grouping attachments received through a journal mail alias.\nFor example, receiving 5 PDFs will dispatch them into 5 groups (one per PDF),\nbut receiving one PDF, one JPG and one XML will dispatch them all into a single group.",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_assign_attachment_to_group_of_different_type",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "incoming_file_data",
+     "groups"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Add the attachment to the group which doesn't yet have an attachment of the same root type\n(however, attachments with no root type don't clash with each other).\nIf several groups are available, we choose the group which has the highest filename similarity.",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_assign_attachment_to_group_with_same_origin_attachment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "incoming_file_data",
+     "groups"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Attachments that come from the same origin attachment are added to the same group. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_similarity_score",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "filename1",
+     "filename2"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Compute a similarity score between two filenames.\nThis is used to group files with similar names together as much as possible\nwhen figuring out how to dispatch attachments received in a mail alias.\n\nSimilarity is defined as the length of the largest common substring between\nthe two filenames.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extend_with_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "files_data",
+     "new"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Extend/enhance a business document with one or more attachments.\n\nOnly the attachment with the highest priority will be used to extend the business document,\nusing the appropriate decoder.\n\nThe decoder may break Python and SQL constraints in difficult-to-predict ways.\nThis method calls the decoder in such a way that any exceptions instead roll back the transaction\nand log a message on the invoice chatter.\n\nThis method will not extract embedded files for you - if you want embedded files to be\nconsidered, you must pass them as part of the `attachments` recordset.\n\n:param self:        An invoice on which to apply the attachments.\n:param files_data:  A list of file_data dicts, each representing an in-DB or extracted attachment.\n:param new:         If true, indicates that the invoice was newly created, will be passed to the decoder.\n:return:            True if at least one document is successfully imported.\n\n⚠️ Because this method commits the cursor, try to:\n(1) do as much work as possible before calling this method, and\n(2) avoid triggering a SerializationError later in the request. If a SerializationError happens,\n    `retrying` will cause the whole request to be retried, which may cause some things\n    to be duplicated. That may be more or less undesirable, depending on what you're doing.",
+      "size_in_lines": 87,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_edi_decoder",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "file_data",
+     "new"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Main method that should be overridden to implement decoders for various file types.\n\n:param file_data: A dict representing an attachment which should be decoded.\n:param new:       (optional) whether the business document was newly created.\n:return:          A dict with the following keys:\n    - decoder:     The decoder function to use. This function should return either None\n                   if decoding was successful, or a string explaining why decoding failed.\n    - priority:    The priority of the decoder.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_attachment_fields_to_clear",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Return a list of fields that should be cleared when an attachment is unattached from the record. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fix_attachments_on_record",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attachments"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Ensure that only attachments of certain types appear in `self`'s attachments.\n\nThis is to provide a consistent behaviour where only certain attachment types\nappear in the chatter's attachments, to avoid cluttering the attachments view.",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fix_attachments_on_record_from_files_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "valid_files_data",
+     "extra_files_data"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_attach_to_record",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attachment"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Indicate whether a given attachment should be displayed in the record's attachments. ",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_files_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attachments"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper method to convert an ir.attachment recordset into an intermediate `files_data` format\nused by the import framework.\n\n:return: a list of dicts, each dict representing one of the attachments in `self`.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_from_files_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "files_data"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper method to convert a `files_data` list-of-dicts back into an ir.attachment recordset.\nThis only returns those elements in `files_data` which correspond to an ir.attachment\n(thus, embedded files that were never turned into ir.attachments are omitted).",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_import_file_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "file_data"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Method to be overridden to identify a file's format. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_xml_tree",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "file_data"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Parse file_data['raw'] into an lxml.etree.ElementTree.\nCan be overridden if custom decoding is needed.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unwrap_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "files_data",
+     "recurse"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Unwrap and return any embedded files.\n\n:param files_data: The files to be unwrapped.\n:param recurse: if True, embedded-of-embedded attachments will also be unwrapped and returned.\n:return: a `files_data` list representation of the embedded attachments.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unwrap_attachment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "file_data",
+     "recurse"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Unwrap a single attachment and return its embedded attachments.\n\nThis method can be overridden to implement custom unwrapping behaviours\n(e.g. EDI formats which contain multiple business documents in a single file)\n\n:param file_data: The file to be unwrapped.\n:param recurse: if True, should return embedded-of-embedded attachments.\n:return: a `files_data` list representation of the embedded attachements.",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_xml_into_new_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "file_data",
+     "tag"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper method to split an XML file into multiple files on a given tag.\n\nIn EDIs, some XMLs contain multiple business documents.\nIn such cases, we often want any business document beyond the first to have its\nown attachment that can be decoded separately.\nThis helper method looks whether the provided XML tree (given in `file_data`) has multiple\ninstances of the given `tag`, and creates a new attachment for each tag beyond the first.\nThe new attachment has the same XML structure as the original file, but only has one instance\nof the specified tag.\n\n:param file_data: The XML file to split\n:param tag: The tag which the XML file should be split on if there are multiple instances of it\n:return: a `files_data` list of files, for each business document beyond the first.",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

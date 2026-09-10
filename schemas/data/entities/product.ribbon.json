@@ -1,0 +1,445 @@
+{
+ "catalog": {
+  "name": "entity:product.ribbon",
+  "description": "Complete definition of entity Product ribbon (product.ribbon).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.ribbon",
+  "storage_name": "product_ribbon",
+  "full_name": "Product ribbon",
+  "kind": "persistent",
+  "description": "Product ribbon",
+  "defined_by_package": "website_sale",
+  "extended_by_packages": [
+   "website_sale_stock"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence ASC, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Ribbon Name",
+    "required": true,
+    "translate": true,
+    "size": 20,
+    "defined_in_package": "website_sale",
+    "full_name": "Ribbon Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "website_sale",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "bg_color",
+    "type": "Char",
+    "string": "Background Color",
+    "required": true,
+    "default": "#000000",
+    "defined_in_package": "website_sale",
+    "full_name": "Background Color"
+   },
+   {
+    "name": "text_color",
+    "type": "Char",
+    "string": "Text Color",
+    "required": true,
+    "default": "#FFFFFF",
+    "defined_in_package": "website_sale",
+    "full_name": "Text Color"
+   },
+   {
+    "name": "position",
+    "type": "Selection",
+    "string": "Position",
+    "selection": [
+     [
+      "left",
+      "Left"
+     ],
+     [
+      "right",
+      "Right"
+     ]
+    ],
+    "required": true,
+    "default": "left",
+    "defined_in_package": "website_sale",
+    "full_name": "Position"
+   },
+   {
+    "name": "style",
+    "type": "Selection",
+    "string": "Style",
+    "selection": [
+     [
+      "ribbon",
+      "Ribbon"
+     ],
+     [
+      "tag",
+      "Badge"
+     ]
+    ],
+    "required": true,
+    "default": "ribbon",
+    "help": "Defines the display style:\n- Ribbon: Shows a ribbon banner on the product image.\n- Badge: Shows a small badge label on the product image.",
+    "defined_in_package": "website_sale",
+    "full_name": "Style"
+   },
+   {
+    "name": "assign",
+    "type": "Selection",
+    "string": "Assign",
+    "selection": [
+     [
+      "manual",
+      "Manually"
+     ],
+     [
+      "sale",
+      "On Sale"
+     ],
+     [
+      "new",
+      "When New"
+     ],
+     [
+      "out_of_stock",
+      "when out of stock"
+     ]
+    ],
+    "required": true,
+    "default": "manual",
+    "help": "Defines how this ribbon is assigned to products:\n- Manually: You assign the ribbon manually to products.\n- Sale: Applied when the product is visibly on sale.\n- New: Applied based on the New period you will define.\n- Out Of Stock: Applied when the product is out of stock.",
+    "defined_in_package": "website_sale",
+    "selection_added_by": [
+     "website_sale_stock"
+    ],
+    "ondelete": {
+     "out_of_stock": "cascade"
+    },
+    "extended_in_packages": [
+     "website_sale_stock"
+    ],
+    "full_name": "Assign"
+   },
+   {
+    "name": "new_period",
+    "type": "Integer",
+    "default": 30,
+    "defined_in_package": "website_sale",
+    "string": "New Period",
+    "full_name": "New Period"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_assign",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "assign"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure only one ribbon exists per automatic assign type.\nThis prevents duplicates, since automatic assignment logic always uses the first ribbon\nwith a given assign value.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Only one ribbon with the assign %s is allowed.",
+        "line": 65
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_css_classes",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Return the CSS classes for this ribbon based on style and position.\nrtype: str",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_applicable_for",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product",
+     "price_data"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Return whether the product matches the criteria of the ribbon automatic assignment.\n\n:param product.product product: the displayed product\n:param dict price_data: price information for the given product\n    (sales price for shop page, combination information for product page)\n\n:return: Whether the ribbon matches the given product and price.\n:rtype: bool",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale_stock",
+      "decorators": [],
+      "documentation": "Override of `website_sale` to handle `out_of_stock` ribbons.",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_assign",
+    "package": "website_sale",
+    "kind": "ValidationError",
+    "message": "Only one ribbon with the assign %s is allowed."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_sale.access_product_ribbon_public_public",
+    "package": "website_sale",
+    "name": "product.ribbon.public",
+    "entity": "product.ribbon",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_ribbon_public_portal",
+    "package": "website_sale",
+    "name": "product.ribbon.public",
+    "entity": "product.ribbon",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_ribbon_public_employee",
+    "package": "website_sale",
+    "name": "product.ribbon.public",
+    "entity": "product.ribbon",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_ribbon_sale_manager",
+    "package": "website_sale",
+    "name": "product.ribbon.sale_manager",
+    "entity": "product.ribbon",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "website_sale.product_ribbon_form_view",
+    "package": "website_sale",
+    "name": "product.ribbon.form.view",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "New Collection"
+      },
+      {
+       "name": "assign"
+      },
+      {
+       "name": "new_period"
+      },
+      {
+       "name": "position",
+       "widget": "radio",
+       "options": "{'horizontal': True}"
+      },
+      {
+       "name": "style",
+       "widget": "radio",
+       "options": "{'horizontal': True}"
+      },
+      {
+       "name": "text_color",
+       "widget": "color"
+      },
+      {
+       "name": "bg_color",
+       "widget": "color"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": null,
+       "string": "Display",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "radio": 2,
+      "color": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_sale.product_ribbon_view_tree",
+    "package": "website_sale",
+    "name": "product.ribbon.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Product Ribbon"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "position"
+      },
+      {
+       "name": "text_color",
+       "widget": "color",
+       "readonly": "1"
+      },
+      {
+       "name": "bg_color",
+       "widget": "color",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "color": 2
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_sale.product_ribbon_action",
+    "package": "website_sale",
+    "name": "Product Ribbons",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'create': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Define a new ribbon\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "product.ribbon"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "website_sale.product_catalog_product_ribbons",
+    "package": "website_sale",
+    "name": "Product Ribbons",
+    "parent_id": null,
+    "action": "website_sale.product_ribbon_action",
+    "sequence": null,
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

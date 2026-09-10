@@ -1,0 +1,2152 @@
+{
+ "catalog": {
+  "name": "views:account.analytic.line",
+  "description": "View declarations for entity account.analytic.line.",
+  "record_count": 41,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account.view_account_analytic_line_form_inherit_account",
+   "package": "account",
+   "name": "account.analytic.line.form.inherit.account",
+   "entity": "account.analytic.line",
+   "view_type": "data",
+   "inherits_view": "analytic.view_account_analytic_line_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "data",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "ref"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "move_line_id",
+      "widget": "line_open_move_widget",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "general_account_id",
+      "readonly": "move_line_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "line_open_move_widget": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='amount']",
+      "position": "after"
+     },
+     {
+      "expr": "//field[@name='product_uom_id']",
+      "position": "before"
+     },
+     {
+      "element": "group",
+      "attributes": {
+       "name": "amount",
+       "position": "after"
+      },
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <data>\n                    <xpath expr=\"//field[@name='amount']\" position=\"after\">\n                        <field name=\"ref\"/>\n                        <field name=\"partner_id\"/>\n                    </xpath>\n                    <xpath expr=\"//field[@name='product_uom_id']\" position=\"before\">\n                        <field name=\"product_id\"/>\n                    </xpath>\n                    <group name=\"amount\" position=\"after\">\n                        <group/> \n                        <group name=\"accounting\" string=\"Accounting\">\n                            <field name=\"move_line_id\" options=\"{'no_create': True}\" widget=\"line_open_move_widget\"/>\n                            <field name=\"general_account_id\" readonly=\"move_line_id\"/>\n                        </group>\n                    </group>\n                </data>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_analytic_line_tree_inherit_account",
+   "package": "account",
+   "name": "account.analytic.line.list.inherit.account",
+   "entity": "account.analytic.line",
+   "view_type": "data",
+   "inherits_view": "analytic.view_account_analytic_line_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "data",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "ref",
+      "column_invisible": "context.get('to_invoice', False)",
+      "optional": "hide"
+     },
+     {
+      "name": "general_account_id",
+      "optional": "hide"
+     },
+     {
+      "name": "move_line_id",
+      "widget": "line_open_move_widget",
+      "optional": "hide"
+     },
+     {
+      "name": "product_id",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "line_open_move_widget": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='account_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <data>\n                    <xpath expr=\"//field[@name='account_id']\" position=\"after\">\n                        <field name=\"ref\" column_invisible=\"context.get('to_invoice', False)\" optional=\"hide\"/>\n                        <field name=\"general_account_id\" optional=\"hide\"/>\n                        <field name=\"move_line_id\" widget=\"line_open_move_widget\" optional=\"hide\"/>\n                        <field name=\"product_id\" optional=\"hide\"/>\n                    </xpath>\n                </data>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_analytic_line_filter_inherit_account",
+   "package": "account",
+   "name": "account.analytic.line.select.inherit.account",
+   "entity": "account.analytic.line",
+   "view_type": "data",
+   "inherits_view": "analytic.view_account_analytic_line_filter",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "data",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "auto_account_id"
+     },
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "general_account_id"
+     },
+     {
+      "name": "partner_id",
+      "filter_domain": "[('partner_id','child_of',self)]"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "fiscal_date",
+      "string": "From last fiscal year",
+      "domain": "[('fiscal_year_search', '=', True)]",
+      "invisible": "1"
+     },
+     {
+      "name": "profit_loss_accounts",
+      "string": "P&L Accounts",
+      "domain": "[('general_account_id.internal_group', 'in', ['income', 'expense'])]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "account_id",
+      "context": "{'group_by': 'account_id'}"
+     },
+     {
+      "name": "group_by_financial_account",
+      "string": "Financial Account",
+      "context": "{'group_by':'general_account_id'}"
+     },
+     {
+      "name": "category",
+      "string": "Category",
+      "context": "{'group_by': 'category'}"
+     },
+     {
+      "name": "product",
+      "string": "Product",
+      "context": "{'group_by':'product_id'}"
+     },
+     {
+      "name": "partner",
+      "string": "Partner",
+      "context": "{'group_by':'partner_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='date']",
+      "position": "after"
+     },
+     {
+      "expr": "//filter[@name='month']",
+      "position": "after"
+     },
+     {
+      "expr": "//group[@name='groupby']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <data>\n                    <xpath expr=\"//field[@name='date']\" position=\"after\">\n                        <field name=\"auto_account_id\"/>\n                        <field name=\"account_id\"/>\n                        <field name=\"product_id\"/>\n                        <field name=\"general_account_id\"/>\n                        <field name=\"partner_id\" filter_domain=\"[('partner_id','child_of',self)]\"/>\n                    </xpath>\n                    <xpath expr=\"//filter[@name='month']\" position=\"after\">\n                        <filter name=\"fiscal_date\" string=\"From last fiscal year\" domain=\"[('fiscal_year_search', '=', True)]\" invisible=\"1\"/>\n                        <separator/>\n                        <filter name=\"profit_loss_accounts\" string=\"P&amp;L Accounts\" domain=\"[('general_account_id.internal_group', 'in', ['income', 'expense'])]\"/>\n                    </xpath>\n                    <xpath expr=\"//group[@name='groupby']\" position=\"inside\">\n                        <separator/>\n                        <filter name=\"account_id\" context=\"{'group_by': 'account_id'}\"/>\n                        <separator/>\n                        <filter string=\"Financial Account\" name=\"group_by_financial_account\" context=\"{'group_by':'general_account_id'}\"/>\n                        <filter string=\"Category\" name=\"category\" context=\"{'group_by': 'category'}\"/>\n                        <filter string=\"Product\" name=\"product\" context=\"{'group_by':'product_id'}\"/>\n                        <filter string=\"Partner\" name=\"partner\" context=\"{'group_by':'partner_id'}\"/>\n                    </xpath>\n                </data>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_analytic_line_pivot",
+   "package": "account",
+   "name": "account.analytic.line.pivot",
+   "entity": "account.analytic.line",
+   "view_type": "field",
+   "inherits_view": "analytic.view_account_analytic_line_pivot",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "account_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "account_id",
+      "position": "after"
+     },
+     {
+      "name": "partner_id",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"account_id\" position=\"after\">\n                    <field name=\"partner_id\" type=\"row\" invisible=\"1\"/>\n                </field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "analytic.view_account_analytic_line_tree",
+   "package": "analytic",
+   "name": "account.analytic.line.list",
+   "entity": "account.analytic.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Analytic Items",
+     "multi_edit": "1",
+     "js_class": "analytic_list"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "date",
+      "optional": "show"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "analytic_distribution",
+      "widget": "analytic_distribution",
+      "options": "{'multi_edit': true}",
+      "optional": "hide"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "unit_amount",
+      "optional": "hide",
+      "sum": "Quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "optional": "hide"
+     },
+     {
+      "name": "partner_id",
+      "optional": "hide"
+     },
+     {
+      "name": "company_id",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "amount",
+      "optional": "show",
+      "sum": "Total"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "analytic_distribution": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Analytic Items\" multi_edit=\"1\" js_class=\"analytic_list\">\n                <field name=\"company_id\" column_invisible=\"True\"/>\n                <field name=\"date\" optional=\"show\"/>\n                <field name=\"name\"/>\n                <field name=\"account_id\"/>\n                <field name=\"analytic_distribution\" widget=\"analytic_distribution\" optional=\"hide\" options=\"{'multi_edit': true}\"/>\n                <field name=\"currency_id\" column_invisible=\"True\"/>\n                <field name=\"unit_amount\" sum=\"Quantity\" optional=\"hide\"/>\n                <field name=\"product_uom_id\" optional=\"hide\"/>\n                <field name=\"partner_id\" optional=\"hide\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"show\"/>\n                <field name=\"amount\" sum=\"Total\" optional=\"show\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "analytic.view_account_analytic_line_filter",
+   "package": "analytic",
+   "name": "account.analytic.line.select",
+   "entity": "account.analytic.line",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Analytic Lines"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "date"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "month",
+      "string": "Date",
+      "date": "date"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_date",
+      "string": "Date",
+      "context": "{'group_by': 'date'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Analytic Lines\">\n                <field name=\"name\"/>\n                <field name=\"date\"/>\n                <separator/>\n                <filter name=\"month\" string=\"Date\" date=\"date\"/>\n                <group name=\"groupby\">\n                    <separator/>\n                    <filter string=\"Date\" name=\"group_date\" context=\"{'group_by': 'date'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "analytic.view_account_analytic_line_form",
+   "package": "analytic",
+   "name": "account.analytic.line.form",
+   "entity": "account.analytic.line",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Analytic Item"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "amount"
+     },
+     {
+      "name": "unit_amount"
+     },
+     {
+      "name": "product_uom_id"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Analytic Item\">\n            <field name=\"company_id\" invisible=\"1\"/>\n            <sheet>\n                <group>\n                    <group name=\"analytic_item\" string=\"Analytic Item\">\n                        <field name=\"name\"/>\n                        <field name=\"account_id\"/>\n                        <field name=\"date\"/>\n                        <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n                    </group>\n                    <group name=\"amount\" string=\"Amount\">\n                        <field name=\"amount\"/>\n                        <field name=\"unit_amount\"/>\n                        <field name=\"product_uom_id\" class=\"oe_inline\"/>\n                        <field name=\"currency_id\" invisible=\"1\"/>\n                    </group>\n                </group>\n            </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "analytic.view_account_analytic_line_graph",
+   "package": "analytic",
+   "name": "account.analytic.line.graph",
+   "entity": "account.analytic.line",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Analytic Items",
+     "sample": "1",
+     "js_class": "analytic_graph"
+    },
+    "fields": [
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "float_time"
+     },
+     {
+      "name": "amount"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "float_time": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "unit_amount",
+      "type": "measure",
+      "widget": "float_time"
+     },
+     {
+      "name": "amount",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Analytic Items\" sample=\"1\" js_class=\"analytic_graph\">\n                <field name=\"account_id\"/>\n                <field name=\"unit_amount\" type=\"measure\" widget=\"float_time\"/>\n                <field name=\"amount\" type=\"measure\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "analytic.view_account_analytic_line_pivot",
+   "package": "analytic",
+   "name": "account.analytic.line.pivot",
+   "entity": "account.analytic.line",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Analytic Items",
+     "sample": "1",
+     "js_class": "analytic_pivot"
+    },
+    "fields": [
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "amount"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "date",
+      "interval": "month",
+      "type": "col"
+     },
+     {
+      "name": "amount",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Analytic Items\" sample=\"1\" js_class=\"analytic_pivot\">\n                <field name=\"account_id\"/>\n                <field name=\"date\" interval=\"month\" type=\"col\"/>\n                <field name=\"amount\" type=\"measure\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "analytic.view_account_analytic_line_kanban",
+   "package": "analytic",
+   "name": "account.analytic.line.kanban",
+   "entity": "account.analytic.line",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "js_class": "analytic_kanban"
+    },
+    "fields": [
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "currency_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "account_id"
+     },
+     {
+      "name": "amount",
+      "widget": "monetary"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "monetary": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\" js_class=\"analytic_kanban\">\n                <field name=\"account_id\"/>\n                <field name=\"currency_id\"/>\n                <templates>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex justify-content-between\">\n                            <field class=\"fw-bold fs-5\" name=\"name\"/>\n                            <field class=\"text-end fw-bold fs-5\" name=\"date\"/>\n                        </div>\n                        <div class=\"d-flex justify-content-between\">\n                            <field class=\"text-muted\" name=\"account_id\"/>\n                            <field class=\"justify-content-end\" name=\"amount\" widget=\"monetary\"/>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_timesheet.hr_timesheet_line_tree",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.list.hr_timesheet",
+   "entity": "account.analytic.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "editable": "top",
+     "string": "Timesheet Activities",
+     "sample": "1",
+     "decoration-muted": "readonly_timesheet == True"
+    },
+    "fields": [
+     {
+      "name": "readonly_timesheet",
+      "column_invisible": "True"
+     },
+     {
+      "name": "date",
+      "readonly": "readonly_timesheet"
+     },
+     {
+      "name": "employee_id",
+      "readonly": "readonly_timesheet",
+      "column_invisible": "True"
+     },
+     {
+      "name": "project_id",
+      "readonly": "readonly_timesheet",
+      "required": "1",
+      "context": "{'search_default_my_projects': True}",
+      "options": "{'no_create_edit': True}"
+     },
+     {
+      "name": "task_id",
+      "widget": "task_with_hours",
+      "readonly": "readonly_timesheet",
+      "context": "{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}",
+      "options": "{'no_create_edit': True, 'no_open': True}",
+      "optional": "show"
+     },
+     {
+      "name": "name",
+      "readonly": "readonly_timesheet",
+      "required": "0",
+      "optional": "show"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "readonly": "readonly_timesheet",
+      "string": "Time Spent",
+      "optional": "show",
+      "sum": "Total",
+      "decoration-danger": "unit_amount > 24 or unit_amount < 0",
+      "decoration-muted": "unit_amount == 0"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "user_id",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "task_with_hours": 1,
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "editable": "top",
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-muted": "readonly_timesheet == True"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list editable=\"top\" string=\"Timesheet Activities\" sample=\"1\" decoration-muted=\"readonly_timesheet == True\">\n                    <field name=\"readonly_timesheet\" column_invisible=\"True\"/>\n                    <field name=\"date\" readonly=\"readonly_timesheet\"/>\n                    <field name=\"employee_id\" column_invisible=\"True\" readonly=\"readonly_timesheet\"/>\n                    <field name=\"project_id\" options=\"{'no_create_edit': True}\" required=\"1\" readonly=\"readonly_timesheet\" context=\"{'search_default_my_projects': True}\"/>\n                    <field name=\"task_id\" optional=\"show\" options=\"{'no_create_edit': True, 'no_open': True}\" widget=\"task_with_hours\" context=\"{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}\" readonly=\"readonly_timesheet\"/>\n                    <field name=\"name\" optional=\"show\" required=\"0\" readonly=\"readonly_timesheet\"/>\n                    <field name=\"unit_amount\" string=\"Time Spent\" optional=\"show\" widget=\"timesheet_uom\" sum=\"Total\" readonly=\"readonly_timesheet\" decoration-danger=\"unit_amount &gt; 24 or unit_amount &lt; 0\" decoration-muted=\"unit_amount == 0\"/>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"user_id\" column_invisible=\"True\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.hr_timesheet_line_portal_tree",
+   "package": "hr_timesheet",
+   "name": "portal.hr_timesheet.account.analytic.line.list",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet_line_tree",
+   "mode": "primary",
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//list\" position=\"attributes\">\n                    <attribute name=\"edit\">0</attribute>\n                    <attribute name=\"create\">0</attribute>\n                    <attribute name=\"delete\">0</attribute>\n                    <attribute name=\"js_class\"/>\n                </xpath>\n                <xpath expr=\"//field[@name='task_id']\" position=\"attributes\">\n                    <attribute name=\"options\">{'no_create_edit': True, 'no_open': True}</attribute>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.timesheet_view_tree_user",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.view.list.with.user",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet_line_tree",
+   "mode": "primary",
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='employee_id']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='employee_id']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='employee_id']\" position=\"attributes\">\n                    <attribute name=\"column_invisible\">0</attribute>\n                    <attribute name=\"required\">1</attribute>\n                    <attribute name=\"widget\">many2one_avatar_employee</attribute>\n                    <attribute name=\"context\">{'active_test': True}</attribute>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_hr_timesheet_line_pivot",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.pivot",
+   "entity": "account.analytic.line",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Timesheets",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "string": "Time Spent"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "employee_id",
+      "type": "row"
+     },
+     {
+      "name": "date",
+      "interval": "month",
+      "type": "col"
+     },
+     {
+      "name": "unit_amount",
+      "string": "Time Spent",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <pivot string=\"Timesheets\" sample=\"1\">\n                    <field name=\"employee_id\" type=\"row\"/>\n                    <field name=\"date\" interval=\"month\" type=\"col\"/>\n                    <field name=\"unit_amount\" string=\"Time Spent\" type=\"measure\" widget=\"timesheet_uom\"/>\n                    <field name=\"amount\" string=\"Timesheet Costs\"/>\n                </pivot>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_my_timesheet_line_pivot",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.pivot",
+   "entity": "account.analytic.line",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Timesheet",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "string": "Time Spent"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date",
+      "interval": "week",
+      "type": "row"
+     },
+     {
+      "name": "unit_amount",
+      "string": "Time Spent",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <pivot string=\"Timesheet\" sample=\"1\">\n                    <field name=\"date\" interval=\"week\" type=\"row\"/>\n                    <field name=\"unit_amount\" string=\"Time Spent\" type=\"measure\" widget=\"timesheet_uom\"/>\n                    <field name=\"amount\" string=\"Timesheet Costs\"/>\n                </pivot>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_hr_timesheet_line_graph",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.graph",
+   "entity": "account.analytic.line",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Timesheets",
+     "sample": "1",
+     "js_class": "hr_timesheet_graphview"
+    },
+    "fields": [
+     {
+      "name": "task_id"
+     },
+     {
+      "name": "project_id"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "string": "Time Spent"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "task_id"
+     },
+     {
+      "name": "project_id"
+     },
+     {
+      "name": "unit_amount",
+      "string": "Time Spent",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <graph string=\"Timesheets\" sample=\"1\" js_class=\"hr_timesheet_graphview\">\n                    <field name=\"task_id\"/>\n                    <field name=\"project_id\"/>\n                    <field name=\"unit_amount\" string=\"Time Spent\" type=\"measure\" widget=\"timesheet_uom\"/>\n                    <field name=\"amount\" string=\"Timesheet Costs\"/>\n                </graph>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_hr_timesheet_line_graph_my",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.graph",
+   "entity": "account.analytic.line",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Timesheet",
+     "sample": "1",
+     "js_class": "hr_timesheet_graphview"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "project_id"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "string": "Time Spent"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date",
+      "interval": "week"
+     },
+     {
+      "name": "project_id"
+     },
+     {
+      "name": "amount",
+      "type": "measure",
+      "string": "Timesheet Costs"
+     },
+     {
+      "name": "unit_amount",
+      "string": "Time Spent",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <graph string=\"Timesheet\" sample=\"1\" js_class=\"hr_timesheet_graphview\">\n                    <field name=\"date\" interval=\"week\"/>\n                    <field name=\"project_id\"/>\n                    <field name=\"amount\" type=\"measure\" string=\"Timesheet Costs\"/>\n                    <field name=\"unit_amount\" string=\"Time Spent\" type=\"measure\" widget=\"timesheet_uom\"/>\n                </graph>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_hr_timesheet_line_graph_all",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.graph",
+   "entity": "account.analytic.line",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Timesheet",
+     "sample": "1",
+     "js_class": "hr_timesheet_graphview"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "project_id"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "string": "Time Spent"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "project_id"
+     },
+     {
+      "name": "amount",
+      "type": "measure",
+      "string": "Timesheet Costs"
+     },
+     {
+      "name": "unit_amount",
+      "string": "Time Spent",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <graph string=\"Timesheet\" sample=\"1\" js_class=\"hr_timesheet_graphview\">\n                    <field name=\"employee_id\"/>\n                    <field name=\"project_id\"/>\n                    <field name=\"amount\" type=\"measure\" string=\"Timesheet Costs\"/>\n                    <field name=\"unit_amount\" string=\"Time Spent\" type=\"measure\" widget=\"timesheet_uom\"/>\n                </graph>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_hr_timesheet_line_by_project",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.graph.by.project",
+   "entity": "account.analytic.line",
+   "view_type": "field",
+   "inherits_view": "hr_timesheet.view_hr_timesheet_line_graph_all",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "project_id",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "project_id",
+      "position": "replace"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"project_id\" position=\"replace\"/>\n                <field name=\"employee_id\" position=\"before\">\n                    <field name=\"date\" interval=\"month\"/>\n                    <field name=\"task_id\"/>\n                </field>\n                <field name=\"employee_id\" position=\"attributes\">\n                    <attribute name=\"invisible\">1</attribute>\n                </field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_hr_timesheet_line_graph_by_employee",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.graph.by.employee",
+   "entity": "account.analytic.line",
+   "view_type": "field",
+   "inherits_view": "hr_timesheet.view_hr_timesheet_line_graph_all",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "project_id",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "project_id",
+      "position": "replace"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"project_id\" position=\"replace\"/>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.hr_timesheet_line_form",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.form",
+   "entity": "account.analytic.line",
+   "view_type": "form",
+   "inherits_view": "False",
+   "mode": null,
+   "priority": "1",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Analytic Entry"
+    },
+    "fields": [
+     {
+      "name": "readonly_timesheet",
+      "invisible": "1"
+     },
+     {
+      "name": "project_id",
+      "readonly": "readonly_timesheet",
+      "required": "1",
+      "context": "{'search_default_my_projects': True}",
+      "options": "{'no_create_edit': True}"
+     },
+     {
+      "name": "task_id",
+      "widget": "task_with_hours",
+      "readonly": "readonly_timesheet",
+      "context": "{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}",
+      "options": "{'no_create_edit': True}"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "date",
+      "readonly": "readonly_timesheet"
+     },
+     {
+      "name": "amount",
+      "invisible": "1"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "readonly": "readonly_timesheet",
+      "string": "Time Spent",
+      "decoration-danger": "unit_amount > 24",
+      "decoration-muted": "unit_amount == 0"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "widget": "text",
+      "readonly": "readonly_timesheet",
+      "required": "0",
+      "nolabel": "1",
+      "placeholder": "Describe your activity"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "task_with_hours": 1,
+     "timesheet_uom": 1,
+     "text": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Analytic Entry\">\n                    <sheet string=\"Analytic Entry\">\n                        <group>\n                            <group>\n                                <field name=\"readonly_timesheet\" invisible=\"1\"/>\n                                <field name=\"project_id\" options=\"{'no_create_edit': True}\" context=\"{'search_default_my_projects': True}\" required=\"1\" readonly=\"readonly_timesheet\"/>\n                                <field name=\"task_id\" widget=\"task_with_hours\" options=\"{'no_create_edit': True}\" context=\"{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}\" readonly=\"readonly_timesheet\"/>\n                                <field name=\"company_id\" groups=\"base.group_multi_company\" invisible=\"1\"/>\n                            </group>\n                            <group>\n                                <field name=\"date\" readonly=\"readonly_timesheet\"/>\n                                <field name=\"amount\" invisible=\"1\"/>\n                                <field name=\"unit_amount\" string=\"Time Spent\" widget=\"timesheet_uom\" decoration-danger=\"unit_amount &gt; 24\" readonly=\"readonly_timesheet\" decoration-muted=\"unit_amount == 0\"/>\n                                <field name=\"currency_id\" invisible=\"1\"/>\n                                <field name=\"company_id\" invisible=\"1\"/>\n                            </group>\n                        </group>\n                        <field name=\"name\" placeholder=\"Describe your activity\" widget=\"text\" nolabel=\"1\" required=\"0\" readonly=\"readonly_timesheet\"/>\n                    </sheet>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.timesheet_view_form_user",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.list.with.user",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.hr_timesheet_line_form",
+   "mode": "primary",
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='date']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "widget": "many2one_avatar_employee",
+      "readonly": "readonly_timesheet",
+      "required": "1",
+      "context": "{'active_test': True}",
+      "groups": "hr_timesheet.group_hr_timesheet_approver"
+     },
+     {
+      "name": "user_id",
+      "invisible": "1",
+      "groups": "hr_timesheet.group_hr_timesheet_approver"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_employee": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='date']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='date']\" position=\"before\">\n                    <field name=\"employee_id\" groups=\"hr_timesheet.group_hr_timesheet_approver\" widget=\"many2one_avatar_employee\" required=\"1\" readonly=\"readonly_timesheet\" context=\"{'active_test': True}\"/>\n                    <field name=\"user_id\" invisible=\"1\" groups=\"hr_timesheet.group_hr_timesheet_approver\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.hr_timesheet_line_search",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.search",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "analytic.view_account_analytic_line_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//filter[@name='month']",
+     "position": "before"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "mine",
+      "string": "My Timesheets",
+      "domain": "[('user_id', '=', uid)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//filter[@name='month']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//filter[@name='month']\" position=\"before\">\n                    <filter name=\"mine\" string=\"My Timesheets\" domain=\"[('user_id', '=', uid)]\"/>\n                    <separator/>\n                </xpath>\n                <filter name=\"month\" position=\"inside\">\n                    <filter name=\"date_this_week\" string=\"This Week\" domain=\"[                         ('date', '&gt;=', '=week_start'),                         ('date', '&lt;', '=week_start +1w'),                     ]\"/>\n                    <filter name=\"date_today\" string=\"Today\" domain=\"[('date', '&gt;=', 'today'), ('date', '&lt;', 'today +1d')]\"/>\n                    <filter name=\"date_last_week\" string=\"Last Week\" domain=\"[                         ('date', '&gt;=', '=week_start -1w'),                         ('date', '&lt;', '=week_start'),                     ]\"/>\n                </filter>\n                <xpath expr=\"//group[@name='groupby']\" position=\"before\">\n                    <field name=\"employee_id\"/>\n                    <field name=\"project_id\"/>\n                    <field name=\"task_id\"/>\n                    <field name=\"parent_task_id\"/>\n                    <field name=\"department_id\"/>\n                    <field name=\"manager_id\"/>\n                </xpath>\n                <xpath expr=\"//group[@name='groupby']\" position=\"inside\">\n                    <filter string=\"Project\" name=\"groupby_project\" domain=\"[]\" context=\"{'group_by': 'project_id'}\"/>\n                    <filter string=\"Parent Task\" name=\"groupby_parent_task\" domain=\"[]\" context=\"{'group_by': 'parent_task_id'}\"/>\n                    <filter string=\"Task\" name=\"groupby_task\" domain=\"[]\" context=\"{'group_by': 'task_id'}\"/>\n                    <filter string=\"Department\" name=\"groupby_department\" domain=\"[]\" context=\"{'group_by': 'department_id'}\"/>\n                    <filter string=\"Manager\" name=\"groupby_manager\" domain=\"[]\" context=\"{'group_by': 'manager_id'}\"/>\n                    <filter string=\"Employee\" name=\"groupby_employee\" domain=\"[]\" context=\"{'group_by': 'employee_id'}\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.timesheet_view_form_portal_user",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.form",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.timesheet_view_form_user",
+   "mode": "primary",
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='employee_id']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='employee_id']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='employee_id']\" position=\"attributes\">\n                    <attribute name=\"required\">1</attribute>\n                    <attribute name=\"widget\">many2one_avatar_employee</attribute>\n                    <attribute name=\"context\">{'active_test': True}</attribute>\n                    <attribute name=\"options\">{'no_open': True}</attribute>\n                    <attribute name=\"readonly\">1</attribute>\n                </xpath>\n                <xpath expr=\"//field[@name='project_id']\" position=\"attributes\">\n                    <attribute name=\"options\">{'no_create_edit': True, 'no_open': True}</attribute>\n                    <attribute name=\"readonly\">1</attribute>\n                </xpath>\n                <xpath expr=\"//field[@name='task_id']\" position=\"attributes\">\n                    <attribute name=\"options\">{'no_create_edit': True, 'no_open': True}</attribute>\n                    <attribute name=\"readonly\">1</attribute>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.hr_timesheet_line_my_timesheet_search",
+   "package": "hr_timesheet",
+   "name": "view.search.my.timesheet.menu",
+   "entity": "account.analytic.line",
+   "view_type": "field",
+   "inherits_view": "hr_timesheet_line_search",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "employee_id",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "position": "replace"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"employee_id\" position=\"replace\"/>\n                <field name=\"department_id\" position=\"replace\"/>\n                <field name=\"manager_id\" position=\"replace\"/>\n                <filter name=\"mine\" position=\"replace\"/>\n                <filter name=\"groupby_department\" position=\"replace\"/>\n                <filter name=\"groupby_manager\" position=\"replace\"/>\n                <filter name=\"groupby_employee\" position=\"replace\"/>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_kanban_account_analytic_line",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.kanban",
+   "entity": "account.analytic.line",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "employee_id",
+      "widget": "image",
+      "invisible": "1",
+      "options": "{'preview_image': 'avatar_128'}"
+     },
+     {
+      "name": "project_id"
+     },
+     {
+      "name": "task_id",
+      "invisible": "context.get('default_project_id')"
+     },
+     {
+      "name": "task_id",
+      "invisible": "not context.get('default_project_id')"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_duration_uom",
+      "decoration-danger": "unit_amount > 24",
+      "decoration-muted": "unit_amount == 0"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "timesheet_duration_uom": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban class=\"o_kanban_mobile\" sample=\"1\">\n                    <field name=\"company_id\" invisible=\"1\"/>\n                    <templates>\n                        <t t-name=\"card\">\n                            <div class=\"d-flex gap-1\">\n                                <span t-att-title=\"record.employee_id.value\">\n                                    <field name=\"employee_id\" widget=\"image\" options=\"{'preview_image': 'avatar_128'}\" class=\"o_image_64_cover me-2 float-start\" invisible=\"1\"/>\n                                    <img t-att-src=\"'/web/image/hr.employee.public/' + record.employee_id.raw_value + '/avatar_128'                                     + '?unique=' + record.write_date.raw_value\" class=\"o_image_64_cover float-start me-2\" alt=\"Employee's image\"/>\n                                </span>\n                                <div class=\"d-flex flex-column min-w-0 lh-sm\">\n                                    <span class=\"text-truncate\" invisible=\"context.get('default_project_id')\" t-att-title=\"record.project_id.value\">\n                                        <field name=\"project_id\" class=\"p-0 fw-bold fs-5\"/>\n                                    </span>\n                                    <span name=\"task_id_wrapper\" class=\"text-truncate\" t-att-title=\"record.task_id.value\">\n                                        <field name=\"task_id\" invisible=\"context.get('default_project_id')\"/>\n                                        <field name=\"task_id\" invisible=\"not context.get('default_project_id')\" class=\"p-0 fw-bold fs-5\"/>\n                                    </span>\n                                    <span>\n                                        <i class=\"fa fa-calendar me-1\" role=\"img\" aria-label=\"Date\" title=\"Date\"/>\n                                        <field name=\"date\"/><span invisible=\"context.get('is_my_timesheets')\"> - <field name=\"employee_id\"/></span>\n                                    </span>\n                                    <span class=\"text-truncate\" t-att-title=\"record.name.value\"><field name=\"name\" class=\"fst-italic\"/></span>\n                                </div>\n                            </div>\n                            <footer class=\"mt-0 pt-0\">\n                                <div class=\"d-flex ms-auto\">\n                                    <strong><field name=\"unit_amount\" widget=\"timesheet_duration_uom\" decoration-danger=\"unit_amount &gt; 24\" decoration-muted=\"unit_amount == 0\" class=\"ms-1\"/></strong>\n                                </div>\n                            </footer>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_calendar_account_analytic_line",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.calendar",
+   "entity": "account.analytic.line",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "scales": "month",
+     "mode": "month",
+     "date_start": "date",
+     "color": "employee_id",
+     "show_unusual_days": "True",
+     "multi_create_view": "hr_timesheet.view_calendar_account_analytic_line_multi_create",
+     "js_class": "timesheet_calendar",
+     "create_name_field": "calendar_display_name",
+     "form_view_id": "%(hr_timesheet.hr_timesheet_line_form)d"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "widget": "many2one_avatar_employee"
+     },
+     {
+      "name": "project_id"
+     },
+     {
+      "name": "task_id",
+      "invisible": "not task_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "employee_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_employee": 1
+    },
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "date",
+     "date_stop": null,
+     "date_delay": null,
+     "color": "employee_id",
+     "mode": "month",
+     "quick_create": null,
+     "event_open_popup": null,
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <calendar scales=\"month\" mode=\"month\" date_start=\"date\" color=\"employee_id\" show_unusual_days=\"True\" multi_create_view=\"hr_timesheet.view_calendar_account_analytic_line_multi_create\" js_class=\"timesheet_calendar\" create_name_field=\"calendar_display_name\" form_view_id=\"%(hr_timesheet.hr_timesheet_line_form)d\">\n                    <field name=\"employee_id\" avatar_field=\"avatar_128\" widget=\"many2one_avatar_employee\"/>\n                    <field name=\"project_id\"/>\n                    <field name=\"task_id\" invisible=\"not task_id\"/>\n                    <field name=\"name\"/>\n                    <field name=\"employee_id\" avatar_field=\"avatar_128\" filters=\"1\" write_model=\"account.analytic.line.calendar.employee\" write_field=\"employee_id\" filter_field=\"checked\"/>\n                </calendar>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_calendar_account_analytic_line_multi_create",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.calendar.multi_create",
+   "entity": "account.analytic.line",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "project_id",
+      "required": "1",
+      "context": "{'search_default_my_projects': True}",
+      "options": "{'no_create_edit': True}"
+     },
+     {
+      "name": "task_id",
+      "widget": "task_with_hours",
+      "context": "{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "string": "Time Spent",
+      "decoration-danger": "unit_amount > 24",
+      "decoration-muted": "unit_amount == 0"
+     },
+     {
+      "name": "name",
+      "required": "0",
+      "placeholder": "e.g. Sending E-mails"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "task_with_hours": 1,
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form>\n                    <group>\n                        <field name=\"project_id\" options=\"{'no_create_edit': True}\" context=\"{'search_default_my_projects': True}\" required=\"1\"/>\n                        <field name=\"task_id\" widget=\"task_with_hours\" context=\"{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}\"/>\n                        <field name=\"unit_amount\" string=\"Time Spent\" widget=\"timesheet_uom\" decoration-danger=\"unit_amount &gt; 24\" decoration-muted=\"unit_amount == 0\"/>\n                        <field name=\"name\" required=\"0\" placeholder=\"e.g. Sending E-mails\"/>\n                    </group>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_calendar_account_analytic_line_my_timesheets",
+   "package": "hr_timesheet",
+   "name": "account.analytic.line.calendar",
+   "entity": "account.analytic.line",
+   "view_type": "calendar",
+   "inherits_view": "hr_timesheet.view_calendar_account_analytic_line",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "calendar",
+      "attributes": {
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ],
+    "calendar": {
+     "date_start": null,
+     "date_stop": null,
+     "date_delay": null,
+     "color": null,
+     "mode": null,
+     "quick_create": null,
+     "event_open_popup": null,
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <calendar position=\"attributes\">\n                    <attribute name=\"color\">project_id</attribute>\n                    <attribute name=\"js_class\">timesheet_calendar_my_timesheets</attribute>\n                </calendar>\n                <field name=\"employee_id\" position=\"replace\"/>\n                <field name=\"employee_id\" filters=\"1\" position=\"replace\"/>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_kanban_account_analytic_line_portal_user",
+   "package": "hr_timesheet",
+   "name": "portal.account.analytic.line.kanban",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.view_kanban_account_analytic_line",
+   "mode": "primary",
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div/span",
+     "position": "replace",
+     "class": "ps-0"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div/span",
+      "position": "replace"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//div/span\" position=\"replace\" class=\"ps-0\"/>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project_account.project_view_account_analytic_line_graph",
+   "package": "project_account",
+   "name": "account.analytic.line.graph",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "analytic.view_account_analytic_line_graph",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//graph",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "date"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//graph",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//graph\" position=\"inside\">\n                <field name=\"date\" type=\"row\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='account_id']\" position=\"replace\">\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "project_account.project_view_account_analytic_line_pivot",
+   "package": "project_account",
+   "name": "account.analytic.line.pivot",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "analytic.view_account_analytic_line_pivot",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//pivot",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "date"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//pivot",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//pivot\" position=\"inside\">\n                <field name=\"date\" type=\"row\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='partner_id']\" position=\"attributes\">\n                <attribute name=\"invisible\">context.get('group_by_date', False)</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='account_id']\" position=\"replace\">\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.timesheet_view_search",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.search",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.hr_timesheet_line_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='task_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "order_id",
+      "string": "Sales Order",
+      "filter_domain": "['|', ('so_line', 'ilike', self), ('order_id', 'ilike', self)]"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='task_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='task_id']\" position=\"after\">\n                    <field name=\"order_id\" string=\"Sales Order\" filter_domain=\"['|', ('so_line', 'ilike', self), ('order_id', 'ilike', self)]\"/>\n                </xpath>\n                <xpath expr=\"//filter[@name='month']\" position=\"before\">\n                    <filter name=\"billable_fixed\" string=\"Billed at a Fixed Price\" domain=\"[('timesheet_invoice_type', '=', 'billable_fixed')]\" groups=\"sales_team.group_sale_salesman\"/>\n                    <filter name=\"billable_time\" string=\"Billed on Timesheets\" domain=\"[('timesheet_invoice_type', '=', 'billable_time')]\" groups=\"sales_team.group_sale_salesman\"/>\n                    <filter name=\"billable_milestones\" string=\"Billed on Milestones\" domain=\"[('timesheet_invoice_type', '=', 'billable_milestones')]\" groups=\"sales_team.group_sale_salesman\"/>\n                    <filter name=\"billable_manual\" string=\"Billed Manually\" domain=\"[('timesheet_invoice_type', '=', 'billable_manual')]\" groups=\"sales_team.group_sale_salesman\"/>\n                    <filter name=\"non_billable\" string=\"Non-Billable\" domain=\"[('timesheet_invoice_type', '=', 'non_billable')]\" groups=\"sales_team.group_sale_salesman\"/>\n                    <separator/>\n                </xpath>\n                <xpath expr=\"//filter[@name='groupby_employee']\" position=\"after\">\n                    <filter string=\"Sales Order Item\" name=\"groupby_sale_order_item\" domain=\"[]\" context=\"{'group_by': 'so_line'}\" groups=\"sales_team.group_sale_salesman\"/>\n                    <filter string=\"Invoice\" name=\"groupby_invoice\" domain=\"[]\" context=\"{'group_by': 'timesheet_invoice_id'}\" groups=\"sales_team.group_sale_salesman\"/>\n                    <filter string=\"Billing Type\" name=\"groupby_timesheet_invoice_type\" domain=\"[]\" context=\"{'group_by': 'timesheet_invoice_type'}\" groups=\"sales_team.group_sale_salesman\"/>\n                </xpath>\n            </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.hr_timesheet_line_tree_inherit",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.list.inherit",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.hr_timesheet_line_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list/field[@name='name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "commercial_partner_id",
+      "column_invisible": "True",
+      "groups": "sales_team.group_sale_salesman"
+     },
+     {
+      "name": "is_so_line_edited",
+      "column_invisible": "True",
+      "groups": "sales_team.group_sale_salesman"
+     },
+     {
+      "name": "allow_billable",
+      "column_invisible": "True",
+      "groups": "sales_team.group_sale_salesman"
+     },
+     {
+      "name": "so_line",
+      "widget": "so_line_field",
+      "invisible": "not allow_billable",
+      "readonly": "readonly_timesheet",
+      "context": "{'create': False, 'edit': False, 'delete': False}",
+      "options": "{'no_create': True, 'no_open': True}",
+      "column_invisible": "context.get('hide_so_line')",
+      "optional": "show",
+      "groups": "sales_team.group_sale_salesman",
+      "placeholder": "Non-billable"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "so_line_field": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//list/field[@name='name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list/field[@name='name']\" position=\"after\">\n                <field name=\"commercial_partner_id\" column_invisible=\"True\" groups=\"sales_team.group_sale_salesman\"/>\n                <field name=\"is_so_line_edited\" column_invisible=\"True\" groups=\"sales_team.group_sale_salesman\"/>\n                <field name=\"allow_billable\" column_invisible=\"True\" groups=\"sales_team.group_sale_salesman\"/>\n                <field name=\"so_line\" widget=\"so_line_field\" optional=\"show\" options=\"{'no_create': True, 'no_open': True}\" context=\"{'create': False, 'edit': False, 'delete': False}\" invisible=\"not allow_billable\" readonly=\"readonly_timesheet\" column_invisible=\"context.get('hide_so_line')\" placeholder=\"Non-billable\" groups=\"sales_team.group_sale_salesman\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.hr_timesheet_line_form_inherit",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.form.inherit",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.hr_timesheet_line_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='task_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "commercial_partner_id",
+      "invisible": "1",
+      "groups": "sales_team.group_sale_salesman"
+     },
+     {
+      "name": "is_so_line_edited",
+      "invisible": "1",
+      "groups": "sales_team.group_sale_salesman"
+     },
+     {
+      "name": "allow_billable",
+      "invisible": "1",
+      "groups": "sales_team.group_sale_salesman"
+     },
+     {
+      "name": "sale_order_state",
+      "invisible": "1"
+     },
+     {
+      "name": "so_line",
+      "widget": "so_line_field",
+      "readonly": "readonly_timesheet",
+      "context": "{'create': False, 'edit': False, 'delete': False, 'with_price_unit': True}",
+      "options": "{\"no_create\": True}",
+      "placeholder": "Non-billable"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "so_line_field": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='task_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='task_id']\" position=\"after\">\n                <field name=\"commercial_partner_id\" invisible=\"1\" groups=\"sales_team.group_sale_salesman\"/>\n                <field name=\"is_so_line_edited\" invisible=\"1\" groups=\"sales_team.group_sale_salesman\"/>\n                <field name=\"allow_billable\" invisible=\"1\" groups=\"sales_team.group_sale_salesman\"/>\n                <field name=\"sale_order_state\" invisible=\"1\"/>\n                <label for=\"so_line\" invisible=\"not allow_billable\" groups=\"sales_team.group_sale_salesman\"/>\n                <div class=\"o_row\" invisible=\"not allow_billable\" groups=\"sales_team.group_sale_salesman\">\n                    <field name=\"so_line\" widget=\"so_line_field\" options=\"{&quot;no_create&quot;: True}\" context=\"{'create': False, 'edit': False, 'delete': False, 'with_price_unit': True}\" readonly=\"readonly_timesheet\" placeholder=\"Non-billable\"/>\n                    <span class=\"fa fa-exclamation-triangle text-warning\" title=\"The sales order associated with this timesheet entry has been cancelled.\" invisible=\"sale_order_state != 'cancel'\"/>\n                </div>\n            </xpath>\n            <xpath expr=\"//group\" position=\"before\">\n                <t groups=\"sales_team.group_sale_salesman\">\n                    <field name=\"order_id\" invisible=\"1\"/>\n                    <field name=\"timesheet_invoice_id\" invisible=\"1\"/>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button name=\"action_sale_order_from_timesheet\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-dollar\" invisible=\"not order_id\">\n                            <div class=\"o_stat_info\">\n                                <span class=\"o_stat_text\">Sales Order</span>\n                            </div>\n                        </button>\n                        <button name=\"action_invoice_from_timesheet\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-pencil-square-o\" invisible=\"not timesheet_invoice_id\">\n                            <div class=\"o_stat_info\">\n                                <span class=\"o_stat_text\">Invoice</span>\n                            </div>\n                        </button>\n                    </div>\n                </t>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.view_hr_timesheet_line_pivot_billing_rate",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.pivot.billing.rate",
+   "entity": "account.analytic.line",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Timesheets",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "timesheet_invoice_type"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "string": "Time Spent"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date",
+      "interval": "month",
+      "type": "row"
+     },
+     {
+      "name": "timesheet_invoice_type",
+      "type": "col"
+     },
+     {
+      "name": "unit_amount",
+      "string": "Time Spent",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Timesheets\" sample=\"1\">\n                <field name=\"date\" interval=\"month\" type=\"row\"/>\n                <field name=\"timesheet_invoice_type\" type=\"col\"/>\n                <field name=\"unit_amount\" string=\"Time Spent\" type=\"measure\" widget=\"timesheet_uom\"/>\n                <field name=\"amount\" string=\"Timesheet Costs\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.view_hr_timesheet_line_graph_employee_per_date",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.graph.employee.per.date",
+   "entity": "account.analytic.line",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Timesheet",
+     "sample": "1",
+     "js_class": "hr_timesheet_graphview"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "amount",
+      "string": "Timesheet Costs"
+     },
+     {
+      "name": "unit_amount",
+      "widget": "timesheet_uom",
+      "string": "Time Spent"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "timesheet_uom": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date",
+      "interval": "month"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "amount",
+      "type": "measure",
+      "string": "Timesheet Costs"
+     },
+     {
+      "name": "unit_amount",
+      "string": "Time Spent",
+      "type": "measure",
+      "widget": "timesheet_uom"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Timesheet\" sample=\"1\" js_class=\"hr_timesheet_graphview\">\n                <field name=\"date\" interval=\"month\"/>\n                <field name=\"employee_id\"/>\n                <field name=\"amount\" type=\"measure\" string=\"Timesheet Costs\"/>\n                <field name=\"unit_amount\" string=\"Time Spent\" type=\"measure\" widget=\"timesheet_uom\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.view_hr_timesheet_line_graph_invoice_employee",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.graph.invoice.employee",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "view_hr_timesheet_line_graph_employee_per_date",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='date']",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "timesheet_invoice_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='date']",
+      "position": "replace"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='date']\" position=\"replace\">\n                <field name=\"timesheet_invoice_id\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.view_hr_timesheet_line_pivot_inherited",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.pivot",
+   "entity": "account.analytic.line",
+   "view_type": "xpath",
+   "inherits_view": "hr_timesheet.view_hr_timesheet_line_pivot",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='amount']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='amount']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='amount']\" position=\"attributes\">\n                <attribute name=\"type\">measure</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.view_calendar_account_analytic_line",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.calendar",
+   "entity": "account.analytic.line",
+   "view_type": "field",
+   "inherits_view": "hr_timesheet.view_calendar_account_analytic_line",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "name",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "position": "before"
+     },
+     {
+      "name": "so_line",
+      "invisible": "not so_line"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"name\" position=\"before\">\n                <field name=\"so_line\" invisible=\"not so_line\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_timesheet.view_calendar_account_analytic_line_multi_create",
+   "package": "sale_timesheet",
+   "name": "account.analytic.line.calendar.multi_create",
+   "entity": "account.analytic.line",
+   "view_type": "field",
+   "inherits_view": "hr_timesheet.view_calendar_account_analytic_line_multi_create",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "unit_amount",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "unit_amount",
+      "position": "before"
+     },
+     {
+      "name": "allow_billable",
+      "invisible": "1",
+      "groups": "sales_team.group_sale_salesman"
+     },
+     {
+      "name": "so_line",
+      "invisible": "not allow_billable",
+      "context": "{'create': False, 'edit': False, 'delete': False, 'with_price_unit': True}",
+      "options": "{\"no_create\": True}",
+      "groups": "sales_team.group_sale_salesman",
+      "placeholder": "Non-billable"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"unit_amount\" position=\"before\">\n                <field name=\"allow_billable\" invisible=\"1\" groups=\"sales_team.group_sale_salesman\"/>\n                <field name=\"so_line\" groups=\"sales_team.group_sale_salesman\" options=\"{&quot;no_create&quot;: True}\" context=\"{'create': False, 'edit': False, 'delete': False, 'with_price_unit': True}\" invisible=\"not allow_billable\" placeholder=\"Non-billable\"/>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

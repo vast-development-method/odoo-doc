@@ -1,0 +1,634 @@
+{
+ "catalog": {
+  "name": "entity:ir.fields.converter",
+  "description": "Complete definition of entity Fields Converter (ir.fields.converter).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.fields.converter",
+  "storage_name": "ir_fields_converter",
+  "full_name": "Fields Converter",
+  "kind": "abstract",
+  "description": "Fields Converter",
+  "defined_by_package": "base",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_str_to_monetary": {
+    "expression": "_str_to_float"
+   }
+  },
+  "fields": [],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_format_import_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "error_type",
+     "error_msg",
+     "error_params",
+     "error_args"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_import_field_path",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "field",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Rebuild field path for import error attribution to the right field.\nThis method uses the 'parent_fields_hierarchy' context key built during treatment of one2many fields\n(_str_to_one2many). As the field to import is the last of the chain (child_id/child_id2/field_to_import),\nwe need to retrieve the complete hierarchy in case of error in order to assign the error to the correct\ncolumn in the import UI.\n\n:param (str) field: field in which the value will be imported.\n:param (str or list) value:\n    - str: in most of the case the value we want to import into a field is a string (or a number).\n    - list: when importing into a one2may field, all the records to import are regrouped into a list of dict.\n        E.g.: creating multiple partners: [{None: 'ChildA_1', 'type': 'Private address'}, {None: 'ChildA_2', 'type': 'Private address'}]\n        where 'None' is the name. (because we can find a partner by his name, we don't need to specify the field.)\n\nThe field_path value is computed based on the last field in the chain.\nfor example,\n\n    - path_field for 'Private address' at childA_1 is ['partner_id', 'type']\n    - path_field for 'childA_1' is ['partner_id']\n\nSo, by retrieving the correct field_path for each value to import, if errors are raised for those fields,\nwe can the link the errors to the correct header-field couple in the import UI.",
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "for_model",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "model",
+     "fromtype",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a converter object for the model. A converter is a\ncallable taking a record-ish (a dictionary representing an the system\nrecord with values of typetag ``fromtype``) and returning a converted\nrecords matching what :meth:`the system.models.Model.write` expects.\n\n:param model: :class:`the system.models.Model` for the conversion base\n:param fromtype:\n:param savepoint: savepoint to rollback to on error\n:returns: a converter callable\n:rtype: (record: dict, logger: (field, error) -> None) -> dict",
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "to_field",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "fromtype",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Fetches a converter for the provided field object, from the\nspecified type.\n\nA converter is simply a callable taking a value of type ``fromtype``\n(or a composite of ``fromtype``, e.g. list or dict) and returning a\nvalue acceptable for a write() on the field ``field``.\n\nBy default, tries to get a method on itself with a name matching the\npattern ``_$fromtype_to_$field.type`` and returns it.\n\nConverter callables can either return a value and a list of warnings\nto their caller or raise ``ValueError``, which will be interpreted as a\nvalidation & conversion failure.\n\nValueError can have either one or two parameters. The first parameter\nis mandatory, **must** be a unicode string and will be used as the\nuser-visible message for the error (it should be translatable and\ntranslated). It can contain a ``field`` named format placeholder so the\ncaller can inject the field's translated, user-facing name (@string).\n\nThe second parameter is optional and, if provided, must be a mapping.\nThis mapping will be merged into the error dictionary returned to the\nclient.\n\nIf a converter can perform its function but has to make assumptions\nabout the data, it can send a warning to the user through adding an\ninstance of :class:`~.ImportWarning` to the second value\nit returns. The handling of a warning at the upper levels is the same\nas ``ValueError`` above.\n\n:param model:\n:param field: field object to generate a value for\n:type field: :class:`the system.fields.Field`\n:param fromtype: type to convert to something fitting for ``field``\n:type fromtype: type | str\n:param savepoint: savepoint to rollback to on errors\n:return: a function (fromtype -> field.write_type), if a converter is found\n:rtype: Callable | None",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_json",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_properties",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 93,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_boolean",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_integer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_float",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_date",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_input_tz",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_datetime",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_boolean_translations",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "src"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_selection_translations",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "field",
+     "src"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_selection",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "db_id_for",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "subfield",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Finds a database id for the reference ``value`` in the referencing\nsubfield ``subfield`` of the provided field of the provided model.\n\n:param model: model to which the field belongs\n:param field: relational field for which references are provided\n:param subfield: a relational subfield allowing building of refs to\n                 existing records: ``None`` for a name_search,\n                 ``id`` for an external id and ``.id`` for a database\n                 id\n:param value: value of the reference to match to an actual record\n:param savepoint: savepoint for rollback on errors\n:return: a pair of the matched database identifier (if any), the\n         translated user-readable name for the field and the list of\n         warnings\n:rtype: (ID|None, unicode, list)",
+      "size_in_lines": 117,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_xmlid_to_record_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "xmlid",
+     "model"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return the record id corresponding to the given external id,\nprovided that the record actually exists; otherwise return ``None``.",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_referencing_subfield",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Checks the record for the subfields allowing referencing (an\nexisting record in an other table), errors out if it finds potential\nconflicts (multiple referencing subfields) or non-referencing subfields\nreturns the name of the correct subfield.\n\n:param record:\n:return: the record subfield to use for referencing and a list of warnings\n:rtype: str, list",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_many2one",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "values",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_many2one_reference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_many2many",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "value",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_str_to_one2many",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "field",
+     "records",
+     "savepoint"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "re-raise",
+        "message": "exception",
+        "line": 707
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

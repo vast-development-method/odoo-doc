@@ -1,0 +1,551 @@
+{
+ "catalog": {
+  "name": "views:lunch.order",
+  "description": "View declarations for entity lunch.order.",
+  "record_count": 6,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "lunch.lunch_order_view_search",
+   "package": "lunch",
+   "name": "lunch.order.search",
+   "entity": "lunch.order",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Product",
+      "filter_domain": "['|', ('name', 'ilike', self), ('note', 'ilike', self)]"
+     },
+     {
+      "name": "user_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "is_mine",
+      "string": "My Orders",
+      "domain": "[('user_id', '=', uid)]"
+     },
+     {
+      "name": "not_confirmed",
+      "string": "Not Received",
+      "domain": "[('state', '!=', ('confirmed'))]"
+     },
+     {
+      "name": "confirmed",
+      "string": "Received",
+      "domain": "[('state', '=', 'confirmed')]"
+     },
+     {
+      "name": "cancelled",
+      "string": "Cancelled",
+      "domain": "[('state', '=', 'cancelled')]"
+     },
+     {
+      "name": "date_filter",
+      "string": "Today",
+      "domain": "[('date', '=', 'today')]"
+     },
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_by_user",
+      "string": "User",
+      "context": "{'group_by': 'user_id'}"
+     },
+     {
+      "name": "group_by_supplier",
+      "string": "Vendor",
+      "context": "{'group_by': 'supplier_id'}"
+     },
+     {
+      "name": "group_by_date",
+      "string": "Order Date",
+      "context": "{'group_by': 'date:day'}",
+      "help": "Vendor Orders by Date"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search\">\n                <field name=\"name\" string=\"Product\" filter_domain=\"['|', ('name', 'ilike', self), ('note', 'ilike', self)]\"/>\n                <field name=\"user_id\"/>\n                <filter name=\"is_mine\" string=\"My Orders\" domain=\"[('user_id', '=', uid)]\"/>\n                <separator/>\n                <filter name=\"not_confirmed\" string=\"Not Received\" domain=\"[('state', '!=', ('confirmed'))]\"/>\n                <filter name=\"confirmed\" string=\"Received\" domain=\"[('state', '=', 'confirmed')]\"/>\n                <filter name=\"cancelled\" string=\"Cancelled\" domain=\"[('state', '=', 'cancelled')]\"/>\n                <separator/>\n                <filter name=\"date_filter\" string=\"Today\" domain=\"[('date', '=', 'today')]\"/>\n                <separator/>\n                <filter string=\"Archived\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n                <group>\n                    <filter name=\"group_by_user\" string=\"User\" context=\"{'group_by': 'user_id'}\"/>\n                    <filter name=\"group_by_supplier\" string=\"Vendor\" context=\"{'group_by': 'supplier_id'}\"/>\n                    <filter name=\"group_by_date\" string=\"Order Date\" context=\"{'group_by': 'date:day'}\" help=\"Vendor Orders by Date\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "lunch.lunch_order_view_tree",
+   "package": "lunch",
+   "name": "lunch.order.list",
+   "entity": "lunch.order",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Order lines List",
+     "create": "false",
+     "edit": "false",
+     "decoration-muted": "state == 'cancelled'",
+     "expand": "1"
+    },
+    "fields": [
+     {
+      "name": "date",
+      "readonly": "state != 'new'"
+     },
+     {
+      "name": "supplier_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "display_toppings"
+     },
+     {
+      "name": "note"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "state != 'new'"
+     },
+     {
+      "name": "lunch_location_id"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "price",
+      "widget": "monetary",
+      "string": "Price",
+      "sum": "Total"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-danger": "state == 'ordered'",
+      "decoration-warning": "state == 'new'",
+      "decoration-success": "state == 'confirmed'",
+      "decoration-info": "state == 'sent'"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "display_reorder_button",
+      "column_invisible": "True"
+     },
+     {
+      "name": "notified",
+      "column_invisible": "True"
+     },
+     {
+      "name": "show_order_button",
+      "invisible": "1"
+     },
+     {
+      "name": "show_confirm_button",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_confirm",
+      "string": "Receive",
+      "type": "object"
+     },
+     {
+      "name": "action_reorder",
+      "string": "Re-order",
+      "type": "object",
+      "invisible": "not display_reorder_button or not display_add_button",
+      "groups": "lunch.group_lunch_user",
+      "icon": "fa-history"
+     },
+     {
+      "name": "action_confirm",
+      "string": "Confirm",
+      "type": "object",
+      "invisible": "state != 'sent'",
+      "groups": "lunch.group_lunch_manager",
+      "icon": "fa-check"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "state in ['cancelled', 'confirmed']",
+      "groups": "lunch.group_lunch_manager",
+      "icon": "fa-times"
+     },
+     {
+      "name": "action_reset",
+      "string": "Reset",
+      "type": "object",
+      "invisible": "state != 'cancelled'",
+      "groups": "lunch.group_lunch_manager",
+      "icon": "fa-undo"
+     },
+     {
+      "name": "action_notify",
+      "string": "Send Notification",
+      "type": "object",
+      "invisible": "state != 'confirmed' or notified",
+      "groups": "lunch.group_lunch_manager",
+      "icon": "fa-envelope"
+     },
+     {
+      "name": "action_send_orders",
+      "string": "Send Orders",
+      "type": "object",
+      "invisible": "not show_order_button"
+     },
+     {
+      "name": "action_confirm_orders",
+      "string": "Confirm Orders",
+      "type": "object",
+      "invisible": "not show_confirm_button"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "monetary": 1,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "false",
+    "delete": null,
+    "edit": "false",
+    "decorations": {
+     "decoration-muted": "state == 'cancelled'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Order lines List\" create=\"false\" edit=\"false\" decoration-muted=\"state == 'cancelled'\" expand=\"1\">\n                <header>\n                    <button name=\"action_confirm\" type=\"object\" string=\"Receive\"/>\n                </header>\n                <field name=\"date\" readonly=\"state != 'new'\"/>\n                <field name=\"supplier_id\"/>\n                <field name=\"product_id\"/>\n                <field name=\"display_toppings\" class=\"o_text_overflow\"/>\n                <field name=\"note\" class=\"o_text_overflow\"/>\n                <field name=\"user_id\" widget=\"many2one_avatar_user\" readonly=\"state != 'new'\"/>\n                <field name=\"lunch_location_id\"/>\n                <field name=\"currency_id\" column_invisible=\"True\"/>\n                <field name=\"price\" sum=\"Total\" string=\"Price\" widget=\"monetary\"/>\n                <field name=\"state\" widget=\"badge\" decoration-warning=\"state == 'new'\" decoration-success=\"state == 'confirmed'\" decoration-info=\"state == 'sent'\" decoration-danger=\"state == 'ordered'\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n                <field name=\"display_reorder_button\" column_invisible=\"True\"/>\n                <field name=\"notified\" column_invisible=\"True\"/>\n                <button name=\"action_reorder\" string=\"Re-order\" type=\"object\" icon=\"fa-history\" invisible=\"not display_reorder_button or not display_add_button\" groups=\"lunch.group_lunch_user\"/>\n                <button name=\"action_confirm\" string=\"Confirm\" type=\"object\" icon=\"fa-check\" invisible=\"state != 'sent'\" groups=\"lunch.group_lunch_manager\"/>\n                <button name=\"action_cancel\" string=\"Cancel\" type=\"object\" icon=\"fa-times\" invisible=\"state in ['cancelled', 'confirmed']\" groups=\"lunch.group_lunch_manager\"/>\n                <button name=\"action_reset\" string=\"Reset\" type=\"object\" icon=\"fa-undo\" invisible=\"state != 'cancelled'\" groups=\"lunch.group_lunch_manager\"/>\n                <button name=\"action_notify\" string=\"Send Notification\" type=\"object\" icon=\"fa-envelope\" invisible=\"state != 'confirmed' or notified\" groups=\"lunch.group_lunch_manager\"/>\n                <groupby name=\"supplier_id\">\n                    <field name=\"show_order_button\" invisible=\"1\"/>\n                    <field name=\"show_confirm_button\" invisible=\"1\"/>\n                    <button string=\"Send Orders\" type=\"object\" name=\"action_send_orders\" invisible=\"not show_order_button\"/>\n                    <button string=\"Confirm Orders\" type=\"object\" name=\"action_confirm_orders\" invisible=\"not show_confirm_button\"/>\n                </groupby>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "lunch.lunch_order_view_kanban",
+   "package": "lunch",
+   "name": "lunch.order.kanban",
+   "entity": "lunch.order",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "create": "false",
+     "edit": "false"
+    },
+    "fields": [
+     {
+      "name": "currency_id"
+     },
+     {
+      "name": "notified"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "state",
+      "widget": "label_selection",
+      "options": "{'classes': {'new': 'default', 'confirmed': 'success', 'cancelled':'danger'}}"
+     },
+     {
+      "name": "note"
+     },
+     {
+      "name": "price"
+     },
+     {
+      "name": "date",
+      "readonly": "state != 'new'"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "state != 'new'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "label_selection": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban create=\"false\" edit=\"false\">\n                <field name=\"currency_id\"/>\n                <field name=\"notified\"/>\n                <templates>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex\">\n                            <field name=\"product_id\" class=\"fw-bold fs-5\"/>\n                            <field name=\"state\" widget=\"label_selection\" options=\"{'classes': {'new': 'default', 'confirmed': 'success', 'cancelled':'danger'}}\" class=\"ms-auto\"/>\n                        </div>\n                        <field name=\"note\"/>\n                        <div class=\"row\">\n                            <div class=\"col-6\">\n                                <i class=\"fa fa-money\" role=\"img\" aria-label=\"Money\" title=\"Money\"/> <field name=\"price\"/>\n                            </div>\n                            <div class=\"col-6 text-end\">\n                                <i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Date\" title=\"Date\"/> <field name=\"date\" readonly=\"state != 'new'\"/>\n                            </div>\n                        </div>\n                        <div class=\"row mt4\">\n                            <div class=\"col-6\">\n                                <a class=\"btn btn-sm btn-success\" role=\"button\" name=\"action_order\" string=\"Order\" type=\"object\" invisible=\"state in ['sent', 'ordered', 'confirmed']\" groups=\"lunch.group_lunch_manager\">\n                                    <i class=\"fa fa-phone\" role=\"img\" aria-label=\"Order button\" title=\"Order button\"/>\n                                </a>\n                                <a class=\"btn btn-sm btn-primary\" role=\"button\" name=\"action_send\" string=\"Send\" type=\"object\" invisible=\"state != 'ordered'\" groups=\"lunch.group_lunch_manager\">\n                                    <i class=\"fa fa-paper-plane\" role=\"img\" aria-label=\"Send button\" title=\"Send button\"/>\n                                </a>\n                                <a class=\"btn btn-sm btn-info\" role=\"button\" name=\"action_confirm\" string=\"Receive\" type=\"object\" invisible=\"state != 'sent'\" groups=\"lunch.group_lunch_manager\">\n                                    <i class=\"fa fa-check\" role=\"img\" aria-label=\"Receive button\" title=\"Receive button\"/>\n                                </a>\n                                <a class=\"btn btn-sm btn-danger\" role=\"button\" name=\"action_cancel\" string=\"Cancel\" type=\"object\" invisible=\"state in ['cancelled', 'confirmed']\" groups=\"lunch.group_lunch_manager\">\n                                    <i class=\"fa fa-times\" role=\"img\" aria-label=\"Cancel button\" title=\"Cancel button\"/>\n                                </a>\n                                <a class=\"btn btn-sm btn-info\" role=\"button\" name=\"action_notify\" string=\"Send Notification\" type=\"object\" invisible=\"state != 'confirmed' or notified\" groups=\"lunch.group_lunch_manager\">\n                                    <i class=\"fa fa-envelope\" role=\"img\" aria-label=\"Send notification\" title=\"Send notification\"/>\n                                </a>\n                            </div>\n                            <div class=\"col-6\">\n                                <field name=\"user_id\" widget=\"many2one_avatar_user\" readonly=\"state != 'new'\" class=\"float-end\"/>\n                            </div>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "lunch.lunch_order_view_pivot",
+   "package": "lunch",
+   "name": "lunch.order.pivot",
+   "entity": "lunch.order",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "supplier_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date",
+      "type": "col"
+     },
+     {
+      "name": "supplier_id",
+      "type": "row"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot sample=\"1\">\n                <field name=\"date\" type=\"col\"/>\n                <field name=\"supplier_id\" type=\"row\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "lunch.lunch_order_view_graph",
+   "package": "lunch",
+   "name": "lunch.order.graph",
+   "entity": "lunch.order",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "product_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "product_id"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph sample=\"1\">\n                <field name=\"product_id\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "lunch.lunch_order_view_form",
+   "package": "lunch",
+   "name": "lunch.order.view.form",
+   "entity": "lunch.order",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "class": "flex-column"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "date",
+      "invisible": "1",
+      "readonly": "state != 'new'"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "quantity",
+      "invisible": "1"
+     },
+     {
+      "name": "product_id",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "invisible": "1"
+     },
+     {
+      "name": "category_id",
+      "invisible": "1"
+     },
+     {
+      "name": "available_toppings_1",
+      "invisible": "1"
+     },
+     {
+      "name": "available_toppings_2",
+      "invisible": "1"
+     },
+     {
+      "name": "available_toppings_3",
+      "invisible": "1"
+     },
+     {
+      "name": "supplier_id",
+      "invisible": "1"
+     },
+     {
+      "name": "order_deadline_passed",
+      "invisible": "1"
+     },
+     {
+      "name": "available_today",
+      "invisible": "1"
+     },
+     {
+      "name": "image_1920",
+      "widget": "image",
+      "options": "{'image_preview': 'image_128'}"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "price"
+     },
+     {
+      "name": "topping_label_1",
+      "invisible": "not available_toppings_1",
+      "nolabel": "1"
+     },
+     {
+      "name": "topping_ids_1",
+      "widget": "many2many_checkboxes",
+      "invisible": "not available_toppings_1",
+      "domain": "[('topping_category', '=', 1), ('supplier_id', '=', supplier_id)]",
+      "nolabel": "1"
+     },
+     {
+      "name": "topping_label_2",
+      "invisible": "not available_toppings_2",
+      "nolabel": "1"
+     },
+     {
+      "name": "topping_ids_2",
+      "widget": "many2many_checkboxes",
+      "invisible": "not available_toppings_2",
+      "domain": "[('topping_category', '=', 2), ('supplier_id', '=', supplier_id)]",
+      "nolabel": "1"
+     },
+     {
+      "name": "topping_label_3",
+      "invisible": "not available_toppings_3",
+      "nolabel": "1"
+     },
+     {
+      "name": "topping_ids_3",
+      "widget": "many2many_checkboxes",
+      "invisible": "not available_toppings_3",
+      "domain": "[('topping_category', '=', 3), ('supplier_id', '=', supplier_id)]",
+      "nolabel": "1"
+     },
+     {
+      "name": "product_description",
+      "nolabel": "1"
+     },
+     {
+      "name": "note",
+      "nolabel": "1",
+      "placeholder": "Information, allergens, ..."
+     }
+    ],
+    "buttons": [
+     {
+      "name": "add_to_cart",
+      "string": "Add To Cart",
+      "type": "object",
+      "invisible": "order_deadline_passed or not display_add_button",
+      "class": "oe_highlight",
+      "data-hotkey": "w"
+     },
+     {
+      "string": "Discard",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "many2many_checkboxes": 3
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form class=\"flex-column\">\n                <field name=\"company_id\" invisible=\"1\"/>\n                <field name=\"date\" invisible=\"1\" readonly=\"state != 'new'\"/>\n                <field name=\"currency_id\" invisible=\"1\"/>\n                <field name=\"quantity\" invisible=\"1\"/>\n                <field name=\"product_id\" invisible=\"1\"/>\n                <field name=\"state\" invisible=\"1\"/>\n                <field name=\"category_id\" invisible=\"1\"/>\n                <field name=\"available_toppings_1\" invisible=\"1\"/>\n                <field name=\"available_toppings_2\" invisible=\"1\"/>\n                <field name=\"available_toppings_3\" invisible=\"1\"/>\n                <field name=\"supplier_id\" invisible=\"1\"/>\n                <field name=\"order_deadline_passed\" invisible=\"1\"/>\n                <field name=\"available_today\" invisible=\"1\"/>\n                <div class=\"d-flex\">\n                    <div class=\"flex-grow-0 pe-5\">\n                        <field name=\"image_1920\" widget=\"image\" class=\"o_lunch_image\" options=\"{'image_preview': 'image_128'}\"/>\n                    </div>\n                    <div class=\"flex-grow-1 pe-5\">\n                        <h2><field name=\"name\"/></h2>\n                        <h3 class=\"pt-3\"><field name=\"price\"/></h3>\n                    </div>\n                </div>\n                <div class=\"o_lunch_wizard\">\n                    <div class=\"row py-3 py-md-0\">\n                        <div class=\"o_td_label col-3 col-md-2\">\n                            <field name=\"topping_label_1\" nolabel=\"1\" invisible=\"not available_toppings_1\" class=\"o_form_label\"/>\n                        </div>\n                        <div class=\"col-9 col-md-10\">\n                            <field name=\"topping_ids_1\" invisible=\"not available_toppings_1\" widget=\"many2many_checkboxes\" nolabel=\"1\" domain=\"[('topping_category', '=', 1), ('supplier_id', '=', supplier_id)]\" class=\"o_field_widget o_quick_editable\"/>\n                        </div>\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"o_td_label col-3 col-md-2\">\n                            <field name=\"topping_label_2\" nolabel=\"1\" invisible=\"not available_toppings_2\" class=\"o_form_label\"/>\n                        </div>\n                        <div class=\"col-9 col-md-10\">\n                            <field name=\"topping_ids_2\" invisible=\"not available_toppings_2\" widget=\"many2many_checkboxes\" nolabel=\"1\" domain=\"[('topping_category', '=', 2), ('supplier_id', '=', supplier_id)]\" class=\"o_field_widget o_quick_editable\"/>\n                        </div>\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"o_td_label col-3 col-md-2\">\n                            <field name=\"topping_label_3\" nolabel=\"1\" invisible=\"not available_toppings_3\" class=\"o_form_label\"/>\n                        </div>\n                        <div class=\"col-9 col-md-10\">\n                            <field name=\"topping_ids_3\" invisible=\"not available_toppings_3\" widget=\"many2many_checkboxes\" nolabel=\"1\" domain=\"[('topping_category', '=', 3), ('supplier_id', '=', supplier_id)]\" class=\"o_field_widget o_quick_editable\"/>\n                        </div>\n                    </div>\n                    <div class=\"row pb-2\">\n                        <div class=\"o_td_label col-3 col-md-2\">\n                            <label for=\"product_description\" class=\"o_form_label\"/>\n                        </div>\n                        <div class=\"col-9 col-md-10\">\n                            <field name=\"product_description\" nolabel=\"1\" class=\"o_field_widget o_quick_editable\"/>\n                        </div>\n                    </div>\n                    <div class=\"row\">\n                        <div class=\"o_td_label col-3 col-md-2\">\n                            <label for=\"note\" class=\"o_form_label\"/>\n                        </div>\n                        <div class=\"col-9 col-md-10\">\n                            <field name=\"note\" nolabel=\"1\" placeholder=\"Information, allergens, ...\" class=\"o_field_widget o_quick_editable\"/>\n                        </div>\n                    </div>\n\n                    <div class=\"row\" invisible=\"not order_deadline_passed\">\n                        <div class=\"col-12\">\n                            <div class=\"alert alert-warning\" role=\"alert\">\n                                The orders for this vendor have already been sent.\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"row\" invisible=\"display_add_button\">\n                        <div class=\"col-12\">\n                            <div class=\"alert alert-warning\" role=\"alert\">\n                                Your wallet does not contain enough money to order that. To add some money to your wallet, please contact your lunch manager.\n                            </div>\n                        </div>\n                    </div>\n                </div>\n                <footer>\n                    <button string=\"Add To Cart\" name=\"add_to_cart\" type=\"object\" class=\"oe_highlight\" invisible=\"order_deadline_passed or not display_add_button\" data-hotkey=\"w\"/>\n                    <button string=\"Discard\" special=\"cancel\" data-hotkey=\"x\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  }
+ ]
+}

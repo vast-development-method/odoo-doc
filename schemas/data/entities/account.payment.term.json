@@ -1,0 +1,965 @@
+{
+ "catalog": {
+  "name": "entity:account.payment.term",
+  "description": "Complete definition of entity Payment Terms (account.payment.term).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.payment.term",
+  "storage_name": "account_payment_term",
+  "full_name": "Payment Terms",
+  "kind": "persistent",
+  "description": "Payment Terms",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Payment Terms",
+    "translate": true,
+    "required": true,
+    "defined_in_package": "account",
+    "full_name": "Payment Terms"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "help": "If the active field is set to False, it will allow you to hide the payment terms without removing it.",
+    "defined_in_package": "account",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Description on the Invoice",
+    "translate": true,
+    "defined_in_package": "account",
+    "full_name": "Description on the Invoice"
+   },
+   {
+    "name": "line_ids",
+    "type": "One2many",
+    "comodel": "account.payment.term.line",
+    "inverse_name": "payment_id",
+    "string": "Terms",
+    "copy": true,
+    "default": {
+     "dynamic": "_default_line_ids"
+    },
+    "defined_in_package": "account",
+    "full_name": "Terms",
+    "target_entity": "account.payment.term.line"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "defined_in_package": "account",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "fiscal_country_codes",
+    "type": "Char",
+    "compute": "_compute_fiscal_country_codes",
+    "defined_in_package": "account",
+    "string": "Fiscal Country Codes",
+    "full_name": "Fiscal Country Codes"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "required": true,
+    "default": 10,
+    "defined_in_package": "account",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "compute": "_compute_currency_id",
+    "defined_in_package": "account",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "display_on_invoice",
+    "type": "Boolean",
+    "string": "Show installment dates",
+    "default": true,
+    "defined_in_package": "account",
+    "full_name": "Show installment dates"
+   },
+   {
+    "name": "example_amount",
+    "type": "Monetary",
+    "currency_field": "currency_id",
+    "default": 1000,
+    "store": false,
+    "readonly": true,
+    "defined_in_package": "account",
+    "string": "Example Amount",
+    "full_name": "Example Amount"
+   },
+   {
+    "name": "example_date",
+    "type": "Date",
+    "string": "Date example",
+    "default": {
+     "dynamic": "_default_example_date"
+    },
+    "store": false,
+    "defined_in_package": "account",
+    "full_name": "Date example"
+   },
+   {
+    "name": "example_invalid",
+    "type": "Boolean",
+    "compute": "_compute_example_invalid",
+    "defined_in_package": "account",
+    "string": "Example Invalid",
+    "full_name": "Example Invalid"
+   },
+   {
+    "name": "example_preview",
+    "type": "Html",
+    "compute": "_compute_example_preview",
+    "defined_in_package": "account",
+    "string": "Example Preview",
+    "full_name": "Example Preview"
+   },
+   {
+    "name": "example_preview_discount",
+    "type": "Html",
+    "compute": "_compute_example_preview",
+    "defined_in_package": "account",
+    "string": "Example Preview Discount",
+    "full_name": "Example Preview Discount"
+   },
+   {
+    "name": "discount_percentage",
+    "type": "Float",
+    "string": "Discount %",
+    "help": "Early Payment Discount granted for this payment term",
+    "default": 2.0,
+    "defined_in_package": "account",
+    "full_name": "Discount %"
+   },
+   {
+    "name": "discount_days",
+    "type": "Integer",
+    "string": "Discount Days",
+    "help": "Number of days before the early payment proposition expires",
+    "default": 10,
+    "defined_in_package": "account",
+    "full_name": "Discount Days"
+   },
+   {
+    "name": "early_pay_discount_computation",
+    "type": "Selection",
+    "selection": [
+     [
+      "included",
+      "On early payment"
+     ],
+     [
+      "excluded",
+      "Never"
+     ],
+     [
+      "mixed",
+      "Always (upon invoice)"
+     ]
+    ],
+    "string": "Cash Discount Tax Reduction",
+    "readonly": false,
+    "store": true,
+    "compute": "_compute_discount_computation",
+    "defined_in_package": "account",
+    "full_name": "Cash Discount Tax Reduction"
+   },
+   {
+    "name": "early_discount",
+    "type": "Boolean",
+    "string": "Early Discount",
+    "defined_in_package": "account",
+    "full_name": "Early Discount"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_line_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_example_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_fiscal_country_codes",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "allowed_company_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_amount_due_after_discount",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "total_amount",
+     "untaxed_amount"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_discount_computation",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_example_invalid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_example_preview",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "currency_id",
+         "example_amount",
+         "example_date",
+         "line_ids.value",
+         "line_ids.value_amount",
+         "line_ids.nb_days",
+         "early_discount",
+         "discount_percentage",
+         "discount_days"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_amount_by_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "terms"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a dictionary with the amount for each date of the payment term\n(grouped by date, discounted percentage and discount last date,\nsorted by date and ignoring null amounts).",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_lines",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "line_ids",
+         "early_discount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The Payment Term must have at least one percent line and the sum of the percent must be 100%.",
+        "line": 162
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The Early Payment Discount functionality can only be used with payment terms using a single 100% line. ",
+        "line": 164
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The Early Payment Discount must be strictly positive.",
+        "line": 167
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The Early Payment Discount days must be strictly positive.",
+        "line": 169
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_terms",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "date_ref",
+     "currency",
+     "company",
+     "tax_amount",
+     "tax_amount_currency",
+     "sign",
+     "untaxed_amount",
+     "untaxed_amount_currency",
+     "cash_rounding"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Get the distribution of this payment term.\n:param date_ref: The move date to take into account\n:param currency: the move's currency\n:param company: the company issuing the move\n:param tax_amount: the signed tax amount for the move\n:param tax_amount_currency: the signed tax amount for the move in the move's currency\n:param untaxed_amount: the signed untaxed amount for the move\n:param untaxed_amount_currency: the signed untaxed amount for the move in the move's currency\n:param sign: the sign of the move\n:param cash_rounding: the cash rounding that should be applied (or None).\n    We assume that the input total in move currency (tax_amount_currency + untaxed_amount_currency) is already cash rounded.\n    The cash rounding does not change the totals: Consider the sum of all the computed payment term amounts in move / company currency.\n    It is the same as the input total in move / company currency.",
+      "size_in_lines": 86,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_referenced_terms",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Uh-oh! Those payment terms are quite popular and can't be deleted since there are still some records referencing them. How about archiving them instead?",
+        "line": 261
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_last_discount_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_ref"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_last_discount_date_formatted",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_ref"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_lines",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The Payment Term must have at least one percent line and the sum of the percent must be 100%."
+   },
+   {
+    "operation": "_check_lines",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The Early Payment Discount functionality can only be used with payment terms using a single 100% line. "
+   },
+   {
+    "operation": "_check_lines",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The Early Payment Discount must be strictly positive."
+   },
+   {
+    "operation": "_check_lines",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The Early Payment Discount days must be strictly positive."
+   },
+   {
+    "operation": "_unlink_except_referenced_terms",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Uh-oh! Those payment terms are quite popular and can't be deleted since there are still some records referencing them. How about archiving them instead?"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_payment_term_partner_manager",
+    "package": "account",
+    "name": "account.payment.term partner manager",
+    "entity": "account.payment.term",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_payment_term_portal",
+    "package": "account",
+    "name": "account.payment.term",
+    "entity": "account.payment.term",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_payment_term_manager",
+    "package": "account",
+    "name": "account.payment.term",
+    "entity": "account.payment.term",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale.access_account_payment_term_salesman",
+    "package": "sale",
+    "name": "account_payment_term salesman",
+    "entity": "account.payment.term",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_payment_term",
+    "package": "website_sale",
+    "name": "payment term public",
+    "entity": "account.payment.term",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.account_payment_term_comp_rule",
+    "package": "account",
+    "name": "Account payment term company rule",
+    "entity": "account.payment.term",
+    "domain": "['|', ('company_id', '=', False), ('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.view_payment_term_search",
+    "package": "account",
+    "name": "account.payment.term.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Payment Terms"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Payment Terms"
+      },
+      {
+       "name": "active"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "account.view_payment_term_tree",
+    "package": "account",
+    "name": "account.payment.term.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Payment Terms"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "account.view_payment_term_form",
+    "package": "account",
+    "name": "account.payment.term.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Payment Terms"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "fiscal_country_codes",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "nolabel": "1",
+       "placeholder": "e.g. 30 days"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "early_discount"
+      },
+      {
+       "name": "discount_percentage",
+       "invisible": "not early_discount"
+      },
+      {
+       "name": "discount_days",
+       "invisible": "not early_discount"
+      },
+      {
+       "name": "early_pay_discount_computation"
+      },
+      {
+       "name": "line_ids",
+       "widget": "payment_term_line_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "value_amount"
+      },
+      {
+       "name": "value",
+       "nolabel": "1"
+      },
+      {
+       "name": "nb_days",
+       "string": "After"
+      },
+      {
+       "name": "delay_type",
+       "nolabel": "1"
+      },
+      {
+       "name": "display_days_next_month",
+       "column_invisible": "1"
+      },
+      {
+       "name": "days_next_month",
+       "invisible": "not display_days_next_month",
+       "nolabel": "1"
+      },
+      {
+       "name": "display_on_invoice",
+       "nolabel": "1"
+      },
+      {
+       "name": "example_amount"
+      },
+      {
+       "name": "example_date"
+      },
+      {
+       "name": "note",
+       "placeholder": "Description on invoice (e.g. Payment terms: 30 days after invoice date)"
+      },
+      {
+       "name": "example_preview_discount",
+       "invisible": "not early_discount or not display_on_invoice"
+      },
+      {
+       "name": "example_preview",
+       "invisible": "not display_on_invoice"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "payment_term_line_ids": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "account.view_account_payment_term_kanban",
+    "package": "account",
+    "name": "account.payment.term.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "note"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_payment_term_form",
+    "package": "account",
+    "name": "Payment Terms",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "view_payment_term_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.payment.term"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

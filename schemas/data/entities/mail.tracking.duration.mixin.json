@@ -1,0 +1,224 @@
+{
+ "catalog": {
+  "name": "entity:mail.tracking.duration.mixin",
+  "description": "Complete definition of entity Mixin to compute the time a record has spent in each value a many2one field can take (mail.tracking.duration.mixin).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.tracking.duration.mixin",
+  "storage_name": "mail_tracking_duration_mixin",
+  "full_name": "Mixin to compute the time a record has spent in each value a many2one field can take",
+  "kind": "abstract",
+  "description": "Mixin to compute the time a record has spent in each value a many2one field can take",
+  "defined_by_package": "mail",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "duration_tracking",
+    "type": "Json",
+    "string": "Status time",
+    "compute": "_compute_duration_tracking",
+    "help": "JSON that maps ids from a many2one field to seconds spent",
+    "defined_in_package": "mail",
+    "full_name": "Status time"
+   },
+   {
+    "name": "rotting_days",
+    "type": "Integer",
+    "string": "Days Rotting",
+    "help": "Day count since this resource was last updated",
+    "compute": "_compute_rotting",
+    "defined_in_package": "mail",
+    "full_name": "Days Rotting"
+   },
+   {
+    "name": "is_rotting",
+    "type": "Boolean",
+    "string": "Rotting",
+    "compute": "_compute_rotting",
+    "search": "_search_is_rotting",
+    "defined_in_package": "mail",
+    "full_name": "Rotting"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_duration_tracking",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Computes duration_tracking, a Json field stored as { <many2one_id (str)>: <duration_spent_in_seconds (int)> }\n\n    e.g. {\"1\": 1230, \"2\": 2220, \"5\": 14}\n\n`_track_duration_field` must be present in the model that uses the mixin to specify on what\nfield to compute time spent. Besides, tracking must be activated for that field.\n\n    e.g.\n    class MyModel(models.Model):\n        _name = 'my.model'\n        _track_duration_field = \"tracked_field\"\n\n        tracked_field = fields.Many2one('tracked.model', tracking=True)",
+      "size_in_lines": 55,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_duration_from_tracking",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "trackings"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Calculates the duration spent in each value based on the provided list of trackings.\nIt adds a \"fake\" tracking at the end of the trackings list to account for the time spent in the current value.\n\nArgs:\n    trackings (list): A list of dictionaries representing the trackings with:\n        - 'create_date': The date and time of the tracking.\n        - 'old_value_integer': The ID of the previous value.\n\nReturns:\n    dict: A dictionary where the keys are the IDs of the values, and the values are the durations in seconds",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_rotting_feature_enabled",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "To enable the rotting behavior, the following must be present:\n\n* Stage-like model (linked by '_track_duration_field') must have a 'rotting_threshold_days' integer field\n    modeling the number of days before a record rots\n\n* Model inheriting from duration mixin must have a 'date_last_stage_update' field tracking the last stage change\n\n\nAlso consider overriding _get_rotting_depends_fields() and _get_rotting_domain().\n\nCertain views have access to widgets to display rotting status:\n    'rotting' for kanbans, 'rotting_statusbar_duration' for forms, 'badge_rotting' for lists.\n\n:return: bool: whether the rotting feature has been configured for this model",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rotting_depends_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "fields added to this method through override should likely also be returned by _get_rotting_domain() override\n\n:return: the array of fields that can affect the ability of a resource to rot",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rotting_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "fields added to this method through override should likely also be returned by _get_rotting_depends_fields() override\n\n:return: domain: conditions that must be met so that the field can be considered rotting",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rotting",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._get_rotting_depends_fields()"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "A resource is rotting if its stage has not been updated in a number of days depending on its\nstage's rotting_threshold_days value, assuming it matches _get_rotting_domain() conditions.\n\nIf the rotting_threshold_days field is not defined on the tracked module,\nor if the value of rotting_threshold_days is 0,\nthen the resource will never rot.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_rotting",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Model configuration does not support the rotting feature",
+        "line": 198
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_search_is_rotting",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Model configuration does not support the rotting feature"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

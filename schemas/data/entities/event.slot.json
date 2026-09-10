@@ -1,0 +1,777 @@
+{
+ "catalog": {
+  "name": "entity:event.slot",
+  "description": "Complete definition of entity Event Slot (event.slot).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.slot",
+  "storage_name": "event_slot",
+  "full_name": "Event Slot",
+  "kind": "persistent",
+  "description": "Event Slot",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "website_event",
+   "pos_event"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "event_id, date, start_hour, end_hour, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "required": true,
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "event",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "default": 0,
+    "defined_in_package": "event",
+    "full_name": "Color"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Date",
+    "required": true,
+    "defined_in_package": "event",
+    "full_name": "Date"
+   },
+   {
+    "name": "date_tz",
+    "type": "Selection",
+    "related": "event_id.date_tz",
+    "defined_in_package": "event",
+    "string": "Date Tz",
+    "full_name": "Date Tz"
+   },
+   {
+    "name": "start_hour",
+    "type": "Float",
+    "string": "Starting Hour",
+    "required": true,
+    "help": "Expressed in the event timezone.",
+    "defined_in_package": "event",
+    "full_name": "Starting Hour"
+   },
+   {
+    "name": "end_hour",
+    "type": "Float",
+    "string": "Ending Hour",
+    "required": true,
+    "help": "Expressed in the event timezone.",
+    "defined_in_package": "event",
+    "full_name": "Ending Hour"
+   },
+   {
+    "name": "start_datetime",
+    "type": "Datetime",
+    "string": "Start Datetime",
+    "compute": "_compute_datetimes",
+    "store": true,
+    "defined_in_package": "event",
+    "full_name": "Start Datetime"
+   },
+   {
+    "name": "end_datetime",
+    "type": "Datetime",
+    "string": "End Datetime",
+    "compute": "_compute_datetimes",
+    "store": true,
+    "defined_in_package": "event",
+    "full_name": "End Datetime"
+   },
+   {
+    "name": "is_sold_out",
+    "type": "Boolean",
+    "string": "Sold Out",
+    "compute": "_compute_is_sold_out",
+    "help": "Whether seats are sold out for this slot.",
+    "defined_in_package": "event",
+    "full_name": "Sold Out"
+   },
+   {
+    "name": "registration_ids",
+    "type": "One2many",
+    "comodel": "event.registration",
+    "inverse_name": "event_slot_id",
+    "string": "Attendees",
+    "defined_in_package": "event",
+    "full_name": "Attendees",
+    "target_entity": "event.registration"
+   },
+   {
+    "name": "seats_available",
+    "type": "Integer",
+    "string": "Available Seats",
+    "store": false,
+    "readonly": true,
+    "compute": "_compute_seats",
+    "defined_in_package": "event",
+    "full_name": "Available Seats"
+   },
+   {
+    "name": "seats_reserved",
+    "type": "Integer",
+    "string": "Number of Registrations",
+    "store": false,
+    "readonly": true,
+    "compute": "_compute_seats",
+    "defined_in_package": "event",
+    "full_name": "Number of Registrations"
+   },
+   {
+    "name": "seats_taken",
+    "type": "Integer",
+    "string": "Number of Taken Seats",
+    "store": false,
+    "readonly": true,
+    "compute": "_compute_seats",
+    "defined_in_package": "event",
+    "full_name": "Number of Taken Seats"
+   },
+   {
+    "name": "seats_used",
+    "type": "Integer",
+    "string": "Number of Attendees",
+    "store": false,
+    "readonly": true,
+    "compute": "_compute_seats",
+    "defined_in_package": "event",
+    "full_name": "Number of Attendees"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_hours",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "start_hour",
+         "end_hour"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A slot hour must be between 0:00 and 23:59.",
+        "line": 51
+       },
+       {
+        "kind": "ValidationError",
+        "message": "A slot end hour must be later than its start hour.\n%s",
+        "line": 53
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_time_range",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "date",
+         "start_hour",
+         "end_hour"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A slot cannot be scheduled outside of its event time range.\n\nEvent:\t\t%(event_start)s - %(event_end)s\nSlot:\t\t%(slot_name)s",
+        "line": 61
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_datetimes",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "date_tz",
+         "start_hour",
+         "end_hour"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "seats_available"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "name_with_seats_availability"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Adds slot seats availability if requested by context.\nAlways display the name without availabilities if the event is multi slots\nbecause the availability displayed won't be relative to the possible ticket combinations\nbut only relative to the event and this will confuse the user.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_sold_out",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_id.seats_limited",
+         "seats_available"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_seats",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_id",
+         "event_id.seats_max",
+         "registration_ids.state",
+         "registration_ids.active"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_if_registrations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The following slots cannot be deleted while they have one or more registrations linked to them:\n- %s",
+        "line": 142
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_filter_open_slots",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_hours",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "A slot hour must be between 0:00 and 23:59."
+   },
+   {
+    "operation": "_check_hours",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "A slot end hour must be later than its start hour.\n%s"
+   },
+   {
+    "operation": "_check_time_range",
+    "package": "event",
+    "kind": "ValidationError",
+    "message": "A slot cannot be scheduled outside of its event time range.\n\nEvent:\t\t%(event_start)s - %(event_end)s\nSlot:\t\t%(slot_name)s"
+   },
+   {
+    "operation": "_unlink_except_if_registrations",
+    "package": "event",
+    "kind": "UserError",
+    "message": "The following slots cannot be deleted while they have one or more registrations linked to them:\n- %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_slot_registration",
+    "package": "event",
+    "name": "event.slot.registration",
+    "entity": "event.slot",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_slot_user",
+    "package": "event",
+    "name": "event.slot.user",
+    "entity": "event.slot",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_event.access_event_event_slot_public",
+    "package": "website_event",
+    "name": "event.slot",
+    "entity": "event.slot",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_event_slot_portal",
+    "package": "website_event",
+    "name": "event.slot",
+    "entity": "event.slot",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_event_slot_employee",
+    "package": "website_event",
+    "name": "event.slot",
+    "entity": "event.slot",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_event.ir_rule_event_slot_public",
+    "package": "website_event",
+    "name": "Event Slot: public/portal: published read",
+    "entity": "event.slot",
+    "domain": "[('event_id.website_published', '=', True)]",
+    "groups": "[(4, ref('base.group_public')), (4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "event.view_event_slot_form",
+    "package": "event",
+    "name": "event.slot.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "event_id",
+       "invisible": "1"
+      },
+      {
+       "name": "start_hour",
+       "widget": "float_time"
+      },
+      {
+       "name": "end_hour",
+       "widget": "float_time"
+      },
+      {
+       "name": "date_tz",
+       "string": "Timezone"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 2,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event.view_event_slot_multi_create_form",
+    "package": "event",
+    "name": "event.slot.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "event_id",
+       "invisible": "1"
+      },
+      {
+       "name": "date_tz",
+       "string": "Timezone"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event.view_event_slot_tree",
+    "package": "event",
+    "name": "event.slot.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Slots",
+      "editable": "bottom",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "start_hour",
+       "widget": "float_time",
+       "string": "From"
+      },
+      {
+       "name": "end_hour",
+       "widget": "float_time",
+       "string": "To"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "durationArrow",
+       "class": "fa fa-long-arrow-right text-center text-secondary pe-none"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 2,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.view_event_slot_calendar",
+    "package": "event",
+    "name": "event.slot.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "js_class": "event_slot_calendar",
+      "date_start": "start_datetime",
+      "date_stop": "end_datetime",
+      "string": "Slots",
+      "scales": "month",
+      "color": "color",
+      "quick_create_view_id": "%(event.view_event_slot_form)d",
+      "multi_create_view": "event.view_event_slot_multi_create_form"
+     },
+     "fields": [
+      {
+       "name": "start_datetime",
+       "invisible": "1"
+      },
+      {
+       "name": "end_datetime",
+       "invisible": "1"
+      },
+      {
+       "name": "date_tz",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "start_datetime",
+      "date_stop": "end_datetime",
+      "date_delay": null,
+      "color": "color",
+      "mode": null,
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event.event_slot_action_from_event",
+    "package": "event",
+    "name": "Slots",
+    "view_mode": "calendar,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('event_id', '=', active_id)]",
+    "context": "{'default_event_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "event.slot"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

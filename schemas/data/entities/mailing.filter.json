@@ -1,0 +1,316 @@
+{
+ "catalog": {
+  "name": "entity:mailing.filter",
+  "description": "Complete definition of entity Mailing Favorite Filters (mailing.filter).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mailing.filter",
+  "storage_name": "mailing_filter",
+  "full_name": "Mailing Favorite Filters",
+  "kind": "persistent",
+  "description": "Mailing Favorite Filters",
+  "defined_by_package": "mass_mailing",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "create_date DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "create_uid",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Saved by",
+    "index": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "defined_in_package": "mass_mailing",
+    "full_name": "Saved by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Filter Name",
+    "required": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Filter Name"
+   },
+   {
+    "name": "mailing_domain",
+    "type": "Char",
+    "string": "Filter Domain",
+    "required": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Filter Domain"
+   },
+   {
+    "name": "mailing_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Recipients Model",
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Recipients Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "mailing_model_name",
+    "type": "Char",
+    "string": "Recipients Model Name",
+    "related": "mailing_model_id.model",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Recipients Model Name"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_mailing_domain",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "mailing_domain",
+         "mailing_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check that if the mailing domain is set, it is a valid one ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The filter domain is not valid for this recipients.",
+        "line": 33
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_mailing_domain",
+    "package": "mass_mailing",
+    "kind": "ValidationError",
+    "message": "The filter domain is not valid for this recipients."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mass_mailing.access_mailing_filter_mailing_user",
+    "package": "mass_mailing",
+    "name": "access.mailing.filter.mailing.user",
+    "entity": "mailing.filter",
+    "group": "mass_mailing.group_mass_mailing_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mass_mailing.mailing_filter_view_search",
+    "package": "mass_mailing",
+    "name": "mailing.filter.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Mailing Filters"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "mailing_model_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_saved_by_me",
+       "string": "My Filters",
+       "domain": "[('create_uid', '=', uid)]",
+       "help": "Filters saved by me"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_recepient_model",
+       "string": "Recipients",
+       "context": "{'group_by' : 'mailing_model_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_filter_view_tree",
+    "package": "mass_mailing",
+    "name": "mailing.filter.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Mailing filters",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user",
+       "string": "Saved by"
+      },
+      {
+       "name": "mailing_model_id",
+       "string": "Recipients"
+      },
+      {
+       "name": "mailing_domain",
+       "string": "Domain",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_filter_view_form",
+    "package": "mass_mailing",
+    "name": "mailing.filter.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Mailing filters"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. \"B2B Canadian Customers\""
+      },
+      {
+       "name": "mailing_model_id",
+       "options": "{'no_create': True, 'no_open': True}",
+       "placeholder": "Select a Target Model..."
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "mailing_model_name",
+       "invisible": "1"
+      },
+      {
+       "name": "mailing_domain",
+       "widget": "domain",
+       "invisible": "not mailing_model_id",
+       "string": "Domain",
+       "options": "{'model': 'mailing_model_name'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "domain": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mass_mailing.mailing_filter_action",
+    "package": "mass_mailing",
+    "name": "Favorite Filters",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_filter_saved_by_me': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No saved filter yet!\n            </p><p>\n                While designing the mailing, you can define the rules to filter recipients.\n                To save the same criteria for future use, you can add it to the favorite list\n                by clicking on <i class=\"fa fa-floppy-o text-warning\"></i> icon next to \"Recipients\".\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mailing.filter"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

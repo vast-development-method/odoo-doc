@@ -1,0 +1,4806 @@
+{
+ "catalog": {
+  "name": "entity:hr.expense",
+  "description": "Complete definition of entity Expense (hr.expense).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.expense",
+  "storage_name": "hr_expense",
+  "full_name": "Expense",
+  "kind": "persistent",
+  "description": "Expense",
+  "defined_by_package": "hr_expense",
+  "extended_by_packages": [
+   "project_hr_expense",
+   "sale_expense",
+   "project_sale_expense"
+  ],
+  "mixins": [
+   "mail.thread.main.attachment",
+   "mail.activity.mixin",
+   "analytic.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "date desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": "read",
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Description",
+    "compute": "_compute_name",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "copy": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Description"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Expense Date",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "hr_expense",
+    "full_name": "Expense Date"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "compute": "_compute_employee_id",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "index": true,
+    "default": {
+     "dynamic": "_default_employee_id"
+    },
+    "check_company": true,
+    "domain": [
+     [
+      "filter_for_expense",
+      "=",
+      true
+     ]
+    ],
+    "tracking": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "string": "Department",
+    "compute": "_compute_from_employee_id",
+    "store": true,
+    "copy": false,
+    "defined_in_package": "hr_expense",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Manager",
+    "compute": "_compute_from_employee_id",
+    "store": true,
+    "domain": {
+     "dynamic": "lambda self: [('share', '=', False), '|', ('employee_id.expense_manager_id', 'in', self.env.user.id), ('all_group_ids', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').ids)]"
+    },
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Manager",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "hr_expense",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Category",
+    "tracking": true,
+    "check_company": true,
+    "domain": [
+     [
+      "can_be_expensed",
+      "=",
+      true
+     ]
+    ],
+    "ondelete": "restrict",
+    "defined_in_package": "hr_expense",
+    "full_name": "Category",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_description",
+    "type": "Html",
+    "compute": "_compute_product_description",
+    "defined_in_package": "hr_expense",
+    "string": "Product Description",
+    "full_name": "Product Description"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "compute": "_compute_uom_id",
+    "precompute": true,
+    "store": true,
+    "copy": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "product_has_cost",
+    "type": "Boolean",
+    "compute": "_compute_from_product",
+    "defined_in_package": "hr_expense",
+    "string": "Product Has Cost",
+    "full_name": "Product Has Cost"
+   },
+   {
+    "name": "product_has_tax",
+    "type": "Boolean",
+    "string": "Whether tax is defined on a selected product",
+    "compute": "_compute_from_product",
+    "defined_in_package": "hr_expense",
+    "full_name": "Whether tax is defined on a selected product"
+   },
+   {
+    "name": "quantity",
+    "type": "Float",
+    "required": true,
+    "digits": "Product Unit",
+    "default": 1,
+    "defined_in_package": "hr_expense",
+    "string": "Quantity",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Internal Notes",
+    "defined_in_package": "hr_expense",
+    "full_name": "Internal Notes"
+   },
+   {
+    "name": "message_main_attachment_checksum",
+    "type": "Char",
+    "related": "message_main_attachment_id.checksum",
+    "defined_in_package": "hr_expense",
+    "string": "Message Main Attachment Checksum",
+    "full_name": "Message Main Attachment Checksum"
+   },
+   {
+    "name": "nb_attachment",
+    "type": "Integer",
+    "string": "Number of Attachments",
+    "compute": "_compute_nb_attachment",
+    "defined_in_package": "hr_expense",
+    "full_name": "Number of Attachments"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "One2many",
+    "comodel": "ir.attachment",
+    "inverse_name": "res_id",
+    "domain": [
+     [
+      "res_model",
+      "=",
+      "hr.expense"
+     ]
+    ],
+    "string": "Attachments",
+    "defined_in_package": "hr_expense",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "submitted",
+      "Submitted"
+     ],
+     [
+      "approved",
+      "Approved"
+     ],
+     [
+      "posted",
+      "Posted"
+     ],
+     [
+      "in_payment",
+      "In Payment"
+     ],
+     [
+      "paid",
+      "Paid"
+     ],
+     [
+      "refused",
+      "Refused"
+     ]
+    ],
+    "string": "Status",
+    "compute": "_compute_state",
+    "store": true,
+    "readonly": true,
+    "index": true,
+    "copy": false,
+    "default": "draft",
+    "tracking": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Status"
+   },
+   {
+    "name": "approval_state",
+    "type": "Selection",
+    "selection": {
+     "expression": "EXPENSE_APPROVAL_STATE"
+    },
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "string": "Approval State",
+    "full_name": "Approval State"
+   },
+   {
+    "name": "approval_date",
+    "type": "Datetime",
+    "string": "Approval Date",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Approval Date"
+   },
+   {
+    "name": "duplicate_expense_ids",
+    "type": "Many2many",
+    "comodel": "hr.expense",
+    "compute": "_compute_duplicate_expense_ids",
+    "defined_in_package": "hr_expense",
+    "string": "Duplicate Expense",
+    "full_name": "Duplicate Expense",
+    "target_entity": "hr.expense"
+   },
+   {
+    "name": "same_receipt_expense_ids",
+    "type": "Many2many",
+    "comodel": "hr.expense",
+    "compute": "_compute_same_receipt_expense_ids",
+    "defined_in_package": "hr_expense",
+    "string": "Same Receipt Expense",
+    "full_name": "Same Receipt Expense",
+    "target_entity": "hr.expense"
+   },
+   {
+    "name": "split_expense_origin_id",
+    "type": "Many2one",
+    "comodel": "hr.expense",
+    "string": "Origin Split Expense",
+    "help": "Original expense from a split.",
+    "defined_in_package": "hr_expense",
+    "full_name": "Origin Split Expense",
+    "target_entity": "hr.expense"
+   },
+   {
+    "name": "tax_amount_currency",
+    "type": "Monetary",
+    "string": "Tax amount in Currency",
+    "currency_field": "currency_id",
+    "compute": "_compute_tax_amount_currency",
+    "precompute": true,
+    "store": true,
+    "help": "Tax amount in currency",
+    "defined_in_package": "hr_expense",
+    "full_name": "Tax amount in Currency"
+   },
+   {
+    "name": "tax_amount",
+    "type": "Monetary",
+    "string": "Tax amount",
+    "currency_field": "company_currency_id",
+    "compute": "_compute_tax_amount",
+    "precompute": true,
+    "store": true,
+    "help": "Tax amount in company currency",
+    "defined_in_package": "hr_expense",
+    "full_name": "Tax amount"
+   },
+   {
+    "name": "total_amount_currency",
+    "type": "Monetary",
+    "string": "Total In Currency",
+    "currency_field": "currency_id",
+    "compute": "_compute_total_amount_currency",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "tracking": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Total In Currency"
+   },
+   {
+    "name": "total_amount",
+    "type": "Monetary",
+    "string": "Total",
+    "currency_field": "company_currency_id",
+    "compute": "_compute_total_amount",
+    "inverse": "_inverse_total_amount",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "tracking": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Total"
+   },
+   {
+    "name": "untaxed_amount_currency",
+    "type": "Monetary",
+    "string": "Total Untaxed Amount In Currency",
+    "currency_field": "currency_id",
+    "compute": "_compute_tax_amount_currency",
+    "precompute": true,
+    "store": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Total Untaxed Amount In Currency"
+   },
+   {
+    "name": "untaxed_amount",
+    "type": "Monetary",
+    "string": "Total Untaxed Amount",
+    "currency_field": "currency_id",
+    "compute": "_compute_tax_amount",
+    "precompute": true,
+    "store": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Total Untaxed Amount"
+   },
+   {
+    "name": "amount_residual",
+    "type": "Monetary",
+    "string": "Amount Due",
+    "currency_field": "company_currency_id",
+    "related": "account_move_id.amount_residual",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Amount Due"
+   },
+   {
+    "name": "price_unit",
+    "type": "Float",
+    "string": "Unit Price",
+    "compute": "_compute_price_unit",
+    "precompute": true,
+    "store": true,
+    "required": true,
+    "readonly": true,
+    "copy": true,
+    "min_display_digits": "Product Price",
+    "defined_in_package": "hr_expense",
+    "full_name": "Unit Price"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "compute": "_compute_currency_id",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company.currency_id"
+    },
+    "defined_in_package": "hr_expense",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "company_currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "company_id.currency_id",
+    "string": "Report Company Currency",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Report Company Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "is_multiple_currency",
+    "type": "Boolean",
+    "string": "Is currency_id different from the company_currency_id",
+    "compute": "_compute_is_multiple_currency",
+    "defined_in_package": "hr_expense",
+    "full_name": "Is currency_id different from the company_currency_id"
+   },
+   {
+    "name": "currency_rate",
+    "type": "Float",
+    "compute": "_compute_currency_rate",
+    "digits": [
+     16,
+     9
+    ],
+    "readonly": true,
+    "tracking": true,
+    "defined_in_package": "hr_expense",
+    "string": "Currency Rate",
+    "full_name": "Currency Rate"
+   },
+   {
+    "name": "label_currency_rate",
+    "type": "Char",
+    "compute": "_compute_currency_rate",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "string": "Label Currency Rate",
+    "full_name": "Label Currency Rate"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "related": "payment_method_line_id.journal_id",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "string": "Journal",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "selectable_payment_method_line_ids",
+    "type": "Many2many",
+    "comodel": "account.payment.method.line",
+    "compute": "_compute_selectable_payment_method_line_ids",
+    "compute_sudo": true,
+    "defined_in_package": "hr_expense",
+    "string": "Selectable Payment Method Line",
+    "full_name": "Selectable Payment Method Line",
+    "target_entity": "account.payment.method.line"
+   },
+   {
+    "name": "payment_method_line_id",
+    "type": "Many2one",
+    "comodel": "account.payment.method.line",
+    "string": "Payment Method",
+    "compute": "_compute_payment_method_line_id",
+    "store": true,
+    "readonly": false,
+    "domain": "[('id', 'in', selectable_payment_method_line_ids)]",
+    "help": "The payment method used when the expense is paid by the company.",
+    "defined_in_package": "hr_expense",
+    "full_name": "Payment Method",
+    "target_entity": "account.payment.method.line"
+   },
+   {
+    "name": "account_move_id",
+    "type": "Many2one",
+    "string": "Journal Entry",
+    "comodel": "account.move",
+    "readonly": true,
+    "copy": false,
+    "index": "btree_not_null",
+    "defined_in_package": "hr_expense",
+    "full_name": "Journal Entry",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "payment_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "own_account",
+      "Employee (to reimburse)"
+     ],
+     [
+      "company_account",
+      "Company"
+     ]
+    ],
+    "string": "Paid By",
+    "default": "own_account",
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Paid By"
+   },
+   {
+    "name": "vendor_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Vendor",
+    "defined_in_package": "hr_expense",
+    "full_name": "Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Account",
+    "compute": "_compute_account_id",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "check_company": true,
+    "domain": "[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'asset_cash', 'liability_credit_card'))]",
+    "help": "An expense account is expected",
+    "defined_in_package": "hr_expense",
+    "full_name": "Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "tax_ids",
+    "type": "Many2many",
+    "comodel": "account.tax",
+    "relation": "expense_tax",
+    "column1": "expense_id",
+    "column2": "tax_id",
+    "string": "Included taxes",
+    "compute": "_compute_tax_ids",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "domain": "[('type_tax_use', '=', 'purchase')]",
+    "check_company": true,
+    "help": "Both price-included and price-excluded taxes will behave as price-included taxes for expenses.",
+    "defined_in_package": "hr_expense",
+    "full_name": "Included taxes",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "is_editable",
+    "type": "Boolean",
+    "string": "Is Editable By Current User",
+    "compute": "_compute_is_editable",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Is Editable By Current User"
+   },
+   {
+    "name": "can_reset",
+    "type": "Boolean",
+    "string": "Can Reset",
+    "compute": "_compute_can_reset",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Can Reset"
+   },
+   {
+    "name": "can_approve",
+    "type": "Boolean",
+    "string": "Can Approve",
+    "compute": "_compute_can_approve",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Can Approve"
+   },
+   {
+    "name": "former_sheet_id",
+    "type": "Integer",
+    "string": "Former Report",
+    "defined_in_package": "hr_expense",
+    "full_name": "Former Report"
+   },
+   {
+    "name": "sale_order_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "string": "Customer to Reinvoice",
+    "compute": "_compute_sale_order_id",
+    "store": true,
+    "readonly": false,
+    "index": "btree_not_null",
+    "tracking": true,
+    "domain": "[('state', '=', 'sale')]",
+    "check_company": true,
+    "help": "If the category has an expense policy, it will be reinvoiced on this sales order",
+    "defined_in_package": "sale_expense",
+    "full_name": "Customer to Reinvoice",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "sale_order_line_id",
+    "type": "Many2one",
+    "comodel": "sale.order.line",
+    "compute": "_compute_sale_order_id",
+    "store": true,
+    "readonly": true,
+    "index": "btree_not_null",
+    "defined_in_package": "sale_expense",
+    "string": "Sale Order Line",
+    "full_name": "Sale Order Line",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "can_be_reinvoiced",
+    "type": "Boolean",
+    "string": "Can be reinvoiced",
+    "compute": "_compute_can_be_reinvoiced",
+    "defined_in_package": "sale_expense",
+    "full_name": "Can be reinvoiced"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_employee_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The current user has no related employee. Please, create one.",
+        "line": 54
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_non_zero",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "state",
+         "approval_state",
+         "total_amount",
+         "total_amount_currency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper to raise when we should ensure that an expense isn't approved  ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Only draft expenses can have a total of 0.",
+        "line": 296
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_o2o_payment",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "account_move_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Only one expense can be linked to a particular payment",
+        "line": 302
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_has_cost"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_editable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "manager_id",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_has_cost",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_has_cost"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Reset quantity to 1, in case of 0-cost product. To make sure switching non-0-cost to 0-cost doesn't keep the quantity.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "lang"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_expense_currency_rate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date_today"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_currency_rate",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "currency_id",
+         "total_amount_currency",
+         "date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "We want the default the system rate when the following change:\n- the currency of the expense\n- the total amount in foreign currency\n- the date of the expense\nthis will cause the rate to be recomputed twice with possible changes but we don't have the required fields\nto store the override state in stable",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_multiple_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "currency_id",
+         "company_currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_from_product",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount_residual",
+         "account_move_id.state",
+         "account_move_id.payment_state",
+         "approval_state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the states of the expense as such (priority is given to the last matching state of the list):\n    - draft: By default\n    - submitted: When the approval_state is 'submitted'\n    - approved: When the approval_state is 'approved'\n    - refused: When the approval_state is 'refused'\n    - paid: When it is a company paid expense or the move state is neither 'draft' nor 'posted'\n    - in_payment (or paid): When the move state is 'posted' and it's 'payment_state' is 'in_payment' or 'paid'\n                            or ('partial' and there is a residual amount)\n    - posted: When the linked move state is 'draft', or if it is 'posted' and it's 'payment_state' is 'not_paid'",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_from_employee_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "employee_id.department_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_amount_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quantity",
+         "price_unit",
+         "tax_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_total_amount_currency",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "total_amount_currency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Uh-oh! You can’t edit this expense.\n\nReach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek.",
+        "line": 509
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "company_id",
+         "currency_id",
+         "company_currency_id",
+         "is_multiple_currency",
+         "total_amount_currency",
+         "product_id",
+         "employee_id.user_id.partner_id",
+         "quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_total_amount",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Allows to set a custom rate on the expense, and avoid the override when it makes no sense ",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_amount_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "total_amount_currency",
+         "tax_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Note: as total_amount_currency can be set directly by the user (for product without cost)\nor needs to be computed (for product with cost), `untaxed_amount_currency` can't be computed in the same method as `total_amount_currency`.",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "total_amount",
+         "currency_rate",
+         "tax_ids",
+         "is_multiple_currency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Note: as total_amount can be set directly by the user when the currency_rate is overridden,\nthe tax must be computed after the total_amount.",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_unit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "total_amount",
+         "total_amount_currency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "The price_unit is the unit price of the product if no product is set and no attachment overrides it.\nOtherwise it is always computed from the total_amount and the quantity else it would break the Receipt Entry\nwhen edited after creation.",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_payment_method_line_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "selectable_payment_method_line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_selectable_payment_method_line_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_employee_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_same_receipt_expense_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attachment_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duplicate_expense_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "product_id",
+         "total_amount_currency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_analytic_distribution",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "account_id",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "project_hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "project_sale_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_nb_attachment",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_reset",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_approve",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_approved",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a posted or approved expense.",
+        "line": 811
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot edit the security fields of an expense manually",
+        "line": 815
+       },
+       {
+        "kind": "UserError",
+        "message": "Uh-oh! You can’t edit this expense.\n\nReach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek.",
+        "line": 819
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "project_hr_expense",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_auto_subscribe_followers",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "updated_values",
+     "subtype_ids"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_employee_from_email",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "email_address"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_product",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "expense_description"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Parse the subject to find the product.\nProduct code should be the first word of expense_description\nReturn product.product and updated description",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_price",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "expense_description",
+     "currencies"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return price, currency and updated description ",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_expense_subject",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "expense_description",
+     "currencies"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Fetch product, price and currency info from mail subject.\n\nProduct can be identified based on product name or product code.\nIt can be passed between [] or it can be placed at start.\n\nWhen parsing, only consider currencies passed as parameter.\nThis will fetch currency in symbol($) or ISO name (USD).\n\nSome valid examples:\n    Travel by Air [TICKET] USD 1205.91\n    TICKET $1205.91 Travel by Air\n    Extra expenses 29.10EUR [EXTRA]",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_expense_success_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "msg_dict",
+     "expense"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Send a confirmation mail to the employee that an expense has been created by their previous mail ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_empty_list_mail_alias",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_subtype",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "init_values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "update_activities_and_mails",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Update the \"Review this expense\" activity with the new state of the expense, also sends mail to approver to ask them to act ",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_send_submitted_expenses_mail",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_submitted_expenses_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_empty_list_help",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "help_message"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "message_new",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "msg_dict",
+     "custom_values"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 39,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_split_expense",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_submit",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Submit a draft expense to an approve, may skip to the approval step if no approver on the employee nor the expense ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You do not have the required permission to submit this expense.",
+        "line": 1133
+       },
+       {
+        "kind": "UserError",
+        "message": "You can not submit an expense without a category.",
+        "line": 1135
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_can_be_autovalidated",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Check whether the given expenses can be auto-validated (no approver) ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_approve",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Approve an expense, pops a wizard if a duplicated expense is found to confirm they are all valid expenses ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_refuse",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Refuse an expense with a reason ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_post",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Post the expense, following one of those two options:\n    - Company-paid expenses: Create and post a payment, with an accounting entry\n    - Employee-paid expenses: Through a wizard, create and post a receipt",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't post simultaneously employee-paid expenses belonging to different companies",
+        "line": 1176
+       },
+       {
+        "kind": "UserError",
+        "message": "The vendor is required for expenses using SEPA Credit Transfer as the payment method.\nPlease set a vendor on the following expenses: %s",
+        "line": 1185
+       }
+      ]
+     },
+     {
+      "package": "sale_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "project_sale_expense",
+      "decorators": [],
+      "documentation": "When creating the move of the expense, if the AA is given in the project of the SO, we take it as reference in the distribution.\nOtherwise, we create a AA for the project of the SO and set the distribution to it.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_pay",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Register payment shortcut on the expense form view ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reset",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Reset an expense to draft state, reversing the accounting entries if needed ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "attach_document",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "When an attachment is uploaded as a receipt, set it as the main attachment.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You don't have the access rights to modify this expense.",
+        "line": 1222
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't add an attachment to an expense once it has been approved.",
+        "line": 1227
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_untitled_expense_name",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "*args"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Done in a specific function to be called by hr_expense_extract to keep the same translation ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_expense_from_attachments",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "attachment_ids",
+     "view_type"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create the expenses from files.\n\n:return: An action redirecting to hr.expense list view.",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No attachment was provided",
+        "line": 1247
+       },
+       {
+        "kind": "UserError",
+        "message": "Invalid attachments!",
+        "line": 1252
+       },
+       {
+        "kind": "UserError",
+        "message": "You need to have at least one category that can be expensed in your database to proceed!",
+        "line": 1258
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_show_same_receipt_expense_ids",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_expense_dashboard",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_approve_duplicates",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_split_wizard",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot split an expense that is already posted.",
+        "line": 1330
+       },
+       {
+        "kind": "UserError",
+        "message": "You do not have the rights to edit this expense.",
+        "line": 1332
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_open_account_move",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_can_approve",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "reasons",
+        "line": 1377
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_cannot_approve_reason",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Returns the reason why the user cannot approve the expense ",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_can_refuse",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "reasons",
+        "line": 1434
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_can_reset_approval",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only HR Officers, accountants, or the concerned employee can reset to draft.",
+        "line": 1438
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot reset to draft an expense linked to a posted journal entry.",
+        "line": 1440
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_can_create_move",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only generate an accounting entry for approved expense(s).",
+        "line": 1444
+       },
+       {
+        "kind": "UserError",
+        "message": "Please specify if the expenses were paid by the company, or the employee.",
+        "line": 1447
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_do_approve",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "check"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_do_reset_approval",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_do_refuse",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reason"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot cancel an expense linked to a posted journal entry",
+        "line": 1473
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_split_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sale_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_responsible_for_approval",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_needs_product_price_computation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_wizard",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Only expense paid by the employee can be posted with the wizard",
+        "line": 1535
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_post_without_wizard",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Post an employee expense without any direct call for the wizard, should never be called unless in very specific flows ",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_company_paid_moves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Creation of the account moves for the company paid expenses.\n-> Create an account payment (we only \"log\" the already paid expense so it can be reconciled)",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_receipts_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_payments_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 83,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You need to add a manual payment method on the journal (%s)",
+        "line": 1638
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_move_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_move_lines_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_base_line_for_taxes_computation",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_move_line_name",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Helper to get the name of the account move lines related to an expense ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_base_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": "Returns the expense account or forces default values if none was found\nWe need to do this as the installation process may delete the original account, and it doesn't recompute properly after\nReturned expense accounts are the first expense account encountered in the following list:\n1. expense account of the expense itself\n2. expense account of the product\n3. expense account of the company\n4. expense account on the purchase journal for employee expense",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "the system had a look at your expense, its product, your company and the journal but came back with empty hands.\nGive the system a hand to find an account by setting up an expense account.\n%(expense)s %(expense_name)s.\n",
+        "line": 1784
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_expense_account_destination",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The following expenses payment method leads to several accounts payable and this isn't supported:\n%(expenses)s",
+        "line": 1814
+       },
+       {
+        "kind": "UserError",
+        "message": "No work contact found for the employee %(name)s, please configure one.",
+        "line": 1801
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_outstanding_account_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "RedirectWarning",
+        "message": null,
+        "line": 1831
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_creation_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_be_reinvoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.expense_policy"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_order_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_be_reinvoiced"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_sale_order_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_expense",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "sale_order_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sale_expense_reset_sol_quantities",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_expense",
+      "decorators": [],
+      "documentation": "Resets the quantity of a SOL created by a reinvoiced expense to 0 when the expense or its move is reset to an unfinished state\n\nNote: Resetting the qty_delivered will raise if the product is a storable product and sale_stock is installed,\n      but it's fine as it doesn't make much sense to have a stored product in an expense.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_sale_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_default_employee_id",
+    "package": "hr_expense",
+    "kind": "ValidationError",
+    "message": "The current user has no related employee. Please, create one."
+   },
+   {
+    "operation": "_check_non_zero",
+    "package": "hr_expense",
+    "kind": "ValidationError",
+    "message": "Only draft expenses can have a total of 0."
+   },
+   {
+    "operation": "_check_o2o_payment",
+    "package": "hr_expense",
+    "kind": "ValidationError",
+    "message": "Only one expense can be linked to a particular payment"
+   },
+   {
+    "operation": "_inverse_total_amount_currency",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "Uh-oh! You can’t edit this expense.\n\nReach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek."
+   },
+   {
+    "operation": "_unlink_except_approved",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You cannot delete a posted or approved expense."
+   },
+   {
+    "operation": "write",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You cannot edit the security fields of an expense manually"
+   },
+   {
+    "operation": "write",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "Uh-oh! You can’t edit this expense.\n\nReach out to the administrators, flash your best smile, and see if they'll grant you the magical access you seek."
+   },
+   {
+    "operation": "action_submit",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You do not have the required permission to submit this expense."
+   },
+   {
+    "operation": "action_submit",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You can not submit an expense without a category."
+   },
+   {
+    "operation": "action_post",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You can't post simultaneously employee-paid expenses belonging to different companies"
+   },
+   {
+    "operation": "action_post",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "The vendor is required for expenses using SEPA Credit Transfer as the payment method.\nPlease set a vendor on the following expenses: %s"
+   },
+   {
+    "operation": "attach_document",
+    "package": "hr_expense",
+    "kind": "AccessError",
+    "message": "You don't have the access rights to modify this expense."
+   },
+   {
+    "operation": "attach_document",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You can't add an attachment to an expense once it has been approved."
+   },
+   {
+    "operation": "create_expense_from_attachments",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "No attachment was provided"
+   },
+   {
+    "operation": "create_expense_from_attachments",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "Invalid attachments!"
+   },
+   {
+    "operation": "create_expense_from_attachments",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You need to have at least one category that can be expensed in your database to proceed!"
+   },
+   {
+    "operation": "action_split_wizard",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You cannot split an expense that is already posted."
+   },
+   {
+    "operation": "action_split_wizard",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You do not have the rights to edit this expense."
+   },
+   {
+    "operation": "_check_can_approve",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "reasons"
+   },
+   {
+    "operation": "_check_can_refuse",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "reasons"
+   },
+   {
+    "operation": "_check_can_reset_approval",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "Only HR Officers, accountants, or the concerned employee can reset to draft."
+   },
+   {
+    "operation": "_check_can_reset_approval",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You cannot reset to draft an expense linked to a posted journal entry."
+   },
+   {
+    "operation": "_check_can_create_move",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You can only generate an accounting entry for approved expense(s)."
+   },
+   {
+    "operation": "_check_can_create_move",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "Please specify if the expenses were paid by the company, or the employee."
+   },
+   {
+    "operation": "_do_refuse",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You cannot cancel an expense linked to a posted journal entry"
+   },
+   {
+    "operation": "_post_wizard",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "Only expense paid by the employee can be posted with the wizard"
+   },
+   {
+    "operation": "_prepare_payments_vals",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You need to add a manual payment method on the journal (%s)"
+   },
+   {
+    "operation": "_get_base_account",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "the system had a look at your expense, its product, your company and the journal but came back with empty hands.\nGive the system a hand to find an account by setting up an expense account.\n%(expense)s %(expense_name)s.\n"
+   },
+   {
+    "operation": "_get_expense_account_destination",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "The following expenses payment method leads to several accounts payable and this isn't supported:\n%(expenses)s"
+   },
+   {
+    "operation": "_get_expense_account_destination",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "No work contact found for the employee %(name)s, please configure one."
+   }
+  ],
+  "state_fields": [
+   "state",
+   "approval_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "hr_expense.access_hr_expense_employee",
+    "package": "hr_expense",
+    "name": "hr.expense.employee",
+    "entity": "hr.expense",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_expense.access_hr_expense_user",
+    "package": "hr_expense",
+    "name": "hr.expense.user",
+    "entity": "hr.expense",
+    "group": "hr_expense.group_hr_expense_team_approver",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_expense.access_hr_expense_manager",
+    "package": "hr_expense",
+    "name": "hr.expense.manager",
+    "entity": "hr.expense",
+    "group": "hr_expense.group_hr_expense_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_expense.access_hr_expense_accountant",
+    "package": "hr_expense",
+    "name": "hr.expense.accountant",
+    "entity": "hr.expense",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_manager",
+    "package": "hr_expense",
+    "name": "Manager Expense",
+    "entity": "hr.expense",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[                 (4, ref('account.group_account_user')),                 (4, ref('hr_expense.group_hr_expense_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_approver",
+    "package": "hr_expense",
+    "name": "Team Approver Expense",
+    "entity": "hr.expense",
+    "domain": "['|', '|', '|', '|',\n                ('employee_id.user_id', '=', user.id),\n                ('employee_id.department_id.manager_id.user_id', '=', user.id),\n                ('employee_id', 'child_of', user.employee_ids.ids),\n                ('employee_id.expense_manager_id', '=', user.id),\n                ('manager_id', '=', user.id)]",
+    "groups": "[(4, ref('hr_expense.group_hr_expense_team_approver'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_employee",
+    "package": "hr_expense",
+    "name": "Employee Expense",
+    "entity": "hr.expense",
+    "domain": "[\n                '|', '&', ('employee_id.expense_manager_id', '=', user.id), ('state', 'in', ['draft', 'submitted', 'approved', 'refused']),\n                     '&', ('employee_id.user_id', '=', user.id), ('state', '=', 'draft')\n            ]",
+    "groups": "[(4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_employee_not_draft",
+    "package": "hr_expense",
+    "name": "Employees can't modify an expense that is not in draft state",
+    "entity": "hr.expense",
+    "domain": "[\n                '|', '&', ('employee_id.user_id', '=', user.id), ('state', '!=', 'draft'),\n                     '&', ('employee_id.expense_manager_id', '=', user.id), ('state', 'in', ['submitted', 'approved', 'refused'])\n            ]",
+    "groups": "[(4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_comp_rule",
+    "package": "hr_expense",
+    "name": "Expense multi company rule",
+    "entity": "hr.expense",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_expense.hr_expense_view_expenses_analysis_tree",
+    "package": "hr_expense",
+    "name": "hr.expense.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Expenses",
+      "multi_edit": "1",
+      "sample": "1",
+      "js_class": "hr_expense_tree",
+      "decoration-info": "state == 'draft'"
+     },
+     "fields": [
+      {
+       "name": "is_editable",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "nb_attachment",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_multiple_currency",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_has_cost",
+       "column_invisible": "True"
+      },
+      {
+       "name": "selectable_payment_method_line_ids",
+       "column_invisible": "True"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "not is_editable"
+      },
+      {
+       "name": "name",
+       "readonly": "not is_editable"
+      },
+      {
+       "name": "department_id",
+       "readonly": "True",
+       "optional": "hide"
+      },
+      {
+       "name": "date",
+       "readonly": "not is_editable",
+       "optional": "show"
+      },
+      {
+       "name": "product_id",
+       "readonly": "not is_editable",
+       "required": "1",
+       "optional": "show"
+      },
+      {
+       "name": "payment_mode",
+       "readonly": "not is_editable",
+       "optional": "show"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "list_activity",
+       "optional": "show"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "readonly": "not is_editable",
+       "options": "{'product_field': 'product_id', 'business_domain': 'expense'}",
+       "optional": "show",
+       "groups": "analytic.group_analytic_accounting"
+      },
+      {
+       "name": "account_id",
+       "readonly": "not is_editable",
+       "optional": "hide",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "journal_id",
+       "readonly": "True",
+       "optional": "hide",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "payment_method_line_id",
+       "readonly": "not is_editable",
+       "optional": "hide",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "manager_id",
+       "readonly": "not is_editable",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "readonly": "True",
+       "optional": "show",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "price_unit",
+       "widget": "monetary",
+       "readonly": "True",
+       "string": "Unit Price",
+       "options": "{'currency_field': 'company_currency_id', 'field_digits': True}",
+       "optional": "hide"
+      },
+      {
+       "name": "quantity",
+       "readonly": "not is_editable or not product_has_cost",
+       "optional": "hide"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "readonly": "not is_editable or not product_has_cost",
+       "optional": "hide",
+       "groups": "account.group_account_invoice,account.group_account_readonly"
+      },
+      {
+       "name": "tax_amount",
+       "readonly": "True",
+       "optional": "hide",
+       "sum": "Total Taxes",
+       "groups": "account.group_account_invoice,account.group_account_readonly"
+      },
+      {
+       "name": "nb_attachment",
+       "widget": "nb_attachment",
+       "readonly": "True",
+       "nolabel": "1"
+      },
+      {
+       "name": "total_amount",
+       "widget": "monetary",
+       "readonly": "not is_editable or product_has_cost",
+       "options": "{'currency_field': 'company_currency_id'}",
+       "sum": "Total Amount",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "total_amount_currency",
+       "widget": "monetary",
+       "readonly": "not is_editable or not is_multiple_currency or product_has_cost",
+       "options": "{'currency_field': 'currency_id'}",
+       "optional": "hide",
+       "decoration-bf": "1",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "currency_id",
+       "readonly": "not is_editable or product_has_cost",
+       "optional": "hide",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "readonly": "True",
+       "optional": "show",
+       "decoration-danger": "state == 'refused'",
+       "decoration-warning": "state == 'submitted'",
+       "decoration-success": "state in ['approved', 'posted', 'in_payment', 'paid']",
+       "decoration-info": "state == 'draft'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1,
+      "list_activity": 1,
+      "analytic_distribution": 1,
+      "monetary": 3,
+      "many2many_tax_tags": 1,
+      "nb_attachment": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state == 'draft'"
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_expense.view_expenses_tree",
+    "package": "hr_expense",
+    "name": "hr.expense.list",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense_view_expenses_analysis_tree",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.view_my_expenses_tree",
+    "package": "hr_expense",
+    "name": "hr.expense.list",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense.view_expenses_tree",
+    "mode": "primary",
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_view_form",
+    "package": "hr_expense",
+    "name": "hr.expense.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Expenses",
+      "js_class": "hr_expense_form_view"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "state in ('submitted', 'in_payment', 'refused')"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "state != 'submitted'"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "state != 'in_payment'"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "state != 'refused'"
+      },
+      {
+       "name": "name",
+       "readonly": "not is_editable",
+       "placeholder": "e.g. Lunch with Customer"
+      },
+      {
+       "name": "product_has_cost",
+       "invisible": "1"
+      },
+      {
+       "name": "product_has_tax",
+       "invisible": "1"
+      },
+      {
+       "name": "is_multiple_currency",
+       "invisible": "1"
+      },
+      {
+       "name": "is_editable",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "company_currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "tax_amount",
+       "invisible": "1"
+      },
+      {
+       "name": "price_unit",
+       "invisible": "1"
+      },
+      {
+       "name": "nb_attachment",
+       "invisible": "1"
+      },
+      {
+       "name": "total_amount",
+       "invisible": "1"
+      },
+      {
+       "name": "duplicate_expense_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_rate",
+       "invisible": "1"
+      },
+      {
+       "name": "selectable_payment_method_line_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "readonly": "not is_editable",
+       "required": "1",
+       "context": "{                                         'default_type': 'service',                                         'default_can_be_expensed': 1,                                         'list_view_ref': 'hr_expense.product_product_expense_tree_view',                                         'form_view_ref': 'hr_expense.product_product_expense_form_view',                                     }"
+      },
+      {
+       "name": "product_description"
+      },
+      {
+       "name": "price_unit",
+       "widget": "monetary",
+       "invisible": "not product_has_cost",
+       "readonly": "True",
+       "required": "1",
+       "options": "{'currency_field': 'currency_id', 'field_digits': True}"
+      },
+      {
+       "name": "quantity",
+       "readonly": "not is_editable"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "not is_editable",
+       "required": "1",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "total_amount_currency",
+       "widget": "monetary",
+       "readonly": "not is_editable",
+       "options": "{'currency_field': 'currency_id'}"
+      },
+      {
+       "name": "currency_id",
+       "readonly": "not is_editable",
+       "options": "{'no_create': True, 'no_open': True}",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "tax_amount"
+      },
+      {
+       "name": "total_amount",
+       "widget": "monetary",
+       "readonly": "not is_editable or product_has_cost",
+       "options": "{'currency_field': 'company_currency_id'}",
+       "force_save": "1"
+      },
+      {
+       "name": "label_currency_rate"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "readonly": "not is_editable",
+       "options": "{'no_create': True}",
+       "force_save": "1"
+      },
+      {
+       "name": "tax_amount_currency"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "not is_editable",
+       "context": "{'default_company_id': company_id}",
+       "options": "{'relation': 'hr.employee.public', 'no_create': True}",
+       "groups": "!hr.group_hr_user"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "not is_editable",
+       "context": "{'default_company_id': company_id}",
+       "options": "{'relation': 'hr.employee'}",
+       "groups": "hr.group_hr_user"
+      },
+      {
+       "name": "payment_mode",
+       "widget": "radio",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "date",
+       "readonly": "not is_editable"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state != 'draft'",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "manager_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "state != 'draft'",
+       "placeholder": "Auto-validation"
+      },
+      {
+       "name": "department_id",
+       "invisible": "1",
+       "readonly": "not is_editable",
+       "context": "{'default_company_id': company_id}"
+      },
+      {
+       "name": "vendor_id",
+       "invisible": "payment_mode != 'company_account'"
+      },
+      {
+       "name": "account_id",
+       "readonly": "not is_editable",
+       "domain": "[('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card')), ('company_ids', 'parent_of', company_id)]",
+       "context": "{'default_company_id': company_id}",
+       "options": "{'no_create': True}",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "payment_method_line_id",
+       "invisible": "payment_mode != 'company_account'",
+       "readonly": "not is_editable",
+       "required": "payment_mode == 'company_account'",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "readonly": "not is_editable",
+       "options": "{'product_field': 'product_id', 'account_field': 'account_id', 'business_domain': 'expense'}",
+       "groups": "analytic.group_analytic_accounting"
+      },
+      {
+       "name": "description",
+       "readonly": "not is_editable",
+       "placeholder": "Notes..."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_submit",
+       "string": "Submit",
+       "type": "object",
+       "invisible": "nb_attachment == 0 or state != 'draft'",
+       "class": "oe_highlight o_expense_submit_highlight",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "invisible": "nb_attachment == 0 or not can_approve or state != 'submitted'",
+       "class": "oe_highlight o_expense_approve_highlight",
+       "context": "{'validate_analytic': True}",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_post",
+       "string": "Post Journal Entries",
+       "type": "object",
+       "invisible": "nb_attachment == 0 or state != 'approved'",
+       "class": "oe_highlight o_expense_post_highlight",
+       "groups": "account.group_account_invoice",
+       "data-hotkey": "y"
+      },
+      {
+       "name": "action_submit",
+       "string": "Submit",
+       "type": "object",
+       "invisible": "nb_attachment >= 1 or state != 'draft'",
+       "class": "o_expense_submit",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "invisible": "nb_attachment >= 1 or not can_approve or state != 'submitted'",
+       "class": "o_expense_approve",
+       "context": "{'validate_analytic': True}",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_post",
+       "string": "Post Journal Entries",
+       "type": "object",
+       "invisible": "nb_attachment  >= 1 or state != 'approved'",
+       "class": "o_expense_post",
+       "groups": "account.group_account_invoice",
+       "data-hotkey": "y"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "type": "object",
+       "invisible": "state not in ('submitted', 'approved')",
+       "class": "o_expense_refuse",
+       "groups": "hr_expense.group_hr_expense_team_approver",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_reset",
+       "string": "Reset",
+       "type": "object",
+       "invisible": "not can_reset or state in 'draft'",
+       "groups": "account.group_account_invoice",
+       "data-hotkey": "r"
+      },
+      {
+       "name": "action_reset",
+       "string": "Reset",
+       "type": "object",
+       "invisible": "not can_reset or state in ('draft', 'posted', 'in_payment','paid')",
+       "groups": "!account.group_account_invoice",
+       "data-hotkey": "r"
+      },
+      {
+       "name": "action_split_wizard",
+       "string": "Split Expense",
+       "type": "object",
+       "invisible": "state != 'draft' or product_has_cost",
+       "class": "o_expense_split_user",
+       "groups": "!hr_expense.group_hr_expense_team_approver,!account.group_account_invoice"
+      },
+      {
+       "name": "action_split_wizard",
+       "string": "Split Expense",
+       "type": "object",
+       "invisible": "state in ('in_payment', 'paid', 'refused', 'posted') or product_has_cost",
+       "class": "o_expense_split_manager",
+       "groups": "hr_expense.group_hr_expense_team_approver,account.group_account_invoice"
+      },
+      {
+       "name": "action_open_split_expense",
+       "string": "Split",
+       "type": "object",
+       "invisible": "not split_expense_origin_id",
+       "class": "oe_stat_button",
+       "icon": "fa-file-text-o"
+      },
+      {
+       "name": "action_open_account_move",
+       "type": "object",
+       "invisible": "not account_move_id",
+       "class": "oe_stat_button",
+       "groups": "account.group_account_invoice",
+       "icon": "fa-bars"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 4,
+      "monetary": 3,
+      "many2one_uom": 1,
+      "many2many_tax_tags": 1,
+      "many2one_avatar_employee": 2,
+      "radio": 1,
+      "many2one_avatar_user": 1,
+      "analytic_distribution": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_submit",
+       "string": "Submit",
+       "type": "object",
+       "class": "oe_highlight o_expense_submit_highlight",
+       "invisible": "nb_attachment == 0 or state != 'draft'",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "data-hotkey": "q",
+       "context": "{'validate_analytic': True}",
+       "invisible": "nb_attachment == 0 or not can_approve or state != 'submitted'",
+       "class": "oe_highlight o_expense_approve_highlight"
+      },
+      {
+       "name": "action_post",
+       "string": "Post Journal Entries",
+       "type": "object",
+       "data-hotkey": "y",
+       "class": "oe_highlight o_expense_post_highlight",
+       "invisible": "nb_attachment == 0 or state != 'approved'",
+       "groups": "account.group_account_invoice"
+      },
+      {
+       "name": "action_submit",
+       "string": "Submit",
+       "type": "object",
+       "class": "o_expense_submit",
+       "invisible": "nb_attachment >= 1 or state != 'draft'",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "data-hotkey": "q",
+       "context": "{'validate_analytic': True}",
+       "invisible": "nb_attachment >= 1 or not can_approve or state != 'submitted'",
+       "class": "o_expense_approve"
+      },
+      {
+       "name": "action_post",
+       "string": "Post Journal Entries",
+       "type": "object",
+       "data-hotkey": "y",
+       "class": "o_expense_post",
+       "invisible": "nb_attachment  >= 1 or state != 'approved'",
+       "groups": "account.group_account_invoice"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "invisible": "state not in ('submitted', 'approved')",
+       "type": "object",
+       "groups": "hr_expense.group_hr_expense_team_approver",
+       "class": "o_expense_refuse",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_reset",
+       "string": "Reset",
+       "type": "object",
+       "data-hotkey": "r",
+       "invisible": "not can_reset or state in 'draft'",
+       "groups": "account.group_account_invoice"
+      },
+      {
+       "name": "action_reset",
+       "string": "Reset",
+       "type": "object",
+       "data-hotkey": "r",
+       "invisible": "not can_reset or state in ('draft', 'posted', 'in_payment','paid')",
+       "groups": "!account.group_account_invoice"
+      },
+      {
+       "name": "action_split_wizard",
+       "string": "Split Expense",
+       "type": "object",
+       "invisible": "state != 'draft' or product_has_cost",
+       "groups": "!hr_expense.group_hr_expense_team_approver,!account.group_account_invoice",
+       "class": "o_expense_split_user"
+      },
+      {
+       "name": "action_split_wizard",
+       "string": "Split Expense",
+       "type": "object",
+       "class": "o_expense_split_manager",
+       "invisible": "state in ('in_payment', 'paid', 'refused', 'posted') or product_has_cost",
+       "groups": "hr_expense.group_hr_expense_team_approver,account.group_account_invoice"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,approved,posted,paid",
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "action_open_split_expense",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-file-text-o",
+       "invisible": "not split_expense_origin_id",
+       "string": "Split"
+      },
+      {
+       "name": "action_open_account_move",
+       "class": "oe_stat_button",
+       "icon": "fa-bars",
+       "type": "object",
+       "invisible": "not account_move_id",
+       "groups": "account.group_account_invoice"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_view_form_without_header",
+    "package": "hr_expense",
+    "name": "hr.expense.view.form",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense.hr_expense_view_form",
+    "mode": "primary",
+    "priority": "35",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "/form/header",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "/form/header",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_view_expenses_analysis_kanban",
+    "package": "hr_expense",
+    "name": "hr.expense.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1",
+      "js_class": "hr_expense_kanban",
+      "quick_create": "false"
+     },
+     "fields": [
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "total_amount_currency",
+       "widget": "monetary"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "True",
+       "options": "{'display_avatar_name': True}"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "options": "{'classes': {                                         'draft': 'default', 'submitted': 'warning', 'refused': 'danger', 'posted': 'warning',                                         'approved': 'success', 'in_payment': 'success', 'paid': 'success'}}"
+      },
+      {
+       "name": "date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1,
+      "many2one_avatar_employee": 1,
+      "label_selection": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": "false",
+     "progressbar": [
+      {
+       "field": "activity_state",
+       "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_kanban_view_minimal",
+    "package": "hr_expense",
+    "name": "hr.expense.kanban",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense_view_expenses_analysis_kanban",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//templates//field[@name='employee_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//templates//field[@name='employee_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_kanban_view",
+    "package": "hr_expense",
+    "name": "hr.expense.kanban",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense_view_expenses_analysis_kanban",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//kanban",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//kanban",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_kanban_view_header",
+    "package": "hr_expense",
+    "name": "hr.expense.kanban",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense_view_expenses_analysis_kanban",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//kanban",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//kanban",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_view_pivot",
+    "package": "hr_expense",
+    "name": "hr.expense.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Expenses Analysis",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "total_amount_currency"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "employee_id",
+       "type": "row"
+      },
+      {
+       "name": "date",
+       "interval": "month",
+       "type": "col"
+      },
+      {
+       "name": "total_amount_currency",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_view_graph",
+    "package": "hr_expense",
+    "name": "hr.expense.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Expenses Analysis",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "price_unit",
+       "invisible": "1"
+      },
+      {
+       "name": "quantity",
+       "invisible": "1"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "total_amount"
+      },
+      {
+       "name": "tax_amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "price_unit",
+       "invisible": "1"
+      },
+      {
+       "name": "quantity",
+       "invisible": "1"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "total_amount",
+       "type": "measure"
+      },
+      {
+       "name": "tax_amount"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_view_search",
+    "package": "hr_expense",
+    "name": "hr.expense.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Expense"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Expense",
+       "filter_domain": "[('name', 'ilike', self)]"
+      },
+      {
+       "name": "department_id",
+       "filter_domain": "[('department_id.name', 'ilike', self)]"
+      },
+      {
+       "name": "company_id",
+       "filter_domain": "[('company_id.name', 'ilike', self)]",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "employee_id",
+       "filter_domain": "[('employee_id.name', 'ilike', self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_open_expenses",
+       "string": "My Expenses",
+       "domain": "[('employee_id.user_id', '=', uid)]"
+      },
+      {
+       "name": "my_team_expenses",
+       "string": "My Team",
+       "domain": "[('employee_id.parent_id.user_id', '=', uid)]",
+       "help": "Expenses of Your Team Member",
+       "groups": "hr_expense.group_hr_expense_team_approver"
+      },
+      {
+       "name": "by_company",
+       "string": "Paid by Company",
+       "domain": "[('payment_mode', '=', 'company_account')]"
+      },
+      {
+       "name": "by_employee",
+       "string": "Paid by Employee",
+       "domain": "[('payment_mode', '=', 'own_account')]"
+      },
+      {
+       "name": "draft",
+       "string": "To Submit",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "submitted",
+       "string": "Waiting Approval",
+       "domain": "[('state', '=', 'submitted')]"
+      },
+      {
+       "name": "approved",
+       "string": "To Post",
+       "domain": "[('state', '=', 'approved')]"
+      },
+      {
+       "name": "to_pay",
+       "string": "Waiting Reimbursement",
+       "domain": "[('state', '=', 'approved'), ('payment_mode', '=', 'own_account')]"
+      },
+      {
+       "name": "date",
+       "string": "Expense Date",
+       "date": "date"
+      },
+      {
+       "name": "all_approved",
+       "string": "All to Post",
+       "domain": "[('state', '=', 'approved')]",
+       "invisible": "True"
+      },
+      {
+       "name": "all_to_pay",
+       "string": "All to Pay",
+       "domain": "[('state', '=', 'posted'), ('payment_mode', '=', 'own_account')]",
+       "invisible": "True"
+      },
+      {
+       "name": "all_paid",
+       "string": "All Paid",
+       "domain": "[('state', 'in', ['in_payment', 'paid']), ('payment_mode', '=', 'own_account')]",
+       "invisible": "True"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "employee",
+       "string": "Employee",
+       "domain": "[]",
+       "context": "{'group_by': 'employee_id'}"
+      },
+      {
+       "name": "product",
+       "string": "Category",
+       "domain": "[]",
+       "context": "{'group_by': 'product_id'}"
+      },
+      {
+       "name": "status",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "expensesmonth",
+       "string": "Expense Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date'}",
+       "help": "Expense Date"
+      },
+      {
+       "name": "company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by': 'company_id'}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "department",
+       "string": "Department",
+       "domain": "[]",
+       "context": "{'group_by': 'department_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_view_activity",
+    "package": "hr_expense",
+    "name": "hr.expense.activity",
+    "view_type": "activity",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "activity",
+     "root_attributes": {
+      "string": "Expenses"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "total_amount_currency",
+       "widget": "monetary"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_view_search_with_panel",
+    "package": "hr_expense",
+    "name": "hr.expense.view.search.with.panel",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense_view_search",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='group_filters']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "state"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='group_filters']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sale_expense.hr_expense_form_view_inherit_sale_expense",
+    "package": "sale_expense",
+    "name": "hr.expense.form.inherit.sale.expense",
+    "view_type": "button",
+    "inherits_view": "hr_expense.hr_expense_view_form",
+    "mode": null,
+    "priority": "30",
+    "groups": null,
+    "structure": {
+     "root": "button",
+     "root_attributes": {
+      "name": "action_open_account_move",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "sale_order_id",
+       "widget": "statinfo",
+       "string": "Sales Order",
+       "context": "{                            'sale_show_partner_name': True,                            'list_view_ref': 'sale_expense.sale_order_reinvoice_tree_view',                            }"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_account_move",
+       "position": "after"
+      },
+      {
+       "name": "action_open_sale_order",
+       "type": "object",
+       "invisible": "not sale_order_id",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-money"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale_expense.hr_expense_tree_view_inherit_sale_expense",
+    "package": "sale_expense",
+    "name": "hr.expense.list.inherit.sale.expense",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense.view_expenses_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='date']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "sale_order_id",
+       "invisible": "not can_be_reinvoiced",
+       "readonly": "state in ['posted', 'refused']",
+       "context": "{'sale_show_partner_name': True, 'sale_expense_all_order': True}",
+       "options": "{'no_create_edit': True, 'no_create': True, 'no_open': True}",
+       "optional": "hide"
+      },
+      {
+       "name": "can_be_reinvoiced",
+       "readonly": "1",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='date']",
+       "position": "before"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_expense.hr_expense_actions_my_all",
+    "package": "hr_expense",
+    "name": "My Expenses",
+    "view_mode": "list,kanban,form,graph,pivot,activity",
+    "view_id": null,
+    "search_view_id": "hr_expense_view_search",
+    "domain": null,
+    "context": "{'search_default_my_open_expenses': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <div class=\"o_view_nocontent_expense_receipt o_view_pink_overlay\">\n                    <p class=\"o_view_nocontent_expense_receipt_image\"></p>\n                    <h2 class=\"d-md-block\">\n                        Upload or drop an expense receipt\n                    </h2>\n                </div>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.expense"
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_actions_to_process",
+    "package": "hr_expense",
+    "name": "Expenses to Process",
+    "view_mode": "list,kanban,form,graph,pivot,activity",
+    "view_id": null,
+    "search_view_id": "hr_expense_view_search_with_panel",
+    "domain": null,
+    "context": "{'searchpanel_default_state': ['submitted']}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <div class=\"o_view_nocontent_expense_receipt o_view_pink_overlay\">\n                    <p class=\"o_view_nocontent_expense_receipt_image\"></p>\n                    <h2 class=\"d-md-block\">\n                        Upload or drop an expense receipt\n                    </h2>\n                </div>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.expense"
+   },
+   {
+    "external_identifier": "hr_expense.hr_expense_actions_all",
+    "package": "hr_expense",
+    "name": "Expenses Analysis",
+    "view_mode": "graph,pivot,list,form",
+    "view_id": null,
+    "search_view_id": "hr_expense_view_search_with_panel",
+    "domain": null,
+    "context": "{ 'searchpanel_default_state': [\"draft\", \"submitted\", \"approved\", \"posted\", \"in_payment\", \"paid\"] }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_empty_folder\">\n                    No data yet!\n                </p><p>\n                    Create new expenses to get statistics.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.expense"
+   },
+   {
+    "external_identifier": "hr_expense.action_hr_expense_account",
+    "package": "hr_expense",
+    "name": "Employee Expenses",
+    "view_mode": "list,kanban,form,pivot,graph",
+    "view_id": "view_expenses_tree",
+    "search_view_id": "hr_expense_view_search",
+    "domain": "[]",
+    "context": "{\n                'search_default_all_approved': 1,\n                'search_default_all_to_pay': 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a new expense\n              </p><p>\n                Once you have created your expense, submit it to your manager who will validate it.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.expense"
+   },
+   {
+    "external_identifier": "hr_expense.action_hr_expense_department_to_approve",
+    "package": "hr_expense",
+    "name": "Expense to Approve",
+    "view_mode": "list,kanban,form,pivot,graph",
+    "view_id": null,
+    "search_view_id": "hr_expense_view_search_with_panel",
+    "domain": "[('department_id', '=', active_id)]",
+    "context": "{ 'searchpanel_default_state': [\"submitted\"] }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.expense"
+   },
+   {
+    "external_identifier": "hr_expense.action_hr_expense_department_filtered",
+    "package": "hr_expense",
+    "name": "Expense Analysis",
+    "view_mode": "graph,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n                'search_default_department_id': [active_id],\n                'default_department_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    No data yet!\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.expense"
+   },
+   {
+    "external_identifier": "sale_expense.hr_expense_action_from_sale_order",
+    "package": "sale_expense",
+    "name": "Expenses",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('sale_order_id', '=', active_id)]",
+    "context": "{'default_sale_order_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.expense"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "hr_expense.action_report_hr_expense",
+    "package": "hr_expense",
+    "name": "Expenses Report",
+    "report_type": "qweb-pdf",
+    "report_name": "hr_expense.report_expense",
+    "report_file": "hr_expense.report_expense",
+    "print_report_name": "'Expense - %s - %s' % (object.employee_id.name, (object.name).replace('/', ''))",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_hr_expense",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "hr.expense"
+   },
+   {
+    "external_identifier": "hr_expense.action_report_expense_img",
+    "package": "hr_expense",
+    "name": "Expense Report Image",
+    "report_type": "qweb-pdf",
+    "report_name": "hr_expense.report_expense_img",
+    "report_file": "hr_expense.report_expense_img",
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "hr.expense"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "hr_expense.ir_cron_send_submitted_expenses_mail",
+    "package": "hr_expense",
+    "name": "HR Expense: Send Submitted Expenses Mail",
+    "interval_number": "1",
+    "interval_type": "weeks",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "hr.expense",
+    "operation": "_cron_send_submitted_expenses_mail",
+    "operation_call": "model._cron_send_submitted_expenses_mail()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

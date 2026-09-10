@@ -1,0 +1,212 @@
+{
+ "catalog": {
+  "name": "views:account.analytic.plan",
+  "description": "View declarations for entity account.analytic.plan.",
+  "record_count": 3,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account.account_analytic_plan_form_view_inherit_account",
+   "package": "account",
+   "name": "account.analytic.plan.inherit.form",
+   "entity": "account.analytic.plan",
+   "view_type": "data",
+   "inherits_view": "analytic.account_analytic_plan_form_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "data",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "display_account_prefix",
+      "column_invisible": "True"
+     },
+     {
+      "name": "account_prefix_placeholder",
+      "column_invisible": "True"
+     },
+     {
+      "name": "account_prefix",
+      "widget": "char_with_placeholder_field",
+      "invisible": "not display_account_prefix",
+      "options": "{'placeholder_field': 'account_prefix_placeholder'}"
+     },
+     {
+      "name": "product_categ_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "char_with_placeholder_field": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='applicability_ids']//field[@name='business_domain']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <data>\n                    <xpath expr=\"//field[@name='applicability_ids']//field[@name='business_domain']\" position=\"after\">\n                        <field name=\"display_account_prefix\" column_invisible=\"True\"/>\n                        <field name=\"account_prefix_placeholder\" column_invisible=\"True\"/>\n                        <field name=\"account_prefix\" widget=\"char_with_placeholder_field\" options=\"{'placeholder_field': 'account_prefix_placeholder'}\" invisible=\"not display_account_prefix\"/>\n                        <field name=\"product_categ_id\"/>\n                    </xpath>\n                </data>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "analytic.account_analytic_plan_form_view",
+   "package": "analytic",
+   "name": "account.analytic.plan.form",
+   "entity": "account.analytic.plan",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Analytic Plans"
+    },
+    "fields": [
+     {
+      "name": "children_count",
+      "widget": "statinfo",
+      "string": "Subplans"
+     },
+     {
+      "name": "all_account_count"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "parent_id"
+     },
+     {
+      "name": "default_applicability",
+      "invisible": "parent_id",
+      "required": "True"
+     },
+     {
+      "name": "color",
+      "widget": "color_picker"
+     },
+     {
+      "name": "applicability_ids"
+     },
+     {
+      "name": "business_domain"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company",
+      "placeholder": "Visible to all"
+     },
+     {
+      "name": "applicability"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_children_plans",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     },
+     {
+      "name": "action_view_analytical_accounts",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "applicability",
+      "string": "Applicability",
+      "invisible": "parent_id",
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "statinfo": 1,
+     "color_picker": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": [
+     {
+      "name": "action_view_children_plans",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     },
+     {
+      "name": "action_view_analytical_accounts",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Analytic Plans\">\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button name=\"action_view_children_plans\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-bars\">\n                            <field string=\"Subplans\" name=\"children_count\" widget=\"statinfo\"/>\n                        </button>\n                        <button name=\"action_view_analytical_accounts\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-bars\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <span class=\"o_stat_value\"><field name=\"all_account_count\"/></span>\n                                <span class=\"o_stat_text\">Analytic Accounts</span>\n                            </div>\n                        </button>\n                    </div>\n                    <div class=\"oe_title\">\n                        <h1>\n                            <field name=\"name\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <group>\n                            <field name=\"parent_id\"/>\n                            <field name=\"default_applicability\" invisible=\"parent_id\" required=\"True\"/>\n                        <field name=\"color\" widget=\"color_picker\"/>\n                        </group>\n                        <group>\n                        </group>\n                    </group>\n\n                    <notebook>\n                        <page string=\"Applicability\" name=\"applicability\" invisible=\"parent_id\">\n                            <field name=\"applicability_ids\">\n                                <list editable=\"bottom\">\n                                    <field name=\"business_domain\"/>\n                                    <field name=\"company_id\" groups=\"base.group_multi_company\" placeholder=\"Visible to all\"/>\n                                    <field name=\"applicability\"/>\n                                </list>\n                            </field>\n                        </page>\n                    </notebook>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "analytic.account_analytic_plan_tree_view",
+   "package": "analytic",
+   "name": "account.analytic.plan.list",
+   "entity": "account.analytic.plan",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Analytic Plans",
+     "multi_edit": "1"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "default_applicability",
+      "required": "True"
+     },
+     {
+      "name": "color",
+      "widget": "color_picker"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "color_picker": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Analytic Plans\" multi_edit=\"1\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\"/>\n                <field name=\"default_applicability\" required=\"True\"/>\n                <field name=\"color\" widget=\"color_picker\"/>\n            </list>\n        </field>\n    "
+  }
+ ]
+}

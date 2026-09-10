@@ -1,0 +1,453 @@
+{
+ "catalog": {
+  "name": "entity:account.debit.note",
+  "description": "Complete definition of entity Add Debit Note wizard (account.debit.note).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.debit.note",
+  "storage_name": "account_debit_note",
+  "full_name": "Add Debit Note wizard",
+  "kind": "transient",
+  "description": "Add Debit Note wizard",
+  "defined_by_package": "account_debit_note",
+  "extended_by_packages": [
+   "l10n_latam_invoice_document",
+   "l10n_hu_edi",
+   "l10n_sa"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "move_ids",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "relation": "account_move_debit_move",
+    "column1": "debit_id",
+    "column2": "move_id",
+    "domain": [
+     [
+      "state",
+      "=",
+      "posted"
+     ]
+    ],
+    "defined_in_package": "account_debit_note",
+    "string": "Move",
+    "full_name": "Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Debit Note Date",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "required": true,
+    "defined_in_package": "account_debit_note",
+    "full_name": "Debit Note Date"
+   },
+   {
+    "name": "reason",
+    "type": "Char",
+    "string": "Reason",
+    "defined_in_package": "account_debit_note",
+    "full_name": "Reason"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Use Specific Journal",
+    "help": "If empty, uses the journal of the journal entry to be debited.",
+    "defined_in_package": "account_debit_note",
+    "full_name": "Use Specific Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "copy_lines",
+    "type": "Boolean",
+    "string": "Copy Lines",
+    "help": "In case you need to do corrections for every line, it can be in handy to copy them.  We won't copy them for debit notes from credit notes. ",
+    "defined_in_package": "account_debit_note",
+    "full_name": "Copy Lines"
+   },
+   {
+    "name": "move_type",
+    "type": "Char",
+    "compute": "_compute_from_moves",
+    "defined_in_package": "account_debit_note",
+    "string": "Move Type",
+    "full_name": "Move Type"
+   },
+   {
+    "name": "journal_type",
+    "type": "Char",
+    "compute": "_compute_journal_type",
+    "defined_in_package": "account_debit_note",
+    "string": "Journal Type",
+    "full_name": "Journal Type"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "move_ids.company_id.country_id.code",
+    "defined_in_package": "account_debit_note",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "l10n_sa_reason",
+    "type": "Selection",
+    "string": "ZATCA Reason",
+    "selection": {
+     "expression": "ADJUSTMENT_REASONS"
+    },
+    "defined_in_package": "l10n_sa",
+    "full_name": "ZATCA Reason"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "account_debit_note",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only debit posted moves.",
+        "line": 35
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't make a debit note for an invoice that is already linked to a debit note.",
+        "line": 37
+       },
+       {
+        "kind": "UserError",
+        "message": "You can make a debit note only for a Customer Invoice, a Customer Credit Note, a Vendor Bill or a Vendor Credit Note.",
+        "line": 39
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_from_moves",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_debit_note",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_journal_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_debit_note",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_default_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "account_debit_note",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_latam_invoice_document",
+      "decorators": [],
+      "documentation": "Needed to avoid constraint when creating Debit Note from Credit Note ",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hu_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sa",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_debit",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_debit_note",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_latam_invoice_document",
+      "decorators": [],
+      "documentation": "Properly compute the latam document type of type debit note. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "default_get",
+    "package": "account_debit_note",
+    "kind": "UserError",
+    "message": "You can only debit posted moves."
+   },
+   {
+    "operation": "default_get",
+    "package": "account_debit_note",
+    "kind": "UserError",
+    "message": "You can't make a debit note for an invoice that is already linked to a debit note."
+   },
+   {
+    "operation": "default_get",
+    "package": "account_debit_note",
+    "kind": "UserError",
+    "message": "You can make a debit note only for a Customer Invoice, a Customer Credit Note, a Vendor Bill or a Vendor Credit Note."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account_debit_note.access_account_debit_note_user",
+    "package": "account_debit_note",
+    "name": "account_debit_note_group_invoice",
+    "entity": "account.debit.note",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account_debit_note.view_account_debit_note",
+    "package": "account_debit_note",
+    "name": "account.debit.note.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Create Debit Note"
+     },
+     "fields": [
+      {
+       "name": "move_type",
+       "invisible": "1"
+      },
+      {
+       "name": "journal_type",
+       "invisible": "1"
+      },
+      {
+       "name": "move_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "reason"
+      },
+      {
+       "name": "date",
+       "string": "Debit Note Date"
+      },
+      {
+       "name": "copy_lines",
+       "invisible": "move_type in ['in_refund', 'out_refund']"
+      },
+      {
+       "name": "journal_id",
+       "domain": "[('type', '=', journal_type)]"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "create_debit",
+       "string": "Create Debit Note",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "l10n_sa.view_account_debit_note_inherit_l10n_sa",
+    "package": "l10n_sa",
+    "name": "account.debit.not.form.inherit.l10n_sa",
+    "view_type": "field",
+    "inherits_view": "account_debit_note.view_account_debit_note",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "date",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "date",
+       "position": "before"
+      },
+      {
+       "name": "l10n_sa_reason",
+       "invisible": "move_type == 'in_refund' or country_code != 'SA'",
+       "string": "ZATCA Reason"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account_debit_note.action_view_account_move_debit",
+    "package": "account_debit_note",
+    "name": "Create Debit Note",
+    "view_mode": "list,form",
+    "view_id": "view_account_debit_note",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "account.model_account_move",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "account.debit.note"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

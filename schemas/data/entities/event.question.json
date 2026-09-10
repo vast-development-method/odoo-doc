@@ -1,0 +1,863 @@
+{
+ "catalog": {
+  "name": "entity:event.question",
+  "description": "Complete definition of entity Event Question (event.question).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.question",
+  "storage_name": "event_question",
+  "full_name": "Event Question",
+  "kind": "persistent",
+  "description": "Event Question",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "pos_event"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence,id",
+  "display_name_field": "title",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "title",
+    "type": "Char",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "event",
+    "string": "Title",
+    "full_name": "Title"
+   },
+   {
+    "name": "question_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "simple_choice",
+      "Selection"
+     ],
+     [
+      "text_box",
+      "Text Input"
+     ],
+     [
+      "name",
+      "Name"
+     ],
+     [
+      "email",
+      "Email"
+     ],
+     [
+      "phone",
+      "Phone"
+     ],
+     [
+      "company_name",
+      "Company"
+     ]
+    ],
+    "default": "simple_choice",
+    "string": "Question Type",
+    "required": true,
+    "defined_in_package": "event",
+    "full_name": "Question Type"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "event",
+    "full_name": "Active"
+   },
+   {
+    "name": "event_type_ids",
+    "type": "Many2many",
+    "comodel": "event.type",
+    "string": "Event Types",
+    "copy": false,
+    "defined_in_package": "event",
+    "full_name": "Event Types",
+    "target_entity": "event.type"
+   },
+   {
+    "name": "event_ids",
+    "type": "Many2many",
+    "comodel": "event.event",
+    "string": "Events",
+    "copy": false,
+    "defined_in_package": "event",
+    "full_name": "Events",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "event_count",
+    "type": "Integer",
+    "string": "# Events",
+    "compute": "_compute_event_count",
+    "defined_in_package": "event",
+    "full_name": "# Events"
+   },
+   {
+    "name": "is_default",
+    "type": "Boolean",
+    "string": "Default question",
+    "help": "Include by default in new events.",
+    "defined_in_package": "event",
+    "full_name": "Default question"
+   },
+   {
+    "name": "is_reusable",
+    "type": "Boolean",
+    "string": "Is Reusable",
+    "compute": "_compute_is_reusable",
+    "default": true,
+    "store": true,
+    "help": "Allow this question to be selected and reused for any future event. Always true for default questions.",
+    "defined_in_package": "event",
+    "full_name": "Is Reusable"
+   },
+   {
+    "name": "answer_ids",
+    "type": "One2many",
+    "comodel": "event.question.answer",
+    "inverse_name": "question_id",
+    "string": "Answers",
+    "copy": true,
+    "defined_in_package": "event",
+    "full_name": "Answers",
+    "target_entity": "event.question.answer"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "event",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "once_per_order",
+    "type": "Boolean",
+    "string": "Ask once per order",
+    "help": "Check this for order-level questions (e.g., 'Company Name') where the answer is the same for everyone.",
+    "defined_in_package": "event",
+    "full_name": "Ask once per order"
+   },
+   {
+    "name": "is_mandatory_answer",
+    "type": "Boolean",
+    "string": "Mandatory Answer",
+    "defined_in_package": "event",
+    "full_name": "Mandatory Answer"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_default_question_is_reusable",
+    "kind": "Constraint",
+    "definition": "CHECK(is_default IS DISTINCT FROM TRUE OR is_reusable IS TRUE)",
+    "message": "A default question must be reusable.",
+    "defined_in_package": "event"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_event_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_reusable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_default",
+         "event_type_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "We add a check to prevent changing the question_type of a question that already has answers.\nIndeed, it would mess up the event.registration.answer (answer type not matching the question type). ",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot change the question type of a question that already has answers!",
+        "line": 64
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_answered_question",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a question that has already been answered by attendees. You can archive it instead.",
+        "line": 70
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_default_question",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a default question.",
+        "line": 75
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_view_question_answers",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Allow analyzing the attendees answers to event questions in a convenient way:\n\n- A graph view showing counts of each suggestion for simple_choice questions\n  (Along with secondary pivot and list views)\n- A list view showing textual answers values for text_box questions.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_event_view",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "write",
+    "package": "event",
+    "kind": "UserError",
+    "message": "You cannot change the question type of a question that already has answers!"
+   },
+   {
+    "operation": "_unlink_except_answered_question",
+    "package": "event",
+    "kind": "UserError",
+    "message": "You cannot delete a question that has already been answered by attendees. You can archive it instead."
+   },
+   {
+    "operation": "_unlink_except_default_question",
+    "package": "event",
+    "kind": "UserError",
+    "message": "You cannot delete a default question."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_question_manager",
+    "package": "event",
+    "name": "event.question",
+    "entity": "event.question",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "event.access_event_question_user",
+    "package": "event",
+    "name": "event.question.user",
+    "entity": "event.question",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_event.access_event_question_public",
+    "package": "website_event",
+    "name": "event.question",
+    "entity": "event.question",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_question_portal",
+    "package": "website_event",
+    "name": "event.question",
+    "entity": "event.question",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_question_user",
+    "package": "website_event",
+    "name": "event.question",
+    "entity": "event.question",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_event.ir_rule_event_question_published",
+    "package": "website_event",
+    "name": "Event Question: not event groups: event published read",
+    "entity": "event.question",
+    "domain": "[('event_ids', 'any', [('is_published', '=', True)])]",
+    "groups": "[(4, ref('base.group_public')), (4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "website_event.ir_rule_event_question_event_user",
+    "package": "website_event",
+    "name": "Event Question: event user: read all",
+    "entity": "event.question",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('event.group_event_registration_desk'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "event.event_question_view_search",
+    "package": "event",
+    "name": "event.question.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Event Question"
+     },
+     "fields": [
+      {
+       "name": "title"
+      },
+      {
+       "name": "question_type"
+      },
+      {
+       "name": "answer_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_is_mandatory_answer",
+       "string": "Mandatory",
+       "domain": "[('is_mandatory_answer', '=', True)]"
+      },
+      {
+       "name": "filter_is_not mandatory_answer",
+       "string": "Not mandatory",
+       "domain": "[('is_mandatory_answer', '=', False)]"
+      },
+      {
+       "name": "filter_once_per_order",
+       "string": "Once per order",
+       "domain": "[('once_per_order', '=', True)]"
+      },
+      {
+       "name": "filter_for_each_attendee",
+       "string": "For each attendee",
+       "domain": "[('once_per_order', '=', False)]"
+      },
+      {
+       "name": "filter_is_reusable",
+       "string": "Reusable",
+       "domain": "[('is_reusable', '=', True)]"
+      },
+      {
+       "name": "filter_is_not_reusable",
+       "string": "Not Reusable",
+       "domain": "[('is_reusable', '=', False)]"
+      },
+      {
+       "name": "filter_is_default",
+       "string": "Default Questions",
+       "domain": "[('is_default', '=', True)]"
+      },
+      {
+       "name": "filter_archive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_event",
+       "string": "Event",
+       "context": "{'group_by': 'event_ids'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event.event_question_view_form",
+    "package": "event",
+    "name": "event.question.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Question"
+     },
+     "fields": [
+      {
+       "name": "event_count"
+      },
+      {
+       "name": "title",
+       "placeholder": "e.g. \"Do you have any diet restrictions?\""
+      },
+      {
+       "name": "is_mandatory_answer"
+      },
+      {
+       "name": "question_type",
+       "widget": "radio"
+      },
+      {
+       "name": "once_per_order"
+      },
+      {
+       "name": "is_default"
+      },
+      {
+       "name": "event_type_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "is_reusable",
+       "readonly": "is_default"
+      },
+      {
+       "name": "answer_ids"
+      },
+      {
+       "name": "display_name",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_question_answers",
+       "type": "object",
+       "invisible": "question_type not in ['simple_choice', 'text_box']",
+       "class": "oe_stat_button",
+       "icon": "fa-line-chart"
+      },
+      {
+       "name": "action_event_view",
+       "type": "object",
+       "class": "oe_link p-0 align-baseline"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "answers",
+       "string": "Answers",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "radio": 1,
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_view_question_answers",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-line-chart",
+       "invisible": "question_type not in ['simple_choice', 'text_box']"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event.event_question_view_list",
+    "package": "event",
+    "name": "event.question.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "title"
+      },
+      {
+       "name": "is_mandatory_answer",
+       "string": "Mandatory"
+      },
+      {
+       "name": "once_per_order",
+       "string": "Once per Order"
+      },
+      {
+       "name": "question_type",
+       "string": "Type"
+      },
+      {
+       "name": "answer_ids",
+       "widget": "many2many_tags",
+       "invisible": "question_type != 'simple_choice'"
+      },
+      {
+       "name": "is_default"
+      },
+      {
+       "name": "is_reusable",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_question_answers",
+       "string": "Stats",
+       "type": "object",
+       "invisible": "question_type not in ['simple_choice', 'text_box']",
+       "class": "p-0",
+       "icon": "fa-bar-chart pe-1"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.event_question_view_list_add",
+    "package": "event",
+    "name": "event.question.view.list.add",
+    "view_type": "xpath",
+    "inherits_view": "event.event_question_view_list",
+    "mode": "primary",
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='is_reusable']",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='is_reusable']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_crm.event_question_view_form",
+    "package": "event_crm",
+    "name": "event.question.view.form",
+    "view_type": "xpath",
+    "inherits_view": "event.event_question_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='answer_ids']/list/field[last()]",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_add_rule_button",
+       "string": "Add a rule",
+       "type": "object",
+       "class": "ms-auto"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='answer_ids']/list/field[last()]",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event.event_question_action",
+    "package": "event",
+    "name": "Event Question",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "event.event_question_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No questions yet! Please create one.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.question"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "event.event_question_menu",
+    "package": "event",
+    "name": null,
+    "parent_id": null,
+    "action": "event.event_question_action",
+    "sequence": null,
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

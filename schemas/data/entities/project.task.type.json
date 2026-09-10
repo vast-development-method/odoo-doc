@@ -1,0 +1,1184 @@
+{
+ "catalog": {
+  "name": "entity:project.task.type",
+  "description": "Complete definition of entity Task Stage (project.task.type).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "project.task.type",
+  "storage_name": "project_task_type",
+  "full_name": "Task Stage",
+  "kind": "persistent",
+  "description": "Task Stage",
+  "defined_by_package": "project",
+  "extended_by_packages": [
+   "sale_project",
+   "project_sms"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "export_string_translation": false,
+    "defined_in_package": "project",
+    "full_name": "Active"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "project",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 1,
+    "defined_in_package": "project",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "project_ids",
+    "type": "Many2many",
+    "comodel": "project.project",
+    "relation": "project_task_type_rel",
+    "column1": "type_id",
+    "column2": "project_id",
+    "string": "Projects",
+    "default": {
+     "dynamic": "lambda self: self._get_default_project_ids()"
+    },
+    "help": "Projects in which this stage is present. If you follow a similar workflow in several projects, you can share this stage among them and get consolidated information this way.",
+    "defined_in_package": "project",
+    "full_name": "Projects",
+    "target_entity": "project.project"
+   },
+   {
+    "name": "mail_template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "string": "Email Template",
+    "domain": [
+     [
+      "model",
+      "=",
+      "project.task"
+     ]
+    ],
+    "help": "If set, an email will be automatically sent to the customer when the task reaches this stage.",
+    "defined_in_package": "project",
+    "full_name": "Email Template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "export_string_translation": false,
+    "defined_in_package": "project",
+    "full_name": "Color"
+   },
+   {
+    "name": "fold",
+    "type": "Boolean",
+    "string": "Folded",
+    "defined_in_package": "project",
+    "full_name": "Folded"
+   },
+   {
+    "name": "rating_template_id",
+    "type": "Many2one",
+    "comodel": "mail.template",
+    "string": "Rating Email Template",
+    "domain": [
+     [
+      "model",
+      "=",
+      "project.task"
+     ]
+    ],
+    "help": "If set, a rating request will automatically be sent by email to the customer when the task reaches this stage. \nAlternatively, it will be sent at a regular interval as long as the task remains in this stage.",
+    "defined_in_package": "project",
+    "full_name": "Rating Email Template",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "auto_validation_state",
+    "type": "Boolean",
+    "string": "Automatic Kanban Status",
+    "default": false,
+    "help": "Automatically modify the state when the customer replies to the feedback for this stage.\n * Good feedback from the customer will update the state to 'Approved' (green bullet).\n * Neutral or bad feedback will set the kanban state to 'Changes Requested' (orange bullet).\n",
+    "defined_in_package": "project",
+    "full_name": "Automatic Kanban Status"
+   },
+   {
+    "name": "rotting_threshold_days",
+    "type": "Integer",
+    "string": "Days to rot",
+    "default": 0,
+    "help": "Day count before tasks in this stage become stale. Set to 0 to disable         Changing this parameter will not affect the rotting status/date of resources last updated before this change.",
+    "defined_in_package": "project",
+    "full_name": "Days to rot"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Stage Owner",
+    "default": {
+     "dynamic": "_default_user_id"
+    },
+    "compute": "_compute_user_id",
+    "store": true,
+    "index": true,
+    "defined_in_package": "project",
+    "full_name": "Stage Owner",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "rating_request_deadline",
+    "type": "Datetime",
+    "compute": "_compute_rating_request_deadline",
+    "store": true,
+    "export_string_translation": false,
+    "defined_in_package": "project",
+    "string": "Rating Request Deadline",
+    "full_name": "Rating Request Deadline"
+   },
+   {
+    "name": "rating_active",
+    "type": "Boolean",
+    "string": "Send a customer rating request",
+    "defined_in_package": "project",
+    "full_name": "Send a customer rating request"
+   },
+   {
+    "name": "rating_status",
+    "type": "Selection",
+    "string": "Customer Ratings Status",
+    "selection": [
+     [
+      "stage",
+      "when reaching this stage"
+     ],
+     [
+      "periodic",
+      "on a periodic basis"
+     ]
+    ],
+    "default": "stage",
+    "required": true,
+    "help": "Collect feedback from your customers by sending them a rating request when a task enters a certain stage. To do so, define a rating email template on the stage.\nRating when changing stage: an email will be automatically sent when a task reaches the stage.\nPeriodic rating: an email will be automatically sent at regular intervals as long as the task remains in the stage.",
+    "defined_in_package": "project",
+    "full_name": "Customer Ratings Status"
+   },
+   {
+    "name": "rating_status_period",
+    "type": "Selection",
+    "string": "Rating Frequency",
+    "selection": [
+     [
+      "daily",
+      "Daily"
+     ],
+     [
+      "weekly",
+      "Weekly"
+     ],
+     [
+      "bimonthly",
+      "Twice a Month"
+     ],
+     [
+      "monthly",
+      "Once a Month"
+     ],
+     [
+      "quarterly",
+      "Quarterly"
+     ],
+     [
+      "yearly",
+      "Yearly"
+     ]
+    ],
+    "default": "monthly",
+    "required": true,
+    "defined_in_package": "project",
+    "full_name": "Rating Frequency"
+   },
+   {
+    "name": "show_rating_active",
+    "type": "Boolean",
+    "compute": "_compute_show_rating_active",
+    "export_string_translation": false,
+    "defined_in_package": "sale_project",
+    "string": "Show Rating Active",
+    "full_name": "Show Rating Active"
+   },
+   {
+    "name": "sms_template_id",
+    "type": "Many2one",
+    "comodel": "sms.template",
+    "string": "SMS Template",
+    "domain": [
+     [
+      "model",
+      "=",
+      "project.task"
+     ]
+    ],
+    "help": "If set, an SMS Text Message will be automatically sent to the customer when the task reaches this stage.",
+    "defined_in_package": "project_sms",
+    "full_name": "text message Template",
+    "target_entity": "sms.template"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_project_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_user_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rating_request_deadline",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "rating_status",
+         "rating_status_period"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink_wizard",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "stage_view"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_remaining_personal_stages",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Prepare personal stages for deletion (i.e. move task to other personal stages) and\navoid unlink if no remaining personal stages for an active internal user.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Each user should have at least one personal stage. Create a new stage to which the tasks can be transferred after the selected ones are deleted.",
+        "line": 156
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_personal_stages_deletion",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "remaining_stages_dict",
+     "personal_stages_to_update"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": "_prepare_personal_stages_deletion prepare the deletion of personal stages of a single user.\n    Tasks using that stage will be moved to the first stage with a lower sequence if it exists\n    higher if not.\n:param self: project.task.type recordset containing the personal stage of a user\n             that need to be deleted\n:param remaining_stages_dict: list of dict representation of the personal stages of a user that\n                              can be used to replace the deleted ones. Can not be empty.\n                              e.g: [{'id': stage1_id, 'seq': stage1_sequence}, ...]\n:param personal_stages_to_update: project.task.stage.personal recordset containing the records\n                                  that need to be updated after stage modification. Is passed to\n                                  this method as an argument to avoid to reload it for each users\n                                  when this method is called multiple times.",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_unarchive",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "project_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Fields project_ids and user_id cannot be set together for a stage. It can happen that\nproject_ids is set after stage creation (e.g. when setting demo data). In such case, the\ndefault user_id has to be removed.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_personal_stage_not_linked_to_projects",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "user_id",
+         "project_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "A personal stage cannot be linked to a project because it is only visible to its corresponding user.",
+        "line": 221
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_send_rating_all",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_rating_active",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "project_ids.allow_billable"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_project_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_project",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "project_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_if_remaining_personal_stages",
+    "package": "project",
+    "kind": "UserError",
+    "message": "Each user should have at least one personal stage. Create a new stage to which the tasks can be transferred after the selected ones are deleted."
+   },
+   {
+    "operation": "_check_personal_stage_not_linked_to_projects",
+    "package": "project",
+    "kind": "UserError",
+    "message": "A personal stage cannot be linked to a project because it is only visible to its corresponding user."
+   }
+  ],
+  "state_fields": [
+   "rating_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "project.access_project_task_type_user",
+    "package": "project",
+    "name": "project.task.type.user",
+    "entity": "project.task.type",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "project.access_project_task_type_project_user",
+    "package": "project",
+    "name": "project.task.type.project.user",
+    "entity": "project.task.type",
+    "group": "project.group_project_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "project.access_project_task_type_manager",
+    "package": "project",
+    "name": "project.task.type manager",
+    "entity": "project.task.type",
+    "group": "project.group_project_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "project.access_project_task_type_portal",
+    "package": "project",
+    "name": "task_type_portal",
+    "entity": "project.task.type",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "project_todo.access_project_task_type_user",
+    "package": "project_todo",
+    "name": "project.task.type.user",
+    "entity": "project.task.type",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "project.task_type_manager_rule",
+    "package": "project",
+    "name": "Project/Task Type: manager sees all",
+    "entity": "project.task.type",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4,ref('project.group_project_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "project.task_type_visibility_rule",
+    "package": "project",
+    "name": "Project/Task Type: see own or unowned stages",
+    "entity": "project.task.type",
+    "domain": "[('user_id', 'in', (False, user.id))]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "project.task_type_own_write_rule",
+    "package": "project",
+    "name": "Project/Task Type: write own stages",
+    "entity": "project.task.type",
+    "domain": "[('user_id', '=', user.id)]",
+    "groups": "[(4,ref('project.group_project_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "True",
+    "applies_to_create": "True",
+    "applies_to_delete": "True"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "project.task_type_search",
+    "package": "project",
+    "name": "project.task.type.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Tasks Stages"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name"
+      },
+      {
+       "name": "project_ids",
+       "string": "Project"
+      },
+      {
+       "name": "mail_template_id"
+      },
+      {
+       "name": "rating_template_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "project_ids",
+       "string": "Projects",
+       "context": "{'group_by': 'project_ids'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "project.task_type_edit",
+    "package": "project",
+    "name": "project.task.type.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Task Stage",
+      "delete": "0"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. To Do"
+      },
+      {
+       "name": "fold"
+      },
+      {
+       "name": "user_id",
+       "invisible": "True"
+      },
+      {
+       "name": "auto_validation_state",
+       "invisible": "not rating_template_id"
+      },
+      {
+       "name": "project_ids",
+       "widget": "many2many_tags",
+       "invisible": "user_id",
+       "required": "not user_id",
+       "options": "{'color_field': 'color', 'edit_tags': True}"
+      },
+      {
+       "name": "rotting_threshold_days"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "sequence",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "mail_template_id",
+       "invisible": "user_id",
+       "context": "{'default_model': 'project.task'}"
+      },
+      {
+       "name": "rating_active"
+      },
+      {
+       "name": "rating_status",
+       "widget": "radio"
+      },
+      {
+       "name": "rating_status_period",
+       "invisible": "rating_status != 'periodic'",
+       "required": "rating_status == 'periodic'"
+      },
+      {
+       "name": "rating_template_id",
+       "required": "rating_active",
+       "context": "{'default_model': 'project.task'}",
+       "placeholder": "Task: Rating Request"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1,
+      "color_picker": 1,
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "project.task_type_tree",
+    "package": "project",
+    "name": "project.task.type.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Task Stage",
+      "delete": "0",
+      "sample": "1",
+      "multi_edit": "1",
+      "editable": "bottom",
+      "open_form_view": "True"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle",
+       "optional": "show"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. To Do"
+      },
+      {
+       "name": "rotting_threshold_days",
+       "optional": "hide"
+      },
+      {
+       "name": "mail_template_id",
+       "optional": "hide"
+      },
+      {
+       "name": "project_ids",
+       "widget": "many2many_tags",
+       "required": "1",
+       "options": "{'color_field': 'color'}",
+       "optional": "show"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker",
+       "optional": "hide"
+      },
+      {
+       "name": "fold",
+       "optional": "show"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": "0",
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "project.task_type_tree_inherited",
+    "package": "project",
+    "name": "project.task.type.list.inherited",
+    "view_type": "xpath",
+    "inherits_view": "task_type_tree",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "rating_template_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "project.view_project_task_type_kanban",
+    "package": "project",
+    "name": "project.task.type.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "highlight_color": "color",
+      "class": "o_kanban_mobile",
+      "sample": "1",
+      "default_group_by": "project_ids"
+     },
+     "fields": [
+      {
+       "name": "color",
+       "widget": "kanban_color_picker"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "project_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "kanban_color_picker": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": "project_ids",
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "project_sms.task_type_edit_view_form_inherit_project_sms",
+    "package": "project_sms",
+    "name": "project.task.type.view.form.inherit.project.sms",
+    "view_type": "field",
+    "inherits_view": "project.task_type_edit",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "mail_template_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mail_template_id",
+       "position": "after"
+      },
+      {
+       "name": "sms_template_id",
+       "invisible": "user_id",
+       "context": "{'default_model': 'project.task'}",
+       "options": "{'no_quick_create': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "project_sms.task_type_edit_view_tree_inherit_project_sms",
+    "package": "project_sms",
+    "name": "project.task.type.view.list.inherit.project.sms",
+    "view_type": "field",
+    "inherits_view": "project.task_type_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "mail_template_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mail_template_id",
+       "position": "after"
+      },
+      {
+       "name": "sms_template_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "project_sms.task_type_search_view_search_inherit_project_sms",
+    "package": "project_sms",
+    "name": "project.task.type.view.search.inherit.project.sms",
+    "view_type": "field",
+    "inherits_view": "project.task_type_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "rating_template_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "rating_template_id",
+       "position": "after"
+      },
+      {
+       "name": "sms_template_id",
+       "domain": "[('model', '=', 'project.task')]"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "sale_project.task_type_edit_inherit_sale_project",
+    "package": "sale_project",
+    "name": "project.task.type.form.inherit.sale_project",
+    "view_type": "xpath",
+    "inherits_view": "project.task_type_edit",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//span[@name='rating_status_helper']",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//span[@name='rating_status_helper']",
+       "position": "replace"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "project.open_task_type_form",
+    "package": "project",
+    "name": "Task Stages",
+    "view_mode": "list,kanban,form",
+    "view_id": "task_type_tree_inherited",
+    "search_view_id": null,
+    "domain": "[('user_id', '=', False)]",
+    "context": "{'default_user_id': False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                No stages found. Let's create one!\n              </p><p>\n                Define the steps your tasks move through from creation to completion.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "project.task.type"
+   },
+   {
+    "external_identifier": "project.open_task_type_form_domain",
+    "package": "project",
+    "name": "Task Stages",
+    "view_mode": "list,kanban,form",
+    "view_id": "task_type_tree_inherited",
+    "search_view_id": null,
+    "domain": "[('project_ids','=', project_id)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                Create a new stage in the task pipeline\n                </p><p>\n                Define the steps that will be used in the project from the\n                creation of the task, up to the closing of the task or issue.\n                You will use these stages in order to track the progress in\n                solving a task or an issue.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "project.task.type"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "project.unlink_task_type_action",
+    "package": "project",
+    "name": "Delete",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "project.ir_cron_rating_project",
+    "package": "project",
+    "name": "Project Stage: Send rating",
+    "interval_number": null,
+    "interval_type": "days",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "project.task.type",
+    "operation": "_send_rating_all",
+    "operation_call": "model._send_rating_all()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,523 @@
+{
+ "catalog": {
+  "name": "entity:mail.tracking.value",
+  "description": "Complete definition of entity Mail Tracking Value (mail.tracking.value).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.tracking.value",
+  "storage_name": "mail_tracking_value",
+  "full_name": "Mail Tracking Value",
+  "kind": "persistent",
+  "description": "Mail Tracking Value",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "account"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id DESC",
+  "display_name_field": "field_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "field_id",
+    "type": "Many2one",
+    "comodel": "ir.model.fields",
+    "required": false,
+    "readonly": true,
+    "index": true,
+    "ondelete": "set null",
+    "defined_in_package": "mail",
+    "string": "Field",
+    "full_name": "Field",
+    "target_entity": "ir.model.fields"
+   },
+   {
+    "name": "field_info",
+    "type": "Json",
+    "string": "Removed field information",
+    "defined_in_package": "mail",
+    "full_name": "Removed field information"
+   },
+   {
+    "name": "old_value_integer",
+    "type": "Integer",
+    "string": "Old Value Integer",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Old Value Integer"
+   },
+   {
+    "name": "old_value_float",
+    "type": "Float",
+    "string": "Old Value Float",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Old Value Float"
+   },
+   {
+    "name": "old_value_char",
+    "type": "Char",
+    "string": "Old Value Char",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Old Value Char"
+   },
+   {
+    "name": "old_value_text",
+    "type": "Text",
+    "string": "Old Value Text",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Old Value Text"
+   },
+   {
+    "name": "old_value_datetime",
+    "type": "Datetime",
+    "string": "Old Value DateTime",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Old Value DateTime"
+   },
+   {
+    "name": "new_value_integer",
+    "type": "Integer",
+    "string": "New Value Integer",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "New Value Integer"
+   },
+   {
+    "name": "new_value_float",
+    "type": "Float",
+    "string": "New Value Float",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "New Value Float"
+   },
+   {
+    "name": "new_value_char",
+    "type": "Char",
+    "string": "New Value Char",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "New Value Char"
+   },
+   {
+    "name": "new_value_text",
+    "type": "Text",
+    "string": "New Value Text",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "New Value Text"
+   },
+   {
+    "name": "new_value_datetime",
+    "type": "Datetime",
+    "string": "New Value Datetime",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "New Value Datetime"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "readonly": true,
+    "ondelete": "set null",
+    "help": "Used to display the currency when tracking monetary values",
+    "defined_in_package": "mail",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "mail_message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "string": "Message ID",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "mail",
+    "full_name": "Message identifier",
+    "target_entity": "mail.message"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_filter_has_field_access",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "env"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the subset of self for which the user in env has access. As\nthis model is admin-only, it is generally accessed as sudo and we need\nto distinguish context environment from tracking values environment.\n\nIf tracking is linked to a field, user should have access to the field.\nOtherwise only members of \"base.group_system\" can access it. ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_free_field_access",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the subset of self which is available for all users: trackings\nlinked to an existing field without access group. It is used notably\nwhen sending tracking summary through notifications. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_tracking_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "initial_value",
+     "new_value",
+     "col_name",
+     "col_info",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Prepare values to create a mail.tracking.value. It prepares old and\nnew value according to the field type.\n\n:param initial_value: field value before the change, could be text, int,\n  date, datetime, ...;\n:param new_value: field value after the change, could be text, int,\n  date, datetime, ...;\n:param str col_name: technical field name, column name (e.g. 'user_id);\n:param dict col_info: result of fields_get(col_name);\n:param <record> record: record on which tracking is performed, used for\n  related computation e.g. finding currency of monetary fields;\n\n:return: a dict values valid for 'mail.tracking.value' creation;",
+      "size_in_lines": 107,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_tracking_values_property",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "initial_value",
+     "col_name",
+     "col_info",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Generate the values for the <mail.tracking.values> corresponding to a property.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_tracking_value_format",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return structure and formatted data structure to be used by chatter\nto display tracking values. Order it according to asked display, aka\nascending sequence (and field name).\n\n:return: for each tracking value in self, their formatted display\n  values given as a dict;\n:rtype: list[dict]",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_tracking_value_format_model",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "model"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return structure and formatted data structure to be used by chatter\nto display tracking values. Order it according to asked display, aka\nascending sequence (and field name).\n\n:returns: for each tracking value in self, their formatted display\n  values given as a dict;\n:rtype: list[dict]",
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_format_display_value",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_type",
+     "new"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Format value of 'mail.tracking.value', according to the field type.\n\n:param str field_type: the system field type;\n:param bool new: if True, display the 'new' value. Otherwise display\n  the 'old' one.",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_except_audit_log",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": true
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_tracking_value_system",
+    "package": "mail",
+    "name": "mail.tracking.value.system",
+    "entity": "mail.tracking.value",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mail.view_mail_tracking_value_tree",
+    "package": "mail",
+    "name": "mail.tracking.value.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "12",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Tracking Value"
+     },
+     "fields": [
+      {
+       "name": "field_id"
+      },
+      {
+       "name": "old_value_integer"
+      },
+      {
+       "name": "old_value_float"
+      },
+      {
+       "name": "old_value_char"
+      },
+      {
+       "name": "old_value_text"
+      },
+      {
+       "name": "old_value_datetime"
+      },
+      {
+       "name": "new_value_integer"
+      },
+      {
+       "name": "new_value_float"
+      },
+      {
+       "name": "new_value_char"
+      },
+      {
+       "name": "new_value_text"
+      },
+      {
+       "name": "new_value_datetime"
+      },
+      {
+       "name": "mail_message_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.view_mail_tracking_value_form",
+    "package": "mail",
+    "name": "mail.tracking.value.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Tracking Value"
+     },
+     "fields": [
+      {
+       "name": "field_id"
+      },
+      {
+       "name": "old_value_integer"
+      },
+      {
+       "name": "old_value_float"
+      },
+      {
+       "name": "old_value_char"
+      },
+      {
+       "name": "old_value_text"
+      },
+      {
+       "name": "old_value_datetime"
+      },
+      {
+       "name": "new_value_integer"
+      },
+      {
+       "name": "new_value_float"
+      },
+      {
+       "name": "new_value_char"
+      },
+      {
+       "name": "new_value_text"
+      },
+      {
+       "name": "new_value_datetime"
+      },
+      {
+       "name": "mail_message_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.action_view_mail_tracking_value",
+    "package": "mail",
+    "name": "Tracking Values",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.tracking.value"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

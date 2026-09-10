@@ -1,0 +1,559 @@
+{
+ "catalog": {
+  "name": "entity:mail.canned.response",
+  "description": "Complete definition of entity Canned Response (mail.canned.response).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.canned.response",
+  "storage_name": "mail_canned_response",
+  "full_name": "Canned Response",
+  "kind": "persistent",
+  "description": "Canned Response",
+  "defined_by_package": "mail",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": "source",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "source",
+    "type": "Char",
+    "string": "Shortcut",
+    "required": true,
+    "index": "trigram",
+    "help": "Canned response that will automatically be substituted with longer content in your messages. Type '::' followed by the name of your shortcut (e.g. ::hello) to use in your messages.",
+    "defined_in_package": "mail",
+    "full_name": "Shortcut"
+   },
+   {
+    "name": "substitution",
+    "type": "Text",
+    "string": "Substitution",
+    "required": true,
+    "help": "Content that will automatically replace the shortcut of your choosing. This content can still be adapted before sending your message.",
+    "defined_in_package": "mail",
+    "full_name": "Substitution"
+   },
+   {
+    "name": "last_used",
+    "type": "Datetime",
+    "string": "Last Used",
+    "help": "Last time this canned_response was used",
+    "defined_in_package": "mail",
+    "full_name": "Last Used"
+   },
+   {
+    "name": "group_ids",
+    "type": "Many2many",
+    "comodel": "res.groups",
+    "string": "Authorized Groups",
+    "domain": {
+     "dynamic": "lambda self: [('id', 'in', self.env.user.all_group_ids.ids)]"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Authorized Groups",
+    "target_entity": "res.groups"
+   },
+   {
+    "name": "is_shared",
+    "type": "Boolean",
+    "string": "Determines if the canned_response is currently shared with other users",
+    "compute": "_compute_is_shared",
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Determines if the canned_response is currently shared with other users"
+   },
+   {
+    "name": "is_editable",
+    "type": "Boolean",
+    "string": "Determines if the canned response can be edited by the current user",
+    "compute": "_compute_is_editable",
+    "defined_in_package": "mail",
+    "full_name": "Determines if the canned response can be edited by the current user"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_is_shared",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "group_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_editable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "create_uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_broadcast",
+    "kind": "internal_rule",
+    "arguments": [
+     "delete"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_canned_reponse",
+    "package": "mail",
+    "name": "mail.canned.response",
+    "entity": "mail.canned.response",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mail.ir_rule_mail_canned_response_admin",
+    "package": "mail",
+    "name": "Canned response: admin has all access on shared canned response",
+    "entity": "mail.canned.response",
+    "domain": "[('is_shared', '=', True)]",
+    "groups": "[Command.link(ref('group_mail_canned_response_admin'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": "False",
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "mail.ir_rule_mail_canned_response_user_read",
+    "package": "mail",
+    "name": "Canned response: User read: own or in groups",
+    "entity": "mail.canned.response",
+    "domain": "['|', ('create_uid', '=', user.id), ('group_ids', 'in', user.all_group_ids.ids)]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "mail.ir_rule_mail_canned_response_user_update",
+    "package": "mail",
+    "name": "Canned response: User write/unlink: own only",
+    "entity": "mail.canned.response",
+    "domain": "[('create_uid', '=', user.id)]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": "False",
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mail.mail_canned_response_view_search",
+    "package": "mail",
+    "name": "mail.canned.response.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Canned Responses Search"
+     },
+     "fields": [
+      {
+       "name": "source"
+      },
+      {
+       "name": "substitution"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_create_uid",
+       "string": "Private",
+       "domain": "[('is_shared', '=', False)]"
+      },
+      {
+       "name": "filter_is_shared",
+       "string": "Shared",
+       "domain": "[('is_shared', '=', True)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_group_ids",
+       "string": "Authorized Groups",
+       "context": "{'group_by': 'group_ids'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_canned_response_view_tree",
+    "package": "mail",
+    "name": "mail.canned.response.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Canned responses",
+      "editable": "bottom",
+      "default_order": "is_shared",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "source",
+       "widget": "shortcut",
+       "readonly": "not is_editable",
+       "placeholder": "e.g. hello"
+      },
+      {
+       "name": "substitution",
+       "readonly": "not is_editable",
+       "placeholder": "e.g. Hello, how may I help you?"
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user",
+       "optional": "hide"
+      },
+      {
+       "name": "group_ids",
+       "widget": "many2many_tags",
+       "readonly": "not is_editable",
+       "optional": "hide"
+      },
+      {
+       "name": "last_used",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "is_editable",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_shared",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "shortcut": 1,
+      "many2one_avatar_user": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_canned_response_view_form",
+    "package": "mail",
+    "name": "mail.canned.response.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Canned response"
+     },
+     "fields": [
+      {
+       "name": "source",
+       "widget": "shortcut",
+       "readonly": "not is_editable"
+      },
+      {
+       "name": "substitution",
+       "readonly": "not is_editable",
+       "placeholder": "e.g. Hello, how may I help you?"
+      },
+      {
+       "name": "group_ids",
+       "widget": "many2many_tags",
+       "readonly": "not is_editable"
+      },
+      {
+       "name": "is_editable",
+       "invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "shortcut": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_canned_response_view_kanban",
+    "package": "mail",
+    "name": "mail.canned.response.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "source",
+       "widget": "shortcut"
+      },
+      {
+       "name": "substitution"
+      },
+      {
+       "name": "group_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "shortcut": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.mail_canned_response_action",
+    "package": "mail",
+    "name": "Canned Responses",
+    "view_mode": "list,form,kanban",
+    "view_id": null,
+    "search_view_id": "mail_canned_response_view_search",
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    No canned response found. Let's create one!\n                </p><p>\n                    Use canned responses to quickly insert prewritten messages with <i>::shortcut</i>. You can edit the text before sending.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mail.canned.response"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "im_livechat.canned_responses",
+    "package": "im_livechat",
+    "name": "Canned Responses",
+    "parent_id": "livechat_config",
+    "action": "mail.mail_canned_response_action",
+    "sequence": "15",
+    "groups_id": "im_livechat_group_user",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "mail.menu_canned_responses",
+    "package": "mail",
+    "name": "Canned Responses",
+    "parent_id": "mail.menu_configuration",
+    "action": "mail.mail_canned_response_action",
+    "sequence": "15",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

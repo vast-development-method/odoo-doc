@@ -1,0 +1,873 @@
+{
+ "catalog": {
+  "name": "entity:event.type",
+  "description": "Complete definition of entity Event Template (event.type).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.type",
+  "storage_name": "event_type",
+  "full_name": "Event Template",
+  "kind": "persistent",
+  "description": "Event Template",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "event_booth",
+   "website_event",
+   "website_event_track",
+   "website_event_booth",
+   "website_event_exhibitor"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Event Template",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "event",
+    "full_name": "Event Template"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Note",
+    "defined_in_package": "event",
+    "full_name": "Note"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "event",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "event_type_ticket_ids",
+    "type": "One2many",
+    "comodel": "event.type.ticket",
+    "inverse_name": "event_type_id",
+    "string": "Tickets",
+    "defined_in_package": "event",
+    "full_name": "Tickets",
+    "target_entity": "event.type.ticket"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "event.tag",
+    "string": "Tags",
+    "defined_in_package": "event",
+    "full_name": "Tags",
+    "target_entity": "event.tag"
+   },
+   {
+    "name": "has_seats_limitation",
+    "type": "Boolean",
+    "string": "Limited Seats",
+    "defined_in_package": "event",
+    "full_name": "Limited Seats"
+   },
+   {
+    "name": "seats_max",
+    "type": "Integer",
+    "string": "Maximum Registrations",
+    "compute": "_compute_seats_max",
+    "readonly": false,
+    "store": true,
+    "help": "It will select this default maximum value when you choose this event",
+    "defined_in_package": "event",
+    "full_name": "Maximum Registrations"
+   },
+   {
+    "name": "default_timezone",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "string": "Timezone",
+    "default": {
+     "dynamic": "lambda self: self.env.user.tz or 'UTC'"
+    },
+    "defined_in_package": "event",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "event_type_mail_ids",
+    "type": "One2many",
+    "comodel": "event.type.mail",
+    "inverse_name": "event_type_id",
+    "string": "Mail Schedule",
+    "default": {
+     "dynamic": "_default_event_mail_type_ids"
+    },
+    "defined_in_package": "event",
+    "full_name": "Mail Schedule",
+    "target_entity": "event.type.mail"
+   },
+   {
+    "name": "ticket_instructions",
+    "type": "Html",
+    "string": "Ticket Instructions",
+    "translate": true,
+    "help": "This information will be printed on your tickets.",
+    "defined_in_package": "event",
+    "full_name": "Ticket Instructions"
+   },
+   {
+    "name": "question_ids",
+    "type": "Many2many",
+    "comodel": "event.question",
+    "default": {
+     "dynamic": "_default_question_ids"
+    },
+    "string": "Questions",
+    "copy": true,
+    "defined_in_package": "event",
+    "full_name": "Questions",
+    "target_entity": "event.question"
+   },
+   {
+    "name": "event_type_booth_ids",
+    "type": "One2many",
+    "comodel": "event.type.booth",
+    "inverse_name": "event_type_id",
+    "string": "Booths",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event_booth",
+    "full_name": "Booths",
+    "target_entity": "event.type.booth"
+   },
+   {
+    "name": "website_menu",
+    "type": "Boolean",
+    "string": "Display a dedicated menu on Website",
+    "defined_in_package": "website_event",
+    "full_name": "Display a dedicated menu on Website"
+   },
+   {
+    "name": "community_menu",
+    "type": "Boolean",
+    "string": "Community Menu",
+    "compute": "_compute_community_menu",
+    "readonly": false,
+    "store": true,
+    "help": "Display community tab on website",
+    "defined_in_package": "website_event",
+    "full_name": "Community Menu"
+   },
+   {
+    "name": "website_track",
+    "type": "Boolean",
+    "string": "Tracks on Website",
+    "compute": "_compute_website_track_menu_data",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Tracks on Website"
+   },
+   {
+    "name": "website_track_proposal",
+    "type": "Boolean",
+    "string": "Tracks Proposals on Website",
+    "compute": "_compute_website_track_menu_data",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Tracks Proposals on Website"
+   },
+   {
+    "name": "booth_menu",
+    "type": "Boolean",
+    "string": "Booths on Website",
+    "compute": "_compute_booth_menu",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_booth",
+    "full_name": "Booths on Website"
+   },
+   {
+    "name": "exhibitor_menu",
+    "type": "Boolean",
+    "string": "Showcase Exhibitors",
+    "compute": "_compute_exhibitor_menu",
+    "readonly": false,
+    "store": true,
+    "help": "Display exhibitors on website, in the footer of every page of the event.",
+    "defined_in_package": "website_event_exhibitor",
+    "full_name": "Showcase Exhibitors"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_event_mail_type_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_question_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_seats_max",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "has_seats_limitation"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_community_menu",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_track_menu_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Simply activate or de-activate all menus at once. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_booth_menu",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_exhibitor_menu",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_exhibitor",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_menu"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_type_registration",
+    "package": "event",
+    "name": "event.type.registration",
+    "entity": "event.type",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_type_manager",
+    "package": "event",
+    "name": "event.type.manager",
+    "entity": "event.type",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_event.access_event_type",
+    "package": "website_event",
+    "name": "event.type",
+    "entity": "event.type",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "event.view_event_type_form",
+    "package": "event",
+    "name": "event.type.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Event Category"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. Online Conferences"
+      },
+      {
+       "name": "default_timezone"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color', 'no_quick_create': True}"
+      },
+      {
+       "name": "has_seats_limitation"
+      },
+      {
+       "name": "seats_max"
+      },
+      {
+       "name": "event_type_ticket_ids",
+       "context": "{                                      'list_view_ref': 'event.event_type_ticket_view_tree_from_type',                                      'form_view_ref': 'event.event_type_ticket_view_form_from_type'                                   }"
+      },
+      {
+       "name": "event_type_mail_ids"
+      },
+      {
+       "name": "template_ref",
+       "widget": "EventMailTemplateReferenceField",
+       "context": "{'filter_template_on_event': True, 'default_model': 'event.registration'}",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "interval_nbr",
+       "readonly": "interval_unit == 'now'"
+      },
+      {
+       "name": "interval_unit"
+      },
+      {
+       "name": "interval_type"
+      },
+      {
+       "name": "question_ids",
+       "domain": "[('is_reusable', '=', True)]",
+       "context": "{'list_view_ref': 'event.event_question_view_list_add'}"
+      },
+      {
+       "name": "title"
+      },
+      {
+       "name": "is_mandatory_answer",
+       "string": "Mandatory"
+      },
+      {
+       "name": "once_per_order",
+       "string": "Once per Order"
+      },
+      {
+       "name": "question_type"
+      },
+      {
+       "name": "answer_ids",
+       "widget": "many2many_tags",
+       "invisible": "question_type != 'simple_choice'"
+      },
+      {
+       "name": "is_default",
+       "optional": "hide"
+      },
+      {
+       "name": "is_reusable",
+       "optional": "hide"
+      },
+      {
+       "name": "note",
+       "nolabel": "1",
+       "placeholder": "Add some internal notes (to do lists, contact info, ...)"
+      },
+      {
+       "name": "ticket_instructions",
+       "nolabel": "1",
+       "placeholder": "e.g. How to get to your event, door closing time, ..."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_tickets",
+       "string": "Tickets",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "event_type_communication",
+       "string": "Communication",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "page_questions",
+       "string": "Questions",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "notes",
+       "string": "Notes",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "many2many_tags": 2,
+      "EventMailTemplateReferenceField": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event.view_event_type_tree",
+    "package": "event",
+    "name": "event.type.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Event Template",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.event_type_view_search",
+    "package": "event",
+    "name": "event.type.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Event Templates"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_type_view_form",
+    "package": "event_booth",
+    "name": "event.type.view.form.inherit.event.booth",
+    "view_type": "page",
+    "inherits_view": "event.view_event_type_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "page",
+     "root_attributes": {
+      "name": "event_type_communication",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "event_type_booth_ids",
+       "context": "{                                'list_view_ref': 'event_booth.event_type_booth_view_tree_from_type',                                'form_view_ref': 'event_booth.event_type_booth_view_form_from_type'                            }"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "event_type_communication",
+       "string": null,
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "page_booths",
+       "string": "Booths",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event.event_type_view_form",
+    "package": "website_event",
+    "name": "event.type.view.form.inherit.website",
+    "view_type": "xpath",
+    "inherits_view": "event.view_event_type_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_title')]",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "website_menu"
+      },
+      {
+       "name": "community_menu"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_title')]",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_booth.event_type_view_form",
+    "package": "website_event_booth",
+    "name": "event.type.view.form.inherit.website.event.booth",
+    "view_type": "xpath",
+    "inherits_view": "website_event.event_type_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//span[@name='website_menu']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "booth_menu"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//span[@name='website_menu']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_exhibitor.event_type_view_form",
+    "package": "website_event_exhibitor",
+    "name": "event.type.view.form.inherit.exhibitor",
+    "view_type": "xpath",
+    "inherits_view": "website_event.event_type_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//span[@name='community_menu']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "exhibitor_menu"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//span[@name='community_menu']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track.event_type_view_form_inherit_track",
+    "package": "website_event_track",
+    "name": "event.type.view.form.inherit.track",
+    "view_type": "xpath",
+    "inherits_view": "website_event.event_type_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//span[@name='website_menu']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "website_track"
+      },
+      {
+       "name": "website_track_proposal"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//span[@name='website_menu']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track_quiz.event_type_view_form",
+    "package": "website_event_track_quiz",
+    "name": "event.type.view.form.inherit.track.quiz",
+    "view_type": "xpath",
+    "inherits_view": "website_event.event_type_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//span[@name='community_menu']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//span[@name='community_menu']",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event.action_event_type",
+    "package": "event",
+    "name": "Event Templates",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create an Event Template\n            </p><p>\n                Event Templates combine configurations you use often and are\n                usually based on the types of events you organize (e.g. \"Workshop\",\n                \"Roadshow\", \"Online Webinar\", etc).\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.type"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "event.menu_event_type",
+    "package": "event",
+    "name": null,
+    "parent_id": null,
+    "action": "event.action_event_type",
+    "sequence": null,
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

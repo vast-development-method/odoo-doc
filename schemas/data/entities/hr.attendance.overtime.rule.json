@@ -1,0 +1,997 @@
+{
+ "catalog": {
+  "name": "entity:hr.attendance.overtime.rule",
+  "description": "Complete definition of entity Overtime Rule (hr.attendance.overtime.rule).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.attendance.overtime.rule",
+  "storage_name": "hr_attendance_overtime_rule",
+  "full_name": "Overtime Rule",
+  "kind": "persistent",
+  "description": "Overtime Rule",
+  "defined_by_package": "hr_attendance",
+  "extended_by_packages": [
+   "hr_holidays_attendance"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "defined_in_package": "hr_attendance",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "defined_in_package": "hr_attendance",
+    "string": "Description",
+    "full_name": "Description"
+   },
+   {
+    "name": "base_off",
+    "type": "Selection",
+    "selection": [
+     [
+      "quantity",
+      "Quantity"
+     ],
+     [
+      "timing",
+      "Timing"
+     ]
+    ],
+    "string": "Based Off",
+    "required": true,
+    "default": "quantity",
+    "help": "Base for overtime calculation.\nUse 'Quantity' when overtime hours are those in excess of a certain amount per day/week.\nUse 'Timing' when overtime hours happen on specific days or at specific times",
+    "defined_in_package": "hr_attendance",
+    "full_name": "Based Off"
+   },
+   {
+    "name": "timing_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "work_days",
+      "On any working day"
+     ],
+     [
+      "non_work_days",
+      "On any non-working day"
+     ],
+     [
+      "leave",
+      "When employee is off"
+     ],
+     [
+      "schedule",
+      "Outside of a specific schedule"
+     ]
+    ],
+    "default": "work_days",
+    "defined_in_package": "hr_attendance",
+    "string": "Timing Type",
+    "full_name": "Timing Type"
+   },
+   {
+    "name": "timing_start",
+    "type": "Float",
+    "string": "From",
+    "default": 0,
+    "defined_in_package": "hr_attendance",
+    "full_name": "From"
+   },
+   {
+    "name": "timing_stop",
+    "type": "Float",
+    "string": "To",
+    "default": 24,
+    "defined_in_package": "hr_attendance",
+    "full_name": "To"
+   },
+   {
+    "name": "expected_hours_from_contract",
+    "type": "Boolean",
+    "string": "Hours from employee schedule",
+    "default": true,
+    "help": "The attendance can go into negative extra hours to represent the missing hours compared to what is expected if the Absence Management setting is enabled.",
+    "defined_in_package": "hr_attendance",
+    "full_name": "Hours from employee schedule"
+   },
+   {
+    "name": "resource_calendar_id",
+    "type": "Many2one",
+    "comodel": "resource.calendar",
+    "string": "Schedule",
+    "domain": [
+     [
+      "flexible_hours",
+      "=",
+      false
+     ]
+    ],
+    "defined_in_package": "hr_attendance",
+    "full_name": "Schedule",
+    "target_entity": "resource.calendar"
+   },
+   {
+    "name": "expected_hours",
+    "type": "Float",
+    "string": "Usual work hours",
+    "defined_in_package": "hr_attendance",
+    "full_name": "Usual work hours"
+   },
+   {
+    "name": "quantity_period",
+    "type": "Selection",
+    "selection": [
+     [
+      "day",
+      "Day"
+     ],
+     [
+      "week",
+      "Week"
+     ]
+    ],
+    "default": "day",
+    "defined_in_package": "hr_attendance",
+    "string": "Quantity Period",
+    "full_name": "Quantity Period"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "hr_attendance",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "ruleset_id",
+    "type": "Many2one",
+    "comodel": "hr.attendance.overtime.ruleset",
+    "required": true,
+    "index": true,
+    "defined_in_package": "hr_attendance",
+    "string": "Ruleset",
+    "full_name": "Ruleset",
+    "target_entity": "hr.attendance.overtime.ruleset"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "ruleset_id.company_id",
+    "defined_in_package": "hr_attendance",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "paid",
+    "type": "Boolean",
+    "string": "Pay Extra Hours",
+    "defined_in_package": "hr_attendance",
+    "full_name": "Pay Extra Hours"
+   },
+   {
+    "name": "amount_rate",
+    "type": "Float",
+    "string": "Rate",
+    "default": 1.0,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Rate"
+   },
+   {
+    "name": "employee_tolerance",
+    "type": "Float",
+    "defined_in_package": "hr_attendance",
+    "string": "Employee Tolerance",
+    "full_name": "Employee Tolerance"
+   },
+   {
+    "name": "employer_tolerance",
+    "type": "Float",
+    "defined_in_package": "hr_attendance",
+    "string": "Employer Tolerance",
+    "full_name": "Employer Tolerance"
+   },
+   {
+    "name": "information_display",
+    "type": "Char",
+    "string": "Information",
+    "compute": "_compute_information_display",
+    "defined_in_package": "hr_attendance",
+    "full_name": "Information"
+   },
+   {
+    "name": "compensable_as_leave",
+    "type": "Boolean",
+    "string": "Give back as time off",
+    "default": false,
+    "defined_in_package": "hr_holidays_attendance",
+    "full_name": "Give back as time off"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_timing_start_is_hour",
+    "kind": "Constraint",
+    "definition": "CHECK(0 <= timing_start AND timing_start < 24)",
+    "message": "Timing Start is an hour of the day",
+    "defined_in_package": "hr_attendance"
+   },
+   {
+    "name": "_timing_stop_is_hour",
+    "kind": "Constraint",
+    "definition": "CHECK(0 <= timing_stop AND timing_stop <= 24)",
+    "message": "Timing Stop is an hour of the day",
+    "defined_in_package": "hr_attendance"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_check_expected_hours",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "base_off",
+         "expected_hours",
+         "quantity_period"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Rule '%(name)s' is based off quantity, but the usual amount of work hours is not specified",
+        "line": 152
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Rule '%(name)s' is based off quantity, but the period is not specified",
+        "line": 155
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_work_schedule",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "base_off",
+         "timing_type",
+         "resource_calendar_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Rule '%(name)s' is based off timing, but the work schedule is not specified",
+        "line": 166
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_local_time_start",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_local_time_stop",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get1_timing_overtime_intervals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attendances",
+     "version_map"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 73,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_periods",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_period_keys",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_expected_hours_from_contract",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date",
+     "version",
+     "period"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_daterange_overtime_intervals_for_quantity_rule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "stop",
+     "attendance_intervals",
+     "schedule"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_daterange_overtime_undertime_intervals_for_quantity_rule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start",
+     "stop",
+     "attendance_intervals",
+     "schedule"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_all_overtime_intervals_for_quantity_rule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attendances_by_periods_by_employee",
+     "schedule_by_employee"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_all_overtime_undertime_intervals_for_quantity_rule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attendances_by_periods_by_employee",
+     "schedule_by_employee"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rules_intervals_by_timing_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "min_check_in",
+     "max_check_out",
+     "employees",
+     "schedules_intervals_by_employee"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 97,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_all_overtime_intervals_for_timing_rule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "min_check_in",
+     "max_check_out",
+     "attendances",
+     "schedules_intervals_by_employee"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 64,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_overtime_intervals_by_employee_by_attendance",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "min_check_in",
+     "max_check_out",
+     "attendances",
+     "schedules_intervals_by_employee"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_overtime_undertime_intervals_by_employee_by_attendance",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "min_check_in",
+     "max_check_out",
+     "attendances",
+     "schedules_intervals_by_employee"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_overtime_intervals_by_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attendances",
+     "version_map"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": "return all overtime over the attendances (all of the SAME employee)\nas a list of `Intervals` sets with the rule as the recordset\ngenerated by `timing` rules in self",
+      "size_in_lines": 110,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_overtime_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "employee",
+     "attendances",
+     "version_map"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_overtime_vals_v2",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "min_check_in",
+     "max_check_out",
+     "attendances",
+     "schedules_intervals_by_employee"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extra_overtime_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_information_display",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_expected_hours",
+    "package": "hr_attendance",
+    "kind": "ValidationError",
+    "message": "Rule '%(name)s' is based off quantity, but the usual amount of work hours is not specified"
+   },
+   {
+    "operation": "_check_expected_hours",
+    "package": "hr_attendance",
+    "kind": "ValidationError",
+    "message": "Rule '%(name)s' is based off quantity, but the period is not specified"
+   },
+   {
+    "operation": "_check_work_schedule",
+    "package": "hr_attendance",
+    "kind": "ValidationError",
+    "message": "Rule '%(name)s' is based off timing, but the work schedule is not specified"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_attendance.access_hr_attendance_overtime_rule_admin",
+    "package": "hr_attendance",
+    "name": "hr.attendance.admin.overtime.rule",
+    "entity": "hr.attendance.overtime.rule",
+    "group": "group_hr_attendance_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_attendance.access_hr_attendance_overtime_rule_user",
+    "package": "hr_attendance",
+    "name": "hr.attendance.admin.overtime.rule",
+    "entity": "hr.attendance.overtime.rule",
+    "group": "hr.group_hr_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_attendance.access_hr_attendance_overtime_rule_officer",
+    "package": "hr_attendance",
+    "name": "hr.attendance.officer.overtime.rule",
+    "entity": "hr.attendance.overtime.rule",
+    "group": "group_hr_attendance_officer",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_attendance.hr_attendance_overtime_rule_view_form",
+    "package": "hr_attendance",
+    "name": "hr.attendance.overtime.rule.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. Over 8 hours daily"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "base_off",
+       "widget": "radio",
+       "string": "The rule is based on"
+      },
+      {
+       "name": "quantity_period",
+       "nolabel": "1"
+      },
+      {
+       "name": "expected_hours_from_contract",
+       "widget": "boolean_radio",
+       "options": "{                                         'yes_label_element_id': 'expected_hours_from_contract_yes',                                         'no_label_element_id': 'expected_hours_from_contract_no'                                     }",
+       "nolabel": "1"
+      },
+      {
+       "name": "expected_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "employer_tolerance",
+       "widget": "float_time",
+       "string": "With a tolerance in favor of the employer of"
+      },
+      {
+       "name": "employee_tolerance",
+       "widget": "float_time",
+       "invisible": "base_off == 'timing'",
+       "string": "With a tolerance in favor of the employee of"
+      },
+      {
+       "name": "timing_type",
+       "widget": "radio",
+       "invisible": "base_off != 'timing'",
+       "string": "If the employee works"
+      },
+      {
+       "name": "timing_start",
+       "widget": "float_time",
+       "nolabel": "1"
+      },
+      {
+       "name": "timing_stop",
+       "widget": "float_time",
+       "nolabel": "1"
+      },
+      {
+       "name": "resource_calendar_id",
+       "invisible": "base_off != 'timing' or timing_type != 'schedule'",
+       "string": "Schedule"
+      },
+      {
+       "name": "paid",
+       "nolabel": "1"
+      },
+      {
+       "name": "amount_rate",
+       "widget": "percentage",
+       "invisible": "not paid"
+      },
+      {
+       "name": "description",
+       "placeholder": "Description"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": null,
+       "string": "Definition",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": null,
+       "string": "Description",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "radio": 2,
+      "boolean_radio": 1,
+      "float_time": 5,
+      "percentage": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_overtime_rule_view_list",
+    "package": "hr_attendance",
+    "name": "hr.attendance.overtime.rule.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "base_off"
+      },
+      {
+       "name": "expected_hours_from_contract",
+       "string": "Get working hours from contract"
+      },
+      {
+       "name": "expected_hours",
+       "invisible": "expected_hours_from_contract or base_off != 'quantity'"
+      },
+      {
+       "name": "resource_calendar_id",
+       "invisible": "expected_hours_from_contract or base_off != 'timing'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.hr_attendance_overtime_rule_view_form",
+    "package": "hr_holidays_attendance",
+    "name": "hr.attendance.overtime.rule.form.inherit.hr_work_entry_attendance",
+    "view_type": "group",
+    "inherits_view": "hr_attendance.hr_attendance_overtime_rule_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "action_section",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "compensable_as_leave"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "action_section",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_attendance.hr_attendance_overtime_rule_action",
+    "package": "hr_attendance",
+    "name": "Overtime Rules",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.attendance.overtime.rule"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

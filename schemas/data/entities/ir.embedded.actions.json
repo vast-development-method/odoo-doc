@@ -1,0 +1,498 @@
+{
+ "catalog": {
+  "name": "entity:ir.embedded.actions",
+  "description": "Complete definition of entity Embedded Actions (ir.embedded.actions).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.embedded.actions",
+  "storage_name": "ir_embedded_actions",
+  "full_name": "Embedded Actions",
+  "kind": "persistent",
+  "description": "Embedded Actions",
+  "defined_by_package": "base",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "translate": true,
+    "defined_in_package": "base",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "defined_in_package": "base",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "parent_action_id",
+    "type": "Many2one",
+    "comodel": "ir.actions.act_window",
+    "required": true,
+    "string": "Parent Action",
+    "ondelete": "cascade",
+    "defined_in_package": "base",
+    "full_name": "Parent Action",
+    "target_entity": "ir.actions.act_window"
+   },
+   {
+    "name": "parent_res_id",
+    "type": "Integer",
+    "string": "Active Parent Id",
+    "defined_in_package": "base",
+    "full_name": "Active Parent Id"
+   },
+   {
+    "name": "parent_res_model",
+    "type": "Char",
+    "string": "Active Parent Model",
+    "required": true,
+    "defined_in_package": "base",
+    "full_name": "Active Parent Model"
+   },
+   {
+    "name": "action_id",
+    "type": "Many2one",
+    "comodel": "ir.actions.actions",
+    "string": "Action",
+    "ondelete": "cascade",
+    "defined_in_package": "base",
+    "full_name": "Action",
+    "target_entity": "ir.actions.actions"
+   },
+   {
+    "name": "python_method",
+    "type": "Char",
+    "help": "Python method returning an action",
+    "defined_in_package": "base",
+    "string": "Python Method",
+    "full_name": "Python Method"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "help": "User specific embedded action. If empty, shared embedded action",
+    "ondelete": "cascade",
+    "defined_in_package": "base",
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "is_deletable",
+    "type": "Boolean",
+    "compute": "_compute_is_deletable",
+    "defined_in_package": "base",
+    "string": "Is Deletable",
+    "full_name": "Is Deletable"
+   },
+   {
+    "name": "default_view_mode",
+    "type": "Char",
+    "string": "Default View",
+    "help": "Default view (if none, default view of the action is taken)",
+    "defined_in_package": "base",
+    "full_name": "Default View"
+   },
+   {
+    "name": "filter_ids",
+    "type": "One2many",
+    "comodel": "ir.filters",
+    "inverse_name": "embedded_action_id",
+    "help": "Default filter of the embedded action (if none, no filters)",
+    "defined_in_package": "base",
+    "string": "Filter",
+    "full_name": "Filter",
+    "target_entity": "ir.filters"
+   },
+   {
+    "name": "is_visible",
+    "type": "Boolean",
+    "string": "Embedded visibility",
+    "help": "Computed field to check if the record should be visible according to the domain",
+    "compute": "_compute_is_visible",
+    "defined_in_package": "base",
+    "full_name": "Embedded visibility"
+   },
+   {
+    "name": "domain",
+    "type": "Char",
+    "default": "[]",
+    "help": "Domain applied to the active id of the parent model",
+    "defined_in_package": "base",
+    "string": "Domain",
+    "full_name": "Domain"
+   },
+   {
+    "name": "context",
+    "type": "Char",
+    "default": "{}",
+    "help": "Context dictionary as Python expression, empty by default (Default: {})",
+    "defined_in_package": "base",
+    "string": "Context",
+    "full_name": "Context"
+   },
+   {
+    "name": "groups_ids",
+    "type": "Many2many",
+    "comodel": "res.groups",
+    "help": "Groups that can execute the embedded action. Leave empty to allow everybody.",
+    "defined_in_package": "base",
+    "string": "Groups",
+    "full_name": "Groups",
+    "target_entity": "res.groups"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_only_one_action_defined",
+    "kind": "Constraint",
+    "definition": "CHECK(\n            (action_id IS NOT NULL AND python_method IS NULL)\n            OR (action_id IS NULL AND python_method IS NOT NULL)\n        )",
+    "message": "Constraint to ensure that either an XML action or a python_method is defined, but not both.",
+    "defined_in_package": "base"
+   },
+   {
+    "name": "_check_python_method_requires_name",
+    "kind": "Constraint",
+    "definition": "CHECK(NOT (python_method IS NOT NULL AND name IS NULL))",
+    "message": "Constraint to ensure that if a python_method is defined, then the name must also be defined.",
+    "defined_in_package": "base"
+   }
+  ],
+  "operations": [
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "action_id.display_name",
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_deletable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_visible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_action_deletable",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a default embedded action",
+        "line": 103
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_readable_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "return the list of fields that are safe to read\n        ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_if_action_deletable",
+    "package": "base",
+    "kind": "UserError",
+    "message": "You cannot delete a default embedded action"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_embedded_actions_group_user",
+    "package": "base",
+    "name": "ir_embedded_actions_group_user",
+    "entity": "ir.embedded.actions",
+    "group": "group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "base.embedded_action_user_delete_rule",
+    "package": "base",
+    "name": "Users can modify or delete embedded actions that they have created or that are shared",
+    "entity": "ir.embedded.actions",
+    "domain": "[('user_id', 'in', [user.id, False])]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "True",
+    "applies_to_create": "False",
+    "applies_to_delete": "True"
+   },
+   {
+    "external_identifier": "base.embedded_action_admin_delete_rule",
+    "package": "base",
+    "name": "Admins have all the rights on embedded actions",
+    "entity": "ir.embedded.actions",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('base.group_system'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "True",
+    "applies_to_create": "False",
+    "applies_to_delete": "True"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "base.embedded_action_form",
+    "package": "base",
+    "name": "ir.embedded.actions.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "parent_action_id"
+      },
+      {
+       "name": "action_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "filter_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "sequence"
+      },
+      {
+       "name": "is_deletable"
+      },
+      {
+       "name": "default_view_mode"
+      },
+      {
+       "name": "parent_res_model"
+      },
+      {
+       "name": "domain"
+      },
+      {
+       "name": "groups_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.embedded_action_tree",
+    "package": "base",
+    "name": "Embedded Actions",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "parent_action_id"
+      },
+      {
+       "name": "action_id"
+      },
+      {
+       "name": "user_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.ir_embedded_action",
+    "package": "base",
+    "name": "Embedded Actions",
+    "view_mode": null,
+    "view_id": "embedded_action_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.embedded.actions"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

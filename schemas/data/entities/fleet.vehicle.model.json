@@ -1,0 +1,858 @@
+{
+ "catalog": {
+  "name": "entity:fleet.vehicle.model",
+  "description": "Complete definition of entity Model of a vehicle (fleet.vehicle.model).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "fleet.vehicle.model",
+  "storage_name": "fleet_vehicle_model",
+  "full_name": "Model of a vehicle",
+  "kind": "persistent",
+  "description": "Model of a vehicle",
+  "defined_by_package": "fleet",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "avatar.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "name asc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Model name",
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Model name"
+   },
+   {
+    "name": "brand_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.model.brand",
+    "string": "Manufacturer",
+    "required": true,
+    "tracking": true,
+    "index": "btree_not_null",
+    "defined_in_package": "fleet",
+    "full_name": "Manufacturer",
+    "target_entity": "fleet.vehicle.model.brand"
+   },
+   {
+    "name": "category_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.model.category",
+    "string": "Category",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Category",
+    "target_entity": "fleet.vehicle.model.category"
+   },
+   {
+    "name": "vendors",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "fleet_vehicle_model_vendors",
+    "column1": "model_id",
+    "column2": "partner_id",
+    "string": "Vendors",
+    "defined_in_package": "fleet",
+    "full_name": "Vendors",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "image_128",
+    "type": "Image",
+    "related": "brand_id.image_128",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "string": "Image 128",
+    "full_name": "Image 128"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "fleet",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "vehicle_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "car",
+      "Car"
+     ],
+     [
+      "bike",
+      "Bike"
+     ]
+    ],
+    "default": "car",
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "string": "Vehicle Type",
+    "full_name": "Vehicle Type"
+   },
+   {
+    "name": "transmission",
+    "type": "Selection",
+    "selection": [
+     [
+      "manual",
+      "Manual"
+     ],
+     [
+      "automatic",
+      "Automatic"
+     ]
+    ],
+    "string": "Transmission",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Transmission"
+   },
+   {
+    "name": "vehicle_count",
+    "type": "Integer",
+    "compute": "_compute_vehicle_count",
+    "search": "_search_vehicle_count",
+    "defined_in_package": "fleet",
+    "string": "Vehicle Count",
+    "full_name": "Vehicle Count"
+   },
+   {
+    "name": "model_year",
+    "type": "Selection",
+    "tracking": true,
+    "selection_method": "_get_year_selection",
+    "defined_in_package": "fleet",
+    "string": "Model Year",
+    "full_name": "Model Year"
+   },
+   {
+    "name": "color",
+    "type": "Char",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "string": "Color",
+    "full_name": "Color"
+   },
+   {
+    "name": "seats",
+    "type": "Integer",
+    "string": "Seating Capacity",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Seating Capacity"
+   },
+   {
+    "name": "doors",
+    "type": "Integer",
+    "string": "Number of Doors",
+    "tracking": true,
+    "help": "Specifies the total number of doors, including the truck and hatch doors, if applicable.",
+    "defined_in_package": "fleet",
+    "full_name": "Number of Doors"
+   },
+   {
+    "name": "trailer_hook",
+    "type": "Boolean",
+    "default": false,
+    "string": "Trailer Hitch",
+    "tracking": true,
+    "help": "A trailer hitch is a device attached to a vehicle's chassis for towing purposes,            such as pulling trailers, boats, or other vehicles.",
+    "defined_in_package": "fleet",
+    "full_name": "Trailer Hitch"
+   },
+   {
+    "name": "default_co2",
+    "type": "Float",
+    "string": "CO₂ Emissions",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "CO₂ Emissions"
+   },
+   {
+    "name": "co2_emission_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "g/km",
+      "g/km"
+     ],
+     [
+      "g/mi",
+      "g/mi"
+     ]
+    ],
+    "compute": "_compute_co2_emission_unit",
+    "required": true,
+    "defined_in_package": "fleet",
+    "string": "Co2 Emission Unit",
+    "full_name": "Co2 Emission Unit"
+   },
+   {
+    "name": "co2_standard",
+    "type": "Char",
+    "string": "Emission Standard",
+    "tracking": true,
+    "help": "Emission Standard specifies the regulatory test procedure or             guideline under which a vehicle's emissions are measured.",
+    "defined_in_package": "fleet",
+    "full_name": "Emission Standard"
+   },
+   {
+    "name": "default_fuel_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "FUEL_TYPES"
+    },
+    "string": "Fuel Type",
+    "default": "electric",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Fuel Type"
+   },
+   {
+    "name": "power",
+    "type": "Float",
+    "string": "Power",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Power"
+   },
+   {
+    "name": "horsepower",
+    "type": "Float",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "string": "Horsepower",
+    "full_name": "Horsepower"
+   },
+   {
+    "name": "horsepower_tax",
+    "type": "Float",
+    "string": "Horsepower Taxation",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Horsepower Taxation"
+   },
+   {
+    "name": "electric_assistance",
+    "type": "Boolean",
+    "default": false,
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "string": "Electric Assistance",
+    "full_name": "Electric Assistance"
+   },
+   {
+    "name": "power_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "power",
+      "kW"
+     ],
+     [
+      "horsepower",
+      "Horsepower (hp)"
+     ]
+    ],
+    "string": "Power Unit",
+    "default": "power",
+    "required": true,
+    "defined_in_package": "fleet",
+    "full_name": "Power Unit"
+   },
+   {
+    "name": "vehicle_properties_definition",
+    "type": "PropertiesDefinition",
+    "string": "Vehicle Properties",
+    "defined_in_package": "fleet",
+    "full_name": "Vehicle Properties"
+   },
+   {
+    "name": "vehicle_range",
+    "type": "Integer",
+    "string": "Range",
+    "defined_in_package": "fleet",
+    "full_name": "Range"
+   },
+   {
+    "name": "range_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "km",
+      "km"
+     ],
+     [
+      "mi",
+      "mi"
+     ]
+    ],
+    "default": "km",
+    "required": true,
+    "defined_in_package": "fleet",
+    "string": "Range Unit",
+    "full_name": "Range Unit"
+   },
+   {
+    "name": "drive_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "fwd",
+      "Front-Wheel Drive (FWD)"
+     ],
+     [
+      "awd",
+      "All-Wheel Drive (AWD)"
+     ],
+     [
+      "rwd",
+      "Rear-Wheel Drive (RWD)"
+     ],
+     [
+      "4wd",
+      "Four-Wheel Drive (4WD)"
+     ]
+    ],
+    "defined_in_package": "fleet",
+    "string": "Drive Type",
+    "full_name": "Drive Type"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_year_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_display_name",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "brand_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_vehicle_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_co2_emission_unit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "range_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_vehicle_count",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_model_vehicle",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "fleet.fleet_vehicle_model_access_right_user",
+    "package": "fleet",
+    "name": "fleet_vehicle_model_access_right",
+    "entity": "fleet.vehicle.model",
+    "group": "fleet_group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_model_access_right",
+    "package": "fleet",
+    "name": "fleet_vehicle_model_access_right",
+    "entity": "fleet.vehicle.model",
+    "group": "fleet_group_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "fleet.fleet_vehicle_model_view_form",
+    "package": "fleet",
+    "name": "fleet.vehicle.model.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Model"
+     },
+     "fields": [
+      {
+       "name": "vehicle_count",
+       "widget": "statinfo",
+       "invisible": "not vehicle_count",
+       "string": "Vehicles"
+      },
+      {
+       "name": "image_128",
+       "widget": "image"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Model S"
+      },
+      {
+       "name": "brand_id",
+       "placeholder": "e.g. Tesla"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "vehicle_type"
+      },
+      {
+       "name": "category_id",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "model_year"
+      },
+      {
+       "name": "seats"
+      },
+      {
+       "name": "doors"
+      },
+      {
+       "name": "color"
+      },
+      {
+       "name": "trailer_hook"
+      },
+      {
+       "name": "electric_assistance"
+      },
+      {
+       "name": "default_fuel_type",
+       "required": "1"
+      },
+      {
+       "name": "transmission"
+      },
+      {
+       "name": "drive_type"
+      },
+      {
+       "name": "power"
+      },
+      {
+       "name": "power_unit"
+      },
+      {
+       "name": "vehicle_range"
+      },
+      {
+       "name": "range_unit"
+      },
+      {
+       "name": "default_co2"
+      },
+      {
+       "name": "co2_emission_unit"
+      },
+      {
+       "name": "co2_standard",
+       "placeholder": "eg. WLTP, Euro 6, or EPA, ..."
+      },
+      {
+       "name": "horsepower"
+      },
+      {
+       "name": "power_unit"
+      },
+      {
+       "name": "horsepower_tax",
+       "invisible": "power_unit != 'horsepower'"
+      },
+      {
+       "name": "vendors"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "phone"
+      },
+      {
+       "name": "email"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_model_vehicle",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-car"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "information",
+       "string": "Information",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "vendors",
+       "string": "Vendors",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statinfo": 1,
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "action_model_vehicle",
+       "type": "object",
+       "icon": "fa-car",
+       "class": "oe_stat_button"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_model_view_tree",
+    "package": "fleet",
+    "name": "fleet.vehicle.model.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Models",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "brand_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "vehicle_count",
+       "string": "Vehicles"
+      },
+      {
+       "name": "category_id",
+       "optional": "show"
+      },
+      {
+       "name": "vehicle_type",
+       "optional": "show"
+      },
+      {
+       "name": "default_co2",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_model_view_kanban",
+    "package": "fleet",
+    "name": "fleet.vehicle.model.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "string": "Models"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "brand_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_model_view_search",
+    "package": "fleet",
+    "name": "fleet.vehicle.model.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Vehicles costs"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Model"
+      },
+      {
+       "name": "brand_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "contains_vehicle",
+       "string": "Contains Vehicle",
+       "domain": "[('vehicle_count', '!=', 0)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_brand",
+       "string": "Manufacturers",
+       "context": "{'group_by' : 'brand_id'}"
+      },
+      {
+       "name": "groupby_category",
+       "string": "Category",
+       "context": "{'group_by' : 'category_id'}"
+      },
+      {
+       "name": "groupby_vehicle_type",
+       "string": "Vehicle Type",
+       "context": "{'group_by' : 'vehicle_type'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "fleet.fleet_vehicle_model_action",
+    "package": "fleet",
+    "name": "Models",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\"search_default_groupby_brand\" : True,}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Create a new model\n          </p><p>\n            You can define several models (e.g. A3, A4) for each make (Audi).\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "fleet.vehicle.model"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

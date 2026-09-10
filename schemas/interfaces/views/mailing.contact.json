@@ -1,0 +1,679 @@
+{
+ "catalog": {
+  "name": "views:mailing.contact",
+  "description": "View declarations for entity mailing.contact.",
+  "record_count": 12,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "mass_mailing.mailing_contact_view_search",
+   "package": "mass_mailing",
+   "name": "mailing.contact.view.search",
+   "entity": "mailing.contact",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Mailing List Contacts"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Name / Email",
+      "filter_domain": "['|', '|', ('name','ilike',self), ('company_name','ilike',self), ('email_normalized','ilike',self)]"
+     },
+     {
+      "name": "tag_ids"
+     },
+     {
+      "name": "list_ids"
+     },
+     {
+      "name": "properties"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "filter_valid_email_recipient",
+      "string": "Valid Email Recipients",
+      "domain": "[('opt_out', '=', False), ('is_blacklisted', '=', False), ('email_normalized', '!=', False)]",
+      "invisible": "not context.get('default_list_ids')"
+     },
+     {
+      "name": "filter_bounce",
+      "string": "Bounced",
+      "domain": "[('message_bounce', '>', 0)]"
+     },
+     {
+      "name": "filter_blacklisted",
+      "string": "Blacklisted",
+      "domain": "[('is_blacklisted','=',True)]",
+      "invisible": "1"
+     },
+     {
+      "name": "filter_opt_out",
+      "string": "Opted-out",
+      "domain": "[('opt_out', '=', True)]",
+      "invisible": "1"
+     },
+     {
+      "name": "filter_not_email_bl",
+      "string": "Exclude Blacklisted Emails",
+      "domain": "[('is_blacklisted', '=', False)]"
+     },
+     {
+      "name": "filter_not_optout",
+      "string": "Exclude Opt Out",
+      "domain": "[('opt_out', '=', False)]",
+      "invisible": "not context.get('default_list_ids')"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_create_date",
+      "string": "Creation Date",
+      "context": "{'group_by': 'create_date'}"
+     },
+     {
+      "name": "group_properties",
+      "string": "Properties",
+      "context": "{'group_by': 'properties'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n           <search string=\"Mailing List Contacts\">\n                <field name=\"name\" filter_domain=\"['|', '|', ('name','ilike',self), ('company_name','ilike',self), ('email_normalized','ilike',self)]\" string=\"Name / Email\"/>\n                <field name=\"tag_ids\"/>\n                <field name=\"list_ids\"/>\n                <field name=\"properties\"/>\n                <separator/>\n                <filter string=\"Valid Email Recipients\" name=\"filter_valid_email_recipient\" domain=\"[('opt_out', '=', False), ('is_blacklisted', '=', False), ('email_normalized', '!=', False)]\" invisible=\"not context.get('default_list_ids')\"/>\n                <separator/>\n                <filter name=\"filter_bounce\" string=\"Bounced\" domain=\"[('message_bounce', '&gt;', 0)]\"/>\n                <filter name=\"filter_blacklisted\" string=\"Blacklisted\" domain=\"[('is_blacklisted','=',True)]\" invisible=\"1\"/>\n                <filter name=\"filter_opt_out\" string=\"Opted-out\" domain=\"[('opt_out', '=', True)]\" invisible=\"1\"/>\n                <separator/>\n                <filter string=\"Exclude Blacklisted Emails\" name=\"filter_not_email_bl\" domain=\"[('is_blacklisted', '=', False)]\"/>\n                <separator/>\n                <filter string=\"Exclude Opt Out\" name=\"filter_not_optout\" domain=\"[('opt_out', '=', False)]\" invisible=\"not context.get('default_list_ids')\"/>\n                <group>\n                    <filter string=\"Creation Date\" name=\"group_create_date\" context=\"{'group_by': 'create_date'}\"/>\n                    <filter string=\"Properties\" name=\"group_properties\" context=\"{'group_by': 'properties'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing.mailing_contact_view_tree",
+   "package": "mass_mailing",
+   "name": "mailing.contact.view.list",
+   "entity": "mailing.contact",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Mailing List Contacts",
+     "sample": "1",
+     "multi_edit": "1"
+    },
+    "fields": [
+     {
+      "name": "create_date",
+      "optional": "show"
+     },
+     {
+      "name": "name",
+      "readonly": "1",
+      "optional": "show"
+     },
+     {
+      "name": "company_name"
+     },
+     {
+      "name": "email",
+      "readonly": "1"
+     },
+     {
+      "name": "is_blacklisted",
+      "string": "Email Blacklisted"
+     },
+     {
+      "name": "country_id",
+      "optional": "hide"
+     },
+     {
+      "name": "message_bounce",
+      "readonly": "1",
+      "sum": "Total Bounces"
+     },
+     {
+      "name": "opt_out",
+      "readonly": "1",
+      "column_invisible": "'default_list_ids' not in context"
+     },
+     {
+      "name": "list_ids",
+      "widget": "many2many_tags",
+      "optional": "hide"
+     },
+     {
+      "name": "properties",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_import",
+      "string": "Import",
+      "type": "object",
+      "context": "{'from_mailing_list_ids': context.get('active_ids') if context.get('active_model') == 'mailing.list' else False}"
+     },
+     {
+      "name": "action_add_to_mailing_list",
+      "string": "Add to List",
+      "type": "object"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Mailing List Contacts\" sample=\"1\" multi_edit=\"1\">\n                <header>\n                    <button name=\"action_import\" string=\"Import\" type=\"object\" display=\"always\" context=\"{'from_mailing_list_ids': context.get('active_ids') if context.get('active_model') == 'mailing.list' else False}\"/>\n                    <button name=\"action_add_to_mailing_list\" string=\"Add to List\" type=\"object\"/>\n                </header>\n                <field name=\"create_date\" optional=\"show\"/>\n                <field name=\"name\" optional=\"show\" readonly=\"1\"/>\n                <field name=\"company_name\"/>\n                <field name=\"email\" readonly=\"1\"/>\n                <field name=\"is_blacklisted\" string=\"Email Blacklisted\"/>\n                <field name=\"country_id\" optional=\"hide\"/>\n                <field name=\"message_bounce\" sum=\"Total Bounces\" readonly=\"1\"/>\n                <field name=\"opt_out\" readonly=\"1\" column_invisible=\"'default_list_ids' not in context\"/>\n                <field name=\"list_ids\" widget=\"many2many_tags\" optional=\"hide\"/>\n                <field name=\"properties\" optional=\"hide\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing.mailing_contact_view_kanban",
+   "package": "mass_mailing",
+   "name": "mailing.contact.view.kanban",
+   "entity": "mailing.contact",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "message_bounce"
+     },
+     {
+      "name": "tag_ids"
+     },
+     {
+      "name": "email"
+     },
+     {
+      "name": "company_name"
+     },
+     {
+      "name": "properties",
+      "widget": "properties"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_import",
+      "string": "Import",
+      "type": "object",
+      "context": "{'from_mailing_list_ids': context.get('active_ids') if context.get('active_model') == 'mailing.list' else False}"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "properties": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban sample=\"1\">\n                <header>\n                    <button name=\"action_import\" string=\"Import\" type=\"object\" display=\"always\" context=\"{'from_mailing_list_ids': context.get('active_ids') if context.get('active_model') == 'mailing.list' else False}\"/>\n                </header>\n                <templates>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex\">\n                            <field name=\"name\" class=\"fw-bolder fs-5\"/>\n                            <div class=\"badge rounded-pill ms-auto\" title=\"Number of bounced email.\">\n                                <i class=\"fa fa-exclamation-triangle\" role=\"img\" aria-label=\"Warning\" title=\"Warning\"/> <field name=\"message_bounce\"/>\n                            </div>\n                        </div>\n                        <field name=\"tag_ids\"/>\n                        <field name=\"email\" class=\"fw-bolder\"/>\n                        <field name=\"company_name\" class=\"ms-auto\"/>\n                        <field name=\"properties\" widget=\"properties\"/>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing.mailing_contact_view_form",
+   "package": "mass_mailing",
+   "name": "mailing.contact.view.form",
+   "entity": "mailing.contact",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Mailing List Contacts"
+    },
+    "fields": [
+     {
+      "name": "id",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. John Smith"
+     },
+     {
+      "name": "email",
+      "widget": "email"
+     },
+     {
+      "name": "is_blacklisted",
+      "invisible": "1"
+     },
+     {
+      "name": "company_name"
+     },
+     {
+      "name": "country_id",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "create_date",
+      "invisible": "not id",
+      "readonly": "1"
+     },
+     {
+      "name": "message_bounce",
+      "invisible": "not id",
+      "readonly": "1"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}",
+      "placeholder": "e.g. \"VIP\", \"Roadshow\", ..."
+     },
+     {
+      "name": "properties",
+      "nolabel": "1"
+     },
+     {
+      "name": "subscription_ids"
+     },
+     {
+      "name": "list_id"
+     },
+     {
+      "name": "opt_out_datetime",
+      "readonly": "1"
+     },
+     {
+      "name": "opt_out"
+     },
+     {
+      "name": "opt_out_reason_id"
+     },
+     {
+      "name": "create_date",
+      "string": "Subscription Date"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "mail_action_blacklist_remove",
+      "type": "object",
+      "invisible": "not is_blacklisted",
+      "class": "fa fa-ban text-danger",
+      "context": "{'default_email': email}",
+      "groups": "base.group_user"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": null,
+      "string": "Subscriptions",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "email": 1,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "chatter": true,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Mailing List Contacts\">\n                <field name=\"id\" invisible=\"1\"/>\n                <sheet>\n                    <div class=\"oe_title\">\n                        <label for=\"name\" string=\"Contact Name\"/>\n                        <h1>\n                            <field class=\"text-break\" name=\"name\" placeholder=\"e.g. John Smith\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <group>\n                            <label for=\"email\" class=\"oe_inline\"/>\n                            <div class=\"o_row o_row_readonly\" name=\"email_details\">\n                                 <button name=\"mail_action_blacklist_remove\" class=\"fa fa-ban text-danger\" title=\"This email is blacklisted for mass mailings. Click to unblacklist.\" type=\"object\" context=\"{'default_email': email}\" groups=\"base.group_user\" invisible=\"not is_blacklisted\"/>\n                                <field name=\"email\" widget=\"email\"/>\n                                <field name=\"is_blacklisted\" invisible=\"1\"/>\n                            </div>\n                            <field name=\"company_name\"/>\n                            <field name=\"country_id\" options=\"{'no_open': True, 'no_create': True}\"/>\n                        </group>\n                        <group>\n                            <field name=\"create_date\" readonly=\"1\" invisible=\"not id\"/>\n                            <field name=\"message_bounce\" readonly=\"1\" invisible=\"not id\"/>\n                            <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\" placeholder=\"e.g. &quot;VIP&quot;, &quot;Roadshow&quot;, ...\" style=\"width: 100%\"/>\n                        </group>\n                    </group>\n                    <div class=\"d-flex\">\n                        <field name=\"properties\" nolabel=\"1\" columns=\"2\"/>\n                    </div>\n                    <notebook>\n                        <page string=\"Subscriptions\">\n                            <field name=\"subscription_ids\">\n                                <list editable=\"bottom\">\n                                    <field name=\"list_id\"/>\n                                    <field name=\"opt_out_datetime\" readonly=\"1\"/>\n                                    <field name=\"opt_out\"/>\n                                    <field name=\"opt_out_reason_id\"/>\n                                    <field name=\"create_date\" string=\"Subscription Date\"/>\n                                </list>\n                            </field>\n                        </page>\n                    </notebook>\n                </sheet>\n                <chatter/>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing.mailing_contact_view_pivot",
+   "package": "mass_mailing",
+   "name": "mailing.contact.pivot",
+   "entity": "mailing.contact",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Mailing List Contacts",
+     "stacked": "1",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "create_date"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "create_date",
+      "type": "row"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Mailing List Contacts\" stacked=\"1\" sample=\"1\">\n                <field name=\"create_date\" type=\"row\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing.mailing_contact_view_graph",
+   "package": "mass_mailing",
+   "name": "mailing.contact.view.graph",
+   "entity": "mailing.contact",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Mailing List Contacts",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "create_date"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "create_date"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Mailing List Contacts\" sample=\"1\">\n                <field name=\"create_date\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing.mailing_contact_view_tree_split_name",
+   "package": "mass_mailing",
+   "name": "mailing.contact.view.list.split.name",
+   "entity": "mailing.contact",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.mailing_contact_view_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": "False",
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "first_name",
+      "readonly": "1",
+      "optional": "hide"
+     },
+     {
+      "name": "last_name",
+      "readonly": "1",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='name']\" position=\"after\">\n                <field name=\"first_name\" optional=\"hide\" readonly=\"1\"/>\n                <field name=\"last_name\" optional=\"hide\" readonly=\"1\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing.mailing_contact_view_form_split_name",
+   "package": "mass_mailing",
+   "name": "mailing.contact.view.form.split.name",
+   "entity": "mailing.contact",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.mailing_contact_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": "False",
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='name']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='name']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='name']\" position=\"attributes\">\n                <attribute name=\"readonly\">1</attribute>\n                <attribute name=\"invisible\">not name</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='name']\" position=\"after\">\n                \n                <span class=\"opacity-50\" invisible=\"name\">e.g. \"John Smith\"</span>\n            </xpath>\n            <xpath expr=\"//group/label[@for='email']\" position=\"before\">\n                <field name=\"first_name\" placeholder=\"e.g. &quot;John&quot;\"/>\n            </xpath>\n            <xpath expr=\"//group/field[@name='create_date']\" position=\"before\">\n                <field name=\"last_name\" placeholder=\"e.g. &quot;Smith&quot;\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_contact_view_search",
+   "package": "mass_mailing_sms",
+   "name": "mailing.contact.view.search.inherit.sms",
+   "entity": "mailing.contact",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.mailing_contact_view_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "mobile"
+     },
+     {
+      "name": "phone_sanitized",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='name']\" position=\"after\">\n                <field name=\"mobile\"/>\n                <field name=\"phone_sanitized\" invisible=\"1\"/>\n            </xpath>\n            <xpath expr=\"//filter[@name='filter_blacklisted']\" position=\"attributes\">\n                <attribute name=\"domain\">['|', ('is_blacklisted','=',True), ('phone_sanitized_blacklisted','=',True)]</attribute>\n            </xpath>\n            <xpath expr=\"//filter[@name='filter_valid_email_recipient']\" position=\"after\">\n                <separator/>\n                <filter string=\"Valid SMS Recipients\" name=\"filter_valid_sms_recipient\" domain=\"[('opt_out', '=', False), ('phone_sanitized_blacklisted', '=', False), ('phone_sanitized', '!=', False)]\" invisible=\"not context.get('default_list_ids')\"/>\n            </xpath>\n            <xpath expr=\"//filter[@name='filter_not_email_bl']\" position=\"after\">\n                <separator/>\n                <filter string=\"Exclude Blacklisted Phone\" name=\"filter_not_phone_bl\" domain=\"[('phone_sanitized_blacklisted', '=', False)]\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_contact_view_tree",
+   "package": "mass_mailing_sms",
+   "name": "mailing.contact.view.list.inherit.sms",
+   "entity": "mailing.contact",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.mailing_contact_view_tree",
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='country_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "mobile",
+      "readonly": "1"
+     },
+     {
+      "name": "phone_sanitized",
+      "column_invisible": "True"
+     },
+     {
+      "name": "phone_sanitized_blacklisted"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='country_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='country_id']\" position=\"after\">\n                <field name=\"mobile\" class=\"o_force_ltr\" readonly=\"1\"/>\n                <field name=\"phone_sanitized\" column_invisible=\"True\"/>\n                <field name=\"phone_sanitized_blacklisted\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_contact_view_form",
+   "package": "mass_mailing_sms",
+   "name": "mailing.contact.view.form.inherit.sms",
+   "entity": "mailing.contact",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.mailing_contact_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='email_details']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "mobile",
+      "widget": "phone",
+      "options": "{'enable_sms': True}"
+     },
+     {
+      "name": "phone_sanitized",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "phone_action_blacklist_remove",
+      "type": "object",
+      "invisible": "not phone_blacklisted",
+      "class": "fa fa-ban text-danger",
+      "context": "{'default_phone': mobile}",
+      "groups": "base.group_user"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "phone": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='email_details']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@name='email_details']\" position=\"after\">\n                <label for=\"mobile\" class=\"oe_inline\"/>\n                <div class=\"o_row o_row_readonly\" name=\"phone_details\">\n                    <button name=\"phone_action_blacklist_remove\" class=\"fa fa-ban text-danger\" title=\"This phone number is blacklisted for SMS Marketing. Click to unblacklist.\" type=\"object\" context=\"{'default_phone': mobile}\" groups=\"base.group_user\" invisible=\"not phone_blacklisted\"/>\n                    <field name=\"mobile\" widget=\"phone\" options=\"{'enable_sms': True}\"/>\n                    <field name=\"phone_sanitized\" invisible=\"1\"/>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_contact_view_kanban",
+   "package": "mass_mailing_sms",
+   "name": "mailing.contact.view.kanban.inherit.sms",
+   "entity": "mailing.contact",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.mailing_contact_view_kanban",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='email']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "mobile"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='email']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='email']\" position=\"after\">\n                <field name=\"mobile\" class=\"fw-bolder\"/>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

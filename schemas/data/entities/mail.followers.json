@@ -1,0 +1,512 @@
+{
+ "catalog": {
+  "name": "entity:mail.followers",
+  "description": "Complete definition of entity Document Followers (mail.followers).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.followers",
+  "storage_name": "mail_followers",
+  "full_name": "Document Followers",
+  "kind": "persistent",
+  "description": "Document Followers",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "sms"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": false,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "res_model",
+    "type": "Char",
+    "string": "Related Document Model Name",
+    "required": true,
+    "index": true,
+    "defined_in_package": "mail",
+    "full_name": "Related Document Model Name"
+   },
+   {
+    "name": "res_id",
+    "type": "Many2oneReference",
+    "string": "Related Document ID",
+    "index": true,
+    "help": "Id of the followed resource",
+    "model_field": "res_model",
+    "defined_in_package": "mail",
+    "full_name": "Related Document identifier"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Related Partner",
+    "index": true,
+    "ondelete": "cascade",
+    "required": true,
+    "defined_in_package": "mail",
+    "full_name": "Related Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "subtype_ids",
+    "type": "Many2many",
+    "comodel": "mail.message.subtype",
+    "string": "Subtype",
+    "help": "Message subtypes followed, meaning subtypes that will be pushed onto the user's Wall.",
+    "defined_in_package": "mail",
+    "full_name": "Subtype",
+    "target_entity": "mail.message.subtype"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "related": "partner_id.name",
+    "defined_in_package": "mail",
+    "full_name": "Name"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "string": "Email",
+    "related": "partner_id.email",
+    "defined_in_package": "mail",
+    "full_name": "Email"
+   },
+   {
+    "name": "is_active",
+    "type": "Boolean",
+    "string": "Is Active",
+    "related": "partner_id.active",
+    "defined_in_package": "mail",
+    "full_name": "Is Active"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_mail_followers_res_partner_res_model_id_uniq",
+    "kind": "Constraint",
+    "definition": "unique(res_model,res_id,partner_id)",
+    "message": "Error, a partner cannot follow twice the same object.",
+    "defined_in_package": "mail"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_invalidate_documents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Invalidate the cache of the documents followed by ``self``.\n\nModifying followers change access rights to individual documents. As the\ncache may contain accessible/inaccessible data, one has to refresh it.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_mail_doc_to_followers",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mail_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get partner mail recipients that follows the related record of the mails.\n\n:param list mail_ids: mail_mail ids\n\n:return: for each (model, document_id): list of partner ids that are followers\n:rtype: dict",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recipient_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records",
+     "message_type",
+     "subtype_id",
+     "pids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Private method allowing to fetch recipients data based on a subtype.\nPurpose of this method is to fetch all data necessary to notify recipients\nin a single query. It fetches data from\n\n * followers of records that follow the given subtype if records and\n   subtype are set;\n * partners if pids is given;\n\n:param records: fetch data from followers of ``records`` that follow\n  ``subtype_id``;\n:param str message_type: mail.message.message_type in order to allow custom\n  behavior depending on it (SMS for example);\n:param int subtype_id: mail.message.subtype to check against followers;\n:param pids: additional set of partner IDs from which to fetch recipient\n  data independently from following status;\n\n:returns: recipients data based on record.ids if given, else a generic\n  '0' key to keep a dict-like return format. Each item is a dict based on\n  recipients partner ids formatted like {\n    'active': partner.active;\n    'email_normalized': partner.email_normalized;\n    'id': res.partner ID;\n    'is_follower': True if linked to a record and if partner is a follower;\n    'lang': partner.lang;\n    'name': partner.name;\n    'groups': groups of the partner's user (see 'uid'). If several users\n        of the same kind (e.g. several internal users) exist groups are\n        concatenated;\n    'notif': notification type ('inbox' or 'email'). Overrides may change\n        this value (e.g. 'sms' in sms module);\n    'share': if partner is a customer (no user or share user);\n    'ushare': if partner has users, whether all are shared (public or portal);\n    'type': summary of partner 'usage' (a string among 'portal', 'customer',\n        'internal user');\n    'uid': linked 'res.users' ID. If several users exist preference is\n        given to internal user, then share users;\n  }\n:rtype: dict",
+      "size_in_lines": 250,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_subscription_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "doc_data",
+     "pids",
+     "include_pshare",
+     "include_active"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Private method allowing to fetch follower data from several documents of a given model.\nMailFollowers can be filtered given partner IDs and channel IDs.\n\n:param doc_data: list of pair (res_model, res_ids) that are the documents from which we\n  want to have subscription data;\n:param pids: optional partner to filter; if None take all, otherwise limitate to pids\n:param include_pshare: optional join in partner to fetch their share status\n:param include_active: optional join in partner to fetch their active flag\n\n:return: list of followers data which is a list of tuples containing\n  follower ID,\n  document ID,\n  partner ID,\n  followed subtype IDs,\n  share status of partner (returned only if include_pshare is True)\n  active flag status of partner (returned only if include_active is True)",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_insert_followers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_model",
+     "res_ids",
+     "partner_ids",
+     "subtypes",
+     "customer_ids",
+     "check_existing",
+     "existing_policy"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Main internal method allowing to create or update followers for documents, given a\nres_model and the document res_ids. This method does not handle access rights. This is the\nrole of the caller to ensure there is no security breach.\n\n:param subtypes: see ``_add_followers``. If not given, default ones are computed.\n:param customer_ids: see ``_add_default_followers``\n:param check_existing: see ``_add_followers``;\n:param existing_policy: see ``_add_followers``;",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_default_followers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_model",
+     "res_ids",
+     "partner_ids",
+     "customer_ids",
+     "check_existing",
+     "existing_policy"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Shortcut to ``_add_followers`` that computes default subtypes. Existing\nfollowers are skipped as their subscription is considered as more important\ncompared to new default subscription.\n\n:param customer_ids: optional list of partner ids that are customers. It is used if computing\n default subtype is necessary and allow to avoid the check of partners being customers (no\n user or share user). It is just a matter of saving queries if the info is already known;\n:param check_existing: see ``_add_followers``;\n:param existing_policy: see ``_add_followers``;\n\n:return: see ``_add_followers``",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_followers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_model",
+     "res_ids",
+     "partner_ids",
+     "subtypes",
+     "check_existing",
+     "existing_policy"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Internal method that generates values to insert or update followers. Callers have to\nhandle the result, for example by making a valid ORM command, inserting or updating directly\nfollower records, ... This method returns two main data\n\n * first one is a dict which keys are res_ids. Value is a list of dict of values valid for\n   creating new followers for the related res_id;\n * second one is a dict which keys are follower ids. Value is a dict of values valid for\n   updating the related follower record;\n\n:param subtypes: optional subtypes for new partner followers. This\n  is a dict whose keys are partner IDs and value subtype IDs for that\n  partner.\n:param check_existing: if True, check for existing followers for given\n  documents and handle them according to existing_policy parameter.\n  Setting to False allows to save some computation if caller is sure\n  there are no conflict for followers;\n:param existing_policy: if check_existing, tells what to do with already\n  existing followers:\n\n  * skip: simply skip existing followers, do not touch them;\n  * force: update existing with given subtypes only;\n  * replace: replace existing with new subtypes (like force without old / new follower);\n  * update: gives an update dict allowing to add missing subtypes (no subtype removal);",
+      "size_in_lines": 61,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_followers_user",
+    "package": "mail",
+    "name": "mail.followers.user",
+    "entity": "mail.followers",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_mail_followers_system",
+    "package": "mail",
+    "name": "mail.followers.system",
+    "entity": "mail.followers",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mail.view_followers_tree",
+    "package": "mail",
+    "name": "mail.followers.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Followers"
+     },
+     "fields": [
+      {
+       "name": "res_model"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "partner_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.view_mail_subscription_form",
+    "package": "mail",
+    "name": "mail.followers.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Followers Form"
+     },
+     "fields": [
+      {
+       "name": "res_model"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "subtype_ids",
+       "widget": "many2many_tags"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.action_view_followers",
+    "package": "mail",
+    "name": "Followers",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.followers"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

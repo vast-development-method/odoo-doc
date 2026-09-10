@@ -1,0 +1,1262 @@
+{
+ "catalog": {
+  "name": "entity:l10n.fr.pdp.reports.flow",
+  "description": "Complete definition of entity French PDP Flow (l10n.fr.pdp.reports.flow).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n.fr.pdp.reports.flow",
+  "storage_name": "l10n_fr_pdp_reports_flow",
+  "full_name": "French PDP Flow",
+  "kind": "persistent",
+  "description": "French PDP Flow",
+  "defined_by_package": "l10n_fr_pdp",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "create_date desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": {
+     "expression": "FLOW_OPEN_STATES_SELECTION + FLOW_SENT_STATES_SELECTION"
+    },
+    "string": "Status",
+    "required": true,
+    "default": "ready",
+    "defined_in_package": "l10n_fr_pdp",
+    "full_name": "Status"
+   },
+   {
+    "name": "payload_id",
+    "type": "Many2one",
+    "comodel": "ir.attachment",
+    "string": "XML Payload",
+    "compute": "_compute_payload_attachment",
+    "defined_in_package": "l10n_fr_pdp",
+    "full_name": "extensible markup language Payload",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "transport_status",
+    "type": "Char",
+    "help": "Raw status returned by the PDP transport API.",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Transport Status",
+    "full_name": "Transport Status"
+   },
+   {
+    "name": "transport_message",
+    "type": "Text",
+    "help": "Additional message or error returned by the PDP transport API.",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Transport Message",
+    "full_name": "Transport Message"
+   },
+   {
+    "name": "report_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "transaction",
+      "Transaction"
+     ],
+     [
+      "payment",
+      "Payment"
+     ]
+    ],
+    "required": true,
+    "default": "transaction",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Report Type",
+    "full_name": "Report Type"
+   },
+   {
+    "name": "operation_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "sale",
+      "Sales"
+     ],
+     [
+      "purchase",
+      "Acquisitions"
+     ]
+    ],
+    "required": true,
+    "default": "sale",
+    "help": "Defines whether the flow reports sales or acquisition transactions.",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Operation Type",
+    "full_name": "Operation Type"
+   },
+   {
+    "name": "transmission_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "initial",
+      "Initial"
+     ],
+     [
+      "rectificative",
+      "Rectificative"
+     ]
+    ],
+    "help": "Type of flow transmission.",
+    "compute": "_compute_transmission_type",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Transmission Type",
+    "full_name": "Transmission Type"
+   },
+   {
+    "name": "initial_flow_id",
+    "type": "Many2one",
+    "comodel": "l10n.fr.pdp.reports.flow",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Initial Flow",
+    "full_name": "Initial Flow",
+    "target_entity": "l10n.fr.pdp.reports.flow"
+   },
+   {
+    "name": "rectificative_flow_ids",
+    "type": "One2many",
+    "comodel": "l10n.fr.pdp.reports.flow",
+    "inverse_name": "initial_flow_id",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Rectificative Flow",
+    "full_name": "Rectificative Flow",
+    "target_entity": "l10n.fr.pdp.reports.flow"
+   },
+   {
+    "name": "pdp_flow_id",
+    "type": "Char",
+    "readonly": true,
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Pdp Flow",
+    "full_name": "Pdp Flow"
+   },
+   {
+    "name": "period_start",
+    "type": "Date",
+    "required": true,
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Period Start",
+    "full_name": "Period Start"
+   },
+   {
+    "name": "period_end",
+    "type": "Date",
+    "required": true,
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Period End",
+    "full_name": "Period End"
+   },
+   {
+    "name": "due_period_start",
+    "type": "Date",
+    "required": true,
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Due Period Start",
+    "full_name": "Due Period Start"
+   },
+   {
+    "name": "due_period_end",
+    "type": "Date",
+    "required": true,
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Due Period End",
+    "full_name": "Due Period End"
+   },
+   {
+    "name": "periodicity_code",
+    "type": "Char",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Periodicity Code",
+    "full_name": "Periodicity Code"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "l10n_fr_pdp",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "move_ids",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "help": "Invoices/Payments reported in this flow.",
+    "compute": "_compute_move_ids",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Move",
+    "full_name": "Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "sent_move_ids",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "relation": "sent_account_move__pdp_flow",
+    "column1": "flow_id",
+    "column2": "move_id",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Sent Move",
+    "full_name": "Sent Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "error_moves_count",
+    "type": "Integer",
+    "compute": "_compute_move_ids",
+    "defined_in_package": "l10n_fr_pdp",
+    "string": "Error Moves Count",
+    "full_name": "Error Moves Count"
+   },
+   {
+    "name": "error_move_message",
+    "type": "Text",
+    "string": "Invalid Invoice Details",
+    "defined_in_package": "l10n_fr_pdp",
+    "full_name": "Invalid Invoice Details"
+   },
+   {
+    "name": "period_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "open",
+      "Open"
+     ],
+     [
+      "grace",
+      "Grace"
+     ],
+     [
+      "closed",
+      "Closed"
+     ]
+    ],
+    "string": "Period Status",
+    "compute": "_compute_period_status",
+    "help": "Current status of the reporting period: Open (before grace), Grace (can send), Closed (after deadline).",
+    "defined_in_package": "l10n_fr_pdp",
+    "full_name": "Period Status"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_move_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "period_start",
+         "period_end",
+         "report_type",
+         "operation_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_payload_attachment",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Compute the payload attachment record linked to this flow.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_period_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "due_period_start",
+         "due_period_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the current status of the reporting period.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_transmission_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "initial_flow_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ondelete_flow",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete sent flows.",
+        "line": 147
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_scope_params_for_move",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "This method returns a flow 10 scope dict for a move\nbut it DOES NOT verify if move is eligible for flow 10",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_open_flow_and_create_if_needed",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "This returns a flow that meets the move scope and that is open.\nIt creates a new initial flow or a rectificative flow if needed.",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_payload",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "moves"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Build single XML payload for the entire flow period.",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Flow %(name)s has already been sent.",
+        "line": 212
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_tracking_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "check_totp"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Send flow payload to transport gateway. The parameter check totp is no longer useful and will be remove in master ",
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_sent_message_on_moves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "moves"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Post audit message on successfully sent moves.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pdp_proxy_user",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No active PDP proxy user is configured for company %(company)s.",
+        "line": 337
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_send_to_proxy",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The flow payload is missing. Build the payload before sending.",
+        "line": 346
+       },
+       {
+        "kind": "UserError",
+        "message": "The PDP proxy did not return a flow tracking identifier.",
+        "line": 361
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_period_flow_properties",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "date",
+     "report_type"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "This method returns a dict with start/end dates for the period and due period.\nWhere period is the time frame in which the revelvant move are, and the due period\nis the time window in which the report must be send. Sometimes the due period is only one day.\nThis depends on the report type and the company perdiodicity.\n                       +----------------------------------------------------+-----------------------------------+\n                       | transactions flow                                  | payment flow                      |\n                       +---------------------+------------------------------+-----------+-----------------------+\n                       | period              | due                          | period    | due                   |\n+----------------------+---------------------+------------------------------+-----------+-----------------------+\n| normal_monthly       | Decade:             | 10 days after end of period: | monthly   | 10th of next month    |\n|                      | from day 1 to 10,   | 20th,                        |           |                       |\n|                      | 11 to 20,           | end of month                 |           |                       |\n|                      | 20 to end of month  | 10th of next month           |           |                       |\n+----------------------+---------------------+------------------------------+-----------+-----------------------+\n| normal_quarterly     | monthly             | 10th of next month           | monthly   | 10th of next month    |\n+----------------------+---------------------+------------------------------+-----------+-----------------------+\n| simplified_monthly   | monthly             | between 25th and 30th        | monthly   | between 25th and 30th |\n|                      |                     | of next month                |           | of next month         |\n+----------------------+---------------------+------------------------------+-----------+-----------------------+\n| simplified_bimonthly | bimonthly           | between 25th and 30th        | bimonthly | between 25th and 30th |\n|                      |                     | of next month                |           | of next month         |\n+----------------------+---------------------+------------------------------+-----------+-----------------------+",
+      "size_in_lines": 82,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_post_once",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "body",
+     "subtype"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Post message if it differs from the last one to avoid chatter spam.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_log_cron_event",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Post message to flow chatter.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_moves",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_build_payload_manual",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Manual trigger for payload building.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_from_ui",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Send flow from UI with error checking.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This flow still contains invoices with validation errors. Fix them or use the 'Send without invalid invoices' button.",
+        "line": 512
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_view_error_moves",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Open list view of invalid invoices.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_send_wizard",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Open send wizard if errors exist, otherwise send directly.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_moves",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": "Open list view of related invoices.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_initial",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_update_and_send_flows",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_process_company",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_ondelete_flow",
+    "package": "l10n_fr_pdp",
+    "kind": "UserError",
+    "message": "You cannot delete sent flows."
+   },
+   {
+    "operation": "_build_payload",
+    "package": "l10n_fr_pdp",
+    "kind": "UserError",
+    "message": "Flow %(name)s has already been sent."
+   },
+   {
+    "operation": "_get_pdp_proxy_user",
+    "package": "l10n_fr_pdp",
+    "kind": "UserError",
+    "message": "No active PDP proxy user is configured for company %(company)s."
+   },
+   {
+    "operation": "_send_to_proxy",
+    "package": "l10n_fr_pdp",
+    "kind": "UserError",
+    "message": "The flow payload is missing. Build the payload before sending."
+   },
+   {
+    "operation": "_send_to_proxy",
+    "package": "l10n_fr_pdp",
+    "kind": "UserError",
+    "message": "The PDP proxy did not return a flow tracking identifier."
+   },
+   {
+    "operation": "action_send_from_ui",
+    "package": "l10n_fr_pdp",
+    "kind": "UserError",
+    "message": "This flow still contains invoices with validation errors. Fix them or use the 'Send without invalid invoices' button."
+   }
+  ],
+  "state_fields": [
+   "state",
+   "period_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_flow_invoice",
+    "package": "l10n_fr_pdp",
+    "name": "l10n.fr.pdp.reports.flow invoice",
+    "entity": "l10n.fr.pdp.reports.flow",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_flow_readonly",
+    "package": "l10n_fr_pdp",
+    "name": "l10n.fr.pdp.reports.flow readonly",
+    "entity": "l10n.fr.pdp.reports.flow",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_flow_user",
+    "package": "l10n_fr_pdp",
+    "name": "l10n.fr.pdp.reports.flow user",
+    "entity": "l10n.fr.pdp.reports.flow",
+    "group": "account.group_account_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_flow_manager",
+    "package": "l10n_fr_pdp",
+    "name": "l10n.fr.pdp.reports.flow manager",
+    "entity": "l10n.fr.pdp.reports.flow",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_view_flow_list",
+    "package": "l10n_fr_pdp",
+    "name": "l10n.fr.pdp.reports.flow.list.reporting",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Flows 10",
+      "create": "0",
+      "default_order": "period_start"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "period_start",
+       "string": "Start date"
+      },
+      {
+       "name": "period_end",
+       "string": "End date"
+      },
+      {
+       "name": "due_period_start",
+       "optional": "hide"
+      },
+      {
+       "name": "due_period_end",
+       "optional": "hide"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "string": "Status",
+       "decoration-danger": "state == 'error'",
+       "decoration-success": "state == 'completed'",
+       "decoration-info": "state == 'ready'",
+       "decoration-muted": "state in ('pending', 'sent')"
+      },
+      {
+       "name": "report_type",
+       "string": "Type"
+      },
+      {
+       "name": "company_id",
+       "string": "Company",
+       "optional": "hide"
+      },
+      {
+       "name": "transmission_type",
+       "widget": "badge",
+       "string": "Transmission type",
+       "optional": "hide",
+       "decoration-warning": "transmission_type == 'rectificative'",
+       "decoration-info": "transmission_type == 'initial'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 2
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_view_flow_form",
+    "package": "l10n_fr_pdp",
+    "name": "l10n.fr.pdp.reports.flow.form.reporting",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "E-Reporting",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "move_ids",
+       "widget": "statinfo",
+       "invisible": "report_type == 'payment'",
+       "string": "Invoices"
+      },
+      {
+       "name": "move_ids",
+       "widget": "statinfo",
+       "invisible": "report_type == 'transaction'",
+       "string": "Payments"
+      },
+      {
+       "name": "name",
+       "readonly": "1"
+      },
+      {
+       "name": "report_type",
+       "readonly": "1",
+       "string": "Type"
+      },
+      {
+       "name": "state",
+       "readonly": "1",
+       "string": "Status"
+      },
+      {
+       "name": "transmission_type",
+       "string": "Transmission type"
+      },
+      {
+       "name": "period_start",
+       "readonly": "1",
+       "string": "Start date"
+      },
+      {
+       "name": "period_end",
+       "readonly": "1",
+       "string": "End date"
+      },
+      {
+       "name": "period_status",
+       "widget": "badge",
+       "readonly": "1",
+       "string": "Period status",
+       "decoration-danger": "period_status == 'closed'",
+       "decoration-warning": "period_status == 'grace'",
+       "decoration-info": "period_status == 'open'"
+      },
+      {
+       "name": "due_period_start",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "due_period_end",
+       "invisible": "due_period_start == due_period_end",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_build_payload_manual",
+       "string": "Build Payload",
+       "type": "object",
+       "invisible": "state not in ['pending', 'error']",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_open_send_wizard",
+       "string": "Send",
+       "type": "object",
+       "invisible": "state not in ['ready', 'pending', 'error']",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_view_moves",
+       "type": "object",
+       "invisible": "not move_ids",
+       "class": "oe_stat_button",
+       "icon": "fa-file-text-o"
+      },
+      {
+       "name": "action_view_initial",
+       "type": "object",
+       "invisible": "not initial_flow_id",
+       "class": "oe_stat_button",
+       "icon": "fa-file-text-o"
+      },
+      {
+       "name": "action_view_error_moves",
+       "type": "object",
+       "class": "btn-link"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 2,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_build_payload_manual",
+       "type": "object",
+       "class": "btn-secondary",
+       "string": "Build Payload",
+       "invisible": "state not in ['pending', 'error']"
+      },
+      {
+       "name": "action_open_send_wizard",
+       "type": "object",
+       "class": "btn-primary",
+       "string": "Send",
+       "invisible": "state not in ['ready', 'pending', 'error']"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "pending,ready,error,sent,completed",
+     "chatter": true,
+     "button_box": [
+      {
+       "type": "object",
+       "name": "action_view_moves",
+       "class": "oe_stat_button",
+       "icon": "fa-file-text-o",
+       "invisible": "not move_ids"
+      },
+      {
+       "type": "object",
+       "name": "action_view_initial",
+       "class": "oe_stat_button",
+       "icon": "fa-file-text-o",
+       "invisible": "not initial_flow_id"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_view_flow_search",
+    "package": "l10n_fr_pdp",
+    "name": "l10n.fr.pdp.reports.flow.search.reporting",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search EDI exports"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_state_pending",
+       "string": "Pending",
+       "domain": "[('state', '=', 'pending')]"
+      },
+      {
+       "name": "filter_state_ready",
+       "string": "Ready",
+       "domain": "[('state', '=', 'ready')]"
+      },
+      {
+       "name": "filter_state_sent",
+       "string": "Sent",
+       "domain": "[('state', 'in', ('sent', 'completed'))]"
+      },
+      {
+       "name": "filter_state_error",
+       "string": "Error",
+       "domain": "[('state', '=', 'error')]"
+      },
+      {
+       "name": "filter_kind_transaction",
+       "string": "Transactions",
+       "domain": "[('report_type', '=', 'transaction')]"
+      },
+      {
+       "name": "filter_kind_payment",
+       "string": "Payments",
+       "domain": "[('report_type', '=', 'payment')]"
+      },
+      {
+       "name": "filter_transmission_in",
+       "string": "Initial",
+       "domain": "[('initial_flow_id', '=', None)]"
+      },
+      {
+       "name": "filter_transmission_re",
+       "string": "Rectificative",
+       "domain": "[('initial_flow_id', '!=', None)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_action_flows",
+    "package": "l10n_fr_pdp",
+    "name": "E-Reporting",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "l10n_fr_pdp_reports_view_flow_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "l10n.fr.pdp.reports.flow"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "l10n_fr_pdp.l10n_fr_pdp_reports_action_build_multi",
+    "package": "l10n_fr_pdp",
+    "name": "Build Payload",
+    "state": "code",
+    "binding_type": "action",
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "l10n_fr_pdp.ir_cron_l10n_fr_pdp_generate_flows",
+    "package": "l10n_fr_pdp",
+    "name": "PDP Generate Flux 10 Flows",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": null,
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "l10n.fr.pdp.reports.flow",
+    "operation": "_cron_update_and_send_flows",
+    "operation_call": "model._cron_update_and_send_flows()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

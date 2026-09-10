@@ -1,0 +1,552 @@
+{
+ "catalog": {
+  "name": "entity:account.group",
+  "description": "Complete definition of entity Account Group (account.group).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.group",
+  "storage_name": "account_group",
+  "full_name": "Account Group",
+  "kind": "persistent",
+  "description": "Account Group",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "code_prefix_start",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "comodel": "account.group",
+    "index": true,
+    "ondelete": "cascade",
+    "readonly": true,
+    "check_company": true,
+    "defined_in_package": "account",
+    "string": "Parent",
+    "full_name": "Parent",
+    "target_entity": "account.group"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "account",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "code_prefix_start",
+    "type": "Char",
+    "compute": "_compute_code_prefix_start",
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "account",
+    "string": "Code Prefix Start",
+    "full_name": "Code Prefix Start"
+   },
+   {
+    "name": "code_prefix_end",
+    "type": "Char",
+    "compute": "_compute_code_prefix_end",
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "account",
+    "string": "Code Prefix End",
+    "full_name": "Code Prefix End"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company.root_id"
+    },
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_length_prefix",
+    "kind": "Constraint",
+    "definition": "CHECK(char_length(COALESCE(code_prefix_start, '')) = char_length(COALESCE(code_prefix_end, '')))",
+    "message": "The length of the starting and the ending code prefix must be the same",
+    "defined_in_package": "account"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_code_prefix_end",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code_prefix_start"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_code_prefix_start",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code_prefix_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code_prefix_start",
+         "code_prefix_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_display_name",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constraint_prefix_overlap",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "code_prefix_start",
+         "code_prefix_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Account Groups with the same granularity can't overlap",
+        "line": 1585
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_sanitize_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_parent_not_circular",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot create recursive groups.",
+        "line": 1597
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_adapt_parent_account_group",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Ensure consistency of the hierarchy of account groups.\n\nFind and set the most specific parent for each group.\nThe most specific is the one with the longest prefixes and with the starting\nprefix being smaller than the child prefixes and the ending prefix being greater.",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constraint_prefix_overlap",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Account Groups with the same granularity can't overlap"
+   },
+   {
+    "operation": "_check_parent_not_circular",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "You cannot create recursive groups."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_group_basic",
+    "package": "account",
+    "name": "account.group.basic",
+    "entity": "account.group",
+    "group": "account.group_account_basic",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_group_manager",
+    "package": "account",
+    "name": "account.group",
+    "entity": "account.group",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "account.access_account_group",
+    "package": "account",
+    "name": "account.group",
+    "entity": "account.group",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.account_group_comp_rule",
+    "package": "account",
+    "name": "Account Group multi-company",
+    "entity": "account.group",
+    "domain": "[('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.view_account_group_form",
+    "package": "account",
+    "name": "account.group.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Account Group"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "code_prefix_start"
+      },
+      {
+       "name": "code_prefix_end"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "account.view_account_group_search",
+    "package": "account",
+    "name": "account.group.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Account groups"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Account group",
+       "filter_domain": "['|', ('code_prefix_start', '=like', self + '%'), ('name', 'ilike', self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "account.view_account_group_tree",
+    "package": "account",
+    "name": "account.group.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Account Group"
+     },
+     "fields": [
+      {
+       "name": "code_prefix_start"
+      },
+      {
+       "name": "code_prefix_end"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

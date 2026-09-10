@@ -1,0 +1,594 @@
+{
+ "catalog": {
+  "name": "views:crm.team",
+  "description": "View declarations for entity crm.team.",
+  "record_count": 11,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "crm.crm_team_view_tree",
+   "package": "crm",
+   "name": "crm.team.list.inherit.crm",
+   "entity": "crm.team",
+   "view_type": "field",
+   "inherits_view": "sales_team.crm_team_view_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "name",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "position": "after"
+     },
+     {
+      "name": "alias_id",
+      "string": "Alias"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"name\" position=\"after\">\n                    <field string=\"Alias\" name=\"alias_id\"/>\n                </field>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "crm.sales_team_form_view_in_crm",
+   "package": "crm",
+   "name": "crm.team.form.inherit",
+   "entity": "crm.team",
+   "view_type": "xpath",
+   "inherits_view": "sales_team.crm_team_view_form",
+   "mode": null,
+   "priority": "12",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//form/*[1]",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "use_leads",
+      "invisible": "1"
+     },
+     {
+      "name": "use_opportunities",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_assign_leads",
+      "string": "Assign Leads",
+      "type": "object",
+      "invisible": "not use_leads and not use_opportunities or not assignment_enabled",
+      "class": "oe_highlight",
+      "confirm": "This will assign leads to all members. Do you want to proceed?"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//form/*[1]",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//form/*[1]\" position=\"before\">\n                    <field name=\"use_leads\" invisible=\"1\"/>\n                    <field name=\"use_opportunities\" invisible=\"1\"/>\n                    <header invisible=\"not use_leads and not use_opportunities or not assignment_enabled\">\n                        <button name=\"action_assign_leads\" type=\"object\" string=\"Assign Leads\" class=\"oe_highlight\" confirm=\"This will assign leads to all members. Do you want to proceed?\" invisible=\"not use_leads and not use_opportunities or not assignment_enabled\" confirm-label=\"Assign Leads\"/>\n                    </header>\n                </xpath>\n                <xpath expr=\"//div[@name='options_active']\" position=\"inside\">\n                    <span name=\"opportunities\" groups=\"crm.group_use_lead\">\n                        <field name=\"use_opportunities\"/>\n                        <label for=\"use_opportunities\"/>\n                    </span>\n                    <span name=\"leads\" groups=\"crm.group_use_lead\">\n                        <field name=\"use_leads\"/>\n                        <label for=\"use_leads\" string=\"Leads\"/>\n                    </span>\n                </xpath>\n                <xpath expr=\"//field[@name='user_id']\" position=\"after\">\n                    <label for=\"alias_name\" string=\"Email Alias\" invisible=\"not use_leads and not use_opportunities\"/>\n                    <div name=\"alias_def\" invisible=\"not use_leads and not use_opportunities\">\n                        <field name=\"alias_id\" string=\"Email Alias\" class=\"oe_read_only\" required=\"0\"/>\n                        <div class=\"oe_edit_only\" name=\"edit_alias\" dir=\"ltr\">\n                            <field name=\"alias_name\" placeholder=\"alias\" class=\"oe_inline\"/>@\n                            <field name=\"alias_domain_id\" class=\"oe_inline\" placeholder=\"e.g. mycompany.com\" options=\"{'no_create': True, 'no_open': True}\"/>\n                        </div>\n                    </div>\n                    <field name=\"alias_contact\" string=\"Accept Emails From\" invisible=\"not use_leads and not use_opportunities\"/>\n                </xpath>\n                <xpath expr=\"//group[@name='right']\" position=\"attributes\">\n                    <attribute name=\"string\">Assignment Rules</attribute>\n                    <attribute name=\"invisible\">not assignment_enabled</attribute>\n                </xpath>\n                <xpath expr=\"//group[@name='right']\" position=\"inside\">\n                    <field name=\"assignment_enabled\" invisible=\"1\"/>\n                    <field name=\"assignment_auto_enabled\" invisible=\"1\"/>\n                    <field name=\"lead_all_assigned_month_exceeded\" invisible=\"1\"/>\n                    <div colspan=\"2\">\n                        <div class=\"o_crm_lead_all_assigned_month_exceeded\" invisible=\"not lead_all_assigned_month_exceeded\"/>\n                        <div class=\"o_crm_lead_month_assignment text-muted\" invisible=\"not assignment_enabled\">\n                            <i class=\"fa fa-info-circle me-2\" title=\"Assigned Lead Count\"/>\n                            <field name=\"lead_all_assigned_month_count\" class=\"oe_inline\"/><span> leads assigned this month\n                            on a maximum of </span><field name=\"assignment_max\" class=\"oe_inline\"/>\n                        </div>\n                    </div>\n                    <field name=\"assignment_domain\" widget=\"domain\" string=\"Domain\" options=\"{'foldable': True, 'model': 'crm.lead', 'in_dialog': True}\" invisible=\"not assignment_enabled\"/>\n                    <field name=\"assignment_optout\" invisible=\"not assignment_auto_enabled\"/>\n                </xpath>\n                <xpath expr=\"//field[@name='member_ids']\" position=\"attributes\">\n                    <attribute name=\"invisible\">assignment_enabled</attribute>\n                </xpath>\n                <xpath expr=\"//field[@name='crm_team_member_ids']\" position=\"attributes\">\n                    <attribute name=\"invisible\">not assignment_enabled</attribute>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "crm.crm_team_view_kanban_dashboard",
+   "package": "crm",
+   "name": "crm.team.view.kanban.dashboard.inherit.crm",
+   "entity": "crm.team",
+   "view_type": "data",
+   "inherits_view": "sales_team.crm_team_view_kanban_dashboard",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "data",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "alias_name"
+     },
+     {
+      "name": "alias_domain"
+     },
+     {
+      "name": "use_opportunities"
+     },
+     {
+      "name": "use_leads"
+     },
+     {
+      "name": "alias_id"
+     },
+     {
+      "name": "lead_unassigned_count"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//templates",
+      "position": "before"
+     },
+     {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     {
+      "expr": "//div[hasclass('crm_team_kanban_bottom')]/field",
+      "position": "before"
+     },
+     {
+      "expr": "//div[@name='manage_view']",
+      "position": "attributes"
+     },
+     {
+      "expr": "//div[@name='manage_view']/h5[hasclass('o_kanban_card_manage_title')]",
+      "position": "after"
+     },
+     {
+      "expr": "//div[@name='manage_new']",
+      "position": "attributes"
+     },
+     {
+      "expr": "//div[@name='manage_new']/h5[hasclass('o_kanban_card_manage_title')]",
+      "position": "after"
+     },
+     {
+      "expr": "//div[@name='manage_reports']",
+      "position": "attributes"
+     },
+     {
+      "expr": "//div[@name='manage_reports']/h5[hasclass('o_kanban_card_manage_title')]",
+      "position": "after"
+     },
+     {
+      "expr": "//div[@name='manage_reports']/div[@name='o_team_kanban_report_separator']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <data>\n                    <xpath expr=\"//templates\" position=\"before\">\n                        <field name=\"alias_name\"/>\n                        <field name=\"alias_domain\"/>\n                        <field name=\"use_opportunities\"/>\n                        <field name=\"use_leads\"/>\n                    </xpath>\n\n                    <xpath expr=\"//field[@name='name']\" position=\"after\">\n                        <div class=\"ms-2\" t-if=\"record.alias_name.value and record.alias_domain.value\">\n                            <span t-translation=\"off\"><i class=\"fa fa-envelope-o\" aria-label=\"Leads\" title=\"Leads\" role=\"img\"/>&amp;nbsp; <field name=\"alias_id\"/></span>\n                        </div>\n                    </xpath>\n\n                    <xpath expr=\"//div[hasclass('crm_team_kanban_bottom')]/field\" position=\"before\">\n                        <a name=\"action_open_unassigned_leads\" type=\"object\" class=\"ms-2 me-auto\" invisible=\"not lead_unassigned_count\">\n                            <field name=\"lead_unassigned_count\" class=\"me-1\"/>Unassigned Leads\n                        </a>\n                    </xpath>\n\n                    <xpath expr=\"//div[@name='manage_view']\" position=\"attributes\">\n                        <attribute name=\"class\" add=\"col-5\" remove=\"col-4\"/>\n                    </xpath>\n                    <xpath expr=\"//div[@name='manage_view']/h5[hasclass('o_kanban_card_manage_title')]\" position=\"after\">\n                        <div t-if=\"record.use_leads.raw_value\" groups=\"crm.group_use_lead\">\n                            <a name=\"%(crm_case_form_view_salesteams_lead)d\" type=\"action\">\n                                Leads\n                            </a>\n                        </div>\n                        <div t-if=\"record.use_opportunities.raw_value\">\n                            <a name=\"%(crm_case_form_view_salesteams_opportunity)d\" type=\"action\">\n                                Opportunities\n                            </a>\n                        </div>\n                    </xpath>\n                    \n                    <xpath expr=\"//div[@name='manage_new']\" position=\"attributes\">\n                        <attribute name=\"class\" add=\"col-5\" remove=\"col-4\"/>\n                    </xpath>\n                    <xpath expr=\"//div[@name='manage_new']/h5[hasclass('o_kanban_card_manage_title')]\" position=\"after\">\n                        <div t-if=\"record.use_leads.raw_value\" groups=\"crm.group_use_lead\">\n                            <a name=\"%(crm_lead_action_open_lead_form)d\" type=\"action\">\n                                Leads\n                            </a>\n                        </div>\n                        <div t-if=\"record.use_opportunities.raw_value\">\n                            <a name=\"%(action_opportunity_form)d\" type=\"action\">\n                                Opportunity\n                            </a>\n                        </div>\n                    </xpath>\n\n                    <xpath expr=\"//div[@name='manage_reports']\" position=\"attributes\">\n                        <attribute name=\"class\" add=\"col-5\" remove=\"col-4\"/>\n                    </xpath>\n                    <xpath expr=\"//div[@name='manage_reports']/h5[hasclass('o_kanban_card_manage_title')]\" position=\"after\">\n                        <div t-if=\"record.use_leads.raw_value\" groups=\"crm.group_use_lead\">\n                            <a name=\"%(action_report_crm_lead_salesteam)d\" type=\"action\">\n                                Leads\n                            </a>\n                        </div>\n                        <div t-if=\"record.use_opportunities.raw_value\">\n                            <a name=\"%(action_report_crm_opportunity_salesteam)d\" type=\"action\">\n                                Opportunities\n                            </a>\n                        </div>\n                    </xpath>\n\n                    <xpath expr=\"//div[@name='manage_reports']/div[@name='o_team_kanban_report_separator']\" position=\"after\">\n                        <div t-if=\"record.use_opportunities.raw_value\">\n                            <a name=\"%(crm.crm_activity_report_action_team)d\" type=\"action\">\n                                Activities\n                            </a>\n                        </div>\n                    </xpath>\n                </data>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "sale.crm_team_salesteams_view_form",
+   "package": "sale",
+   "name": "crm.team.form",
+   "entity": "crm.team",
+   "view_type": "field",
+   "inherits_view": "sales_team.crm_team_view_form",
+   "mode": null,
+   "priority": "9",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "company_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "position": "after"
+     },
+     {
+      "name": "invoiced_target",
+      "widget": "monetary",
+      "options": "{'currency_field': 'currency_id'}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "monetary": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"company_id\" position=\"after\">\n                <label for=\"invoiced_target\"/>\n                <div class=\"o_row\" id=\"invoiced_target\">\n                    <field name=\"invoiced_target\" widget=\"monetary\" options=\"{'currency_field': 'currency_id'}\" class=\"oe_inline\"/>\n                    <span class=\"flex-grow-1\">/ Month</span>\n                </div>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale.crm_team_view_kanban_dashboard",
+   "package": "sale",
+   "name": "crm.team.view.kanban.dashboard.inherit.sale",
+   "entity": "crm.team",
+   "view_type": "xpath",
+   "inherits_view": "sales_team.crm_team_view_kanban_dashboard",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//templates",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "invoiced_target"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//templates",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//templates\" position=\"before\">\n                <field name=\"invoiced_target\"/>\n            </xpath>\n\n            <xpath expr=\"//div[@name='manage_view']\" position=\"inside\">\n                <div>\n                    <a name=\"%(action_orders_salesteams)d\" type=\"action\">Sales Orders</a>\n                </div>\n                <div groups=\"account.group_account_invoice\">\n                    <a name=\"%(action_invoice_salesteams)d\" type=\"action\">Invoices</a>\n                </div>\n            </xpath>\n\n            <div name=\"o_team_kanban_report_separator\" position=\"before\">\n                <div name=\"sales_report\">\n                    <a name=\"%(action_order_report_so_salesteam)d\" type=\"action\">\n                        Sales\n                    </a>\n                </div>\n                <div groups=\"account.group_account_invoice\" name=\"invoices_report\">\n                    <a name=\"%(action_account_invoice_report_salesteam)d\" type=\"action\">\n                        Invoices\n                    </a>\n                </div>\n            </div>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_crm.crm_team_salesteams_view_form_in_sale_crm",
+   "package": "sale_crm",
+   "name": "crm.team.form",
+   "entity": "crm.team",
+   "view_type": "data",
+   "inherits_view": "crm.sales_team_form_view_in_crm",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "data",
+    "root_attributes": {},
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//span[@name='opportunities']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <data>\n                <xpath expr=\"//span[@name='opportunities']\" position=\"attributes\">\n                    <attribute name=\"invisible\">0</attribute>\n                </xpath>\n            </data>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sales_team.crm_team_view_search",
+   "package": "sales_team",
+   "name": "crm.team.view.search",
+   "entity": "crm.team",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Salesteams Search"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "member_ids"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active','=',False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "company",
+      "string": "Company",
+      "domain": "[]",
+      "context": "{'group_by': 'company_id'}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "team_leader",
+      "string": "Team Leader",
+      "domain": "[]",
+      "context": "{'group_by': 'user_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Salesteams Search\">\n                <filter string=\"Archived\" name=\"inactive\" domain=\"[('active','=',False)]\"/>\n                <field name=\"name\"/>\n                <field name=\"user_id\"/>\n                <field name=\"member_ids\"/>\n                <group>\n                    <filter string=\"Company\" name=\"company\" domain=\"[]\" context=\"{'group_by': 'company_id'}\" groups=\"base.group_multi_company\"/>\n                    <filter string=\"Team Leader\" name=\"team_leader\" domain=\"[]\" context=\"{'group_by': 'user_id'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sales_team.crm_team_view_form",
+   "package": "sales_team",
+   "name": "crm.team.form",
+   "entity": "crm.team",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Sales Team",
+     "js_class": "crm_team_form",
+     "class": "o_crm_team_form_view"
+    },
+    "fields": [
+     {
+      "name": "member_warning"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. North America"
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "sequence",
+      "invisible": "1"
+     },
+     {
+      "name": "is_membership_multi",
+      "invisible": "1"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "domain": "[('share', '=', False)]"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company",
+      "placeholder": "Visible to all"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "member_company_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "member_ids",
+      "mode": "kanban"
+     },
+     {
+      "name": "avatar_128",
+      "widget": "image"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "email"
+     },
+     {
+      "name": "crm_team_member_ids",
+      "invisible": "is_membership_multi or not is_membership_multi",
+      "context": "{                                     'kanban_view_ref': 'sales_team.crm_team_member_view_kanban_from_team',                                     'form_view_ref': 'sales_team.crm_team_member_view_form_from_team',                                     'list_view_ref': 'sales_team.crm_team_member_view_tree_from_team',                                     'default_crm_team_id': id,                                 }",
+      "mode": "kanban"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "crm_team_activate_multi_membership",
+      "type": "button",
+      "class": "btn btn-link p-0 lh-1"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "members_users",
+      "string": "Members",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "image": 1
+    },
+    "inheritance_operations": [],
+    "chatter": true,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Sales Team\" js_class=\"crm_team_form\" class=\"o_crm_team_form_view\">\n                <div class=\"alert alert-info text-center d-flex flex-wrap justify-content-center gap-1\" role=\"alert\" invisible=\"is_membership_multi or not member_warning\">\n                    <field name=\"member_warning\" class=\"w-auto\"/>\n                    Working in multiple teams?\n                    <button name=\"crm_team_activate_multi_membership\" type=\"button\" class=\"btn btn-link p-0 lh-1\">\n                        Activate \"Multi-team\"\n                    </button>\n                </div>\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\"/>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <div class=\"oe_title\">\n                        <label for=\"name\" string=\"Sales Team\"/>\n                        <h1>\n                            <field class=\"text-break\" name=\"name\" placeholder=\"e.g. North America\"/>\n                        </h1>\n                        <div name=\"options_active\" class=\"o_row\"/>\n                    </div>\n                    <group>\n                        <group name=\"left\" string=\"Team Details\">\n                            <field name=\"active\" invisible=\"1\"/>\n                            <field name=\"sequence\" invisible=\"1\"/>\n                            <field name=\"is_membership_multi\" invisible=\"1\"/>\n                            <field name=\"user_id\" widget=\"many2one_avatar_user\" domain=\"[('share', '=', False)]\"/>\n                            <field name=\"company_id\" options=\"{'no_create': True}\" groups=\"base.group_multi_company\" placeholder=\"Visible to all\"/>\n                            <field name=\"currency_id\" invisible=\"1\"/>\n                            <field name=\"member_company_ids\" invisible=\"1\"/>\n                        </group>\n                        <group name=\"right\">\n                        </group>\n                    </group>\n                    <notebook>\n                        <page string=\"Members\" name=\"members_users\">\n                            <field name=\"member_ids\" mode=\"kanban\" class=\"w-100\">\n                                <kanban>\n                                    <templates>\n                                        <t t-name=\"card\" class=\"flex-row\">\n                                            <aside>\n                                                <field name=\"avatar_128\" widget=\"image\" class=\"o_image_64_cover\" alt=\"Avatar\"/>\n                                            </aside>\n                                            <main class=\"ms-3\">\n                                                <field name=\"name\" class=\"fw-bold fs-5\"/>\n                                                <div class=\"d-flex align-items-baseline text-break\">\n                                                    <i class=\"fa fa-envelope me-1\" role=\"img\" aria-label=\"Email\" title=\"Email\"/><field name=\"email\"/>\n                                                </div>\n                                            </main>\n                                        </t>\n                                    </templates>\n                                </kanban>\n                            </field>\n                            <field name=\"crm_team_member_ids\" mode=\"kanban\" class=\"w-100\" invisible=\"is_membership_multi or not is_membership_multi\" context=\"{                                     'kanban_view_ref': 'sales_team.crm_team_member_view_kanban_from_team',                                     'form_view_ref': 'sales_team.crm_team_member_view_form_from_team',                                     'list_view_ref': 'sales_team.crm_team_member_view_tree_from_team',                                     'default_crm_team_id': id,                                 }\"/>\n                        </page>\n                    </notebook>\n                </sheet>\n                <chatter/>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sales_team.crm_team_view_tree",
+   "package": "sales_team",
+   "name": "crm.team.list",
+   "entity": "crm.team",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Sales Team",
+     "sample": "1",
+     "multi_edit": "1"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name",
+      "readonly": "1"
+     },
+     {
+      "name": "active",
+      "column_invisible": "True"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "domain": "[('share', '=', False)]"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Sales Team\" sample=\"1\" multi_edit=\"1\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\" readonly=\"1\"/>\n                <field name=\"active\" column_invisible=\"True\"/>\n                <field name=\"user_id\" domain=\"[('share', '=', False)]\" widget=\"many2one_avatar_user\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sales_team.crm_team_view_kanban",
+   "package": "sales_team",
+   "name": "crm.team.view.kanban",
+   "entity": "crm.team",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "user_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\" sample=\"1\">\n                <templates>\n                    <t t-name=\"card\" class=\"row g-0\">\n                        <field name=\"name\" class=\"col-6 fw-bold\"/>\n                        <div class=\"col-6\">\n                            <field name=\"user_id\" class=\"float-end\"/>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sales_team.crm_team_view_kanban_dashboard",
+   "package": "sales_team",
+   "name": "crm.team.view.kanban.dashboard",
+   "entity": "crm.team",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_crm_team_kanban",
+     "highlight_color": "color",
+     "create": "0",
+     "can_open": "0",
+     "action": "action_primary_channel_button",
+     "type": "object",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "color",
+      "widget": "kanban_color_picker"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "kanban_color_picker": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_crm_team_kanban\" highlight_color=\"color\" create=\"0\" can_open=\"0\" action=\"action_primary_channel_button\" type=\"object\" sample=\"1\">\n                <templates>\n                    <t t-name=\"menu\">\n                        <div class=\"container\">\n                            <div class=\"row\">\n                                <div name=\"manage_view\" class=\"col-4\">\n                                    <h5 role=\"menuitem\" class=\" o_kanban_card_manage_title\">\n                                        <span>View</span>\n                                    </h5>\n                                </div>\n                                <div name=\"manage_new\" class=\"col-4\">\n                                    <h5 role=\"menuitem\" class=\"o_kanban_card_manage_title\">\n                                        <span>New</span>\n                                    </h5>\n                                </div>\n                                <div name=\"manage_reports\" class=\"col-4\">\n                                    <h5 role=\"menuitem\" class=\"o_kanban_card_manage_title\">\n                                        <span>Reporting</span>\n                                    </h5>\n                                    <div name=\"o_team_kanban_report_separator\"/>\n                                </div>\n                            </div>\n\n                            <div t-if=\"widget.editable\" class=\"o_kanban_card_manage_settings row\" groups=\"sales_team.group_sale_manager\">\n                                <div role=\"menuitem\" aria-haspopup=\"true\" class=\"col-8\">\n                                    <field name=\"color\" widget=\"kanban_color_picker\"/>\n                                </div>\n                                <div role=\"menuitem\" class=\"col-4\">\n                                    <a class=\"dropdown-item\" type=\"open\">Configuration</a>\n                                </div>\n                            </div>\n                        </div>\n                    </t>\n                    <t t-name=\"card\" class=\"flex-column justify-content-between\">\n                        <div class=\"ms-2 me-3\">\n                            <field name=\"name\" class=\"fw-bold fs-2\"/>\n                        </div>\n                        <div class=\"crm_team_kanban_bottom d-flex align-items-center mt-5\">\n                            <field name=\"company_id\" invisible=\"1\"/>\n                            <field name=\"user_id\" widget=\"many2one_avatar_user\" class=\"ms-auto\"/>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  }
+ ]
+}

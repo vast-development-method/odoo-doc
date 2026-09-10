@@ -1,0 +1,669 @@
+{
+ "catalog": {
+  "name": "entity:account.report.line",
+  "description": "Complete definition of entity Accounting Report Line (account.report.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.report.line",
+  "storage_name": "account_report_line",
+  "full_name": "Accounting Report Line",
+  "kind": "persistent",
+  "description": "Accounting Report Line",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "translate": true,
+    "required": true,
+    "defined_in_package": "account",
+    "full_name": "Name"
+   },
+   {
+    "name": "expression_ids",
+    "type": "One2many",
+    "string": "Expressions",
+    "comodel": "account.report.expression",
+    "inverse_name": "report_line_id",
+    "defined_in_package": "account",
+    "full_name": "Expressions",
+    "target_entity": "account.report.expression"
+   },
+   {
+    "name": "report_id",
+    "type": "Many2one",
+    "string": "Parent Report",
+    "comodel": "account.report",
+    "compute": "_compute_report_id",
+    "store": true,
+    "readonly": false,
+    "required": true,
+    "recursive": true,
+    "precompute": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "account",
+    "full_name": "Parent Report",
+    "target_entity": "account.report"
+   },
+   {
+    "name": "hierarchy_level",
+    "type": "Integer",
+    "string": "Level",
+    "compute": "_compute_hierarchy_level",
+    "store": true,
+    "readonly": false,
+    "recursive": true,
+    "required": true,
+    "precompute": true,
+    "defined_in_package": "account",
+    "full_name": "Level"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "string": "Parent Line",
+    "comodel": "account.report.line",
+    "ondelete": "set null",
+    "index": "btree_not_null",
+    "defined_in_package": "account",
+    "full_name": "Parent Line",
+    "target_entity": "account.report.line"
+   },
+   {
+    "name": "children_ids",
+    "type": "One2many",
+    "string": "Child Lines",
+    "comodel": "account.report.line",
+    "inverse_name": "parent_id",
+    "defined_in_package": "account",
+    "full_name": "Child Lines",
+    "target_entity": "account.report.line"
+   },
+   {
+    "name": "groupby",
+    "type": "Char",
+    "string": "Group By",
+    "help": "Comma-separated list of fields from account.move.line (Journal Item). When set, this line will generate sublines grouped by those keys.",
+    "defined_in_package": "account",
+    "full_name": "Group By"
+   },
+   {
+    "name": "user_groupby",
+    "type": "Char",
+    "string": "User Group By",
+    "compute": "_compute_user_groupby",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "help": "Comma-separated list of fields from account.move.line (Journal Item). When set, this line will generate sublines grouped by those keys.",
+    "defined_in_package": "account",
+    "full_name": "User Group By"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "defined_in_package": "account",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "string": "Code",
+    "help": "Unique identifier for this line.",
+    "defined_in_package": "account",
+    "full_name": "Code"
+   },
+   {
+    "name": "foldable",
+    "type": "Boolean",
+    "string": "Foldable",
+    "help": "By default, we always unfold the lines that can be. If this is checked, the line won't be unfolded by default, and a folding button will be displayed.",
+    "defined_in_package": "account",
+    "full_name": "Foldable"
+   },
+   {
+    "name": "print_on_new_page",
+    "type": "Boolean",
+    "string": "Print On New Page",
+    "help": "When checked this line and everything after it will be printed on a new page.",
+    "defined_in_package": "account",
+    "full_name": "Print On New Page"
+   },
+   {
+    "name": "action_id",
+    "type": "Many2one",
+    "string": "Action",
+    "comodel": "ir.actions.actions",
+    "help": "Setting this field will turn the line into a link, executing the action when clicked.",
+    "defined_in_package": "account",
+    "full_name": "Action",
+    "target_entity": "ir.actions.actions"
+   },
+   {
+    "name": "hide_if_zero",
+    "type": "Boolean",
+    "string": "Hide if Zero",
+    "help": "This line and its children will be hidden when all of their columns are 0.",
+    "defined_in_package": "account",
+    "full_name": "Hide if Zero"
+   },
+   {
+    "name": "domain_formula",
+    "type": "Char",
+    "string": "Domain Formula Shortcut",
+    "help": "Internal field to shorten expression_ids creation for the domain engine",
+    "inverse": "_inverse_domain_formula",
+    "store": false,
+    "defined_in_package": "account",
+    "full_name": "Domain Formula Shortcut"
+   },
+   {
+    "name": "account_codes_formula",
+    "type": "Char",
+    "string": "Account Codes Formula Shortcut",
+    "help": "Internal field to shorten expression_ids creation for the account_codes engine",
+    "inverse": "_inverse_account_codes_formula",
+    "store": false,
+    "defined_in_package": "account",
+    "full_name": "Account Codes Formula Shortcut"
+   },
+   {
+    "name": "aggregation_formula",
+    "type": "Char",
+    "string": "Aggregation Formula Shortcut",
+    "help": "Internal field to shorten expression_ids creation for the aggregation engine",
+    "inverse": "_inverse_aggregation_formula",
+    "store": false,
+    "defined_in_package": "account",
+    "full_name": "Aggregation Formula Shortcut"
+   },
+   {
+    "name": "external_formula",
+    "type": "Char",
+    "string": "External Formula Shortcut",
+    "help": "Internal field to shorten expression_ids creation for the external engine",
+    "inverse": "_inverse_external_formula",
+    "store": false,
+    "defined_in_package": "account",
+    "full_name": "External Formula Shortcut"
+   },
+   {
+    "name": "horizontal_split_side",
+    "type": "Selection",
+    "string": "Horizontal Split Side",
+    "selection": [
+     [
+      "left",
+      "Left"
+     ],
+     [
+      "right",
+      "Right"
+     ]
+    ],
+    "compute": "_compute_horizontal_split_side",
+    "readonly": false,
+    "store": true,
+    "recursive": true,
+    "defined_in_package": "account",
+    "full_name": "Horizontal Split Side"
+   },
+   {
+    "name": "tax_tags_formula",
+    "type": "Char",
+    "string": "Tax Tags Formula Shortcut",
+    "help": "Internal field to shorten expression_ids creation for the tax_tags engine",
+    "inverse": "_inverse_aggregation_tax_formula",
+    "store": false,
+    "defined_in_package": "account",
+    "full_name": "Tax Tags Formula Shortcut"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_code_uniq",
+    "kind": "Constraint",
+    "definition": "unique (report_id, code)",
+    "message": "A report line with the same code already exists.",
+    "defined_in_package": "account"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_hierarchy_level",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_id.hierarchy_level"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_report_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_id.report_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_horizontal_split_side",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_id.horizontal_split_side"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_groupby",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "groupby",
+         "expression_ids.engine"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_groupby_no_child",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A line cannot have both children and a groupby value (line '%s').",
+        "line": 438
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_validate_groupby",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "groupby",
+         "user_groupby"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_parent_line",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Line \"%s\" defines itself as its parent.",
+        "line": 447
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_copy_hierarchy",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "copied_report",
+     "parent",
+     "code_mapping"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Copy the whole hierarchy from this line by copying each line children recursively and adapting the\nformulas with the new copied codes.\n\n:param copied_report: The copy of the report.\n:param parent: The parent line in the hierarchy (a copy of the original parent line).\n:param code_mapping: A dictionary keeping track of mapping old_code -> new_code",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_copied_code",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Look for an unique copied code.\n\n:return: an unique code for the copied account.report.line",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_domain_formula",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_aggregation_formula",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_aggregation_tax_formula",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_account_codes_formula",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_external_formula",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_report_expression",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "engine"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_child_expressions",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "We explicitly unlink child expressions.\nThis is necessary even if there is an ondelete='cascade' on it, because\nthe @api.ondelete method _unlink_archive_used_tags is not automatically\ncalled if the parent model is deleted.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_validate_groupby_no_child",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "A line cannot have both children and a groupby value (line '%s')."
+   },
+   {
+    "operation": "_check_parent_line",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Line \"%s\" defines itself as its parent."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_report_line_basic",
+    "package": "account",
+    "name": "account.report.line.basic",
+    "entity": "account.report.line",
+    "group": "account.group_account_basic",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_report_line_readonly",
+    "package": "account",
+    "name": "account.report.line.readonly",
+    "entity": "account.report.line",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_report_line_ac_user",
+    "package": "account",
+    "name": "account.report.line.ac.user",
+    "entity": "account.report.line",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

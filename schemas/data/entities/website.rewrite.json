@@ -1,0 +1,702 @@
+{
+ "catalog": {
+  "name": "entity:website.rewrite",
+  "description": "Complete definition of entity Website rewrite (website.rewrite).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "website.rewrite",
+  "storage_name": "website_rewrite",
+  "full_name": "Website rewrite",
+  "kind": "persistent",
+  "description": "Website rewrite",
+  "defined_by_package": "website",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "website",
+    "full_name": "Name"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "comodel": "website",
+    "string": "Website",
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "website",
+    "full_name": "Website",
+    "target_entity": "website"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "website",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "url_from",
+    "type": "Char",
+    "string": "URL from",
+    "index": true,
+    "defined_in_package": "website",
+    "full_name": "uniform resource locator from"
+   },
+   {
+    "name": "route_id",
+    "type": "Many2one",
+    "comodel": "website.route",
+    "defined_in_package": "website",
+    "string": "Route",
+    "full_name": "Route",
+    "target_entity": "website.route"
+   },
+   {
+    "name": "url_to",
+    "type": "Char",
+    "string": "URL to",
+    "defined_in_package": "website",
+    "full_name": "uniform resource locator to"
+   },
+   {
+    "name": "redirect_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "404",
+      "404 Not Found"
+     ],
+     [
+      "301",
+      "301 Moved permanently"
+     ],
+     [
+      "302",
+      "302 Moved temporarily"
+     ],
+     [
+      "308",
+      "308 Redirect / Rewrite"
+     ]
+    ],
+    "string": "Action",
+    "default": "302",
+    "help": "Type of redirect/Rewrite:\n\n        301 Moved permanently: The browser will keep in cache the new url.\n        302 Moved temporarily: The browser will not keep in cache the new url and ask again the next time the new url.\n        404 Not Found: If you want remove a specific page/controller (e.g. Ecommerce is installed, but you don't want /shop on a specific website)\n        308 Redirect / Rewrite: If you want rename a controller with a new url. (Eg: /shop -> /garden - Both url will be accessible but /shop will automatically be redirected to /garden)\n    ",
+    "defined_in_package": "website",
+    "full_name": "Action"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "defined_in_package": "website",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_onchange_route_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "route_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_url_to",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "url_to",
+         "url_from",
+         "redirect_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "\"URL to\" can not be empty.",
+        "line": 95
+       },
+       {
+        "kind": "ValidationError",
+        "message": "\"URL from\" can not be empty.",
+        "line": 97
+       },
+       {
+        "kind": "ValidationError",
+        "message": "URL must not start with '#'.",
+        "line": 99
+       },
+       {
+        "kind": "ValidationError",
+        "message": "base URL of 'URL to' should not be same as 'URL from'.",
+        "line": 101
+       },
+       {
+        "kind": "ValidationError",
+        "message": "\"URL to\" must start with a leading slash.",
+        "line": 105
+       },
+       {
+        "kind": "ValidationError",
+        "message": "\"URL to\" cannot be set to \"/\". To change the homepage content, use the \"Homepage URL\" field in the website settings or the page properties on any custom page.",
+        "line": 114
+       },
+       {
+        "kind": "ValidationError",
+        "message": "\"URL to\" cannot be set to an existing page.",
+        "line": 122
+       },
+       {
+        "kind": "ValidationError",
+        "message": "\"URL to\" must contain parameter %s used in \"URL from\".",
+        "line": 108
+       },
+       {
+        "kind": "ValidationError",
+        "message": "\"URL to\" cannot contain parameter %s which is not used in \"URL from\".",
+        "line": 111
+       },
+       {
+        "kind": "ValidationError",
+        "message": "\"URL to\" is invalid: %s",
+        "line": 130
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "redirect_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_invalidate_routing",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "refresh_routes",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_import_templates",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "\"URL to\" can not be empty."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "\"URL from\" can not be empty."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "URL must not start with '#'."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "base URL of 'URL to' should not be same as 'URL from'."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "\"URL to\" must start with a leading slash."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "\"URL to\" cannot be set to \"/\". To change the homepage content, use the \"Homepage URL\" field in the website settings or the page properties on any custom page."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "\"URL to\" cannot be set to an existing page."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "\"URL to\" must contain parameter %s used in \"URL from\"."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "\"URL to\" cannot contain parameter %s which is not used in \"URL from\"."
+   },
+   {
+    "operation": "_check_url_to",
+    "package": "website",
+    "kind": "ValidationError",
+    "message": "\"URL to\" is invalid: %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website.access_website_rewrite",
+    "package": "website",
+    "name": "access_website_rewrite",
+    "entity": "website.rewrite",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website.access_website_rewrite_designer",
+    "package": "website",
+    "name": "Web Rewrite Manager",
+    "entity": "website.rewrite",
+    "group": "group_website_designer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "website.view_website_rewrite_form",
+    "package": "website",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Website rewrite Settings"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "redirect_type"
+      },
+      {
+       "name": "url_from",
+       "invisible": "redirect_type == '308'"
+      },
+      {
+       "name": "route_id",
+       "invisible": "redirect_type != '308'",
+       "string": "URL from",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "url_to",
+       "invisible": "redirect_type == '404'"
+      },
+      {
+       "name": "website_id",
+       "options": "{'no_create': True}",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "sequence",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "refresh_routes",
+       "string": "Refresh route's list",
+       "type": "object",
+       "invisible": "redirect_type != '308'",
+       "class": "btn-light"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "refresh_routes",
+       "string": "Refresh route's list",
+       "type": "object",
+       "class": "btn-light",
+       "invisible": "redirect_type != '308'"
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website.action_website_rewrite_tree",
+    "package": "website",
+    "name": "website.rewrite.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Website rewrites"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "redirect_type"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "url_from"
+      },
+      {
+       "name": "url_to"
+      },
+      {
+       "name": "website_id",
+       "options": "{'no_create': True}",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "active"
+      },
+      {
+       "name": "create_date",
+       "optional": "hide"
+      },
+      {
+       "name": "write_date",
+       "optional": "hide"
+      },
+      {
+       "name": "create_uid",
+       "optional": "hide"
+      },
+      {
+       "name": "write_uid",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website.view_rewrite_search",
+    "package": "website",
+    "name": "website.rewrite.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Redirect"
+     },
+     "fields": [
+      {
+       "name": "url_from"
+      },
+      {
+       "name": "url_to"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "404",
+       "string": "404 Not Found",
+       "domain": "[('redirect_type', '=', '404')]"
+      },
+      {
+       "name": "301",
+       "string": "301 Moved permanently",
+       "domain": "[('redirect_type', '=', '301')]"
+      },
+      {
+       "name": "302",
+       "string": "302 Moved temporarily",
+       "domain": "[('redirect_type', '=', '302')]"
+      },
+      {
+       "name": "308",
+       "string": "308 Redirect / Rewrite",
+       "domain": "[('redirect_type', '=', '308')]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_type",
+       "string": "Redirection Type",
+       "domain": "[]",
+       "context": "{'group_by': 'redirect_type'}"
+      },
+      {
+       "name": "group_by_author",
+       "string": "Created by",
+       "domain": "[]",
+       "context": "{'group_by': 'create_uid'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website.action_website_rewrite_list",
+    "package": "website",
+    "name": "Rewrite",
+    "view_mode": null,
+    "view_id": "False",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "website.rewrite"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

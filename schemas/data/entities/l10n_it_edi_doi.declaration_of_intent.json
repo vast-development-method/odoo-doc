@@ -1,0 +1,963 @@
+{
+ "catalog": {
+  "name": "entity:l10n_it_edi_doi.declaration_of_intent",
+  "description": "Complete definition of entity Declaration of Intent (l10n_it_edi_doi.declaration_of_intent).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_it_edi_doi.declaration_of_intent",
+  "storage_name": "l10n_it_edi_doi_declaration_of_intent",
+  "full_name": "Declaration of Intent",
+  "kind": "persistent",
+  "description": "Declaration of Intent",
+  "defined_by_package": "l10n_it_edi_doi",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread.main.attachment",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "protocol_number_part1, protocol_number_part2",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "active",
+      "Active"
+     ],
+     [
+      "revoked",
+      "Revoked"
+     ],
+     [
+      "terminated",
+      "Terminated"
+     ]
+    ],
+    "string": "State",
+    "tracking": true,
+    "default": "draft",
+    "required": true,
+    "readonly": true,
+    "help": "The state of this Declaration of Intent. \n- 'Draft' means that the Declaration of Intent still needs to be confirmed before being usable. \n- 'Active' means that the Declaration of Intent is usable. \n- 'Terminated' designates that the Declaration of Intent has been marked as not to use anymore without invalidating usages of it. \n- 'Revoked' means the Declaration of Intent should not have been used. You will probably need to revert previous usages of it, if any.\n",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "State"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "index": true,
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company._accessible_branches()[:1]"
+    },
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Partner",
+    "index": true,
+    "required": true,
+    "domain": "['|', ('is_company', '=', True), ('parent_id', '=', False)]",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "default": {
+     "dynamic": "lambda self: self.env.ref('base.EUR', raise_if_not_found=False).id"
+    },
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "issue_date",
+    "type": "Date",
+    "string": "Date of Issue",
+    "required": true,
+    "copy": false,
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "help": "Date on which the Declaration of Intent was issued",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Date of Issue"
+   },
+   {
+    "name": "start_date",
+    "type": "Date",
+    "string": "Start Date",
+    "required": true,
+    "copy": false,
+    "help": "First date on which the Declaration of Intent is valid",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "end_date",
+    "type": "Date",
+    "string": "End Date",
+    "required": true,
+    "copy": false,
+    "help": "Last date on which the Declaration of Intent is valid",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "End Date"
+   },
+   {
+    "name": "threshold",
+    "type": "Monetary",
+    "string": "Threshold",
+    "required": true,
+    "help": "Total amount of allowed sales without VAT under this Declaration of Intent",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Threshold"
+   },
+   {
+    "name": "invoiced",
+    "type": "Monetary",
+    "string": "Invoiced",
+    "compute": "_compute_invoiced",
+    "store": true,
+    "readonly": true,
+    "help": "Total amount of sales under this Declaration of Intent",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Invoiced"
+   },
+   {
+    "name": "not_yet_invoiced",
+    "type": "Monetary",
+    "string": "Not Yet Invoiced",
+    "compute": "_compute_not_yet_invoiced",
+    "store": true,
+    "readonly": true,
+    "help": "Total amount of planned sales under this Declaration of Intent (i.e. current quotation and sales orders) that can still be invoiced",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Not Yet Invoiced"
+   },
+   {
+    "name": "remaining",
+    "type": "Monetary",
+    "string": "Remaining",
+    "compute": "_compute_remaining",
+    "store": true,
+    "readonly": true,
+    "help": "Remaining amount after deduction of the Invoiced and Not Yet Invoiced amounts.",
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Remaining"
+   },
+   {
+    "name": "protocol_number_part1",
+    "type": "Char",
+    "string": "Protocol 1",
+    "required": true,
+    "readonly": false,
+    "copy": false,
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Protocol 1"
+   },
+   {
+    "name": "protocol_number_part2",
+    "type": "Char",
+    "string": "Protocol 2",
+    "required": true,
+    "readonly": false,
+    "copy": false,
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Protocol 2"
+   },
+   {
+    "name": "invoice_ids",
+    "type": "One2many",
+    "comodel": "account.move",
+    "inverse_name": "l10n_it_edi_doi_id",
+    "string": "Invoices / Refunds",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Invoices / Refunds",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "sale_order_ids",
+    "type": "One2many",
+    "comodel": "sale.order",
+    "inverse_name": "l10n_it_edi_doi_id",
+    "string": "Sales Orders / Quotations",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "l10n_it_edi_doi",
+    "full_name": "Sales Orders / Quotations",
+    "target_entity": "sale.order"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_protocol_number_unique",
+    "kind": "Constraint",
+    "definition": "unique(protocol_number_part1, protocol_number_part2)",
+    "message": "The Protocol Number of a Declaration of Intent must be unique! Please choose another one.",
+    "defined_in_package": "l10n_it_edi_doi"
+   },
+   {
+    "name": "_threshold_positive",
+    "kind": "Constraint",
+    "definition": "CHECK(threshold > 0)",
+    "message": "The Threshold of a Declaration of Intent must be positive.",
+    "defined_in_package": "l10n_it_edi_doi"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "protocol_number_part1",
+         "protocol_number_part2"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "invoice_ids",
+         "invoice_ids.state",
+         "invoice_ids.l10n_it_edi_doi_amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_not_yet_invoiced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sale_order_ids",
+         "sale_order_ids.state",
+         "sale_order_ids.l10n_it_edi_doi_not_yet_invoiced"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_remaining",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "threshold",
+         "not_yet_invoiced",
+         "invoiced"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_threshold_warning_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "invoiced",
+     "not_yet_invoiced"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": "Build a warning message that will be displayed in a yellow banner on top of a document\nif the `remaining` of the Declaration of Intent is less than 0 when including the document\nor the Declaration of Intent is revoked\n    :param float invoiced:          The `declaration.invoiced` amount when including the document.\n    :param float not_yet_invoiced:  The `declaration.not_yet_invoiced` amount when including the document.\n    :return str:                    The warning message to be shown.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_validity_errors",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company",
+     "partner",
+     "currency"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": "Check whether all declarations of intent in self are valid for the specified `company`, `partner`, `date` and `currency'.\nViolating these constraints leads to errors in the feature. They should not be ignored.\nReturn all errors as a list of strings.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_validity_warnings",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company",
+     "partner",
+     "currency",
+     "date",
+     "invoiced_amount",
+     "only_blocking",
+     "sales_order"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": "Check whether all declarations of intent in self are valid for the specified `company`, `partner`, `date` and `currency'.\nThe checks for `date` and state of the declaration (except draft) are not considered blocking in case `invoiced_amount` is not positive.\nAll other checks are considered blocking (prevent posting).\nIncludes all checks from `_get_validity_errors`.\nThe checks are different for invoices and sales orders (toggled via kwarg `sales_order`).\nI.e. we do not care about the date for sales orders.\nReturn all errors as a list of strings.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_valid_declaration_of_intent",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "company",
+     "partner",
+     "currency",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Fetch a declaration of intent that is valid for the specified `company`, `partner`, `date` and `currency`\nand has not reached the threshold yet.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_linked_to_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete Declarations of Intents that are already used on at least one Invoice or Sales Order.",
+        "line": 256
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_validate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": "Move a 'draft' Declaration of Intent to 'active'.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reset_to_draft",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": "Resets an 'active' Declaration of Intent back to 'draft'.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reactivate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": "Resets a not 'active' Declaration of Intent back to 'active'.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_revoke",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": "Called by the 'revoke' button of the form view.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_terminate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": "Called by the 'terminated' button of the form view.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_sale_order_ids",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_invoice_ids",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_it_edi_doi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_except_linked_to_document",
+    "package": "l10n_it_edi_doi",
+    "kind": "UserError",
+    "message": "You cannot delete Declarations of Intents that are already used on at least one Invoice or Sales Order."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_it_edi_doi.l10n_it_edi_doi.access_l10n_it_edi_doi_declaration_of_intent_readonly",
+    "package": "l10n_it_edi_doi",
+    "name": "access_l10n_it_edi_doi_declaration_of_intent",
+    "entity": "l10n_it_edi_doi.declaration_of_intent",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_it_edi_doi.l10n_it_edi_doi.access_l10n_it_edi_doi_declaration_of_intent_invoice",
+    "package": "l10n_it_edi_doi",
+    "name": "access_l10n_it_edi_doi_declaration_of_intent",
+    "entity": "l10n_it_edi_doi.declaration_of_intent",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_it_edi_doi.view_l10n_it_edi_doi_tree",
+    "package": "l10n_it_edi_doi",
+    "name": "l10n_it_edi_doi.declaration_of_intent.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "decoration-info": "state == 'draft'",
+      "decoration-muted": "state == 'terminated'",
+      "decoration-danger": "state == 'revoked'"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "company_id",
+       "optional": "hidden",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "protocol_number_part1",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "protocol_number_part2",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "issue_date",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "start_date",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "end_date",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "threshold",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "not_yet_invoiced",
+       "optional": "hidden"
+      },
+      {
+       "name": "invoiced",
+       "optional": "hidden"
+      },
+      {
+       "name": "remaining"
+      },
+      {
+       "name": "state"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state == 'draft'",
+      "decoration-muted": "state == 'terminated'",
+      "decoration-danger": "state == 'revoked'"
+     }
+    }
+   },
+   {
+    "external_identifier": "l10n_it_edi_doi.view_l10n_it_edi_doi_form",
+    "package": "l10n_it_edi_doi",
+    "name": "l10n_it_edi_doi.declaration_of_intent.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "invoice_ids",
+       "invisible": "True"
+      },
+      {
+       "name": "sale_order_ids",
+       "invisible": "True"
+      },
+      {
+       "name": "partner_id",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state != 'draft'",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "protocol_number_part1",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "protocol_number_part2",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "issue_date",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "start_date",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "end_date",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "True"
+      },
+      {
+       "name": "threshold",
+       "widget": "monetary",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "not_yet_invoiced",
+       "widget": "monetary"
+      },
+      {
+       "name": "invoiced",
+       "widget": "monetary"
+      },
+      {
+       "name": "remaining",
+       "widget": "monetary"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_validate",
+       "string": "Validate",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_terminate",
+       "string": "Terminate",
+       "type": "object",
+       "invisible": "state != 'active'",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_reset_to_draft",
+       "string": "Reset to Draft",
+       "type": "object",
+       "invisible": "state != 'active'",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_reactivate",
+       "string": "Reactivate",
+       "type": "object",
+       "invisible": "state not in ['terminated', 'revoked']",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_revoke",
+       "string": "Revoke",
+       "type": "object",
+       "invisible": "state != 'active'",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_open_invoice_ids",
+       "type": "object",
+       "invisible": "not invoice_ids",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      },
+      {
+       "name": "action_open_sale_order_ids",
+       "type": "object",
+       "invisible": "not sale_order_ids",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "monetary": 4
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Validate",
+       "invisible": "state != 'draft'",
+       "class": "btn-primary",
+       "type": "object",
+       "name": "action_validate"
+      },
+      {
+       "string": "Terminate",
+       "invisible": "state != 'active'",
+       "class": "btn-primary",
+       "type": "object",
+       "name": "action_terminate"
+      },
+      {
+       "string": "Reset to Draft",
+       "invisible": "state != 'active'",
+       "class": "btn-secondary",
+       "type": "object",
+       "name": "action_reset_to_draft"
+      },
+      {
+       "string": "Reactivate",
+       "invisible": "state not in ['terminated', 'revoked']",
+       "class": "btn-secondary",
+       "type": "object",
+       "name": "action_reactivate"
+      },
+      {
+       "string": "Revoke",
+       "invisible": "state != 'active'",
+       "class": "btn-secondary",
+       "type": "object",
+       "name": "action_revoke"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,active",
+     "chatter": true,
+     "button_box": [
+      {
+       "type": "object",
+       "class": "oe_stat_button",
+       "name": "action_open_invoice_ids",
+       "icon": "fa-pencil-square-o",
+       "invisible": "not invoice_ids"
+      },
+      {
+       "type": "object",
+       "class": "oe_stat_button",
+       "name": "action_open_sale_order_ids",
+       "icon": "fa-pencil-square-o",
+       "invisible": "not sale_order_ids"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_it_edi_doi.view_l10n_it_edi_doi_declaration_of_intent_search",
+    "package": "l10n_it_edi_doi",
+    "name": "l10n_it_edi_doi.declaration_of_intent.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "protocol_number_part1"
+      },
+      {
+       "name": "protocol_number_part2"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "l10n_it_edi_doi_declaration_of_intent_active_filter",
+       "string": "Active",
+       "domain": "[('state','=', 'active')]",
+       "help": "Show active declarations of intent"
+      },
+      {
+       "name": "l10n_it_edi_doi_declaration_of_intent_draft_filter",
+       "string": "Draft",
+       "domain": "[('state','=', 'draft')]",
+       "help": "Show draft declarations of intent"
+      },
+      {
+       "name": "l10n_it_edi_doi_declaration_of_intent_terminated_filter",
+       "string": "Terminated / Revoked",
+       "domain": "[('state','in', ['terminated', 'revoked'])]",
+       "help": "Show terminated or revoked Declarations of Intent"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,554 @@
+{
+ "catalog": {
+  "name": "entity:account.sale.closing",
+  "description": "Complete definition of entity Sale Closing (account.sale.closing).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.sale.closing",
+  "storage_name": "account_sale_closing",
+  "full_name": "Sale Closing",
+  "kind": "persistent",
+  "description": "Sale Closing",
+  "defined_by_package": "l10n_fr_pos_cert",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "date_closing_stop desc, sequence_number desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "help": "Frequency and unique sequence number",
+    "required": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "date_closing_stop",
+    "type": "Datetime",
+    "string": "Closing Date",
+    "help": "Date to which the values are computed",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Closing Date"
+   },
+   {
+    "name": "date_closing_start",
+    "type": "Datetime",
+    "string": "Starting Date",
+    "help": "Date from which the total interval is computed",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Starting Date"
+   },
+   {
+    "name": "frequency",
+    "type": "Selection",
+    "string": "Closing Type",
+    "selection": [
+     [
+      "daily",
+      "Daily"
+     ],
+     [
+      "monthly",
+      "Monthly"
+     ],
+     [
+      "annually",
+      "Annual"
+     ]
+    ],
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Closing Type"
+   },
+   {
+    "name": "total_interval",
+    "type": "Monetary",
+    "string": "Period Total",
+    "help": "Total in receivable accounts during the interval, excluding overlapping periods",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Period Total"
+   },
+   {
+    "name": "cumulative_total",
+    "type": "Monetary",
+    "string": "Cumulative Grand Total",
+    "help": "Total in receivable accounts since the beginnig of times",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Cumulative Grand Total"
+   },
+   {
+    "name": "sequence_number",
+    "type": "Integer",
+    "string": "Sequence #",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Sequence #"
+   },
+   {
+    "name": "last_order_id",
+    "type": "Many2one",
+    "comodel": "pos.order",
+    "string": "Last Pos Order",
+    "help": "Last Pos order included in the grand total",
+    "readonly": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Last Pos Order",
+    "target_entity": "pos.order"
+   },
+   {
+    "name": "last_order_hash",
+    "type": "Char",
+    "string": "Last Order entry's inalteralbility hash",
+    "readonly": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Last Order entry's inalteralbility hash"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "help": "The company's currency",
+    "readonly": true,
+    "related": "company_id.currency_id",
+    "store": true,
+    "defined_in_package": "l10n_fr_pos_cert",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_query_for_aml",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "company",
+     "first_move_sequence_number",
+     "date_start"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amounts",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "frequency",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": "Method used to compute all the business data of the new object.\nIt will search for previous closings of the same frequency to infer the move from which\naccount move lines should be fetched.\n@param {string} frequency: a valid value of the selection field on the object (daily, monthly, annually)\n    frequencies are literal (daily means 24 hours and so on)\n@param {recordset} company: the company for which the closing is done\n@return {dict} containing {field: value} for each business field of the object",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_interval_dates",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "frequency",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": "Method used to compute the theoretical date from which account move lines should be fetched\n@param {string} frequency: a valid value of the selection field on the object (daily, monthly, annually)\n    frequencies are literal (daily means 24 hours and so on)\n@param {recordset} company: the company for which the closing is done\n@return {dict} the theoretical date from which account move lines are fetched.\n    date_stop date to which the move lines are fetched, always now()\n    the dates are in their the system Database string representation",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Sale Closings are not meant to be written or deleted under any circumstances.",
+        "line": 142
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_never",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": true
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Sale Closings are not meant to be written or deleted under any circumstances.",
+        "line": 146
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_automated_closing",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "frequency"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "To be executed by the CRON to create an object of the given frequency for each company that needs it\n@param {string} frequency: a valid value of the selection field on the object (daily, monthly, annually)\n    frequencies are literal (daily means 24 hours and so on)\n@return {recordset} all the objects created for the given frequency",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "write",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "Sale Closings are not meant to be written or deleted under any circumstances."
+   },
+   {
+    "operation": "_unlink_never",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "Sale Closings are not meant to be written or deleted under any circumstances."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_fr_pos_cert.access_l10n_fr_pos_cert_account_sale_closing_user",
+    "package": "l10n_fr_pos_cert",
+    "name": "l10n_fr_pos_cert.account.sale.closing.user",
+    "entity": "account.sale.closing",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "l10n_fr_pos_cert.account_sale_closing_multi_company",
+    "package": "l10n_fr_pos_cert",
+    "name": "Sale Closing multi-company",
+    "entity": "account.sale.closing",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "l10n_fr_pos_cert.list_view_account_sale_closing",
+    "package": "l10n_fr_pos_cert",
+    "name": "Sales Closings",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "create": "false",
+      "import": "false"
+     },
+     "fields": [
+      {
+       "name": "date_closing_start"
+      },
+      {
+       "name": "date_closing_stop"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "frequency"
+      },
+      {
+       "name": "sequence_number",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "total_interval"
+      },
+      {
+       "name": "cumulative_total"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "l10n_fr_pos_cert.form_view_account_sale_closing",
+    "package": "l10n_fr_pos_cert",
+    "name": "Sales Closings",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "create": "false",
+      "edit": "false",
+      "string": "Account Closing"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "date_closing_start"
+      },
+      {
+       "name": "date_closing_stop"
+      },
+      {
+       "name": "frequency"
+      },
+      {
+       "name": "sequence_number",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "total_interval"
+      },
+      {
+       "name": "cumulative_total"
+      },
+      {
+       "name": "last_order_id",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "last_order_hash",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "l10n_fr_pos_cert.action_list_view_account_sale_closing",
+    "package": "l10n_fr_pos_cert",
+    "name": "Sales Closings",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_nocreate\">\n                The closings are created by the system\n                </p><p>\n                Sales closings run automatically on a daily, monthly and annual basis. It computes both period and cumulative totals from all the sales entries posted in the system after the previous closing.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "account.sale.closing"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "l10n_fr_pos_cert.menu_account_closing",
+    "package": "l10n_fr_pos_cert",
+    "name": null,
+    "parent_id": "pos_fr_statements_menu",
+    "action": "l10n_fr_pos_cert.action_list_view_account_sale_closing",
+    "sequence": "80",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "l10n_fr_pos_cert.account_sale_closing_daily",
+    "package": "l10n_fr_pos_cert",
+    "name": "Generate Daily Sales Closing",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "account.sale.closing",
+    "operation": "_automated_closing",
+    "operation_call": "model._automated_closing('daily')"
+   },
+   {
+    "external_identifier": "l10n_fr_pos_cert.account_sale_closing_monthly",
+    "package": "l10n_fr_pos_cert",
+    "name": "Generate Monthly Sales Closing",
+    "interval_number": "1",
+    "interval_type": "months",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "account.sale.closing",
+    "operation": "_automated_closing",
+    "operation_call": "model._automated_closing('monthly')"
+   },
+   {
+    "external_identifier": "l10n_fr_pos_cert.account_sale_closing_annually",
+    "package": "l10n_fr_pos_cert",
+    "name": "Generate Annual Sales Closing",
+    "interval_number": "12",
+    "interval_type": "months",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "account.sale.closing",
+    "operation": "_automated_closing",
+    "operation_call": "model._automated_closing('annually')"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

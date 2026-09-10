@@ -1,0 +1,1461 @@
+{
+ "catalog": {
+  "name": "entity:event.booth",
+  "description": "Complete definition of entity Event Booth (event.booth).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.booth",
+  "storage_name": "event_booth",
+  "full_name": "Event Booth",
+  "kind": "persistent",
+  "description": "Event Booth",
+  "defined_by_package": "event_booth",
+  "extended_by_packages": [
+   "event_booth_sale",
+   "website_event_booth_exhibitor"
+  ],
+  "mixins": [
+   "event.type.booth",
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "event_type_id",
+    "type": "Many2one",
+    "ondelete": "set null",
+    "required": false,
+    "defined_in_package": "event_booth",
+    "string": "Event Type",
+    "full_name": "Event Type"
+   },
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "event_booth",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Renter",
+    "tracking": true,
+    "copy": false,
+    "defined_in_package": "event_booth",
+    "full_name": "Renter",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "contact_name",
+    "type": "Char",
+    "string": "Renter Name",
+    "compute": "_compute_contact_name",
+    "readonly": false,
+    "store": true,
+    "copy": false,
+    "defined_in_package": "event_booth",
+    "full_name": "Renter Name"
+   },
+   {
+    "name": "contact_email",
+    "type": "Char",
+    "string": "Renter Email",
+    "compute": "_compute_contact_email",
+    "readonly": false,
+    "store": true,
+    "copy": false,
+    "defined_in_package": "event_booth",
+    "full_name": "Renter Email"
+   },
+   {
+    "name": "contact_phone",
+    "type": "Char",
+    "string": "Renter Phone",
+    "compute": "_compute_contact_phone",
+    "readonly": false,
+    "store": true,
+    "copy": false,
+    "defined_in_package": "event_booth",
+    "full_name": "Renter Phone"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "available",
+      "Available"
+     ],
+     [
+      "unavailable",
+      "Unavailable"
+     ]
+    ],
+    "string": "Status",
+    "group_expand": true,
+    "default": "available",
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "event_booth",
+    "full_name": "Status"
+   },
+   {
+    "name": "is_available",
+    "type": "Boolean",
+    "compute": "_compute_is_available",
+    "search": "_search_is_available",
+    "defined_in_package": "event_booth",
+    "string": "Is Available",
+    "full_name": "Is Available"
+   },
+   {
+    "name": "event_booth_registration_ids",
+    "type": "One2many",
+    "comodel": "event.booth.registration",
+    "inverse_name": "event_booth_id",
+    "defined_in_package": "event_booth_sale",
+    "string": "Event Booth Registration",
+    "full_name": "Event Booth Registration",
+    "target_entity": "event.booth.registration"
+   },
+   {
+    "name": "sale_order_line_registration_ids",
+    "type": "Many2many",
+    "comodel": "sale.order.line",
+    "relation": "event_booth_registration",
+    "column1": "event_booth_id",
+    "column2": "sale_order_line_id",
+    "string": "SO Lines with reservations",
+    "groups": "sales_team.group_sale_salesman",
+    "copy": false,
+    "defined_in_package": "event_booth_sale",
+    "full_name": "sales order Lines with reservations",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "sale_order_line_id",
+    "type": "Many2one",
+    "comodel": "sale.order.line",
+    "string": "Final Sale Order Line",
+    "ondelete": "set null",
+    "readonly": false,
+    "index": "btree_not_null",
+    "groups": "sales_team.group_sale_salesman",
+    "copy": false,
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Final Sale Order Line",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "sale_order_id",
+    "type": "Many2one",
+    "related": "sale_order_line_id.order_id",
+    "store": "True",
+    "readonly": true,
+    "index": "btree_not_null",
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "event_booth_sale",
+    "string": "Sale Order",
+    "full_name": "Sale Order"
+   },
+   {
+    "name": "is_paid",
+    "type": "Boolean",
+    "string": "Is Paid",
+    "copy": false,
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Is Paid"
+   },
+   {
+    "name": "use_sponsor",
+    "type": "Boolean",
+    "related": "booth_category_id.use_sponsor",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "string": "Use Sponsor",
+    "full_name": "Use Sponsor"
+   },
+   {
+    "name": "sponsor_type_id",
+    "type": "Many2one",
+    "related": "booth_category_id.sponsor_type_id",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "string": "Sponsor Type",
+    "full_name": "Sponsor Type"
+   },
+   {
+    "name": "sponsor_id",
+    "type": "Many2one",
+    "comodel": "event.sponsor",
+    "string": "Sponsor",
+    "copy": false,
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor",
+    "target_entity": "event.sponsor"
+   },
+   {
+    "name": "sponsor_name",
+    "type": "Char",
+    "string": "Sponsor Name",
+    "related": "sponsor_id.name",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor Name"
+   },
+   {
+    "name": "sponsor_email",
+    "type": "Char",
+    "string": "Sponsor Email",
+    "related": "sponsor_id.email",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor Email"
+   },
+   {
+    "name": "sponsor_phone",
+    "type": "Char",
+    "string": "Sponsor Phone",
+    "related": "sponsor_id.phone",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor Phone"
+   },
+   {
+    "name": "sponsor_subtitle",
+    "type": "Char",
+    "string": "Sponsor Slogan",
+    "related": "sponsor_id.subtitle",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor Slogan"
+   },
+   {
+    "name": "sponsor_website_description",
+    "type": "Html",
+    "string": "Sponsor Description",
+    "related": "sponsor_id.website_description",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor Description"
+   },
+   {
+    "name": "sponsor_image_512",
+    "type": "Image",
+    "string": "Sponsor Logo",
+    "related": "sponsor_id.image_512",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor Logo"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_contact_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_contact_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_contact_phone",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_available",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_available",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_confirmation_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_confirm",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "additional_values"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_post_confirm",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "write_vals"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_booth_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_linked_sale_order",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't delete the following booths as they are linked to sales orders: %(booths)s",
+        "line": 31
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_set_paid",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_sale_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_booth_multiline_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_sponsor",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_booth_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_or_create_sponsor",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_booth_exhibitor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_except_linked_sale_order",
+    "package": "event_booth_sale",
+    "kind": "UserError",
+    "message": "You can't delete the following booths as they are linked to sales orders: %(booths)s"
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "event_booth.access_event_booth_all",
+    "package": "event_booth",
+    "name": "event.booth.public",
+    "entity": "event.booth",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event_booth.access_event_booth_desk",
+    "package": "event_booth",
+    "name": "event.booth.user",
+    "entity": "event.booth",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event_booth.access_event_booth_user",
+    "package": "event_booth",
+    "name": "event.booth.user",
+    "entity": "event.booth",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "event_booth.access_event_booth_manager",
+    "package": "event_booth",
+    "name": "event.booth.manager",
+    "entity": "event.booth",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_event_booth.access_event_booth_public",
+    "package": "website_event_booth",
+    "name": "event.booth.public",
+    "entity": "event.booth",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_booth.access_event_booth_portal",
+    "package": "website_event_booth",
+    "name": "event.booth.public",
+    "entity": "event.booth",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_booth.access_event_booth_employee",
+    "package": "website_event_booth",
+    "name": "event.booth.public",
+    "entity": "event.booth",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_event_booth.ir_rule_event_booth_public",
+    "package": "website_event_booth",
+    "name": "Event Booth: public/portal: published read",
+    "entity": "event.booth",
+    "domain": "[('event_id.website_published', '=', True)]",
+    "groups": "[(4, ref('base.group_public')), (4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "event_booth.event_booth_view_form_from_event",
+    "package": "event_booth",
+    "name": "event.booth.view.form.from.event",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Booths"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "options": "{'clickable': '1'}"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. First Booth Alley 1"
+      },
+      {
+       "name": "booth_category_id",
+       "placeholder": "Pick a Booth Category..."
+      },
+      {
+       "name": "partner_id",
+       "placeholder": "Pick a Renter..."
+      },
+      {
+       "name": "contact_name"
+      },
+      {
+       "name": "contact_email",
+       "widget": "email"
+      },
+      {
+       "name": "contact_phone",
+       "widget": "phone"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "email": 1,
+      "phone": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "statusbar_field": "state",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_form",
+    "package": "event_booth",
+    "name": "event.booth.view.form",
+    "view_type": "field",
+    "inherits_view": "event_booth_view_form_from_event",
+    "mode": "primary",
+    "priority": "16",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "booth_category_id",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "booth_category_id",
+       "position": "before"
+      },
+      {
+       "name": "event_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_form_simple_from_event",
+    "package": "event_booth",
+    "name": "event.booth.view.form.simple.from.event",
+    "view_type": "xpath",
+    "inherits_view": "event_booth_view_form_from_event",
+    "mode": "primary",
+    "priority": "48",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_tree_from_event",
+    "package": "event_booth",
+    "name": "event.booth.view.list.from.event",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Booths",
+      "sample": "1",
+      "expand": "1"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "booth_category_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "contact_name",
+       "optional": "hide"
+      },
+      {
+       "name": "contact_email",
+       "optional": "hide"
+      },
+      {
+       "name": "contact_phone",
+       "optional": "hide"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state == 'unavailable'",
+       "decoration-info": "state == 'available'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_tree",
+    "package": "event_booth",
+    "name": "event.booth.view.list",
+    "view_type": "field",
+    "inherits_view": "event_booth_view_tree_from_event",
+    "mode": "primary",
+    "priority": "16",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "event_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_kanban_from_event",
+    "package": "event_booth",
+    "name": "event.booth.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "default_group_by": "state",
+      "quick_create_view": "event_booth.event_booth_view_form_quick_create",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "booth_category_id"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "kanban_activity"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "kanban_activity": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": "state",
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_kanban",
+    "package": "event_booth",
+    "name": "event.booth.view.kanban",
+    "view_type": "xpath",
+    "inherits_view": "event_booth_view_kanban_from_event",
+    "mode": "primary",
+    "priority": "16",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//footer",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "event_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//footer",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_form_quick_create",
+    "package": "event_booth",
+    "name": "event.booth.view.form.quick_create",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. First Booth Alley 1"
+      },
+      {
+       "name": "booth_category_id",
+       "placeholder": "Pick a Booth Category..."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_search",
+    "package": "event_booth",
+    "name": "event.booth.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Event Booth"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name",
+       "filter_domain": "[('name', 'ilike', self)]"
+      },
+      {
+       "name": "contact_name",
+       "string": "Renter Name",
+       "filter_domain": "[('contact_name', 'ilike', self)]"
+      },
+      {
+       "name": "contact_email",
+       "string": "Renter Email",
+       "filter_domain": "[('contact_email', 'ilike', self)]"
+      },
+      {
+       "name": "event_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_booth_available",
+       "string": "Available",
+       "domain": "[('state', '=', 'available')]"
+      },
+      {
+       "name": "filter_booth_unavailable",
+       "string": "Unavailable",
+       "domain": "[('state', '=', 'unavailable')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_state",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "group_by_partner_id",
+       "context": "{'group_by': 'partner_id'}"
+      },
+      {
+       "name": "group_by_booth_category_id",
+       "context": "{'group_by': 'booth_category_id'}"
+      },
+      {
+       "name": "group_by_event_id",
+       "string": "Event",
+       "context": "{'group_by': 'event_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_graph",
+    "package": "event_booth",
+    "name": "event.booth.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Event booth",
+      "sample": "1",
+      "type": "pie"
+     },
+     "fields": [
+      {
+       "name": "booth_category_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "booth_category_id"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_view_pivot",
+    "package": "event_booth",
+    "name": "event.booth.view.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Event booth",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "booth_category_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "booth_category_id",
+       "type": "row"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_booth_sale.event_booth_view_form_from_event",
+    "package": "event_booth_sale",
+    "name": "event.booth.view.form.inherit.sale",
+    "view_type": "div",
+    "inherits_view": "event_booth.event_booth_view_form_from_event",
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "sale_order_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_sale_order",
+       "type": "object",
+       "invisible": "not sale_order_id",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-usd"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_booth_sale.event_booth_view_tree_from_event",
+    "package": "event_booth_sale",
+    "name": "event.booth.view.list.from.event.inherit.sale",
+    "view_type": "field",
+    "inherits_view": "event_booth.event_booth_view_tree_from_event",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "partner_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "partner_id",
+       "position": "after"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "price",
+       "widget": "monetary",
+       "options": "{'currency_field': 'currency_id'}",
+       "sum": "Total"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_booth_sale.event_booth_view_search",
+    "package": "event_booth_sale",
+    "name": "event.booth.view.search.inherit.sale",
+    "view_type": "xpath",
+    "inherits_view": "event_booth.event_booth_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "sale_order_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_booth_sale.event_booth_view_graph",
+    "package": "event_booth_sale",
+    "name": "event.booth.event.booth.view.graph.inherit.sale",
+    "view_type": "xpath",
+    "inherits_view": "event_booth.event_booth_view_graph",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//graph",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "price"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//graph",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_booth_sale.event_booth_view_pivot",
+    "package": "event_booth_sale",
+    "name": "event.booth.event.booth.view.pivot.inherit.sale",
+    "view_type": "xpath",
+    "inherits_view": "event_booth.event_booth_view_pivot",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//pivot",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "price"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//pivot",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_booth_exhibitor.event_booth_view_form_from_event",
+    "package": "website_event_booth_exhibitor",
+    "name": "event.booth.view.form.inherit.website.event.booth.exhibitor",
+    "view_type": "div",
+    "inherits_view": "event_booth.event_booth_view_form_from_event",
+    "mode": null,
+    "priority": "5",
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "sponsor_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_sponsor",
+       "string": "Sponsor",
+       "type": "object",
+       "invisible": "not sponsor_id",
+       "class": "oe_stat_button",
+       "icon": "fa-black-tie"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event_booth.event_booth_action",
+    "package": "event_booth",
+    "name": "Booths",
+    "view_mode": "kanban,list,form,graph,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[]",
+    "context": "{'search_default_group_by_state': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a Booth\n            </p><p>\n                Booths are the physical stands that you rent during your event.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.booth"
+   },
+   {
+    "external_identifier": "event_booth.event_booth_action_from_event",
+    "package": "event_booth",
+    "name": "Booths",
+    "view_mode": "kanban,list,form,graph,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('event_id', '=', active_id)]",
+    "context": "{'default_event_id': active_id, 'search_default_group_by_state': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a Booth\n            </p><p>\n                Booths are the physical stands that you rent during your event.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.booth"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,430 @@
+{
+ "catalog": {
+  "name": "views:gamification.badge",
+  "description": "View declarations for entity gamification.badge.",
+  "record_count": 7,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "gamification.gamification_badge_view_search",
+   "package": "gamification",
+   "name": "gamification.badge.view.search",
+   "entity": "gamification.badge",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Badge"
+    },
+    "fields": [
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Badge\">\n                <field name=\"name\"/>\n                <separator/>\n                <filter string=\"Archived\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "gamification.badge_list_view",
+   "package": "gamification",
+   "name": "Badge List",
+   "entity": "gamification.badge",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Badge List"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "granted_count"
+     },
+     {
+      "name": "stat_this_month"
+     },
+     {
+      "name": "stat_my"
+     },
+     {
+      "name": "rule_auth"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Badge List\">\n                <field name=\"name\"/>\n                <field name=\"granted_count\"/>\n                <field name=\"stat_this_month\"/>\n                <field name=\"stat_my\"/>\n                <field name=\"rule_auth\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "gamification.badge_form_view",
+   "package": "gamification",
+   "name": "Badge Form",
+   "entity": "gamification.badge",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Badge"
+    },
+    "fields": [
+     {
+      "name": "image_1920",
+      "widget": "image",
+      "options": "{'preview_image': 'image_128'}"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. Problem Solver"
+     },
+     {
+      "name": "description",
+      "nolabel": "1",
+      "placeholder": "Badge Description"
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "rule_auth",
+      "widget": "radio"
+     },
+     {
+      "name": "rule_auth_user_ids",
+      "widget": "many2many_tags",
+      "invisible": "rule_auth != 'users'"
+     },
+     {
+      "name": "rule_auth_badge_ids",
+      "widget": "many2many_tags",
+      "invisible": "rule_auth != 'having'"
+     },
+     {
+      "name": "rule_max",
+      "invisible": "rule_auth == 'nobody'"
+     },
+     {
+      "name": "rule_max_number",
+      "invisible": "not rule_max or rule_auth == 'nobody'"
+     },
+     {
+      "name": "stat_my_monthly_sending",
+      "invisible": "rule_auth == 'nobody'"
+     },
+     {
+      "name": "remaining_sending"
+     },
+     {
+      "name": "challenge_ids",
+      "widget": "many2many",
+      "context": "{'default_reward_id': id}",
+      "nolabel": "1",
+      "mode": "kanban"
+     },
+     {
+      "name": "level"
+     },
+     {
+      "name": "granted_count"
+     },
+     {
+      "name": "stat_this_month"
+     },
+     {
+      "name": "granted_users_count"
+     },
+     {
+      "name": "stat_my"
+     },
+     {
+      "name": "stat_my_this_month"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(action_grant_wizard)d",
+      "string": "Grant this Badge",
+      "type": "action",
+      "invisible": "remaining_sending == 0",
+      "class": "oe_highlight"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "radio": 1,
+     "many2many_tags": 2,
+     "many2many": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "string": "Grant this Badge",
+      "type": "action",
+      "name": "%(action_grant_wizard)d",
+      "class": "oe_highlight",
+      "invisible": "remaining_sending == 0"
+     }
+    ],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Badge\">\n                <header>\n                    <button string=\"Grant this Badge\" type=\"action\" name=\"%(action_grant_wizard)d\" class=\"oe_highlight\" invisible=\"remaining_sending == 0\"/>\n                </header>\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\"/>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"bg-danger\" invisible=\"active\"/>\n                    <field name=\"image_1920\" widget=\"image\" class=\"oe_avatar\" options=\"{'preview_image': 'image_128'}\"/>\n                    <div class=\"oe_title\">\n                        <label for=\"name\"/>\n                        <h1>\n                            <field name=\"name\" placeholder=\"e.g. Problem Solver\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <field name=\"description\" nolabel=\"1\" placeholder=\"Badge Description\" colspan=\"2\"/>\n                    </group>\n                    <group string=\"Granting\">\n                        <div class=\"opacity-50\" colspan=\"2\">\n                            Security rules to define who is allowed to manually grant badges. Not enforced for administrator.\n                        </div>\n                        <group>\n                            <field name=\"active\" invisible=\"1\"/>\n                            <field name=\"rule_auth\" widget=\"radio\"/>\n                            <field name=\"rule_auth_user_ids\" invisible=\"rule_auth != 'users'\" widget=\"many2many_tags\"/>\n                            <field name=\"rule_auth_badge_ids\" invisible=\"rule_auth != 'having'\" widget=\"many2many_tags\"/>\n                            <field name=\"rule_max\" invisible=\"rule_auth == 'nobody'\"/>\n                            <field name=\"rule_max_number\" invisible=\"not rule_max or rule_auth == 'nobody'\"/>\n                            <label for=\"stat_my_monthly_sending\"/>\n                            <div>\n                                <field name=\"stat_my_monthly_sending\" invisible=\"rule_auth == 'nobody'\"/>\n                                <div invisible=\"remaining_sending == -1\" class=\"opacity-50\">\n                                    You can still grant <field name=\"remaining_sending\" class=\"oe_inline\"/> badges this month\n                                </div>\n                                <div invisible=\"remaining_sending != -1\" class=\"opacity-50\">\n                                    No monthly sending limit\n                                </div>\n                            </div>\n                        </group>\n                    </group>\n                    <group string=\"Rewards for challenges\">\n                        <field name=\"challenge_ids\" mode=\"kanban\" widget=\"many2many\" nolabel=\"1\" context=\"{'default_reward_id': id}\" colspan=\"2\"/>\n                        <field name=\"level\" colspan=\"2\"/>\n                    </group>\n                    <group id=\"badge_statistics\" string=\"Statistics\">\n                        <group>\n                            <field name=\"granted_count\"/>\n                            <field name=\"stat_this_month\"/>\n                            <field name=\"granted_users_count\"/>\n                        </group>\n                        <group>\n                            <field name=\"stat_my\"/>\n                            <field name=\"stat_my_this_month\"/>\n                        </group>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "gamification.badge_kanban_view",
+   "package": "gamification",
+   "name": "Badge Kanban View",
+   "entity": "gamification.badge",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "remaining_sending"
+     },
+     {
+      "name": "image_1024",
+      "widget": "image"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "stat_my_monthly_sending"
+     },
+     {
+      "name": "rule_max_number"
+     },
+     {
+      "name": "stat_my_monthly_sending"
+     },
+     {
+      "name": "granted_count"
+     },
+     {
+      "name": "stat_this_month"
+     },
+     {
+      "name": "description"
+     },
+     {
+      "name": "unique_owner_ids",
+      "widget": "many2many_avatar_user"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(action_grant_wizard)d",
+      "type": "action",
+      "class": "btn btn-primary ms-auto"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "many2many_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban>\n                <field name=\"remaining_sending\"/>\n                <templates>\n                    <t t-name=\"card\" class=\"row g-0\">\n                        <aside class=\"col-2\">\n                            <field name=\"image_1024\" widget=\"image\" t-att-alt=\"record.name.value\"/>\n                        </aside>\n                        <main class=\"col ps-2\">\n                            <span>\n                                <field class=\"fw-bold fs-5 me-1\" name=\"name\"/>\n                                <t t-if=\"record.remaining_sending.value != -1\">\n                                    <field name=\"stat_my_monthly_sending\"/>/<field name=\"rule_max_number\"/>\n                                </t>\n                                <t t-else=\"\">\n                                    <field name=\"stat_my_monthly_sending\"/>/∞\n                                </t>\n                            </span>\n                            <div t-if=\"record.remaining_sending.value == 0\">Can not grant</div>\n                            <div>\n                                <field class=\"fw-bold\" name=\"granted_count\"/> granted,\n                                <field class=\"fw-bold\" name=\"stat_this_month\"/> this month\n                            </div>\n                            <div>\n                                <field class=\"fst-italic\" name=\"description\"/>\n                                <field name=\"unique_owner_ids\" widget=\"many2many_avatar_user\"/>\n                            </div>\n                            <footer t-if=\"record.remaining_sending.value != 0 and !selection_mode\">\n                                <button type=\"action\" name=\"%(action_grant_wizard)d\" class=\"btn btn-primary ms-auto\">Grant</button>\n                            </footer>\n                        </main>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_gamification.hr_badge_form_view",
+   "package": "hr_gamification",
+   "name": "gamification.badge.form.inherit",
+   "entity": "gamification.badge",
+   "view_type": "div",
+   "inherits_view": "gamification.badge_form_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "name": "button_box",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "granted_employees_count",
+      "widget": "statinfo",
+      "string": "Granted"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "get_granted_employees",
+      "type": "object",
+      "invisible": "granted_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-user"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "name": "button_box",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <div name=\"button_box\" position=\"inside\">\n                    <button class=\"oe_stat_button\" type=\"object\" name=\"get_granted_employees\" invisible=\"granted_count == 0\" icon=\"fa-user\">\n                        <field name=\"granted_employees_count\" string=\"Granted\" widget=\"statinfo\"/>\n                    </button>\n                </div>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "survey.gamification_badge_form_view_simplified",
+   "package": "survey",
+   "name": "gamification.badge.form.view.simplified",
+   "entity": "gamification.badge",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "100",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Badge"
+    },
+    "fields": [
+     {
+      "name": "image_1920",
+      "widget": "image",
+      "options": "{'preview_image': 'image_128'}"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. Problem Solver"
+     },
+     {
+      "name": "description",
+      "placeholder": "e.g. No one can solve challenges like you do"
+     },
+     {
+      "name": "level"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Badge\">\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\"/>\n                    <field name=\"image_1920\" widget=\"image\" class=\"oe_avatar\" options=\"{'preview_image': 'image_128'}\"/>\n                    <div class=\"oe_title\">\n                        <label for=\"name\"/>\n                        <h1>\n                            <field name=\"name\" placeholder=\"e.g. Problem Solver\"/>\n                        </h1>\n                    </div>\n                    <field name=\"description\" placeholder=\"e.g. No one can solve challenges like you do\"/>\n                    <group string=\"Rewards for challenges\">\n                        <field name=\"level\"/>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_profile.gamification_badge_view_form",
+   "package": "website_profile",
+   "name": "gamification.badge.view.form.inherit.website",
+   "entity": "gamification.badge",
+   "view_type": "xpath",
+   "inherits_view": "gamification.badge_form_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='button_box']",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "is_published",
+      "widget": "website_publish_button"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "website_publish_button",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-globe"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "website_publish_button": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n        \t<xpath expr=\"//div[@name='button_box']\" position=\"inside\">\n                <button name=\"website_publish_button\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-globe\">\n                    <field name=\"is_published\" widget=\"website_publish_button\"/>\n                </button>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

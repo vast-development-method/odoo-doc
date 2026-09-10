@@ -1,0 +1,515 @@
+{
+ "catalog": {
+  "name": "views:hr.leave.type",
+  "description": "View declarations for entity hr.leave.type.",
+  "record_count": 8,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr_holidays.view_holidays_status_filter",
+   "package": "hr_holidays",
+   "name": "hr.leave.type.filter",
+   "entity": "hr.leave.type",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Time Off Type"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Time Off Types"
+     },
+     {
+      "name": "create_calendar_meeting"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active','=',False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "country",
+      "string": "Country",
+      "context": "{'group_by': 'country_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Time Off Type\">\n                <field name=\"name\" string=\"Time Off Types\"/>\n                <field name=\"create_calendar_meeting\"/>\n                <separator/>\n                <filter string=\"Archived\" name=\"inactive\" domain=\"[('active','=',False)]\"/>\n                <filter string=\"Country\" name=\"country\" context=\"{'group_by': 'country_id'}\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.edit_holiday_status_form",
+   "package": "hr_holidays",
+   "name": "hr.leave.type.form",
+   "entity": "hr.leave.type",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Time Off Type"
+    },
+    "fields": [
+     {
+      "name": "allocation_count"
+     },
+     {
+      "name": "group_days_leave"
+     },
+     {
+      "name": "accrual_count"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. Yearly Vacation"
+     },
+     {
+      "name": "request_unit",
+      "widget": "radio",
+      "options": "{'horizontal': True}"
+     },
+     {
+      "name": "time_type",
+      "required": "1",
+      "string": "Count as"
+     },
+     {
+      "name": "responsible_ids",
+      "widget": "many2many_tags",
+      "invisible": "leave_validation_type in ['no_validation', 'manager'] and (not requires_allocation or allocation_validation_type not in ['hr', 'both'])",
+      "placeholder": "Nobody to notify"
+     },
+     {
+      "name": "company_id",
+      "readonly": "is_used",
+      "groups": "base.group_multi_company",
+      "placeholder": "Visible to all"
+     },
+     {
+      "name": "country_id",
+      "readonly": "company_id or is_used",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "country_id",
+      "invisible": "1"
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "leave_validation_type",
+      "widget": "radio",
+      "string": "Approval"
+     },
+     {
+      "name": "requires_allocation",
+      "widget": "checkbox"
+     },
+     {
+      "name": "employee_requests",
+      "widget": "checkbox",
+      "invisible": "not requires_allocation"
+     },
+     {
+      "name": "allocation_validation_type",
+      "widget": "radio",
+      "invisible": "not requires_allocation",
+      "string": "Approval"
+     },
+     {
+      "name": "include_public_holidays_in_duration",
+      "nolabel": "1"
+     },
+     {
+      "name": "hide_on_dashboard",
+      "nolabel": "1"
+     },
+     {
+      "name": "support_document",
+      "nolabel": "1"
+     },
+     {
+      "name": "elligible_for_accrual_rate",
+      "readonly": "time_type != 'leave'",
+      "nolabel": "1"
+     },
+     {
+      "name": "allow_request_on_top",
+      "invisible": "time_type == 'leave'",
+      "nolabel": "1"
+     },
+     {
+      "name": "create_calendar_meeting",
+      "nolabel": "1"
+     },
+     {
+      "name": "allows_negative",
+      "nolabel": "1"
+     },
+     {
+      "name": "max_allowed_negative"
+     },
+     {
+      "name": "color",
+      "widget": "color_picker"
+     },
+     {
+      "name": "icon_id",
+      "widget": "hr_holidays_radio_image",
+      "options": "{'horizontal': true}"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_see_days_allocated",
+      "type": "object",
+      "invisible": "not requires_allocation or not id",
+      "class": "oe_stat_button",
+      "icon": "fa-calendar"
+     },
+     {
+      "name": "action_see_group_leaves",
+      "type": "object",
+      "invisible": "not id",
+      "class": "oe_stat_button",
+      "icon": "fa-calendar"
+     },
+     {
+      "name": "action_see_accrual_plans",
+      "type": "object",
+      "invisible": "not id or accrual_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-calendar"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "radio": 3,
+     "many2many_tags": 1,
+     "checkbox": 2,
+     "color_picker": 1,
+     "hr_holidays_radio_image": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "type": "object",
+      "name": "action_see_days_allocated",
+      "icon": "fa-calendar",
+      "invisible": "not requires_allocation or not id",
+      "help": "Count of allocations for this time off type (approved or waiting for approbation) with a validity period starting this year."
+     },
+     {
+      "class": "oe_stat_button",
+      "type": "object",
+      "name": "action_see_group_leaves",
+      "icon": "fa-calendar",
+      "invisible": "not id",
+      "help": "Count of time off requests for this time off type (approved or waiting for approbation) with a start date in the current year."
+     },
+     {
+      "class": "oe_stat_button",
+      "type": "object",
+      "name": "action_see_accrual_plans",
+      "icon": "fa-calendar",
+      "invisible": "not id or accrual_count == 0",
+      "help": "Count of plans linked to this time off type."
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Time Off Type\">\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button class=\"oe_stat_button\" type=\"object\" name=\"action_see_days_allocated\" icon=\"fa-calendar\" invisible=\"not requires_allocation or not id\" help=\"Count of allocations for this time off type (approved or waiting for approbation) with a validity period starting this year.\">\n                            <div class=\"o_stat_info\">\n                                <field name=\"allocation_count\" class=\"o_stat_value\"/>\n                                <span class=\"o_stat_text\">Allocations</span>\n                            </div>\n                        </button>\n                        <button class=\"oe_stat_button\" type=\"object\" name=\"action_see_group_leaves\" icon=\"fa-calendar\" invisible=\"not id\" help=\"Count of time off requests for this time off type (approved or waiting for approbation) with a start date in the current year.\">\n                            <div class=\"o_stat_info\">\n                                <field name=\"group_days_leave\" class=\"o_stat_value\"/>\n                                <span class=\"o_stat_text\">Time Off</span>\n                            </div>\n                        </button>\n                        <button class=\"oe_stat_button\" type=\"object\" name=\"action_see_accrual_plans\" icon=\"fa-calendar\" invisible=\"not id or accrual_count == 0\" help=\"Count of plans linked to this time off type.\">\n                            <div class=\"o_stat_info\">\n                                <field name=\"accrual_count\" class=\"o_stat_value\"/>\n                                <span class=\"o_stat_text\">Accruals</span>\n                            </div>\n                        </button>\n                    </div>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <label for=\"name\">Time off type</label>\n                    <div class=\"oe_title\">\n                        <field name=\"name\" placeholder=\"e.g. Yearly Vacation\" class=\"h1\"/>\n                    </div>\n                    <group>\n                        <group>\n                                <field name=\"request_unit\" widget=\"radio\" options=\"{'horizontal': True}\"/>\n                                <field name=\"time_type\" required=\"1\" string=\"Count as\"/>\n                                <field name=\"responsible_ids\" widget=\"many2many_tags\" placeholder=\"Nobody to notify\" invisible=\"leave_validation_type in ['no_validation', 'manager'] and (not requires_allocation or allocation_validation_type not in ['hr', 'both'])\"/>\n                        </group>\n                        <group>\n                            <field name=\"company_id\" groups=\"base.group_multi_company\" readonly=\"is_used\" placeholder=\"Visible to all\"/>\n                            <field name=\"country_id\" groups=\"base.group_multi_company\" readonly=\"company_id or is_used\"/>\n                            <field name=\"country_id\" invisible=\"1\"/>\n                        </group>\n                    </group>\n                    <group>\n                        <group name=\"leave_validation\" id=\"time_off_requests\" string=\"Time Off Requests\">\n                            <field name=\"active\" invisible=\"1\"/>\n                            <field name=\"leave_validation_type\" string=\"Approval\" widget=\"radio\"/>\n                        </group>\n                        <group name=\"allocation_validation\" id=\"allocation_requests\" string=\"Allocation Requests\">\n                            <field name=\"requires_allocation\" widget=\"checkbox\"/>\n                            <field name=\"employee_requests\" widget=\"checkbox\" invisible=\"not requires_allocation\"/>\n                            <field name=\"allocation_validation_type\" string=\"Approval\" widget=\"radio\" invisible=\"not requires_allocation\"/>\n                        </group>\n                    </group>\n                    <group style=\"justify-content: unset;\">\n                        <group name=\"configuration\" id=\"configuration\" string=\"Configuration\">\n                            <div class=\"o_cell o_wrap_label text-break text-900 d-flex flex-row\" colspan=\"2\">\n                                <div class=\"d-flex flex-column gap-2\">\n                                    <label for=\"include_public_holidays_in_duration\" class=\"me-4\"/>\n                                    <label for=\"hide_on_dashboard\" class=\"me-4\"/>\n                                    <label for=\"support_document\" class=\"me-4\" string=\"Require Supporting Document\"/>\n                                    <label for=\"elligible_for_accrual_rate\" class=\"me-4\"/>\n                                    <label for=\"allow_request_on_top\" class=\"me-4\" invisible=\"time_type == 'leave'\"/>\n                                    <label for=\"create_calendar_meeting\" class=\"fw-bold me-4\"/>\n                                </div>\n                                <div class=\"d-flex flex-column gap-1\">\n                                    <field name=\"include_public_holidays_in_duration\" class=\"mb-2\" nolabel=\"1\"/>\n                                    <field name=\"hide_on_dashboard\" class=\"mb-2\" nolabel=\"1\"/>\n                                    <field name=\"support_document\" nolabel=\"1\"/>\n                                    <field name=\"elligible_for_accrual_rate\" nolabel=\"1\" readonly=\"time_type != 'leave'\"/>\n                                    <field name=\"allow_request_on_top\" nolabel=\"1\" invisible=\"time_type == 'leave'\"/>\n                                    <field name=\"create_calendar_meeting\" nolabel=\"1\"/>\n                                </div>\n                            </div>\n                        </group>\n                        <group>\n                            <group name=\"negative_cap\" id=\"negative_cap\" string=\"Negative Cap\" invisible=\"not requires_allocation\" colspan=\"2\">\n                                <div class=\"o_row o_cell o_wrap_label text-break text-900\" colspan=\"2\">\n                                    <label for=\"allows_negative\" class=\"me-4\" readonly=\"0\"/>\n                                    <field name=\"allows_negative\" nolabel=\"1\"/>\n                                    <div invisible=\"not allows_negative\">\n                                        <span class=\"mx-2\">up to</span>\n                                        <field name=\"max_allowed_negative\" class=\"oe_inline\"/>\n                                        <span class=\"mx-2\" invisible=\"request_unit == 'hour'\">days</span>\n                                        <span class=\"mx-2\" invisible=\"request_unit != 'hour'\">hours</span>\n                                    </div>\n                                </div>\n                            </group>\n                        </group>\n                    </group>\n                    <group name=\"visual\" id=\"visual\" string=\"Display Option\" class=\"mw-100 col-lg-12\">\n                        <field name=\"color\" widget=\"color_picker\"/>\n                        <field class=\"o_time_off_icon_types d-flex flex-wrap\" name=\"icon_id\" widget=\"hr_holidays_radio_image\" options=\"{'horizontal': true}\"/>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_holiday_status_view_kanban",
+   "package": "hr_holidays",
+   "name": "hr.leave.type.kanban",
+   "entity": "hr.leave.type",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "max_leaves"
+     },
+     {
+      "name": "leaves_taken"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\">\n                <templates>\n                    <t t-name=\"card\">\n                        <field class=\"fw-bold\" name=\"name\"/>\n                        <div>\n                            Max Time Off: <field name=\"max_leaves\"/>\n                            <span class=\"float-end\">Time Off Taken: <field name=\"leaves_taken\"/></span>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.view_holiday_status_normal_tree",
+   "package": "hr_holidays",
+   "name": "hr.leave.type.normal.list",
+   "entity": "hr.leave.type",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Time Off Type",
+     "multi_edit": "1"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "display_name"
+     },
+     {
+      "name": "request_unit",
+      "optional": "hide"
+     },
+     {
+      "name": "leave_validation_type",
+      "string": "Time Off Approval",
+      "optional": "hide"
+     },
+     {
+      "name": "responsible_ids",
+      "widget": "many2many_tags",
+      "invisible": "leave_validation_type in ['no_validation', 'manager'] and (not requires_allocation or allocation_validation_type != 'hr')",
+      "optional": "hide"
+     },
+     {
+      "name": "requires_allocation",
+      "optional": "hide"
+     },
+     {
+      "name": "allocation_validation_type",
+      "string": "Allocation Approval"
+     },
+     {
+      "name": "employee_requests",
+      "optional": "hide"
+     },
+     {
+      "name": "color",
+      "widget": "color_picker",
+      "optional": "hide"
+     },
+     {
+      "name": "company_id",
+      "readonly": "is_used",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "country_id",
+      "readonly": "company_id or is_used",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "many2many_tags": 1,
+     "color_picker": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Time Off Type\" multi_edit=\"1\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"display_name\"/>\n                <field name=\"request_unit\" optional=\"hide\"/>\n                <field name=\"leave_validation_type\" optional=\"hide\" string=\"Time Off Approval\"/>\n                <field name=\"responsible_ids\" widget=\"many2many_tags\" invisible=\"leave_validation_type in ['no_validation', 'manager'] and (not requires_allocation or allocation_validation_type != 'hr')\" optional=\"hide\"/>\n                <field name=\"requires_allocation\" optional=\"hide\"/>\n                <field name=\"allocation_validation_type\" string=\"Allocation Approval\"/>\n                <field name=\"employee_requests\" optional=\"hide\"/>\n                <field name=\"color\" widget=\"color_picker\" optional=\"hide\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"show\" readonly=\"is_used\"/>\n                <field name=\"country_id\" groups=\"base.group_multi_company\" optional=\"show\" readonly=\"company_id or is_used\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays_attendance.hr_leave_type_view_form",
+   "package": "hr_holidays_attendance",
+   "name": "hr.leave.type.view.form.inherit",
+   "entity": "hr.leave.type",
+   "view_type": "label",
+   "inherits_view": "hr_holidays.edit_holiday_status_form",
+   "mode": null,
+   "priority": "30",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "label",
+    "root_attributes": {
+     "for": "support_document",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "label",
+      "attributes": {
+       "for": "support_document",
+       "position": "after"
+      },
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <label for=\"support_document\" position=\"after\">\n                <label for=\"overtime_deductible\" class=\"fw-bold me-4\"/>\n            </label>\n            <field name=\"support_document\" nolabel=\"1\" position=\"after\">\n                <field name=\"overtime_deductible\" nolabel=\"1\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_work_entry_holidays.work_entry_type_leave_form_inherit",
+   "package": "hr_work_entry_holidays",
+   "name": "work_entry.type.leave.form.inherit",
+   "entity": "hr.leave.type",
+   "view_type": "xpath",
+   "inherits_view": "hr_holidays.edit_holiday_status_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='negative_cap']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "work_entry_type_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='negative_cap']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//group[@name='negative_cap']\" position=\"after\">\n                    <group name=\"payroll\" string=\"Payroll\" colspan=\"2\">\n                        <field name=\"work_entry_type_id\"/>\n                    </group>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_work_entry_holidays.view_holiday_status_normal_tree",
+   "package": "hr_work_entry_holidays",
+   "name": null,
+   "entity": "hr.leave.type",
+   "view_type": "field",
+   "inherits_view": "hr_holidays.view_holiday_status_normal_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "employee_requests",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "employee_requests",
+      "position": "after"
+     },
+     {
+      "name": "work_entry_type_id",
+      "optional": "show"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"employee_requests\" position=\"after\">\n                <field name=\"work_entry_type_id\" optional=\"show\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_in_hr_holidays.hr_leave_type_view_form_inherit",
+   "package": "l10n_in_hr_holidays",
+   "name": "hr.leave.type.form.inherit",
+   "entity": "hr.leave.type",
+   "view_type": "xpath",
+   "inherits_view": "hr_holidays.edit_holiday_status_form",
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='configuration']//label[@for='support_document']",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='configuration']//label[@for='support_document']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//group[@name='configuration']//label[@for='support_document']\" position=\"after\">\n                <label for=\"l10n_in_is_sandwich_leave\" class=\"me-4\" string=\"Sandwich Leaves\" invisible=\"country_code and country_code != 'IN'\"/>\n                <label for=\"l10n_in_is_limited_to_optional_days\" class=\"me-4\" string=\"Limited to Optional Holidays\" invisible=\"country_code and country_code != 'IN'\"/>\n            </xpath>\n            <xpath expr=\"//group[@name='configuration']//field[@name='support_document']\" position=\"after\">\n                <field name=\"l10n_in_is_sandwich_leave\" class=\"mb-2\" nolabel=\"1\" invisible=\"country_code and country_code != 'IN'\"/>\n                <field name=\"l10n_in_is_limited_to_optional_days\" class=\"mb-2\" nolabel=\"1\" invisible=\"country_code and country_code != 'IN'\"/>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

@@ -1,0 +1,1153 @@
+{
+ "catalog": {
+  "name": "views:mrp.workorder",
+  "description": "View declarations for entity mrp.workorder.",
+  "record_count": 12,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "mrp.view_mrp_production_work_order_search",
+   "package": "mrp",
+   "name": "mrp.production.work.order.search",
+   "entity": "mrp.workorder",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "production_id"
+     },
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "finished_lot_ids"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "ready",
+      "string": "To Do",
+      "domain": "[('state','=','ready')]"
+     },
+     {
+      "name": "blocked",
+      "string": "Blocked",
+      "domain": "[('state','=','blocked')]"
+     },
+     {
+      "name": "progress",
+      "string": "In Progress",
+      "domain": "[('state','=','progress')]"
+     },
+     {
+      "name": "done",
+      "string": "Done",
+      "domain": "[('state','=', 'done')]"
+     },
+     {
+      "name": "late",
+      "string": "Late",
+      "domain": "[('date_start', '<=', 'today')]"
+     },
+     {
+      "name": "date_start_filter",
+      "string": "Start Date",
+      "date": "date_start"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "workcenter",
+      "string": "Work center",
+      "domain": "[]",
+      "context": "{'group_by': 'workcenter_id'}"
+     },
+     {
+      "name": "product",
+      "string": "Product",
+      "domain": "[]",
+      "context": "{'group_by': 'product_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search>\n                <field name=\"production_id\"/>\n                <field name=\"workcenter_id\"/>\n                <field name=\"product_id\"/>\n                <field name=\"finished_lot_ids\"/>\n                <filter string=\"To Do\" name=\"ready\" domain=\"[('state','=','ready')]\"/>\n                <filter string=\"Blocked\" name=\"blocked\" domain=\"[('state','=','blocked')]\"/>\n                <filter string=\"In Progress\" name=\"progress\" domain=\"[('state','=','progress')]\"/>\n                <filter string=\"Done\" name=\"done\" domain=\"[('state','=', 'done')]\"/>\n                <filter string=\"Late\" name=\"late\" domain=\"[('date_start', '&lt;=', 'today')]\"/>\n                <separator/>\n                <filter string=\"Start Date\" name=\"date_start_filter\" date=\"date_start\"/>\n                <group>\n                    <filter string=\"Work center\" name=\"workcenter\" domain=\"[]\" context=\"{'group_by': 'workcenter_id'}\"/>\n                    <filter string=\"Product\" name=\"product\" domain=\"[]\" context=\"{'group_by': 'product_id'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.mrp_production_workorder_tree_editable_view",
+   "package": "mrp",
+   "name": "mrp.production.work.order.list.editable",
+   "entity": "mrp.workorder",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "100",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "multi_edit": "1"
+    },
+    "fields": [
+     {
+      "name": "consumption",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_produced",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_user_working",
+      "column_invisible": "True"
+     },
+     {
+      "name": "product_uom_id",
+      "readonly": "0",
+      "column_invisible": "True"
+     },
+     {
+      "name": "production_state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "production_bom_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "qty_producing",
+      "column_invisible": "True"
+     },
+     {
+      "name": "time_ids",
+      "column_invisible": "True"
+     },
+     {
+      "name": "working_state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "operation_id",
+      "domain": "['|', ('bom_id', '=', production_bom_id), ('bom_id', '=', False)]",
+      "context": "{'default_workcenter_id': workcenter_id, 'default_company_id': company_id}",
+      "column_invisible": "True"
+     },
+     {
+      "name": "name",
+      "readonly": "state in ['cancel', 'done']",
+      "string": "Operation"
+     },
+     {
+      "name": "workcenter_id",
+      "readonly": "state in ['cancel', 'done', 'progress']"
+     },
+     {
+      "name": "product_id",
+      "optional": "show"
+     },
+     {
+      "name": "qty_remaining",
+      "string": "Quantity",
+      "optional": "show"
+     },
+     {
+      "name": "qty_ready",
+      "optional": "hide",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "finished_lot_ids",
+      "string": "Lot/Serial",
+      "optional": "hide"
+     },
+     {
+      "name": "date_start",
+      "readonly": "state in ['progress', 'done', 'cancel']",
+      "optional": "hide"
+     },
+     {
+      "name": "date_finished",
+      "readonly": "state in ['progress', 'done', 'cancel']",
+      "optional": "hide"
+     },
+     {
+      "name": "duration_expected",
+      "widget": "float_time",
+      "readonly": "state in ['cancel', 'done']",
+      "sum": "expected duration"
+     },
+     {
+      "name": "duration",
+      "widget": "mrp_timer",
+      "invisible": "production_state == 'draft'",
+      "readonly": "is_user_working",
+      "sum": "real duration"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "invisible": "production_state == 'draft'",
+      "column_invisible": "parent and parent.state == 'draft'",
+      "decoration-danger": "state == 'cancel'",
+      "decoration-warning": "state == 'blocked'",
+      "decoration-success": "state == 'done'",
+      "decoration-info": "state == 'progress'",
+      "decoration-muted": "state == 'ready'"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "button_start",
+      "type": "object",
+      "invisible": "production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or state in ('done', 'cancel') or is_user_working",
+      "class": "btn-success px-2",
+      "icon": "fa-play"
+     },
+     {
+      "name": "button_pending",
+      "type": "object",
+      "invisible": "production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working",
+      "class": "btn-warning px-2",
+      "icon": "fa-pause"
+     },
+     {
+      "name": "button_finish",
+      "type": "object",
+      "invisible": "production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working",
+      "class": "btn-success px-2",
+      "icon": "fa-check"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "float_time": 1,
+     "mrp_timer": 1,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list multi_edit=\"1\">\n                <field name=\"consumption\" column_invisible=\"True\"/>\n                <field name=\"company_id\" column_invisible=\"True\"/>\n                <field name=\"is_produced\" column_invisible=\"True\"/>\n                <field name=\"is_user_working\" column_invisible=\"True\"/>\n                <field name=\"product_uom_id\" readonly=\"0\" column_invisible=\"True\"/>\n                <field name=\"production_state\" column_invisible=\"True\"/>\n                <field name=\"production_bom_id\" column_invisible=\"True\"/>\n                <field name=\"qty_producing\" column_invisible=\"True\"/>\n                <field name=\"time_ids\" column_invisible=\"True\"/>\n                <field name=\"working_state\" column_invisible=\"True\"/>\n                <field name=\"operation_id\" column_invisible=\"True\" domain=\"['|', ('bom_id', '=', production_bom_id), ('bom_id', '=', False)]\" context=\"{'default_workcenter_id': workcenter_id, 'default_company_id': company_id}\"/>\n                <field name=\"name\" string=\"Operation\" readonly=\"state in ['cancel', 'done']\"/>\n                <field name=\"workcenter_id\" readonly=\"state in ['cancel', 'done', 'progress']\"/>\n                <field name=\"product_id\" optional=\"show\"/>\n                <field name=\"qty_remaining\" optional=\"show\" string=\"Quantity\"/>\n                <field name=\"qty_ready\" optional=\"hide\" groups=\"base.group_no_one\"/>\n                <field name=\"finished_lot_ids\" optional=\"hide\" string=\"Lot/Serial\"/>\n                <field name=\"date_start\" optional=\"hide\" readonly=\"state in ['progress', 'done', 'cancel']\"/>\n                <field name=\"date_finished\" optional=\"hide\" readonly=\"state in ['progress', 'done', 'cancel']\"/>\n                <field name=\"duration_expected\" widget=\"float_time\" sum=\"expected duration\" readonly=\"state in ['cancel', 'done']\"/>\n                <field name=\"duration\" widget=\"mrp_timer\" invisible=\"production_state == 'draft'\" readonly=\"is_user_working\" sum=\"real duration\"/>\n                <button name=\"button_start\" type=\"object\" title=\"Start\" class=\"btn-success px-2\" invisible=\"production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or state in ('done', 'cancel') or is_user_working\" icon=\"fa-play\"/>\n                <button name=\"button_pending\" type=\"object\" title=\"Pause\" class=\"btn-warning px-2\" icon=\"fa-pause\" invisible=\"production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working\"/>\n                <button name=\"button_finish\" type=\"object\" title=\"Done\" class=\"btn-success px-2\" icon=\"fa-check\" invisible=\"production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working\"/>\n                <widget name=\"mo_view_list_dropdown\"/>\n                <field name=\"state\" widget=\"badge\" decoration-info=\"state == 'progress'\" decoration-success=\"state == 'done'\" decoration-danger=\"state == 'cancel'\" decoration-warning=\"state == 'blocked'\" decoration-muted=\"state == 'ready'\" column_invisible=\"parent and parent.state == 'draft'\" invisible=\"production_state == 'draft'\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.mrp_production_workorder_tree_editable_view_mo_form",
+   "package": "mrp",
+   "name": "mrp.production.work.order.list.editable",
+   "entity": "mrp.workorder",
+   "view_type": "xpath",
+   "inherits_view": "mrp_production_workorder_tree_editable_view",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list/field[@name='qty_remaining']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list/field[@name='qty_remaining']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list/field[@name='qty_remaining']\" position=\"attributes\">\n                <attribute name=\"column_invisible\">parent.state == 'done'</attribute>\n            </xpath>\n            <xpath expr=\"//list/field[@name='qty_ready']\" position=\"attributes\">\n                <attribute name=\"column_invisible\">parent.state == 'done'</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='name']\" position=\"before\">\n                <field name=\"sequence\" widget=\"handle\" column_invisible=\"parent.state != 'draft'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.mrp_production_workorder_tree_view",
+   "package": "mrp",
+   "name": "mrp.production.work.order.list",
+   "entity": "mrp.workorder",
+   "view_type": "xpath",
+   "inherits_view": "mrp.mrp_production_workorder_tree_editable_view",
+   "mode": "primary",
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list\" position=\"attributes\">\n                <attribute name=\"create\">0</attribute>\n                <attribute name=\"sample\">1</attribute>\n                <attribute name=\"editable\"/>\n            </xpath>\n            <field name=\"workcenter_id\" position=\"after\">\n                <field name=\"production_id\" optional=\"hide\"/>\n            </field>\n            <field name=\"state\" position=\"attributes\">\n                <attribute name=\"invisible\">production_state == 'draft'</attribute>\n                <attribute name=\"column_invisible\">False</attribute>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.mrp_production_workorder_form_view_inherit",
+   "package": "mrp",
+   "name": "mrp.production.work.order.form",
+   "entity": "mrp.workorder",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Production Workcenter",
+     "delete": "0",
+     "create": "0"
+    },
+    "fields": [
+     {
+      "name": "is_user_working",
+      "invisible": "1"
+     },
+     {
+      "name": "working_state",
+      "invisible": "1"
+     },
+     {
+      "name": "production_state",
+      "invisible": "1"
+     },
+     {
+      "name": "operation_id",
+      "invisible": "1"
+     },
+     {
+      "name": "sequence",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "widget": "statusbar"
+     },
+     {
+      "name": "scrap_count"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "product_tracking",
+      "invisible": "1"
+     },
+     {
+      "name": "product_id",
+      "invisible": "1"
+     },
+     {
+      "name": "finished_lot_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "readonly": "state in ['cancel', 'done']",
+      "force_save": "1"
+     },
+     {
+      "name": "workcenter_id",
+      "readonly": "state in ['cancel', 'done', 'progress']"
+     },
+     {
+      "name": "product_id",
+      "readonly": "1"
+     },
+     {
+      "name": "qty_remaining",
+      "invisible": "state == 'done'",
+      "readonly": "1",
+      "string": "Quantity"
+     },
+     {
+      "name": "qty_produced",
+      "readonly": "state == 'done' or product_tracking == 'serial'",
+      "string": "Produced Quantity",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "finished_lot_ids",
+      "widget": "many2many_tags",
+      "readonly": "1",
+      "options": "{'edit_tags': True}"
+     },
+     {
+      "name": "is_planned",
+      "invisible": "1"
+     },
+     {
+      "name": "date_start",
+      "readonly": "state in ['cancel', 'done']"
+     },
+     {
+      "name": "date_finished",
+      "readonly": "state in ['cancel', 'done']"
+     },
+     {
+      "name": "show_json_popover",
+      "invisible": "1"
+     },
+     {
+      "name": "json_popover",
+      "widget": "mrp_workorder_popover",
+      "invisible": "not show_json_popover"
+     },
+     {
+      "name": "duration_expected",
+      "widget": "float_time",
+      "readonly": "state in ['cancel', 'done']"
+     },
+     {
+      "name": "production_id",
+      "force_save": "1"
+     },
+     {
+      "name": "time_ids",
+      "context": "{'default_workcenter_id': workcenter_id, 'default_workorder_id': id}",
+      "nolabel": "1"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "duration",
+      "widget": "float_time",
+      "readonly": "id"
+     },
+     {
+      "name": "date_start"
+     },
+     {
+      "name": "date_end"
+     },
+     {
+      "name": "workcenter_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "loss_id",
+      "string": "Productivity",
+      "optional": "show"
+     },
+     {
+      "name": "date_start"
+     },
+     {
+      "name": "date_end"
+     },
+     {
+      "name": "duration",
+      "widget": "float_time"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "loss_id"
+     },
+     {
+      "name": "duration",
+      "widget": "float_time",
+      "readonly": "1"
+     },
+     {
+      "name": "move_raw_ids",
+      "readonly": "1"
+     },
+     {
+      "name": "state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "product_id",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "product_qty",
+      "string": "To Consume"
+     },
+     {
+      "name": "quantity",
+      "string": "Quantity"
+     },
+     {
+      "name": "picked",
+      "string": "Consumed"
+     },
+     {
+      "name": "product_qty_available",
+      "invisible": "not is_storable",
+      "string": "On Hand"
+     },
+     {
+      "name": "product_virtual_available",
+      "invisible": "not is_storable",
+      "string": "Forecasted"
+     },
+     {
+      "name": "allow_workorder_dependencies",
+      "invisible": "1"
+     },
+     {
+      "name": "blocked_by_workorder_ids",
+      "readonly": "1",
+      "nolabel": "1"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "name",
+      "readonly": "state in ['cancel', 'done']",
+      "string": "Operation"
+     },
+     {
+      "name": "company_id",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "workcenter_id",
+      "readonly": "state in ['cancel', 'done', 'progress']"
+     },
+     {
+      "name": "date_start",
+      "readonly": "1"
+     },
+     {
+      "name": "date_finished",
+      "readonly": "1"
+     },
+     {
+      "name": "duration_expected",
+      "widget": "float_time",
+      "readonly": "state in ['cancel', 'done']",
+      "sum": "expected duration"
+     },
+     {
+      "name": "production_state",
+      "column_invisible": "True"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "invisible": "production_state == 'draft'",
+      "column_invisible": "parent.state == 'draft'",
+      "decoration-warning": "state == 'progress'",
+      "decoration-success": "state == 'done'",
+      "decoration-info": "state not in ('progress', 'done', 'cancel')"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_see_move_scrap",
+      "type": "object",
+      "invisible": "scrap_count == 0",
+      "class": "oe_stat_button",
+      "icon": "oi-arrows-v"
+     },
+     {
+      "name": "action_open_wizard",
+      "string": "View WorkOrder",
+      "type": "object",
+      "class": "oe_link float-end"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "time_tracking",
+      "string": "Time Tracking",
+      "invisible": null,
+      "groups": "mrp.group_mrp_manager"
+     },
+     {
+      "name": "components",
+      "string": "Components",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "dependencies",
+      "string": "Blocked By",
+      "invisible": "not allow_workorder_dependencies",
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "statusbar": 1,
+     "many2many_tags": 1,
+     "mrp_workorder_popover": 1,
+     "float_time": 5,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [],
+    "statusbar_field": "state",
+    "statusbar_visible": "blocked,ready,progress,done",
+    "chatter": false,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "name": "action_see_move_scrap",
+      "type": "object",
+      "icon": "oi-arrows-v",
+      "invisible": "scrap_count == 0"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Production Workcenter\" delete=\"0\" create=\"0\">\n            <field name=\"is_user_working\" invisible=\"1\"/>\n            <field name=\"working_state\" invisible=\"1\"/>\n            <field name=\"production_state\" invisible=\"1\"/>\n            <field name=\"operation_id\" invisible=\"1\"/>\n            <field name=\"sequence\" invisible=\"1\"/>\n            <header>\n                <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"blocked,ready,progress,done\"/>\n            </header>\n            <sheet>\n                <div class=\"oe_button_box\" name=\"button_box\">\n                    <button class=\"oe_stat_button\" name=\"action_see_move_scrap\" type=\"object\" icon=\"oi-arrows-v\" invisible=\"scrap_count == 0\">\n                        <div class=\"o_field_widget o_stat_info\">\n                            <span class=\"o_stat_value\"><field name=\"scrap_count\"/></span>\n                            <span class=\"o_stat_text\">Scraps</span>\n                        </div>\n                    </button>\n                </div>\n                <field name=\"company_id\" invisible=\"1\"/>\n                <field name=\"product_tracking\" invisible=\"1\"/>\n                <field name=\"product_id\" invisible=\"1\"/>\n                <field name=\"finished_lot_ids\" invisible=\"1\"/>\n                <group>\n                    <group>\n                        <field name=\"name\" readonly=\"state in ['cancel', 'done']\" force_save=\"1\"/>\n                        <field name=\"workcenter_id\" readonly=\"state in ['cancel', 'done', 'progress']\"/>\n                    </group>\n                    <group>\n                        <field name=\"product_id\" readonly=\"1\"/>\n                        <field name=\"qty_remaining\" string=\"Quantity\" readonly=\"1\" invisible=\"state == 'done'\"/>\n                        <field name=\"qty_produced\" string=\"Produced Quantity\" groups=\"base.group_no_one\" readonly=\"state == 'done' or product_tracking == 'serial'\"/>\n                        <field name=\"finished_lot_ids\" readonly=\"1\" widget=\"many2many_tags\" options=\"{'edit_tags': True}\"/>\n                    </group>\n                </group>\n                <group>\n                    <group>\n                        <label for=\"date_start\" string=\"Start Date\"/>\n                        <div class=\"oe_inline\">\n                            <field name=\"is_planned\" invisible=\"1\"/>\n                            <field name=\"date_start\" class=\"mr8 oe_inline\" readonly=\"state in ['cancel', 'done']\"/>\n                            <strong class=\"mr8 oe_inline\">to</strong>\n                            <field name=\"date_finished\" class=\"oe_inline\" readonly=\"state in ['cancel', 'done']\"/>\n                            <field name=\"show_json_popover\" invisible=\"1\"/>\n                            <field name=\"json_popover\" widget=\"mrp_workorder_popover\" class=\"oe_inline mx-2\" invisible=\"not show_json_popover\"/>\n                        </div>\n                        <label for=\"duration_expected\"/>\n                        <div class=\"o_row\">\n                            <field name=\"duration_expected\" widget=\"float_time\" readonly=\"state in ['cancel', 'done']\"/>\n                            <span>minutes</span>\n                        </div>\n                    </group>\n                    <group>\n                        <field name=\"production_id\" force_save=\"1\"/>\n                    </group>\n                </group>\n                <notebook>\n                    <page string=\"Time Tracking\" name=\"time_tracking\" groups=\"mrp.group_mrp_manager\">\n                        <field name=\"time_ids\" nolabel=\"1\" context=\"{'default_workcenter_id': workcenter_id, 'default_workorder_id': id}\">\n                            <list editable=\"bottom\">\n                                <field name=\"user_id\"/>\n                                <field name=\"duration\" widget=\"float_time\" readonly=\"id\"/>\n                                <field name=\"date_start\"/>\n                                <field name=\"date_end\"/>\n                                <field name=\"workcenter_id\" column_invisible=\"True\"/>\n                                <field name=\"company_id\" column_invisible=\"True\"/>\n                                <field name=\"loss_id\" string=\"Productivity\" optional=\"show\"/>\n                            </list>\n                            <form>\n                                <group>\n                                    <group>\n                                        <field name=\"date_start\"/>\n                                        <field name=\"date_end\"/>\n                                        <field name=\"duration\" widget=\"float_time\"/>\n                                        <field name=\"company_id\" invisible=\"1\"/>\n                                    </group>\n                                    <group>\n                                        <field name=\"user_id\"/>\n                                        <field name=\"workcenter_id\"/>\n                                        <field name=\"company_id\" invisible=\"1\"/>\n                                        <field name=\"loss_id\"/>\n                                    </group>\n                                </group>\n                            </form>\n                        </field>\n                        <div>\n                            <label for=\"duration\" class=\"pe-2\"/>\n                            <field name=\"duration\" widget=\"float_time\" readonly=\"1\"/>\n                            <span> (minutes)</span>\n                        </div>\n                </page>\n                <page string=\"Components\" name=\"components\">\n                    <field name=\"move_raw_ids\" readonly=\"1\">\n                        <list>\n                            <field name=\"state\" column_invisible=\"True\"/>\n                            <field name=\"product_id\" readonly=\"state == 'done'\"/>\n                            <field name=\"product_qty\" string=\"To Consume\"/>\n                            <field name=\"quantity\" string=\"Quantity\"/>\n                            <field name=\"picked\" string=\"Consumed\"/>\n                            <field name=\"product_qty_available\" string=\"On Hand\" invisible=\"not is_storable\"/>\n                            <field name=\"product_virtual_available\" string=\"Forecasted\" invisible=\"not is_storable\"/>\n                        </list>\n                    </field>\n                </page>\n                <field name=\"allow_workorder_dependencies\" invisible=\"1\"/>\n                <page string=\"Blocked By\" name=\"dependencies\" invisible=\"not allow_workorder_dependencies\">\n                    <field name=\"blocked_by_workorder_ids\" nolabel=\"1\" readonly=\"1\">\n                        <list>\n                            <field name=\"company_id\" column_invisible=\"True\"/>\n                            <field name=\"name\" string=\"Operation\" readonly=\"state in ['cancel', 'done']\"/>\n                            <field name=\"company_id\" optional=\"hide\" groups=\"base.group_multi_company\"/>\n                            <field name=\"workcenter_id\" readonly=\"state in ['cancel', 'done', 'progress']\"/>\n                            <field name=\"date_start\" readonly=\"1\"/>\n                            <field name=\"date_finished\" readonly=\"1\"/>\n                            <field name=\"duration_expected\" widget=\"float_time\" sum=\"expected duration\" readonly=\"state in ['cancel', 'done']\"/>\n                            <field name=\"production_state\" column_invisible=\"True\"/>\n                            <field name=\"state\" widget=\"badge\" decoration-warning=\"state == 'progress'\" decoration-success=\"state == 'done'\" decoration-info=\"state not in ('progress', 'done', 'cancel')\" column_invisible=\"parent.state == 'draft'\" invisible=\"production_state == 'draft'\"/>\n                            <button class=\"oe_link float-end\" string=\"View WorkOrder\" name=\"action_open_wizard\" type=\"object\"/>\n                        </list>\n                    </field>\n                </page>\n                </notebook>\n            </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.view_mrp_production_workorder_form_view_filter",
+   "package": "mrp",
+   "name": "mrp.production.work.order.select",
+   "entity": "mrp.workorder",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Work Orders"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Work Order"
+     },
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "production_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "finished_lot_ids"
+     },
+     {
+      "name": "product_variant_attributes"
+     },
+     {
+      "name": "move_raw_ids",
+      "string": "Component",
+      "filter_domain": "[('move_raw_ids.product_id', 'ilike', self)]"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "progress",
+      "string": "In Progress",
+      "domain": "[('state', '=', 'progress')]"
+     },
+     {
+      "name": "ready",
+      "string": "To Do",
+      "domain": "[('state', '=', 'ready')]"
+     },
+     {
+      "name": "blocked",
+      "string": "Blocked",
+      "domain": "[('state', '=', 'blocked')]"
+     },
+     {
+      "name": "finish",
+      "string": "Finished",
+      "domain": "[('state', '=', 'done')]"
+     },
+     {
+      "name": "cancel",
+      "string": "Cancelled",
+      "domain": "[('state', '=', 'cancel')]"
+     },
+     {
+      "name": "late",
+      "string": "Late",
+      "domain": "['&', ('date_start', '<', 'now'), ('state', '=', 'ready')]",
+      "help": "Production started late"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "work_center",
+      "string": "Work Center",
+      "domain": "[]",
+      "context": "{'group_by': 'workcenter_id'}"
+     },
+     {
+      "name": "production",
+      "string": "Manufacturing Order",
+      "domain": "[]",
+      "context": "{'group_by': 'production_id'}"
+     },
+     {
+      "name": "status",
+      "string": "Status",
+      "domain": "[]",
+      "context": "{'group_by': 'state'}"
+     },
+     {
+      "name": "scheduled_month",
+      "string": "Date",
+      "domain": "[]",
+      "context": "{'group_by': 'date_start'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Work Orders\">\n                <field name=\"name\" string=\"Work Order\"/>\n                <field name=\"workcenter_id\"/>\n                <field name=\"production_id\"/>\n                <field name=\"product_id\"/>\n                <field name=\"finished_lot_ids\"/>\n                <field name=\"product_variant_attributes\"/>\n                <field name=\"move_raw_ids\" string=\"Component\" filter_domain=\"[('move_raw_ids.product_id', 'ilike', self)]\"/>\n                <filter string=\"In Progress\" name=\"progress\" domain=\"[('state', '=', 'progress')]\"/>\n                <filter string=\"To Do\" name=\"ready\" domain=\"[('state', '=', 'ready')]\"/>\n                <filter string=\"Blocked\" name=\"blocked\" domain=\"[('state', '=', 'blocked')]\"/>\n                <filter string=\"Finished\" name=\"finish\" domain=\"[('state', '=', 'done')]\"/>\n                <filter string=\"Cancelled\" name=\"cancel\" domain=\"[('state', '=', 'cancel')]\"/>\n                <separator/>\n                <filter string=\"Late\" name=\"late\" domain=\"['&amp;', ('date_start', '&lt;', 'now'), ('state', '=', 'ready')]\" help=\"Production started late\"/>\n                <group>\n                    <filter string=\"Work Center\" name=\"work_center\" domain=\"[]\" context=\"{'group_by': 'workcenter_id'}\"/>\n                    <filter string=\"Manufacturing Order\" name=\"production\" domain=\"[]\" context=\"{'group_by': 'production_id'}\"/>\n                    <filter string=\"Status\" name=\"status\" domain=\"[]\" context=\"{'group_by': 'state'}\"/>\n                    <filter string=\"Date\" name=\"scheduled_month\" domain=\"[]\" context=\"{'group_by': 'date_start'}\"/>\n                </group>\n             </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.workcenter_line_calendar",
+   "package": "mrp",
+   "name": "mrp.production.work.order.calendar",
+   "entity": "mrp.workorder",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "date_stop": "date_finished",
+     "date_start": "date_start",
+     "string": "Operations",
+     "color": "workcenter_id",
+     "event_limit": "5",
+     "delete": "0",
+     "create": "0"
+    },
+    "fields": [
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "production_id"
+     },
+     {
+      "name": "state"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "date_start",
+     "date_stop": "date_finished",
+     "date_delay": null,
+     "color": "workcenter_id",
+     "mode": null,
+     "quick_create": null,
+     "event_open_popup": null,
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <calendar date_stop=\"date_finished\" date_start=\"date_start\" string=\"Operations\" color=\"workcenter_id\" event_limit=\"5\" delete=\"0\" create=\"0\">\n                <field name=\"workcenter_id\" filters=\"1\"/>\n                <field name=\"production_id\"/>\n                <field name=\"state\"/>\n            </calendar>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.workcenter_line_graph",
+   "package": "mrp",
+   "name": "mrp.production.work.order.graph",
+   "entity": "mrp.workorder",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Operations",
+     "stacked": "0",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "production_id"
+     },
+     {
+      "name": "duration",
+      "string": "Duration (minutes)"
+     },
+     {
+      "name": "duration_unit"
+     },
+     {
+      "name": "duration_expected"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "production_id"
+     },
+     {
+      "name": "duration",
+      "type": "measure",
+      "string": "Duration (minutes)"
+     },
+     {
+      "name": "duration_unit",
+      "type": "measure"
+     },
+     {
+      "name": "duration_expected",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Operations\" stacked=\"0\" sample=\"1\">\n                <field name=\"production_id\"/>\n                <field name=\"duration\" type=\"measure\" string=\"Duration (minutes)\"/>\n                <field name=\"duration_unit\" type=\"measure\"/>\n                <field name=\"duration_expected\" type=\"measure\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.workcenter_line_pivot",
+   "package": "mrp",
+   "name": "mrp.production.work.order.pivot",
+   "entity": "mrp.workorder",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Operations",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date_start"
+     },
+     {
+      "name": "operation_id"
+     },
+     {
+      "name": "duration",
+      "widget": "float_time",
+      "string": "Duration (minutes)"
+     },
+     {
+      "name": "duration_unit",
+      "widget": "float_time"
+     },
+     {
+      "name": "duration_expected",
+      "widget": "float_time"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "float_time": 3
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date_start"
+     },
+     {
+      "name": "operation_id"
+     },
+     {
+      "name": "duration",
+      "type": "measure",
+      "string": "Duration (minutes)",
+      "widget": "float_time"
+     },
+     {
+      "name": "duration_unit",
+      "type": "measure",
+      "widget": "float_time"
+     },
+     {
+      "name": "duration_expected",
+      "type": "measure",
+      "widget": "float_time"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Operations\" sample=\"1\">\n                <field name=\"date_start\"/>\n                <field name=\"operation_id\"/>\n                <field name=\"duration\" type=\"measure\" string=\"Duration (minutes)\" widget=\"float_time\"/>\n                <field name=\"duration_unit\" type=\"measure\" widget=\"float_time\"/>\n                <field name=\"duration_expected\" type=\"measure\" widget=\"float_time\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.workcenter_line_kanban",
+   "package": "mrp",
+   "name": "mrp.production.work.order.kanban",
+   "entity": "mrp.workorder",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_mrp_workorder_kanban",
+     "create": "0",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "last_working_user_id"
+     },
+     {
+      "name": "workcenter_id",
+      "invisible": "True"
+     },
+     {
+      "name": "product_uom_id",
+      "invisible": "True",
+      "force_save": "True"
+     },
+     {
+      "name": "operation_id",
+      "invisible": "True"
+     },
+     {
+      "name": "working_user_ids"
+     },
+     {
+      "name": "working_state"
+     },
+     {
+      "name": "date_start"
+     },
+     {
+      "name": "production_date"
+     },
+     {
+      "name": "production_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "date_start"
+     },
+     {
+      "name": "production_date"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "qty_production"
+     },
+     {
+      "name": "product_uom_id",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "finished_lot_ids"
+     },
+     {
+      "name": "last_working_user_id",
+      "widget": "image",
+      "options": "{'preview_image': 'avatar_128'}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_mrp_workorder_kanban\" create=\"0\" sample=\"1\">\n                <field name=\"last_working_user_id\"/>\n                <field name=\"workcenter_id\" invisible=\"True\"/>\n                <field name=\"product_uom_id\" invisible=\"True\" force_save=\"True\"/>\n                <field name=\"operation_id\" invisible=\"True\"/>\n                <field name=\"working_user_ids\"/>\n                <field name=\"working_state\"/>\n                <field name=\"date_start\"/>\n                <field name=\"production_date\"/>\n                <templates>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex o_kanban_record_top\">\n                            <div class=\"o_kanban_workorder_title h4\">\n                                <field name=\"production_id\"/> - <field name=\"name\"/>\n                            </div>\n                            <div class=\"o_kanban_workorder_date h5\">\n                                <field name=\"date_start\"/>\n                                <field t-if=\"!record.date_start.raw_value\" name=\"production_date\"/>\n                            </div>\n                            <div class=\"h2 ms-2\">\n                                <span t-attf-class=\"badge #{['progress'].indexOf(record.state.raw_value) &gt; -1 ? 'text-bg-warning' : ['ready', 'blocked'].indexOf(record.state.raw_value) &gt; -1 ? 'text-bg-primary' : ['done'].indexOf(record.state.raw_value) &gt; -1 ? 'text-bg-success' : 'text-bg-danger'}\">\n                                    <field name=\"state\"/>\n                                </span>\n                            </div>\n                        </div>\n                        <footer>\n                            <h5>\n                                <field name=\"product_id\"/>, <field name=\"qty_production\" class=\"ms-1\"/> <field name=\"product_uom_id\" groups=\"uom.group_uom\"/><t t-if=\"record.finished_lot_ids.value\">, </t> <field t-if=\"record.finished_lot_ids.value\" name=\"finished_lot_ids\" class=\"ms-1\"/>\n                            </h5>\n                            <div class=\"o_kanban_workorder_status d-flex ms-auto\" t-if=\"record.state.raw_value == 'progress'\">\n                                <span t-if=\"record.working_state.raw_value != 'blocked' and record.working_user_ids.raw_value.length &gt; 0\" class=\"fa fa-play fs-6\" role=\"img\" aria-label=\"Is running\" title=\"Is running\"/>\n                                <span t-if=\"record.working_state.raw_value != 'blocked' and record.working_user_ids.raw_value.length == 0 and record.last_working_user_id.raw_value\" class=\"fa fa-pause\" role=\"img\" aria-label=\"Is paused\" title=\"Is paused\"/>\n                                <span t-if=\"record.working_state.raw_value == 'blocked' and (record.working_user_ids.raw_value.length == 0 or record.last_working_user_id.raw_value)\" class=\"fa fa-stop\" role=\"img\" aria-label=\"Is stopped\" title=\"Is stopped\"/>\n                                <field t-if=\"record.last_working_user_id.raw_value\" name=\"last_working_user_id\" widget=\"image\" options=\"{'preview_image': 'avatar_128'}\" class=\"ms-1 o_avatar\"/>\n                            </div>\n                        </footer>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.view_workcenter_load_pivot",
+   "package": "mrp",
+   "name": "report.workcenter.load.pivot",
+   "entity": "mrp.workorder",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Work Center Loads",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "duration_expected",
+      "string": "Expected Duration (minutes)"
+     },
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "production_date"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "duration_expected",
+      "type": "measure",
+      "string": "Expected Duration (minutes)"
+     },
+     {
+      "name": "workcenter_id",
+      "type": "row"
+     },
+     {
+      "name": "production_date",
+      "type": "row",
+      "interval": "day"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Work Center Loads\" sample=\"1\">\n                <field name=\"duration_expected\" type=\"measure\" string=\"Expected Duration (minutes)\"/>\n                <field name=\"workcenter_id\" type=\"row\"/>\n                <field name=\"production_date\" type=\"row\" interval=\"day\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp.view_work_center_load_graph",
+   "package": "mrp",
+   "name": "report.workcenter.load.graph",
+   "entity": "mrp.workorder",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Work Center load",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "production_date"
+     },
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "duration_expected",
+      "string": "Expected Duration (minutes)"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "production_date",
+      "interval": "day"
+     },
+     {
+      "name": "workcenter_id"
+     },
+     {
+      "name": "duration_expected",
+      "type": "measure",
+      "string": "Expected Duration (minutes)"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Work Center load\" sample=\"1\">\n                <field name=\"production_date\" interval=\"day\"/>\n                <field name=\"workcenter_id\"/>\n                <field name=\"duration_expected\" type=\"measure\" string=\"Expected Duration (minutes)\"/>\n            </graph>\n        </field>\n    "
+  }
+ ]
+}

@@ -1,0 +1,340 @@
+{
+ "catalog": {
+  "name": "entity:account.reconcile.model.line",
+  "description": "Complete definition of entity Rules for the reconciliation model (account.reconcile.model.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.reconcile.model.line",
+  "storage_name": "account_reconcile_model_line",
+  "full_name": "Rules for the reconciliation model",
+  "kind": "persistent",
+  "description": "Rules for the reconciliation model",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [
+   "analytic.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "model_id",
+    "type": "Many2one",
+    "comodel": "account.reconcile.model",
+    "readonly": true,
+    "index": "btree_not_null",
+    "ondelete": "cascade",
+    "defined_in_package": "account",
+    "string": "Model",
+    "full_name": "Model",
+    "target_entity": "account.reconcile.model"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "model_id.company_id",
+    "store": true,
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "required": true,
+    "default": 10,
+    "defined_in_package": "account",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Account",
+    "ondelete": "cascade",
+    "domain": "[('account_type', '!=', 'off_balance')]",
+    "check_company": true,
+    "defined_in_package": "account",
+    "full_name": "Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Partner",
+    "defined_in_package": "account",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "label",
+    "type": "Char",
+    "string": "Label",
+    "translate": true,
+    "defined_in_package": "account",
+    "full_name": "Label"
+   },
+   {
+    "name": "amount_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "fixed",
+      "Fixed"
+     ],
+     [
+      "percentage",
+      "Percentage of balance"
+     ],
+     [
+      "percentage_st_line",
+      "Percentage of statement line"
+     ],
+     [
+      "regex",
+      "From label"
+     ]
+    ],
+    "required": true,
+    "default": "percentage",
+    "defined_in_package": "account",
+    "string": "Amount Type",
+    "full_name": "Amount Type"
+   },
+   {
+    "name": "amount",
+    "type": "Float",
+    "string": "Float Amount",
+    "compute": "_compute_float_amount",
+    "store": true,
+    "defined_in_package": "account",
+    "full_name": "Float Amount"
+   },
+   {
+    "name": "amount_string",
+    "type": "Char",
+    "string": "Amount",
+    "default": "100",
+    "required": true,
+    "help": "Value for the amount of the writeoff line\n    * Percentage: Percentage of the balance, between 0 and 100.\n    * Fixed: The fixed value of the writeoff. The amount will count as a debit if it is negative, as a credit if it is positive.\n    * From Label: There is no need for regex delimiter, only the regex is needed. For instance if you want to extract the amount from\nR:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\nYou could enter\nBRT: ([\\d,]+)\n    If the label is \"01870912 0009065 00115\" and you need the amount in decimal\n    format (e.g. 90.65), you can use a regex with capturing groups, for example:\n        \\s+0*(\\d+?)(\\d{2})(?=\\s)\n    In this case:\n    • the first group captures the integer part\n    • the second group captures the decimal part (last two digits)\n    ",
+    "defined_in_package": "account",
+    "full_name": "Amount"
+   },
+   {
+    "name": "tax_ids",
+    "type": "Many2many",
+    "comodel": "account.tax",
+    "relation": "account_reconcile_model_line_account_tax_rel",
+    "column1": "account_reconcile_model_line_id",
+    "column2": "account_tax_id",
+    "string": "Taxes",
+    "ondelete": "restrict",
+    "check_company": true,
+    "defined_in_package": "account",
+    "full_name": "Taxes",
+    "target_entity": "account.tax"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_onchange_amount_type",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "amount_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_float_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount_string"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_amount",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "amount_string"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The amount is not a number",
+        "line": 82
+       },
+       {
+        "kind": "UserError",
+        "message": "Statement line percentage can't be 0",
+        "line": 84
+       },
+       {
+        "kind": "UserError",
+        "message": "Balance percentage can't be 0",
+        "line": 86
+       },
+       {
+        "kind": "UserError",
+        "message": "The regex is not valid",
+        "line": 91
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_validate_amount",
+    "package": "account",
+    "kind": "UserError",
+    "message": "The amount is not a number"
+   },
+   {
+    "operation": "_validate_amount",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Statement line percentage can't be 0"
+   },
+   {
+    "operation": "_validate_amount",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Balance percentage can't be 0"
+   },
+   {
+    "operation": "_validate_amount",
+    "package": "account",
+    "kind": "UserError",
+    "message": "The regex is not valid"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_reconcile_model_line_readonly",
+    "package": "account",
+    "name": "account.reconcile.model.line.readonly",
+    "entity": "account.reconcile.model.line",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_reconcile_model_line_billing",
+    "package": "account",
+    "name": "account.reconcile.model.line.billing",
+    "entity": "account.reconcile.model.line",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_reconcile_model_line",
+    "package": "account",
+    "name": "account.reconcile.model.line",
+    "entity": "account.reconcile.model.line",
+    "group": "account.group_account_basic",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.account_reconcile_model_line_template_comp_rule",
+    "package": "account",
+    "name": "Account reconcile model_line template company rule",
+    "entity": "account.reconcile.model.line",
+    "domain": "[('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

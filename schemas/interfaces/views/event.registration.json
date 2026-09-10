@@ -1,0 +1,1215 @@
+{
+ "catalog": {
+  "name": "views:event.registration",
+  "description": "View declarations for entity event.registration.",
+  "record_count": 19,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "event.view_event_registration_tree",
+   "package": "event",
+   "name": "event.registration.list",
+   "entity": "event.registration",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Registration",
+     "multi_edit": "1",
+     "sample": "1",
+     "expand": "1",
+     "default_order": "create_date desc",
+     "class": "o_event_registration_view_tree",
+     "js_class": "registration_summary_dialog_list"
+    },
+    "fields": [
+     {
+      "name": "barcode",
+      "column_invisible": "True"
+     },
+     {
+      "name": "active",
+      "column_invisible": "True"
+     },
+     {
+      "name": "create_date",
+      "string": "Registration Date",
+      "optional": "show"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "partner_id",
+      "optional": "hide"
+     },
+     {
+      "name": "email",
+      "optional": "show"
+     },
+     {
+      "name": "phone",
+      "optional": "show"
+     },
+     {
+      "name": "company_name",
+      "optional": "hide"
+     },
+     {
+      "name": "event_id",
+      "column_invisible": "context.get('default_event_id')"
+     },
+     {
+      "name": "event_slot_id",
+      "domain": "[('event_id', '=', event_id)]"
+     },
+     {
+      "name": "event_ticket_id",
+      "domain": "[('event_id', '=', event_id)]"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "list_activity"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-success": "state == 'done'",
+      "decoration-info": "state in ('draft', 'open')",
+      "decoration-muted": "state == 'cancel'"
+     },
+     {
+      "name": "company_id",
+      "readonly": "state != 'draft'",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "message_needaction",
+      "column_invisible": "True"
+     },
+     {
+      "name": "activity_exception_decoration",
+      "widget": "activity_exception"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_confirm",
+      "string": "Registered",
+      "type": "object",
+      "invisible": "not active or state != 'draft'",
+      "icon": "fa-check"
+     },
+     {
+      "name": "action_set_done",
+      "string": "Mark as Attending",
+      "type": "object",
+      "invisible": "not active or state != 'open'",
+      "icon": "fa-level-down"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "not active or (state != 'open' and state != 'draft')",
+      "class": "o_btn_cancel_registration",
+      "icon": "fa-times"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "list_activity": 1,
+     "badge": 1,
+     "activity_exception": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Registration\" multi_edit=\"1\" sample=\"1\" expand=\"1\" default_order=\"create_date desc\" class=\"o_event_registration_view_tree\" js_class=\"registration_summary_dialog_list\">\n                <field name=\"barcode\" column_invisible=\"True\"/>\n                <field name=\"active\" column_invisible=\"True\"/>\n                <field name=\"create_date\" optional=\"show\" string=\"Registration Date\"/>\n                <field name=\"name\"/>\n                <field name=\"partner_id\" optional=\"hide\"/>\n                <field name=\"email\" optional=\"show\"/>\n                <field name=\"phone\" optional=\"show\"/>\n                <field name=\"company_name\" optional=\"hide\"/>\n                <field name=\"event_id\" column_invisible=\"context.get('default_event_id')\"/>\n                <field name=\"event_slot_id\" domain=\"[('event_id', '=', event_id)]\"/>\n                <field name=\"event_ticket_id\" domain=\"[('event_id', '=', event_id)]\"/>\n                <field name=\"activity_ids\" widget=\"list_activity\"/>\n                <field name=\"state\" decoration-info=\"state in ('draft', 'open')\" decoration-success=\"state == 'done'\" decoration-muted=\"state == 'cancel'\" widget=\"badge\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" optional=\"hide\" readonly=\"state != 'draft'\"/>\n                <field name=\"message_needaction\" column_invisible=\"True\"/>\n                <button name=\"action_confirm\" string=\"Registered\" type=\"object\" icon=\"fa-check\" invisible=\"not active or state != 'draft'\"/>\n                <button name=\"action_set_done\" string=\"Mark as Attending\" type=\"object\" icon=\"fa-level-down\" invisible=\"not active or state != 'open'\"/>\n                <button name=\"action_cancel\" string=\"Cancel\" type=\"object\" class=\"o_btn_cancel_registration\" icon=\"fa-times\" invisible=\"not active or (state != 'open' and state != 'draft')\"/>\n                <field name=\"activity_exception_decoration\" widget=\"activity_exception\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.view_event_registration_form",
+   "package": "event",
+   "name": "event.registration.form",
+   "entity": "event.registration",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Event Registration"
+    },
+    "fields": [
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "widget": "statusbar",
+      "readonly": "False",
+      "options": "{'clickable': '1'}",
+      "nolabel": "1"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "email"
+     },
+     {
+      "name": "phone",
+      "widget": "phone",
+      "options": "{'enable_sms': true}"
+     },
+     {
+      "name": "company_name",
+      "placeholder": "e.g. \"Azure Interior\""
+     },
+     {
+      "name": "event_id",
+      "context": "{'name_with_seats_availability': True}",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "event_slot_id",
+      "invisible": "not is_multi_slots",
+      "required": "is_multi_slots",
+      "domain": "[('event_id', '=', event_id)]",
+      "context": "{'name_with_seats_availability': True}",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "event_ticket_id",
+      "invisible": "not event_id",
+      "domain": "[('event_id', '=', event_id)]",
+      "context": "{'name_with_seats_availability': True, 'is_event_multi_slots': is_multi_slots}",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "barcode",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "create_date",
+      "string": "Registration Date",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "date_closed",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "utm_campaign_id"
+     },
+     {
+      "name": "utm_medium_id"
+     },
+     {
+      "name": "utm_source_id"
+     },
+     {
+      "name": "registration_properties"
+     },
+     {
+      "name": "registration_answer_ids",
+      "widget": "one2many"
+     },
+     {
+      "name": "event_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "question_id",
+      "domain": "[('event_ids', 'in', event_id)]",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "question_type",
+      "string": "Type"
+     },
+     {
+      "name": "value_answer_id",
+      "invisible": "question_type != 'simple_choice'",
+      "domain": "[('question_id', '=', question_id)]",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "value_text_box",
+      "invisible": "question_type == 'simple_choice'"
+     },
+     {
+      "name": "event_id"
+     },
+     {
+      "name": "question_type"
+     },
+     {
+      "name": "question_id",
+      "domain": "[('event_ids', 'in', event_id)]"
+     },
+     {
+      "name": "value_answer_id",
+      "invisible": "question_type != 'simple_choice'",
+      "domain": "[('question_id', '=', question_id)]",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "value_text_box",
+      "invisible": "question_type == 'simple_choice'"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_send_badge_email",
+      "string": "Send by Email",
+      "type": "object",
+      "invisible": "not active or state != 'open' and state != 'done'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_confirm",
+      "string": "Registered",
+      "type": "object",
+      "invisible": "not active or state != 'draft'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_set_done",
+      "string": "Attended",
+      "type": "object",
+      "invisible": "not active or state != 'open'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel Registration",
+      "type": "object",
+      "invisible": "not active or state == 'cancel'"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "questions",
+      "string": "Questions",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "statusbar": 1,
+     "phone": 1,
+     "one2many": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "action_send_badge_email",
+      "string": "Send by Email",
+      "type": "object",
+      "class": "oe_highlight",
+      "invisible": "not active or state != 'open' and state != 'done'"
+     },
+     {
+      "name": "action_confirm",
+      "string": "Registered",
+      "type": "object",
+      "class": "oe_highlight",
+      "invisible": "not active or state != 'draft'"
+     },
+     {
+      "name": "action_set_done",
+      "string": "Attended",
+      "type": "object",
+      "class": "oe_highlight",
+      "invisible": "not active or state != 'open'"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel Registration",
+      "type": "object",
+      "invisible": "not active or state == 'cancel'"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": "open,done",
+    "chatter": true,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Event Registration\">\n                <field name=\"active\" invisible=\"1\"/>\n                <header>\n                    <button name=\"action_send_badge_email\" string=\"Send by Email\" type=\"object\" class=\"oe_highlight\" invisible=\"not active or state != 'open' and state != 'done'\"/>\n                    <button name=\"action_confirm\" string=\"Registered\" type=\"object\" class=\"oe_highlight\" invisible=\"not active or state != 'draft'\"/>\n                    <button name=\"action_set_done\" string=\"Attended\" type=\"object\" class=\"oe_highlight\" invisible=\"not active or state != 'open'\"/>\n                    <button name=\"action_cancel\" string=\"Cancel Registration\" type=\"object\" invisible=\"not active or state == 'cancel'\"/>\n                    <field name=\"state\" nolabel=\"1\" colspan=\"2\" widget=\"statusbar\" statusbar_visible=\"open,done\" readonly=\"False\" options=\"{'clickable': '1'}\"/>\n                </header>\n                <sheet string=\"Registration\">\n                    <div class=\"oe_button_box\" name=\"button_box\"/>\n                    <widget name=\"web_ribbon\" text=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <group>\n                        <group string=\"Attendee\" name=\"attendee\">\n                            <field class=\"o_text_overflow\" name=\"name\"/>\n                            <field name=\"email\"/>\n                            <field name=\"phone\" class=\"o_force_ltr\" widget=\"phone\" options=\"{'enable_sms': true}\"/>\n                            <field name=\"company_name\" placeholder=\"e.g. &quot;Azure Interior&quot;\"/>\n                        </group>\n                        <group string=\"Event Information\" name=\"event\">\n                            <field class=\"text-break\" name=\"event_id\" context=\"{'name_with_seats_availability': True}\" options=\"{'no_create': True}\"/>\n                            <field name=\"event_slot_id\" invisible=\"not is_multi_slots\" required=\"is_multi_slots\" context=\"{'name_with_seats_availability': True}\" options=\"{'no_open': True, 'no_create': True}\" domain=\"[('event_id', '=', event_id)]\"/>\n                            <field name=\"event_ticket_id\" invisible=\"not event_id\" context=\"{'name_with_seats_availability': True, 'is_event_multi_slots': is_multi_slots}\" options=\"{'no_open': True, 'no_create': True}\" domain=\"[('event_id', '=', event_id)]\"/>\n                            <field name=\"barcode\" groups=\"base.group_no_one\"/>\n                            <field name=\"partner_id\"/>\n                            <field name=\"create_date\" string=\"Registration Date\" groups=\"base.group_no_one\"/>\n                            <field name=\"date_closed\" groups=\"base.group_no_one\"/>\n                        </group>\n                        <group string=\"Marketing\" name=\"utm_link\" groups=\"base.group_no_one\">\n                            <field name=\"utm_campaign_id\"/>\n                            <field name=\"utm_medium_id\"/>\n                            <field name=\"utm_source_id\"/>\n                        </group>\n                    </group>\n                    <field name=\"registration_properties\" columns=\"2\"/>\n                    <notebook>\n                        <page string=\"Questions\" name=\"questions\">\n                            <field name=\"registration_answer_ids\" widget=\"one2many\">\n                                <list editable=\"bottom\">\n                                    <field name=\"event_id\" column_invisible=\"True\"/>\n                                    <field name=\"question_id\" domain=\"[('event_ids', 'in', event_id)]\" options=\"{'no_create': True}\"/>\n                                    <field name=\"question_type\" string=\"Type\"/>\n                                    <field name=\"value_answer_id\" invisible=\"question_type != 'simple_choice'\" domain=\"[('question_id', '=', question_id)]\" options=\"{'no_create': True}\"/>\n                                    <field name=\"value_text_box\" invisible=\"question_type == 'simple_choice'\"/>\n                                </list>\n                                <kanban class=\"o_kanban_mobile\" create=\"false\" delete=\"false\">\n                                    <field name=\"event_id\"/>\n                                    <field name=\"question_type\"/>\n                                    <templates>\n                                        <t t-name=\"card\" class=\"justify-content-between\">\n                                            <field class=\"fw-bold fs-5\" name=\"question_id\" domain=\"[('event_ids', 'in', event_id)]\"/>\n                                            <field name=\"value_answer_id\" invisible=\"question_type != 'simple_choice'\" domain=\"[('question_id', '=', question_id)]\" options=\"{'no_create': True}\"/>\n                                            <field name=\"value_text_box\" invisible=\"question_type == 'simple_choice'\"/>\n                                        </t>\n                                    </templates>\n                                </kanban>\n                            </field>\n                        </page>\n                    </notebook>\n                </sheet>\n                <chatter reload_on_post=\"True\"/>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.event_registration_view_kanban",
+   "package": "event",
+   "name": "event.registration.kanban",
+   "entity": "event.registration",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_event_attendee_kanban_view",
+     "default_order": "name, create_date desc",
+     "sample": "1",
+     "js_class": "registration_summary_dialog_kanban"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "active"
+     },
+     {
+      "name": "barcode"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-success": "state == 'done'"
+     },
+     {
+      "name": "event_id",
+      "invisible": "context.get('default_event_id')"
+     },
+     {
+      "name": "company_name"
+     },
+     {
+      "name": "registration_properties"
+     },
+     {
+      "name": "event_slot_id"
+     },
+     {
+      "name": "event_ticket_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_event_attendee_kanban_view\" default_order=\"name, create_date desc\" sample=\"1\" js_class=\"registration_summary_dialog_kanban\">\n                <field name=\"name\"/>\n                <field name=\"state\"/>\n                <field name=\"active\"/>\n                <field name=\"barcode\"/>\n                <templates>\n                    <t t-name=\"card\" class=\"row g-0\">\n                        <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                        <div class=\"col-8\">\n                            <field class=\"d-block fw-bold fs-5\" name=\"name\"/>\n                            <field name=\"state\" widget=\"badge\" decoration-success=\"state == 'done'\" class=\"position-absolute top-0 end-0 o_event_registration_kanban_badge\"/>\n                            <div class=\"o_kanban_event_registration_event_name\">\n                                <field class=\"text-truncate text-primary\" name=\"event_id\" invisible=\"context.get('default_event_id')\"/>\n                            </div>\n                            <span class=\"text-truncate\" invisible=\"not company_name\">\n                                <i class=\"fa fa-building\" title=\"Attendee Company\"/> <field name=\"company_name\"/>\n                            </span>\n                            <div id=\"event_ticket_id\">\n                                <field name=\"registration_properties\"/>\n                                <div t-if=\"record.event_slot_id.raw_value\">\n                                    <i class=\"fa fa-calendar\" title=\"Slot\"/>\n                                    <field name=\"event_slot_id\" class=\"fw-bold text-truncate ms-1\"/>\n                                </div>\n                                <div t-if=\"record.event_ticket_id.raw_value\">\n                                    <i class=\"fa fa-ticket\" title=\"Ticket type\"/>\n                                    <field name=\"event_ticket_id\" class=\"fw-bold text-truncate ms-1\"/>\n                                </div>\n                            </div>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.view_event_registration_calendar",
+   "package": "event",
+   "name": "event.registration.calendar",
+   "entity": "event.registration",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "2",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "date_start": "event_begin_date",
+     "date_stop": "event_end_date",
+     "string": "Event Registration",
+     "color": "event_id",
+     "event_limit": "5"
+    },
+    "fields": [
+     {
+      "name": "event_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "registration_properties"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "event_begin_date",
+     "date_stop": "event_end_date",
+     "date_delay": null,
+     "color": "event_id",
+     "mode": null,
+     "quick_create": null,
+     "event_open_popup": null,
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <calendar date_start=\"event_begin_date\" date_stop=\"event_end_date\" string=\"Event Registration\" color=\"event_id\" event_limit=\"5\">\n                <field name=\"event_id\" filters=\"1\"/>\n                <field name=\"name\"/>\n                <field name=\"registration_properties\"/>\n            </calendar>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.view_event_registration_pivot",
+   "package": "event",
+   "name": "event.registration.pivot",
+   "entity": "event.registration",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Registration",
+     "display_quantity": "1",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "event_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "event_id",
+      "type": "row"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Registration\" display_quantity=\"1\" sample=\"1\">\n                <field name=\"event_id\" type=\"row\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.view_event_registration_graph",
+   "package": "event",
+   "name": "event.registration.graph",
+   "entity": "event.registration",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Registration",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "event_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "event_id"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Registration\" sample=\"1\">\n                <field name=\"event_id\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.view_registration_search",
+   "package": "event",
+   "name": "event.registration.search",
+   "entity": "event.registration",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Event Registration"
+    },
+    "fields": [
+     {
+      "name": "id",
+      "string": "Registration ID"
+     },
+     {
+      "name": "name",
+      "string": "Participant",
+      "filter_domain": "['|', '|', ('name', 'ilike', self), ('email', 'ilike', self), ('company_name', 'ilike', self)]"
+     },
+     {
+      "name": "company_id"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "event_ticket_id",
+      "string": "Ticket"
+     },
+     {
+      "name": "event_id"
+     },
+     {
+      "name": "event_user_id",
+      "invisible": "1",
+      "string": "Responsible"
+     },
+     {
+      "name": "event_organizer_id",
+      "invisible": "1",
+      "string": "Organizer"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "filter_is_ongoing",
+      "string": "Ongoing Events",
+      "domain": "[('event_id.is_ongoing', '=', True)]"
+     },
+     {
+      "name": "taken",
+      "string": "Taken",
+      "domain": "[('state', 'in', ['open', 'done'])]"
+     },
+     {
+      "name": "unconfirmed",
+      "string": "Unconfirmed",
+      "domain": "[('state', '=', 'draft')]"
+     },
+     {
+      "name": "confirmed",
+      "string": "Registered",
+      "domain": "[('state', '=', 'open')]"
+     },
+     {
+      "name": "attended",
+      "string": "Attended",
+      "domain": "[('state', '=', 'done')]"
+     },
+     {
+      "name": "filter_create_date",
+      "string": "Registration Date",
+      "date": "create_date"
+     },
+     {
+      "name": "filter_event_begin_date",
+      "string": "Event Start Date",
+      "date": "event_begin_date"
+     },
+     {
+      "name": "filter_date_closed",
+      "string": "Attended Date",
+      "date": "date_closed"
+     },
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "filter_last_month_creation",
+      "string": "Last 30 days",
+      "domain": "[('create_date','>', 'today -30d')]"
+     },
+     {
+      "name": "filter_inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "partner",
+      "string": "Partner",
+      "domain": "[]",
+      "context": "{'group_by':'partner_id'}"
+     },
+     {
+      "name": "group_event",
+      "string": "Event",
+      "domain": "[]",
+      "context": "{'group_by':'event_id'}"
+     },
+     {
+      "name": "group_by_event_slot_id",
+      "string": "Slot",
+      "context": "{'group_by': 'event_slot_id'}"
+     },
+     {
+      "name": "group_event_ticket_id",
+      "string": "Ticket Type",
+      "domain": "[]",
+      "context": "{'group_by': 'event_ticket_id'}"
+     },
+     {
+      "name": "status",
+      "string": "Status",
+      "domain": "[]",
+      "context": "{'group_by':'state'}"
+     },
+     {
+      "name": "group_by_create_date_week",
+      "string": "Registration Date",
+      "domain": "[]",
+      "context": "{'group_by': 'create_date:week'}",
+      "invisible": "context.get('registration_view_hide_group_by_create_date_week')"
+     },
+     {
+      "name": "group_by_create_date_day",
+      "string": "Registration Date",
+      "domain": "[]",
+      "context": "{'group_by': 'create_date:day'}",
+      "invisible": "not context.get('registration_view_hide_group_by_create_date_week')"
+     },
+     {
+      "name": "group_by_utm_campaign_id",
+      "string": "Campaign",
+      "domain": "[]",
+      "context": "{'group_by': 'utm_campaign_id'}"
+     },
+     {
+      "name": "group_by_utm_medium_id",
+      "string": "Medium",
+      "domain": "[]",
+      "context": "{'group_by': 'utm_medium_id'}"
+     },
+     {
+      "name": "group_by_utm_source_id",
+      "string": "Source",
+      "domain": "[]",
+      "context": "{'group_by': 'utm_source_id'}"
+     },
+     {
+      "name": "group_by_registration_properties",
+      "string": "Properties",
+      "context": "{'group_by': 'registration_properties'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Event Registration\">\n                <field name=\"id\" string=\"Registration ID\"/>\n                <field name=\"name\" string=\"Participant\" filter_domain=\"['|', '|', ('name', 'ilike', self), ('email', 'ilike', self), ('company_name', 'ilike', self)]\"/>\n                <field name=\"company_id\"/>\n                <field name=\"partner_id\"/>\n                <field name=\"event_ticket_id\" string=\"Ticket\"/>\n                <field name=\"event_id\"/>\n                <field name=\"event_user_id\" string=\"Responsible\" invisible=\"1\"/>\n                <field name=\"event_organizer_id\" string=\"Organizer\" invisible=\"1\"/>\n                <filter string=\"Ongoing Events\" name=\"filter_is_ongoing\" domain=\"[('event_id.is_ongoing', '=', True)]\"/>\n                <filter string=\"Taken\" name=\"taken\" domain=\"[('state', 'in', ['open', 'done'])]\"/>\n                <separator/>\n                <filter string=\"Unconfirmed\" name=\"unconfirmed\" domain=\"[('state', '=', 'draft')]\"/>\n                <filter string=\"Registered\" name=\"confirmed\" domain=\"[('state', '=', 'open')]\"/>\n                <filter string=\"Attended\" name=\"attended\" domain=\"[('state', '=', 'done')]\"/>\n                <separator/>\n                <filter string=\"Registration Date\" name=\"filter_create_date\" date=\"create_date\"/>\n                <filter string=\"Event Start Date\" name=\"filter_event_begin_date\" date=\"event_begin_date\"/>\n                <filter string=\"Attended Date\" name=\"filter_date_closed\" date=\"date_closed\"/>\n                <separator/>\n                <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                <separator invisible=\"1\"/>\n                <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')]\"/>\n                <filter string=\"Last 30 days\" name=\"filter_last_month_creation\" domain=\"[('create_date','&gt;', 'today -30d')]\"/>\n                <separator/>\n                <filter string=\"Archived\" name=\"filter_inactive\" domain=\"[('active', '=', False)]\"/>\n                <group>\n                    <filter string=\"Partner\" name=\"partner\" domain=\"[]\" context=\"{'group_by':'partner_id'}\"/>\n                    <filter string=\"Event\" name=\"group_event\" domain=\"[]\" context=\"{'group_by':'event_id'}\"/>\n                    <filter string=\"Slot\" name=\"group_by_event_slot_id\" context=\"{'group_by': 'event_slot_id'}\"/>\n                    <filter string=\"Ticket Type\" name=\"group_event_ticket_id\" domain=\"[]\" context=\"{'group_by': 'event_ticket_id'}\"/>\n                    <filter string=\"Status\" name=\"status\" domain=\"[]\" context=\"{'group_by':'state'}\"/>\n                    <filter string=\"Registration Date\" name=\"group_by_create_date_week\" domain=\"[]\" context=\"{'group_by': 'create_date:week'}\" invisible=\"context.get('registration_view_hide_group_by_create_date_week')\"/>\n                    <filter string=\"Registration Date\" name=\"group_by_create_date_day\" domain=\"[]\" context=\"{'group_by': 'create_date:day'}\" invisible=\"not context.get('registration_view_hide_group_by_create_date_week')\"/>\n                    <filter string=\"Campaign\" name=\"group_by_utm_campaign_id\" domain=\"[]\" context=\"{'group_by': 'utm_campaign_id'}\"/>\n                    <filter string=\"Medium\" name=\"group_by_utm_medium_id\" domain=\"[]\" context=\"{'group_by': 'utm_medium_id'}\"/>\n                    <filter string=\"Source\" name=\"group_by_utm_source_id\" domain=\"[]\" context=\"{'group_by': 'utm_source_id'}\"/>\n                    <filter string=\"Properties\" name=\"group_by_registration_properties\" context=\"{'group_by': 'registration_properties'}\"/>\n               </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.event_registration_view_search_event_specific",
+   "package": "event",
+   "name": "event.registration.view.search.event.specific",
+   "entity": "event.registration",
+   "view_type": "xpath",
+   "inherits_view": "view_registration_search",
+   "mode": "primary",
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//search/field[@name='event_id']",
+     "position": "replace"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//search/field[@name='event_id']",
+      "position": "replace"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//search/field[@name='event_id']\" position=\"replace\"/>\n            <xpath expr=\"//search/filter[@name='filter_is_ongoing']\" position=\"replace\"/>\n            <xpath expr=\"//search/group/filter[@name='group_event']\" position=\"replace\"/>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_crm.event_registration_view_form",
+   "package": "event_crm",
+   "name": "event.registration.form.inherit.event.crm",
+   "entity": "event.registration",
+   "view_type": "xpath",
+   "inherits_view": "event.view_event_registration_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='button_box']",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "lead_count"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(crm_lead_action_from_registration)d",
+      "type": "action",
+      "invisible": "lead_count == 0",
+      "class": "oe_stat_button",
+      "groups": "sales_team.group_sale_salesman",
+      "icon": "fa-star"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@name='button_box']\" position=\"inside\">\n                <button name=\"%(crm_lead_action_from_registration)d\" class=\"oe_stat_button\" type=\"action\" icon=\"fa-star\" invisible=\"lead_count == 0\" groups=\"sales_team.group_sale_salesman\">\n                    <div class=\"o_stat_info\">\n                        <field name=\"lead_count\"/>\n                        <span class=\"o_stat_text\"> Leads</span>\n                    </div>\n                </button>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_product.view_event_registration_ticket_tree",
+   "package": "event_product",
+   "name": "event.registration.list.inherit",
+   "entity": "event.registration",
+   "view_type": "field",
+   "inherits_view": "event.view_event_registration_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "state",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "state",
+      "position": "after"
+     },
+     {
+      "name": "sale_status",
+      "widget": "badge",
+      "invisible": "not sale_status",
+      "optional": "show",
+      "decoration-danger": "sale_status == 'to_pay'",
+      "decoration-success": "sale_status == 'sold'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "badge": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"state\" position=\"after\">\n                <field name=\"sale_status\" optional=\"show\" widget=\"badge\" decoration-success=\"sale_status == 'sold'\" decoration-danger=\"sale_status == 'to_pay'\" invisible=\"not sale_status\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_product.event_registration_view_graph",
+   "package": "event_product",
+   "name": "event.registration.graph.inherit.event.sale",
+   "entity": "event.registration",
+   "view_type": "field",
+   "inherits_view": "event.view_event_registration_graph",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "event_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "event_id",
+      "position": "after"
+     },
+     {
+      "name": "sale_status"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"event_id\" position=\"after\">\n                <field name=\"sale_status\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_product.event_registration_ticket_view_form",
+   "package": "event_product",
+   "name": "event.registration.form.inherit",
+   "entity": "event.registration",
+   "view_type": "xpath",
+   "inherits_view": "event.view_event_registration_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group",
+     "position": "before"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//group",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//group\" position=\"before\">\n                <widget name=\"web_ribbon\" title=\"Sold\" bg_color=\"text-bg-success\" invisible=\"sale_status != 'sold'\"/>\n                <widget name=\"web_ribbon\" title=\"Not Sold\" bg_color=\"text-bg-info\" invisible=\"not sale_status or sale_status in ('sold', 'free') or not id\"/>\n            </xpath>\n             <group name=\"utm_link\" position=\"before\">\n                <group string=\"Transaction\" name=\"transaction\" groups=\"base.group_no_one\"/>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_sale.view_event_registration_ticket_tree",
+   "package": "event_sale",
+   "name": "event.registration.list.inherit",
+   "entity": "event.registration",
+   "view_type": "field",
+   "inherits_view": "event.view_event_registration_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "event_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "event_id",
+      "position": "after"
+     },
+     {
+      "name": "sale_order_id",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"event_id\" position=\"after\">\n                <field name=\"sale_order_id\" optional=\"hide\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_sale.event_registration_ticket_view_form",
+   "package": "event_sale",
+   "name": "event.registration.form.inherit",
+   "entity": "event.registration",
+   "view_type": "xpath",
+   "inherits_view": "event_product.event_registration_ticket_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='button_box']",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [
+     {
+      "name": "action_view_sale_order",
+      "type": "object",
+      "invisible": "not sale_order_id",
+      "class": "oe_stat_button",
+      "groups": "sales_team.group_sale_salesman",
+      "icon": "fa-usd"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@name='button_box']\" position=\"inside\">\n                <button name=\"action_view_sale_order\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-usd\" groups=\"sales_team.group_sale_salesman\" invisible=\"not sale_order_id\">\n                        <div class=\"o_stat_info\">\n                            <span class=\"o_stat_text\">Sale Order</span>\n                        </div>\n                </button>\n            </xpath>\n            <group name=\"transaction\" position=\"inside\">\n                <field name=\"sale_order_id\"/>\n                <field name=\"sale_order_line_id\" readonly=\"1\" invisible=\"not sale_order_id\"/>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_event.event_registration_ticket_view_form",
+   "package": "pos_event",
+   "name": "event.registration.form.inherit",
+   "entity": "event.registration",
+   "view_type": "xpath",
+   "inherits_view": "event_product.event_registration_ticket_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='button_box']",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [
+     {
+      "name": "action_view_pos_order",
+      "type": "object",
+      "invisible": "not pos_order_id",
+      "class": "oe_stat_button",
+      "groups": "point_of_sale.group_pos_user",
+      "icon": "fa-usd"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@name='button_box']\" position=\"inside\">\n                <button name=\"action_view_pos_order\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-usd\" groups=\"point_of_sale.group_pos_user\" invisible=\"not pos_order_id\">\n                        <div class=\"o_stat_info\">\n                            <span class=\"o_stat_text\">PoS Order</span>\n                        </div>\n                </button>\n            </xpath>\n            <group name=\"transaction\" position=\"inside\">\n                <field name=\"pos_order_id\" invisible=\"not pos_order_id\"/>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event.event_registration_view_form",
+   "package": "website_event",
+   "name": "event.registration.view.form.inherit.online",
+   "entity": "event.registration",
+   "view_type": "xpath",
+   "inherits_view": "event.view_event_registration_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='phone']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "visitor_id",
+      "groups": "base.group_no_one"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='phone']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='phone']\" position=\"after\">\n                <field name=\"visitor_id\" groups=\"base.group_no_one\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event.event_registration_view_tree",
+   "package": "website_event",
+   "name": "event.registration.view.list.inherit.online",
+   "entity": "event.registration",
+   "view_type": "xpath",
+   "inherits_view": "event.view_event_registration_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='partner_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "visitor_id",
+      "optional": "hide",
+      "groups": "base.group_no_one"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='partner_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='partner_id']\" position=\"after\">\n                <field name=\"visitor_id\" optional=\"hide\" groups=\"base.group_no_one\"/>\n            </xpath>\n            <field name=\"state\" position=\"before\">\n                <field name=\"registration_answer_ids\" string=\"Selected Answers\" widget=\"many2many_tags\" optional=\"hide\" readonly=\"1\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event.event_registration_view_kanban",
+   "package": "website_event",
+   "name": "event.registration.kanban.inherit.online",
+   "entity": "event.registration",
+   "view_type": "xpath",
+   "inherits_view": "event.event_registration_view_kanban",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@id='event_ticket_id']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "registration_answer_choice_ids",
+      "widget": "many2many_tags"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//div[@id='event_ticket_id']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@id='event_ticket_id']\" position=\"before\">\n                <field name=\"registration_answer_choice_ids\" class=\"mt-1\" widget=\"many2many_tags\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event.event_registration_view_search",
+   "package": "website_event",
+   "name": "event.registration.view.search.inherit.online",
+   "entity": "event.registration",
+   "view_type": "field",
+   "inherits_view": "event.view_registration_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "position": "after"
+     },
+     {
+      "name": "registration_answer_ids",
+      "string": "Selected Answers"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"partner_id\" position=\"after\">\n                <field name=\"registration_answer_ids\" string=\"Selected Answers\"/>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

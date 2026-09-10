@@ -1,0 +1,1169 @@
+{
+ "catalog": {
+  "name": "entity:l10n_latam.check",
+  "description": "Complete definition of entity Account payment check (l10n_latam.check).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_latam.check",
+  "storage_name": "l10n_latam_check",
+  "full_name": "Account payment check",
+  "kind": "persistent",
+  "description": "Account payment check",
+  "defined_by_package": "l10n_latam_check",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "payment_id",
+    "type": "Many2one",
+    "comodel": "account.payment",
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "l10n_latam_check",
+    "string": "Payment",
+    "full_name": "Payment",
+    "target_entity": "account.payment"
+   },
+   {
+    "name": "operation_ids",
+    "type": "Many2many",
+    "comodel": "account.payment",
+    "relation": "l10n_latam_check_account_payment_rel",
+    "column1": "check_id",
+    "column2": "payment_id",
+    "readonly": true,
+    "check_company": true,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Operation",
+    "full_name": "Operation",
+    "target_entity": "account.payment"
+   },
+   {
+    "name": "current_journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "compute": "_compute_current_journal",
+    "store": true,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Current Journal",
+    "full_name": "Current Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Number",
+    "defined_in_package": "l10n_latam_check",
+    "full_name": "Number"
+   },
+   {
+    "name": "bank_id",
+    "type": "Many2one",
+    "comodel": "res.bank",
+    "compute": "_compute_bank_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Bank",
+    "full_name": "Bank",
+    "target_entity": "res.bank"
+   },
+   {
+    "name": "issuer_vat",
+    "type": "Char",
+    "compute": "_compute_issuer_vat",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Issuer Value-added tax",
+    "full_name": "Issuer Value-added tax"
+   },
+   {
+    "name": "payment_date",
+    "type": "Date",
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Payment Date",
+    "full_name": "Payment Date"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "defined_in_package": "l10n_latam_check",
+    "string": "Amount",
+    "full_name": "Amount"
+   },
+   {
+    "name": "outstanding_line_id",
+    "type": "Many2one",
+    "comodel": "account.move.line",
+    "readonly": true,
+    "check_company": true,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Outstanding Line",
+    "full_name": "Outstanding Line",
+    "target_entity": "account.move.line"
+   },
+   {
+    "name": "issue_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "handed",
+      "Handed"
+     ],
+     [
+      "debited",
+      "Debited"
+     ],
+     [
+      "voided",
+      "Voided"
+     ]
+    ],
+    "compute": "_compute_issue_state",
+    "store": true,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Issue State",
+    "full_name": "Issue State"
+   },
+   {
+    "name": "payment_method_code",
+    "type": "Char",
+    "related": "payment_id.payment_method_code",
+    "defined_in_package": "l10n_latam_check",
+    "string": "Payment Method Code",
+    "full_name": "Payment Method Code"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "related": "payment_id.partner_id",
+    "defined_in_package": "l10n_latam_check",
+    "string": "Partner",
+    "full_name": "Partner"
+   },
+   {
+    "name": "original_journal_id",
+    "type": "Many2one",
+    "related": "payment_id.journal_id",
+    "defined_in_package": "l10n_latam_check",
+    "string": "Original Journal",
+    "full_name": "Original Journal"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "payment_id.company_id",
+    "store": true,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "payment_id.currency_id",
+    "defined_in_package": "l10n_latam_check",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "payment_method_line_id",
+    "type": "Many2one",
+    "related": "payment_id.payment_method_line_id",
+    "store": true,
+    "defined_in_package": "l10n_latam_check",
+    "string": "Payment Method Line",
+    "full_name": "Payment Method Line"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique",
+    "kind": "UniqueIndex",
+    "definition": "(name, payment_method_line_id) WHERE outstanding_line_id IS NOT NULL",
+    "message": null,
+    "defined_in_package": "l10n_latam_check"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_onchange_name",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_void_move_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_issue_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "outstanding_line_id.amount_residual"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_void",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_last_operation",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_journal",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_id.state",
+         "operation_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_open_payment",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_open_check_operations",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": "Redirect the user to the invoice(s) paid by this payment.\n:return:    An action on account.move.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_show_reconciled_move",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_show_journal_entry",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_reconciled_move",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constrains_min_amount",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The amount of the check must be greater than 0",
+        "line": 192
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_bank_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_line_id.code",
+         "payment_id.partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_issuer_vat",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_line_id.code",
+         "payment_id.partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_clean_issuer_vat",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "issuer_vat"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_issuer_vat",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "issuer_vat"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_payment_is_draft",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_check",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Can't delete a check if payment is In Process!",
+        "line": 223
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constrains_min_amount",
+    "package": "l10n_latam_check",
+    "kind": "ValidationError",
+    "message": "The amount of the check must be greater than 0"
+   },
+   {
+    "operation": "_unlink_if_payment_is_draft",
+    "package": "l10n_latam_check",
+    "kind": "UserError",
+    "message": "Can't delete a check if payment is In Process!"
+   }
+  ],
+  "state_fields": [
+   "issue_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_latam_check.access_l10n_latam_check_readonly",
+    "package": "l10n_latam_check",
+    "name": "l10n_latam.check",
+    "entity": "l10n_latam.check",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_latam_check.access_l10n_latam_check",
+    "package": "l10n_latam_check",
+    "name": "l10n_latam.check",
+    "entity": "l10n_latam.check",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "l10n_latam_check.l10n_latam_check_comp_rule",
+    "package": "l10n_latam_check",
+    "name": "Latam Check company rule",
+    "entity": "l10n_latam.check",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "l10n_latam_check.view_account_payment_search",
+    "package": "l10n_latam_check",
+    "name": "account.check.search",
+    "view_type": "search",
+    "inherits_view": "False",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "original_journal_id"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "payment_date",
+       "string": "Payment Date",
+       "date": "payment_date"
+      },
+      {
+       "name": "checks_on_hand",
+       "string": "Handed",
+       "domain": "[('issue_state', '=', 'handed')]"
+      },
+      {
+       "name": "checks_voided",
+       "string": "Voided",
+       "domain": "[('issue_state', '=', 'voided')]"
+      },
+      {
+       "name": "checks_debited",
+       "string": "Debited",
+       "domain": "[('issue_state', '=', 'debited')]"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_partner",
+       "string": "Partner",
+       "domain": "[]",
+       "context": "{'group_by': 'partner_id'}"
+      },
+      {
+       "name": "groupby_date",
+       "string": "Payment Date",
+       "domain": "[]",
+       "context": "{'group_by': 'payment_date'}"
+      },
+      {
+       "name": "groupby_issue_state",
+       "string": "State",
+       "domain": "[]",
+       "context": "{'group_by': 'issue_state'}"
+      },
+      {
+       "name": "groupby_company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by': 'company_id'}",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_latam_check.view_account_payment_third_party_checks_search",
+    "package": "l10n_latam_check",
+    "name": "account.check.search",
+    "view_type": "filter",
+    "inherits_view": "view_account_payment_search",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "filter",
+     "root_attributes": {
+      "name": "checks_on_hand",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "checks_on_hand",
+       "position": "replace"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_latam_check.view_account_check_calendar",
+    "package": "l10n_latam_check",
+    "name": "account.check.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "mode": "month",
+      "date_start": "payment_date",
+      "color": "original_journal_id"
+     },
+     "fields": [
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "payment_date",
+      "date_stop": null,
+      "date_delay": null,
+      "color": "original_journal_id",
+      "mode": "month",
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "l10n_latam_check.view_account_check_pivot",
+    "package": "l10n_latam_check",
+    "name": "account.check.calendar",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "payment_date"
+      },
+      {
+       "name": "payment_date"
+      },
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "payment_date",
+       "type": "row",
+       "interval": "month"
+      },
+      {
+       "name": "payment_date",
+       "type": "row",
+       "interval": "week"
+      },
+      {
+       "name": "amount",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_latam_check.l10n_latam_check_view_form",
+    "package": "l10n_latam_check",
+    "name": "l10n_latam_check.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "create": "false",
+      "edit": "false",
+      "delete": "false"
+     },
+     "fields": [
+      {
+       "name": "outstanding_line_id",
+       "invisible": "True"
+      },
+      {
+       "name": "issue_state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "payment_date"
+      },
+      {
+       "name": "original_journal_id"
+      },
+      {
+       "name": "current_journal_id",
+       "invisible": "issue_state"
+      },
+      {
+       "name": "amount"
+      },
+      {
+       "name": "bank_id",
+       "invisible": "issue_state"
+      },
+      {
+       "name": "issuer_vat",
+       "invisible": "issue_state"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_void",
+       "string": "Void Check",
+       "type": "object",
+       "invisible": "issue_state != 'handed'",
+       "class": "oe_highlight",
+       "confirm": "Marking a check as void will cancel the check and generate a new entry that will re-open the debt.",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "button_open_check_operations",
+       "type": "object",
+       "invisible": "payment_method_code != 'new_third_party_checks'",
+       "icon": "fa-bars"
+      },
+      {
+       "name": "button_open_payment",
+       "type": "object",
+       "invisible": "payment_method_code != 'own_checks'",
+       "icon": "fa-bars"
+      },
+      {
+       "name": "action_show_journal_entry",
+       "type": "object",
+       "invisible": "not outstanding_line_id",
+       "groups": "account.group_account_user,account.group_account_readonly",
+       "icon": "fa-bars"
+      },
+      {
+       "name": "action_show_reconciled_move",
+       "type": "object",
+       "invisible": "not issue_state or issue_state == 'handed'",
+       "groups": "account.group_account_user,account.group_account_readonly",
+       "icon": "fa-bars"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_void",
+       "string": "Void Check",
+       "invisible": "issue_state != 'handed'",
+       "type": "object",
+       "class": "oe_highlight",
+       "confirm": "Marking a check as void will cancel the check and generate a new entry that will re-open the debt.",
+       "data-hotkey": "v"
+      }
+     ],
+     "statusbar_field": "issue_state",
+     "statusbar_visible": "issue_state",
+     "chatter": true,
+     "button_box": [
+      {
+       "icon": "fa-bars",
+       "type": "object",
+       "name": "button_open_check_operations",
+       "invisible": "payment_method_code != 'new_third_party_checks'"
+      },
+      {
+       "icon": "fa-bars",
+       "type": "object",
+       "name": "button_open_payment",
+       "invisible": "payment_method_code != 'own_checks'"
+      },
+      {
+       "icon": "fa-bars",
+       "type": "object",
+       "invisible": "not outstanding_line_id",
+       "name": "action_show_journal_entry",
+       "groups": "account.group_account_user,account.group_account_readonly"
+      },
+      {
+       "icon": "fa-bars",
+       "type": "object",
+       "invisible": "not issue_state or issue_state == 'handed'",
+       "name": "action_show_reconciled_move",
+       "groups": "account.group_account_user,account.group_account_readonly"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_latam_check.view_account_own_check_tree",
+    "package": "l10n_latam_check",
+    "name": "account.check.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "edit": "false",
+      "create": "false",
+      "delete": "false",
+      "duplicate": "false",
+      "sample": "1",
+      "decoration-info": "issue_state == 'handed'",
+      "decoration-muted": "issue_state in ('voided','debited')"
+     },
+     "fields": [
+      {
+       "name": "payment_date",
+       "optional": "show"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "original_journal_id"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "payment_method_line_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "partner_id",
+       "string": "Customer"
+      },
+      {
+       "name": "amount",
+       "optional": "show"
+      },
+      {
+       "name": "currency_id",
+       "string": "Payment Currency",
+       "optional": "hide"
+      },
+      {
+       "name": "issue_state",
+       "widget": "badge",
+       "decoration-info": "issue_state == 'handed'",
+       "decoration-muted": "issue_state in ('voided','debited')"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": "false",
+     "edit": "false",
+     "decorations": {
+      "decoration-info": "issue_state == 'handed'",
+      "decoration-muted": "issue_state in ('voided','debited')"
+     }
+    }
+   },
+   {
+    "external_identifier": "l10n_latam_check.view_account_third_party_check_tree",
+    "package": "l10n_latam_check",
+    "name": "account.check.list",
+    "view_type": "field",
+    "inherits_view": "view_account_own_check_tree",
+    "mode": "primary",
+    "priority": "110",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "issue_state",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "issue_state",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "l10n_latam_check.action_own_check",
+    "package": "l10n_latam_check",
+    "name": "Own Checks",
+    "view_mode": "list,form,calendar,graph,pivot",
+    "view_id": "view_account_own_check_tree",
+    "search_view_id": "view_account_payment_search",
+    "domain": "[('outstanding_line_id', '!=', False)]",
+    "context": "{'search_default_checks_on_hand': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "l10n_latam.check"
+   },
+   {
+    "external_identifier": "l10n_latam_check.action_third_party_check",
+    "package": "l10n_latam_check",
+    "name": "Third Party Checks",
+    "view_mode": "list,form,calendar,graph,pivot",
+    "view_id": "view_account_third_party_check_tree",
+    "search_view_id": "l10n_latam_check.view_account_payment_third_party_checks_search",
+    "domain": "[('payment_method_code', '=', 'new_third_party_checks'), ('payment_id.state', '!=', 'draft')]",
+    "context": "{'search_default_checks_on_hand': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "l10n_latam.check"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

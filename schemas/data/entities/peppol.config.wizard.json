@@ -1,0 +1,488 @@
+{
+ "catalog": {
+  "name": "entity:peppol.config.wizard",
+  "description": "Complete definition of entity Peppol Configuration Wizard (peppol.config.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "peppol.config.wizard",
+  "storage_name": "peppol_config_wizard",
+  "full_name": "Peppol Configuration Wizard",
+  "kind": "transient",
+  "description": "Peppol Configuration Wizard",
+  "defined_by_package": "account_peppol",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "account_peppol",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "account_peppol_edi_user",
+    "type": "Many2one",
+    "related": "company_id.account_peppol_edi_user",
+    "defined_in_package": "account_peppol",
+    "string": "Account the pan-European public procurement online network Electronic data interchange User",
+    "full_name": "Account the pan-European public procurement online network Electronic data interchange User"
+   },
+   {
+    "name": "account_peppol_edi_identification",
+    "type": "Char",
+    "related": "account_peppol_edi_user.edi_identification",
+    "defined_in_package": "account_peppol",
+    "string": "Account the pan-European public procurement online network Electronic data interchange Identification",
+    "full_name": "Account the pan-European public procurement online network Electronic data interchange Identification"
+   },
+   {
+    "name": "account_peppol_proxy_state",
+    "type": "Selection",
+    "related": "company_id.account_peppol_proxy_state",
+    "readonly": false,
+    "defined_in_package": "account_peppol",
+    "string": "Account the pan-European public procurement online network Proxy State",
+    "full_name": "Account the pan-European public procurement online network Proxy State"
+   },
+   {
+    "name": "account_peppol_contact_email",
+    "type": "Char",
+    "default": {
+     "dynamic": "lambda self: self.env.company.account_peppol_contact_email"
+    },
+    "required": true,
+    "defined_in_package": "account_peppol",
+    "string": "Account the pan-European public procurement online network Contact Email",
+    "full_name": "Account the pan-European public procurement online network Contact Email"
+   },
+   {
+    "name": "account_peppol_migration_key",
+    "type": "Char",
+    "related": "company_id.account_peppol_migration_key",
+    "readonly": false,
+    "defined_in_package": "account_peppol",
+    "string": "Account the pan-European public procurement online network Migration Key",
+    "full_name": "Account the pan-European public procurement online network Migration Key"
+   },
+   {
+    "name": "peppol_activate_self_billing",
+    "type": "Boolean",
+    "string": "Activate self-billing",
+    "help": "If activated, you will be able to send and receive self-billed invoices via Peppol.You can still disable reception by disabling the self-billing document types below.",
+    "compute": "_compute_peppol_activate_self_billing",
+    "inverse": "_inverse_peppol_activate_self_billing",
+    "defined_in_package": "account_peppol",
+    "full_name": "Activate self-billing"
+   },
+   {
+    "name": "peppol_self_billing_reception_journal_id",
+    "type": "Many2one",
+    "related": "company_id.peppol_self_billing_reception_journal_id",
+    "readonly": false,
+    "defined_in_package": "account_peppol",
+    "string": "the pan-European public procurement online network Self Billing Reception Journal",
+    "full_name": "the pan-European public procurement online network Self Billing Reception Journal"
+   },
+   {
+    "name": "service_json",
+    "type": "Json",
+    "compute": "_compute_service_json",
+    "store": true,
+    "readonly": false,
+    "help": "JSON representation of peppol services as retrieved from the peppol server.",
+    "defined_in_package": "account_peppol",
+    "string": "Service JavaScript Object Notation",
+    "full_name": "Service JavaScript Object Notation"
+   },
+   {
+    "name": "service_info",
+    "type": "Html",
+    "compute": "_compute_service_info",
+    "defined_in_package": "account_peppol",
+    "string": "Service Info",
+    "full_name": "Service Info"
+   },
+   {
+    "name": "service_ids",
+    "type": "One2many",
+    "comodel": "account_peppol.service",
+    "inverse_name": "wizard_id",
+    "compute": "_compute_service_ids",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "account_peppol",
+    "string": "Service",
+    "full_name": "Service",
+    "target_entity": "account_peppol.service"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_service_json",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_peppol_edi_user",
+         "account_peppol_proxy_state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_service_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_peppol_proxy_state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_service_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_peppol_proxy_state",
+         "service_json"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Get the selectable document types.\n\nSynthesize a combination of locally available document types and those added to the user on\nthe IAP, add the relevant services.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_peppol_activate_self_billing",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id.peppol_activate_self_billing_sending"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_peppol_activate_self_billing",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "peppol_activate_self_billing"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_sync_form_with_peppol_proxy",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": "Update the peppol contact email on IAP.\nNote: The service configuration is DEPRECATED / hidden in the view.\nDisabling services can lead to complicance issues and is not necessary\nsince all existing services should just work.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_peppol_unregister",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": "Unregister the user from Peppol network.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_peppol_reset_to_sender",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": "Reset the participant back to sender and unregister it from the SMP",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_peppol_register_sender_as_receiver",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_peppol",
+      "decorators": [],
+      "documentation": "Reset the participant back to sender and unregister it from the SMP",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "account_peppol_proxy_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "account_peppol.access_peppol_config_wizard",
+    "package": "account_peppol",
+    "name": "access.peppol.config.wizard",
+    "entity": "peppol.config.wizard",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account_peppol.peppol_config_wizard_form",
+    "package": "account_peppol",
+    "name": "peppol.config.wizard.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "account_peppol_edi_user",
+       "invisible": "1"
+      },
+      {
+       "name": "account_peppol_edi_identification",
+       "readonly": "1"
+      },
+      {
+       "name": "account_peppol_edi_identification",
+       "readonly": "1"
+      },
+      {
+       "name": "account_peppol_contact_email",
+       "required": "account_peppol_proxy_state in ('sender', 'smp_registration', 'receiver')",
+       "nolabel": "1"
+      },
+      {
+       "name": "account_peppol_migration_key"
+      },
+      {
+       "name": "peppol_activate_self_billing",
+       "invisible": "account_peppol_proxy_state not in ('sender', 'receiver')"
+      },
+      {
+       "name": "peppol_self_billing_reception_journal_id",
+       "invisible": "account_peppol_proxy_state != 'receiver'"
+      },
+      {
+       "name": "service_info",
+       "invisible": "not service_info"
+      },
+      {
+       "name": "service_ids",
+       "widget": "one2many",
+       "nolabel": "1"
+      },
+      {
+       "name": "wizard_id",
+       "column_invisible": "1"
+      },
+      {
+       "name": "document_name",
+       "readonly": "1"
+      },
+      {
+       "name": "document_identifier",
+       "invisible": "1"
+      },
+      {
+       "name": "enabled",
+       "widget": "boolean_toggle"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_peppol_unregister",
+       "string": "Remove from Peppol",
+       "type": "object",
+       "class": "btn btn-danger text-nowrap",
+       "confirm": "This will delete your Peppol registration."
+      },
+      {
+       "name": "button_peppol_register_sender_as_receiver",
+       "string": "Enable reception",
+       "type": "object",
+       "invisible": "account_peppol_proxy_state != 'sender'",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "button_peppol_reset_to_sender",
+       "string": "Disable the reception.",
+       "type": "object",
+       "invisible": "account_peppol_proxy_state not in ('smp_registration', 'receiver')",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "button_sync_form_with_peppol_proxy",
+       "string": "Save",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "one2many": 1,
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

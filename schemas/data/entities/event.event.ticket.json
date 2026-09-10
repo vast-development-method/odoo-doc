@@ -1,0 +1,1221 @@
+{
+ "catalog": {
+  "name": "entity:event.event.ticket",
+  "description": "Complete definition of entity Event Ticket (event.event.ticket).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.event.ticket",
+  "storage_name": "event_event_ticket",
+  "full_name": "Event Ticket",
+  "kind": "persistent",
+  "description": "Event Ticket",
+  "defined_by_package": "event",
+  "extended_by_packages": [
+   "event_product",
+   "event_sale",
+   "pos_event",
+   "website_event_sale"
+  ],
+  "mixins": [
+   "event.type.ticket",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "event_id, sequence, name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "event_type_id",
+    "type": "Many2one",
+    "ondelete": "set null",
+    "required": false,
+    "defined_in_package": "event",
+    "string": "Event Type",
+    "full_name": "Event Type"
+   },
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "event",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "related": "event_id.company_id",
+    "defined_in_package": "event",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "start_sale_datetime",
+    "type": "Datetime",
+    "string": "Registration Start",
+    "defined_in_package": "event",
+    "full_name": "Registration Start"
+   },
+   {
+    "name": "end_sale_datetime",
+    "type": "Datetime",
+    "string": "Registration End",
+    "defined_in_package": "event",
+    "full_name": "Registration End"
+   },
+   {
+    "name": "is_launched",
+    "type": "Boolean",
+    "string": "Are sales launched",
+    "compute": "_compute_is_launched",
+    "defined_in_package": "event",
+    "full_name": "Are sales launched"
+   },
+   {
+    "name": "is_expired",
+    "type": "Boolean",
+    "string": "Is Expired",
+    "compute": "_compute_is_expired",
+    "defined_in_package": "event",
+    "full_name": "Is Expired"
+   },
+   {
+    "name": "sale_available",
+    "type": "Boolean",
+    "string": "Is Available",
+    "compute": "_compute_sale_available",
+    "compute_sudo": true,
+    "help": "Whether it is possible to sell these tickets",
+    "defined_in_package": "event",
+    "full_name": "Is Available"
+   },
+   {
+    "name": "registration_ids",
+    "type": "One2many",
+    "comodel": "event.registration",
+    "inverse_name": "event_ticket_id",
+    "string": "Registrations",
+    "defined_in_package": "event",
+    "full_name": "Registrations",
+    "target_entity": "event.registration"
+   },
+   {
+    "name": "seats_reserved",
+    "type": "Integer",
+    "string": "Reserved Seats",
+    "compute": "_compute_seats",
+    "store": false,
+    "defined_in_package": "event",
+    "full_name": "Reserved Seats"
+   },
+   {
+    "name": "seats_available",
+    "type": "Integer",
+    "string": "Available Seats",
+    "compute": "_compute_seats",
+    "store": false,
+    "defined_in_package": "event",
+    "full_name": "Available Seats"
+   },
+   {
+    "name": "seats_used",
+    "type": "Integer",
+    "string": "Used Seats",
+    "compute": "_compute_seats",
+    "store": false,
+    "defined_in_package": "event",
+    "full_name": "Used Seats"
+   },
+   {
+    "name": "seats_taken",
+    "type": "Integer",
+    "string": "Taken Seats",
+    "compute": "_compute_seats",
+    "store": false,
+    "defined_in_package": "event",
+    "full_name": "Taken Seats"
+   },
+   {
+    "name": "limit_max_per_order",
+    "type": "Integer",
+    "string": "Limit per Order",
+    "default": 0,
+    "help": "Maximum of this product per order.\nSet to 0 to ignore this rule",
+    "defined_in_package": "event",
+    "full_name": "Limit per Order"
+   },
+   {
+    "name": "is_sold_out",
+    "type": "Boolean",
+    "string": "Sold Out",
+    "compute": "_compute_is_sold_out",
+    "help": "Whether seats are not available for this ticket.",
+    "defined_in_package": "event",
+    "full_name": "Sold Out"
+   },
+   {
+    "name": "color",
+    "type": "Char",
+    "string": "Color",
+    "default": "#875A7B",
+    "defined_in_package": "event",
+    "full_name": "Color"
+   },
+   {
+    "name": "price_reduce_taxinc",
+    "type": "Float",
+    "string": "Price Reduce Tax inc",
+    "compute": "_compute_price_reduce_taxinc",
+    "compute_sudo": true,
+    "defined_in_package": "event_product",
+    "full_name": "Price Reduce Tax inc"
+   },
+   {
+    "name": "price_incl",
+    "type": "Float",
+    "string": "Price include",
+    "compute": "_compute_price_incl",
+    "min_display_digits": "Product Price",
+    "readonly": false,
+    "compute_sudo": true,
+    "defined_in_package": "event_product",
+    "full_name": "Price include"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_expired",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "end_sale_datetime",
+         "event_id.date_tz"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_launched",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "start_sale_datetime",
+         "event_id.date_tz"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_available",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_expired",
+         "start_sale_datetime",
+         "event_id.date_tz",
+         "seats_available",
+         "seats_max"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.active"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_seats",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "seats_max",
+         "registration_ids.state",
+         "registration_ids.active"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Determine available, reserved, used and taken seats. ",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_sold_out",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "seats_limited",
+         "seats_available",
+         "event_id.event_registrations_sold_out"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constrains_dates_coherency",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "start_sale_datetime",
+         "end_sale_datetime"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The stop date cannot be earlier than the start date. Please check ticket %(ticket_name)s",
+        "line": 122
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_constrains_limit_max_per_order",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "limit_max_per_order",
+         "seats_max"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The limit per order cannot be greater than the maximum seats number. Please check ticket %(ticket_name)s",
+        "line": 129
+       },
+       {
+        "kind": "UserError",
+        "message": "The limit per order cannot be greater than %(limit_orderable)s. Please check ticket %(ticket_name)s",
+        "line": 132
+       },
+       {
+        "kind": "UserError",
+        "message": "The limit per order must be positive. Please check ticket %(ticket_name)s",
+        "line": 135
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "seats_max",
+         "seats_available"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "name_with_seats_availability"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Adds ticket seats availability if requested by context.\nAlways display the name without availabilities if the event is multi slots\nbecause the availability displayed won't be relative to the possible slot combinations\nbut only relative to the event and this will confuse the user.",
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_current_limit_per_order",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "event_slot",
+     "event"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Compute the maximum possible number of tickets for an order, taking\ninto account the given event_slot if applicable.\nIf no ticket is created (alone event), event_id argument is used. Then\nreturn the dictionary with False as key. ",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ticket_multiline_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": "Compute a multiline description of this ticket. It is used when ticket\ndescription are necessary without having to encode it manually, like sales\ninformation. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "event_sale",
+      "decorators": [],
+      "documentation": "If people set a description on their product it has more priority\nthan the ticket name itself for the SO description. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_tz_context",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_if_registrations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The following tickets cannot be deleted while they have one or more registrations linked to them:\n- %s",
+        "line": 193
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_reduce_taxinc",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_incl",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.taxes_id",
+         "price"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_show_discount",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_sale",
+      "decorators": [],
+      "documentation": "Determine if the discount should be shown on the website for this ticket.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constrains_dates_coherency",
+    "package": "event",
+    "kind": "UserError",
+    "message": "The stop date cannot be earlier than the start date. Please check ticket %(ticket_name)s"
+   },
+   {
+    "operation": "_constrains_limit_max_per_order",
+    "package": "event",
+    "kind": "UserError",
+    "message": "The limit per order cannot be greater than the maximum seats number. Please check ticket %(ticket_name)s"
+   },
+   {
+    "operation": "_constrains_limit_max_per_order",
+    "package": "event",
+    "kind": "UserError",
+    "message": "The limit per order cannot be greater than %(limit_orderable)s. Please check ticket %(ticket_name)s"
+   },
+   {
+    "operation": "_constrains_limit_max_per_order",
+    "package": "event",
+    "kind": "UserError",
+    "message": "The limit per order must be positive. Please check ticket %(ticket_name)s"
+   },
+   {
+    "operation": "_unlink_except_if_registrations",
+    "package": "event",
+    "kind": "UserError",
+    "message": "The following tickets cannot be deleted while they have one or more registrations linked to them:\n- %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event.access_event_event_ticket",
+    "package": "event",
+    "name": "event.event.ticket",
+    "entity": "event.event.ticket",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_event_ticket_registration",
+    "package": "event",
+    "name": "event.event.ticket.registration",
+    "entity": "event.event.ticket",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event.access_event_event_ticket_user",
+    "package": "event",
+    "name": "event.event.ticket.user",
+    "entity": "event.event.ticket",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "pos_event.access_event_event_ticket",
+    "package": "pos_event",
+    "name": "event.event.ticket",
+    "entity": "event.event.ticket",
+    "group": "point_of_sale.group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_event_ticket_public",
+    "package": "website_event",
+    "name": "event.event.ticket",
+    "entity": "event.event.ticket",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_event_ticket_portal",
+    "package": "website_event",
+    "name": "event.event.ticket",
+    "entity": "event.event.ticket",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_event_event_ticket_employee",
+    "package": "website_event",
+    "name": "event.event.ticket",
+    "entity": "event.event.ticket",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "event.ir_rule_event_event_ticket_company",
+    "package": "event",
+    "name": "Event/Ticket: multi-company",
+    "entity": "event.event.ticket",
+    "domain": "[('event_id.company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_event.ir_rule_event_event_ticket_public",
+    "package": "website_event",
+    "name": "Event Ticket: public/portal: published read",
+    "entity": "event.event.ticket",
+    "domain": "[('event_id.website_published', '=', True)]",
+    "groups": "[(4, ref('base.group_public')), (4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "event.event_event_ticket_view_tree_from_event",
+    "package": "event",
+    "name": "event.event.ticket.view.list.from.event",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Tickets",
+      "editable": "bottom"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "description",
+       "optional": "hide"
+      },
+      {
+       "name": "start_sale_datetime",
+       "optional": "show"
+      },
+      {
+       "name": "end_sale_datetime",
+       "optional": "show"
+      },
+      {
+       "name": "seats_max",
+       "string": "Maximum",
+       "column_invisible": "context.get('is_event_multi_slots')",
+       "sum": "Total"
+      },
+      {
+       "name": "seats_max",
+       "string": "Maximum per slot",
+       "column_invisible": "not context.get('is_event_multi_slots')",
+       "sum": "Total"
+      },
+      {
+       "name": "seats_taken",
+       "string": "Registration",
+       "column_invisible": "context.get('is_event_multi_slots')",
+       "sum": "Total"
+      },
+      {
+       "name": "seats_taken",
+       "string": "Total Registration",
+       "column_invisible": "not context.get('is_event_multi_slots')",
+       "sum": "Total"
+      },
+      {
+       "name": "limit_max_per_order",
+       "optional": "hidden"
+      },
+      {
+       "name": "color",
+       "widget": "color",
+       "optional": "hidden"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "color": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event.event_event_ticket_view_form_from_event",
+    "package": "event",
+    "name": "event.event.ticket.view.form.from.event",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Ticket"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "start_sale_datetime"
+      },
+      {
+       "name": "end_sale_datetime"
+      },
+      {
+       "name": "seats_max"
+      },
+      {
+       "name": "seats_reserved"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event.event_event_ticket_view_kanban_from_event",
+    "package": "event",
+    "name": "event.event.ticket.view.kanban.from.event",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "seats_reserved"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "event.event_event_ticket_view_tree",
+    "package": "event",
+    "name": "event.event.ticket.view.list",
+    "view_type": "xpath",
+    "inherits_view": "event_event_ticket_view_tree_from_event",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event.event_event_ticket_form_view",
+    "package": "event",
+    "name": "event.event.ticket.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Event's Ticket"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. VIP Ticket"
+      },
+      {
+       "name": "event_id",
+       "placeholder": "All Events"
+      },
+      {
+       "name": "seats_limited"
+      },
+      {
+       "name": "seats_available"
+      },
+      {
+       "name": "start_sale_datetime"
+      },
+      {
+       "name": "end_sale_datetime"
+      },
+      {
+       "name": "seats_max"
+      },
+      {
+       "name": "seats_reserved"
+      },
+      {
+       "name": "seats_used"
+      },
+      {
+       "name": "is_expired"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event_product.event_event_ticket_view_tree_from_event",
+    "package": "event_product",
+    "name": "event.event.ticket.view.list.from.event.inherit.event.product",
+    "view_type": "field",
+    "inherits_view": "event.event_event_ticket_view_tree_from_event",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "start_sale_datetime",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "start_sale_datetime",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_product.event_event_ticket_view_form_from_event",
+    "package": "event_product",
+    "name": "event.event.ticket.view.form.from.event.inherit.event.product",
+    "view_type": "field",
+    "inherits_view": "event.event_event_ticket_view_form_from_event",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "before"
+      },
+      {
+       "name": "product_id",
+       "context": "{                         'default_type': 'service',                         'default_service_tracking': 'event',                     }"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_product.event_event_ticket_view_kanban_from_event",
+    "package": "event_product",
+    "name": "event.event.ticket.view.kanban.from.event.product",
+    "view_type": "field",
+    "inherits_view": "event.event_event_ticket_view_kanban_from_event",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "price"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_product.event_event_ticket_form_view",
+    "package": "event_product",
+    "name": "event.event.ticket.view.form.inherit.event.product",
+    "view_type": "field",
+    "inherits_view": "event.event_event_ticket_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "end_sale_datetime",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "end_sale_datetime",
+       "position": "after"
+      },
+      {
+       "name": "price"
+      },
+      {
+       "name": "price_reduce",
+       "groups": "base.group_no_one"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

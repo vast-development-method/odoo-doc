@@ -1,0 +1,1155 @@
+{
+ "catalog": {
+  "name": "entity:mailing.contact",
+  "description": "Complete definition of entity Mailing Contact (mailing.contact).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mailing.contact",
+  "storage_name": "mailing_contact",
+  "full_name": "Mailing Contact",
+  "kind": "persistent",
+  "description": "Mailing Contact",
+  "defined_by_package": "mass_mailing",
+  "extended_by_packages": [
+   "mass_mailing_sms"
+  ],
+  "mixins": [
+   "mail.thread.blacklist",
+   "properties.base.definition.mixin",
+   "mail.thread.phone"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "name ASC, id DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_mailing_enabled": true
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "compute": "_compute_name",
+    "readonly": false,
+    "store": true,
+    "tracking": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Name"
+   },
+   {
+    "name": "first_name",
+    "type": "Char",
+    "string": "First Name",
+    "defined_in_package": "mass_mailing",
+    "full_name": "First Name"
+   },
+   {
+    "name": "last_name",
+    "type": "Char",
+    "string": "Last Name",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Last Name"
+   },
+   {
+    "name": "company_name",
+    "type": "Char",
+    "string": "Company Name",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Company Name"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "string": "Email",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Email"
+   },
+   {
+    "name": "list_ids",
+    "type": "Many2many",
+    "comodel": "mailing.list",
+    "relation": "mailing_subscription",
+    "column1": "contact_id",
+    "column2": "list_id",
+    "string": "Mailing Lists",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mailing Lists",
+    "target_entity": "mailing.list"
+   },
+   {
+    "name": "subscription_ids",
+    "type": "One2many",
+    "comodel": "mailing.subscription",
+    "inverse_name": "contact_id",
+    "string": "Subscription Information",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Subscription Information",
+    "target_entity": "mailing.subscription"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Country",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "res.partner.category",
+    "string": "Tags",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Tags",
+    "target_entity": "res.partner.category"
+   },
+   {
+    "name": "opt_out",
+    "type": "Boolean",
+    "string": "Opt Out",
+    "compute": "_compute_opt_out",
+    "search": "_search_opt_out",
+    "help": "Opt out flag for a specific mailing list. This field should not be used in a view without a unique and active mailing list context.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Opt Out"
+   },
+   {
+    "name": "mobile",
+    "type": "Char",
+    "string": "Mobile",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Mobile"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "When coming from a mailing list we may have a default_list_ids context\nkey. We should use it to create subscription_ids default value that\nare displayed to the user as list_ids is not displayed on form view. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "fields_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "allfields",
+     "attributes"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Hide first and last name field if the split name feature is not enabled. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_opt_out",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "first_name",
+         "last_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_opt_out",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "subscription_ids"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "default_list_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Synchronize default_list_ids (currently used notably for computed\nfields) default key with subscription_ids given by user when creating\ncontacts.\n\nThose two values have the same purpose, adding a list to to the contact\neither through a direct write on m2m, either through a write on middle\nmodel subscription.\n\nThis is a bit hackish but is due to default_list_ids key being\nused to compute oupt_out field. This should be cleaned in master but here\nwe simply try to limit issues while keeping current behavior. ",
+      "size_in_lines": 43,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You should give either list_ids, either subscription_ids to create new contacts.",
+        "line": 112
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Cleans the default_list_ids while duplicating mailing contact in context of\na mailing list because we already have subscription lists copied over for newly\ncreated contact, no need to add the ones from default_list_ids again ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "name_create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "add_to_list",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "name",
+     "list_id"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_import",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_add_to_mailing_list",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_import_templates",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_name_split_activated",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return whether the contact names are populated as first and last name or as a single field (name). ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "create",
+    "package": "mass_mailing",
+    "kind": "UserError",
+    "message": "You should give either list_ids, either subscription_ids to create new contacts."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mass_mailing.access_mailing_contact_mm_user",
+    "package": "mass_mailing",
+    "name": "access.mailing.contact.mm.user",
+    "entity": "mailing.contact",
+    "group": "mass_mailing.group_mass_mailing_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mass_mailing.mailing_contact_view_search",
+    "package": "mass_mailing",
+    "name": "mailing.contact.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Mailing List Contacts"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name / Email",
+       "filter_domain": "['|', '|', ('name','ilike',self), ('company_name','ilike',self), ('email_normalized','ilike',self)]"
+      },
+      {
+       "name": "tag_ids"
+      },
+      {
+       "name": "list_ids"
+      },
+      {
+       "name": "properties"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_valid_email_recipient",
+       "string": "Valid Email Recipients",
+       "domain": "[('opt_out', '=', False), ('is_blacklisted', '=', False), ('email_normalized', '!=', False)]",
+       "invisible": "not context.get('default_list_ids')"
+      },
+      {
+       "name": "filter_bounce",
+       "string": "Bounced",
+       "domain": "[('message_bounce', '>', 0)]"
+      },
+      {
+       "name": "filter_blacklisted",
+       "string": "Blacklisted",
+       "domain": "[('is_blacklisted','=',True)]",
+       "invisible": "1"
+      },
+      {
+       "name": "filter_opt_out",
+       "string": "Opted-out",
+       "domain": "[('opt_out', '=', True)]",
+       "invisible": "1"
+      },
+      {
+       "name": "filter_not_email_bl",
+       "string": "Exclude Blacklisted Emails",
+       "domain": "[('is_blacklisted', '=', False)]"
+      },
+      {
+       "name": "filter_not_optout",
+       "string": "Exclude Opt Out",
+       "domain": "[('opt_out', '=', False)]",
+       "invisible": "not context.get('default_list_ids')"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_create_date",
+       "string": "Creation Date",
+       "context": "{'group_by': 'create_date'}"
+      },
+      {
+       "name": "group_properties",
+       "string": "Properties",
+       "context": "{'group_by': 'properties'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_contact_view_tree",
+    "package": "mass_mailing",
+    "name": "mailing.contact.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Mailing List Contacts",
+      "sample": "1",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date",
+       "optional": "show"
+      },
+      {
+       "name": "name",
+       "readonly": "1",
+       "optional": "show"
+      },
+      {
+       "name": "company_name"
+      },
+      {
+       "name": "email",
+       "readonly": "1"
+      },
+      {
+       "name": "is_blacklisted",
+       "string": "Email Blacklisted"
+      },
+      {
+       "name": "country_id",
+       "optional": "hide"
+      },
+      {
+       "name": "message_bounce",
+       "readonly": "1",
+       "sum": "Total Bounces"
+      },
+      {
+       "name": "opt_out",
+       "readonly": "1",
+       "column_invisible": "'default_list_ids' not in context"
+      },
+      {
+       "name": "list_ids",
+       "widget": "many2many_tags",
+       "optional": "hide"
+      },
+      {
+       "name": "properties",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_import",
+       "string": "Import",
+       "type": "object",
+       "context": "{'from_mailing_list_ids': context.get('active_ids') if context.get('active_model') == 'mailing.list' else False}"
+      },
+      {
+       "name": "action_add_to_mailing_list",
+       "string": "Add to List",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_contact_view_kanban",
+    "package": "mass_mailing",
+    "name": "mailing.contact.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "message_bounce"
+      },
+      {
+       "name": "tag_ids"
+      },
+      {
+       "name": "email"
+      },
+      {
+       "name": "company_name"
+      },
+      {
+       "name": "properties",
+       "widget": "properties"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_import",
+       "string": "Import",
+       "type": "object",
+       "context": "{'from_mailing_list_ids': context.get('active_ids') if context.get('active_model') == 'mailing.list' else False}"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "properties": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_contact_view_form",
+    "package": "mass_mailing",
+    "name": "mailing.contact.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Mailing List Contacts"
+     },
+     "fields": [
+      {
+       "name": "id",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. John Smith"
+      },
+      {
+       "name": "email",
+       "widget": "email"
+      },
+      {
+       "name": "is_blacklisted",
+       "invisible": "1"
+      },
+      {
+       "name": "company_name"
+      },
+      {
+       "name": "country_id",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "create_date",
+       "invisible": "not id",
+       "readonly": "1"
+      },
+      {
+       "name": "message_bounce",
+       "invisible": "not id",
+       "readonly": "1"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}",
+       "placeholder": "e.g. \"VIP\", \"Roadshow\", ..."
+      },
+      {
+       "name": "properties",
+       "nolabel": "1"
+      },
+      {
+       "name": "subscription_ids"
+      },
+      {
+       "name": "list_id"
+      },
+      {
+       "name": "opt_out_datetime",
+       "readonly": "1"
+      },
+      {
+       "name": "opt_out"
+      },
+      {
+       "name": "opt_out_reason_id"
+      },
+      {
+       "name": "create_date",
+       "string": "Subscription Date"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "mail_action_blacklist_remove",
+       "type": "object",
+       "invisible": "not is_blacklisted",
+       "class": "fa fa-ban text-danger",
+       "context": "{'default_email': email}",
+       "groups": "base.group_user"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": null,
+       "string": "Subscriptions",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "email": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_contact_view_pivot",
+    "package": "mass_mailing",
+    "name": "mailing.contact.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Mailing List Contacts",
+      "stacked": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "create_date",
+       "type": "row"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_contact_view_graph",
+    "package": "mass_mailing",
+    "name": "mailing.contact.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Mailing List Contacts",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "create_date"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_contact_view_tree_split_name",
+    "package": "mass_mailing",
+    "name": "mailing.contact.view.list.split.name",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.mailing_contact_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "first_name",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "last_name",
+       "readonly": "1",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_contact_view_form_split_name",
+    "package": "mass_mailing",
+    "name": "mailing.contact.view.form.split.name",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.mailing_contact_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_contact_view_search",
+    "package": "mass_mailing_sms",
+    "name": "mailing.contact.view.search.inherit.sms",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.mailing_contact_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mobile"
+      },
+      {
+       "name": "phone_sanitized",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_contact_view_tree",
+    "package": "mass_mailing_sms",
+    "name": "mailing.contact.view.list.inherit.sms",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.mailing_contact_view_tree",
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='country_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mobile",
+       "readonly": "1"
+      },
+      {
+       "name": "phone_sanitized",
+       "column_invisible": "True"
+      },
+      {
+       "name": "phone_sanitized_blacklisted"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='country_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_contact_view_form",
+    "package": "mass_mailing_sms",
+    "name": "mailing.contact.view.form.inherit.sms",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.mailing_contact_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='email_details']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mobile",
+       "widget": "phone",
+       "options": "{'enable_sms': True}"
+      },
+      {
+       "name": "phone_sanitized",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "phone_action_blacklist_remove",
+       "type": "object",
+       "invisible": "not phone_blacklisted",
+       "class": "fa fa-ban text-danger",
+       "context": "{'default_phone': mobile}",
+       "groups": "base.group_user"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "phone": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='email_details']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_contact_view_kanban",
+    "package": "mass_mailing_sms",
+    "name": "mailing.contact.view.kanban.inherit.sms",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.mailing_contact_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='email']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mobile"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='email']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mass_mailing.action_view_mass_mailing_contacts",
+    "package": "mass_mailing",
+    "name": "Mailing List Contacts",
+    "view_mode": "list,kanban,form,graph,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_filter_not_email_bl': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a mailing contact\n            </p><p>\n                Mailing contacts allow you to separate your marketing audience from your business contact directory.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mailing.contact"
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_contact_action_sms",
+    "package": "mass_mailing_sms",
+    "name": "Mailing List Contacts",
+    "view_mode": "list,form",
+    "view_id": "mailing_contact_view_tree",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'mailing_sms': True, 'search_default_filter_not_phone_bl': 1, }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a mailing contact\n            </p><p>\n                Mailing contacts allow you to separate your marketing audience from your contact directory.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mailing.contact"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,1555 @@
+{
+ "catalog": {
+  "name": "entity:hr.leave.accrual.level",
+  "description": "Complete definition of entity Accrual Plan Level (hr.leave.accrual.level).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.leave.accrual.level",
+  "storage_name": "hr_leave_accrual_level",
+  "full_name": "Accrual Plan Level",
+  "kind": "persistent",
+  "description": "Accrual Plan Level",
+  "defined_by_package": "hr_holidays",
+  "extended_by_packages": [
+   "hr_holidays_attendance"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence asc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "sequence",
+    "compute": "_compute_sequence",
+    "store": true,
+    "help": "Sequence is generated automatically by start time delta.",
+    "defined_in_package": "hr_holidays",
+    "full_name": "sequence"
+   },
+   {
+    "name": "accrual_plan_id",
+    "type": "Many2one",
+    "comodel": "hr.leave.accrual.plan",
+    "string": "Accrual Plan",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_id', None)"
+    },
+    "defined_in_package": "hr_holidays",
+    "full_name": "Accrual Plan",
+    "target_entity": "hr.leave.accrual.plan"
+   },
+   {
+    "name": "accrued_gain_time",
+    "type": "Selection",
+    "related": "accrual_plan_id.accrued_gain_time",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Accrued Gain Time",
+    "full_name": "Accrued Gain Time"
+   },
+   {
+    "name": "start_count",
+    "type": "Integer",
+    "export_string_translation": false,
+    "help": "The accrual starts after a defined period from the allocation start date. This field defines the number of days, months or years after which accrual is used.",
+    "defined_in_package": "hr_holidays",
+    "string": "Start Count",
+    "full_name": "Start Count"
+   },
+   {
+    "name": "start_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "day",
+      "Days"
+     ],
+     [
+      "month",
+      "Months"
+     ],
+     [
+      "year",
+      "Years"
+     ]
+    ],
+    "default": "day",
+    "required": true,
+    "export_string_translation": false,
+    "help": "This field defines the unit of time after which the accrual starts.",
+    "defined_in_package": "hr_holidays",
+    "string": "Start Type",
+    "full_name": "Start Type"
+   },
+   {
+    "name": "milestone_date",
+    "type": "Selection",
+    "selection": [
+     [
+      "creation",
+      "At allocation creation"
+     ],
+     [
+      "after",
+      "After"
+     ]
+    ],
+    "compute": "_compute_milestone_date",
+    "inverse": "_inverse_milestone_date",
+    "readonly": false,
+    "store": true,
+    "export_string_translation": false,
+    "default": "creation",
+    "required": true,
+    "defined_in_package": "hr_holidays",
+    "string": "Milestone Date",
+    "full_name": "Milestone Date"
+   },
+   {
+    "name": "added_value",
+    "type": "Float",
+    "digits": [
+     16,
+     5
+    ],
+    "required": true,
+    "default": 1,
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Added Value",
+    "full_name": "Added Value"
+   },
+   {
+    "name": "added_value_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "day",
+      "Day(s)"
+     ],
+     [
+      "hour",
+      "Hour(s)"
+     ]
+    ],
+    "compute": "_compute_added_value_type",
+    "inverse": "_inverse_added_value_type",
+    "precompute": true,
+    "store": true,
+    "required": true,
+    "readonly": false,
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Added Value Type",
+    "full_name": "Added Value Type"
+   },
+   {
+    "name": "frequency",
+    "type": "Selection",
+    "selection": [
+     [
+      "hourly",
+      "Hourly"
+     ],
+     [
+      "daily",
+      "Daily"
+     ],
+     [
+      "weekly",
+      "Weekly"
+     ],
+     [
+      "bimonthly",
+      "Twice a month"
+     ],
+     [
+      "monthly",
+      "Monthly"
+     ],
+     [
+      "biyearly",
+      "Twice a year"
+     ],
+     [
+      "yearly",
+      "Yearly"
+     ],
+     [
+      "worked_hours",
+      "Per Hour Worked"
+     ]
+    ],
+    "default": "daily",
+    "required": true,
+    "string": "Frequency",
+    "defined_in_package": "hr_holidays",
+    "selection_added_by": [
+     "hr_holidays_attendance"
+    ],
+    "ondelete": {
+     "worked_hours": "cascade"
+    },
+    "compute": "_compute_frequency",
+    "store": true,
+    "readonly": false,
+    "extended_in_packages": [
+     "hr_holidays_attendance"
+    ],
+    "full_name": "Frequency"
+   },
+   {
+    "name": "week_day",
+    "type": "Selection",
+    "selection": [
+     [
+      "0",
+      "Monday"
+     ],
+     [
+      "1",
+      "Tuesday"
+     ],
+     [
+      "2",
+      "Wednesday"
+     ],
+     [
+      "3",
+      "Thursday"
+     ],
+     [
+      "4",
+      "Friday"
+     ],
+     [
+      "5",
+      "Saturday"
+     ],
+     [
+      "6",
+      "Sunday"
+     ]
+    ],
+    "default": "0",
+    "required": true,
+    "string": "Allocation on",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Allocation on"
+   },
+   {
+    "name": "first_day",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_selection_days"
+    },
+    "default": "1",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "First Day",
+    "full_name": "First Day"
+   },
+   {
+    "name": "second_day",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_selection_days"
+    },
+    "default": "15",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Second Day",
+    "full_name": "Second Day"
+   },
+   {
+    "name": "first_month_day",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_selection_days"
+    },
+    "compute": "_compute_first_month_day",
+    "store": true,
+    "readonly": false,
+    "default": "1",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "First Month Day",
+    "full_name": "First Month Day"
+   },
+   {
+    "name": "first_month",
+    "type": "Selection",
+    "selection": [
+     [
+      "1",
+      "January"
+     ],
+     [
+      "2",
+      "February"
+     ],
+     [
+      "3",
+      "March"
+     ],
+     [
+      "4",
+      "April"
+     ],
+     [
+      "5",
+      "May"
+     ],
+     [
+      "6",
+      "June"
+     ]
+    ],
+    "default": "1",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "First Month",
+    "full_name": "First Month"
+   },
+   {
+    "name": "second_month_day",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_selection_days"
+    },
+    "compute": "_compute_second_month_day",
+    "store": true,
+    "readonly": false,
+    "default": "1",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Second Month Day",
+    "full_name": "Second Month Day"
+   },
+   {
+    "name": "second_month",
+    "type": "Selection",
+    "selection": [
+     [
+      "7",
+      "July"
+     ],
+     [
+      "8",
+      "August"
+     ],
+     [
+      "9",
+      "September"
+     ],
+     [
+      "10",
+      "October"
+     ],
+     [
+      "11",
+      "November"
+     ],
+     [
+      "12",
+      "December"
+     ]
+    ],
+    "default": "7",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Second Month",
+    "full_name": "Second Month"
+   },
+   {
+    "name": "yearly_month",
+    "type": "Selection",
+    "selection": [
+     [
+      "1",
+      "January"
+     ],
+     [
+      "2",
+      "February"
+     ],
+     [
+      "3",
+      "March"
+     ],
+     [
+      "4",
+      "April"
+     ],
+     [
+      "5",
+      "May"
+     ],
+     [
+      "6",
+      "June"
+     ],
+     [
+      "7",
+      "July"
+     ],
+     [
+      "8",
+      "August"
+     ],
+     [
+      "9",
+      "September"
+     ],
+     [
+      "10",
+      "October"
+     ],
+     [
+      "11",
+      "November"
+     ],
+     [
+      "12",
+      "December"
+     ]
+    ],
+    "default": "1",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Yearly Month",
+    "full_name": "Yearly Month"
+   },
+   {
+    "name": "yearly_day",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_selection_days"
+    },
+    "compute": "_compute_yearly_day",
+    "store": true,
+    "readonly": false,
+    "default": "1",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Yearly Day",
+    "full_name": "Yearly Day"
+   },
+   {
+    "name": "cap_accrued_time",
+    "type": "Boolean",
+    "export_string_translation": false,
+    "help": "When the field is checked the balance of an allocation using this accrual plan will never exceed the specified amount.",
+    "defined_in_package": "hr_holidays",
+    "string": "Cap Accrued Time",
+    "full_name": "Cap Accrued Time"
+   },
+   {
+    "name": "maximum_leave",
+    "type": "Float",
+    "digits": [
+     16,
+     2
+    ],
+    "compute": "_compute_maximum_leave",
+    "default": 0,
+    "readonly": false,
+    "store": true,
+    "help": "Choose a cap for this accrual.",
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Maximum Leave",
+    "full_name": "Maximum Leave"
+   },
+   {
+    "name": "cap_accrued_time_yearly",
+    "type": "Boolean",
+    "export_string_translation": false,
+    "store": true,
+    "readonly": false,
+    "help": "When the field is checked the total amount accrued each year will be capped at the specified amount",
+    "defined_in_package": "hr_holidays",
+    "string": "Cap Accrued Time Yearly",
+    "full_name": "Cap Accrued Time Yearly"
+   },
+   {
+    "name": "maximum_leave_yearly",
+    "type": "Float",
+    "digits": [
+     16,
+     2
+    ],
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Maximum Leave Yearly",
+    "full_name": "Maximum Leave Yearly"
+   },
+   {
+    "name": "can_be_carryover",
+    "type": "Boolean",
+    "related": "accrual_plan_id.can_be_carryover",
+    "readonly": true,
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Can Be Carryover",
+    "full_name": "Can Be Carryover"
+   },
+   {
+    "name": "action_with_unused_accruals",
+    "type": "Selection",
+    "selection": [
+     [
+      "lost",
+      "Lost"
+     ],
+     [
+      "all",
+      "Carried over"
+     ]
+    ],
+    "compute": "_compute_action_with_unused_accruals",
+    "store": true,
+    "export_string_translation": false,
+    "default": "lost",
+    "required": true,
+    "help": "When the Carry-Over Time is reached, according to Plan's setting, select what you want to happen with the unused time off: Lost (time will be reset to zero), Carried over (accrued time carried over to the next period.)",
+    "defined_in_package": "hr_holidays",
+    "string": "Action With Unused Accruals",
+    "full_name": "Action With Unused Accruals"
+   },
+   {
+    "name": "carryover_options",
+    "type": "Selection",
+    "selection": [
+     [
+      "unlimited",
+      "Unlimited"
+     ],
+     [
+      "limited",
+      "Up to"
+     ]
+    ],
+    "store": true,
+    "readonly": false,
+    "export_string_translation": false,
+    "compute": "_compute_carryover_options",
+    "default": "unlimited",
+    "required": true,
+    "help": "You can limit the accrued time carried over for the next period.",
+    "defined_in_package": "hr_holidays",
+    "string": "Carryover Options",
+    "full_name": "Carryover Options"
+   },
+   {
+    "name": "postpone_max_days",
+    "type": "Integer",
+    "export_string_translation": false,
+    "help": "Set a maximum of accruals an allocation keeps at the end of the year.",
+    "defined_in_package": "hr_holidays",
+    "string": "Postpone Max Days",
+    "full_name": "Postpone Max Days"
+   },
+   {
+    "name": "can_modify_value_type",
+    "type": "Boolean",
+    "compute": "_compute_can_modify_value_type",
+    "default": false,
+    "export_string_translation": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Can Modify Value Type",
+    "full_name": "Can Modify Value Type"
+   },
+   {
+    "name": "accrual_validity",
+    "type": "Boolean",
+    "export_string_translation": false,
+    "compute": "_compute_accrual_validity",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "hr_holidays",
+    "string": "Accrual Validity",
+    "full_name": "Accrual Validity"
+   },
+   {
+    "name": "accrual_validity_count",
+    "type": "Integer",
+    "export_string_translation": false,
+    "help": "You can define a period of time where the days carried over will be available",
+    "default": "1",
+    "defined_in_package": "hr_holidays",
+    "string": "Accrual Validity Count",
+    "full_name": "Accrual Validity Count"
+   },
+   {
+    "name": "accrual_validity_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "day",
+      "Days"
+     ],
+     [
+      "month",
+      "Months"
+     ]
+    ],
+    "default": "day",
+    "export_string_translation": false,
+    "required": true,
+    "help": "This field defines the unit of time after which the accrual ends.",
+    "defined_in_package": "hr_holidays",
+    "string": "Accrual Validity Type",
+    "full_name": "Accrual Validity Type"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_start_count_check",
+    "kind": "Constraint",
+    "definition": "CHECK((start_count > 0 AND milestone_date = 'after') OR (start_count = 0 AND milestone_date = 'creation'))",
+    "message": "You can not start an accrual in the past.",
+    "defined_in_package": "hr_holidays"
+   },
+   {
+    "name": "_added_value_greater_than_zero",
+    "kind": "Constraint",
+    "definition": "CHECK(added_value > 0)",
+    "message": "You must give a rate greater than 0 in accrual plan levels.",
+    "defined_in_package": "hr_holidays"
+   },
+   {
+    "name": "_valid_postpone_max_days_value",
+    "kind": "Constraint",
+    "definition": "CHECK(action_with_unused_accruals <> 'all' OR carryover_options <> 'limited' OR COALESCE(postpone_max_days, 0) > 0)",
+    "message": "You cannot have a maximum quantity to carryover set to 0.",
+    "defined_in_package": "hr_holidays"
+   },
+   {
+    "name": "_valid_accrual_validity_value",
+    "kind": "Constraint",
+    "definition": "CHECK(accrual_validity IS NOT TRUE OR COALESCE(accrual_validity_count, 0) > 0)",
+    "message": "You cannot have an accrual validity time set to 0.",
+    "defined_in_package": "hr_holidays"
+   },
+   {
+    "name": "_valid_yearly_cap_value",
+    "kind": "Constraint",
+    "definition": "CHECK(cap_accrued_time_yearly IS NOT TRUE OR COALESCE(maximum_leave_yearly, 0) > 0)",
+    "message": "You cannot have a cap on yearly accrued time without setting a maximum amount.",
+    "defined_in_package": "hr_holidays"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_check_dates",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "first_day",
+         "second_day",
+         "week_day",
+         "frequency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "error_message",
+        "line": 178
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_maximum_leaves",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "cap_accrued_time",
+         "maximum_leave"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot have a balance cap on accrued time set to 0.",
+        "line": 184
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_sequence",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "start_count",
+         "start_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_modify_value_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "accrual_plan_id",
+         "accrual_plan_id.level_ids",
+         "accrual_plan_id.time_off_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_added_value_type",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_added_value_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "accrual_plan_id",
+         "accrual_plan_id.level_ids",
+         "accrual_plan_id.added_value_type",
+         "accrual_plan_id.time_off_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_day",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "day_field",
+     "month_field"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_first_month_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "first_month"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_second_month_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "second_month"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_yearly_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "yearly_month"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_maximum_leave",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "cap_accrued_time"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_action_with_unused_accruals",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "can_be_carryover"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_carryover_options",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "action_with_unused_accruals"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_accrual_validity",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "action_with_unused_accruals"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_milestone_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "start_count",
+         "milestone_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_milestone_date",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_hourly_frequencies",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "last_call"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Returns the next date with the given last call",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Your frequency selection is not correct: please choose a frequency between theses options:Hourly, Daily, Weekly, Twice a month, Monthly, Twice a year and Yearly.",
+        "line": 313
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_previous_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "last_call"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": "Returns the date a potential previous call would have been at\nFor example if you have a monthly level giving 16/02 would return 01/02\nContrary to `_get_next_date` this function will return the 01/02 if that date is given",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Your frequency selection is not correct: please choose a frequency between theses options:Hourly, Daily, Weekly, Twice a month, Monthly, Twice a year and Yearly.",
+        "line": 359
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_level_transition_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "allocation_start"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_save_new",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_worked_hours",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "frequency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You can't base accrued time on hours worked, because time is accrued at the start of the period.",
+        "line": 21
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_frequency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "accrued_gain_time"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_dates",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "error_message"
+   },
+   {
+    "operation": "_check_maximum_leaves",
+    "package": "hr_holidays",
+    "kind": "UserError",
+    "message": "You cannot have a balance cap on accrued time set to 0."
+   },
+   {
+    "operation": "_get_next_date",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "Your frequency selection is not correct: please choose a frequency between theses options:Hourly, Daily, Weekly, Twice a month, Monthly, Twice a year and Yearly."
+   },
+   {
+    "operation": "_get_previous_date",
+    "package": "hr_holidays",
+    "kind": "ValidationError",
+    "message": "Your frequency selection is not correct: please choose a frequency between theses options:Hourly, Daily, Weekly, Twice a month, Monthly, Twice a year and Yearly."
+   },
+   {
+    "operation": "_check_worked_hours",
+    "package": "hr_holidays_attendance",
+    "kind": "ValidationError",
+    "message": "You can't base accrued time on hours worked, because time is accrued at the start of the period."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_holidays.access_hr_leave_accrual_level_user",
+    "package": "hr_holidays",
+    "name": "hr.leave.accrual.level.user",
+    "entity": "hr.leave.accrual.level",
+    "group": "hr_holidays.group_hr_holidays_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_holidays.access_hr_leave_accrual_level_manager",
+    "package": "hr_holidays",
+    "name": "hr.leave.accrual.level.manager",
+    "entity": "hr.leave.accrual.level",
+    "group": "hr_holidays.group_hr_holidays_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_holidays.hr_accrual_level_view_form",
+    "package": "hr_holidays",
+    "name": "hr.leave.accrual.level.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Accrual Level"
+     },
+     "fields": [
+      {
+       "name": "can_modify_value_type",
+       "invisible": "1"
+      },
+      {
+       "name": "added_value",
+       "widget": "float_without_trailing_zeros",
+       "nolabel": "1"
+      },
+      {
+       "name": "added_value_type",
+       "readonly": "not can_modify_value_type",
+       "nolabel": "1"
+      },
+      {
+       "name": "frequency",
+       "nolabel": "1"
+      },
+      {
+       "name": "week_day",
+       "required": "frequency == 'weekly'",
+       "nolabel": "1",
+       "placeholder": "select a weekday"
+      },
+      {
+       "name": "first_day",
+       "required": "frequency == 'monthly'",
+       "nolabel": "1",
+       "placeholder": "select a day"
+      },
+      {
+       "name": "first_day",
+       "required": "frequency == 'bimonthly'",
+       "nolabel": "1",
+       "placeholder": "select a day"
+      },
+      {
+       "name": "second_day",
+       "required": "frequency == 'bimonthly'",
+       "nolabel": "1",
+       "placeholder": "select a day"
+      },
+      {
+       "name": "first_month_day",
+       "widget": "day_selection",
+       "required": "frequency == 'biyearly'",
+       "nolabel": "1",
+       "placeholder": "select a day"
+      },
+      {
+       "name": "first_month",
+       "required": "frequency == 'biyearly'",
+       "placeholder": "select a month"
+      },
+      {
+       "name": "second_month_day",
+       "widget": "day_selection",
+       "required": "frequency == 'biyearly'",
+       "nolabel": "1",
+       "placeholder": "select a day"
+      },
+      {
+       "name": "second_month",
+       "required": "frequency == 'biyearly'",
+       "nolabel": "1",
+       "placeholder": "select a month"
+      },
+      {
+       "name": "yearly_day",
+       "widget": "day_selection",
+       "required": "frequency == 'yearly'",
+       "nolabel": "1",
+       "placeholder": "select a day"
+      },
+      {
+       "name": "yearly_month",
+       "required": "frequency == 'yearly'",
+       "nolabel": "1",
+       "placeholder": "select a month"
+      },
+      {
+       "name": "milestone_date",
+       "widget": "radio_followed_by_element",
+       "options": "{'links': {'after': 'milestone_date_after'}, 'observe': 'milestone_date'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "start_count",
+       "nolabel": "1"
+      },
+      {
+       "name": "start_type",
+       "nolabel": "1"
+      },
+      {
+       "name": "action_with_unused_accruals",
+       "widget": "radio",
+       "readonly": "not can_be_carryover",
+       "nolabel": "1"
+      },
+      {
+       "name": "carryover_options",
+       "widget": "radio_followed_by_element",
+       "options": "{'links': {'limited': 'carryover_options_limited'}, 'observe': 'carryover_options'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "postpone_max_days",
+       "nolabel": "1"
+      },
+      {
+       "name": "added_value_type",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "accrual_validity",
+       "nolabel": "1"
+      },
+      {
+       "name": "accrual_validity_count",
+       "nolabel": "1"
+      },
+      {
+       "name": "accrual_validity_type",
+       "nolabel": "1"
+      },
+      {
+       "name": "cap_accrued_time_yearly",
+       "nolabel": "1"
+      },
+      {
+       "name": "maximum_leave_yearly",
+       "widget": "float_without_trailing_zeros",
+       "nolabel": "1"
+      },
+      {
+       "name": "added_value_type",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "cap_accrued_time",
+       "nolabel": "1"
+      },
+      {
+       "name": "maximum_leave",
+       "widget": "float_without_trailing_zeros",
+       "nolabel": "1"
+      },
+      {
+       "name": "added_value_type",
+       "readonly": "1",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "string": "Save",
+       "type": "object",
+       "class": "btn btn-primary",
+       "special": "save"
+      },
+      {
+       "name": "action_save_new",
+       "string": "Save & New",
+       "type": "object",
+       "invisible": "not context.get('new')",
+       "class": "btn btn-primary"
+      },
+      {
+       "string": "Discard",
+       "class": "btn btn-secondary",
+       "special": "cancel"
+      },
+      {
+       "name": "unlink",
+       "string": "Delete",
+       "type": "object",
+       "invisible": "context.get('new')",
+       "class": "btn btn-danger ms-auto"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_without_trailing_zeros": 3,
+      "day_selection": 3,
+      "radio_followed_by_element": 2,
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.hr_leave_accrual_level_view_form",
+    "package": "hr_holidays_attendance",
+    "name": "hr.leave.accrual.level.form",
+    "view_type": "xpath",
+    "inherits_view": "hr_holidays.hr_accrual_level_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='frequency']",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "frequency",
+       "widget": "filterable_selection",
+       "invisible": "accrued_gain_time == 'end'",
+       "options": "{'blacklisted_values': ['worked_hours']}",
+       "nolabel": "1"
+      },
+      {
+       "name": "frequency",
+       "widget": "selection",
+       "invisible": "accrued_gain_time == 'start'",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "filterable_selection": 1,
+      "selection": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='frequency']",
+       "position": "replace"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

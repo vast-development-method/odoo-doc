@@ -1,0 +1,423 @@
+{
+ "catalog": {
+  "name": "views:project.update",
+  "description": "View declarations for entity project.update.",
+  "record_count": 6,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr_timesheet.project_update_view_search_inherit",
+   "package": "hr_timesheet",
+   "name": "project.update.view.search.inherit",
+   "entity": "project.update",
+   "view_type": "xpath",
+   "inherits_view": "project.project_update_view_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//filter[@name='my_updates']",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_team_updates",
+      "string": "My Team's Updates",
+      "domain": "[('user_id.employee_id.parent_id.user_id', '=', uid)]"
+     },
+     {
+      "name": "my_department_updates",
+      "string": "My Department's Updates",
+      "domain": "[('user_id.employee_id.member_of_department', '=', True)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//filter[@name='my_updates']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//filter[@name='my_updates']\" position=\"after\">\n                    <filter string=\"My Team's Updates\" name=\"my_team_updates\" domain=\"[('user_id.employee_id.parent_id.user_id', '=', uid)]\"/>\n                    <filter string=\"My Department's Updates\" name=\"my_department_updates\" domain=\"[('user_id.employee_id.member_of_department', '=', True)]\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_timesheet.project_update_view_kanban_inherit",
+   "package": "hr_timesheet",
+   "name": "project.update.view.kanban.inherit",
+   "entity": "project.update",
+   "view_type": "div",
+   "inherits_view": "project.project_update_view_kanban",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "id": "tasks_stats",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "display_timesheet_stats",
+      "invisible": "1"
+     },
+     {
+      "name": "timesheet_time"
+     },
+     {
+      "name": "allocated_time"
+     },
+     {
+      "name": "uom_id"
+     },
+     {
+      "name": "timesheet_percentage"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "id": "tasks_stats",
+       "position": "after"
+      },
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <div id=\"tasks_stats\" position=\"after\">\n                    <field name=\"display_timesheet_stats\" invisible=\"1\"/>\n                    <div class=\"o_pupdate_kanban_width flex-grow-1 fw-bolder\" invisible=\"not display_timesheet_stats\">\n                        <field name=\"timesheet_time\"/><span invisible=\"not allocated_time\"> / <field name=\"allocated_time\"/></span> <field name=\"uom_id\" no_open=\"1\"/><span invisible=\"not allocated_time\"> (<field name=\"timesheet_percentage\"/>%)</span>\n                    </div>\n                </div>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "project.project_update_view_search",
+   "package": "project",
+   "name": "project.update.view.search",
+   "entity": "project.update",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Update"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "project_id",
+      "invisible": "1"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "description"
+     },
+     {
+      "name": "status"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_updates",
+      "string": "My Updates",
+      "domain": "[('user_id', '=', uid)]"
+     },
+     {
+      "name": "on_track",
+      "string": "On Track",
+      "domain": "[('status', '=', 'on_track')]"
+     },
+     {
+      "name": "at_risk",
+      "string": "At Risk",
+      "domain": "[('status', '=', 'at_risk')]"
+     },
+     {
+      "name": "off_track",
+      "string": "Off Track",
+      "domain": "[('status', '=', 'off_track')]"
+     },
+     {
+      "name": "on_hold",
+      "string": "On Hold",
+      "domain": "[('status', '=', 'on_hold')]"
+     },
+     {
+      "name": "date",
+      "string": "Date",
+      "date": "date"
+     },
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Update\">\n                <field name=\"name\"/>\n                <field name=\"project_id\" invisible=\"1\"/>\n                <field name=\"user_id\"/>\n                <field name=\"description\"/>\n                <field name=\"status\"/>\n                <filter string=\"My Updates\" name=\"my_updates\" domain=\"[('user_id', '=', uid)]\"/>\n                <separator/>\n                <filter string=\"On Track\" name=\"on_track\" domain=\"[('status', '=', 'on_track')]\"/>\n                <filter string=\"At Risk\" name=\"at_risk\" domain=\"[('status', '=', 'at_risk')]\"/>\n                <filter string=\"Off Track\" name=\"off_track\" domain=\"[('status', '=', 'off_track')]\"/>\n                <filter string=\"On Hold\" name=\"on_hold\" domain=\"[('status', '=', 'on_hold')]\"/>\n                <separator/>\n                <filter name=\"date\" string=\"Date\" date=\"date\"/>\n                <separator invisible=\"1\"/>\n                <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                <separator invisible=\"1\"/>\n                <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')]\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "project.project_update_view_form",
+   "package": "project",
+   "name": "project.update.view.form",
+   "entity": "project.update",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Project Update",
+     "js_class": "form_description_expander"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "placeholder": "e.g. Monthly review"
+     },
+     {
+      "name": "project_id",
+      "invisible": "1"
+     },
+     {
+      "name": "color",
+      "invisible": "1"
+     },
+     {
+      "name": "status",
+      "widget": "status_with_color"
+     },
+     {
+      "name": "progress",
+      "widget": "progressbar",
+      "options": "{'editable': true}"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "1"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "description",
+      "options": "{'resizable': false, 'collaborative': true}",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "description",
+      "string": "Description",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "status_with_color": 1,
+     "progressbar": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "chatter": true,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Project Update\" js_class=\"form_description_expander\">\n                <sheet>\n                    <div class=\"oe_title\">\n                        <h1>\n                            <field name=\"name\" class=\"o_text_overflow\" placeholder=\"e.g. Monthly review\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <group>\n                            <field name=\"project_id\" invisible=\"1\"/>\n                            <field name=\"color\" invisible=\"1\"/>\n                            <field name=\"status\" widget=\"status_with_color\"/>\n                            <field name=\"progress\" widget=\"progressbar\" options=\"{'editable': true}\"/>\n                        </group>\n                        <group>\n                            <field name=\"user_id\" widget=\"many2one_avatar_user\" readonly=\"1\"/>\n                            <field name=\"date\"/>\n                        </group>\n                    </group>\n                    <separator/>\n                    <notebook>\n                        <page string=\"Description\" name=\"description\">\n                            <field name=\"description\" nolabel=\"1\" class=\"o_project_update_description\" options=\"{'resizable': false, 'collaborative': true}\"/>\n                        </page>\n                    </notebook>\n                </sheet>\n                <chatter class=\"d-print-none\" reload_on_follower=\"True\"/>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "project.project_update_view_kanban",
+   "package": "project",
+   "name": "project.update.view.kanban",
+   "entity": "project.update",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "highlight_color": "color",
+     "sample": "0",
+     "js_class": "project_update_kanban"
+    },
+    "fields": [
+     {
+      "name": "color"
+     },
+     {
+      "name": "name_cropped"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "color",
+      "invisible": "1"
+     },
+     {
+      "name": "status",
+      "widget": "status_with_color",
+      "readonly": "1"
+     },
+     {
+      "name": "progress_percentage",
+      "widget": "percentage"
+     },
+     {
+      "name": "closed_task_count"
+     },
+     {
+      "name": "task_count"
+     },
+     {
+      "name": "label_tasks"
+     },
+     {
+      "name": "closed_task_percentage"
+     },
+     {
+      "name": "label_tasks"
+     },
+     {
+      "name": "date"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "status_with_color": 1,
+     "percentage": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban highlight_color=\"color\" sample=\"0\" js_class=\"project_update_kanban\">\n                <field name=\"color\"/>\n                <templates>\n                    <t t-name=\"card\" class=\"o_project_update_card column-gap-0 column-gap-md-3 row-gap-2 flex-row flex-wrap align-items-center px-3\">\n                        <div class=\"flex-grow-1 flex-shrink-0 w-50 w-md-auto px-2 px-md-0\">\n                            <field name=\"name_cropped\" class=\"fw-bolder\"/>\n                            <div class=\"d-flex gap-1\">\n                                <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                                <field name=\"user_id\"/>\n                            </div>\n                        </div>\n                        <div class=\"flex-grow-1 flex-shrink-0 w-50 w-md-auto px-2 px-md-0\">\n                            <span>Status</span>\n                            <field name=\"color\" invisible=\"1\"/>\n                            <field name=\"status\" class=\"fw-bolder\" readonly=\"1\" widget=\"status_with_color\"/>\n                        </div>\n                        <div class=\"flex-grow-1 flex-shrink-0 w-50 w-md-auto px-2 px-md-0\">\n                            <span>Progress</span>\n                            <field name=\"progress_percentage\" class=\"fw-bolder\" widget=\"percentage\"/>\n                        </div>\n                        <div class=\"flex-grow-1 flex-shrink-0 w-50 w-md-auto px-2 px-md-0\">\n                            <div id=\"tasks_stats\" class=\"fw-bolder\">\n                                <span invisible=\"not task_count\">\n                                    <field name=\"closed_task_count\"/> / <field name=\"task_count\"/> <field name=\"label_tasks\"/> (<field name=\"closed_task_percentage\"/>%)\n                                </span>\n                                <span invisible=\"task_count\">0 <field name=\"label_tasks\"/></span>\n                            </div>\n                        </div>\n                        <div class=\"flex-grow-1 flex-shrink-0 w-50 w-md-auto px-2 px-md-0\">\n                            <div>Date</div>\n                            <field name=\"date\" class=\"fw-bolder\"/>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "project.project_update_view_tree",
+   "package": "project",
+   "name": "project.update.view.list",
+   "entity": "project.update",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "sample": "1",
+     "js_class": "project_update_list"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "optional": "show"
+     },
+     {
+      "name": "date",
+      "optional": "show"
+     },
+     {
+      "name": "progress",
+      "widget": "progressbar",
+      "string": "Progress",
+      "optional": "show"
+     },
+     {
+      "name": "color",
+      "column_invisible": "True"
+     },
+     {
+      "name": "status",
+      "widget": "status_with_color"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "progressbar": 1,
+     "status_with_color": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list sample=\"1\" js_class=\"project_update_list\">\n                <field name=\"name\"/>\n                <field name=\"user_id\" widget=\"many2one_avatar_user\" class=\"fw-bolder\" optional=\"show\"/>\n                <field name=\"date\" optional=\"show\"/>\n                <field name=\"progress\" string=\"Progress\" widget=\"progressbar\" optional=\"show\"/>\n                <field name=\"color\" column_invisible=\"True\"/>\n                <field name=\"status\" widget=\"status_with_color\"/>\n            </list>\n        </field>\n    "
+  }
+ ]
+}

@@ -1,0 +1,449 @@
+{
+ "catalog": {
+  "name": "entity:account.tax.repartition.line",
+  "description": "Complete definition of entity Tax Repartition Line (account.tax.repartition.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.tax.repartition.line",
+  "storage_name": "account_tax_repartition_line",
+  "full_name": "Tax Repartition Line",
+  "kind": "persistent",
+  "description": "Tax Repartition Line",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "document_type, repartition_type, sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "factor_percent",
+    "type": "Float",
+    "string": "%",
+    "default": 100,
+    "digits": [
+     16,
+     12
+    ],
+    "required": true,
+    "help": "Factor to apply on the account move lines generated from this distribution line, in percents",
+    "defined_in_package": "account",
+    "full_name": "%"
+   },
+   {
+    "name": "factor",
+    "type": "Float",
+    "string": "Factor Ratio",
+    "compute": "_compute_factor",
+    "help": "Factor to apply on the account move lines generated from this distribution line",
+    "defined_in_package": "account",
+    "full_name": "Factor Ratio"
+   },
+   {
+    "name": "repartition_type",
+    "type": "Selection",
+    "string": "Based On",
+    "selection": [
+     [
+      "base",
+      "Base"
+     ],
+     [
+      "tax",
+      "of tax"
+     ]
+    ],
+    "required": true,
+    "default": "tax",
+    "help": "Base on which the factor will be applied.",
+    "defined_in_package": "account",
+    "full_name": "Based On"
+   },
+   {
+    "name": "document_type",
+    "type": "Selection",
+    "string": "Related to",
+    "selection": [
+     [
+      "invoice",
+      "Invoice"
+     ],
+     [
+      "refund",
+      "Refund"
+     ]
+    ],
+    "required": true,
+    "defined_in_package": "account",
+    "full_name": "Related to"
+   },
+   {
+    "name": "account_id",
+    "type": "Many2one",
+    "string": "Account",
+    "comodel": "account.account",
+    "domain": "[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'off_balance'))]",
+    "check_company": true,
+    "help": "Account on which to post the tax amount",
+    "defined_in_package": "account",
+    "full_name": "Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "string": "Tax Grids",
+    "comodel": "account.account.tag",
+    "domain": [
+     [
+      "applicability",
+      "=",
+      "taxes"
+     ]
+    ],
+    "copy": true,
+    "ondelete": "restrict",
+    "defined_in_package": "account",
+    "full_name": "Tax Grids",
+    "target_entity": "account.account.tag"
+   },
+   {
+    "name": "tax_id",
+    "type": "Many2one",
+    "comodel": "account.tax",
+    "index": "btree_not_null",
+    "ondelete": "cascade",
+    "check_company": true,
+    "defined_in_package": "account",
+    "string": "Tax",
+    "full_name": "Tax",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "string": "Company",
+    "comodel": "res.company",
+    "related": "tax_id.company_id",
+    "store": true,
+    "help": "The company this distribution line belongs to.",
+    "defined_in_package": "account",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 1,
+    "help": "The order in which distribution lines are displayed and matched. For refunds to work properly, invoice distribution lines should be arranged in the same order as the credit note distribution lines they correspond to.",
+    "defined_in_package": "account",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "use_in_tax_closing",
+    "type": "Boolean",
+    "string": "Tax Closing Entry",
+    "compute": "_compute_use_in_tax_closing",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "defined_in_package": "account",
+    "full_name": "Tax Closing Entry"
+   },
+   {
+    "name": "tag_ids_domain",
+    "type": "Binary",
+    "string": "tag domain",
+    "help": "Dynamic domain used for the tag that can be set on tax",
+    "compute": "_compute_tag_ids_domain",
+    "defined_in_package": "account",
+    "full_name": "tag domain"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_tag_ids_domain",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id.multi_vat_foreign_country_ids",
+         "company_id.account_fiscal_country_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_in_tax_closing",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_id",
+         "repartition_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_factor",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "factor_percent"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_repartition_type",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "repartition_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_aml_target_tax_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "force_caba_exigibility"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Get the default tax account to set on a business line.\n\n:return: An account.account record or an empty recordset.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_tax_repartition_line_user",
+    "package": "account",
+    "name": "account.tax repartition.line.user",
+    "entity": "account.tax.repartition.line",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_tax_repartition_line_readonly",
+    "package": "account",
+    "name": "account.tax repartition.line.invoice",
+    "entity": "account.tax.repartition.line",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_tax_repartition_line_invoice",
+    "package": "account",
+    "name": "account.tax repartition.line.invoice",
+    "entity": "account.tax.repartition.line",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_tax_repartition_line_manager",
+    "package": "account",
+    "name": "account.tax repartition.line.manager",
+    "entity": "account.tax.repartition.line",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.tax_rep_comp_rule",
+    "package": "account",
+    "name": "Tax Repartition multi-company",
+    "entity": "account.tax.repartition.line",
+    "domain": "['|',('company_id','=',False), ('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.tax_repartition_line_tree",
+    "package": "account",
+    "name": "account.tax.repartition.line.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "bottom",
+      "create": "1",
+      "delete": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "factor_percent",
+       "widget": "account_tax_repartition_line_factor_percent",
+       "invisible": "repartition_type == 'base'"
+      },
+      {
+       "name": "repartition_type"
+      },
+      {
+       "name": "account_id",
+       "invisible": "repartition_type == 'base'",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "domain": "tag_ids_domain",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "use_in_tax_closing",
+       "invisible": "repartition_type == 'base'",
+       "optional": "hidden"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "tag_ids_domain",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "account_tax_repartition_line_factor_percent": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": "1",
+     "delete": "1",
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

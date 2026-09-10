@@ -1,0 +1,2672 @@
+{
+ "catalog": {
+  "name": "entity:website.visitor",
+  "description": "Complete definition of entity Website Visitor (website.visitor).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "website.visitor",
+  "storage_name": "website_visitor",
+  "full_name": "Website Visitor",
+  "kind": "persistent",
+  "description": "Website Visitor",
+  "defined_by_package": "website",
+  "extended_by_packages": [
+   "website_sale",
+   "website_event",
+   "website_event_track",
+   "website_crm",
+   "website_livechat",
+   "website_sms",
+   "website_crm_sms"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "related": "partner_id.name",
+    "defined_in_package": "website",
+    "full_name": "Name"
+   },
+   {
+    "name": "access_token",
+    "type": "Char",
+    "required": true,
+    "default": {
+     "dynamic": "_get_access_token"
+    },
+    "copy": false,
+    "defined_in_package": "website",
+    "string": "Access Token",
+    "full_name": "Access Token"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "comodel": "website",
+    "string": "Website",
+    "readonly": true,
+    "defined_in_package": "website",
+    "full_name": "Website",
+    "target_entity": "website"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Contact",
+    "help": "Partner of the last logged in user.",
+    "compute": "_compute_partner_id",
+    "store": true,
+    "index": "btree_not_null",
+    "defined_in_package": "website",
+    "full_name": "Contact",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_image",
+    "type": "Binary",
+    "related": "partner_id.image_1920",
+    "defined_in_package": "website",
+    "string": "Partner Image",
+    "full_name": "Partner Image"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "string": "Country",
+    "readonly": true,
+    "defined_in_package": "website",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "country_flag",
+    "type": "Char",
+    "related": "country_id.image_url",
+    "string": "Country Flag",
+    "defined_in_package": "website",
+    "full_name": "Country Flag"
+   },
+   {
+    "name": "lang_id",
+    "type": "Many2one",
+    "comodel": "res.lang",
+    "string": "Language",
+    "help": "Language from the website when visitor has been created",
+    "defined_in_package": "website",
+    "full_name": "Language",
+    "target_entity": "res.lang"
+   },
+   {
+    "name": "timezone",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "string": "Timezone",
+    "defined_in_package": "website",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "string": "Email",
+    "compute": "_compute_email_phone",
+    "compute_sudo": true,
+    "defined_in_package": "website",
+    "full_name": "Email"
+   },
+   {
+    "name": "mobile",
+    "type": "Char",
+    "string": "Mobile",
+    "compute": "_compute_email_phone",
+    "compute_sudo": true,
+    "defined_in_package": "website",
+    "full_name": "Mobile"
+   },
+   {
+    "name": "visit_count",
+    "type": "Integer",
+    "string": "# Visits",
+    "default": 1,
+    "readonly": true,
+    "help": "A new visit is considered if last connection was more than 8 hours ago.",
+    "defined_in_package": "website",
+    "full_name": "# Visits"
+   },
+   {
+    "name": "website_track_ids",
+    "type": "One2many",
+    "comodel": "website.track",
+    "inverse_name": "visitor_id",
+    "string": "Visited Pages History",
+    "readonly": true,
+    "defined_in_package": "website",
+    "full_name": "Visited Pages History",
+    "target_entity": "website.track"
+   },
+   {
+    "name": "visitor_page_count",
+    "type": "Integer",
+    "string": "Page Views",
+    "compute": "_compute_page_statistics",
+    "help": "Total number of visits on tracked pages",
+    "defined_in_package": "website",
+    "full_name": "Page Views"
+   },
+   {
+    "name": "page_ids",
+    "type": "Many2many",
+    "comodel": "website.page",
+    "string": "Visited Pages",
+    "compute": "_compute_page_statistics",
+    "groups": "website.group_website_designer",
+    "search": "_search_page_ids",
+    "defined_in_package": "website",
+    "full_name": "Visited Pages",
+    "target_entity": "website.page"
+   },
+   {
+    "name": "page_count",
+    "type": "Integer",
+    "string": "# Visited Pages",
+    "compute": "_compute_page_statistics",
+    "help": "Total number of tracked page visited",
+    "defined_in_package": "website",
+    "full_name": "# Visited Pages"
+   },
+   {
+    "name": "last_visited_page_id",
+    "type": "Many2one",
+    "comodel": "website.page",
+    "string": "Last Visited Page",
+    "compute": "_compute_last_visited_page_id",
+    "defined_in_package": "website",
+    "full_name": "Last Visited Page",
+    "target_entity": "website.page"
+   },
+   {
+    "name": "create_date",
+    "type": "Datetime",
+    "string": "First Connection",
+    "readonly": true,
+    "defined_in_package": "website",
+    "full_name": "First Connection"
+   },
+   {
+    "name": "last_connection_datetime",
+    "type": "Datetime",
+    "string": "Last Connection",
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "help": "Last page view date",
+    "readonly": true,
+    "defined_in_package": "website",
+    "full_name": "Last Connection"
+   },
+   {
+    "name": "time_since_last_action",
+    "type": "Char",
+    "string": "Last action",
+    "compute": "_compute_time_statistics",
+    "help": "Time since last page view. E.g.: 2 minutes ago",
+    "defined_in_package": "website",
+    "full_name": "Last action"
+   },
+   {
+    "name": "is_connected",
+    "type": "Boolean",
+    "string": "Is connected?",
+    "compute": "_compute_time_statistics",
+    "help": "A visitor is considered as connected if his last page view was within the last 5 minutes.",
+    "defined_in_package": "website",
+    "full_name": "Is connected?"
+   },
+   {
+    "name": "visitor_product_count",
+    "type": "Integer",
+    "string": "Product Views",
+    "help": "Total number of views on products",
+    "compute": "_compute_product_statistics",
+    "defined_in_package": "website_sale",
+    "full_name": "Product Views"
+   },
+   {
+    "name": "product_ids",
+    "type": "Many2many",
+    "string": "Visited Products",
+    "comodel": "product.product",
+    "compute": "_compute_product_statistics",
+    "defined_in_package": "website_sale",
+    "full_name": "Visited Products",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_count",
+    "type": "Integer",
+    "string": "Products Views",
+    "help": "Total number of product viewed",
+    "compute": "_compute_product_statistics",
+    "defined_in_package": "website_sale",
+    "full_name": "Products Views"
+   },
+   {
+    "name": "event_registration_ids",
+    "type": "One2many",
+    "comodel": "event.registration",
+    "inverse_name": "visitor_id",
+    "string": "Event Registrations",
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "website_event",
+    "full_name": "Event Registrations",
+    "target_entity": "event.registration"
+   },
+   {
+    "name": "event_registration_count",
+    "type": "Integer",
+    "string": "# Registrations",
+    "compute": "_compute_event_registration_count",
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "website_event",
+    "full_name": "# Registrations"
+   },
+   {
+    "name": "event_registered_ids",
+    "type": "Many2many",
+    "comodel": "event.event",
+    "string": "Registered Events",
+    "compute": "_compute_event_registered_ids",
+    "compute_sudo": true,
+    "search": "_search_event_registered_ids",
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "website_event",
+    "full_name": "Registered Events",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "event_track_visitor_ids",
+    "type": "One2many",
+    "comodel": "event.track.visitor",
+    "inverse_name": "visitor_id",
+    "string": "Track Visitors",
+    "groups": "event.group_event_user",
+    "defined_in_package": "website_event_track",
+    "full_name": "Track Visitors",
+    "target_entity": "event.track.visitor"
+   },
+   {
+    "name": "event_track_wishlisted_ids",
+    "type": "Many2many",
+    "comodel": "event.track",
+    "string": "Wishlisted Tracks",
+    "compute": "_compute_event_track_wishlisted_ids",
+    "compute_sudo": true,
+    "search": "_search_event_track_wishlisted_ids",
+    "groups": "event.group_event_user",
+    "defined_in_package": "website_event_track",
+    "full_name": "Wishlisted Tracks",
+    "target_entity": "event.track"
+   },
+   {
+    "name": "event_track_wishlisted_count",
+    "type": "Integer",
+    "string": "# Wishlisted",
+    "compute": "_compute_event_track_wishlisted_ids",
+    "compute_sudo": true,
+    "groups": "event.group_event_user",
+    "defined_in_package": "website_event_track",
+    "full_name": "# Wishlisted"
+   },
+   {
+    "name": "lead_ids",
+    "type": "Many2many",
+    "comodel": "crm.lead",
+    "string": "Leads",
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "website_crm",
+    "full_name": "Leads",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "lead_count",
+    "type": "Integer",
+    "string": "# Leads",
+    "compute": "_compute_lead_count",
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "website_crm",
+    "full_name": "# Leads"
+   },
+   {
+    "name": "livechat_operator_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "compute": "_compute_livechat_operator_id",
+    "store": true,
+    "string": "Speaking with",
+    "index": "btree_not_null",
+    "defined_in_package": "website_livechat",
+    "full_name": "Speaking with",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "livechat_operator_name",
+    "type": "Char",
+    "string": "Operator Name",
+    "related": "livechat_operator_id.name",
+    "defined_in_package": "website_livechat",
+    "full_name": "Operator Name"
+   },
+   {
+    "name": "discuss_channel_ids",
+    "type": "One2many",
+    "comodel": "discuss.channel",
+    "inverse_name": "livechat_visitor_id",
+    "string": "Visitor's livechat channels",
+    "readonly": true,
+    "defined_in_package": "website_livechat",
+    "full_name": "Visitor's livechat channels",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "session_count",
+    "type": "Integer",
+    "string": "# Sessions",
+    "compute": "_compute_session_count",
+    "defined_in_package": "website_livechat",
+    "full_name": "# Sessions"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_access_token_unique",
+    "kind": "Constraint",
+    "definition": "unique(access_token)",
+    "message": "Access token should be unique.",
+    "defined_in_package": "website"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_get_access_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Either the user's partner.id or a hash. ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "event_registration_ids.name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "If there is an event registration for an anonymous visitor, use that\nregistered attendee name as visitor name. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "access_token"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_email_phone",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id.email_normalized",
+         "partner_id.phone"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_registration_ids.email",
+         "event_registration_ids.phone"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id.email_normalized",
+         "partner_id.phone",
+         "lead_ids.email_normalized",
+         "lead_ids.phone"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_page_statistics",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_track_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_page_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_last_visited_page_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_track_ids.page_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_time_statistics",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "last_connection_datetime"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_for_message_composer",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Purpose of this method is to actualize visitor model prior to contacting\nhim. Used notably for inheritance purpose, when dealing with leads that\ncould update the visitor model. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_message_composer_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_mail",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There are no contact and/or no email linked to this visitor.",
+        "line": 176
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_upsert_visitor",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "access_token",
+     "force_track_values"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Based on the given `access_token`, either create or return the\nrelated visitor if exists, through a single raw SQL UPSERT Query.\n\nIt will also create a tracking record if requested, in the same query.\n\n:param access_token: token to be used to upsert the visitor\n:param force_track_values: an optional dict to create a track at the\n    same time.\n:return: a tuple containing the visitor id and the upsert result (either\n    `inserted` or `updated).",
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_visitor_from_request",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "force_create",
+     "force_track_values"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Return the visitor as sudo from the request.\n\n:param force_create: force a visitor creation if no visitor exists\n:param force_track_values: an optional dict to create a track at the\n    same time.\n:return: the website visitor if exists or forced, empty recordset\n    otherwise.",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_handle_webpage_dispatch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "website_page"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Create a website.visitor if the http request object is a tracked\nwebsite.page or a tracked ir.ui.view.\nSince this method is only called on tracked elements, the\nlast_connection_datetime might not be accurate as the visitor could have\nbeen visiting only untracked page during his last visit.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_tracking",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "website_track_values"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Add the track and update the visitor",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_merge_visitor",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Merge an anonymous visitor data to a partner visitor then unlink\nthat anonymous visitor.\nPurpose is to try to aggregate as much sub-records (tracked pages,\nleads, ...) as possible.\nIt is especially useful to aggregate data from the same user on\ndifferent devices.\n\nThis method is meant to be overridden for other modules to merge their\nown anonymous visitor data to the partner visitor before unlink.\n\nThis method is only called after the user logs in.\n\n:param target: main visitor, target of link process;",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Override linking process to link registrations to the final visitor. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": "Override linking process to link wishlist to the final visitor. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm",
+      "decorators": [],
+      "documentation": "Link the leads to the main visitor to avoid them being lost. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": "Copy sessions of the secondary visitors to the main partner visitor. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_unlink_old_visitors",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "batch_size"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Unlink inactive visitors (see '_inactive_visitors_domain' for\ndetails).\n\nVisitors were previously archived but we came to the conclusion that\narchived visitors have very little value and bloat the database for no\nreason. ",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inactive_visitors_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "This method defines the domain of visitors that can be cleaned. By\ndefault visitors not linked to any partner and not active for\n'website.visitor.live.days' days (default being 60) are considered as\ninactive.\n\nThis method is meant to be overridden by sub-modules to further refine\ninactivity conditions. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Visitors registered to events are considered always active and should not be deleted. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": "Visitors registered to push subscriptions are considered always active and should not be\ndeleted. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm",
+      "decorators": [],
+      "documentation": "Visitors tied to leads are considered always active and should not be deleted. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_visitor_timezone",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "timezone"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "We need to do this part here to avoid concurrent updates error. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_visitor_last_visit",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_visitor_timezone",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_statistics",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_track_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_add_viewed_product",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "add a website_track with a page marked as viewed",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_registration_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_registration_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_registered_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_registration_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_event_registered_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "website_event",
+      "decorators": [],
+      "documentation": "Search visitors with terms on events within their event registrations. E.g. [('event_registered_ids',\n'in', [1, 2])] should return visitors having a registration on events 1, 2 as\nwell as their children for notification purpose. ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unsupported 'Not In' operation on visitors registrations",
+        "line": 65
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_track_wishlisted_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_track_visitor_ids.track_id",
+         "event_track_visitor_ids.is_wishlisted"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_event_track_wishlisted_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": "Search visitors with terms on wishlisted tracks. E.g. [('event_track_wishlisted_ids',\n'in', [1, 2])] should return visitors having wishlisted tracks 1, 2. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unsupported 'Not In' operation on track wishlist visitors",
+        "line": 40
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_lead_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_crm",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lead_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_auto_init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_operator_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "discuss_channel_ids.livechat_end_dt",
+         "discuss_channel_ids.livechat_operator_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_session_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "discuss_channel_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_chat_request",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": "Send a chat request to website_visitor(s).\nThis creates a chat_request and a discuss_channel with livechat active flag.\nBut for the visitor to get the chat request, the operator still has to speak to the visitor.\nThe visitor will receive the chat request the next time he navigates to a website page.\n(see _handle_webpage_dispatch for next step)",
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Recipients are not available. Please refresh the page to get latest visitors status.",
+        "line": 56
+       },
+       {
+        "kind": "UserError",
+        "message": "No Livechat Channel allows you to send a chat request for website %s.",
+        "line": 60
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_field_store_repr",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name"
+    ],
+    "definitions": [
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_visitor_history",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_for_sms_composer",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sms",
+      "decorators": [],
+      "documentation": "Purpose of this method is to actualize visitor model prior to contacting\nhim. Used notably for inheritance purpose, when dealing with leads that\ncould update the visitor model. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_sms_composer_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_crm_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_sms",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There are no contact and/or no phone or mobile numbers linked to this visitor.",
+        "line": 28
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_send_mail",
+    "package": "website",
+    "kind": "UserError",
+    "message": "There are no contact and/or no email linked to this visitor."
+   },
+   {
+    "operation": "_search_event_registered_ids",
+    "package": "website_event",
+    "kind": "UserError",
+    "message": "Unsupported 'Not In' operation on visitors registrations"
+   },
+   {
+    "operation": "_search_event_track_wishlisted_ids",
+    "package": "website_event_track",
+    "kind": "UserError",
+    "message": "Unsupported 'Not In' operation on track wishlist visitors"
+   },
+   {
+    "operation": "action_send_chat_request",
+    "package": "website_livechat",
+    "kind": "UserError",
+    "message": "Recipients are not available. Please refresh the page to get latest visitors status."
+   },
+   {
+    "operation": "action_send_chat_request",
+    "package": "website_livechat",
+    "kind": "UserError",
+    "message": "No Livechat Channel allows you to send a chat request for website %s."
+   },
+   {
+    "operation": "action_send_sms",
+    "package": "website_sms",
+    "kind": "UserError",
+    "message": "There are no contact and/or no phone or mobile numbers linked to this visitor."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website.access_website_visitor_designer",
+    "package": "website",
+    "name": "access_website_visitor_designer",
+    "entity": "website.visitor",
+    "group": "website.group_website_designer",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": true
+   },
+   {
+    "external_identifier": "website.access_website_visitor_system",
+    "package": "website",
+    "name": "access_website_visitor_system",
+    "entity": "website.visitor",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_crm.access_website_visitor_salesman",
+    "package": "website_crm",
+    "name": "access_website_visitor_salesman",
+    "entity": "website.visitor",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event.access_website_visitor_user",
+    "package": "website_event",
+    "name": "website.visitor.user",
+    "entity": "website.visitor",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_livechat.access_website_visitor_livechat_users",
+    "package": "website_livechat",
+    "name": "website.visitor.livechat.users",
+    "entity": "website.visitor",
+    "group": "im_livechat.im_livechat_group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "website.website_visitor_view_kanban",
+    "package": "website",
+    "name": "website.visitor.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_wvisitor_kanban",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "country_flag"
+      },
+      {
+       "name": "email"
+      },
+      {
+       "name": "is_connected"
+      },
+      {
+       "name": "partner_image"
+      },
+      {
+       "name": "partner_id",
+       "widget": "image",
+       "options": "{'preview_image': 'image_128', 'size': [54, 54]}"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "country_flag",
+       "widget": "image_url"
+      },
+      {
+       "name": "time_since_last_action"
+      },
+      {
+       "name": "visit_count"
+      },
+      {
+       "name": "last_visited_page_id"
+      },
+      {
+       "name": "page_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send_mail",
+       "type": "object",
+       "invisible": "not email",
+       "class": "btn btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "image_url": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "website.website_visitor_view_form",
+    "package": "website",
+    "name": "website.visitor.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Website Visitor"
+     },
+     "fields": [
+      {
+       "name": "visit_count",
+       "widget": "statinfo",
+       "string": "Visits"
+      },
+      {
+       "name": "visitor_page_count",
+       "widget": "statinfo",
+       "string": "Page Views"
+      },
+      {
+       "name": "country_flag",
+       "widget": "image_url",
+       "options": "{\"size\": [32, 32]}"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "is_connected",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "email"
+      },
+      {
+       "name": "mobile"
+      },
+      {
+       "name": "country_id",
+       "invisible": "not country_id"
+      },
+      {
+       "name": "lang_id"
+      },
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "last_connection_datetime"
+      },
+      {
+       "name": "page_ids",
+       "widget": "many2many_tags",
+       "string": "Pages"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send_mail",
+       "string": "Send Email",
+       "type": "object",
+       "invisible": "not email",
+       "class": "btn btn-primary"
+      },
+      {
+       "invisible": "not is_connected",
+       "class": "oe_stat_button o_stat_button_info"
+      },
+      {
+       "invisible": "is_connected",
+       "class": "oe_stat_button o_stat_button_info"
+      },
+      {
+       "class": "oe_stat_button o_stat_button_info",
+       "icon": "fa-globe"
+      },
+      {
+       "name": "%(website.website_visitor_page_action)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-tags"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 2,
+      "image_url": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_send_mail",
+       "type": "object",
+       "class": "btn btn-primary",
+       "invisible": "not email",
+       "string": "Send Email"
+      }
+     ],
+     "chatter": false,
+     "button_box": [
+      {
+       "class": "oe_stat_button o_stat_button_info",
+       "disabled": "1",
+       "invisible": "not is_connected"
+      },
+      {
+       "class": "oe_stat_button o_stat_button_info",
+       "disabled": "1",
+       "invisible": "is_connected"
+      },
+      {
+       "id": "w_visitor_visit_counter",
+       "class": "oe_stat_button o_stat_button_info",
+       "disabled": "1",
+       "icon": "fa-globe"
+      },
+      {
+       "name": "%(website.website_visitor_page_action)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-tags"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website.website_visitor_view_tree",
+    "package": "website",
+    "name": "website.visitor.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Web Visitors",
+      "decoration-success": "is_connected",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "country_flag",
+       "widget": "image_url",
+       "options": "{\"size\": [20, 20]}",
+       "nolabel": "1"
+      },
+      {
+       "name": "display_name",
+       "string": "Name"
+      },
+      {
+       "name": "create_date",
+       "optional": "hide"
+      },
+      {
+       "name": "last_connection_datetime"
+      },
+      {
+       "name": "lang_id"
+      },
+      {
+       "name": "country_id",
+       "optional": "hide"
+      },
+      {
+       "name": "visit_count"
+      },
+      {
+       "name": "page_ids",
+       "widget": "many2many_tags",
+       "string": "Pages"
+      },
+      {
+       "name": "last_visited_page_id",
+       "string": "Last Page",
+       "optional": "hide"
+      },
+      {
+       "name": "is_connected",
+       "column_invisible": "True"
+      },
+      {
+       "name": "email",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send_mail",
+       "string": "Email",
+       "type": "object",
+       "invisible": "not email",
+       "icon": "fa-envelope"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image_url": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-success": "is_connected"
+     }
+    }
+   },
+   {
+    "external_identifier": "website.website_visitor_view_search",
+    "package": "website",
+    "name": "website.visitor.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Visitor"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "lang_id"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "visit_count"
+      },
+      {
+       "name": "page_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_last_7_days",
+       "string": "Last 7 Days",
+       "domain": "[('last_connection_datetime', '>', '-7d')]"
+      },
+      {
+       "name": "filter_type_visitor",
+       "string": "Unregistered",
+       "domain": "[('partner_id', '=', False)]"
+      },
+      {
+       "name": "filter_type_customer",
+       "string": "Contacts",
+       "domain": "[('partner_id', '!=', False)]"
+      },
+      {
+       "name": "filter_is_connected",
+       "string": "Connected",
+       "domain": "[('last_connection_datetime', '>', '-5M')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_country",
+       "string": "Country",
+       "context": "{'group_by': 'country_id'}"
+      },
+      {
+       "name": "group_by_timezone",
+       "string": "Timezone",
+       "context": "{'group_by': 'timezone'}"
+      },
+      {
+       "name": "group_by_lang",
+       "string": "Language",
+       "context": "{'group_by': 'lang_id'}"
+      },
+      {
+       "name": "group_by_visit_count",
+       "string": "# Visits",
+       "context": "{'group_by': 'visit_count'}"
+      },
+      {
+       "name": "group_by_website_id",
+       "string": "Website",
+       "context": "{'group_by': 'website_id'}",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "group_by_create_date",
+       "string": "First Connection",
+       "context": "{'group_by': 'create_date'}"
+      },
+      {
+       "name": "group_by_last_connection_datetime",
+       "string": "Last Connection",
+       "context": "{'group_by': 'last_connection_datetime'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website.website_visitor_view_graph",
+    "package": "website",
+    "name": "website.visitor.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Visitors",
+      "type": "line",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "last_connection_datetime"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "last_connection_datetime",
+       "interval": "day"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_crm.website_visitor_view_form",
+    "package": "website_crm",
+    "name": "website.visitor.view.form.inherit.website.crm",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@id='w_visitor_visit_counter']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "lead_count",
+       "widget": "statinfo",
+       "string": "Leads"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(website_crm.crm_lead_action_from_visitor)d",
+       "type": "action",
+       "invisible": "lead_count == 0",
+       "class": "oe_stat_button",
+       "groups": "sales_team.group_sale_salesman",
+       "icon": "fa-star"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@id='w_visitor_visit_counter']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_crm.website_visitor_view_tree",
+    "package": "website_crm",
+    "name": "website.visitor.view.list.inherit.website.crm",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='page_ids']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "lead_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='page_ids']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_crm.website_visitor_view_search",
+    "package": "website_crm",
+    "name": "website.visitor.view.search.inherit.website.crm",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='filter_type_visitor']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='filter_type_visitor']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_crm.website_visitor_view_kanban",
+    "package": "website_crm",
+    "name": "website.visitor.view.kanban.inherit.website.crm",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@id='wvisitor_visited_page']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "lead_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@id='wvisitor_visited_page']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.website_visitor_view_tree",
+    "package": "website_event",
+    "name": "website.visitor.view.list.inherit.event",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='page_ids']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "event_registration_count",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='page_ids']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event.website_visitor_view_form",
+    "package": "website_event",
+    "name": "website.visitor.view.form.inherit.event",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@id='w_visitor_visit_counter']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "event_registration_count",
+       "widget": "statinfo",
+       "string": "Registrations"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(website_event.event_registration_action_from_visitor)d",
+       "type": "action",
+       "invisible": "event_registration_count == 0",
+       "class": "oe_stat_button",
+       "groups": "event.group_event_user",
+       "icon": "fa-ticket"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@id='w_visitor_visit_counter']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track.website_visitor_view_tree",
+    "package": "website_event_track",
+    "name": "website.visitor.view.list.inherit.event.track",
+    "view_type": "xpath",
+    "inherits_view": "website_event.website_visitor_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='event_registration_count']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "event_track_wishlisted_count",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='event_registration_count']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track.website_visitor_view_form",
+    "package": "website_event_track",
+    "name": "website.visitor.view.form.inherit.event.track",
+    "view_type": "xpath",
+    "inherits_view": "website_event.website_visitor_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@id='w_visitor_visit_counter']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "event_track_wishlisted_count",
+       "widget": "statinfo",
+       "string": "Tracks"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(website_event_track.event_track_action_from_visitor)d",
+       "type": "action",
+       "invisible": "event_track_wishlisted_count == 0",
+       "class": "oe_stat_button",
+       "groups": "event.group_event_manager",
+       "icon": "fa-ticket"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@id='w_visitor_visit_counter']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_livechat.website_visitor_view_kanban",
+    "package": "website_livechat",
+    "name": "website.visitor.view.kanban.inherit.website.livechat",
+    "view_type": "field",
+    "inherits_view": "website.website_visitor_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "country_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "country_id",
+       "position": "after"
+      },
+      {
+       "name": "livechat_operator_id"
+      },
+      {
+       "name": "session_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_livechat.website_visitor_view_form",
+    "package": "website_livechat",
+    "name": "website.visitor.view.form.inherit.website.livechat",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_send_chat_request",
+       "string": "Send chat request",
+       "type": "object",
+       "invisible": "livechat_operator_id or not is_connected",
+       "class": "oe_highlight"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_livechat.website_visitor_view_tree",
+    "package": "website_livechat",
+    "name": "website.visitor.view.list.inherit.website.livechat",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='email']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "livechat_operator_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send_chat_request",
+       "string": "Chat",
+       "type": "object",
+       "invisible": "livechat_operator_id or not is_connected",
+       "icon": "fa-comments"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='email']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_livechat.website_visitor_view_search",
+    "package": "website_livechat",
+    "name": "website.visitor.view.search.website.livechat",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='filter_is_connected']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_not_in_conversation",
+       "string": "Available",
+       "domain": "[('livechat_operator_id', '=', False)]"
+      },
+      {
+       "name": "filter_in_conversation",
+       "string": "In Conversation",
+       "domain": "[('livechat_operator_id', '!=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='filter_is_connected']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_sale.website_sale_visitor_view_form",
+    "package": "website_sale",
+    "name": "website.visitor.view.form",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='%(website.website_visitor_page_action)d']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "visitor_product_count",
+       "widget": "statinfo",
+       "string": "Product Views"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(website_sale.website_sale_visitor_product_action)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-tags"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='%(website.website_visitor_page_action)d']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_sale.website_sale_visitor_view_tree",
+    "package": "website_sale",
+    "name": "website.visitor.view.list",
+    "view_type": "field",
+    "inherits_view": "website.website_visitor_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "page_ids",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "page_ids",
+       "position": "after"
+      },
+      {
+       "name": "product_ids",
+       "widget": "many2many_tags",
+       "string": "Products"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_sale.website_sale_visitor_view_kanban",
+    "package": "website_sale",
+    "name": "website.visitor.view.kanban",
+    "view_type": "field",
+    "inherits_view": "website.website_visitor_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "country_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "country_id",
+       "position": "after"
+      },
+      {
+       "name": "product_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_sms.website_visitor_view_form",
+    "package": "website_sms",
+    "name": "website.visitor.view.form.inherit.website.mass.mailing.sms",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_send_sms",
+       "string": "Send SMS",
+       "type": "object",
+       "invisible": "not mobile",
+       "class": "btn btn-primary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_sms.website_visitor_view_kanban",
+    "package": "website_sms",
+    "name": "website.visitor.view.kanban.inherit.website.sms",
+    "view_type": "field",
+    "inherits_view": "website.website_visitor_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "country_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "country_id",
+       "position": "after"
+      },
+      {
+       "name": "mobile",
+       "widget": "phone"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "phone": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_sms.website_visitor_view_tree",
+    "package": "website_sms",
+    "name": "website.visitor.view.list.inherit.website.sms",
+    "view_type": "xpath",
+    "inherits_view": "website.website_visitor_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='is_connected']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "mobile",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='is_connected']",
+       "position": "before"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website.website_visitors_action",
+    "package": "website",
+    "name": "Visitors",
+    "view_mode": "kanban,list,form,graph",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_filter_last_7_days':1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            No Visitors yet!\n          </p><p>\n            Wait for visitors to come to your website to see their history and engage with them.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "website.visitor"
+   },
+   {
+    "external_identifier": "website_event_track.website_visitor_action_from_track",
+    "package": "website_event_track",
+    "name": "Visitors Wishlist",
+    "view_mode": "kanban,list,form,graph",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('event_track_wishlisted_ids', 'in', [active_id])]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Wait for visitors to add this track to their list of favorites\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "website.visitor"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "website_livechat.website_livechat_send_chat_request_action_server",
+    "package": "website_livechat",
+    "name": "Send Chat Requests",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "website.website_visitor_menu",
+    "package": "website",
+    "name": "Visitors",
+    "parent_id": "website.menu_reporting",
+    "action": "website.website_visitors_action",
+    "sequence": "40",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "website_livechat.website_livechat_visitor_menu",
+    "package": "website_livechat",
+    "name": "Visitors",
+    "parent_id": "im_livechat.menu_livechat_root",
+    "action": "website.website_visitors_action",
+    "sequence": "15",
+    "groups_id": "im_livechat.im_livechat_group_user",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "website.website_visitor_cron",
+    "package": "website",
+    "name": "Website Visitor : clean inactive visitors",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": "True",
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "website.visitor",
+    "operation": "_cron_unlink_old_visitors",
+    "operation_call": "model._cron_unlink_old_visitors()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

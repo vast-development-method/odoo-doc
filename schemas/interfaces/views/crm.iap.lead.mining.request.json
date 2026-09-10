@@ -1,0 +1,427 @@
+{
+ "catalog": {
+  "name": "views:crm.iap.lead.mining.request",
+  "description": "View declarations for entity crm.iap.lead.mining.request.",
+  "record_count": 3,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "crm_iap_mine.crm_iap_lead_mining_request_view_form",
+   "package": "crm_iap_mine",
+   "name": "crm.iap.lead.mining.request.view.form",
+   "entity": "crm.iap.lead.mining.request",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "state",
+      "widget": "statusbar",
+      "invisible": "context.get('is_modal')"
+     },
+     {
+      "name": "error_type",
+      "invisible": "1"
+     },
+     {
+      "name": "lead_type",
+      "invisible": "1"
+     },
+     {
+      "name": "lead_count"
+     },
+     {
+      "name": "lead_count"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "lead_number",
+      "readonly": "state == 'done'",
+      "nolabel": "1"
+     },
+     {
+      "name": "search_type",
+      "widget": "selection",
+      "readonly": "state == 'done'",
+      "nolabel": "1"
+     },
+     {
+      "name": "country_ids",
+      "widget": "many2many_tags",
+      "readonly": "state == 'done'",
+      "required": "True",
+      "options": "{'no_create': True, 'no_open': True}"
+     },
+     {
+      "name": "available_state_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "state_ids",
+      "widget": "many2many_tags",
+      "invisible": "not country_ids or not available_state_ids",
+      "readonly": "state == 'done'",
+      "domain": "[('id', 'in', available_state_ids)]",
+      "options": "{'no_create': True, 'no_open': True}",
+      "placeholder": "Pick States..."
+     },
+     {
+      "name": "industry_ids",
+      "widget": "many2many_tags",
+      "readonly": "state == 'done'",
+      "required": "1",
+      "options": "{'no_create': True, 'no_open': True}"
+     },
+     {
+      "name": "filter_on_size",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "company_size_min",
+      "readonly": "state == 'done'",
+      "required": "filter_on_size"
+     },
+     {
+      "name": "company_size_max",
+      "readonly": "state == 'done'",
+      "required": "filter_on_size"
+     },
+     {
+      "name": "lead_type",
+      "invisible": "context.get('is_modal')",
+      "readonly": "state == 'done'",
+      "groups": "crm.group_use_lead"
+     },
+     {
+      "name": "team_id",
+      "readonly": "state == 'done'",
+      "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "readonly": "state == 'done'",
+      "string": "Default Tags",
+      "options": "{'color_field': 'color', 'no_create_edit': True}"
+     },
+     {
+      "name": "contact_number",
+      "readonly": "state == 'done'",
+      "required": "search_type == 'people'",
+      "nolabel": "1"
+     },
+     {
+      "name": "contact_filter_type",
+      "widget": "radio",
+      "readonly": "state == 'done'",
+      "options": "{'horizontal': true}"
+     },
+     {
+      "name": "preferred_role_id",
+      "invisible": "contact_filter_type != 'role'",
+      "readonly": "state == 'done'",
+      "required": "search_type == 'people' and contact_filter_type == 'role'",
+      "options": "{'no_create_edit': True, 'no_quick_create': True, 'no_open': True}"
+     },
+     {
+      "name": "role_ids",
+      "widget": "many2many_tags",
+      "invisible": "not preferred_role_id or contact_filter_type != 'role'",
+      "readonly": "state == 'done'",
+      "options": "{'color_field': 'color', 'no_create_edit': True, 'no_quick_create': True}"
+     },
+     {
+      "name": "seniority_id",
+      "invisible": "contact_filter_type != 'seniority'",
+      "readonly": "state == 'done'",
+      "required": "search_type == 'people' and contact_filter_type == 'seniority'",
+      "options": "{'no_create_edit': True, 'no_quick_create': True, 'no_open': True}"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_submit",
+      "string": "Submit",
+      "type": "object",
+      "invisible": "context.get('is_modal') or state != 'draft'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_submit",
+      "string": "Retry",
+      "type": "object",
+      "invisible": "context.get('is_modal') or state != 'error'",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_buy_credits",
+      "type": "object",
+      "class": "oe_inline p-0 border-0 align-top text-primary"
+     },
+     {
+      "name": "action_get_opportunity_action",
+      "type": "object",
+      "invisible": "lead_type != 'opportunity' or state != 'done'",
+      "class": "oe_stat_button",
+      "context": "{'create': False}",
+      "icon": "fa-star"
+     },
+     {
+      "name": "action_get_lead_action",
+      "type": "object",
+      "invisible": "lead_type != 'lead' or state != 'done'",
+      "class": "oe_stat_button",
+      "context": "{'create': False}",
+      "groups": "crm.group_use_lead",
+      "icon": "fa-star"
+     },
+     {
+      "name": "action_submit",
+      "string": "Generate Leads",
+      "type": "object",
+      "invisible": "not context.get('is_modal')",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Cancel",
+      "invisible": "not context.get('is_modal')",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statusbar": 1,
+     "selection": 1,
+     "many2many_tags": 5,
+     "many2one_avatar_user": 1,
+     "radio": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "action_submit",
+      "type": "object",
+      "string": "Submit",
+      "class": "oe_highlight",
+      "invisible": "context.get('is_modal') or state != 'draft'"
+     },
+     {
+      "name": "action_submit",
+      "type": "object",
+      "string": "Retry",
+      "class": "oe_highlight",
+      "invisible": "context.get('is_modal') or state != 'error'"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": "draft,done",
+    "chatter": false,
+    "button_box": [
+     {
+      "name": "action_get_opportunity_action",
+      "class": "oe_stat_button",
+      "type": "object",
+      "icon": "fa-star",
+      "context": "{'create': False}",
+      "invisible": "lead_type != 'opportunity' or state != 'done'"
+     },
+     {
+      "name": "action_get_lead_action",
+      "class": "oe_stat_button",
+      "type": "object",
+      "icon": "fa-star",
+      "groups": "crm.group_use_lead",
+      "context": "{'create': False}",
+      "invisible": "lead_type != 'lead' or state != 'done'"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form>\n                <header>\n                    <button name=\"action_submit\" type=\"object\" string=\"Submit\" class=\"oe_highlight\" invisible=\"context.get('is_modal') or state != 'draft'\"/>\n                    <button name=\"action_submit\" type=\"object\" string=\"Retry\" class=\"oe_highlight\" invisible=\"context.get('is_modal') or state != 'error'\"/>\n                    <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"draft,done\" invisible=\"context.get('is_modal')\"/>\n                </header>\n                <div class=\"alert alert-danger text-center\" role=\"alert\" invisible=\"not error_type\">\n                    <field name=\"error_type\" invisible=\"1\"/>\n                    <field name=\"lead_type\" invisible=\"1\"/>\n                    <span invisible=\"error_type != 'credits'\">\n                        <span>You do not have enough credits to submit this request.\n                            <button name=\"action_buy_credits\" type=\"object\" class=\"oe_inline p-0 border-0 align-top text-primary\">Buy credits.</button>\n                        </span>\n                    </span>\n                    <span invisible=\"error_type != 'no_result'\">Your request did not return any result (no credits were used). Try removing some filters.</span>\n                </div>\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button name=\"action_get_opportunity_action\" class=\"oe_stat_button\" type=\"object\" icon=\"fa-star\" context=\"{'create': False}\" invisible=\"lead_type != 'opportunity' or state != 'done'\">\n                            <div class=\"o_stat_info\">\n                                <field name=\"lead_count\"/>\n                                <span class=\"o_stat_text\">Opportunities</span>\n                            </div>\n                        </button>\n                        <button name=\"action_get_lead_action\" class=\"oe_stat_button\" type=\"object\" icon=\"fa-star\" groups=\"crm.group_use_lead\" context=\"{'create': False}\" invisible=\"lead_type != 'lead' or state != 'done'\">\n                            <div class=\"o_stat_info\">\n                                <field name=\"lead_count\"/>\n                                <span class=\"o_stat_text\">Leads</span>\n                            </div>\n                        </button>\n                    </div>\n                    <span invisible=\"context.get('is_modal')\">\n                        <div class=\"row\">\n                            <div class=\"col-md-6\">\n                                <div class=\"oe_title\">\n                                    <h1>\n                                        <field name=\"name\"/>\n                                    </h1>\n                                </div>\n                            </div>\n                        </div>\n                    </span>\n\n                    <h2>How many leads would you like?</h2>\n\n                    <group name=\"requests\">\n                        <group>\n                            <div class=\"o_row py-3\">\n                                <field name=\"lead_number\" readonly=\"state == 'done'\" nolabel=\"1\" class=\"oe_inline pe-2 o_input_3ch o_field_highlight\"/>\n                                <field name=\"search_type\" widget=\"selection\" readonly=\"state == 'done'\" nolabel=\"1\" class=\"oe_inline o_field_highlight\"/>\n                            </div>\n                        </group>\n                    </group>\n\n                    <group>\n                        <group name=\"companies\">\n                            <field name=\"country_ids\" widget=\"many2many_tags\" required=\"True\" readonly=\"state == 'done'\" options=\"{'no_create': True, 'no_open': True}\"/>\n                            <field name=\"available_state_ids\" invisible=\"1\"/>\n                            <field name=\"state_ids\" widget=\"many2many_tags\" placeholder=\"Pick States...\" invisible=\"not country_ids or not available_state_ids\" readonly=\"state == 'done'\" domain=\"[('id', 'in', available_state_ids)]\" options=\"{'no_create': True, 'no_open': True}\"/>\n                            <field name=\"industry_ids\" widget=\"many2many_tags\" options=\"{'no_create': True, 'no_open': True}\" class=\"o_industry o_field_highlight\" required=\"1\" readonly=\"state == 'done'\"/>\n                            <field name=\"filter_on_size\" readonly=\"state == 'done'\"/>\n                            <label for=\"company_size_min\" invisible=\"not filter_on_size\"/>\n                            <div invisible=\"not filter_on_size\">\n                                From\n                                <field name=\"company_size_min\" class=\"oe_inline px-2 o_input_5ch\" readonly=\"state == 'done'\" required=\"filter_on_size\"/>\n                                to\n                                <field name=\"company_size_max\" class=\"oe_inline px-2 o_input_7ch\" readonly=\"state == 'done'\" required=\"filter_on_size\"/>\n                                employees\n                            </div>\n\n                        </group>\n                        <group name=\"lead_info\">\n                            <field name=\"lead_type\" groups=\"crm.group_use_lead\" invisible=\"context.get('is_modal')\" readonly=\"state == 'done'\"/>\n                            <field name=\"team_id\" no_create=\"1\" no_open=\"1\" readonly=\"state == 'done'\" context=\"{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}\"/>\n                            <field name=\"user_id\" no_create=\"1\" no_open=\"1\" readonly=\"state == 'done'\" widget=\"many2one_avatar_user\"/>\n                            <field name=\"tag_ids\" string=\"Default Tags\" widget=\"many2many_tags\" options=\"{'color_field': 'color', 'no_create_edit': True}\" readonly=\"state == 'done'\"/>\n                        </group>\n                    </group>\n\n                    <group name=\"contacts\" invisible=\"search_type != 'people'\">\n                        <div colspan=\"2\" class=\"py-3\">\n                             <field name=\"contact_number\" readonly=\"state == 'done'\" required=\"search_type == 'people'\" nolabel=\"1\" class=\"oe_inline pe-2 col-md-1 o_input_2ch\"/>\n                             <span class=\"col-md-6\">Extra contacts per Company</span>\n                        </div>\n                    </group>\n                    <group invisible=\"search_type != 'people'\">\n                        <group>\n                            <field name=\"contact_filter_type\" widget=\"radio\" readonly=\"state == 'done'\" options=\"{'horizontal': true}\"/>\n                            <field name=\"preferred_role_id\" options=\"{'no_create_edit': True, 'no_quick_create': True, 'no_open': True}\" invisible=\"contact_filter_type != 'role'\" readonly=\"state == 'done'\" required=\"search_type == 'people' and contact_filter_type == 'role'\"/>\n                            <field name=\"role_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color', 'no_create_edit': True, 'no_quick_create': True}\" invisible=\"not preferred_role_id or contact_filter_type != 'role'\" readonly=\"state == 'done'\"/>\n                            <field name=\"seniority_id\" options=\"{'no_create_edit': True, 'no_quick_create': True, 'no_open': True}\" invisible=\"contact_filter_type != 'seniority'\" readonly=\"state == 'done'\" required=\"search_type == 'people' and contact_filter_type == 'seniority'\"/>\n                        </group>\n                    </group>\n                    <footer>\n                        <button string=\"Generate Leads\" name=\"action_submit\" type=\"object\" default_focus=\"1\" class=\"btn-primary\" invisible=\"not context.get('is_modal')\" data-hotkey=\"q\"/>\n                        <button string=\"Cancel\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\" invisible=\"not context.get('is_modal')\"/>\n                    </footer>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "crm_iap_mine.crm_iap_lead_mining_request_view_tree",
+   "package": "crm_iap_mine",
+   "name": "crm.iap.lead.mining.request.view.list",
+   "entity": "crm.iap.lead.mining.request",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name",
+      "decoration-bf": "1"
+     },
+     {
+      "name": "lead_number",
+      "string": "Number of Leads"
+     },
+     {
+      "name": "search_type"
+     },
+     {
+      "name": "country_ids",
+      "widget": "many2many_tags"
+     },
+     {
+      "name": "industry_ids",
+      "widget": "many2many_tags"
+     },
+     {
+      "name": "team_id",
+      "optional": "hide"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "optional": "hide"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}",
+      "optional": "hide"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "readonly": "1",
+      "decoration-danger": "state == 'error'",
+      "decoration-success": "state == 'done'",
+      "decoration-info": "state == 'draft'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tags": 3,
+     "many2one_avatar_user": 1,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list>\n                <field name=\"name\" decoration-bf=\"1\"/>\n                <field name=\"lead_number\" string=\"Number of Leads\"/>\n                <field name=\"search_type\"/>\n                <field name=\"country_ids\" widget=\"many2many_tags\"/>\n                <field name=\"industry_ids\" widget=\"many2many_tags\"/>\n                <field name=\"team_id\" optional=\"hide\"/>\n                <field name=\"user_id\" optional=\"hide\" widget=\"many2one_avatar_user\"/>\n                <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\" optional=\"hide\"/>\n                <field name=\"state\" readonly=\"1\" decoration-info=\"state == 'draft'\" decoration-success=\"state == 'done'\" decoration-danger=\"state == 'error'\" widget=\"badge\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "crm_iap_mine.crm_iap_lead_mining_request_view_search",
+   "package": "crm_iap_mine",
+   "name": "crm.iap.lead.mining.request.view.search",
+   "entity": "crm.iap.lead.mining.request",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Lead Mining Request"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "industry_ids"
+     },
+     {
+      "name": "country_ids"
+     },
+     {
+      "name": "team_id"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "tag_ids"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "state_is_draft",
+      "string": "Draft",
+      "domain": "[('state', '=', 'draft')]"
+     },
+     {
+      "name": "state_is_done",
+      "string": "Done",
+      "domain": "[('state', '=', 'done')]"
+     },
+     {
+      "name": "state_is_error",
+      "string": "Error",
+      "domain": "[('state', '=', 'error')]"
+     },
+     {
+      "name": "type_is_lead",
+      "string": "Leads",
+      "domain": "[('lead_type', '=', 'lead')]"
+     },
+     {
+      "name": "type_is_opportunity",
+      "string": "Opportunities",
+      "domain": "[('lead_type', '=', 'opportunity')]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "groupby_lead_type",
+      "string": "Type",
+      "domain": "[]",
+      "context": "{'group_by':'lead_type'}"
+     },
+     {
+      "name": "groupby_team_id",
+      "string": "Sales Team",
+      "domain": "[]",
+      "context": "{'group_by':'team_id'}"
+     },
+     {
+      "name": "groupby_user_id",
+      "string": "Salesperson",
+      "domain": "[]",
+      "context": "{'group_by':'user_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Lead Mining Request\">\n                <field name=\"name\"/>\n                <field name=\"industry_ids\"/>\n                <field name=\"country_ids\"/>\n                <field name=\"team_id\"/>\n                <field name=\"user_id\"/>\n                <field name=\"tag_ids\"/>\n                <filter name=\"state_is_draft\" string=\"Draft\" domain=\"[('state', '=', 'draft')]\"/>\n                <filter name=\"state_is_done\" string=\"Done\" domain=\"[('state', '=', 'done')]\"/>\n                <filter name=\"state_is_error\" string=\"Error\" domain=\"[('state', '=', 'error')]\"/>\n                <separator/>\n                <filter name=\"type_is_lead\" string=\"Leads\" domain=\"[('lead_type', '=', 'lead')]\"/>\n                <filter name=\"type_is_opportunity\" string=\"Opportunities\" domain=\"[('lead_type', '=', 'opportunity')]\"/>\n                <group>\n                    <filter string=\"Type\" name=\"groupby_lead_type\" domain=\"[]\" context=\"{'group_by':'lead_type'}\"/>\n                    <filter string=\"Sales Team\" name=\"groupby_team_id\" domain=\"[]\" context=\"{'group_by':'team_id'}\"/>\n                    <filter string=\"Salesperson\" name=\"groupby_user_id\" domain=\"[]\" context=\"{'group_by':'user_id'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  }
+ ]
+}

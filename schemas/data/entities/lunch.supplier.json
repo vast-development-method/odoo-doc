@@ -1,0 +1,1228 @@
+{
+ "catalog": {
+  "name": "entity:lunch.supplier",
+  "description": "Complete definition of entity Lunch Supplier (lunch.supplier).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "lunch.supplier",
+  "storage_name": "lunch_supplier",
+  "full_name": "Lunch Supplier",
+  "kind": "persistent",
+  "description": "Lunch Supplier",
+  "defined_by_package": "lunch",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Vendor",
+    "required": true,
+    "defined_in_package": "lunch",
+    "full_name": "Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "related": "partner_id.name",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "full_name": "Name"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "related": "partner_id.email",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "string": "Email",
+    "full_name": "Email"
+   },
+   {
+    "name": "email_formatted",
+    "type": "Char",
+    "related": "partner_id.email_formatted",
+    "readonly": true,
+    "defined_in_package": "lunch",
+    "string": "Email Formatted",
+    "full_name": "Email Formatted"
+   },
+   {
+    "name": "phone",
+    "type": "Char",
+    "related": "partner_id.phone",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "string": "Phone",
+    "full_name": "Phone"
+   },
+   {
+    "name": "street",
+    "type": "Char",
+    "related": "partner_id.street",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "string": "Street",
+    "full_name": "Street"
+   },
+   {
+    "name": "street2",
+    "type": "Char",
+    "related": "partner_id.street2",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "string": "Street2",
+    "full_name": "Street2"
+   },
+   {
+    "name": "zip_code",
+    "type": "Char",
+    "related": "partner_id.zip",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "string": "Zip Code",
+    "full_name": "Zip Code"
+   },
+   {
+    "name": "city",
+    "type": "Char",
+    "related": "partner_id.city",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "string": "City",
+    "full_name": "City"
+   },
+   {
+    "name": "state_id",
+    "type": "Many2one",
+    "comodel": "res.country.state",
+    "related": "partner_id.state_id",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "string": "State",
+    "full_name": "State",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "related": "partner_id.country_id",
+    "readonly": false,
+    "defined_in_package": "lunch",
+    "string": "Country",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "related": "partner_id.company_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "lunch",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "responsible_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "domain": {
+     "dynamic": "lambda self: [('all_group_ids', 'in', self.env.ref('lunch.group_lunch_manager').id)]"
+    },
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "help": "The responsible is the person that will order lunch for everyone. It will be used as the 'from' when sending the automatic email.",
+    "defined_in_package": "lunch",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "send_by",
+    "type": "Selection",
+    "selection": [
+     [
+      "phone",
+      "Phone"
+     ],
+     [
+      "mail",
+      "Email"
+     ]
+    ],
+    "string": "Send Order By",
+    "default": "phone",
+    "defined_in_package": "lunch",
+    "full_name": "Send Order By"
+   },
+   {
+    "name": "automatic_email_time",
+    "type": "Float",
+    "string": "Order Time",
+    "default": 12.0,
+    "required": true,
+    "defined_in_package": "lunch",
+    "full_name": "Order Time"
+   },
+   {
+    "name": "cron_id",
+    "type": "Many2one",
+    "comodel": "ir.cron",
+    "ondelete": "cascade",
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "lunch",
+    "string": "Cron",
+    "full_name": "Cron",
+    "target_entity": "ir.cron"
+   },
+   {
+    "name": "mon",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Mon",
+    "full_name": "Mon"
+   },
+   {
+    "name": "tue",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Tue",
+    "full_name": "Tue"
+   },
+   {
+    "name": "wed",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Wed",
+    "full_name": "Wed"
+   },
+   {
+    "name": "thu",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Thu",
+    "full_name": "Thu"
+   },
+   {
+    "name": "fri",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Fri",
+    "full_name": "Fri"
+   },
+   {
+    "name": "sat",
+    "type": "Boolean",
+    "defined_in_package": "lunch",
+    "string": "Sat",
+    "full_name": "Sat"
+   },
+   {
+    "name": "sun",
+    "type": "Boolean",
+    "defined_in_package": "lunch",
+    "string": "Sun",
+    "full_name": "Sun"
+   },
+   {
+    "name": "recurrency_end_date",
+    "type": "Date",
+    "string": "Until",
+    "help": "This field is used in order to ",
+    "defined_in_package": "lunch",
+    "full_name": "Until"
+   },
+   {
+    "name": "available_location_ids",
+    "type": "Many2many",
+    "comodel": "lunch.location",
+    "string": "Location",
+    "defined_in_package": "lunch",
+    "full_name": "Location",
+    "target_entity": "lunch.location"
+   },
+   {
+    "name": "available_today",
+    "type": "Boolean",
+    "string": "This is True when if the supplier is available today",
+    "compute": "_compute_available_today",
+    "search": "_search_available_today",
+    "defined_in_package": "lunch",
+    "full_name": "This is True when if the supplier is available today"
+   },
+   {
+    "name": "order_deadline_passed",
+    "type": "Boolean",
+    "compute": "_compute_order_deadline_passed",
+    "defined_in_package": "lunch",
+    "string": "Order Deadline Passed",
+    "full_name": "Order Deadline Passed"
+   },
+   {
+    "name": "tz",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "string": "Timezone",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.user.tz or 'UTC'"
+    },
+    "defined_in_package": "lunch",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "lunch",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "moment",
+    "type": "Selection",
+    "selection": [
+     [
+      "am",
+      "AM"
+     ],
+     [
+      "pm",
+      "PM"
+     ]
+    ],
+    "default": "am",
+    "required": true,
+    "defined_in_package": "lunch",
+    "string": "Moment",
+    "full_name": "Moment"
+   },
+   {
+    "name": "delivery",
+    "type": "Selection",
+    "selection": [
+     [
+      "delivery",
+      "Delivery"
+     ],
+     [
+      "no_delivery",
+      "No Delivery"
+     ]
+    ],
+    "default": "no_delivery",
+    "defined_in_package": "lunch",
+    "string": "Delivery",
+    "full_name": "Delivery"
+   },
+   {
+    "name": "topping_label_1",
+    "type": "Char",
+    "string": "Extra 1 Label",
+    "required": true,
+    "default": "Extras",
+    "defined_in_package": "lunch",
+    "full_name": "Extra 1 Label"
+   },
+   {
+    "name": "topping_label_2",
+    "type": "Char",
+    "string": "Extra 2 Label",
+    "required": true,
+    "default": "Beverages",
+    "defined_in_package": "lunch",
+    "full_name": "Extra 2 Label"
+   },
+   {
+    "name": "topping_label_3",
+    "type": "Char",
+    "string": "Extra 3 Label",
+    "required": true,
+    "default": "Extra Label 3",
+    "defined_in_package": "lunch",
+    "full_name": "Extra 3 Label"
+   },
+   {
+    "name": "topping_ids_1",
+    "type": "One2many",
+    "comodel": "lunch.topping",
+    "inverse_name": "supplier_id",
+    "domain": [
+     [
+      "topping_category",
+      "=",
+      1
+     ]
+    ],
+    "defined_in_package": "lunch",
+    "string": "Topping Identifiers 1",
+    "full_name": "Topping Identifiers 1",
+    "target_entity": "lunch.topping"
+   },
+   {
+    "name": "topping_ids_2",
+    "type": "One2many",
+    "comodel": "lunch.topping",
+    "inverse_name": "supplier_id",
+    "domain": [
+     [
+      "topping_category",
+      "=",
+      2
+     ]
+    ],
+    "defined_in_package": "lunch",
+    "string": "Topping Identifiers 2",
+    "full_name": "Topping Identifiers 2",
+    "target_entity": "lunch.topping"
+   },
+   {
+    "name": "topping_ids_3",
+    "type": "One2many",
+    "comodel": "lunch.topping",
+    "inverse_name": "supplier_id",
+    "domain": [
+     [
+      "topping_category",
+      "=",
+      3
+     ]
+    ],
+    "defined_in_package": "lunch",
+    "string": "Topping Identifiers 3",
+    "full_name": "Topping Identifiers 3",
+    "target_entity": "lunch.topping"
+   },
+   {
+    "name": "topping_quantity_1",
+    "type": "Selection",
+    "selection": [
+     [
+      "0_more",
+      "None or More"
+     ],
+     [
+      "1_more",
+      "One or More"
+     ],
+     [
+      "1",
+      "Only One"
+     ]
+    ],
+    "string": "Extra 1 Quantity",
+    "default": "0_more",
+    "required": true,
+    "defined_in_package": "lunch",
+    "full_name": "Extra 1 Quantity"
+   },
+   {
+    "name": "topping_quantity_2",
+    "type": "Selection",
+    "selection": [
+     [
+      "0_more",
+      "None or More"
+     ],
+     [
+      "1_more",
+      "One or More"
+     ],
+     [
+      "1",
+      "Only One"
+     ]
+    ],
+    "string": "Extra 2 Quantity",
+    "default": "0_more",
+    "required": true,
+    "defined_in_package": "lunch",
+    "full_name": "Extra 2 Quantity"
+   },
+   {
+    "name": "topping_quantity_3",
+    "type": "Selection",
+    "selection": [
+     [
+      "0_more",
+      "None or More"
+     ],
+     [
+      "1_more",
+      "One or More"
+     ],
+     [
+      "1",
+      "Only One"
+     ]
+    ],
+    "string": "Extra 3 Quantity",
+    "default": "0_more",
+    "required": true,
+    "defined_in_package": "lunch",
+    "full_name": "Extra 3 Quantity"
+   },
+   {
+    "name": "show_order_button",
+    "type": "Boolean",
+    "compute": "_compute_buttons",
+    "defined_in_package": "lunch",
+    "string": "Show Order Button",
+    "full_name": "Show Order Button"
+   },
+   {
+    "name": "show_confirm_button",
+    "type": "Boolean",
+    "compute": "_compute_buttons",
+    "defined_in_package": "lunch",
+    "string": "Show Confirm Button",
+    "full_name": "Show Confirm Button"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_automatic_email_time_range",
+    "kind": "Constraint",
+    "definition": "CHECK(automatic_email_time >= 0 AND automatic_email_time <= 12)",
+    "message": "Automatic Email Sending Time should be between 0 and 12",
+    "defined_in_package": "lunch"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "phone"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_sync_cron",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cancel_future_days",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "weekdays"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_current_orders",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "state"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": "Returns today's orders ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_auto_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": "Send an email to the supplier with the order of the day ",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cannot send an email to this supplier!",
+        "line": 256
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_today",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "recurrency_end_date",
+         "mon",
+         "tue",
+         "wed",
+         "thu",
+         "fri",
+         "sat",
+         "sun"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_available_on_date",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_order_deadline_passed",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "available_today",
+         "automatic_email_time",
+         "send_by"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_available_today",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_buttons",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_confirm_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "lunch",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_send_auto_email",
+    "package": "lunch",
+    "kind": "UserError",
+    "message": "Cannot send an email to this supplier!"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "lunch.lunch_supplier_user",
+    "package": "lunch",
+    "name": "Lunch Supplier User Rights",
+    "entity": "lunch.supplier",
+    "group": "group_lunch_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "lunch.lunch_supplier_manager",
+    "package": "lunch",
+    "name": "Lunch Supplier Manager Rights",
+    "entity": "lunch.supplier",
+    "group": "group_lunch_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "lunch.ir_rule_lunch_supplier_multi_company",
+    "package": "lunch",
+    "name": "Lunch supplier: Multi Company",
+    "entity": "lunch.supplier",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "lunch.lunch_supplier_view_tree",
+    "package": "lunch",
+    "name": "lunch.supplier.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "phone"
+      },
+      {
+       "name": "email"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_supplier_view_form",
+    "package": "lunch",
+    "name": "lunch.supplier.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "required": "1",
+       "placeholder": "e.g. The Pizzeria Inn"
+      },
+      {
+       "name": "partner_id",
+       "context": "{'default_is_company': True, 'default_city': city, 'default_name': name, 'default_street': street, 'default_street2': street2, 'default_state_id': state_id, 'default_zip': zip_code, 'default_country_id': country_id, 'default_phone': phone}"
+      },
+      {
+       "name": "street",
+       "placeholder": "Street..."
+      },
+      {
+       "name": "street2",
+       "placeholder": "Street 2..."
+      },
+      {
+       "name": "city",
+       "placeholder": "City"
+      },
+      {
+       "name": "state_id",
+       "context": "{'country_id': country_id, 'zip': zip_code}",
+       "options": "{'no_open': True}",
+       "placeholder": "State"
+      },
+      {
+       "name": "zip_code",
+       "placeholder": "ZIP"
+      },
+      {
+       "name": "country_id",
+       "options": "{'no_open': True, 'no_create': True}",
+       "placeholder": "Country"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "email",
+       "required": "send_by == 'mail'"
+      },
+      {
+       "name": "phone",
+       "required": "send_by == 'phone'"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "responsible_id",
+       "required": "send_by == 'mail'",
+       "domain": "[('share', '=', False)]",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "tz",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "sun",
+       "invisible": "1"
+      },
+      {
+       "name": "recurrency_end_date",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "delivery"
+      },
+      {
+       "name": "available_location_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "send_by",
+       "widget": "radio"
+      },
+      {
+       "name": "automatic_email_time",
+       "widget": "float_time"
+      },
+      {
+       "name": "moment"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "topping_label_1"
+      },
+      {
+       "name": "topping_quantity_1"
+      },
+      {
+       "name": "topping_ids_1",
+       "nolabel": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "price",
+       "widget": "monetary"
+      },
+      {
+       "name": "topping_label_2"
+      },
+      {
+       "name": "topping_quantity_2"
+      },
+      {
+       "name": "topping_ids_2",
+       "nolabel": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "price",
+       "widget": "monetary"
+      },
+      {
+       "name": "topping_label_3"
+      },
+      {
+       "name": "topping_quantity_3"
+      },
+      {
+       "name": "topping_ids_3",
+       "nolabel": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "price",
+       "widget": "monetary"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1,
+      "radio": 1,
+      "float_time": 1,
+      "monetary": 3
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_supplier_view_kanban",
+    "package": "lunch",
+    "name": "lunch.supplier.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "city"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "city"
+      },
+      {
+       "name": "country_id"
+      },
+      {
+       "name": "email"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "lunch.lunch_supplier_view_search",
+    "package": "lunch",
+    "name": "lunch.supplier.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "lunch.lunch_vendors_action",
+    "package": "lunch",
+    "name": "Vendors",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": "lunch_supplier_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "lunch.supplier"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "lunch.lunch_order_mail_supplier",
+    "package": "lunch",
+    "name": "Lunch: Supplier Order",
+    "subject": "Orders for {{ ctx.get('order', {}).get('company_name') }}"
+   }
+  ]
+ }
+}

@@ -1,0 +1,384 @@
+{
+ "catalog": {
+  "name": "entity:payment.refund.wizard",
+  "description": "Complete definition of entity Payment Refund Wizard (payment.refund.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "payment.refund.wizard",
+  "storage_name": "payment_refund_wizard",
+  "full_name": "Payment Refund Wizard",
+  "kind": "transient",
+  "description": "Payment Refund Wizard",
+  "defined_by_package": "account_payment",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "payment_id",
+    "type": "Many2one",
+    "string": "Payment",
+    "comodel": "account.payment",
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_id')"
+    },
+    "defined_in_package": "account_payment",
+    "full_name": "Payment",
+    "target_entity": "account.payment"
+   },
+   {
+    "name": "transaction_id",
+    "type": "Many2one",
+    "string": "Payment Transaction",
+    "related": "payment_id.payment_transaction_id",
+    "defined_in_package": "account_payment",
+    "full_name": "Payment Transaction"
+   },
+   {
+    "name": "payment_amount",
+    "type": "Monetary",
+    "string": "Payment Amount",
+    "related": "payment_id.amount",
+    "defined_in_package": "account_payment",
+    "full_name": "Payment Amount"
+   },
+   {
+    "name": "refunded_amount",
+    "type": "Monetary",
+    "string": "Refunded Amount",
+    "compute": "_compute_refunded_amount",
+    "defined_in_package": "account_payment",
+    "full_name": "Refunded Amount"
+   },
+   {
+    "name": "amount_available_for_refund",
+    "type": "Monetary",
+    "string": "Maximum Refund Allowed",
+    "related": "payment_id.amount_available_for_refund",
+    "defined_in_package": "account_payment",
+    "full_name": "Maximum Refund Allowed"
+   },
+   {
+    "name": "amount_to_refund",
+    "type": "Monetary",
+    "string": "Refund Amount",
+    "compute": "_compute_amount_to_refund",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "account_payment",
+    "full_name": "Refund Amount"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "string": "Currency",
+    "related": "transaction_id.currency_id",
+    "defined_in_package": "account_payment",
+    "full_name": "Currency"
+   },
+   {
+    "name": "support_refund",
+    "type": "Selection",
+    "string": "Refund",
+    "selection": [
+     [
+      "none",
+      "Unsupported"
+     ],
+     [
+      "full_only",
+      "Full Only"
+     ],
+     [
+      "partial",
+      "Partial"
+     ]
+    ],
+    "compute": "_compute_support_refund",
+    "defined_in_package": "account_payment",
+    "full_name": "Refund"
+   },
+   {
+    "name": "has_pending_refund",
+    "type": "Boolean",
+    "string": "Has a pending refund",
+    "compute": "_compute_has_pending_refund",
+    "defined_in_package": "account_payment",
+    "full_name": "Has a pending refund"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_amount_to_refund_within_boundaries",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "amount_to_refund"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The amount to be refunded must be positive and cannot be superior to %s.",
+        "line": 42
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_refunded_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount_available_for_refund"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount_to_refund",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "amount_available_for_refund"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Set the default amount to refund to the amount available for refund. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_support_refund",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "transaction_id.provider_id",
+         "transaction_id.payment_method_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_pending_refund",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_refund",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_amount_to_refund_within_boundaries",
+    "package": "account_payment",
+    "kind": "ValidationError",
+    "message": "The amount to be refunded must be positive and cannot be superior to %s."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account_payment.payment_refund_wizard",
+    "package": "account_payment",
+    "name": "payment.refund.wizard",
+    "entity": "payment.refund.wizard",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account_payment.payment_refund_wizard_view_form",
+    "package": "account_payment",
+    "name": "payment.refund.wizard.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Refund"
+     },
+     "fields": [
+      {
+       "name": "has_pending_refund",
+       "invisible": "1"
+      },
+      {
+       "name": "payment_id",
+       "invisible": "1"
+      },
+      {
+       "name": "transaction_id",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "support_refund",
+       "invisible": "1"
+      },
+      {
+       "name": "payment_amount"
+      },
+      {
+       "name": "refunded_amount",
+       "invisible": "refunded_amount <= 0"
+      },
+      {
+       "name": "amount_available_for_refund"
+      },
+      {
+       "name": "amount_to_refund",
+       "readonly": "support_refund == 'full_only'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_refund",
+       "string": "Refund",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "string": "Close",
+       "class": "btn-secondary",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

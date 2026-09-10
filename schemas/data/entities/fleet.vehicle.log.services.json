@@ -1,0 +1,1224 @@
+{
+ "catalog": {
+  "name": "entity:fleet.vehicle.log.services",
+  "description": "Complete definition of entity Services for vehicles (fleet.vehicle.log.services).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "fleet.vehicle.log.services",
+  "storage_name": "fleet_vehicle_log_services",
+  "full_name": "Services for vehicles",
+  "kind": "persistent",
+  "description": "Services for vehicles",
+  "defined_by_package": "fleet",
+  "extended_by_packages": [
+   "account_fleet",
+   "hr_fleet"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "service_type_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "fleet",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "vehicle_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle",
+    "string": "Vehicle",
+    "required": true,
+    "index": true,
+    "defined_in_package": "fleet",
+    "compute": "_compute_vehicle_id",
+    "store": true,
+    "readonly": false,
+    "extended_in_packages": [
+     "account_fleet"
+    ],
+    "full_name": "Vehicle",
+    "target_entity": "fleet.vehicle"
+   },
+   {
+    "name": "model_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.model",
+    "string": "Model",
+    "related": "vehicle_id.model_id",
+    "store": true,
+    "defined_in_package": "fleet",
+    "full_name": "Model",
+    "target_entity": "fleet.vehicle.model"
+   },
+   {
+    "name": "brand_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.model.brand",
+    "string": "Brand",
+    "related": "vehicle_id.model_id.brand_id",
+    "store": true,
+    "defined_in_package": "fleet",
+    "full_name": "Brand",
+    "target_entity": "fleet.vehicle.model.brand"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Fleet Manager",
+    "related": "vehicle_id.manager_id",
+    "store": true,
+    "defined_in_package": "fleet",
+    "full_name": "Fleet Manager",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "string": "Cost",
+    "defined_in_package": "fleet",
+    "compute": "_compute_amount",
+    "inverse": "_inverse_amount",
+    "readonly": false,
+    "store": true,
+    "tracking": true,
+    "extended_in_packages": [
+     "account_fleet"
+    ],
+    "full_name": "Cost"
+   },
+   {
+    "name": "description",
+    "type": "Char",
+    "string": "Description",
+    "defined_in_package": "fleet",
+    "full_name": "Description"
+   },
+   {
+    "name": "odometer_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.odometer",
+    "string": "Odometer",
+    "help": "Odometer measure of the vehicle at the moment of this log",
+    "defined_in_package": "fleet",
+    "full_name": "Odometer",
+    "target_entity": "fleet.vehicle.odometer"
+   },
+   {
+    "name": "odometer",
+    "type": "Float",
+    "compute": "_get_odometer",
+    "inverse": "_set_odometer",
+    "string": "Odometer Value",
+    "help": "Odometer measure of the vehicle at the moment of this log",
+    "defined_in_package": "fleet",
+    "full_name": "Odometer Value"
+   },
+   {
+    "name": "odometer_unit",
+    "type": "Selection",
+    "related": "vehicle_id.odometer_unit",
+    "string": "Unit",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "full_name": "Unit"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "help": "Date when the cost has been executed",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "fleet",
+    "string": "Date",
+    "full_name": "Date"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "fleet",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "company_id.currency_id",
+    "defined_in_package": "fleet",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "purchaser_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Driver",
+    "compute": "_compute_purchaser_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "fleet",
+    "full_name": "Driver",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "inv_ref",
+    "type": "Char",
+    "string": "Vendor Reference",
+    "defined_in_package": "fleet",
+    "full_name": "Vendor Reference"
+   },
+   {
+    "name": "vendor_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Vendor",
+    "defined_in_package": "fleet",
+    "full_name": "Vendor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "notes",
+    "type": "Text",
+    "defined_in_package": "fleet",
+    "string": "Notes",
+    "full_name": "Notes"
+   },
+   {
+    "name": "service_type_id",
+    "type": "Many2one",
+    "comodel": "fleet.service.type",
+    "string": "Service Type",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.ref('fleet.type_service_service_7', raise_if_not_found=False)"
+    },
+    "defined_in_package": "fleet",
+    "full_name": "Service Type",
+    "target_entity": "fleet.service.type"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "new",
+      "New"
+     ],
+     [
+      "running",
+      "Running"
+     ],
+     [
+      "done",
+      "Done"
+     ],
+     [
+      "cancelled",
+      "Cancelled"
+     ]
+    ],
+    "default": "new",
+    "string": "Stage",
+    "group_expand": true,
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Stage"
+   },
+   {
+    "name": "account_move_line_id",
+    "type": "Many2one",
+    "comodel": "account.move.line",
+    "index": "btree_not_null",
+    "defined_in_package": "account_fleet",
+    "string": "Account Move Line",
+    "full_name": "Account Move Line",
+    "target_entity": "account.move.line"
+   },
+   {
+    "name": "account_move_state",
+    "type": "Selection",
+    "related": "account_move_line_id.parent_state",
+    "defined_in_package": "account_fleet",
+    "string": "Account Move State",
+    "full_name": "Account Move State"
+   },
+   {
+    "name": "purchaser_employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Driver (Employee)",
+    "compute": "_compute_purchaser_employee_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "hr_fleet",
+    "full_name": "Driver (Employee)",
+    "target_entity": "hr.employee"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_odometer",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_odometer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Emptying the odometer value of a vehicle is not allowed.",
+        "line": 53
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_purchaser_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "vehicle_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "vehicle_id",
+         "purchaser_employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_vehicle_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_move_line_id.vehicle_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_amount",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot modify amount of services linked to an account move line. Do it on the related accounting entry instead.",
+        "line": 27
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_move_line_id.price_subtotal"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_account_move",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_no_linked_bill",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_fleet",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete log services records because one or more of them were bill created.",
+        "line": 50
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_purchaser_employee_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "vehicle_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_set_odometer",
+    "package": "fleet",
+    "kind": "UserError",
+    "message": "Emptying the odometer value of a vehicle is not allowed."
+   },
+   {
+    "operation": "_inverse_amount",
+    "package": "account_fleet",
+    "kind": "UserError",
+    "message": "You cannot modify amount of services linked to an account move line. Do it on the related accounting entry instead."
+   },
+   {
+    "operation": "_unlink_if_no_linked_bill",
+    "package": "account_fleet",
+    "kind": "UserError",
+    "message": "You cannot delete log services records because one or more of them were bill created."
+   }
+  ],
+  "state_fields": [
+   "state",
+   "account_move_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_access_right_user",
+    "package": "fleet",
+    "name": "fleet_vehicle_log_services_access_right",
+    "entity": "fleet.vehicle.log.services",
+    "group": "fleet_group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_access_right",
+    "package": "fleet",
+    "name": "fleet_vehicle_log_services_access_right",
+    "entity": "fleet.vehicle.log.services",
+    "group": "fleet_group_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "fleet.fleet_rule_service_visibility_manager",
+    "package": "fleet",
+    "name": "Administrator has all rights on vehicle's services",
+    "entity": "fleet.vehicle.log.services",
+    "domain": null,
+    "groups": "[Command.link(ref('fleet_group_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "fleet.ir_rule_fleet_log_services",
+    "package": "fleet",
+    "name": "Fleet log services: Multi Company",
+    "entity": "fleet.vehicle.log.services",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account_fleet.fleet_vehicle_log_services_view_form",
+    "package": "account_fleet",
+    "name": "fleet.vehicle.log.services.form.inherit.account",
+    "view_type": "xpath",
+    "inherits_view": "fleet.fleet_vehicle_log_services_view_form",
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//sheet",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_open_account_move",
+       "type": "object",
+       "invisible": "not account_move_line_id",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//sheet",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_view_form",
+    "package": "fleet",
+    "name": "fleet.vehicle.log.services.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Services Logs"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "options": "{'clickable': '1'}"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "service_type_id"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "amount",
+       "widget": "monetary"
+      },
+      {
+       "name": "vendor_id",
+       "widget": "many2one_avatar"
+      },
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "purchaser_id",
+       "widget": "many2one_avatar"
+      },
+      {
+       "name": "odometer"
+      },
+      {
+       "name": "odometer_unit"
+      },
+      {
+       "name": "notes",
+       "nolabel": "1",
+       "placeholder": "Write here any other information related to the service completed."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "monetary": 1,
+      "many2one_avatar": 2
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "statusbar_field": "state",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_view_tree",
+    "package": "fleet",
+    "name": "fleet.vehicle.log.services.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Services Logs",
+      "multi_edit": "1",
+      "expand": "1"
+     },
+     "fields": [
+      {
+       "name": "date",
+       "readonly": "1"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "service_type_id"
+      },
+      {
+       "name": "vehicle_id",
+       "widget": "many2one_avatar",
+       "readonly": "1"
+      },
+      {
+       "name": "purchaser_id",
+       "widget": "many2one_avatar",
+       "readonly": "1"
+      },
+      {
+       "name": "vendor_id",
+       "optional": "show"
+      },
+      {
+       "name": "inv_ref",
+       "column_invisible": "True"
+      },
+      {
+       "name": "notes",
+       "optional": "show"
+      },
+      {
+       "name": "amount",
+       "widget": "monetary",
+       "sum": "Total"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "readonly": "1",
+       "decoration-warning": "state == 'new'",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state == 'running'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar": 2,
+      "monetary": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_view_kanban",
+    "package": "fleet",
+    "name": "fleet.vehicle.log.services.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "default_group_by": "state"
+     },
+     "fields": [
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "vehicle_id",
+       "widget": "image",
+       "options": "{'preview_image': 'image_128'}"
+      },
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "service_type_id"
+      },
+      {
+       "name": "purchaser_id"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "vendor_id"
+      },
+      {
+       "name": "amount",
+       "widget": "monetary",
+       "options": "{'currency_field': 'currency_id'}"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "kanban_activity"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "monetary": 1,
+      "kanban_activity": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": "state",
+     "quick_create": null,
+     "progressbar": [
+      {
+       "field": "activity_state",
+       "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_view_graph",
+    "package": "fleet",
+    "name": "fleet.vehicle.log.services.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Services Costs Per Month",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "amount",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_view_activity",
+    "package": "fleet",
+    "name": null,
+    "view_type": "activity",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "activity",
+     "root_attributes": {
+      "string": "Services"
+     },
+     "fields": [
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "description"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_view_pivot",
+    "package": "fleet",
+    "name": null,
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "service_type_id"
+      },
+      {
+       "name": "vendor_id"
+      },
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "amount"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "service_type_id",
+       "type": "col"
+      },
+      {
+       "name": "vendor_id",
+       "type": "row"
+      },
+      {
+       "name": "vehicle_id",
+       "type": "row"
+      },
+      {
+       "name": "amount",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_view_search",
+    "package": "fleet",
+    "name": "fleet.vehicle.log.services.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Services Logs"
+     },
+     "fields": [
+      {
+       "name": "vehicle_id"
+      },
+      {
+       "name": "service_type_id"
+      },
+      {
+       "name": "description"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_service_type_id",
+       "string": "Service Type",
+       "context": "{'group_by': 'service_type_id'}"
+      },
+      {
+       "name": "groupby_manager_id",
+       "string": "Fleet Manager",
+       "context": "{'group_by': 'manager_id'}"
+      },
+      {
+       "name": "groupby_model_id",
+       "string": "Model",
+       "context": "{'group_by': 'model_id'}"
+      },
+      {
+       "name": "groupby_brand_id",
+       "string": "Manufacturer",
+       "context": "{'group_by': 'brand_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_fleet.fleet_vehicle_log_services_view_form_inherit_hr",
+    "package": "hr_fleet",
+    "name": "fleet.vehicle.log.contract.form.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "fleet.fleet_vehicle_log_services_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='purchaser_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "purchaser_employee_id",
+       "invisible": "1",
+       "string": "Driver (Employee)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='purchaser_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_fleet.fleet_vehicle_log_services_view_tree_inherit_hr",
+    "package": "hr_fleet",
+    "name": "fleet.vehicle.log.services.list.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "fleet.fleet_vehicle_log_services_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='purchaser_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "purchaser_employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "1",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='purchaser_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_fleet.fleet_vehicle_log_services_view_kanban_inherit_hr",
+    "package": "hr_fleet",
+    "name": "fleet.vehicle.log.services.kanban.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "fleet.fleet_vehicle_log_services_view_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div/field[@name='purchaser_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "purchaser_employee_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div/field[@name='purchaser_id']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "fleet.fleet_vehicle_log_services_action",
+    "package": "fleet",
+    "name": "Services",
+    "view_mode": "list,kanban,form,graph,pivot,activity",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_groupby_service_type_id': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Create a new service entry\n          </p><p>\n            Track all the services done on your vehicle.\n            Services can be of many types: occasional repair, fixed maintenance, etc.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "fleet.vehicle.log.services"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

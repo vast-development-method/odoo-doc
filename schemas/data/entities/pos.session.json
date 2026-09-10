@@ -1,0 +1,3755 @@
+{
+ "catalog": {
+  "name": "entity:pos.session",
+  "description": "Complete definition of entity Point of Sale Session (pos.session).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "pos.session",
+  "storage_name": "pos_session",
+  "full_name": "Point of Sale Session",
+  "kind": "persistent",
+  "description": "Point of Sale Session",
+  "defined_by_package": "point_of_sale",
+  "extended_by_packages": [
+   "l10n_ar_pos",
+   "pos_restaurant",
+   "pos_sale",
+   "l10n_fr_pos_cert",
+   "l10n_in_pos",
+   "l10n_pe_pos",
+   "l10n_tw_edi_ecpay_pos",
+   "l10n_vn_edi_viettel_pos",
+   "pos_event",
+   "pos_hr",
+   "pos_loyalty",
+   "pos_mercado_pago",
+   "pos_online_payment",
+   "pos_self_order"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "pos.bus.mixin",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "related": "config_id.company_id",
+    "string": "Company",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "config_id",
+    "type": "Many2one",
+    "comodel": "pos.config",
+    "string": "Point of Sale",
+    "required": true,
+    "index": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Point of Sale",
+    "target_entity": "pos.config"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Session ID",
+    "readonly": true,
+    "default": "/",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Session identifier"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Opened By",
+    "required": true,
+    "index": true,
+    "readonly": false,
+    "default": {
+     "dynamic": "lambda self: self.env.uid"
+    },
+    "ondelete": "restrict",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Opened By",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "config_id.currency_id",
+    "string": "Currency",
+    "readonly": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "start_at",
+    "type": "Datetime",
+    "string": "Opening Date",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Opening Date"
+   },
+   {
+    "name": "stop_at",
+    "type": "Datetime",
+    "string": "Closing Date",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Closing Date"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": {
+     "expression": "POS_SESSION_STATE"
+    },
+    "string": "Status",
+    "required": true,
+    "readonly": true,
+    "index": true,
+    "copy": false,
+    "default": "opening_control",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Status"
+   },
+   {
+    "name": "opening_notes",
+    "type": "Text",
+    "string": "Opening Notes",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Opening Notes"
+   },
+   {
+    "name": "closing_notes",
+    "type": "Text",
+    "string": "Closing Notes",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Closing Notes"
+   },
+   {
+    "name": "cash_control",
+    "type": "Boolean",
+    "compute": "_compute_cash_control",
+    "string": "Has Cash Control",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Has Cash Control"
+   },
+   {
+    "name": "cash_journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "compute": "_compute_cash_journal",
+    "string": "Cash Journal",
+    "store": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Cash Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "cash_register_balance_end_real",
+    "type": "Monetary",
+    "string": "Ending Balance",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Ending Balance"
+   },
+   {
+    "name": "cash_register_balance_start",
+    "type": "Monetary",
+    "string": "Starting Balance",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Starting Balance"
+   },
+   {
+    "name": "cash_register_balance_end",
+    "type": "Monetary",
+    "compute": "_compute_cash_balance",
+    "string": "Theoretical Closing Balance",
+    "help": "Opening balance summed to all cash transactions.",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Theoretical Closing Balance"
+   },
+   {
+    "name": "cash_register_difference",
+    "type": "Monetary",
+    "compute": "_compute_cash_balance",
+    "string": "Before Closing Difference",
+    "help": "Difference between the theoretical closing balance and the real closing balance.",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Before Closing Difference"
+   },
+   {
+    "name": "cash_real_transaction",
+    "type": "Monetary",
+    "string": "Transaction",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Transaction"
+   },
+   {
+    "name": "order_ids",
+    "type": "One2many",
+    "comodel": "pos.order",
+    "inverse_name": "session_id",
+    "string": "Orders",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Orders",
+    "target_entity": "pos.order"
+   },
+   {
+    "name": "order_count",
+    "type": "Integer",
+    "compute": "_compute_order_count",
+    "defined_in_package": "point_of_sale",
+    "string": "Order Count",
+    "full_name": "Order Count"
+   },
+   {
+    "name": "statement_line_ids",
+    "type": "One2many",
+    "comodel": "account.bank.statement.line",
+    "inverse_name": "pos_session_id",
+    "string": "Cash Lines",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Cash Lines",
+    "target_entity": "account.bank.statement.line"
+   },
+   {
+    "name": "failed_pickings",
+    "type": "Boolean",
+    "compute": "_compute_picking_count",
+    "defined_in_package": "point_of_sale",
+    "string": "Failed Pickings",
+    "full_name": "Failed Pickings"
+   },
+   {
+    "name": "picking_count",
+    "type": "Integer",
+    "compute": "_compute_picking_count",
+    "defined_in_package": "point_of_sale",
+    "string": "Picking Count",
+    "full_name": "Picking Count"
+   },
+   {
+    "name": "picking_ids",
+    "type": "One2many",
+    "comodel": "stock.picking",
+    "inverse_name": "pos_session_id",
+    "defined_in_package": "point_of_sale",
+    "string": "Picking",
+    "full_name": "Picking",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "rescue",
+    "type": "Boolean",
+    "string": "Recovery Session",
+    "help": "Auto-generated session for orphan orders, ignored in constraints",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Recovery Session"
+   },
+   {
+    "name": "move_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "string": "Journal Entry",
+    "index": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Journal Entry",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "payment_method_ids",
+    "type": "Many2many",
+    "comodel": "pos.payment.method",
+    "related": "config_id.payment_method_ids",
+    "string": "Payment Methods",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Payment Methods",
+    "target_entity": "pos.payment.method"
+   },
+   {
+    "name": "total_payments_amount",
+    "type": "Float",
+    "compute": "_compute_total_payments_amount",
+    "string": "Total Payments Amount",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Total Payments Amount"
+   },
+   {
+    "name": "is_in_company_currency",
+    "type": "Boolean",
+    "string": "Is Using Company Currency",
+    "compute": "_compute_is_in_company_currency",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Is Using Company Currency"
+   },
+   {
+    "name": "update_stock_at_closing",
+    "type": "Boolean",
+    "string": "Stock should be updated at closing",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Stock should be updated at closing"
+   },
+   {
+    "name": "bank_payment_ids",
+    "type": "One2many",
+    "comodel": "account.payment",
+    "inverse_name": "pos_session_id",
+    "string": "Bank Payments",
+    "help": "Account payments representing aggregated and bank split payments.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Bank Payments",
+    "target_entity": "account.payment"
+   },
+   {
+    "name": "crm_team_id",
+    "type": "Many2one",
+    "comodel": "crm.team",
+    "related": "config_id.crm_team_id",
+    "string": "Sales Team",
+    "readonly": true,
+    "defined_in_package": "pos_sale",
+    "full_name": "Sales Team",
+    "target_entity": "crm.team"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Cashier",
+    "help": "The employee who currently uses the cash register",
+    "tracking": true,
+    "defined_in_package": "pos_hr",
+    "full_name": "Cashier",
+    "target_entity": "hr.employee"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_relations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_models",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_ar_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_pe_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_hr",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_data",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "models_to_load"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "load_data_params",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "filter_local_data",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "models_to_filter"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "delete_opening_control_session",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only cancel a session that is in opening control state and has no orders.",
+        "line": 208
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_delete_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_pos_ui_product_pricelist_item_by_product",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "product_tmpl_ids",
+     "product_ids",
+     "config_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_in_company_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "currency_id",
+         "company_id.currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_cash_balance",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_method_ids",
+         "order_ids",
+         "cash_register_balance_start"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_payments_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_ids.payment_ids.amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_order_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_picking_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "picking_ids",
+         "picking_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_stock_picking",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_cash_control",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "cash_journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_cash_journal",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "config_id",
+         "payment_method_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_pos_config",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "config_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Another session is already opened for this point of sale.",
+        "line": 319
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_start_date",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "start_at"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot create a session starting before: %(lock_date_info)s",
+        "line": 329
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_invoices_are_posted",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot close the POS when invoices are not posted.\nInvoices: %s",
+        "line": 335
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You should assign a Point of Sale to your session.",
+        "line": 345
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_pos_session_open",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_session_orders",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_pos_session_closing_control",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "balancing_account",
+     "amount_to_balance",
+     "bank_payment_method_diffs"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot close the POS while there are still draft orders for the day.",
+        "line": 392
+       },
+       {
+        "kind": "UserError",
+        "message": "This session is already closed.",
+        "line": 394
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_pos_session_validate",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "balancing_account",
+     "amount_to_balance",
+     "bank_payment_method_diffs"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_pos_session_close",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "balancing_account",
+     "amount_to_balance",
+     "bank_payment_method_diffs"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "balancing_account",
+     "amount_to_balance",
+     "bank_payment_method_diffs"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 61,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This session is already closed.",
+        "line": 433
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_post_statement_difference",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please go on the %s journal and define a Loss Account. This account will be used to record cash difference.",
+        "line": 498
+       },
+       {
+        "kind": "UserError",
+        "message": "Please go on the %s journal and define a Profit Account. This account will be used to record cash difference.",
+        "line": 507
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_cash_diff_line_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "counterpart_account",
+     "taxes",
+     "name",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_close_session_action",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount_to_balance"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "close_session_from_ui",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "bank_payment_method_diff_pairs"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Calling this method will try to close the session.\n\nparam bank_payment_method_diff_pairs: list[(int, float)]\n    Pairs of payment_method_id and diff_amount which will be used to post\n    loss/profit when closing the session.\n\nIf successful, it returns {'successful': True}\nOtherwise, it returns {'successful': False, 'message': str, 'redirect': bool}.\n'redirect' is a boolean used to know whether we redirect the user to the back end or not.\nWhen necessary, error (i.e. UserError, AccessError) is raised which should redirect the user to the back end.",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "post_close_register_message",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "update_closing_control_state_session",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "notes"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This session is already closed.",
+        "line": 649
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "post_closing_cash_details",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "counted_cash"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Calling this method will try store the cash details during the session closing.\n\n:param counted_cash: float, the total cash the user counted from its cash register\n\nIf successful, it returns ``{'successful': True}``.\nOtherwise, it returns ``{'successful': False, 'message': str, 'redirect': bool}`` where\n``'redirect'`` is a boolean used to know whether we redirect the user to the back end or not.\nWhen necessary, error (i.e. UserError, AccessError) is raised which should redirect the user to the back end.",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There is no cash register in this session.",
+        "line": 674
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_diff_account_move_for_split_payment_method",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_method",
+     "diff_amount"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_diff_account_move_ref",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "payment_method"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_diff_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "payment_method_id",
+     "diff_amount",
+     "outstanding_account"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cannot_close_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bank_payment_method_diffs"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Add check in this method if you want to return or raise an error when trying to either post cash details\nor close the session. Raising an error will always redirect the user to the back end.\nIt should return {'successful': False, 'message': str, 'redirect': bool} if we can't close the session",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_cash_in_out_list",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You don't have the access rights to get the cash in/out list.",
+        "line": 758
+       }
+      ]
+     },
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_closing_control_data",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You don't have the access rights to get the point of sale closing control data.",
+        "line": 780
+       }
+      ]
+     },
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_picking_at_end_of_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_balancing_line",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "balancing_account",
+     "amount_to_balance"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_balancing_line_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "imbalance_amount",
+     "move",
+     "balancing_account"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_balancing_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_account_move",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "balancing_account",
+     "amount_to_balance",
+     "bank_payment_method_diffs"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Create account.move and account.move.line records for this session.\n\nSide-effects include:\n    - setting self.move_id to the created account.move record\n    - reconciling cash receivable lines, invoice receivable lines and stock output lines",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_accumulate_amounts",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 174,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_non_reconciliable_move_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unable to close and validate the session.\nPlease set corresponding tax account in each repartition line of the following taxes: \n%s",
+        "line": 1091
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_bank_payment_moves",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_pay_later_receivable_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_payment_outstanding_account",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment",
+     "payment_amount"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_combine_account_payment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_method",
+     "amounts",
+     "diff_amount"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_apply_diff_on_account_payment_move",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "account_payment",
+     "payment_method",
+     "diff_amount"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_split_account_payment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment",
+     "amounts"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_split_account_payment_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "payment",
+     "amounts",
+     "accounting_partner",
+     "destination_account"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_split_account_payments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "payment_amounts_list"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_cash_statement_lines_and_cash_move_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 67,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_invoice_receivable_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_stock_valuation_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reconcile_account_move_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rounding_difference_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "amount_converted"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_split_receivable_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "payment",
+     "amount",
+     "amount_converted"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You have enabled the \"Identify Customer\" option for %(payment_method)s payment method,but the order %(order)s does not contain a customer.",
+        "line": 1437
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_combine_receivable_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "payment_method",
+     "amount",
+     "amount_converted"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invoice_receivable_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "amount_converted"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sale_key",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "base_line"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sale_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "key",
+     "sale_vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_tax_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "key",
+     "amount",
+     "amount_converted",
+     "base_amount_converted"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_stock_expense_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "exp_account",
+     "amount",
+     "amount_converted"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_stock_valuation_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "stock_val_account",
+     "amount",
+     "amount_converted"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_combine_statement_line_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "journal",
+     "amount",
+     "payment_method"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_split_statement_line_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "journal",
+     "amount",
+     "payment"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_statement_line_amount_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "journal",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_amounts",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "old_amounts",
+     "amounts_to_add",
+     "date",
+     "round",
+     "force_company_currency"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Responsible for adding `amounts_to_add` to `old_amounts` considering the currency of the session.\n\n    old_amounts {                                                       new_amounts {\n        amount                         amounts_to_add {                     amount\n        amount_converted        +          amount               ->          amount_converted\n       [base_amount                       [base_amount]                    [base_amount\n        base_amount_converted]        }                                     base_amount_converted]\n    }                                                                   }\n\nNOTE:\n    - Notice that `amounts_to_add` does not have `amount_converted` field.\n        This function is responsible in calculating the `amount_converted` from the\n        `amount` of `amounts_to_add` which is used to update the values of `old_amounts`.\n    - Values of `amount` and/or `base_amount` should always be in session's currency [1].\n    - Value of `amount_converted` should be in company's currency\n\n[1] Except when `force_company_currency` = True. It means that values in `amounts_to_add`\n    is in company currency.\n\n:param dict old_amounts:\n    Amounts to update\n:param dict amounts_to_add:\n    Amounts used to update the old_amounts\n:param date date:\n    Date used for conversion\n:param bool round:\n    Same as round parameter of `res.currency._convert`.\n    Defaults to True because that is the default of `res.currency._convert`.\n    We put it to False if we want to round globally.\n:param bool force_company_currency:\n    If True, the values in amounts_to_add are in company's currency.\n    Defaults to False because it is only used to anglo-saxon lines.\n\n:returns: new amounts combining the values of `old_amounts` and `amounts_to_add`.\n:rtype: dict",
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_round_amounts",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amounts"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_credit_amounts",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partial_move_line_vals",
+     "amount",
+     "amount_converted",
+     "force_company_currency"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "`partial_move_line_vals` is completed by `credit`ing the given amounts.\n\nNOTE Amounts in PoS are in the currency of journal_id in the session.config_id.\nThis means that amount fields in any pos record are actually equivalent to amount_currency\nin account module. Understanding this basic is important in correctly assigning values for\n'amount' and 'amount_currency' in the account.move.line record.\n\n:param dict partial_move_line_vals:\n    initial values in creating account.move.line\n:param float amount:\n    amount derived from pos.payment, pos.order, or pos.order.line records\n:param float amount_converted:\n    converted value of `amount` from the given `session_currency` to company currency\n\n:return: complete values for creating 'amount.move.line' record\n:rtype: dict",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_debit_amounts",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "partial_move_line_vals",
+     "amount",
+     "amount_converted",
+     "force_company_currency"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "`partial_move_line_vals` is completed by `debit`ing the given amounts.\n\nSee _credit_amounts docs for more details.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_amount_converter",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "date",
+     "round"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "show_cash_register",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "show_journal_items",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_other_related_moves",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_related_account_moves",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_receivable_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "payment_method"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Returns the default pos receivable account if no receivable_account_id is set on the payment method.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_show_payments_list",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_captured_payments_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_frontend_cb",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Open the pos interface with config_id as an extra argument.\n\nIn vanilla PoS each user can only have one active session, therefore it was not needed to pass the config_id\non opening a session. It is also possible to login to sessions created by other users.\n\n:returns: dict",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_opening_control_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "cashbox_value",
+     "notes"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Internal logic for opening the session.\nInherit this method to add custom logic before the sequence is assigned.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_opening_control",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "cashbox_value",
+     "notes"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Public method to open the session.\nThis calls the internal logic and, if successful, assigns the sequence name.\n\nDO NOT INHERIT THIS METHOD. Inherit _set_opening_control_data instead.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_cash_details_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "state",
+     "expected",
+     "difference",
+     "notes"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_order",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alert_old_session",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_if_no_draft_orders",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There are still orders in draft state in the session. Pay or cancel the following orders to validate the session:\n%s",
+        "line": 1862
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_account_bank_statement_line_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "session",
+     "sign",
+     "amount",
+     "reason",
+     "partner_id",
+     "extras"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "try_cash_in_out",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "_type",
+     "amount",
+     "reason",
+     "partner_id",
+     "extras"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You don't have the access rights to perform a cash in/out.",
+        "line": 1881
+       },
+       {
+        "kind": "UserError",
+        "message": "There is no cash payment method for this PoS Session",
+        "line": 1885
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "delete_cash_in_out",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "absl_id",
+     "partner_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You don't have the access rights to delete a cash in/out.",
+        "line": 1896
+       },
+       {
+        "kind": "AccessError",
+        "message": "You cannot delete a cash move that is not linked to this session.",
+        "line": 1899
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_attributes_by_ptal_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partners_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "find_product_by_barcode",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "barcode",
+     "config_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_total_discount",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_invoice_total_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_total_invoice",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "log_partner_message",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "partner_id",
+     "action",
+     "message_type"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_pos_has_valid_product",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_closed_orders",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_last_order_preparation_change",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "order_ids"
+    ],
+    "definitions": [
+     {
+      "package": "pos_restaurant",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_session_timing",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_missing_hsn_codes_in_pos_orders",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "l10n_tw_edi_check_mobile_barcode",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "text"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Mobile barcode is invalid!",
+        "line": 20
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "l10n_tw_edi_check_love_code",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "text"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tw_edi_ecpay_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Love code is invalid!",
+        "line": 31
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_vn_edi_viettel_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_message_author",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_aggregate_payments_amounts_by_employee",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "all_payments"
+    ],
+    "definitions": [
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_aggregate_moves_by_employee",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_loader_params_pos_payment_method",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_mercado_pago",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_split_receivable_op_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "payment",
+     "amount",
+     "amount_converted"
+    ],
+    "definitions": [
+     {
+      "package": "pos_online_payment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The partner of the POS online payment (id=%d) could not be found",
+        "line": 54
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "delete_opening_control_session",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You can only cancel a session that is in opening control state and has no orders."
+   },
+   {
+    "operation": "_check_pos_config",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "Another session is already opened for this point of sale."
+   },
+   {
+    "operation": "_check_start_date",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You cannot create a session starting before: %(lock_date_info)s"
+   },
+   {
+    "operation": "_check_invoices_are_posted",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You cannot close the POS when invoices are not posted.\nInvoices: %s"
+   },
+   {
+    "operation": "create",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You should assign a Point of Sale to your session."
+   },
+   {
+    "operation": "action_pos_session_closing_control",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You cannot close the POS while there are still draft orders for the day."
+   },
+   {
+    "operation": "action_pos_session_closing_control",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "This session is already closed."
+   },
+   {
+    "operation": "_validate_session",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "This session is already closed."
+   },
+   {
+    "operation": "_post_statement_difference",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Please go on the %s journal and define a Loss Account. This account will be used to record cash difference."
+   },
+   {
+    "operation": "_post_statement_difference",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Please go on the %s journal and define a Profit Account. This account will be used to record cash difference."
+   },
+   {
+    "operation": "update_closing_control_state_session",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "This session is already closed."
+   },
+   {
+    "operation": "post_closing_cash_details",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "There is no cash register in this session."
+   },
+   {
+    "operation": "get_cash_in_out_list",
+    "package": "point_of_sale",
+    "kind": "AccessError",
+    "message": "You don't have the access rights to get the cash in/out list."
+   },
+   {
+    "operation": "get_closing_control_data",
+    "package": "point_of_sale",
+    "kind": "AccessError",
+    "message": "You don't have the access rights to get the point of sale closing control data."
+   },
+   {
+    "operation": "_create_non_reconciliable_move_lines",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Unable to close and validate the session.\nPlease set corresponding tax account in each repartition line of the following taxes: \n%s"
+   },
+   {
+    "operation": "_get_split_receivable_vals",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You have enabled the \"Identify Customer\" option for %(payment_method)s payment method,but the order %(order)s does not contain a customer."
+   },
+   {
+    "operation": "_check_if_no_draft_orders",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "There are still orders in draft state in the session. Pay or cancel the following orders to validate the session:\n%s"
+   },
+   {
+    "operation": "try_cash_in_out",
+    "package": "point_of_sale",
+    "kind": "AccessError",
+    "message": "You don't have the access rights to perform a cash in/out."
+   },
+   {
+    "operation": "try_cash_in_out",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "There is no cash payment method for this PoS Session"
+   },
+   {
+    "operation": "delete_cash_in_out",
+    "package": "point_of_sale",
+    "kind": "AccessError",
+    "message": "You don't have the access rights to delete a cash in/out."
+   },
+   {
+    "operation": "delete_cash_in_out",
+    "package": "point_of_sale",
+    "kind": "AccessError",
+    "message": "You cannot delete a cash move that is not linked to this session."
+   },
+   {
+    "operation": "l10n_tw_edi_check_mobile_barcode",
+    "package": "l10n_tw_edi_ecpay_pos",
+    "kind": "UserError",
+    "message": "Mobile barcode is invalid!"
+   },
+   {
+    "operation": "l10n_tw_edi_check_love_code",
+    "package": "l10n_tw_edi_ecpay_pos",
+    "kind": "UserError",
+    "message": "Love code is invalid!"
+   },
+   {
+    "operation": "_get_split_receivable_op_vals",
+    "package": "pos_online_payment",
+    "kind": "UserError",
+    "message": "The partner of the POS online payment (id=%d) could not be found"
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_pos_session_user",
+    "package": "point_of_sale",
+    "name": "pos.session user",
+    "entity": "pos.session",
+    "group": "group_pos_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "point_of_sale.rule_pos_session_multi_company",
+    "package": "point_of_sale",
+    "name": "Point Of Sale Session",
+    "entity": "pos.session",
+    "domain": "[('config_id.company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "point_of_sale.view_pos_session_form",
+    "package": "point_of_sale",
+    "name": "pos.session.form.view",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Point of Sale Session",
+      "create": "0",
+      "edit": "0"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "nolabel": "1"
+      },
+      {
+       "name": "failed_pickings",
+       "invisible": "1"
+      },
+      {
+       "name": "rescue",
+       "invisible": "1"
+      },
+      {
+       "name": "order_count",
+       "widget": "statinfo",
+       "string": "Orders"
+      },
+      {
+       "name": "picking_count",
+       "widget": "statinfo",
+       "invisible": "failed_pickings",
+       "string": "Pickings"
+      },
+      {
+       "name": "picking_count",
+       "widget": "statinfo",
+       "invisible": "not failed_pickings",
+       "string": "Pickings"
+      },
+      {
+       "name": "total_payments_amount",
+       "widget": "statinfo",
+       "string": "Payments"
+      },
+      {
+       "name": "name",
+       "invisible": "name == '/'"
+      },
+      {
+       "name": "cash_control",
+       "invisible": "1"
+      },
+      {
+       "name": "user_id",
+       "readonly": "state != 'opening_control'"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "config_id",
+       "readonly": "1"
+      },
+      {
+       "name": "move_id",
+       "readonly": "1",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "start_at",
+       "invisible": "state == 'opening_control'"
+      },
+      {
+       "name": "stop_at",
+       "invisible": "state != 'closed'"
+      },
+      {
+       "name": "cash_register_balance_start"
+      },
+      {
+       "name": "cash_register_balance_end_real",
+       "invisible": "state != 'closed'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "open_frontend_cb",
+       "string": "Continue Selling",
+       "type": "object",
+       "invisible": "rescue or state not in ['opening_control', 'opened']"
+      },
+      {
+       "name": "action_pos_session_closing_control",
+       "string": "Close Session & Post Entries",
+       "type": "object",
+       "invisible": "(state != 'closing_control' and not rescue or state == 'closed' and rescue) and state != 'closing_control'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_view_order",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-shopping-basket"
+      },
+      {
+       "name": "action_stock_picking",
+       "type": "object",
+       "invisible": "picking_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-truck"
+      },
+      {
+       "name": "action_show_payments_list",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-dollar"
+      },
+      {
+       "name": "show_journal_items",
+       "type": "object",
+       "class": "oe_stat_button",
+       "groups": "account.group_account_readonly",
+       "icon": "fa-bars"
+      },
+      {
+       "name": "show_cash_register",
+       "type": "object",
+       "invisible": "not cash_control",
+       "class": "oe_stat_button",
+       "groups": "account.group_account_readonly",
+       "icon": "fa-bars"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 4
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "open_frontend_cb",
+       "type": "object",
+       "string": "Continue Selling",
+       "invisible": "rescue or state not in ['opening_control', 'opened']"
+      },
+      {
+       "id": "validate_closing_control",
+       "name": "action_pos_session_closing_control",
+       "type": "object",
+       "string": "Close Session & Post Entries",
+       "invisible": "(state != 'closing_control' and not rescue or state == 'closed' and rescue) and state != 'closing_control'",
+       "class": "oe_highlight"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "opened,closing_control,closed",
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "action_view_order",
+       "class": "oe_stat_button",
+       "icon": "fa-shopping-basket",
+       "type": "object"
+      },
+      {
+       "class": "oe_stat_button",
+       "name": "action_stock_picking",
+       "type": "object",
+       "icon": "fa-truck",
+       "invisible": "picking_count == 0"
+      },
+      {
+       "name": "action_show_payments_list",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-dollar"
+      },
+      {
+       "name": "show_journal_items",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-bars",
+       "groups": "account.group_account_readonly"
+      },
+      {
+       "name": "show_cash_register",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-bars",
+       "invisible": "not cash_control",
+       "groups": "account.group_account_readonly"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_session_tree",
+    "package": "point_of_sale",
+    "name": "pos.session.list.view",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Point of Sale Session",
+      "create": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "config_id"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "state != 'opening_control'"
+      },
+      {
+       "name": "start_at"
+      },
+      {
+       "name": "stop_at"
+      },
+      {
+       "name": "cash_register_balance_start"
+      },
+      {
+       "name": "cash_register_balance_end_real"
+      },
+      {
+       "name": "cash_register_balance_end"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-warning": "state == 'closing_control'",
+       "decoration-success": "state in ('opened', 'closed')",
+       "decoration-info": "state in ('opening_control')"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_session_kanban",
+    "package": "point_of_sale",
+    "name": "pos.session.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "create": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "config_id"
+      },
+      {
+       "name": "state",
+       "widget": "label_selection",
+       "options": "{'classes': {'opening_control': 'default',                                     'opened': 'success', 'closing_control': 'warning', 'closed': 'warning'}}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "start_at"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "state != 'opening_control'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "label_selection": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_session_search",
+    "package": "point_of_sale",
+    "name": "pos.session.search.view",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Point of Sale Session"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "config_id"
+      },
+      {
+       "name": "user_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_sessions",
+       "string": "My Sessions",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "open_sessions",
+       "string": "In Progress",
+       "domain": "[('state', '=', 'opened')]"
+      },
+      {
+       "name": "start_date",
+       "string": "Opening Date",
+       "date": "start_at"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "user",
+       "string": "Opened By",
+       "domain": "[]",
+       "context": "{'group_by' : 'user_id'}"
+      },
+      {
+       "name": "point_of_sale",
+       "string": "Point of Sale",
+       "domain": "[]",
+       "context": "{'group_by': 'config_id'}"
+      },
+      {
+       "name": "status",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "opening_date",
+       "string": "Opening Date",
+       "domain": "[]",
+       "context": "{'group_by': 'start_at'}"
+      },
+      {
+       "name": "closing_date",
+       "string": "Closing Date",
+       "domain": "[]",
+       "context": "{'group_by': 'stop_at'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "pos_sale.view_pos_session_search_inherit_pos_sale",
+    "package": "pos_sale",
+    "name": "pos.session.search.view",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_session_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='config_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "crm_team_id",
+       "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='config_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "pos_self_order.pos_self_view_pos_session_form",
+    "package": "pos_self_order",
+    "name": "pos.self.session.form.view",
+    "view_type": "xpath",
+    "inherits_view": "point_of_sale.view_pos_session_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='open_frontend_cb']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='open_frontend_cb']",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "point_of_sale.action_pos_session",
+    "package": "point_of_sale",
+    "name": "Sessions",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "view_pos_session_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No sessions found\n            </p><p>\n                A session is a period of time, usually one day, during which you sell through the Point of Sale.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "pos.session"
+   },
+   {
+    "external_identifier": "point_of_sale.action_pos_session_filtered",
+    "package": "point_of_sale",
+    "name": "Sessions",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_pos_session_search",
+    "domain": null,
+    "context": "{\n            'search_default_config_id': [active_id],\n            'default_config_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No sessions found\n            </p>\n            <p>\n                Daily sessions hold sales from your Point of Sale.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "pos.session"
+   },
+   {
+    "external_identifier": "pos_sale.pos_session_action_from_crm_team",
+    "package": "pos_sale",
+    "name": "Open Sessions",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_open_sessions': True, 'search_default_crm_team_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "sales_team.model_crm_team",
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "pos.session"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "point_of_sale.sale_details_report",
+    "package": "point_of_sale",
+    "name": "Sales Details",
+    "report_type": "qweb-pdf",
+    "report_name": "point_of_sale.report_saledetails",
+    "report_file": null,
+    "print_report_name": null,
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "point_of_sale.model_pos_session",
+    "binding_type": null,
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "pos.session"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

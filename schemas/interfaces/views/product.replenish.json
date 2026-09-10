@@ -1,0 +1,149 @@
+{
+ "catalog": {
+  "name": "views:product.replenish",
+  "description": "View declarations for entity product.replenish.",
+  "record_count": 2,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "purchase_stock.view_product_replenish_form_inherit_stock",
+   "package": "purchase_stock",
+   "name": "product.replenish.form.inherit.stock",
+   "entity": "product.replenish",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_product_replenish",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='route_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "show_vendor",
+      "invisible": "1"
+     },
+     {
+      "name": "supplier_id",
+      "invisible": "not show_vendor",
+      "required": "show_vendor",
+      "domain": "[('product_tmpl_id', '=', product_tmpl_id)]",
+      "options": "{'no_open': 1, 'no_create': 1}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='route_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='route_id']\" position=\"after\">\n                <label for=\"supplier_id\" invisible=\"not show_vendor\"/>\n                <div class=\"o_row\">\n                    <field name=\"show_vendor\" invisible=\"1\"/>\n                    <field name=\"supplier_id\" invisible=\"not show_vendor\" required=\"show_vendor\" domain=\"[('product_tmpl_id', '=', product_tmpl_id)]\" options=\"{'no_open': 1, 'no_create': 1}\"/>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_product_replenish",
+   "package": "stock",
+   "name": "Replenish",
+   "entity": "product.replenish",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Replenish wizard"
+    },
+    "fields": [
+     {
+      "name": "product_id",
+      "readonly": "not product_has_variants",
+      "domain": "[('product_tmpl_id', '=', product_tmpl_id)]",
+      "options": "{'no_open': 1, 'no_create': 1}"
+     },
+     {
+      "name": "forecasted_quantity"
+     },
+     {
+      "name": "forecast_uom_id",
+      "readonly": "1",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "product_tmpl_id",
+      "invisible": "1"
+     },
+     {
+      "name": "product_has_variants",
+      "invisible": "1"
+     },
+     {
+      "name": "allowed_route_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "quantity"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "options": "{'no_open': 1, 'no_create': 1, 'quantity_field': 'quantity'}",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "date_planned"
+     },
+     {
+      "name": "warehouse_id",
+      "groups": "stock.group_stock_multi_warehouses"
+     },
+     {
+      "name": "route_id",
+      "domain": "[('id', 'in', allowed_route_ids)]"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "launch_replenishment",
+      "string": "Confirm",
+      "type": "object",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Discard",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Replenish wizard\">\n                <p>\n                    The forecasted quantity of\n                    <field name=\"product_id\" domain=\"[('product_tmpl_id', '=', product_tmpl_id)]\" readonly=\"not product_has_variants\" options=\"{'no_open': 1, 'no_create': 1}\" class=\"fw-bold\"/> is\n                    <field name=\"forecasted_quantity\"/>\n                    <field class=\"ps-1\" name=\"forecast_uom_id\" groups=\"uom.group_uom\" readonly=\"1\"/>\n                </p>\n                <group>\n                    <group>\n                        <field name=\"product_tmpl_id\" invisible=\"1\"/>\n                        <field name=\"product_has_variants\" invisible=\"1\"/>\n                        <field name=\"allowed_route_ids\" invisible=\"1\"/>\n                        <field name=\"company_id\" invisible=\"1\"/>\n                        <label for=\"quantity\"/>\n                        <div class=\"o_row\">\n                            <field name=\"quantity\"/>\n                            <field name=\"product_uom_id\" groups=\"uom.group_uom\" widget=\"many2one_uom\" options=\"{'no_open': 1, 'no_create': 1, 'quantity_field': 'quantity'}\"/>\n                        </div>\n                        <field name=\"date_planned\"/>\n                        <field name=\"warehouse_id\" groups=\"stock.group_stock_multi_warehouses\"/>\n                        <field name=\"route_id\" domain=\"[('id', 'in', allowed_route_ids)]\"/>\n                    </group>\n                </group>\n                <footer>\n                    <button name=\"launch_replenishment\" string=\"Confirm\" type=\"object\" data-hotkey=\"q\" class=\"btn-primary\"/>\n                    <button string=\"Discard\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  }
+ ]
+}

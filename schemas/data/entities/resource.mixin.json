@@ -1,0 +1,289 @@
+{
+ "catalog": {
+  "name": "entity:resource.mixin",
+  "description": "Complete definition of entity Resource Mixin (resource.mixin).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "resource.mixin",
+  "storage_name": "resource_mixin",
+  "full_name": "Resource Mixin",
+  "kind": "abstract",
+  "description": "Resource Mixin",
+  "defined_by_package": "resource",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "resource_id",
+    "type": "Many2one",
+    "comodel": "resource.resource",
+    "string": "Resource",
+    "bypass_search_access": true,
+    "index": true,
+    "ondelete": "restrict",
+    "required": true,
+    "defined_in_package": "resource",
+    "full_name": "Resource",
+    "target_entity": "resource.resource"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "index": true,
+    "related": "resource_id.company_id",
+    "precompute": true,
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "resource",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "resource_calendar_id",
+    "type": "Many2one",
+    "comodel": "resource.calendar",
+    "string": "Working Hours",
+    "default": {
+     "dynamic": "lambda self: self.env.company.resource_calendar_id"
+    },
+    "index": true,
+    "related": "resource_id.calendar_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "resource",
+    "full_name": "Working Hours",
+    "target_entity": "resource.calendar"
+   },
+   {
+    "name": "tz",
+    "type": "Selection",
+    "string": "Timezone",
+    "related": "resource_id.tz",
+    "readonly": false,
+    "help": "This field is used in order to define in which timezone the resources will work.",
+    "defined_in_package": "resource",
+    "full_name": "Timezone"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_resource_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "vals",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_calendars",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_from"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_work_days_data_batch",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "from_datetime",
+     "to_datetime",
+     "compute_leaves",
+     "calendar",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "By default the resource calendar is used, but it can be\nchanged using the `calendar` argument.\n\n`domain` is used in order to recognise the leaves to take,\nNone means default value ('time_type', '=', 'leave')\n\nReturns a dict {'days': n, 'hours': h} containing the\nquantity of working time expressed as days and as hours.",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_leave_days_data_batch",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "from_datetime",
+     "to_datetime",
+     "calendar",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "By default the resource calendar is used, but it can be\nchanged using the `calendar` argument.\n\n`domain` is used in order to recognise the leaves to take,\nNone means default value ('time_type', '=', 'leave')\n\nReturns a dict {'days': n, 'hours': h} containing the number of leaves\nexpressed as days and as hours.",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_adjust_to_calendar",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start",
+     "end"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_list_work_time_per_day",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "from_datetime",
+     "to_datetime",
+     "calendar",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "By default the resource calendar is used, but it can be\nchanged using the `calendar` argument.\n\n`domain` is used in order to recognise the leaves to take,\nNone means default value ('time_type', '=', 'leave')\n\nReturns a list of tuples (day, hours) for each day\ncontaining at least an attendance.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "list_leaves",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "from_datetime",
+     "to_datetime",
+     "calendar",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "By default the resource calendar is used, but it can be\nchanged using the `calendar` argument.\n\n`domain` is used in order to recognise the leaves to take,\nNone means default value ('time_type', '=', 'leave')\n\nReturns a list of tuples (day, hours, resource.calendar.leaves)\nfor each leave in the calendar.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,1512 @@
+{
+ "catalog": {
+  "name": "entity:stock.scrap",
+  "description": "Complete definition of entity Scrap (stock.scrap).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.scrap",
+  "storage_name": "stock_scrap",
+  "full_name": "Scrap",
+  "kind": "persistent",
+  "description": "Scrap",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "mrp"
+  ],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Reference",
+    "default": {
+     "dynamic": "lambda self: _('New')"
+    },
+    "copy": false,
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Reference"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "origin",
+    "type": "Char",
+    "string": "Source Document",
+    "defined_in_package": "stock",
+    "full_name": "Source Document"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "domain": "[('type', '=', 'consu')]",
+    "required": true,
+    "check_company": true,
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "allowed_uom_ids",
+    "type": "Many2many",
+    "comodel": "uom.uom",
+    "compute": "_compute_allowed_uom_ids",
+    "defined_in_package": "stock",
+    "string": "Allowed Unit of measure",
+    "full_name": "Allowed Unit of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "domain": "[('id', 'in', allowed_uom_ids)]",
+    "compute": "_compute_product_uom_id",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "tracking",
+    "type": "Selection",
+    "string": "Product Tracking",
+    "readonly": true,
+    "related": "product_id.tracking",
+    "defined_in_package": "stock",
+    "full_name": "Product Tracking"
+   },
+   {
+    "name": "lot_id",
+    "type": "Many2one",
+    "comodel": "stock.lot",
+    "string": "Lot/Serial",
+    "domain": "[('product_id', '=', product_id)]",
+    "check_company": true,
+    "defined_in_package": "stock",
+    "full_name": "Lot/Serial",
+    "target_entity": "stock.lot"
+   },
+   {
+    "name": "package_id",
+    "type": "Many2one",
+    "comodel": "stock.package",
+    "string": "Package",
+    "check_company": true,
+    "defined_in_package": "stock",
+    "full_name": "Package",
+    "target_entity": "stock.package"
+   },
+   {
+    "name": "owner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Owner",
+    "check_company": true,
+    "defined_in_package": "stock",
+    "full_name": "Owner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "move_ids",
+    "type": "One2many",
+    "comodel": "stock.move",
+    "inverse_name": "scrap_id",
+    "defined_in_package": "stock",
+    "string": "Move",
+    "full_name": "Move",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "picking_id",
+    "type": "Many2one",
+    "comodel": "stock.picking",
+    "string": "Picking",
+    "check_company": true,
+    "defined_in_package": "stock",
+    "full_name": "Picking",
+    "target_entity": "stock.picking"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Source Location",
+    "compute": "_compute_location_id",
+    "store": true,
+    "required": true,
+    "precompute": true,
+    "domain": "[('usage', '=', 'internal')]",
+    "check_company": true,
+    "readonly": false,
+    "defined_in_package": "stock",
+    "full_name": "Source Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "scrap_location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Scrap Location",
+    "compute": "_compute_scrap_location_id",
+    "store": true,
+    "required": true,
+    "precompute": true,
+    "domain": "[('usage', '=', 'inventory')]",
+    "check_company": true,
+    "readonly": false,
+    "defined_in_package": "stock",
+    "full_name": "Scrap Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "scrap_qty",
+    "type": "Float",
+    "string": "Quantity",
+    "required": true,
+    "digits": "Product Unit",
+    "compute": "_compute_scrap_qty",
+    "default": 1.0,
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "stock",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "done",
+      "Done"
+     ]
+    ],
+    "string": "Status",
+    "default": "draft",
+    "readonly": true,
+    "tracking": true,
+    "defined_in_package": "stock",
+    "full_name": "Status"
+   },
+   {
+    "name": "date_done",
+    "type": "Datetime",
+    "string": "Date",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "Date"
+   },
+   {
+    "name": "should_replenish",
+    "type": "Boolean",
+    "string": "Replenish Quantities",
+    "help": "Trigger replenishment for scrapped products",
+    "defined_in_package": "stock",
+    "full_name": "Replenish Quantities"
+   },
+   {
+    "name": "scrap_reason_tag_ids",
+    "type": "Many2many",
+    "comodel": "stock.scrap.reason.tag",
+    "string": "Scrap Reason",
+    "defined_in_package": "stock",
+    "full_name": "Scrap Reason",
+    "target_entity": "stock.scrap.reason.tag"
+   },
+   {
+    "name": "production_id",
+    "type": "Many2one",
+    "comodel": "mrp.production",
+    "string": "Manufacturing Order",
+    "index": "btree_not_null",
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "Manufacturing Order",
+    "target_entity": "mrp.production"
+   },
+   {
+    "name": "workorder_id",
+    "type": "Many2one",
+    "comodel": "mrp.workorder",
+    "string": "Work Order",
+    "index": "btree_not_null",
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "Work Order",
+    "target_entity": "mrp.workorder"
+   },
+   {
+    "name": "product_is_kit",
+    "type": "Boolean",
+    "related": "product_id.is_kits",
+    "defined_in_package": "mrp",
+    "string": "Product Is Kit",
+    "full_name": "Product Is Kit"
+   },
+   {
+    "name": "product_template",
+    "type": "Many2one",
+    "related": "product_id.product_tmpl_id",
+    "defined_in_package": "mrp",
+    "string": "Product Template",
+    "full_name": "Product Template"
+   },
+   {
+    "name": "bom_id",
+    "type": "Many2one",
+    "comodel": "mrp.bom",
+    "string": "Kit",
+    "domain": "[('type', '=', 'phantom'), '|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_template)]",
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "Kit",
+    "target_entity": "mrp.bom"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_allowed_uom_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.uom_id",
+         "product_id.uom_ids",
+         "product_id.seller_ids",
+         "product_id.seller_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_uom_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_location_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "picking_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "workorder_id",
+         "production_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_scrap_location_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_scrap_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids",
+         "move_ids.move_line_ids.quantity",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids",
+         "move_ids.move_line_ids.quantity",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_serial_number",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "lot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "lot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_done",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a scrap which is done.",
+        "line": 123
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_move_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "do_scrap",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_scrap_move",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "do_replenish",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_get_stock_picking",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_get_stock_move_lines",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_check_available_qty",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_available_qty",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_validate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only enter positive quantities.",
+        "line": 214
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_except_done",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You cannot delete a scrap which is done."
+   },
+   {
+    "operation": "action_validate",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You can only enter positive quantities."
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "stock.access_stock_scrap_user",
+    "package": "stock",
+    "name": "stock.scrap.user",
+    "entity": "stock.scrap",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_stock_scrap_manager",
+    "package": "stock",
+    "name": "stock.scrap.manager",
+    "entity": "stock.scrap",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "stock.stock_scrap_company_rule",
+    "package": "stock",
+    "name": "stock_scrap_company multi-company",
+    "entity": "stock.scrap",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mrp.stock_scrap_view_form2_mrp_inherit_mrp",
+    "package": "mrp",
+    "name": "stock.scrap.view.form2.inherit.mrp",
+    "view_type": "field",
+    "inherits_view": "stock.stock_scrap_form_view2",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "owner_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "owner_id",
+       "position": "after"
+      },
+      {
+       "name": "workorder_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "production_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "product_is_kit",
+       "invisible": "1"
+      },
+      {
+       "name": "product_template",
+       "invisible": "1"
+      },
+      {
+       "name": "bom_id",
+       "invisible": "not product_is_kit",
+       "readonly": "state == 'done'",
+       "required": "product_is_kit"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp.stock_scrap_view_form_mrp_inherit_mrp",
+    "package": "mrp",
+    "name": "stock.scrap.view.form.inherit.mrp",
+    "view_type": "field",
+    "inherits_view": "stock.stock_scrap_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "owner_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "owner_id",
+       "position": "after"
+      },
+      {
+       "name": "workorder_id",
+       "invisible": "not workorder_id",
+       "readonly": "state == 'done'",
+       "domain": "[('production_id', '=', product_id)]"
+      },
+      {
+       "name": "production_id",
+       "invisible": "not production_id",
+       "readonly": "state == 'done'",
+       "domain": "[('company_id', '=', company_id)]"
+      },
+      {
+       "name": "product_is_kit",
+       "invisible": "1"
+      },
+      {
+       "name": "product_template",
+       "invisible": "1"
+      },
+      {
+       "name": "bom_id",
+       "invisible": "not product_is_kit",
+       "readonly": "state == 'done'",
+       "required": "product_is_kit"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp.stock_scrap_search_view_inherit_mrp",
+    "package": "mrp",
+    "name": "stock.scrap.search.inherit.mrp",
+    "view_type": "xpath",
+    "inherits_view": "stock.stock_scrap_search_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='create_date']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_draft",
+       "string": "Draft",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "filter_done",
+       "string": "Done",
+       "domain": "[('state', '=', 'done')]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='create_date']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.stock_scrap_search_view",
+    "package": "stock",
+    "name": "stock.scrap.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Scrap"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Reference"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "scrap_location_id"
+      },
+      {
+       "name": "create_date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "product",
+       "string": "Product",
+       "domain": "[]",
+       "context": "{'group_by':'product_id'}"
+      },
+      {
+       "name": "location",
+       "string": "Location",
+       "domain": "[]",
+       "context": "{'group_by':'location_id'}"
+      },
+      {
+       "name": "scrap_location",
+       "string": "Scrap Location",
+       "domain": "[]",
+       "context": "{'group_by':'scrap_location_id'}"
+      },
+      {
+       "name": "transfer",
+       "string": "Transfer",
+       "domain": "[]",
+       "context": "{'group_by':'picking_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock.stock_scrap_form_view",
+    "package": "stock",
+    "name": "stock.scrap.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Scrap"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "picking_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "move_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "nolabel": "1"
+      },
+      {
+       "name": "product_id",
+       "readonly": "state == 'done'",
+       "context": "{'default_is_storable': True}"
+      },
+      {
+       "name": "tracking",
+       "invisible": "1"
+      },
+      {
+       "name": "scrap_qty",
+       "readonly": "state == 'done' or tracking == 'serial'"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "state == 'done' or tracking == 'serial'",
+       "groups": "uom.group_uom",
+       "force_save": "1"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "not product_id or tracking == 'none'",
+       "readonly": "state == 'done'",
+       "required": "tracking != 'none'",
+       "context": "{'default_product_id': product_id}",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "should_replenish",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "scrap_reason_tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "package_id",
+       "readonly": "state == 'done'",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "readonly": "state == 'done'",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True, 'no_open': True}",
+       "groups": "stock.group_stock_multi_locations",
+       "force_save": "1"
+      },
+      {
+       "name": "scrap_location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True, 'no_open': True}",
+       "groups": "stock.group_stock_multi_locations",
+       "force_save": "1"
+      },
+      {
+       "name": "origin"
+      },
+      {
+       "name": "date_done",
+       "invisible": "state == 'draft'"
+      },
+      {
+       "name": "picking_id",
+       "invisible": "not picking_id",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "company_id",
+       "readonly": "state == 'done'",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_validate",
+       "string": "Validate",
+       "type": "object",
+       "invisible": "state != 'draft'",
+       "class": "oe_highlight",
+       "context": "{'not_unlink_on_discard': True}",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_get_stock_picking",
+       "string": "Stock Operation",
+       "type": "object",
+       "invisible": "not picking_id",
+       "class": "oe_stat_button",
+       "icon": "fa-cogs"
+      },
+      {
+       "name": "action_get_stock_move_lines",
+       "type": "object",
+       "invisible": "not move_ids",
+       "class": "oe_stat_button",
+       "icon": "fa-exchange"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "many2one_uom": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_validate",
+       "invisible": "state != 'draft'",
+       "string": "Validate",
+       "type": "object",
+       "class": "oe_highlight",
+       "context": "{'not_unlink_on_discard': True}",
+       "data-hotkey": "v"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,done",
+     "chatter": true,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "action_get_stock_picking",
+       "string": "Stock Operation",
+       "type": "object",
+       "invisible": "not picking_id",
+       "icon": "fa-cogs"
+      },
+      {
+       "class": "oe_stat_button",
+       "name": "action_get_stock_move_lines",
+       "type": "object",
+       "invisible": "not move_ids",
+       "icon": "fa-exchange"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.stock_scrap_view_kanban",
+    "package": "stock",
+    "name": "stock.scrap.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "date_done"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "scrap_qty"
+      },
+      {
+       "name": "state"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "stock.stock_scrap_tree_view",
+    "package": "stock",
+    "name": "stock.scrap.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "multi_edit": "1",
+      "sample": "1",
+      "decoration-info": "state == 'draft'"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "readonly": "state == 'done'",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "date_done"
+      },
+      {
+       "name": "product_id",
+       "readonly": "1"
+      },
+      {
+       "name": "scrap_qty",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "state == 'done'",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "scrap_location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "company_id",
+       "readonly": "1",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state == 'done'",
+       "decoration-muted": "state == 'draft'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state == 'draft'"
+     }
+    }
+   },
+   {
+    "external_identifier": "stock.stock_scrap_form_view2",
+    "package": "stock",
+    "name": "stock.scrap.form2",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Scrap"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "readonly": "state == 'done'",
+       "domain": "[('id', 'in', context.get('product_ids', []))]",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "tracking",
+       "invisible": "1"
+      },
+      {
+       "name": "scrap_qty",
+       "readonly": "tracking == 'serial'"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "readonly": "tracking == 'serial'",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "lot_id",
+       "invisible": "not product_id or tracking == 'none'",
+       "readonly": "state == 'done'",
+       "required": "tracking != 'none'",
+       "context": "{'default_product_id': product_id}",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "scrap_reason_tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "picking_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "package_id",
+       "readonly": "state == 'done'",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "readonly": "state == 'done'",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "scrap_location_id",
+       "readonly": "state == 'done'",
+       "options": "{'no_open': True, 'no_create': True}",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "should_replenish",
+       "readonly": "state == 'done'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_validate",
+       "string": "Scrap Products",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock.action_stock_scrap",
+    "package": "stock",
+    "name": "Scrap Orders",
+    "view_mode": "list,form,kanban,pivot,graph",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Scrap products\n              </p><p>\n                Scrapping a product will remove it from your stock. The product will\n                end up in a scrap location that can be used for reporting purpose.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "stock.scrap"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "mrp.menu_mrp_scrap",
+    "package": "mrp",
+    "name": "Scrap",
+    "parent_id": "menu_mrp_manufacturing",
+    "action": "stock.action_stock_scrap",
+    "sequence": "25",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

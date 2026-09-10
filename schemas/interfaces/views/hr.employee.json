@@ -1,0 +1,2981 @@
+{
+ "catalog": {
+  "name": "views:hr.employee",
+  "description": "View declarations for entity hr.employee.",
+  "record_count": 43,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr.view_employee_filter",
+   "package": "hr",
+   "name": "hr.employee.search",
+   "entity": "hr.employee",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Employees"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Employee",
+      "filter_domain": "['|', ('work_email', 'ilike', self), ('name', 'ilike', self)]"
+     },
+     {
+      "name": "department_id"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "department_id"
+     },
+     {
+      "name": "parent_id",
+      "string": "Manager",
+      "domain": "[('company_id', 'in', allowed_company_ids)]"
+     },
+     {
+      "name": "contract_date_start",
+      "groups": "hr.group_hr_manager"
+     },
+     {
+      "name": "job_id"
+     },
+     {
+      "name": "coach_id",
+      "domain": "[('company_id', 'in', allowed_company_ids)]"
+     },
+     {
+      "name": "category_ids",
+      "groups": "hr.group_hr_user"
+     },
+     {
+      "name": "private_car_plate",
+      "groups": "hr.group_hr_user"
+     },
+     {
+      "name": "resource_calendar_id",
+      "domain": "[('company_id', 'in', allowed_company_ids)]"
+     },
+     {
+      "name": "company_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "message_needaction",
+      "string": "Unread Messages",
+      "domain": "[('message_needaction', '=', True)]",
+      "groups": "mail.group_mail_notification_type_inbox"
+     },
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "my_team",
+      "string": "My Team",
+      "domain": "[('parent_id.user_id', '=', uid)]"
+     },
+     {
+      "name": "my_department",
+      "string": "My Department",
+      "domain": "[('member_of_department', '=', True)]"
+     },
+     {
+      "name": "newly_hired",
+      "string": "Newly Hired",
+      "domain": "[('newly_hired', '=', True)]"
+     },
+     {
+      "name": "in_contract",
+      "string": "In Contract",
+      "domain": "[                                 ('contract_date_start', '!=', False),                                 ('contract_date_start', '<=', 'today'),                                 '|',                                     ('contract_date_end', '=', False),                                     ('contract_date_end', '>=', 'today')                             ]",
+      "groups": "hr.group_hr_manager"
+     },
+     {
+      "name": "out_of_contract",
+      "string": "Out of Contract",
+      "domain": "[                                 '|',                                     ('contract_date_start', '=', False),                                     '|',                                         ('contract_date_start', '>', 'today'),                                         '&',                                             ('contract_date_end', '!=', False),                                             ('contract_date_end', '<', 'today')                              ]",
+      "groups": "hr.group_hr_manager"
+     },
+     {
+      "name": "contract_date_start",
+      "string": "Contract Start Date",
+      "groups": "hr.group_hr_manager",
+      "date": "contract_date_start"
+     },
+     {
+      "name": "contract_date_end",
+      "string": "Contract End Date",
+      "groups": "hr.group_hr_manager",
+      "date": "contract_date_end"
+     },
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_manager",
+      "string": "Manager",
+      "domain": "[]",
+      "context": "{'group_by': 'parent_id'}"
+     },
+     {
+      "name": "group_department",
+      "string": "Department",
+      "domain": "[]",
+      "context": "{'group_by': 'department_id'}"
+     },
+     {
+      "name": "group_job",
+      "string": "Job Position",
+      "domain": "[]",
+      "context": "{'group_by': 'job_id'}"
+     },
+     {
+      "name": "group_employee_type",
+      "string": "Employee Type",
+      "domain": "[]",
+      "context": "{'group_by': 'employee_type'}"
+     },
+     {
+      "name": "group_birthday",
+      "domain": "[]",
+      "context": "{'group_by': 'birthday'}"
+     },
+     {
+      "name": "group_start",
+      "string": "Start Date",
+      "domain": "[]",
+      "context": "{'group_by': 'contract_date_start'}",
+      "groups": "hr.group_hr_manager"
+     },
+     {
+      "name": "group_category_ids",
+      "string": "Tags",
+      "domain": "[]",
+      "context": "{'group_by': 'category_ids'}"
+     },
+     {
+      "name": "group_by_employee_properties",
+      "string": "Properties",
+      "context": "{'group_by': 'employee_properties'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Employees\">\n                    <field name=\"name\" string=\"Employee\" filter_domain=\"['|', ('work_email', 'ilike', self), ('name', 'ilike', self)]\"/>\n                    <field name=\"department_id\"/>\n                    <searchpanel view_types=\"kanban,list,graph,pivot,hierarchy\">\n                        <field name=\"company_id\" groups=\"base.group_multi_company\" icon=\"fa-building\" enable_counters=\"1\"/>\n                        <field name=\"department_id\" icon=\"fa-users\" enable_counters=\"1\"/>\n                    </searchpanel>\n                    <field name=\"parent_id\" string=\"Manager\" domain=\"[('company_id', 'in', allowed_company_ids)]\"/>\n                    <field name=\"contract_date_start\" groups=\"hr.group_hr_manager\"/>\n                    <field name=\"job_id\"/>\n                    <field name=\"coach_id\" domain=\"[('company_id', 'in', allowed_company_ids)]\"/>\n                    <field name=\"category_ids\" groups=\"hr.group_hr_user\"/>\n                    <field name=\"private_car_plate\" groups=\"hr.group_hr_user\"/>\n                    <field name=\"resource_calendar_id\" domain=\"[('company_id', 'in', allowed_company_ids)]\"/>\n                    <field name=\"company_id\"/>\n                    <separator/>\n                    <filter string=\"Unread Messages\" name=\"message_needaction\" domain=\"[('message_needaction', '=', True)]\" groups=\"mail.group_mail_notification_type_inbox\"/>\n                    <separator/>\n                    <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                    <separator invisible=\"1\"/>\n                    <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\"/>\n                    <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                    <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')]\"/>\n                    <separator/>\n                    <filter name=\"my_team\" string=\"My Team\" domain=\"[('parent_id.user_id', '=', uid)]\"/>\n                    <filter name=\"my_department\" string=\"My Department\" domain=\"[('member_of_department', '=', True)]\"/>\n                    <separator/>\n                    <filter name=\"newly_hired\" string=\"Newly Hired\" domain=\"[('newly_hired', '=', True)]\"/>\n                    <separator/>\n                    <filter string=\"In Contract\" name=\"in_contract\" domain=\"[                                 ('contract_date_start', '!=', False),                                 ('contract_date_start', '&lt;=', 'today'),                                 '|',                                     ('contract_date_end', '=', False),                                     ('contract_date_end', '&gt;=', 'today')                             ]\" groups=\"hr.group_hr_manager\"/>\n                    <filter string=\"Out of Contract\" name=\"out_of_contract\" domain=\"[                                 '|',                                     ('contract_date_start', '=', False),                                     '|',                                         ('contract_date_start', '&gt;', 'today'),                                         '&amp;',                                             ('contract_date_end', '!=', False),                                             ('contract_date_end', '&lt;', 'today')                              ]\" groups=\"hr.group_hr_manager\"/>\n                    <separator/>\n                    <filter string=\"Contract Start Date\" name=\"contract_date_start\" date=\"contract_date_start\" groups=\"hr.group_hr_manager\"/>\n                    <filter string=\"Contract End Date\" name=\"contract_date_end\" date=\"contract_date_end\" groups=\"hr.group_hr_manager\"/>\n                    <separator/>\n                    <filter string=\"Archived\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n                    <group>\n                        <filter name=\"group_manager\" string=\"Manager\" domain=\"[]\" context=\"{'group_by': 'parent_id'}\"/>\n                        <filter name=\"group_department\" string=\"Department\" domain=\"[]\" context=\"{'group_by': 'department_id'}\"/>\n                        <filter name=\"group_job\" string=\"Job Position\" domain=\"[]\" context=\"{'group_by': 'job_id'}\"/>\n                        <filter name=\"group_employee_type\" string=\"Employee Type\" domain=\"[]\" context=\"{'group_by': 'employee_type'}\"/>\n                        <separator name=\"main_groupby_separator\"/>\n                        <filter name=\"group_birthday\" domain=\"[]\" context=\"{'group_by': 'birthday'}\"/>\n                        <filter name=\"group_start\" string=\"Start Date\" domain=\"[]\" context=\"{'group_by': 'contract_date_start'}\" groups=\"hr.group_hr_manager\"/>\n                        <separator name=\"secondary_groupby_separator\"/>\n                        <separator name=\"managers_groupby_separator\"/>\n                        <filter name=\"group_category_ids\" string=\"Tags\" domain=\"[]\" context=\"{'group_by': 'category_ids'}\"/>\n                        <separator/>\n                        <filter string=\"Properties\" name=\"group_by_employee_properties\" context=\"{'group_by': 'employee_properties'}\"/>\n                    </group>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.view_employee_form",
+   "package": "hr",
+   "name": "hr.employee.form",
+   "entity": "hr.employee",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Employee",
+     "js_class": "hr_employee_form",
+     "duplicate": "false"
+    },
+    "fields": [
+     {
+      "name": "version_id",
+      "widget": "versions_timeline",
+      "invisible": "not id",
+      "readonly": "False",
+      "context": "{'version_revision': version_revision}",
+      "options": "{'clickable': True}"
+     },
+     {
+      "name": "version_revision",
+      "invisible": "1"
+     },
+     {
+      "name": "versions_count"
+     },
+     {
+      "name": "image_1920",
+      "widget": "image",
+      "options": "{'size': [128,158], 'zoom': true, 'preview_image':'avatar_128', 'img_class': 'border rounded h-100 object-fit-contain'}"
+     },
+     {
+      "name": "show_hr_icon_display",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "required": "True",
+      "placeholder": "Employee's Name"
+     },
+     {
+      "name": "work_email",
+      "widget": "email",
+      "string": "Work Email",
+      "placeholder": "e.g. johndoe@example.com"
+     },
+     {
+      "name": "work_phone",
+      "widget": "phone",
+      "string": "Work Phone",
+      "placeholder": "Work Phone"
+     },
+     {
+      "name": "mobile_phone",
+      "widget": "phone",
+      "string": "Work Mobile",
+      "placeholder": "Work Mobile"
+     },
+     {
+      "name": "category_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color', 'no_create_edit': True}",
+      "groups": "hr.group_hr_user",
+      "placeholder": "e.g. Founder, Motorized, Building B, ..."
+     },
+     {
+      "name": "hr_icon_display",
+      "widget": "hr_presence_status",
+      "invisible": "not show_hr_icon_display or not id or not active"
+     },
+     {
+      "name": "employee_properties"
+     },
+     {
+      "name": "company_id",
+      "domain": "[('id', 'in', allowed_company_ids)]",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "department_id"
+     },
+     {
+      "name": "job_id",
+      "string": "Job Position",
+      "context": "{'default_no_of_recruitment': 0, 'default_is_favorite': False}",
+      "placeholder": "e.g. Sales Manager"
+     },
+     {
+      "name": "job_title"
+     },
+     {
+      "name": "parent_id",
+      "widget": "many2one_avatar_employee"
+     },
+     {
+      "name": "address_id",
+      "context": "{'show_address': 1}",
+      "options": "{\"highlight_first_line\": True}"
+     },
+     {
+      "name": "work_location_id",
+      "context": "{'default_address_id': address_id}",
+      "placeholder": "e.g. Building 2, Remote, etc."
+     },
+     {
+      "name": "departure_reason_id",
+      "options": "{'no_edit': True, 'no_create': True, 'no_open': True}"
+     },
+     {
+      "name": "departure_description"
+     },
+     {
+      "name": "departure_date"
+     },
+     {
+      "name": "additional_note",
+      "nolabel": "1",
+      "placeholder": "Provide additional information about this version..."
+     },
+     {
+      "name": "private_email",
+      "string": "Email",
+      "placeholder": "e.g. myprivateemail@example.com"
+     },
+     {
+      "name": "private_phone",
+      "widget": "phone",
+      "string": "Phone"
+     },
+     {
+      "name": "has_multiple_bank_accounts",
+      "invisible": "1"
+     },
+     {
+      "name": "is_trusted_bank_account",
+      "invisible": "1"
+     },
+     {
+      "name": "bank_account_ids",
+      "widget": "many2many_tags",
+      "invisible": "1",
+      "options": "{'color_field': 'color'}"
+     },
+     {
+      "name": "bank_account_ids",
+      "widget": "many2many_tags_salary_bank",
+      "readonly": "not id",
+      "context": "{'default_partner_id': work_contact_id}",
+      "options": "{'color_field': 'color', 'no_quick_create': True, 'edit_tags': True}"
+     },
+     {
+      "name": "bank_account_ids",
+      "widget": "many2many_tags_salary_bank",
+      "readonly": "not id",
+      "context": "{'default_partner_id': work_contact_id}",
+      "options": "{'color_field': 'color', 'no_quick_create': True, 'edit_tags': True}"
+     },
+     {
+      "name": "legal_name"
+     },
+     {
+      "name": "birthday"
+     },
+     {
+      "name": "birthday_public_display"
+     },
+     {
+      "name": "place_of_birth",
+      "nolabel": "1",
+      "placeholder": "City"
+     },
+     {
+      "name": "country_of_birth",
+      "nolabel": "1",
+      "placeholder": "Country"
+     },
+     {
+      "name": "sex",
+      "string": "Gender"
+     },
+     {
+      "name": "emergency_contact",
+      "string": "Contact"
+     },
+     {
+      "name": "emergency_phone",
+      "string": "Phone"
+     },
+     {
+      "name": "visa_no"
+     },
+     {
+      "name": "visa_expire",
+      "invisible": "not visa_no"
+     },
+     {
+      "name": "permit_no"
+     },
+     {
+      "name": "work_permit_expiration_date",
+      "invisible": "not permit_no"
+     },
+     {
+      "name": "work_permit_name",
+      "invisible": "1"
+     },
+     {
+      "name": "has_work_permit",
+      "widget": "work_permit_upload",
+      "string": "Document"
+     },
+     {
+      "name": "country_id",
+      "options": "{\"no_open\": True, \"no_create\": True}"
+     },
+     {
+      "name": "identification_id"
+     },
+     {
+      "name": "ssnid"
+     },
+     {
+      "name": "passport_id"
+     },
+     {
+      "name": "passport_expiration_date",
+      "invisible": "not passport_id"
+     },
+     {
+      "name": "private_street",
+      "placeholder": "Street..."
+     },
+     {
+      "name": "private_street2",
+      "placeholder": "Street 2..."
+     },
+     {
+      "name": "private_city",
+      "placeholder": "City"
+     },
+     {
+      "name": "private_state_id",
+      "domain": "[('id', 'in', allowed_country_state_ids)]",
+      "context": "{'default_country_id': private_country_id}",
+      "options": "{\"no_open\": True, \"no_create\": True}",
+      "placeholder": "State"
+     },
+     {
+      "name": "private_zip",
+      "placeholder": "ZIP"
+     },
+     {
+      "name": "private_country_id",
+      "options": "{\"no_open\": True, \"no_create\": True}",
+      "placeholder": "Country"
+     },
+     {
+      "name": "distance_home_work"
+     },
+     {
+      "name": "distance_home_work_unit"
+     },
+     {
+      "name": "marital"
+     },
+     {
+      "name": "spouse_complete_name",
+      "invisible": "marital not in ['married', 'cohabitant']"
+     },
+     {
+      "name": "spouse_birthdate",
+      "invisible": "marital not in ['married', 'cohabitant']"
+     },
+     {
+      "name": "children"
+     },
+     {
+      "name": "certificate"
+     },
+     {
+      "name": "study_field"
+     },
+     {
+      "name": "id_card"
+     },
+     {
+      "name": "driving_license"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "contract_date_start",
+      "string": "Start Date",
+      "placeholder": "Not Employed"
+     },
+     {
+      "name": "contract_date_end",
+      "invisible": "not contract_date_start",
+      "string": "End Date",
+      "placeholder": "Indefinite"
+     },
+     {
+      "name": "wage",
+      "nolabel": "1"
+     },
+     {
+      "name": "employee_type"
+     },
+     {
+      "name": "contract_type_id",
+      "string": "Contract Type",
+      "placeholder": "Contract Type"
+     },
+     {
+      "name": "structure_type_id",
+      "string": "Pay Category",
+      "domain": "['|', ('country_id', '=', False), ('country_id', '=', company_country_id)]",
+      "placeholder": "Employee will be excluded from Pay Runs"
+     },
+     {
+      "name": "resource_calendar_id"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "string": "User",
+      "domain": "[('company_ids', 'in', company_id)]",
+      "context": "{                                                     'default_create_employee_id': id,                                                     'default_name': name,                                                     'default_phone': work_phone,                                                     'default_mobile': mobile_phone,                                                     'default_login': work_email,                                                     'default_partner_id': work_contact_id,                                                     'search_default_filter_no_share': 1,                                                 }",
+      "groups": "base.group_erp_manager",
+      "placeholder": "No user linked"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "string": "User",
+      "domain": "[('company_ids', 'in', company_id)]",
+      "context": "{                                                     'default_create_employee_id': id,                                                     'default_name': name,                                                     'default_phone': work_phone,                                                     'default_mobile': mobile_phone,                                                     'default_login': work_email,                                                     'default_partner_id': work_contact_id,                                                     'search_default_filter_no_share': 1,                                                 }",
+      "options": "{'no_open': True}",
+      "groups": "!base.group_erp_manager",
+      "placeholder": "No user linked"
+     },
+     {
+      "name": "tz",
+      "required": "id"
+     },
+     {
+      "name": "hr_responsible_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "pin",
+      "string": "PIN Code"
+     },
+     {
+      "name": "barcode"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_create_user",
+      "string": "Create User",
+      "type": "object",
+      "invisible": "user_id",
+      "class": "btn btn-primary",
+      "context": "{'default_create_employee': True}",
+      "groups": "base.group_erp_manager"
+     },
+     {
+      "name": "%(plan_wizard_action)d",
+      "string": "Launch Plan",
+      "type": "action",
+      "invisible": "not active or not id",
+      "context": "{'sort_by_responsible': True}",
+      "groups": "hr.group_hr_user"
+     },
+     {
+      "name": "action_open_versions",
+      "type": "object",
+      "class": "oe_stat_button",
+      "groups": "hr.group_hr_user",
+      "icon": "fa-address-book"
+     },
+     {
+      "name": "action_open_allocation_wizard",
+      "string": "Salary Allocation",
+      "type": "object",
+      "class": "btn btn-link p-0 ms-auto text-nowrap"
+     },
+     {
+      "name": "action_toggle_primary_bank_account_trust",
+      "type": "object",
+      "invisible": "is_trusted_bank_account",
+      "class": "pt-0",
+      "icon": "fa-toggle-off fa-lg"
+     },
+     {
+      "name": "action_toggle_primary_bank_account_trust",
+      "type": "object",
+      "invisible": "not is_trusted_bank_account",
+      "class": "button-on pt-0",
+      "icon": "fa-toggle-on fa-lg"
+     },
+     {
+      "name": "%(hr_version_wizard_action)d",
+      "string": "Load a Template",
+      "type": "action",
+      "class": "btn btn-link ms-auto text-end lh-1 h-100 p-0"
+     },
+     {
+      "name": "generate_random_barcode",
+      "string": "Generate",
+      "type": "object",
+      "invisible": "barcode",
+      "class": "btn btn-link"
+     },
+     {
+      "name": "%(hr_employee_print_badge)d",
+      "string": "Print Badge",
+      "type": "action",
+      "invisible": "not barcode",
+      "class": "btn btn-link"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "work_information",
+      "string": "Work",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "resume",
+      "string": "Resume",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "personal_information",
+      "string": "Personal",
+      "invisible": null,
+      "groups": "hr.group_hr_user"
+     },
+     {
+      "name": "payroll_information",
+      "string": "Payroll",
+      "invisible": null,
+      "groups": "hr.group_hr_manager"
+     },
+     {
+      "name": "hr_settings",
+      "string": "Settings",
+      "invisible": null,
+      "groups": "hr.group_hr_user"
+     }
+    ],
+    "widgets": {
+     "versions_timeline": 1,
+     "image": 1,
+     "email": 1,
+     "phone": 3,
+     "many2many_tags": 2,
+     "hr_presence_status": 1,
+     "many2one_avatar_employee": 1,
+     "many2many_tags_salary_bank": 2,
+     "work_permit_upload": 1,
+     "many2one_avatar_user": 3
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "string": "Create User",
+      "name": "action_create_user",
+      "type": "object",
+      "class": "btn btn-primary",
+      "invisible": "user_id",
+      "groups": "base.group_erp_manager",
+      "context": "{'default_create_employee': True}"
+     },
+     {
+      "name": "%(plan_wizard_action)d",
+      "string": "Launch Plan",
+      "type": "action",
+      "groups": "hr.group_hr_user",
+      "invisible": "not active or not id",
+      "context": "{'sort_by_responsible': True}"
+     }
+    ],
+    "statusbar_field": "version_id",
+    "statusbar_visible": null,
+    "chatter": true,
+    "button_box": [
+     {
+      "name": "action_open_versions",
+      "class": "oe_stat_button",
+      "icon": "fa-address-book",
+      "type": "object",
+      "groups": "hr.group_hr_user"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Employee\" js_class=\"hr_employee_form\" duplicate=\"false\">\n                    <header groups=\"hr.group_hr_user\">\n                        <button string=\"Create User\" name=\"action_create_user\" type=\"object\" class=\"btn btn-primary\" invisible=\"user_id\" groups=\"base.group_erp_manager\" context=\"{'default_create_employee': True}\"/>\n                        <button name=\"%(plan_wizard_action)d\" string=\"Launch Plan\" type=\"action\" groups=\"hr.group_hr_user\" invisible=\"not active or not id\" context=\"{'sort_by_responsible': True}\"/>\n                        <field name=\"version_id\" widget=\"versions_timeline\" context=\"{'version_revision': version_revision}\" invisible=\"not id\" options=\"{'clickable': True}\" readonly=\"False\"/>\n                        <field name=\"version_revision\" invisible=\"1\"/>\n                    </header>\n                    <sheet>\n                        <div name=\"button_box\" class=\"oe_button_box\">\n                            <button name=\"action_open_versions\" class=\"oe_stat_button\" icon=\"fa-address-book\" type=\"object\" groups=\"hr.group_hr_user\">\n                                <div class=\"o_stat_info\">\n                                    History\n                                    <span class=\"o_stat_value\">\n                                        <field name=\"versions_count\"/>\n                                    </span>\n                                </div>\n                            </button>\n                        </div>\n                        <div class=\"d-flex flex-column flex-sm-row align-items-center\">\n                            <div class=\"o_employee_avatar ms-2 p-0\">\n                                <field name=\"image_1920\" widget=\"image\" class=\"m-0\" options=\"{'size': [128,158], 'zoom': true, 'preview_image':'avatar_128', 'img_class': 'border rounded h-100 object-fit-contain'}\"/>\n                                <field name=\"show_hr_icon_display\" invisible=\"1\"/>\n                            </div>\n                            <div class=\"col-12 col-sm-6 col-md-7 col-lg-8 px-4\">\n                                <div class=\"oe_title mw-100 ps-0 pe-sm-2\">\n                                    <h1 class=\"d-flex flex-row align-items-center\">\n                                        <field name=\"name\" placeholder=\"Employee's Name\" required=\"True\" style=\"font-size: min(4vw, 2.6rem);\"/>\n                                    </h1>\n                                    <h5 class=\"d-flex align-items-baseline mb-0\">\n                                        <i class=\"fa fa-envelope fa-fw me-1 text-primary\" title=\"Work Email\"/>\n                                        <field name=\"work_email\" widget=\"email\" placeholder=\"e.g. johndoe@example.com\" string=\"Work Email\" class=\"w-100 w-sm-75\"/>\n                                    </h5>\n                                    <h5 class=\"d-flex align-items-baseline mb-0\">\n                                        <i class=\"fa fa-phone fa-fw me-1 text-primary\" title=\"Work Phone\"/>\n                                        <field name=\"work_phone\" widget=\"phone\" placeholder=\"Work Phone\" string=\"Work Phone\" class=\"w-100 w-sm-75\"/>\n                                    </h5>\n                                    <h5 class=\"d-flex align-items-baseline mb-0\">\n                                        <i class=\"fa fa-mobile fa-fw me-1 text-primary\" title=\"Work Mobile\"/>\n                                        <field name=\"mobile_phone\" widget=\"phone\" placeholder=\"Work Mobile\" string=\"Work Mobile\" class=\"w-100 w-sm-75\"/>\n                                    </h5>\n                                    <h5>\n                                        <i class=\"fa fa-tags fa-fw me-1 text-primary\" title=\"Tags\"/>\n                                        <field name=\"category_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color', 'no_create_edit': True}\" placeholder=\"e.g. Founder, Motorized, Building B, ...\" groups=\"hr.group_hr_user\"/>\n                                    </h5>\n                                </div>\n                            </div>\n                            <div class=\"align-self-start w-auto end-0 mt-2 d-flex align-items-center justify-content-end gap-2 o_presence_status_pill_wrapper\">\n                                <div invisible=\"not user_id\">\n                                    <widget name=\"hr_employee_chat\" invisible=\"not context.get('chat_icon')\"/>\n                                </div>\n                                <field name=\"hr_icon_display\" invisible=\"not show_hr_icon_display or not id or not active\" widget=\"hr_presence_status\"/>\n                            </div>\n                        </div>\n                        <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                        <field name=\"employee_properties\" columns=\"2\"/>\n                        <notebook>\n                            <page name=\"work_information\" string=\"Work\">\n                                <div class=\"row\" id=\"o_hr_work_information_container\">\n                                    <div id=\"o_work_information\" class=\"o_hr_column col-lg-7 d-flex flex-column\">\n                                        <group string=\"work\">\n                                            <field name=\"company_id\" groups=\"base.group_multi_company\" domain=\"[('id', 'in', allowed_company_ids)]\"/>\n                                            <field name=\"department_id\"/>\n                                            <field name=\"job_id\" string=\"Job Position\" context=\"{'default_no_of_recruitment': 0, 'default_is_favorite': False}\" placeholder=\"e.g. Sales Manager\"/>\n                                            <field name=\"job_title\"/>\n                                            <field name=\"parent_id\" widget=\"many2one_avatar_employee\"/>\n                                        </group>\n                                        <group string=\"Location\">\n                                            <field name=\"address_id\" context=\"{'show_address': 1}\" options=\"{&quot;highlight_first_line&quot;: True}\"/>\n                                            <field name=\"work_location_id\" context=\"{'default_address_id': address_id}\" placeholder=\"e.g. Building 2, Remote, etc.\"/>\n                                        </group>\n                                        <group name=\"departure\" string=\"Departure\" invisible=\"active\">\n                                            <field name=\"departure_reason_id\" options=\"{'no_edit': True, 'no_create': True, 'no_open': True}\"/>\n                                            <field name=\"departure_description\"/>\n                                            <field name=\"departure_date\"/>\n                                        </group>\n                                        <group string=\"Note\" name=\"note\" groups=\"hr.group_hr_user\">\n                                            <field name=\"additional_note\" placeholder=\"Provide additional information about this version...\" colspan=\"2\" nolabel=\"1\"/>\n                                        </group>\n                                    </div>\n                                    <div id=\"o_employee_org_chart\" class=\"o_hr_column col-lg-5\"/>\n                                </div>\n                            </page>\n                            <page name=\"resume\" string=\"Resume\">\n                                <div class=\"row\" id=\"o_hr_skills_resume_container\">\n                                    <div id=\"o_employee_left\" class=\"o_hr_skills_editable o_hr_skills_group o_hr_column o_group_resume col-lg-7 d-flex flex-column\"/>\n                                    <div id=\"o_work_information_right\" class=\"o_hr_skills_editable o_hr_skills_group o_hr_column o_group_skills col-lg-5\"/>\n                                </div>\n                            </page>\n                            <page name=\"personal_information\" string=\"Personal\" groups=\"hr.group_hr_user\">\n                                <group>\n                                    <group string=\"Private Contact\">\n                                        <field name=\"private_email\" placeholder=\"e.g. myprivateemail@example.com\" string=\"Email\"/>\n                                        <field name=\"private_phone\" widget=\"phone\" string=\"Phone\"/>\n                                        <field name=\"has_multiple_bank_accounts\" invisible=\"1\"/>\n                                        <field name=\"is_trusted_bank_account\" invisible=\"1\"/>\n                                        <field name=\"bank_account_ids\" invisible=\"1\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\"/>\n                                        <label for=\"bank_account_ids\"/>\n                                        <div class=\"d-flex align-items-start justify-content-between\" invisible=\"not has_multiple_bank_accounts\">\n                                                <field name=\"bank_account_ids\" widget=\"many2many_tags_salary_bank\" context=\"{'default_partner_id': work_contact_id}\" options=\"{'color_field': 'color', 'no_quick_create': True, 'edit_tags': True}\" readonly=\"not id\"/>\n                                            <div class=\"pt-0 ms-2\">\n                                                <button name=\"action_open_allocation_wizard\" type=\"object\" string=\"Salary Allocation\" class=\"btn btn-link p-0 ms-auto text-nowrap\"/>\n                                            </div>\n                                        </div>\n\n                                        <div class=\"o-row d-flex justify-content-between gap-2 align-items-start\" invisible=\"has_multiple_bank_accounts\">\n                                            <field name=\"bank_account_ids\" widget=\"many2many_tags_salary_bank\" context=\"{'default_partner_id': work_contact_id}\" options=\"{'color_field': 'color', 'no_quick_create': True, 'edit_tags': True}\" readonly=\"not id\"/>\n                                            <div class=\"d-flex align-items-start\" invisible=\"not bank_account_ids\">\n                                                <span class=\"d-flex w-50\">\n                                                    <span invisible=\"is_trusted_bank_account\" class=\"text-muted\">Untrusted</span>\n                                                    <span invisible=\"not is_trusted_bank_account\" class=\"text-success\">Trusted</span>\n                                                </span>\n                                                <button title=\"Trust Bank Account\" class=\"pt-0\" icon=\"fa-toggle-off fa-lg\" type=\"object\" name=\"action_toggle_primary_bank_account_trust\" invisible=\"is_trusted_bank_account\"/>\n                                                <button title=\"Untrust Bank Account\" class=\"button-on pt-0\" icon=\"fa-toggle-on fa-lg\" type=\"object\" name=\"action_toggle_primary_bank_account_trust\" invisible=\"not is_trusted_bank_account\"/>\n                                            </div>\n                                        </div>\n                                    </group>\n                                    <group string=\"Personal Information\" name=\"hr_birth_group\">\n                                        <field name=\"legal_name\"/>\n                                        <label for=\"birthday\"/>\n                                        <div class=\"o_row\" name=\"div_km_home_work\">\n                                            <field name=\"birthday\" class=\"o_hr_narrow_field\"/>\n                                            <span invisible=\"not birthday\">\n                                                <label for=\"birthday_public_display\" class=\"fw-bold text-900 form-check-label ms-3\"/>\n                                                <field name=\"birthday_public_display\" class=\"ms-3\"/>\n                                            </span>\n                                        </div>\n                                        <label for=\"place_of_birth\"/>\n                                        <div class=\"o_row\" name=\"birth_location\">\n                                            <field name=\"place_of_birth\" class=\"oe_inline o_hr_narrow_field\" nolabel=\"1\" placeholder=\"City\"/>\n                                            <div class=\"mx-3 flex-grow-0\">─</div>\n                                            <field name=\"country_of_birth\" class=\"oe_inline o_hr_narrow_field\" nolabel=\"1\" placeholder=\"Country\"/>\n                                        </div>\n                                        <field name=\"sex\" string=\"Gender\"/>\n                                    </group>\n                                    <group string=\"Emergency Contact\">\n                                        <field name=\"emergency_contact\" string=\"Contact\"/>\n                                        <field name=\"emergency_phone\" class=\"o_force_ltr\" string=\"Phone\"/>\n                                    </group>\n                                    <group string=\"Visa &amp; Work Permit\">\n                                        <label for=\"visa_no\"/>\n                                        <div class=\"o_wrap_label d-flex flex-row gap-3 align-items-baseline\">\n                                            <field name=\"visa_no\"/>\n                                            <label for=\"visa_expire\" class=\"flex-shrink-0\" invisible=\"not visa_no\" string=\"Expires on\"/>\n                                            <field name=\"visa_expire\" invisible=\"not visa_no\"/>\n                                        </div>\n                                        <label for=\"permit_no\"/>\n                                        <div class=\"o_wrap_label d-flex flex-row gap-3 align-items-baseline\">\n                                            <field name=\"permit_no\"/>\n                                            <label for=\"work_permit_expiration_date\" class=\"flex-shrink-0\" invisible=\"not permit_no\" string=\"Expires on\"/>\n                                            <field name=\"work_permit_expiration_date\" invisible=\"not permit_no\"/>\n                                        </div>\n                                        <field name=\"work_permit_name\" invisible=\"1\"/>\n                                        <field name=\"has_work_permit\" widget=\"work_permit_upload\" filename=\"work_permit_name\" string=\"Document\"/>\n                                    </group>\n                                    <group name=\"citizenship\" string=\"Citizenship\">\n                                        <field name=\"country_id\" options=\"{&quot;no_open&quot;: True, &quot;no_create&quot;: True}\"/>\n                                        <field name=\"identification_id\"/>\n                                        <field name=\"ssnid\"/>\n                                        <label for=\"passport_id\"/>\n                                        <div class=\"o_wrap_label d-flex flex-row gap-3 align-items-baseline\">\n                                            <field name=\"passport_id\"/>\n                                            <label for=\"passport_expiration_date\" class=\"flex-shrink-0\" invisible=\"not passport_id\" string=\"Expires on\"/>\n                                            <field name=\"passport_expiration_date\" invisible=\"not passport_id\"/>\n                                        </div>\n                                    </group>\n                                    <group string=\"Location\" name=\"hr_location_group\">\n                                        <label for=\"private_street\" string=\"Private Address\"/>\n                                        <div class=\"o_address_format\">\n                                            <field name=\"private_street\" placeholder=\"Street...\" class=\"o_address_street\"/>\n                                            <field name=\"private_street2\" placeholder=\"Street 2...\" class=\"o_address_street\"/>\n                                            <field name=\"private_city\" placeholder=\"City\" class=\"o_address_city\"/>\n                                            <field name=\"private_state_id\" class=\"o_address_state\" placeholder=\"State\" options=\"{&quot;no_open&quot;: True, &quot;no_create&quot;: True}\" context=\"{'default_country_id': private_country_id}\" domain=\"[('id', 'in', allowed_country_state_ids)]\"/>\n                                            <field name=\"private_zip\" placeholder=\"ZIP\" class=\"o_address_zip\"/>\n                                            <field name=\"private_country_id\" placeholder=\"Country\" class=\"o_address_country\" options=\"{&quot;no_open&quot;: True, &quot;no_create&quot;: True}\"/>\n                                        </div>\n                                        <label for=\"distance_home_work\"/>\n                                        <div class=\"o_row\" name=\"div_km_home_work\">\n                                            <field name=\"distance_home_work\" class=\"o_hr_narrow_field\"/>\n                                            <span><field name=\"distance_home_work_unit\"/></span>\n                                        </div>\n                                    </group>\n                                    <group string=\"Family\" name=\"hr_family_group\">\n                                        <field name=\"marital\"/>\n                                        <field name=\"spouse_complete_name\" invisible=\"marital not in ['married', 'cohabitant']\"/>\n                                        <field name=\"spouse_birthdate\" invisible=\"marital not in ['married', 'cohabitant']\"/>\n                                        <field name=\"children\"/>\n                                    </group>\n                                    <group string=\"Education\" name=\"hr_education_group\">\n                                        <field name=\"certificate\"/>\n                                        <field name=\"study_field\"/>\n                                    </group>\n                                    <group string=\"Documents\" name=\"hr_document_group\">\n                                        <field name=\"id_card\"/>\n                                        <field name=\"driving_license\"/>\n                                    </group>\n                                </group>\n                            </page>\n                            <page name=\"payroll_information\" string=\"Payroll\" groups=\"hr.group_hr_manager\">\n                                <field name=\"currency_id\" invisible=\"1\"/>\n                                <group name=\"payroll_group\">\n                                    <group name=\"contract\" groups=\"hr.group_hr_user\">\n                                        <div colspan=\"2\" class=\"col-lg-6 w-100 mt-4 mb-3 o_horizontal_separator text-uppercase fw-bolder small d-flex\">\n                                            <span>Contract Overview</span>\n                                            <button name=\"%(hr_version_wizard_action)d\" type=\"action\" string=\"Load a Template\" class=\"btn btn-link ms-auto text-end lh-1 h-100 p-0\"/>\n                                        </div>\n                                        <label for=\"contract_date_start\" string=\"Contract\"/>\n                                        <div class=\"o_row\" name=\"contract_dates\">\n                                            <field name=\"contract_date_start\" string=\"Start Date\" placeholder=\"Not Employed\" class=\"o_hr_narrow_field me-3\"/>\n                                            <span invisible=\"not contract_date_start\">to</span>\n                                            <field name=\"contract_date_end\" string=\"End Date\" placeholder=\"Indefinite\" class=\"o_hr_narrow_field ms-3\" invisible=\"not contract_date_start\"/>\n                                            <widget name=\"button_new_contract\"/>\n                                        </div>\n                                        <label for=\"wage\"/>\n                                        <div class=\"o_row\" name=\"wage\">\n                                            <field name=\"wage\" class=\"oe_inline o_hr_narrow_field\" nolabel=\"1\"/>\n                                        </div>\n                                        <field name=\"employee_type\"/>\n                                        <field name=\"contract_type_id\" string=\"Contract Type\" placeholder=\"Contract Type\"/>\n                                        <field name=\"structure_type_id\" string=\"Pay Category\" placeholder=\"Employee will be excluded from Pay Runs\" domain=\"['|', ('country_id', '=', False), ('country_id', '=', company_country_id)]\"/>\n\n                                        <separator name=\"schedule\" string=\"Schedule\"/>\n                                        <field name=\"resource_calendar_id\" help=\"The default working hours are set in configuration.\"/>\n                                    </group>\n                                </group>\n                            </page>\n                            <page name=\"hr_settings\" string=\"Settings\" groups=\"hr.group_hr_user\">\n                                <group name=\"settings_group\">\n                                    <group string=\"User\" name=\"user\">\n                                        <label for=\"user_id\"/>\n                                        <div class=\"o_row align-items-center\">\n                                            <field name=\"user_id\" string=\"User\" placeholder=\"No user linked\" domain=\"[('company_ids', 'in', company_id)]\" context=\"{                                                     'default_create_employee_id': id,                                                     'default_name': name,                                                     'default_phone': work_phone,                                                     'default_mobile': mobile_phone,                                                     'default_login': work_email,                                                     'default_partner_id': work_contact_id,                                                     'search_default_filter_no_share': 1,                                                 }\" widget=\"many2one_avatar_user\" groups=\"base.group_erp_manager\"/>\n                                            <field name=\"user_id\" string=\"User\" placeholder=\"No user linked\" domain=\"[('company_ids', 'in', company_id)]\" context=\"{                                                     'default_create_employee_id': id,                                                     'default_name': name,                                                     'default_phone': work_phone,                                                     'default_mobile': mobile_phone,                                                     'default_login': work_email,                                                     'default_partner_id': work_contact_id,                                                     'search_default_filter_no_share': 1,                                                 }\" widget=\"many2one_avatar_user\" groups=\"!base.group_erp_manager\" options=\"{'no_open': True}\"/>\n                                            <span invisible=\"not user_id or is_user_active\">\n                                                (User is Inactive)\n                                            </span>\n                                            <field name=\"tz\" required=\"id\"/>\n                                        </div>\n                                    </group>\n                                    <group name=\"managers\" string=\"Approvers\">\n                                        <field name=\"hr_responsible_id\" widget=\"many2one_avatar_user\"/>\n                                    </group>\n                                    <group name=\"application_group\" string=\"Application Settings\" invisible=\"1\"/>\n                                    <group string=\"Attendance/Point of Sale\" name=\"identification_group\">\n                                        <field name=\"pin\" string=\"PIN Code\"/>\n                                        <label for=\"barcode\"/>\n                                        <div class=\"o_row\">\n                                            <field name=\"barcode\"/>\n                                            <button string=\"Generate\" class=\"btn btn-link\" type=\"object\" name=\"generate_random_barcode\" invisible=\"barcode\"/>\n                                            <button name=\"%(hr_employee_print_badge)d\" string=\"Print Badge\" class=\"btn btn-link\" type=\"action\" invisible=\"not barcode\"/>\n                                        </div>\n                                    </group>\n                                </group>\n                            </page>\n                        </notebook>\n                    </sheet>\n                    <chatter reload_on_follower=\"True\"/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.hr_employee_view_graph",
+   "package": "hr",
+   "name": "hr.employee.view.graph",
+   "entity": "hr.employee",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "New Employees Over Time",
+     "type": "line",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "contract_date_start"
+     },
+     {
+      "name": "id"
+     },
+     {
+      "name": "color",
+      "invisible": "1"
+     },
+     {
+      "name": "distance_home_work",
+      "invisible": "1"
+     },
+     {
+      "name": "km_home_work",
+      "invisible": "1"
+     },
+     {
+      "name": "children",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "contract_date_start",
+      "interval": "month"
+     },
+     {
+      "name": "id"
+     },
+     {
+      "name": "color",
+      "type": "measure",
+      "invisible": "1"
+     },
+     {
+      "name": "distance_home_work",
+      "type": "measure",
+      "invisible": "1"
+     },
+     {
+      "name": "km_home_work",
+      "type": "measure",
+      "invisible": "1"
+     },
+     {
+      "name": "children",
+      "type": "measure",
+      "invisible": "1"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <graph string=\"New Employees Over Time\" type=\"line\" sample=\"1\">\n                    <field name=\"contract_date_start\" interval=\"month\"/>\n                    <field name=\"id\"/>\n                    <field name=\"color\" type=\"measure\" invisible=\"1\"/>\n                    <field name=\"distance_home_work\" type=\"measure\" invisible=\"1\"/>\n                    <field name=\"km_home_work\" type=\"measure\" invisible=\"1\"/>\n                    <field name=\"children\" type=\"measure\" invisible=\"1\"/>\n                </graph>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.hr_employee_view_pivot",
+   "package": "hr",
+   "name": "hr.employee.view.pivot",
+   "entity": "hr.employee",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "New Employees Over Time",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "job_id"
+     },
+     {
+      "name": "contract_date_start"
+     },
+     {
+      "name": "id"
+     },
+     {
+      "name": "color",
+      "invisible": "1"
+     },
+     {
+      "name": "distance_home_work",
+      "invisible": "1"
+     },
+     {
+      "name": "km_home_work",
+      "invisible": "1"
+     },
+     {
+      "name": "children",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "job_id",
+      "type": "row"
+     },
+     {
+      "name": "contract_date_start",
+      "interval": "year",
+      "type": "col"
+     },
+     {
+      "name": "id"
+     },
+     {
+      "name": "color",
+      "type": "measure",
+      "invisible": "1"
+     },
+     {
+      "name": "distance_home_work",
+      "type": "measure",
+      "invisible": "1"
+     },
+     {
+      "name": "km_home_work",
+      "type": "measure",
+      "invisible": "1"
+     },
+     {
+      "name": "children",
+      "type": "measure",
+      "invisible": "1"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <pivot string=\"New Employees Over Time\" sample=\"1\">\n                    <field name=\"job_id\" type=\"row\"/>\n                    <field name=\"contract_date_start\" interval=\"year\" type=\"col\"/>\n                    <field name=\"id\"/>\n                    <field name=\"color\" type=\"measure\" invisible=\"1\"/>\n                    <field name=\"distance_home_work\" type=\"measure\" invisible=\"1\"/>\n                    <field name=\"km_home_work\" type=\"measure\" invisible=\"1\"/>\n                    <field name=\"children\" type=\"measure\" invisible=\"1\"/>\n                </pivot>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.view_employee_tree",
+   "package": "hr",
+   "name": "hr.employee.list",
+   "entity": "hr.employee",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Employees",
+     "expand": "context.get('expand', False)",
+     "multi_edit": "1",
+     "duplicate": "false",
+     "sample": "1",
+     "js_class": "hr_employee_list"
+    },
+    "fields": [
+     {
+      "name": "avatar_128",
+      "widget": "image",
+      "options": "{'size': [24, 24], 'img_class': 'rounded-3'}",
+      "nolabel": "1"
+     },
+     {
+      "name": "name",
+      "readonly": "1"
+     },
+     {
+      "name": "work_phone",
+      "readonly": "1",
+      "optional": "show"
+     },
+     {
+      "name": "work_email",
+      "optional": "hide"
+     },
+     {
+      "name": "hr_presence_state",
+      "string": "Presence",
+      "optional": "hide"
+     },
+     {
+      "name": "contract_date_start",
+      "optional": "hide"
+     },
+     {
+      "name": "contract_date_end",
+      "optional": "hide"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "1"
+     },
+     {
+      "name": "wage",
+      "widget": "monetary",
+      "optional": "hide"
+     },
+     {
+      "name": "employee_type",
+      "optional": "hide"
+     },
+     {
+      "name": "contract_type_id",
+      "optional": "hide"
+     },
+     {
+      "name": "structure_type_id",
+      "optional": "hide"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "list_activity",
+      "optional": "hide"
+     },
+     {
+      "name": "activity_user_id",
+      "widget": "many2one_avatar_user",
+      "string": "Activity by",
+      "optional": "hide"
+     },
+     {
+      "name": "activity_date_deadline",
+      "widget": "remaining_days",
+      "optional": "hide"
+     },
+     {
+      "name": "company_id",
+      "readonly": "1",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "department_id",
+      "optional": "show"
+     },
+     {
+      "name": "job_id",
+      "context": "{'default_no_of_recruitment': 0, 'default_is_favorite': False}",
+      "optional": "show"
+     },
+     {
+      "name": "parent_id",
+      "widget": "many2one_avatar_employee",
+      "optional": "show"
+     },
+     {
+      "name": "address_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "birthday",
+      "optional": "hide"
+     },
+     {
+      "name": "work_location_id",
+      "optional": "hide"
+     },
+     {
+      "name": "coach_id",
+      "widget": "many2one_avatar_employee",
+      "optional": "hide"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "string": "Related User",
+      "optional": "hide"
+     },
+     {
+      "name": "active",
+      "column_invisible": "True"
+     },
+     {
+      "name": "category_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}",
+      "optional": "hide"
+     },
+     {
+      "name": "country_id",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(plan_wizard_action)d",
+      "string": "Launch Plan",
+      "type": "action",
+      "groups": "hr.group_hr_user"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "monetary": 1,
+     "list_activity": 1,
+     "many2one_avatar_user": 2,
+     "remaining_days": 1,
+     "many2one_avatar_employee": 2,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Employees\" expand=\"context.get('expand', False)\" multi_edit=\"1\" duplicate=\"false\" sample=\"1\" js_class=\"hr_employee_list\">\n                    <header>\n                        <button name=\"%(plan_wizard_action)d\" string=\"Launch Plan\" type=\"action\" groups=\"hr.group_hr_user\"/>\n                    </header>\n                    <field name=\"avatar_128\" widget=\"image\" options=\"{'size': [24, 24], 'img_class': 'rounded-3'}\" width=\"30\" nolabel=\"1\"/>\n                    <field name=\"name\" readonly=\"1\"/>\n                    <field name=\"work_phone\" class=\"o_force_ltr\" readonly=\"1\" optional=\"show\"/>\n                    <field name=\"work_email\" optional=\"hide\"/>\n                    <field name=\"hr_presence_state\" string=\"Presence\" optional=\"hide\"/>\n                    <field name=\"contract_date_start\" optional=\"hide\"/>\n                    <field name=\"contract_date_end\" optional=\"hide\"/>\n                    <field name=\"currency_id\" column_invisible=\"1\"/>\n                    <field name=\"wage\" widget=\"monetary\" optional=\"hide\"/>\n                    <field name=\"employee_type\" optional=\"hide\"/>\n                    <field name=\"contract_type_id\" optional=\"hide\"/>\n                    <field name=\"structure_type_id\" optional=\"hide\"/>\n                    <field name=\"activity_ids\" widget=\"list_activity\" optional=\"hide\"/>\n                    <field name=\"activity_user_id\" optional=\"hide\" string=\"Activity by\" widget=\"many2one_avatar_user\"/>\n                    <field name=\"activity_date_deadline\" widget=\"remaining_days\" optional=\"hide\"/>\n                    <field name=\"company_id\" groups=\"base.group_multi_company\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"department_id\" optional=\"show\"/>\n                    <field name=\"job_id\" context=\"{'default_no_of_recruitment': 0, 'default_is_favorite': False}\" optional=\"show\"/>\n                    <field name=\"parent_id\" widget=\"many2one_avatar_employee\" optional=\"show\"/>\n                    <field name=\"address_id\" column_invisible=\"True\"/>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"birthday\" optional=\"hide\"/>\n                    <field name=\"work_location_id\" optional=\"hide\"/>\n                    <field name=\"coach_id\" widget=\"many2one_avatar_employee\" optional=\"hide\"/>\n                    <field name=\"user_id\" string=\"Related User\" widget=\"many2one_avatar_user\" optional=\"hide\"/>\n                    <field name=\"active\" column_invisible=\"True\"/>\n                    <field name=\"category_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\" optional=\"hide\"/>\n                    <field name=\"country_id\" optional=\"hide\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.hr_employee_list_view",
+   "package": "hr",
+   "name": "hr.employee.list",
+   "entity": "hr.employee",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Employees",
+     "multi_edit": "1",
+     "editable": "bottom",
+     "duplicate": "false",
+     "sample": "1",
+     "js_class": "hr_employee_list"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "readonly": "1"
+     },
+     {
+      "name": "company_id",
+      "optional": "hide"
+     },
+     {
+      "name": "department_id",
+      "optional": "hide"
+     },
+     {
+      "name": "job_id",
+      "context": "{'default_no_of_recruitment': 0, 'default_is_favorite': False}",
+      "optional": "hide"
+     },
+     {
+      "name": "parent_id",
+      "widget": "many2one_avatar_employee",
+      "optional": "hide"
+     },
+     {
+      "name": "contract_date_start",
+      "optional": "hide"
+     },
+     {
+      "name": "resource_calendar_id",
+      "optional": "show"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_employee": 1
+    },
+    "inheritance_operations": [],
+    "editable": "bottom",
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Employees\" multi_edit=\"1\" editable=\"bottom\" duplicate=\"false\" sample=\"1\" js_class=\"hr_employee_list\">\n                    <field name=\"name\" readonly=\"1\"/>\n                    <field name=\"company_id\" optional=\"hide\"/>\n                    <field name=\"department_id\" optional=\"hide\"/>\n                    <field name=\"job_id\" context=\"{'default_no_of_recruitment': 0, 'default_is_favorite': False}\" optional=\"hide\"/>\n                    <field name=\"parent_id\" widget=\"many2one_avatar_employee\" optional=\"hide\"/>\n                    <field name=\"contract_date_start\" optional=\"hide\"/>\n                    <field name=\"resource_calendar_id\" optional=\"show\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.hr_employee_list_activites_view",
+   "package": "hr",
+   "name": "hr.employee.list.activites.view",
+   "entity": "hr.employee",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Employees",
+     "expand": "context.get('expand', False)",
+     "multi_edit": "1",
+     "sample": "1",
+     "js_class": "hr_employee_list"
+    },
+    "fields": [
+     {
+      "name": "avatar_128",
+      "widget": "image",
+      "options": "{'size': [24, 24], 'img_class': 'rounded-3'}",
+      "nolabel": "1"
+     },
+     {
+      "name": "name",
+      "readonly": "1"
+     },
+     {
+      "name": "work_phone",
+      "readonly": "1",
+      "optional": "hide"
+     },
+     {
+      "name": "work_email",
+      "optional": "hide"
+     },
+     {
+      "name": "contract_date_start",
+      "optional": "hide"
+     },
+     {
+      "name": "contract_date_end",
+      "optional": "hide"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "1"
+     },
+     {
+      "name": "wage",
+      "widget": "monetary",
+      "optional": "hide"
+     },
+     {
+      "name": "employee_type",
+      "optional": "hide"
+     },
+     {
+      "name": "contract_type_id",
+      "optional": "hide"
+     },
+     {
+      "name": "structure_type_id",
+      "optional": "hide"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "list_activity",
+      "optional": "show"
+     },
+     {
+      "name": "activity_user_id",
+      "widget": "many2one_avatar_user",
+      "string": "Activity by",
+      "optional": "hide"
+     },
+     {
+      "name": "activity_date_deadline",
+      "widget": "remaining_days",
+      "optional": "show"
+     },
+     {
+      "name": "company_id",
+      "readonly": "1",
+      "optional": "hide",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "department_id",
+      "optional": "show"
+     },
+     {
+      "name": "job_id",
+      "context": "{'default_no_of_recruitment': 0, 'default_is_favorite': False}",
+      "optional": "show"
+     },
+     {
+      "name": "parent_id",
+      "widget": "many2one_avatar_employee",
+      "optional": "hide"
+     },
+     {
+      "name": "address_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "birthday",
+      "optional": "hide"
+     },
+     {
+      "name": "work_location_id",
+      "optional": "hide"
+     },
+     {
+      "name": "coach_id",
+      "widget": "many2one_avatar_employee",
+      "optional": "hide"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "string": "Related User",
+      "optional": "hide"
+     },
+     {
+      "name": "active",
+      "column_invisible": "True"
+     },
+     {
+      "name": "category_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}",
+      "optional": "hide"
+     },
+     {
+      "name": "country_id",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "monetary": 1,
+     "list_activity": 1,
+     "many2one_avatar_user": 2,
+     "remaining_days": 1,
+     "many2one_avatar_employee": 2,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Employees\" expand=\"context.get('expand', False)\" multi_edit=\"1\" sample=\"1\" js_class=\"hr_employee_list\">\n                    <field name=\"avatar_128\" widget=\"image\" options=\"{'size': [24, 24], 'img_class': 'rounded-3'}\" width=\"30\" nolabel=\"1\"/>\n                    <field name=\"name\" readonly=\"1\"/>\n                    <field name=\"work_phone\" class=\"o_force_ltr\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"work_email\" optional=\"hide\"/>\n                    <field name=\"contract_date_start\" optional=\"hide\"/>\n                    <field name=\"contract_date_end\" optional=\"hide\"/>\n                    <field name=\"currency_id\" column_invisible=\"1\"/>\n                    <field name=\"wage\" widget=\"monetary\" optional=\"hide\"/>\n                    <field name=\"employee_type\" optional=\"hide\"/>\n                    <field name=\"contract_type_id\" optional=\"hide\"/>\n                    <field name=\"structure_type_id\" optional=\"hide\"/>\n                    <field name=\"activity_ids\" widget=\"list_activity\" optional=\"show\"/>\n                    <field name=\"activity_user_id\" optional=\"hide\" string=\"Activity by\" widget=\"many2one_avatar_user\"/>\n                    <field name=\"activity_date_deadline\" widget=\"remaining_days\" optional=\"show\"/>\n                    <field name=\"company_id\" groups=\"base.group_multi_company\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"department_id\" optional=\"show\"/>\n                    <field name=\"job_id\" context=\"{'default_no_of_recruitment': 0, 'default_is_favorite': False}\" optional=\"show\"/>\n                    <field name=\"parent_id\" widget=\"many2one_avatar_employee\" optional=\"hide\"/>\n                    <field name=\"address_id\" column_invisible=\"True\"/>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"birthday\" optional=\"hide\"/>\n                    <field name=\"work_location_id\" optional=\"hide\"/>\n                    <field name=\"coach_id\" widget=\"many2one_avatar_employee\" optional=\"hide\"/>\n                    <field name=\"user_id\" string=\"Related User\" widget=\"many2one_avatar_user\" optional=\"hide\"/>\n                    <field name=\"active\" column_invisible=\"True\"/>\n                    <field name=\"category_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\" optional=\"hide\"/>\n                    <field name=\"country_id\" optional=\"hide\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.hr_kanban_view_employees",
+   "package": "hr",
+   "name": "hr.employee.kanban",
+   "entity": "hr.employee",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_hr_employee_kanban",
+     "sample": "1",
+     "duplicate": "false"
+    },
+    "fields": [
+     {
+      "name": "show_hr_icon_display"
+     },
+     {
+      "name": "image_128"
+     },
+     {
+      "name": "company_id"
+     },
+     {
+      "name": "image_1024",
+      "widget": "background_image",
+      "options": "{'zoom': true, 'zoom_delay': 1000, 'preview_image':'image_128'}"
+     },
+     {
+      "name": "avatar_128",
+      "widget": "background_image",
+      "options": "{'zoom': true, 'zoom_delay': 1000}"
+     },
+     {
+      "name": "hr_icon_display",
+      "widget": "hr_presence_status"
+     },
+     {
+      "name": "name",
+      "placeholder": "Employee's Name"
+     },
+     {
+      "name": "job_title"
+     },
+     {
+      "name": "work_email"
+     },
+     {
+      "name": "work_phone"
+     },
+     {
+      "name": "contract_date_start"
+     },
+     {
+      "name": "contract_date_end"
+     },
+     {
+      "name": "birthday_public_display_string"
+     },
+     {
+      "name": "employee_properties",
+      "widget": "properties"
+     },
+     {
+      "name": "category_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color'}",
+      "optional": "hide"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "1"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "kanban_activity"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "background_image": 2,
+     "hr_presence_status": 1,
+     "properties": 1,
+     "many2many_tags": 1,
+     "many2one_avatar_user": 1,
+     "kanban_activity": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban class=\"o_hr_employee_kanban\" sample=\"1\" duplicate=\"false\">\n                    <field name=\"show_hr_icon_display\"/>\n                    <field name=\"image_128\"/>\n                    <field name=\"company_id\"/>\n                    <templates>\n                        <t t-name=\"card\" class=\"flex-row\">\n                            <aside class=\"o_kanban_aside_full\">\n                                <t t-if=\"record.image_1024.raw_value\">\n                                    <field name=\"image_1024\" widget=\"background_image\" options=\"{'zoom': true, 'zoom_delay': 1000, 'preview_image':'image_128'}\" class=\"d-block position-relative\"/>\n                                </t>\n                                <t t-elif=\"record.image_128.raw_value\">\n                                    <field name=\"avatar_128\" widget=\"background_image\" options=\"{'zoom': true, 'zoom_delay': 1000}\" class=\"d-block position-relative\"/>\n                                </t>\n                                <div t-else=\"\" class=\"d-flex align-items-center justify-content-center bg-100 bg-gradient\">\n                                    <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-75 h-75 opacity-50\" viewBox=\"0 0 20 20\">\n                                        <g fill=\"currentColor\">\n                                            <path d=\"M 10 11 C 4.08 11 2 14 2 16 L 2 19 L 18 19 L 18 16 C 18 14 15.92 11 10 11 Z\"/>\n                                            <circle cx=\"10\" cy=\"5.5\" r=\"4.5\"/>\n                                        </g>\n                                    </svg>\n                                </div>\n                            </aside>\n                            <main class=\"ms-2\">\n                                <div>\n                                    <div t-if=\"record.show_hr_icon_display.raw_value\" class=\"float-end\">\n                                        <field name=\"hr_icon_display\" widget=\"hr_presence_status\"/>\n                                    </div>\n                                    <field class=\"fw-bold fs-5\" name=\"name\" placeholder=\"Employee's Name\"/>\n                                </div>\n                                <div t-if=\"record.job_title.raw_value\" class=\"text-truncate\">\n                                    <i class=\"fa fa-fw me-2 fa-suitcase text-primary\" title=\"Job Position\"/>\n                                    <field name=\"job_title\"/>\n                                </div>\n                                <div t-if=\"record.work_email.raw_value\" class=\"text-truncate\">\n                                    <i class=\"fa fa-fw me-2 fa-envelope text-primary\" title=\"Email\"/>\n                                    <field name=\"work_email\"/>\n                                </div>\n                                <div t-if=\"record.work_phone.raw_value\">\n                                    <i class=\"fa fa-fw me-2 fa-phone text-primary\" title=\"Phone\"/>\n                                    <field name=\"work_phone\"/>\n                                </div>\n                                <div t-if=\"record.contract_date_start.raw_value\" groups=\"hr.group_hr_manager\" t-att-class=\"{'text-danger': record.contract_date_end.raw_value &lt; luxon.DateTime.now().toISO()}\">\n                                    <i class=\"fa fa-fw me-2 fa-briefcase text-primary\" title=\"Contract\"/>\n                                    <field name=\"contract_date_start\"/>\n                                    <span t-if=\"record.contract_date_end.raw_value\"> - </span>\n                                    <field t-if=\"record.contract_date_end.raw_value\" name=\"contract_date_end\"/>\n                                </div>\n                                <div invisible=\"birthday_public_display_string == 'hidden'\">\n                                    <i class=\"fa fa-fw me-2 fa-birthday-cake text-primary\" title=\"Birthday\"/>\n                                    <field name=\"birthday_public_display_string\"/>\n                                </div>\n                                <field name=\"employee_properties\" widget=\"properties\"/>\n                                <field class=\"hr_tags\" name=\"category_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color'}\" optional=\"hide\"/>\n                                <footer class=\"py-0\">\n                                    <div class=\"d-flex ms-auto\">\n                                        <field name=\"user_id\" widget=\"many2one_avatar_user\" readonly=\"1\" class=\"mb-1 ms-2\"/>\n                                        <field name=\"activity_ids\" widget=\"kanban_activity\" class=\"m-1 ms-2\"/>\n                                    </div>\n                                </footer>\n                            </main>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.view_employee_form_smartbutton_inherited",
+   "package": "hr",
+   "name": "view.employee.form.smartbutton.inherited",
+   "entity": "hr.employee",
+   "view_type": "button",
+   "inherits_view": "view_employee_form",
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_open_versions",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "related_partners_count"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_versions",
+      "position": "before"
+     },
+     {
+      "name": "action_related_contacts",
+      "type": "object",
+      "class": "oe_stat_button",
+      "groups": "base.group_no_one",
+      "icon": "fa-address-card-o"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <button name=\"action_open_versions\" position=\"before\">\n                    <button name=\"action_related_contacts\" class=\"oe_stat_button\" icon=\"fa-address-card-o\" type=\"object\" help=\"Related Contacts\" groups=\"base.group_no_one\">\n                        <div class=\"o_field_widget o_stat_info\">\n                            <span class=\"o_stat_value\"><field name=\"related_partners_count\"/></span>\n                            <span class=\"o_stat_text\">Contacts</span>\n                        </div>\n                    </button>\n                </button>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr.hr_employee_view_activity",
+   "package": "hr",
+   "name": "hr.employee.activity",
+   "entity": "hr.employee",
+   "view_type": "activity",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "activity",
+    "root_attributes": {
+     "string": "Employees"
+    },
+    "fields": [
+     {
+      "name": "id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "job_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <activity string=\"Employees\">\n                    <field name=\"id\"/>\n                    <templates>\n                        <div t-name=\"activity-box\">\n                            <img class=\"rounded\" t-att-src=\"activity_image('hr.employee', 'avatar_128', record.id.raw_value)\" role=\"img\" t-att-title=\"record.id.value\" t-att-alt=\"record.id.value\"/>\n                            <div class=\"ms-2\">\n                                <field name=\"name\" display=\"full\" class=\"o_text_block\"/>\n                                <field name=\"job_id\" muted=\"1\" display=\"full\" class=\"o_text_block\"/>\n                            </div>\n                        </div>\n                    </templates>\n                </activity>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_attendance.hr_employee_search_view",
+   "package": "hr_attendance",
+   "name": "hr.employee.search.view",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//separator[@name='managers_groupby_separator']",
+     "position": "before"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [
+     {
+      "name": "group_attendance_manager",
+      "string": "Attendance Approver",
+      "context": "{'group_by': 'attendance_manager_id'}",
+      "groups": "hr_attendance.group_hr_attendance_user"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//separator[@name='managers_groupby_separator']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//separator[@name='managers_groupby_separator']\" position=\"before\">\n                <filter name=\"group_attendance_manager\" string=\"Attendance Approver\" context=\"{'group_by': 'attendance_manager_id'}\" groups=\"hr_attendance.group_hr_attendance_user\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_attendance.view_employee_form_inherit_hr_attendance",
+   "package": "hr_attendance",
+   "name": "hr.employee",
+   "entity": "hr.employee",
+   "view_type": "button",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": "110",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_open_versions",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "attendance_state",
+      "invisible": "1"
+     },
+     {
+      "name": "hours_last_month",
+      "invisible": "1",
+      "groups": "hr_attendance.group_hr_attendance_officer"
+     },
+     {
+      "name": "display_attendances",
+      "invisible": "1"
+     },
+     {
+      "name": "hours_last_month",
+      "widget": "float_time"
+     },
+     {
+      "name": "hours_last_month_overtime",
+      "widget": "float_time"
+     },
+     {
+      "name": "hours_last_month_overtime",
+      "widget": "float_time"
+     },
+     {
+      "name": "hours_last_month",
+      "widget": "float_time"
+     },
+     {
+      "name": "hours_last_month_overtime",
+      "widget": "float_time"
+     },
+     {
+      "name": "hours_last_month_overtime",
+      "widget": "float_time"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_versions",
+      "position": "before"
+     },
+     {
+      "name": "action_open_last_month_attendances",
+      "type": "object",
+      "invisible": "not display_attendances",
+      "class": "oe_stat_button",
+      "groups": "hr_attendance.group_hr_attendance_officer",
+      "icon": "fa-clock-o"
+     },
+     {
+      "name": "action_open_last_month_attendances",
+      "type": "object",
+      "invisible": "user_id != uid or not display_attendances",
+      "class": "oe_stat_button",
+      "groups": "!hr_attendance.group_hr_attendance_officer,hr_attendance.group_hr_attendance_own_reader",
+      "icon": "fa-clock-o"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "float_time": 6
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_open_versions\" position=\"before\">\n                <field name=\"attendance_state\" invisible=\"1\"/>\n                <field name=\"hours_last_month\" groups=\"hr_attendance.group_hr_attendance_officer\" invisible=\"1\"/>\n                <field name=\"display_attendances\" invisible=\"1\"/>\n                <button name=\"action_open_last_month_attendances\" class=\"oe_stat_button\" icon=\"fa-clock-o\" type=\"object\" groups=\"hr_attendance.group_hr_attendance_officer\" help=\"Worked hours this month\" invisible=\"not display_attendances\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_value\">\n                            <field name=\"hours_last_month\" widget=\"float_time\"/>\n                            <span class=\"o_stat_value text-success\" invisible=\"hours_last_month_overtime &lt;= 0 or not display_extra_hours\">\n                                (+<field name=\"hours_last_month_overtime\" widget=\"float_time\"/>)\n                            </span>\n                            <span class=\"o_stat_value text-danger\" invisible=\"hours_last_month_overtime &gt;= 0 or not display_extra_hours\">\n                                (<field name=\"hours_last_month_overtime\" widget=\"float_time\"/>)\n                            </span>\n                        </span>\n                        <span class=\"o_stat_text\">\n                            Monthly Hours\n                        </span>\n                    </div>\n                </button>\n                <button name=\"action_open_last_month_attendances\" class=\"oe_stat_button\" icon=\"fa-clock-o\" type=\"object\" groups=\"!hr_attendance.group_hr_attendance_officer,hr_attendance.group_hr_attendance_own_reader\" help=\"Worked hours this month\" invisible=\"user_id != uid or not display_attendances\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_value\">\n                            <field name=\"hours_last_month\" widget=\"float_time\"/>\n                            <span class=\"o_stat_value text-success\" invisible=\"hours_last_month_overtime &lt;= 0 or not display_extra_hours\">\n                                (+<field name=\"hours_last_month_overtime\" widget=\"float_time\"/>)\n                            </span>\n                            <span class=\"o_stat_value text-danger\" invisible=\"hours_last_month_overtime &gt;= 0 or not display_extra_hours\">\n                                (<field name=\"hours_last_month_overtime\" widget=\"float_time\"/>)\n                            </span>\n                        </span>\n                        <span class=\"o_stat_text\">\n                            Monthly Hours\n                        </span>\n                    </div>\n                </button>\n            </button>\n            <xpath expr=\"//group[@name='managers']\" position=\"inside\">\n                <field name=\"attendance_manager_id\" string=\"Attendance\" widget=\"many2one_avatar_user\" groups=\"hr_attendance.group_hr_attendance_user\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='barcode']\" position=\"attributes\">\n                <attribute name=\"string\">RFID/Badge Number</attribute>\n            </xpath>\n            <xpath expr=\"//button[@name='generate_random_barcode']\" position=\"after\">\n                <button name=\"open_barcode_scanner\" string=\"Read a badge\" type=\"object\" class=\"btn btn-link\" invisible=\"barcode\"/>\n            </xpath>\n            \n            <group name=\"identification_group\" position=\"inside\">\n                <field name=\"ruleset_id\" string=\"Overtime Ruleset\" placeholder=\"Select a ruleset to manage overtime.\"/>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_attendance.hr_employees_view_kanban",
+   "package": "hr_attendance",
+   "name": "hr.employee.kanban",
+   "entity": "hr.employee",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "99",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "create": "false"
+    },
+    "fields": [
+     {
+      "name": "attendance_state"
+     },
+     {
+      "name": "avatar_128",
+      "widget": "image"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "job_id"
+     },
+     {
+      "name": "work_location_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban create=\"false\">\n                <field name=\"attendance_state\"/>\n                <templates>\n                    <t t-name=\"card\" class=\"flex-row\">\n                        <aside>\n                            <field name=\"avatar_128\" widget=\"image\" alt=\"Employee\" class=\"mb-0\"/>\n                        </aside>\n                        <main class=\"w-100 ms-2\">\n                            <div>\n                                <div class=\"float-end\" t-if=\"record.attendance_state.raw_value == 'checked_in'\">\n                                    <span class=\"fa fa-circle text-success me-1\" role=\"img\" aria-label=\"Available\" title=\"Available\"/>\n                                </div>\n                                <div class=\"float-end\" t-if=\"record.attendance_state.raw_value == 'checked_out'\">\n                                    <span class=\"fa fa-circle text-warning me-1\" role=\"img\" aria-label=\"Not available\" title=\"Not available\">\n                                    </span>\n                                </div>\n                                <field class=\"fw-bolder\" name=\"name\"/>\n                            </div>\n                            <field t-if=\"record.job_id.raw_value\" name=\"job_id\"/>\n                            <field t-if=\"record.work_location_id.raw_value\" name=\"work_location_id\"/>\n                        </main>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_attendance.view_employee_tree_inherit_leave",
+   "package": "hr_attendance",
+   "name": "hr.employee.list.leave",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='work_location_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "attendance_manager_id",
+      "widget": "many2one_avatar_user",
+      "optional": "hide",
+      "groups": "hr_attendance.group_hr_attendance_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='work_location_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='work_location_id']\" position=\"after\">\n                <field name=\"attendance_manager_id\" optional=\"hide\" widget=\"many2one_avatar_user\" groups=\"hr_attendance.group_hr_attendance_user\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_expense.hr_employee_view_form_inherit_expense",
+   "package": "hr_expense",
+   "name": "hr.employee.view.form.expense",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='managers']",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "expense_manager_id",
+      "widget": "many2one_avatar_user",
+      "string": "Expense",
+      "context": "{'default_company_id': company_id}",
+      "placeholder": "Auto-validation"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='managers']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//group[@name='managers']\" position=\"inside\">\n                    <field name=\"expense_manager_id\" placeholder=\"Auto-validation\" string=\"Expense\" context=\"{'default_company_id': company_id}\" widget=\"many2one_avatar_user\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_expense.view_employee_tree_inherit_expense",
+   "package": "hr_expense",
+   "name": "hr.employee.list.expense",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='work_location_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "expense_manager_id",
+      "widget": "many2one_avatar_user",
+      "optional": "hide",
+      "placeholder": "Auto-validation"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='work_location_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='work_location_id']\" position=\"after\">\n                    <field name=\"expense_manager_id\" placeholder=\"Auto-validation\" optional=\"hide\" widget=\"many2one_avatar_user\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_expense.hr_employee_search_view",
+   "package": "hr_expense",
+   "name": "hr.employee.search.view",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//separator[@name='managers_groupby_separator']",
+     "position": "before"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [
+     {
+      "name": "group_expense_manager",
+      "string": "Expense Approver",
+      "context": "{'group_by': 'expense_manager_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//separator[@name='managers_groupby_separator']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//separator[@name='managers_groupby_separator']\" position=\"before\">\n                    <filter name=\"group_expense_manager\" string=\"Expense Approver\" context=\"{'group_by': 'expense_manager_id'}\"/>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "hr_fleet.view_employee_form",
+   "package": "hr_fleet",
+   "name": "hr.employee.form.inherit.hr.fleet",
+   "entity": "hr.employee",
+   "view_type": "button",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": "60",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_open_versions",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "employee_cars_count",
+      "widget": "statinfo",
+      "string": "Cars History"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_versions",
+      "position": "before"
+     },
+     {
+      "name": "action_open_employee_cars",
+      "type": "object",
+      "invisible": "employee_cars_count == 0",
+      "class": "oe_stat_button",
+      "groups": "fleet.fleet_group_manager",
+      "icon": "fa-car"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_open_versions\" position=\"before\">\n                <button name=\"action_open_employee_cars\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-car\" groups=\"fleet.fleet_group_manager\" invisible=\"employee_cars_count == 0\">\n                    <field name=\"employee_cars_count\" widget=\"statinfo\" string=\"Cars History\"/>\n                </button>\n            </button>\n            <group name=\"application_group\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </group>\n            <group name=\"application_group\" position=\"inside\">\n                <field name=\"mobility_card\" string=\"Fleet Mobility Card\"/>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_fleet.view_employee_filter",
+   "package": "hr_fleet",
+   "name": "hr.employee.filter.inherit.hr.fleet",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='private_car_plate']",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "license_plate"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='private_car_plate']",
+      "position": "replace"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='private_car_plate']\" position=\"replace\">\n                <field name=\"license_plate\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_gamification.hr_hr_employee_view_form",
+   "package": "hr_gamification",
+   "name": "hr.employee.view.form.inherit",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//page[@name='hr_settings']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "has_badges",
+      "invisible": "1"
+     },
+     {
+      "name": "badge_ids",
+      "mode": "kanban"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(action_reward_wizard)d",
+      "string": "Grant a Badge",
+      "type": "action",
+      "class": "mt-2 grant_badge_btn o_kanban_renderer o_kanban_record o-kanban-button-new btn btn-link py-3"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "received_badges",
+      "string": "Badges",
+      "invisible": "not user_id",
+      "groups": null
+     }
+    ],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//page[@name='hr_settings']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n\n            <xpath expr=\"//page[@name='hr_settings']\" position=\"before\">\n                <page string=\"Badges\" name=\"received_badges\" invisible=\"not user_id\">\n                    <field name=\"has_badges\" invisible=\"1\"/>\n                    <div class=\"o_field_nocontent\" invisible=\"has_badges\">\n                        <div class=\"o_nocontent_help\">\n                            <p class=\"o_view_nocontent_neutral_face\"/>\n                            <p>\n                                There are no badges for this employee.<br/>\n                                It's time to allow the first one.\n                            </p>\n                        </div>\n                    </div>\n                    <div class=\"mt-2\">\n                        <field name=\"badge_ids\" mode=\"kanban\"/>\n                        <div class=\"d-flex justify-content-center\">\n                            <button class=\"mt-2 grant_badge_btn o_kanban_renderer o_kanban_record o-kanban-button-new btn btn-link py-3\" string=\"Grant a Badge\" type=\"action\" name=\"%(action_reward_wizard)d\"/>\n                        </div>\n                    </div>\n                </page>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_employee_view_search",
+   "package": "hr_holidays",
+   "name": "hr.employee.search.view.inherit",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//filter[@name='my_team']",
+     "position": "before"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "at_work",
+      "string": "At work",
+      "domain": "[('is_absent', '=', False)]"
+     },
+     {
+      "name": "on_timeoff",
+      "string": "On Time Off",
+      "domain": "[('is_absent', '=', True)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//filter[@name='my_team']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//filter[@name='my_team']\" position=\"before\">\n                <filter name=\"at_work\" string=\"At work\" domain=\"[('is_absent', '=', False)]\"/>\n                <filter name=\"on_timeoff\" string=\"On Time Off\" domain=\"[('is_absent', '=', True)]\"/>\n                <separator/>\n            </xpath>\n            <xpath expr=\"//separator[@name='secondary_groupby_separator']\" position=\"after\">\n                <filter name=\"group_leave_manager\" string=\"Time Off Approver\" context=\"{'group_by': 'leave_manager_id'}\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_kanban_view_employees_kanban",
+   "package": "hr_holidays",
+   "name": "hr.employee.kanban.leaves.status",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.hr_kanban_view_employees",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//templates",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "current_leave_id"
+     },
+     {
+      "name": "current_leave_state"
+     },
+     {
+      "name": "leave_date_from"
+     },
+     {
+      "name": "leave_date_to"
+     },
+     {
+      "name": "is_absent"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//templates",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//templates\" position=\"before\">\n                <field name=\"current_leave_id\"/>\n                <field name=\"current_leave_state\"/>\n                <field name=\"leave_date_from\"/>\n                <field name=\"leave_date_to\"/>\n                <field name=\"is_absent\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='hr_icon_display']\" position=\"attributes\">\n                <attribute name=\"widget\">hr_presence_status_private</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.view_employee_form_leave_inherit",
+   "package": "hr_holidays",
+   "name": "hr.employee.leave.form.inherit",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='managers']",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "leave_manager_id",
+      "widget": "many2one_avatar_user",
+      "string": "Time Off"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='managers']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//group[@name='managers']\" position=\"inside\">\n                <field name=\"leave_manager_id\" string=\"Time Off\" widget=\"many2one_avatar_user\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='hr_icon_display']\" position=\"attributes\">\n                <attribute name=\"widget\">hr_presence_status_private</attribute>\n            </xpath>\n            <button name=\"action_open_versions\" position=\"before\">\n                <field name=\"show_leaves\" invisible=\"1\"/>\n                <field name=\"is_absent\" invisible=\"1\"/>\n                <field name=\"hr_icon_display\" invisible=\"1\"/>\n                <button name=\"action_time_off_dashboard\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-calendar\" invisible=\"not show_leaves or company_id not in allowed_company_ids\" groups=\"base.group_user\" help=\"Remaining leaves\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_value\" invisible=\"allocation_display == '0'\">\n                            <field name=\"allocation_remaining_display\"/>/<field name=\"allocation_display\"/> Days\n                        </span>\n                        <span class=\"o_stat_text\">\n                            Time Off\n                        </span>\n                    </div>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.view_employee_tree_inherit_leave",
+   "package": "hr_holidays",
+   "name": "hr.employee.list.leave",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='work_location_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "leave_manager_id",
+      "widget": "many2one_avatar_user",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='work_location_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='work_location_id']\" position=\"after\">\n                <field name=\"leave_manager_id\" optional=\"hide\" widget=\"many2one_avatar_user\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays_attendance.hr_employee_view_form_inherit",
+   "package": "hr_holidays_attendance",
+   "name": "hr.holidays.attendance.employee.view.form.inherit",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": "120",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//header",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "total_overtime",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(hr_leave_allocation_overtime_manager_action)d",
+      "string": "Deduct Extra Hours",
+      "type": "action",
+      "invisible": "total_overtime <= 1 or not active",
+      "context": "{'default_employee_id': id, 'deduct_extra_hours': True}",
+      "groups": "hr_holidays.group_hr_holidays_user"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//header",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//header\" position=\"inside\">\n                <field name=\"total_overtime\" invisible=\"1\"/>\n                <button name=\"%(hr_leave_allocation_overtime_manager_action)d\" string=\"Deduct Extra Hours\" type=\"action\" groups=\"hr_holidays.group_hr_holidays_user\" context=\"{'default_employee_id': id, 'deduct_extra_hours': True}\" invisible=\"total_overtime &lt;= 1 or not active\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_homeworking.view_employee_filter",
+   "package": "hr_homeworking",
+   "name": "view.employee.form.inherit.hr",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//separator[@name='main_groupby_separator']",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [
+     {
+      "name": "_search_today_location",
+      "string": "Work location",
+      "domain": "[]",
+      "context": "{'group_by':'today_location_name'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//separator[@name='main_groupby_separator']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//separator[@name='main_groupby_separator']\" position=\"after\">\n                <filter name=\"_search_today_location\" string=\"Work location\" domain=\"[]\" context=\"{'group_by':'today_location_name'}\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_homeworking.view_employee_form",
+   "package": "hr_homeworking",
+   "name": "view.employee.form.inherit.hr",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='departure']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "monday_location_id",
+      "placeholder": "Unspecified",
+      "force_save": "1"
+     },
+     {
+      "name": "tuesday_location_id",
+      "placeholder": "Unspecified",
+      "force_save": "1"
+     },
+     {
+      "name": "wednesday_location_id",
+      "placeholder": "Unspecified",
+      "force_save": "1"
+     },
+     {
+      "name": "thursday_location_id",
+      "placeholder": "Unspecified",
+      "force_save": "1"
+     },
+     {
+      "name": "friday_location_id",
+      "placeholder": "Unspecified",
+      "force_save": "1"
+     },
+     {
+      "name": "saturday_location_id",
+      "placeholder": "Unspecified",
+      "force_save": "1"
+     },
+     {
+      "name": "sunday_location_id",
+      "placeholder": "Unspecified",
+      "force_save": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='departure']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//group[@name='departure']\" position=\"after\">\n                <group string=\"Usual Work Location\">\n                    <field name=\"monday_location_id\" placeholder=\"Unspecified\" force_save=\"1\"/>\n                    <field name=\"tuesday_location_id\" placeholder=\"Unspecified\" force_save=\"1\"/>\n                    <field name=\"wednesday_location_id\" placeholder=\"Unspecified\" force_save=\"1\"/>\n                    <field name=\"thursday_location_id\" placeholder=\"Unspecified\" force_save=\"1\"/>\n                    <field name=\"friday_location_id\" placeholder=\"Unspecified\" force_save=\"1\"/>\n                    <field name=\"saturday_location_id\" placeholder=\"Unspecified\" force_save=\"1\"/>\n                    <field name=\"sunday_location_id\" placeholder=\"Unspecified\" force_save=\"1\"/>\n                </group>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_homeworking.view_employee_tree",
+   "package": "hr_homeworking",
+   "name": "hr.employee.list.timesheet",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='work_email']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "work_location_name",
+      "readonly": "0",
+      "string": "Work Location",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='work_email']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='work_email']\" position=\"after\">\n            <field name=\"work_location_name\" readonly=\"0\" string=\"Work Location\" optional=\"hide\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='work_location_id']\" position=\"attributes\">\n                <attribute name=\"column_invisible\">1</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_hourly_cost.view_employee_form",
+   "package": "hr_hourly_cost",
+   "name": "view.employee.form.inherit.hr.employee.hourly.wage",
+   "entity": "hr.employee",
+   "view_type": "group",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": "40",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "group",
+    "root_attributes": {
+     "name": "application_group",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "group",
+      "attributes": {
+       "name": "application_group",
+       "position": "attributes"
+      },
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <group name=\"application_group\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </group>\n            <group name=\"application_group\" position=\"inside\">\n                <label for=\"hourly_cost\"/>\n                <div name=\"hourly_cost\">\n                    <field name=\"hourly_cost\" class=\"oe_inline\"/>\n                    <field name=\"currency_id\" invisible=\"1\"/>\n                </div>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_maintenance.hr_employee_view_form",
+   "package": "hr_maintenance",
+   "name": "hr.employee.view.form.inherit.maintenance",
+   "entity": "hr.employee",
+   "view_type": "button",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": "50",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_open_versions",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "equipment_count",
+      "widget": "statinfo",
+      "string": "Equipment"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_versions",
+      "position": "before"
+     },
+     {
+      "name": "%(maintenance.hr_equipment_action)d",
+      "type": "action",
+      "class": "o_stat_button",
+      "context": "{'search_default_employee_id': id, 'default_employee_id': id}",
+      "groups": "maintenance.group_equipment_manager",
+      "icon": "fa-cubes"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_open_versions\" position=\"before\">\n                <button name=\"%(maintenance.hr_equipment_action)d\" context=\"{'search_default_employee_id': id, 'default_employee_id': id}\" groups=\"maintenance.group_equipment_manager\" class=\"o_stat_button\" icon=\"fa-cubes\" type=\"action\">\n                    <field name=\"equipment_count\" string=\"Equipment\" widget=\"statinfo\"/>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_org_chart.hr_employee_view_form_inherit_org_chart",
+   "package": "hr_org_chart",
+   "name": "hr.employee.view.form.inherit.org_chart",
+   "entity": "hr.employee",
+   "view_type": "div",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "id": "o_employee_org_chart",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "child_ids",
+      "widget": "hr_org_chart",
+      "readonly": "1",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "hr_org_chart": 1
+    },
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "id": "o_employee_org_chart",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div id=\"o_employee_org_chart\" position=\"inside\">\n                <div invisible=\"not subordinate_ids and (not parent_id or parent_id == id)\" class=\"o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small\">\n                    Organization Chart\n                    <a name=\"%(hr_org_chart.action_hr_employee_org_chart)d\" type=\"action\" role=\"button\" class=\"float-end me-2 cursor-pointer\" context=\"{'hierarchy_res_id': id}\">\n                        <i class=\"fa fa-share-alt fa-rotate-90 ms-1 mt-1\" role=\"img\" aria-label=\"Full Chart\"/>\n                        Full Chart\n                    </a>\n                </div>\n                <div invisible=\"subordinate_ids or (parent_id and not parent_id == id)\" class=\"o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small\">\n                    Organization Chart\n                </div>\n                <field name=\"child_ids\" class=\"position-relative w-100\" widget=\"hr_org_chart\" readonly=\"1\" nolabel=\"1\"/>\n            </div>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_org_chart.hr_employee_view_pivot_inherit_org_chart",
+   "package": "hr_org_chart",
+   "name": "hr.employee.view.pivot.inherit.org_chart",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.hr_employee_view_pivot",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//pivot",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "department_color",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//pivot",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//pivot\" position=\"inside\">\n                <field name=\"department_color\" type=\"measure\" invisible=\"1\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_org_chart.hr_employee_view_graph_inherit_org_chart",
+   "package": "hr_org_chart",
+   "name": "hr.employee.view.graph.inherit.org_chart",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.hr_employee_view_graph",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//graph",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "department_color",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//graph",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//graph\" position=\"inside\">\n                <field name=\"department_color\" type=\"measure\" invisible=\"1\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_org_chart.hr_employee_hierarchy_view",
+   "package": "hr_org_chart",
+   "name": "hr.employee.view.hierarchy",
+   "entity": "hr.employee",
+   "view_type": "hierarchy",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "hierarchy",
+    "root_attributes": {
+     "child_field": "child_ids",
+     "js_class": "hr_employee_hierarchy",
+     "icon": "fa-users",
+     "draggable": "1"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "job_id"
+     },
+     {
+      "name": "department_color"
+     },
+     {
+      "name": "hr_icon_display"
+     },
+     {
+      "name": "department_id"
+     },
+     {
+      "name": "image_1024",
+      "widget": "background_image",
+      "options": "{'zoom': true, 'zoom_delay': 1000}"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "hr_icon_display",
+      "widget": "hr_presence_status"
+     },
+     {
+      "name": "job_title"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "background_image": 1,
+     "hr_presence_status": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <hierarchy child_field=\"child_ids\" js_class=\"hr_employee_hierarchy\" icon=\"fa-users\" draggable=\"1\">\n                <field name=\"name\"/>\n                <field name=\"job_id\"/>\n                <field name=\"department_color\"/>\n                <field name=\"hr_icon_display\"/>\n                <field name=\"department_id\"/>\n                <templates>\n                    <t t-name=\"hierarchy-box\">\n                        <div t-attf-class=\"o_hierarchy_node_header d-flex justify-content-center pb-4 o_hierarchy_node_color_{{ record.department_color.raw_value }}\" t-att-title=\"record.department_id.value\">\n                            <field name=\"image_1024\" preview_image=\"image_128\" options=\"{'zoom': true, 'zoom_delay': 1000}\" widget=\"background_image\"/>\n                        </div>\n                        <div class=\"d-flex flex-column text-center\">\n                            <div class=\"d-flex\">\n                                <field class=\"fw-bold w-100\" name=\"name\"/>\n                                <field name=\"hr_icon_display\" class=\"flex-shrink-0\" widget=\"hr_presence_status\"/>\n                            </div>\n                            <field name=\"job_title\"/>\n                        </div>\n                    </t>\n                </templates>\n            </hierarchy>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_presence.hr_employee_view_search",
+   "package": "hr_presence",
+   "name": "hr.employee.view.search",
+   "entity": "hr.employee",
+   "view_type": "filter",
+   "inherits_view": "hr.view_employee_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "at_work",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "at_work",
+      "position": "after"
+     },
+     {
+      "name": "absent",
+      "string": "Absent",
+      "domain": "[('hr_presence_state_display', '=', 'absent')]"
+     },
+     {
+      "name": "out_of_working_hours",
+      "string": "Off-Hours",
+      "domain": "[('hr_presence_state_display', '=', 'out_of_working_hour')]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"at_work\" position=\"after\">\n                <filter name=\"absent\" string=\"Absent\" domain=\"[('hr_presence_state_display', '=', 'absent')]\"/>\n                <filter name=\"out_of_working_hours\" string=\"Off-Hours\" domain=\"[('hr_presence_state_display', '=', 'out_of_working_hour')]\"/>\n            </filter>\n            <filter name=\"group_birthday\" position=\"before\">\n                <filter name=\"group_hr_presence_state\" string=\"Presence/Absence\" domain=\"[]\" context=\"{'group_by':'hr_presence_state_display'}\" groups=\"hr.group_hr_manager\"/>\n            </filter>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_skills.hr_employee_view_search",
+   "package": "hr_skills",
+   "name": "hr.employee.skill.search",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_filter",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='job_id']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "employee_skill_ids"
+     },
+     {
+      "name": "resume_line_ids",
+      "string": "Resume",
+      "filter_domain": "                     ['|',                         ('version_ids.job_title', 'ilike', self),                         '|',                             ('resume_line_ids.name', 'ilike', self),                             ('resume_line_ids.description', 'ilike', self),                     ]"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='job_id']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='job_id']\" position=\"after\">\n                <field name=\"employee_skill_ids\"/>\n                <field name=\"resume_line_ids\" string=\"Resume\" filter_domain=\"                     ['|',                         ('version_ids.job_title', 'ilike', self),                         '|',                             ('resume_line_ids.name', 'ilike', self),                             ('resume_line_ids.description', 'ilike', self),                     ]\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_skills.hr_employee_view_form",
+   "package": "hr_skills",
+   "name": "hr.employee.view.form.inherit.resume",
+   "entity": "hr.employee",
+   "view_type": "div",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "id": "o_employee_left",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "invisible": "1"
+     },
+     {
+      "name": "resume_line_ids",
+      "widget": "resume_one2many",
+      "context": "{'default_employee_id': employee_id}",
+      "nolabel": "1",
+      "mode": "list"
+     },
+     {
+      "name": "line_type_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "description"
+     },
+     {
+      "name": "date_start"
+     },
+     {
+      "name": "date_end"
+     },
+     {
+      "name": "is_course"
+     },
+     {
+      "name": "duration"
+     },
+     {
+      "name": "external_url"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "resume_one2many": 1
+    },
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "id": "o_employee_left",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div id=\"o_employee_left\" position=\"inside\">\n                <field name=\"employee_id\" invisible=\"1\"/> \n                <separator string=\"Resume\" class=\"mb-4\"/>\n                \n                <widget name=\"internal_resume_lines\"/>\n                <field mode=\"list\" nolabel=\"1\" name=\"resume_line_ids\" widget=\"resume_one2many\" context=\"{'default_employee_id': employee_id}\">\n                    <list>\n                        <field name=\"line_type_id\"/>\n                        <field name=\"name\"/>\n                        <field name=\"description\"/>\n                        <field name=\"date_start\"/>\n                        <field name=\"date_end\"/>\n                        <field name=\"is_course\"/>\n                        <field name=\"duration\"/>\n                        <field name=\"external_url\"/>\n                    </list>\n                </field>\n            </div>\n            <div id=\"o_work_information_right\" position=\"inside\">\n                <field mode=\"list\" nolabel=\"1\" name=\"current_employee_skill_ids\" widget=\"skills_one2many\" context=\"{'no_timeline': not employee_skill_ids}\">\n                    <list class=\"o_employee_skills\" decoration-muted=\"valid_to and valid_to &lt; context_today().strftime('%Y-%m-%d')\" decoration-danger=\"valid_to and valid_to &lt;= (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d') and valid_to &gt; context_today().strftime('%Y-%m-%d')\" decoration-warning=\"valid_to and valid_to &lt;= (context_today() + relativedelta(months=3)).strftime('%Y-%m-%d') and valid_to &gt; (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d')\">\n                        <field name=\"skill_id\"/>\n                        <field name=\"skill_level_id\"/>\n                        <field name=\"level_progress\" widget=\"progressbar\"/>\n                        <field name=\"skill_type_id\" optional=\"hidden\"/>\n                        <field name=\"valid_to\" column_invisible=\"1\"/>\n                        <field name=\"is_certification\" column_invisible=\"1\"/>\n                    </list>\n                </field>\n            </div>\n            <page name=\"resume\" position=\"after\">\n                <page name=\"certification\" string=\"Certifications\" invisible=\"not display_certification_page\">\n                    <field name=\"certification_ids\" mode=\"list\" widget=\"one2many\" nolabel=\"1\" context=\"{'form_view_ref': 'hr_skills.employee_skill_view_inherit_certificate_form', 'dialog_size': 'large', 'default_employee_id': id, 'certificate_skill': True}\">\n                        <list decoration-muted=\"valid_to and valid_to &lt; context_today().strftime('%Y-%m-%d')\">\n                            <field name=\"skill_id\" width=\"300\" string=\"Certification\"/>\n                            <field name=\"valid_from\" string=\"From\" widget=\"formatted_date\" options=\"{                                 'month_format': 'short',                             }\"/>\n                            <field name=\"valid_to\" string=\"To\" widget=\"formatted_date\" options=\"{                                 'month_format': 'short',                                 'color': {                                     'danger': 'valid_to and valid_to &lt;= (context_today() + relativedelta(days=7)).strftime(\\'%Y-%m-%d\\') and valid_to &gt; context_today().strftime(\\'%Y-%m-%d\\')',                                     'warning': 'valid_to and valid_to &lt;= (context_today() + relativedelta(months=3)).strftime(\\'%Y-%m-%d\\') and valid_to &gt; (context_today() + relativedelta(days=7)).strftime(\\'%Y-%m-%d\\')'                                 }                             }\"/>\n                        </list>\n                    </field>\n                </page>\n            </page>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_skills_slides.hr_employee_view_form",
+   "package": "hr_skills_slides",
+   "name": "hr.employee.view.form.inherit.resume.slides",
+   "entity": "hr.employee",
+   "view_type": "button",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": "45",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_open_versions",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "has_subscribed_courses",
+      "invisible": "1",
+      "groups": "website_slides.group_website_slides_officer"
+     },
+     {
+      "name": "courses_completion_text",
+      "widget": "statinfo",
+      "string": "Courses"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_versions",
+      "position": "before"
+     },
+     {
+      "name": "action_open_courses",
+      "type": "object",
+      "invisible": "not user_id or not has_subscribed_courses",
+      "class": "oe_stat_button",
+      "groups": "website_slides.group_website_slides_officer",
+      "icon": "fa-graduation-cap"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_open_versions\" position=\"before\">\n                <field name=\"has_subscribed_courses\" invisible=\"1\" groups=\"website_slides.group_website_slides_officer\"/>\n                <button name=\"action_open_courses\" class=\"oe_stat_button\" groups=\"website_slides.group_website_slides_officer\" icon=\"fa-graduation-cap\" type=\"object\" invisible=\"not user_id or not has_subscribed_courses\">\n                    <field name=\"courses_completion_text\" widget=\"statinfo\" string=\"Courses\"/>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_skills_slides.hr_employee_resume_view_form_inherit",
+   "package": "hr_skills_slides",
+   "name": "hr.employee.view.form.inherit.resume.slides",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr_skills.hr_employee_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='external_url']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "course_url"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='external_url']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='external_url']\" position=\"after\">\n                <field name=\"course_url\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_timesheet.hr_employee_view_form_inherit_timesheet",
+   "package": "hr_timesheet",
+   "name": "hr.employee.form.timesheet",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr_hourly_cost.view_employee_form",
+   "mode": null,
+   "priority": "40",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "/form",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "/form",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"/form\" position=\"attributes\">\n                <attribute name=\"delete\">0</attribute>\n            </xpath>\n            <button name=\"action_open_versions\" position=\"before\">\n                <field name=\"has_timesheet\" groups=\"hr_timesheet.group_hr_timesheet_user\" invisible=\"1\"/>\n                <button invisible=\"not has_timesheet\" class=\"oe_stat_button\" type=\"object\" name=\"action_timesheet_from_employee\" icon=\"fa-calendar\" groups=\"hr_timesheet.group_hr_timesheet_user\">\n                    <div class=\"o_stat_info\">\n                        <span class=\"o_stat_text\">Timesheets</span>\n                    </div>\n                </button>\n            </button>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_timesheet.view_employee_tree_inherit_timesheet",
+   "package": "hr_timesheet",
+   "name": "hr.employee.list.timesheet",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.view_employee_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "/list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "/list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"/list\" position=\"attributes\">\n                <attribute name=\"delete\">0</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_timesheet.hr_employee_view_kanban_inherit_timesheet",
+   "package": "hr_timesheet",
+   "name": "hr.employee.kanban.timesheet",
+   "entity": "hr.employee",
+   "view_type": "xpath",
+   "inherits_view": "hr.hr_kanban_view_employees",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "/kanban",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "/kanban",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"/kanban\" position=\"attributes\">\n                <attribute name=\"delete\">0</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_work_entry.hr_employee_view_form",
+   "package": "hr_work_entry",
+   "name": "hr.employee.view.form.inherit.hr.work.entry",
+   "entity": "hr.employee",
+   "view_type": "button",
+   "inherits_view": "hr.view_employee_form",
+   "mode": null,
+   "priority": "90",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "button",
+    "root_attributes": {
+     "name": "action_open_versions",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "has_work_entries",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_versions",
+      "position": "before"
+     },
+     {
+      "name": "action_open_work_entries",
+      "type": "object",
+      "invisible": "not has_work_entries",
+      "class": "oe_stat_button",
+      "groups": "hr.group_hr_manager",
+      "icon": "fa-calendar"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <button name=\"action_open_versions\" position=\"before\">\n                <field name=\"has_work_entries\" invisible=\"1\"/>\n                <button invisible=\"not has_work_entries\" type=\"object\" class=\"oe_stat_button\" id=\"open_work_entries\" icon=\"fa-calendar\" name=\"action_open_work_entries\" groups=\"hr.group_hr_manager\">\n                    <div class=\"o_stat_info\">\n                            <span class=\"o_stat_text\">\n                            Work Entries\n                            </span>\n                        </div>\n                </button>\n            </button>\n            <separator name=\"schedule\" position=\"after\">\n                <field name=\"work_entry_source\" invisible=\"1\"/>\n            </separator>\n        </field>\n    "
+  }
+ ]
+}

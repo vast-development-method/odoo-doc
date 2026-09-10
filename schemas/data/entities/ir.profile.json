@@ -1,0 +1,663 @@
+{
+ "catalog": {
+  "name": "entity:ir.profile",
+  "description": "Complete definition of entity Profiling results (ir.profile).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.profile",
+  "storage_name": "ir_profile",
+  "full_name": "Profiling results",
+  "kind": "persistent",
+  "description": "Profiling results",
+  "defined_by_package": "base",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "session desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": false,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_allow_sudo_commands": false
+  },
+  "fields": [
+   {
+    "name": "create_date",
+    "type": "Datetime",
+    "string": "Creation Date",
+    "defined_in_package": "base",
+    "full_name": "Creation Date"
+   },
+   {
+    "name": "session",
+    "type": "Char",
+    "string": "Session",
+    "index": true,
+    "defined_in_package": "base",
+    "full_name": "Session"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Description",
+    "defined_in_package": "base",
+    "full_name": "Description"
+   },
+   {
+    "name": "duration",
+    "type": "Float",
+    "string": "Duration",
+    "digits": [
+     9,
+     3
+    ],
+    "help": "Real elapsed time",
+    "defined_in_package": "base",
+    "full_name": "Duration"
+   },
+   {
+    "name": "cpu_duration",
+    "type": "Float",
+    "string": "CPU Duration",
+    "digits": [
+     9,
+     3
+    ],
+    "help": "CPU clock (not including other processes or SQL)",
+    "defined_in_package": "base",
+    "full_name": "CPU Duration"
+   },
+   {
+    "name": "init_stack_trace",
+    "type": "Text",
+    "string": "Initial stack trace",
+    "prefetch": false,
+    "defined_in_package": "base",
+    "full_name": "Initial stack trace"
+   },
+   {
+    "name": "sql",
+    "type": "Text",
+    "string": "Sql",
+    "prefetch": false,
+    "defined_in_package": "base",
+    "full_name": "Sql"
+   },
+   {
+    "name": "sql_count",
+    "type": "Integer",
+    "string": "Queries Count",
+    "defined_in_package": "base",
+    "full_name": "Queries Count"
+   },
+   {
+    "name": "traces_async",
+    "type": "Text",
+    "string": "Traces Async",
+    "prefetch": false,
+    "defined_in_package": "base",
+    "full_name": "Traces Async"
+   },
+   {
+    "name": "traces_sync",
+    "type": "Text",
+    "string": "Traces Sync",
+    "prefetch": false,
+    "defined_in_package": "base",
+    "full_name": "Traces Sync"
+   },
+   {
+    "name": "others",
+    "type": "Text",
+    "string": "others",
+    "prefetch": false,
+    "defined_in_package": "base",
+    "full_name": "others"
+   },
+   {
+    "name": "qweb",
+    "type": "Text",
+    "string": "Qweb",
+    "prefetch": false,
+    "defined_in_package": "base",
+    "full_name": "Qweb"
+   },
+   {
+    "name": "entry_count",
+    "type": "Integer",
+    "string": "Entry count",
+    "defined_in_package": "base",
+    "full_name": "Entry count"
+   },
+   {
+    "name": "speedscope",
+    "type": "Binary",
+    "string": "Speedscope",
+    "compute": "_compute_speedscope",
+    "defined_in_package": "base",
+    "full_name": "Speedscope"
+   },
+   {
+    "name": "speedscope_url",
+    "type": "Text",
+    "string": "Open",
+    "compute": "_compute_speedscope_url",
+    "defined_in_package": "base",
+    "full_name": "Open"
+   },
+   {
+    "name": "config_url",
+    "type": "Text",
+    "string": "Open profiles config",
+    "compute": "_compute_config_url",
+    "defined_in_package": "base",
+    "full_name": "Open profiles config"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_gc_profile",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_memory_traces",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return True if all profiles have RSS memory measurements in traces_async.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_memory_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return baselined RSS memory data points for the chart.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_config_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_speedscope",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "init_stack_trace"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_profile_params",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_params",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "params"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_speedscope",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "params"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "All profiles must have the same initial stack trace to be displayed together.",
+        "line": 131
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_add_outputs",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sp",
+     "suffix",
+     "params"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_speedscope_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "speedscope"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_enabled_until",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "If the profiling is enabled, return until when it is enabled.\nOtherwise return ``None``.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_profiling",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "profile",
+     "collectors",
+     "params"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Enable or disable profiling for the current user.\n\n:param profile: ``True`` to enable profiling, ``False`` to disable it.\n:param list collectors: optional list of collectors to use (string)\n:param dict params: optional parameters set on the profiler object",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Profiling is not enabled on this database. Please contact an administrator.",
+        "line": 200
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_view_speedscope",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_generate_speedscope",
+    "package": "base",
+    "kind": "UserError",
+    "message": "All profiles must have the same initial stack trace to be displayed together."
+   },
+   {
+    "operation": "set_profiling",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Profiling is not enabled on this database. Please contact an administrator."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_profile",
+    "package": "base",
+    "name": "ir_profile",
+    "entity": "ir.profile",
+    "group": "group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.ir_profile_view_search",
+    "package": "base",
+    "name": "IR Profile Search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name"
+      },
+      {
+       "name": "session",
+       "string": "Session"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "group_session",
+       "string": "Session",
+       "context": "{'group_by':'session'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "base.ir_profile_view_list",
+    "package": "base",
+    "name": "IR Profile List",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Profile Session",
+      "default_order": "session desc, id desc",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "session"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "entry_count"
+      },
+      {
+       "name": "sql_count",
+       "optional": "hide"
+      },
+      {
+       "name": "speedscope_url",
+       "widget": "url"
+      },
+      {
+       "name": "config_url",
+       "widget": "url"
+      },
+      {
+       "name": "duration"
+      },
+      {
+       "name": "cpu_duration",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_speedscope",
+       "string": "View in speedscope",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "url": 2
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.ir_profile_view_form",
+    "package": "base",
+    "name": "IR Profile Form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "IR Profile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "session"
+      },
+      {
+       "name": "cpu_duration"
+      },
+      {
+       "name": "entry_count"
+      },
+      {
+       "name": "sql_count",
+       "invisible": "sql_count == 0"
+      },
+      {
+       "name": "speedscope_url",
+       "widget": "url"
+      },
+      {
+       "name": "config_url",
+       "widget": "url"
+      },
+      {
+       "name": "qweb",
+       "widget": "profiling_qweb_view",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "url": 2,
+      "profiling_qweb_view": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.action_menu_ir_profile",
+    "package": "base",
+    "name": "Ir profile",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_group_session': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "ir.profile"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

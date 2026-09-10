@@ -1,0 +1,413 @@
+{
+ "catalog": {
+  "name": "views:base.automation",
+  "description": "View declarations for entity base.automation.",
+  "record_count": 4,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "base_automation.view_base_automation_form",
+   "package": "base_automation",
+   "name": "Automations",
+   "entity": "base.automation",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Automation Rule"
+    },
+    "fields": [
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "model_name",
+      "invisible": "1",
+      "force_save": "True"
+     },
+     {
+      "name": "name",
+      "placeholder": "Set an explicit name"
+     },
+     {
+      "name": "model_id",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "model_id",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "trigger",
+      "widget": "base_automation_trigger_selection"
+     },
+     {
+      "name": "trg_date_id",
+      "invisible": "trigger != 'on_time'",
+      "required": "trigger == 'on_time'",
+      "context": "{'hide_model': 1}",
+      "options": "{'no_open': True, 'no_create': True}",
+      "placeholder": "Select a date field..."
+     },
+     {
+      "name": "trg_selection_field_id",
+      "invisible": "trigger not in ['on_state_set', 'on_priority_set']",
+      "required": "trigger in ['on_state_set', 'on_priority_set']",
+      "options": "{'no_open': True, 'no_create': True}",
+      "placeholder": "Select a value..."
+     },
+     {
+      "name": "trg_field_ref",
+      "invisible": "trigger not in ['on_stage_set', 'on_tag_set']",
+      "required": "trigger in ['on_stage_set', 'on_tag_set']",
+      "options": "{'no_open': True, 'no_create': True}",
+      "placeholder": "Select a value..."
+     },
+     {
+      "name": "trg_field_ref_model_name",
+      "invisible": "1"
+     },
+     {
+      "name": "url",
+      "widget": "CopyClipboardURL"
+     },
+     {
+      "name": "log_webhook_calls",
+      "widget": "boolean_toggle",
+      "invisible": "trigger != 'on_webhook'",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "trg_date_range",
+      "required": "trigger in ['on_time', 'on_time_created', 'on_time_updated']"
+     },
+     {
+      "name": "trg_date_range_type",
+      "required": "trigger in ['on_time', 'on_time_created', 'on_time_updated']"
+     },
+     {
+      "name": "trg_date_range_mode",
+      "invisible": "trigger in ['on_time_created', 'on_time_updated']",
+      "required": "trigger == 'on_time'"
+     },
+     {
+      "name": "trg_date_calendar_id",
+      "invisible": "not trg_date_id or trg_date_range_type != 'day'",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "filter_pre_domain",
+      "widget": "domain",
+      "invisible": "trigger in [                                             'on_create',                                             'on_unlink',                                             'on_change',                                             'on_webhook',                                             'on_time',                                             'on_time_created',                                             'on_time_updated'                                         ]",
+      "options": "{'model': 'model_name', 'in_dialog': True, 'allow_expressions':True}",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "previous_domain",
+      "invisible": "1"
+     },
+     {
+      "name": "filter_domain",
+      "widget": "domain",
+      "invisible": "trigger in ['on_webhook']",
+      "options": "{'model': 'model_name', 'in_dialog': True, 'allow_expressions':True}",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "filter_domain",
+      "widget": "domain",
+      "invisible": "trigger not in ['on_create', 'on_create_or_write', 'on_change', 'on_unlink', 'on_time', 'on_time_created', 'on_time_updated']",
+      "options": "{'model': 'model_name', 'in_dialog': False, 'foldable': True, 'allow_expressions':True}",
+      "groups": "!base.group_no_one"
+     },
+     {
+      "name": "trigger_field_ids",
+      "widget": "many2many_tags",
+      "invisible": "trigger != 'on_create_or_write'",
+      "string": "When updating",
+      "domain": "[('model_id', '=', model_id),('store','=',True)]",
+      "context": "{'hide_model': 1}",
+      "options": "{'no_open': True, 'no_create': True}",
+      "placeholder": "Select fields..."
+     },
+     {
+      "name": "on_change_field_ids",
+      "widget": "many2many_tags",
+      "invisible": "trigger != 'on_change'",
+      "string": "When updating",
+      "domain": "[('model_id', '=', model_id)]",
+      "context": "{'hide_model': 1}",
+      "options": "{'no_open': True, 'no_create': True}",
+      "placeholder": "Select fields..."
+     },
+     {
+      "name": "record_getter",
+      "string": "Target Record"
+     },
+     {
+      "name": "action_server_ids",
+      "widget": "one2many",
+      "context": "{'default_model_id': model_id, 'is_modal': 1}",
+      "mode": "kanban"
+     },
+     {
+      "name": "description",
+      "placeholder": "Keep track of what this automation does and why it exists..."
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_webhook_logs",
+      "string": "Logs",
+      "type": "object",
+      "invisible": "trigger != 'on_webhook'",
+      "class": "oe_stat_button",
+      "groups": "base.group_no_one",
+      "icon": "fa-list"
+     },
+     {
+      "name": "action_rotate_webhook_uuid",
+      "string": "Renew",
+      "type": "object",
+      "class": "oe_inline btn btn-link flex-shrink-0 px-1 py-0",
+      "groups": "base.group_no_one",
+      "icon": "fa-refresh"
+     },
+     {
+      "name": "action_open_scheduled_action",
+      "string": "Scheduled action",
+      "type": "object",
+      "class": "oe_inline btn-link mt-n1",
+      "groups": "base.group_no_one",
+      "icon": "oi-arrow-right"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "actions",
+      "string": "Actions To Do",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "notes",
+      "string": "Notes",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "base_automation_trigger_selection": 1,
+     "CopyClipboardURL": 1,
+     "boolean_toggle": 1,
+     "domain": 3,
+     "many2many_tags": 2,
+     "one2many": 1
+    },
+    "inheritance_operations": [],
+    "chatter": true,
+    "button_box": [
+     {
+      "groups": "base.group_no_one",
+      "invisible": "trigger != 'on_webhook'",
+      "type": "object",
+      "name": "action_view_webhook_logs",
+      "string": "Logs",
+      "class": "oe_stat_button",
+      "icon": "fa-list"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Automation Rule\">\n                    <sheet>\n                        <div class=\"oe_button_box\" name=\"button_box\">\n                            <button groups=\"base.group_no_one\" invisible=\"trigger != 'on_webhook'\" type=\"object\" name=\"action_view_webhook_logs\" string=\"Logs\" class=\"oe_stat_button\" icon=\"fa-list\"/>\n                        </div>\n                        <field name=\"active\" invisible=\"1\"/>\n                        <field name=\"model_name\" invisible=\"1\" force_save=\"True\"/>\n                        <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"bg-danger\" invisible=\"active\"/>\n                        <div class=\"oe_title\">\n                            <h1><field name=\"name\" placeholder=\"Set an explicit name\"/></h1>\n                        </div>\n                        <group groups=\"!base.group_no_one\" invisible=\"context.get('default_model_id')\">\n                            <group>\n                                <field name=\"model_id\" options=\"{'no_create': True}\"/>\n                            </group>\n                        </group>\n                        <group groups=\"base.group_no_one\">\n                            <group>\n                                <field name=\"model_id\" options=\"{'no_create': True}\"/>\n                            </group>\n                        </group>\n                        <group invisible=\"not model_id\">\n                            <group>\n                                <label for=\"trigger\"/>\n                                <div>\n                                    <div class=\"d-flex flex-row\">\n                                        <field name=\"trigger\" widget=\"base_automation_trigger_selection\"/>\n                                        <field name=\"trg_date_id\" class=\"oe_inline\" placeholder=\"Select a date field...\" options=\"{'no_open': True, 'no_create': True}\" context=\"{'hide_model': 1}\" invisible=\"trigger != 'on_time'\" required=\"trigger == 'on_time'\"/>\n                                        <field name=\"trg_selection_field_id\" placeholder=\"Select a value...\" class=\"oe_inline\" options=\"{'no_open': True, 'no_create': True}\" invisible=\"trigger not in ['on_state_set', 'on_priority_set']\" required=\"trigger in ['on_state_set', 'on_priority_set']\"/>\n                                        <field name=\"trg_field_ref\" placeholder=\"Select a value...\" class=\"oe_inline\" options=\"{'no_open': True, 'no_create': True}\" invisible=\"trigger not in ['on_stage_set', 'on_tag_set']\" required=\"trigger in ['on_stage_set', 'on_tag_set']\"/>\n                                        <field name=\"trg_field_ref_model_name\" invisible=\"1\"/>\n                                    </div>\n                                    <div class=\"text-muted\" invisible=\"trigger != 'on_change'\"><i class=\"fa fa-warning\"/> Automation rules triggered by UI changes will be executed <em>every time</em> the watched fields change, <em>whether you save or not</em>.</div>\n                                </div>\n                                <label for=\"url\" string=\"Secret URL\" invisible=\"trigger != 'on_webhook'\"/>\n                                <div class=\"d-flex flex-row\" invisible=\"trigger != 'on_webhook'\">\n                                    <field name=\"url\" class=\"oe_inline mb-0\" widget=\"CopyClipboardURL\"/>\n                                    <button groups=\"base.group_no_one\" type=\"object\" name=\"action_rotate_webhook_uuid\" class=\"oe_inline btn btn-link flex-shrink-0 px-1 py-0\" icon=\"fa-refresh\" string=\"Renew\" help=\"If renewed, update the secret URL in the third-party app that calls this webhook.\"/>\n                                </div>\n                                <field name=\"log_webhook_calls\" widget=\"boolean_toggle\" invisible=\"trigger != 'on_webhook'\" groups=\"base.group_no_one\"/>\n                                <label for=\"trg_date_range\" invisible=\"trigger not in ['on_time', 'on_time_created', 'on_time_updated']\"/>\n                                <div class=\"d-flex flex-row gap-2\" invisible=\"trigger not in ['on_time', 'on_time_created', 'on_time_updated']\">\n                                    <field name=\"trg_date_range\" class=\"oe_inline o_input_3ch\" required=\"trigger in ['on_time', 'on_time_created', 'on_time_updated']\"/>\n                                    <field name=\"trg_date_range_type\" class=\"oe_inline\" required=\"trigger in ['on_time', 'on_time_created', 'on_time_updated']\"/>\n                                    <field name=\"trg_date_range_mode\" class=\"oe_inline\" invisible=\"trigger in ['on_time_created', 'on_time_updated']\" required=\"trigger == 'on_time'\"/>\n                                    <button type=\"object\" name=\"action_open_scheduled_action\" string=\"Scheduled action\" icon=\"oi-arrow-right\" class=\"oe_inline btn-link mt-n1\" groups=\"base.group_no_one\"/>\n                                </div>\n                                <field name=\"trg_date_calendar_id\" class=\"oe_inline\" options=\"{'no_open': True, 'no_create': True}\" invisible=\"not trg_date_id or trg_date_range_type != 'day'\"/>\n                                <field name=\"filter_pre_domain\" widget=\"domain\" groups=\"base.group_no_one\" options=\"{'model': 'model_name', 'in_dialog': True, 'allow_expressions':True}\" invisible=\"trigger in [                                             'on_create',                                             'on_unlink',                                             'on_change',                                             'on_webhook',                                             'on_time',                                             'on_time_created',                                             'on_time_updated'                                         ]\"/>\n                                <field name=\"previous_domain\" invisible=\"1\"/>\n                                <field name=\"filter_domain\" widget=\"domain\" groups=\"base.group_no_one\" options=\"{'model': 'model_name', 'in_dialog': True, 'allow_expressions':True}\" invisible=\"trigger in ['on_webhook']\"/>\n                                <field name=\"filter_domain\" widget=\"domain\" groups=\"!base.group_no_one\" options=\"{'model': 'model_name', 'in_dialog': False, 'foldable': True, 'allow_expressions':True}\" invisible=\"trigger not in ['on_create', 'on_create_or_write', 'on_change', 'on_unlink', 'on_time', 'on_time_created', 'on_time_updated']\"/>\n                                <field name=\"trigger_field_ids\" string=\"When updating\" placeholder=\"Select fields...\" options=\"{'no_open': True, 'no_create': True}\" domain=\"[('model_id', '=', model_id),('store','=',True)]\" context=\"{'hide_model': 1}\" invisible=\"trigger != 'on_create_or_write'\" widget=\"many2many_tags\"/>\n                                <field name=\"on_change_field_ids\" string=\"When updating\" placeholder=\"Select fields...\" options=\"{'no_open': True, 'no_create': True}\" domain=\"[('model_id', '=', model_id)]\" context=\"{'hide_model': 1}\" invisible=\"trigger != 'on_change'\" widget=\"many2many_tags\"/>\n                            </group>\n                            <group>\n                                <label for=\"record_getter\" string=\"Target Record\" invisible=\"trigger != 'on_webhook'\"/>\n                                <div invisible=\"trigger != 'on_webhook'\">\n                                    <field name=\"record_getter\" string=\"Target Record\"/>\n                                    <div>\n                                        <div class=\"text-muted\"><i class=\"fa fa-info-circle\"/> The default target record getter will work out-of-the-box for any webhook coming from another the system instance.</div>\n                                        <span class=\"text-muted\"> Available variables: </span>\n                                        <ul class=\"text-muted\">\n                                            <li><code>env</code>: environment on which the action is triggered</li>\n                                            <li><code>model</code>: model of the record on which the action is triggered; is a void recordset</li>\n                                            <li><code>time</code>, <code>datetime</code>, <code>dateutil</code>, <code>timezone</code>: useful Python libraries</li>\n                                            <li><code>payload</code>: the payload of the call (GET parameters, JSON body), as a dict.</li>\n                                        </ul>\n                                    </div>\n                                </div>\n                            </group>\n                        </group>\n                        <notebook invisible=\"not model_id\">\n                            <page string=\"Actions To Do\" name=\"actions\">\n                                <field name=\"action_server_ids\" widget=\"one2many\" mode=\"kanban\" context=\"{'default_model_id': model_id, 'is_modal': 1}\"/>\n                            </page>\n                            <page string=\"Notes\" name=\"notes\">\n                                <field name=\"description\" placeholder=\"Keep track of what this automation does and why it exists...\"/>\n                            </page>\n                        </notebook>\n                    </sheet>\n                    <chatter/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "base_automation.view_base_automation_tree",
+   "package": "base_automation",
+   "name": "base.automation.list",
+   "entity": "base.automation",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Automation Rules"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "trigger"
+     },
+     {
+      "name": "model_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Automation Rules\">\n                    <field name=\"name\"/>\n                    <field name=\"trigger\"/>\n                    <field name=\"model_id\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "base_automation.view_base_automation_kanban",
+   "package": "base_automation",
+   "name": "base.automation.kanban",
+   "entity": "base.automation",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "string": "Automation Rules",
+     "class": "o_base_automation_kanban_view",
+     "records_draggable": "false",
+     "groups_draggable": "false",
+     "quick_create": "false",
+     "group_create": "false",
+     "group_edit": "false",
+     "group_delete": "false"
+    },
+    "fields": [
+     {
+      "name": "active"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "model_id",
+      "invisible": "context.get('default_model_id')"
+     },
+     {
+      "name": "trigger"
+     },
+     {
+      "name": "on_change_field_ids",
+      "invisible": "trigger != 'on_change'"
+     },
+     {
+      "name": "trg_selection_field_id",
+      "invisible": "trigger not in ['on_state_set', 'on_priority_set']"
+     },
+     {
+      "name": "trg_field_ref",
+      "invisible": "trigger not in ['on_stage_set', 'on_tag_set']"
+     },
+     {
+      "name": "trigger_field_ids",
+      "invisible": "trigger not in ['on_create_or_write']"
+     },
+     {
+      "name": "trg_date_range"
+     },
+     {
+      "name": "trg_date_range_type"
+     },
+     {
+      "name": "trg_date_range_mode"
+     },
+     {
+      "name": "trg_date_id",
+      "invisible": "trigger != 'on_time'"
+     },
+     {
+      "name": "trg_date_range"
+     },
+     {
+      "name": "trg_date_range_type"
+     },
+     {
+      "name": "trigger"
+     },
+     {
+      "name": "trg_date_id",
+      "invisible": "trigger != 'on_time'"
+     },
+     {
+      "name": "trg_date_calendar_id",
+      "invisible": "not trg_date_id or trg_date_range_type != 'day'"
+     },
+     {
+      "name": "action_server_ids",
+      "widget": "base_automation_actions_one2many"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "base_automation_actions_one2many": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": "false",
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban string=\"Automation Rules\" class=\"o_base_automation_kanban_view\" records_draggable=\"false\" groups_draggable=\"false\" quick_create=\"false\" group_create=\"false\" group_edit=\"false\" group_delete=\"false\">\n                    <field name=\"active\"/>\n                    <templates>\n                        <t t-name=\"card\" class=\"flex-md-row\">\n                            <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                            <div class=\"d-flex align-items-center w-100 w-md-25 o_automation_base_info\">\n                                <div class=\"d-flex flex-column\">\n                                    <field name=\"name\" class=\"fs-2 fw-bold\"/>\n                                    <field name=\"model_id\" invisible=\"context.get('default_model_id')\"/>\n                                    <div class=\"d-flex align-items-center gap-1\" invisible=\"trigger in ['on_time', 'on_time_created', 'on_time_updated']\">\n                                        <field name=\"trigger\"/>\n                                        <field name=\"on_change_field_ids\" invisible=\"trigger != 'on_change'\" class=\"my-1\"/>\n                                        <field name=\"trg_selection_field_id\" invisible=\"trigger not in ['on_state_set', 'on_priority_set']\" class=\"o_tag o_tag_color_0 rounded-pill p-1 px-2\"/>\n                                        <field name=\"trg_field_ref\" invisible=\"trigger not in ['on_stage_set', 'on_tag_set']\" class=\"o_tag o_tag_color_0 rounded-pill p-1 px-2\"/>\n                                        <field name=\"trigger_field_ids\" invisible=\"trigger not in ['on_create_or_write']\" class=\"my-1\"/>\n                                    </div>\n                                    <div class=\"d-flex align-items-center gap-1\" invisible=\"trigger != 'on_time'\">\n                                        <field name=\"trg_date_range\"/>\n                                        <field name=\"trg_date_range_type\" class=\"text-lowercase text-nowrap\"/>\n                                        <field name=\"trg_date_range_mode\" class=\"text-lowercase text-nowrap\"/>\n                                        <span class=\"flex-shrink-0\">\n                                            based on <field name=\"trg_date_id\" invisible=\"trigger != 'on_time'\" class=\"o_tag o_tag_color_0 rounded-pill p-1 px-2\"/>\n                                        </span>\n                                    </div>\n                                    <div class=\"d-flex align-items-center gap-1\" invisible=\"trigger not in ['on_time_created', 'on_time_updated']\">\n                                        <field name=\"trg_date_range\"/>\n                                        <field name=\"trg_date_range_type\" class=\"text-lowercase\"/>\n                                        <field name=\"trigger\" class=\"text-lowercase\"/>\n                                        <field name=\"trg_date_id\" invisible=\"trigger != 'on_time'\" class=\"o_tag o_tag_color_0 rounded-pill p-1 px-2\"/>\n                                    </div>\n                                    <field name=\"trg_date_calendar_id\" invisible=\"not trg_date_id or trg_date_range_type != 'day'\"/>\n                                </div>\n                            </div>\n                            <div class=\"d-none d-md-flex flex-grow-1 align-items-center gap-3 o_automation_actions\" data-name=\"more-info\">\n                                <i class=\"fa fa-2x fa-arrow-right text-primary\" title=\"Actions\"/>\n                                <field name=\"action_server_ids\" widget=\"base_automation_actions_one2many\" class=\"align-self-center w-100 me-md-3\"/>\n                            </div>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "base_automation.view_base_automation_search",
+   "package": "base_automation",
+   "name": "base.automation.search",
+   "entity": "base.automation",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "model_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Include Archived",
+      "domain": "[('active', 'in', [False, True])]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search>\n                    <field name=\"name\"/>\n                    <field name=\"model_id\"/>\n                    <separator/>\n                    <filter string=\"Include Archived\" name=\"inactive\" domain=\"[('active', 'in', [False, True])]\"/>\n                </search>\n            </field>\n        "
+  }
+ ]
+}

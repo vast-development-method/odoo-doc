@@ -1,0 +1,1127 @@
+{
+ "catalog": {
+  "name": "entity:product.category",
+  "description": "Complete definition of entity Product Category (product.category).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.category",
+  "storage_name": "product_category",
+  "full_name": "Product Category",
+  "kind": "persistent",
+  "description": "Product Category",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "account",
+   "delivery",
+   "stock",
+   "stock_account",
+   "point_of_sale",
+   "mrp_account"
+  ],
+  "mixins": [
+   "mail.thread",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "complete_name",
+  "display_name_field": "complete_name",
+  "display_name_search_fields": null,
+  "parent_field": "parent_id",
+  "hierarchy_path_stored": true,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "index": "trigram",
+    "required": true,
+    "defined_in_package": "product",
+    "full_name": "Name"
+   },
+   {
+    "name": "complete_name",
+    "type": "Char",
+    "string": "Complete Name",
+    "compute": "_compute_complete_name",
+    "recursive": true,
+    "store": true,
+    "defined_in_package": "product",
+    "full_name": "Complete Name"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "comodel": "product.category",
+    "string": "Parent Category",
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "product",
+    "full_name": "Parent Category",
+    "target_entity": "product.category"
+   },
+   {
+    "name": "parent_path",
+    "type": "Char",
+    "index": true,
+    "defined_in_package": "product",
+    "string": "Parent Path",
+    "full_name": "Parent Path"
+   },
+   {
+    "name": "child_id",
+    "type": "One2many",
+    "comodel": "product.category",
+    "inverse_name": "parent_id",
+    "string": "Child Categories",
+    "defined_in_package": "product",
+    "full_name": "Child Categories",
+    "target_entity": "product.category"
+   },
+   {
+    "name": "product_count",
+    "type": "Integer",
+    "string": "# Products",
+    "compute": "_compute_product_count",
+    "help": "The number of products under this category (Does not consider the children categories)",
+    "defined_in_package": "product",
+    "full_name": "# Products"
+   },
+   {
+    "name": "product_properties_definition",
+    "type": "PropertiesDefinition",
+    "string": "Product Properties",
+    "defined_in_package": "product",
+    "full_name": "Product Properties"
+   },
+   {
+    "name": "property_account_income_categ_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "company_dependent": true,
+    "string": "Income Account",
+    "domain": {
+     "dynamic": "ACCOUNT_DOMAIN"
+    },
+    "help": "This account will be used when validating a customer invoice.",
+    "tracking": true,
+    "ondelete": "restrict",
+    "defined_in_package": "account",
+    "full_name": "Income Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "property_account_expense_categ_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "company_dependent": true,
+    "string": "Expense Account",
+    "domain": {
+     "dynamic": "ACCOUNT_DOMAIN"
+    },
+    "help": "The expense is accounted for when a vendor bill is validated, except in anglo-saxon accounting with perpetual inventory valuation in which case the expense (Cost of Goods Sold account) is recognized at the customer invoice validation.",
+    "tracking": true,
+    "ondelete": "restrict",
+    "defined_in_package": "account",
+    "full_name": "Expense Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "route_ids",
+    "type": "Many2many",
+    "comodel": "stock.route",
+    "relation": "stock_route_categ",
+    "column1": "categ_id",
+    "column2": "route_id",
+    "string": "Routes",
+    "domain": [
+     [
+      "product_categ_selectable",
+      "=",
+      true
+     ]
+    ],
+    "defined_in_package": "stock",
+    "full_name": "Routes",
+    "target_entity": "stock.route"
+   },
+   {
+    "name": "removal_strategy_id",
+    "type": "Many2one",
+    "comodel": "product.removal",
+    "string": "Force Removal Strategy",
+    "help": "Set a specific removal strategy that will be used regardless of the source location for this product category.\n\nFIFO: products/lots that were stocked first will be moved out first.\nLIFO: products/lots that were stocked last will be moved out first.\nClosest location: products/lots closest to the target location will be moved out first.\nFEFO: products/lots with the closest removal date will be moved out first (the availability of this method depends on the \"Expiration Dates\" setting).\nLeast Packages: FIFO but with the least number of packages possible when there are several packages containing the same product.",
+    "tracking": true,
+    "defined_in_package": "stock",
+    "full_name": "Force Removal Strategy",
+    "target_entity": "product.removal"
+   },
+   {
+    "name": "parent_route_ids",
+    "type": "Many2many",
+    "comodel": "stock.route",
+    "string": "Parent Routes",
+    "compute": "_compute_parent_route_ids",
+    "defined_in_package": "stock",
+    "full_name": "Parent Routes",
+    "target_entity": "stock.route"
+   },
+   {
+    "name": "total_route_ids",
+    "type": "Many2many",
+    "comodel": "stock.route",
+    "string": "Total routes",
+    "compute": "_compute_total_route_ids",
+    "search": "_search_total_route_ids",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "Total routes",
+    "target_entity": "stock.route"
+   },
+   {
+    "name": "putaway_rule_ids",
+    "type": "One2many",
+    "comodel": "stock.putaway.rule",
+    "inverse_name": "category_id",
+    "string": "Putaway Rules",
+    "defined_in_package": "stock",
+    "full_name": "Putaway Rules",
+    "target_entity": "stock.putaway.rule"
+   },
+   {
+    "name": "packaging_reserve_method",
+    "type": "Selection",
+    "selection": [
+     [
+      "full",
+      "Reserve Only Full Packagings"
+     ],
+     [
+      "partial",
+      "Reserve Partial Packagings"
+     ]
+    ],
+    "string": "Reserve Packagings",
+    "default": "partial",
+    "help": "Reserve Only Full Packagings: will not reserve partial packagings. If customer orders 2 pallets of 1000 units each and you only have 1600 in stock, then only 1000 will be reserved\nReserve Partial Packagings: allow reserving partial packagings. If customer orders 2 pallets of 1000 units each and you only have 1600 in stock, then 1600 will be reserved",
+    "defined_in_package": "stock",
+    "full_name": "Reserve Packagings"
+   },
+   {
+    "name": "filter_for_stock_putaway_rule",
+    "type": "Boolean",
+    "string": "stock.putaway.rule",
+    "store": false,
+    "search": "_search_filter_for_stock_putaway_rule",
+    "defined_in_package": "stock",
+    "full_name": "stock.putaway.rule"
+   },
+   {
+    "name": "anglo_saxon_accounting",
+    "type": "Boolean",
+    "string": "Use Anglo-Saxon Accounting",
+    "compute": "_compute_anglo_saxon_accounting",
+    "help": "If checked, the product will be valued using the Anglo-Saxon accounting method.",
+    "defined_in_package": "stock_account",
+    "full_name": "Use Anglo-Saxon Accounting"
+   },
+   {
+    "name": "property_valuation",
+    "type": "Selection",
+    "string": "Inventory Valuation",
+    "selection": [
+     [
+      "periodic",
+      "Periodic (at closing)"
+     ],
+     [
+      "real_time",
+      "Perpetual (at invoicing)"
+     ]
+    ],
+    "company_dependent": true,
+    "copy": true,
+    "tracking": true,
+    "help": "Periodic: The accounting entries are suggested manually in the inventory valuation report.\n        Perpetual: An accounting entry is automatically created to value the inventory when a product is billed or invoiced.\n        ",
+    "defined_in_package": "stock_account",
+    "full_name": "Inventory Valuation"
+   },
+   {
+    "name": "property_cost_method",
+    "type": "Selection",
+    "string": "Costing Method",
+    "selection": [
+     [
+      "standard",
+      "Standard Price"
+     ],
+     [
+      "fifo",
+      "First In First Out (FIFO)"
+     ],
+     [
+      "average",
+      "Average Cost (AVCO)"
+     ]
+    ],
+    "company_dependent": true,
+    "copy": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company.cost_method"
+    },
+    "help": "Standard Price: The products are valued at their standard cost defined on the product.\n        Average Cost (AVCO): The products are valued at weighted average cost.\n        First In First Out (FIFO): The products are valued supposing those that enter the company first will also leave it first.\n        ",
+    "tracking": true,
+    "defined_in_package": "stock_account",
+    "full_name": "Costing Method"
+   },
+   {
+    "name": "property_stock_journal",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Stock Journal",
+    "company_dependent": true,
+    "help": "When doing automated inventory valuation, this is the Accounting Journal in which entries will be automatically posted when stock moves are processed.",
+    "defined_in_package": "stock_account",
+    "full_name": "Stock Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "property_stock_valuation_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Stock Valuation Account",
+    "company_dependent": true,
+    "ondelete": "restrict",
+    "check_company": true,
+    "help": "When automated inventory valuation is enabled on a product, this account will hold the current value of the products.",
+    "defined_in_package": "stock_account",
+    "full_name": "Stock Valuation Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "property_price_difference_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Price Difference Account",
+    "company_dependent": true,
+    "ondelete": "restrict",
+    "check_company": true,
+    "help": "With perpetual valuation, this account will hold the price difference between the standard price and the bill price.",
+    "defined_in_package": "stock_account",
+    "full_name": "Price Difference Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "account_stock_variation_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Stock Variation Account",
+    "readonly": false,
+    "related": "property_stock_valuation_account_id.account_stock_variation_id",
+    "defined_in_package": "stock_account",
+    "full_name": "Stock Variation Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "property_stock_account_production_cost_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Production Account",
+    "company_dependent": true,
+    "ondelete": "restrict",
+    "check_company": true,
+    "help": "This account will be used as a valuation counterpart for both components and final products for manufacturing orders.\n                If there are any workcenter/employee costs, this value will remain on the account once the production is completed.",
+    "defined_in_package": "mrp_account",
+    "full_name": "Production Account",
+    "target_entity": "account.account"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_complete_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "parent_id.complete_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_category_recursion",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot create recursive categories.",
+        "line": 49
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "name_create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "hierarchical_naming"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_delivery_category",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete the deliveries product category as it is used on the delivery carriers products.",
+        "line": 14
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_parent_route_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_total_route_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_route_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_ids",
+         "parent_route_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_filter_for_stock_putaway_rule",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_anglo_saxon_accounting",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_category_recursion",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "You cannot create recursive categories."
+   },
+   {
+    "operation": "_unlink_except_delivery_category",
+    "package": "delivery",
+    "kind": "UserError",
+    "message": "You cannot delete the deliveries product category as it is used on the delivery carriers products."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "product.access_product_category_user",
+    "package": "product",
+    "name": "product.category.user",
+    "entity": "product.category",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_category_manager",
+    "package": "product",
+    "name": "product.category.manager",
+    "entity": "product.category",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_sale.access_product_category_public_public",
+    "package": "website_sale",
+    "name": "product.category.public",
+    "entity": "product.category",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_category_public_portal",
+    "package": "website_sale",
+    "name": "product.category.public",
+    "entity": "product.category",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_category_public_employee",
+    "package": "website_sale",
+    "name": "product.category.public",
+    "entity": "product.category",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.view_category_property_form",
+    "package": "account",
+    "name": "product.category.property.form.inherit",
+    "view_type": "group",
+    "inherits_view": "product.product_category_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "first",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "property_account_income_categ_id"
+      },
+      {
+       "name": "property_account_expense_categ_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "first",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product.product_category_form_view",
+    "package": "product",
+    "name": "product.category.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "class": "oe_form_configuration"
+     },
+     "fields": [
+      {
+       "name": "product_count"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Lamps"
+      },
+      {
+       "name": "parent_id"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(product_template_action_all)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "context": "{'search_default_categ_id': id, 'default_categ_id': id, 'group_expand': True}",
+       "icon": "fa-th-list"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "%(product_template_action_all)d",
+       "icon": "fa-th-list",
+       "type": "action",
+       "context": "{'search_default_categ_id': id, 'default_categ_id': id, 'group_expand': True}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product.product_category_list_view",
+    "package": "product",
+    "name": "product.category.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Product Categories"
+     },
+     "fields": [
+      {
+       "name": "display_name",
+       "string": "Product Category"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "product.product_category_search_view",
+    "package": "product",
+    "name": "product.category.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Product Categories"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Product Categories"
+      },
+      {
+       "name": "parent_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock.product_category_form_view_inherit",
+    "package": "stock",
+    "name": "product.category.form",
+    "view_type": "div",
+    "inherits_view": "product.product_category_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "%(category_open_putaway)d",
+       "string": "Putaway Rules",
+       "type": "action",
+       "class": "oe_stat_button",
+       "groups": "stock.group_stock_multi_locations",
+       "icon": "fa-random"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_account.view_category_property_form_stock",
+    "package": "stock_account",
+    "name": "product.category.stock.property.form.inherit.stock",
+    "view_type": "group",
+    "inherits_view": "stock.product_category_form_view_inherit",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "logistics",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "property_cost_method",
+       "required": "True"
+      },
+      {
+       "name": "property_valuation",
+       "groups": "account.group_account_readonly,stock.group_stock_manager"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "logistics",
+        "position": "after"
+       },
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_account.view_category_property_form",
+    "package": "stock_account",
+    "name": "product.category.stock.property.form.inherit",
+    "view_type": "field",
+    "inherits_view": "account.view_category_property_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "property_account_expense_categ_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "property_account_expense_categ_id",
+       "position": "after"
+      },
+      {
+       "name": "property_stock_valuation_account_id",
+       "string": "Stock Account",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "account_stock_variation_id",
+       "string": "Stock Variation",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "property_price_difference_account_id",
+       "invisible": "not (property_cost_method == 'standard' and property_valuation == 'real_time')",
+       "options": "{'no_create': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "point_of_sale.product_category_action",
+    "package": "point_of_sale",
+    "name": "Internal Categories",
+    "view_mode": null,
+    "view_id": "product.product_category_list_view",
+    "search_view_id": "product.product_category_search_view",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "product.category"
+   },
+   {
+    "external_identifier": "product.product_category_action_form",
+    "package": "product",
+    "name": "Categories",
+    "view_mode": null,
+    "view_id": "product_category_list_view",
+    "search_view_id": "product_category_search_view",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "product.category"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "account.menu_product_product_categories",
+    "package": "account",
+    "name": "Product Categories",
+    "parent_id": null,
+    "action": "product.product_category_action_form",
+    "sequence": "30",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "purchase.menu_product_category_config_purchase",
+    "package": "purchase",
+    "name": null,
+    "parent_id": "purchase.menu_product_in_config_purchase",
+    "action": "product.product_category_action_form",
+    "sequence": "3",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.menu_product_categories",
+    "package": "sale",
+    "name": null,
+    "parent_id": null,
+    "action": "product.product_category_action_form",
+    "sequence": "20",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "stock.menu_product_category_config_stock",
+    "package": "stock",
+    "name": null,
+    "parent_id": "stock.menu_product_in_config_stock",
+    "action": "product.product_category_action_form",
+    "sequence": "2",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,458 @@
+{
+ "catalog": {
+  "name": "entity:forum.tag",
+  "description": "Complete definition of entity Forum Tag (forum.tag).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "forum.tag",
+  "storage_name": "forum_tag",
+  "full_name": "Forum Tag",
+  "kind": "persistent",
+  "description": "Forum Tag",
+  "defined_by_package": "website_forum",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.thread",
+   "website.searchable.mixin",
+   "website.seo.metadata"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Name"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "defined_in_package": "website_forum",
+    "full_name": "Color"
+   },
+   {
+    "name": "forum_id",
+    "type": "Many2one",
+    "comodel": "forum.forum",
+    "string": "Forum",
+    "required": true,
+    "index": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Forum",
+    "target_entity": "forum.forum"
+   },
+   {
+    "name": "post_ids",
+    "type": "Many2many",
+    "comodel": "forum.post",
+    "relation": "forum_tag_rel",
+    "column1": "forum_tag_id",
+    "column2": "forum_post_id",
+    "string": "Posts",
+    "domain": [
+     [
+      "state",
+      "=",
+      "active"
+     ]
+    ],
+    "defined_in_package": "website_forum",
+    "full_name": "Posts",
+    "target_entity": "forum.post"
+   },
+   {
+    "name": "posts_count",
+    "type": "Integer",
+    "string": "Number of Posts",
+    "compute": "_compute_posts_count",
+    "store": true,
+    "defined_in_package": "website_forum",
+    "full_name": "Number of Posts"
+   },
+   {
+    "name": "website_url",
+    "type": "Char",
+    "string": "Link to questions with the tag",
+    "compute": "_compute_website_url",
+    "defined_in_package": "website_forum",
+    "full_name": "Link to questions with the tag"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_name_uniq",
+    "kind": "Constraint",
+    "definition": "unique (name, forum_id)",
+    "message": "Tag name already exists!",
+    "defined_in_package": "website_forum"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_posts_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "post_ids",
+         "post_ids.tag_ids",
+         "post_ids.state",
+         "post_ids.active"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "forum_id",
+         "forum_id.name",
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "%d karma required to create a new Tag.",
+        "line": 45
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_search_get_detail",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "website",
+     "order",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "website_forum",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "create",
+    "package": "website_forum",
+    "kind": "AccessError",
+    "message": "%d karma required to create a new Tag."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_forum.access_forum_tag_public",
+    "package": "website_forum",
+    "name": "forum.tag.public",
+    "entity": "forum.tag",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_forum.access_forum_tag_portal",
+    "package": "website_forum",
+    "name": "forum.tag.portal",
+    "entity": "forum.tag",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_forum.access_forum_tag_user",
+    "package": "website_forum",
+    "name": "forum.tag.user",
+    "entity": "forum.tag",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_forum.website_forum_public_tag",
+    "package": "website_forum",
+    "name": "Website forum tag: Public user can only access to tag linked to public forum",
+    "entity": "forum.tag",
+    "domain": "[('forum_id.privacy', '=', 'public')]",
+    "groups": "[(4, ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_forum.website_forum_connected_tag",
+    "package": "website_forum",
+    "name": "Website forum tag: User can only access to tag linked to public (or authorized) forum",
+    "entity": "forum.tag",
+    "domain": "['|', ('forum_id.privacy', 'in', ['public', 'connected']), '&', ('forum_id.privacy', '=', 'private'), ('forum_id.authorized_group_id', 'in', user.all_group_ids.ids)]",
+    "groups": "[(4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_forum.website_forum_private_tag",
+    "package": "website_forum",
+    "name": "Website forum tag : Manager user can access to all tags",
+    "entity": "forum.tag",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('base.group_erp_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_slides_forum.website_slides_forum_public_tag",
+    "package": "website_slides_forum",
+    "name": "Website slides forum tag: Public User can only access to tag linked to forum related to public courses",
+    "entity": "forum.tag",
+    "domain": "[('forum_id.slide_channel_ids.website_published', '=', True), ('forum_id.slide_channel_ids.visibility', '=', 'public')]",
+    "groups": "[(4, ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_slides_forum.website_slides_forum_tag_signed_in_user",
+    "package": "website_slides_forum",
+    "name": "Website forum: Signed In users can access tags linked to public or connected users-visibility courses",
+    "entity": "forum.tag",
+    "domain": "[\n            '&',\n                ('forum_id.slide_channel_ids.website_published', '=', True),\n                '|',\n                    ('forum_id.slide_channel_ids.visibility', 'in', ('public','connected')),\n                    ('forum_id.slide_channel_ids.is_member', '=', True)\n            ]",
+    "groups": "[(4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_slides_forum.website_slides_forum_website_slides_officer_tag",
+    "package": "website_slides_forum",
+    "name": "Website slides forum tag: website slides officer can access all tag",
+    "entity": "forum.tag",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('website_slides.group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "website_forum.forum_tag_view_list",
+    "package": "website_forum",
+    "name": "forum.tag.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Tags",
+      "editable": "bottom"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "forum_id",
+       "options": "{'no_create_edit': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_forum.forum_tag_view_form",
+    "package": "website_forum",
+    "name": "forum.tag.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Tag"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "forum_id",
+       "options": "{'no_create_edit': True}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_forum.forum_tag_action",
+    "package": "website_forum",
+    "name": "Forum Tags",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a new tag\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "forum.tag"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

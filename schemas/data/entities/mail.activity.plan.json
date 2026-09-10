@@ -1,0 +1,1124 @@
+{
+ "catalog": {
+  "name": "entity:mail.activity.plan",
+  "description": "Complete definition of entity Activity Plan (mail.activity.plan).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.activity.plan",
+  "storage_name": "mail_activity_plan",
+  "full_name": "Activity Plan",
+  "kind": "persistent",
+  "description": "Activity Plan",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "hr",
+   "hr_recruitment"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id DESC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "mail",
+    "full_name": "Name"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "mail",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "template_ids",
+    "type": "One2many",
+    "comodel": "mail.activity.plan.template",
+    "inverse_name": "plan_id",
+    "string": "Activities",
+    "copy": true,
+    "defined_in_package": "mail",
+    "full_name": "Activities",
+    "target_entity": "mail.activity.plan.template"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "mail",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "res_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Applies to",
+    "compute": "_compute_res_model_id",
+    "compute_sudo": true,
+    "ondelete": "cascade",
+    "precompute": true,
+    "readonly": false,
+    "required": true,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Applies to",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "res_model",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_model_selection"
+    },
+    "string": "Model",
+    "required": true,
+    "help": "Specify a model if the activity should be specific to a model and not available when managing activities for other models.",
+    "defined_in_package": "mail",
+    "full_name": "Model"
+   },
+   {
+    "name": "steps_count",
+    "type": "Integer",
+    "compute": "_compute_steps_count",
+    "defined_in_package": "mail",
+    "string": "Steps Count",
+    "full_name": "Steps Count"
+   },
+   {
+    "name": "has_user_on_demand",
+    "type": "Boolean",
+    "string": "Has on demand responsible",
+    "compute": "_compute_has_user_on_demand",
+    "defined_in_package": "mail",
+    "full_name": "Has on demand responsible"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "check_company": true,
+    "index": "btree_not_null",
+    "compute": "_compute_department_id",
+    "ondelete": "cascade",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "hr",
+    "string": "Department",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "department_assignable",
+    "type": "Boolean",
+    "compute": "_compute_department_assignable",
+    "defined_in_package": "hr",
+    "string": "Department Assignable",
+    "full_name": "Department Assignable"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_model_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_res_model_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_res_model_compatibility_with_templates",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_steps_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_user_on_demand",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "template_ids.responsible_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_compatibility_with_model",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check that when the model is updated to a model different from employee,\nthere are no remaining specific values to employee. ",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Plan %(plan_names)s cannot use a department as it is used only for some HR plans.",
+        "line": 23
+       },
+       {
+        "kind": "UserError",
+        "message": "Plan activities %(template_names)s cannot use coach, manager or employee responsible as it is used only for employee plans.",
+        "line": 32
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_department_assignable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_department_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_compatibility_with_model",
+    "package": "hr",
+    "kind": "UserError",
+    "message": "Plan %(plan_names)s cannot use a department as it is used only for some HR plans."
+   },
+   {
+    "operation": "_check_compatibility_with_model",
+    "package": "hr",
+    "kind": "UserError",
+    "message": "Plan activities %(template_names)s cannot use coach, manager or employee responsible as it is used only for employee plans."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "crm.access_mail_activity_plan_sale_manager",
+    "package": "crm",
+    "name": "mail.activity.plan.sale.manager",
+    "entity": "mail.activity.plan",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr.access_mail_activity_plan_hr_manager",
+    "package": "hr",
+    "name": "mail.activity.plan.hr.manager",
+    "entity": "mail.activity.plan",
+    "group": "group_hr_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment.access_mail_activity_plan_hr_recruitment_manager",
+    "package": "hr_recruitment",
+    "name": "mail.activity.plan.hr.recruitment.manager",
+    "entity": "mail.activity.plan",
+    "group": "hr_recruitment.group_hr_recruitment_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.access_mail_activity_plan_user",
+    "package": "mail",
+    "name": "mail.activity.plan.user",
+    "entity": "mail.activity.plan",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_mail_activity_plan_system",
+    "package": "mail",
+    "name": "mail.activity.plan.system",
+    "entity": "mail.activity.plan",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "project.access_mail_activity_plan_project_manager",
+    "package": "project",
+    "name": "mail.activity.plan.project.manager",
+    "entity": "mail.activity.plan",
+    "group": "project.group_project_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale.access_mail_activity_plan_sale_manager",
+    "package": "sale",
+    "name": "mail.activity.plan.sale.manager",
+    "entity": "mail.activity.plan",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "crm.mail_plan_rule_group_sale_manager_lead",
+    "package": "crm",
+    "name": "Manager can manage lead plans",
+    "entity": "mail.activity.plan",
+    "domain": "[('res_model', '=', 'crm.lead')]",
+    "groups": "[(4, ref('sales_team.group_sale_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr.mail_plan_rule_group_hr_manager",
+    "package": "hr",
+    "name": "Manager can edit employee plan",
+    "entity": "mail.activity.plan",
+    "domain": "[('res_model', '=', 'hr.employee')]",
+    "groups": "[(4, ref('group_hr_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment.mail_plan_rule_group_hr_recruitment_manager_applicant",
+    "package": "hr_recruitment",
+    "name": "Manager can manage applicant plans",
+    "entity": "mail.activity.plan",
+    "domain": "[('res_model', '=', 'hr.applicant')]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_rule_admin",
+    "package": "mail",
+    "name": "Administrators can access all activity plans.",
+    "entity": "mail.activity.plan",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('base.group_system'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "project.mail_plan_rule_group_project_manager_task",
+    "package": "project",
+    "name": "Manager can manage project/task plans",
+    "entity": "mail.activity.plan",
+    "domain": "[('res_model', 'in', ('project.project', 'project.task'))]",
+    "groups": "[(4, ref('group_project_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "sale.mail_plan_rule_group_sale_manager",
+    "package": "sale",
+    "name": "Manager can manage sale order plans",
+    "entity": "mail.activity.plan",
+    "domain": "[('res_model', '=', 'sale.order')]",
+    "groups": "[(4, ref('sales_team.group_sale_manager'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr.mail_activity_plan_view_form",
+    "package": "hr",
+    "name": "mail.activity.plan.view.form.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_plan_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='template_ids']/list/field[@name='responsible_type']",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "responsible_type",
+       "widget": "filterable_selection",
+       "options": "{'whitelisted_values': ['on_demand', 'other']}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "filterable_selection": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='template_ids']/list/field[@name='responsible_type']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr.mail_activity_plan_view_form_hr_employee",
+    "package": "hr",
+    "name": "mail.activity.plan.view.form.hr.employee",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_plan_view_form_fixed_model",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr.mail_activity_plan_view_tree",
+    "package": "hr",
+    "name": "mail.activity.plan.view.list.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_plan_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='steps_count']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "department_id",
+       "column_invisible": "context.get('default_res_model') != 'hr.employee'",
+       "optional": "show"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='steps_count']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_view_search",
+    "package": "mail",
+    "name": "mail.activity.plan.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Plan"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_model",
+       "string": "Model",
+       "domain": "[]",
+       "context": "{'group_by': 'res_model_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_view_tree",
+    "package": "mail",
+    "name": "mail.activity.plan.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Planning",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "res_model_id",
+       "optional": "hide"
+      },
+      {
+       "name": "steps_count"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_view_tree_detailed",
+    "package": "mail",
+    "name": "mail.activity.plan.view.list.detailed",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_plan_view_tree",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='res_model_id']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='res_model_id']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_view_form",
+    "package": "mail",
+    "name": "mail.activity.plan.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Planning"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "widget": "text",
+       "options": "{'line_breaks': False}",
+       "placeholder": "e.g. Onboarding"
+      },
+      {
+       "name": "res_model"
+      },
+      {
+       "name": "company_id",
+       "domain": "[('id', '=', allowed_company_ids)]",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "template_ids",
+       "context": "{'default_res_model': res_model}",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "1"
+      },
+      {
+       "name": "note",
+       "column_invisible": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "activity_type_id",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "summary",
+       "placeholder": "e.g. Discuss Proposal"
+      },
+      {
+       "name": "responsible_type"
+      },
+      {
+       "name": "responsible_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "responsible_type != 'other'"
+      },
+      {
+       "name": "delay_count"
+      },
+      {
+       "name": "delay_unit",
+       "string": "Unit"
+      },
+      {
+       "name": "delay_from"
+      },
+      {
+       "name": "next_activity_ids",
+       "widget": "many2many_tags",
+       "invisible": "not next_activity_ids",
+       "options": "{                                                 'no_quick_create': True,                                                 'edit_tags': True,                                             }",
+       "optional": "hide"
+      },
+      {
+       "name": "icon"
+      },
+      {
+       "name": "activity_type_id"
+      },
+      {
+       "name": "summary"
+      },
+      {
+       "name": "delay_count"
+      },
+      {
+       "name": "delay_unit"
+      },
+      {
+       "name": "delay_from"
+      },
+      {
+       "name": "next_activity_ids",
+       "widget": "many2many_tags",
+       "invisible": "not next_activity_ids"
+      },
+      {
+       "name": "responsible_type"
+      },
+      {
+       "name": "responsible_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": null,
+       "string": "Activities To Create",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "text": 1,
+      "handle": 1,
+      "many2one_avatar_user": 2,
+      "many2many_tags": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_view_kanban",
+    "package": "mail",
+    "name": "mail.activity.plan.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "res_model_id"
+      },
+      {
+       "name": "steps_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_view_form_fixed_model",
+    "package": "mail",
+    "name": "mail.activity.plan.view.form.fixed.model",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_plan_view_form",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "project.mail_activity_plan_view_form_project_and_task",
+    "package": "project",
+    "name": "mail.activity.plan.view.form.project.and.task",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_plan_view_form",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='res_model']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='res_model']",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "crm.mail_activity_plan_action_lead",
+    "package": "crm",
+    "name": "Lead Activity Plans",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "mail.mail_activity_plan_view_search",
+    "domain": "[('res_model', '=', 'crm.lead')]",
+    "context": "{'default_res_model': 'crm.lead'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a Lead Activity Plan\n                </p>\n                <p>\n                    Activity plans are used to assign a list of activities in just a few clicks\n                    (e.g. \"Demo Preparation Process\", \"Qualification\", ...)\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mail.activity.plan"
+   },
+   {
+    "external_identifier": "hr.mail_activity_plan_action",
+    "package": "hr",
+    "name": "Employee Plans",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "mail.mail_activity_plan_view_search",
+    "domain": "[('res_model', '=', 'hr.employee'), '|', ('company_id', 'in', allowed_company_ids), ('company_id', '=', False)]",
+    "context": "{'default_res_model': 'hr.employee'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create an Activity Plan\n                </p>\n                <p>\n                    Activity plans are used to assign a list of activities in just a few clicks\n                    (e.g. \"Onboarding\", \"Offboarding\", ...)\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mail.activity.plan"
+   },
+   {
+    "external_identifier": "hr_recruitment.mail_activity_plan_action_config_hr_applicant",
+    "package": "hr_recruitment",
+    "name": "Recruitment Plans",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "mail.mail_activity_plan_view_search",
+    "domain": "[('res_model', '=', 'hr.applicant')]",
+    "context": "{'default_res_model': 'hr.applicant'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a Recruitment Activity Plan\n                </p>\n                <p>\n                    Activity plans are used to assign a list of activities in just a few clicks\n                    (e.g. \"Language Test\", \"Prepare Offer\", ...)\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mail.activity.plan"
+   },
+   {
+    "external_identifier": "mail.mail_activity_plan_action",
+    "package": "mail",
+    "name": "Activity Plans",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "mail_activity_plan_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create an Activity Plan\n                </p>\n                <p>\n                    Activity plans are used to assign a list of activities in just a few clicks\n                    (e.g. \"Onboarding\", \"Prospect Follow-up\", \"Project Milestone Meeting\", ...)\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mail.activity.plan"
+   },
+   {
+    "external_identifier": "project.mail_activity_plan_action_config_project_task_plan",
+    "package": "project",
+    "name": "Activity Plans",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "mail.mail_activity_plan_view_search",
+    "domain": "[('res_model', 'in', ('project.project', 'project.task'))]",
+    "context": "{'default_res_model': 'project.task'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a Task Activity Plan\n                </p>\n                <p>\n                    Activity plans are used to assign a list of activities in just a few clicks\n                    (e.g. \"Progress Report\", \"Stand-up Meeting\", ...)\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mail.activity.plan"
+   },
+   {
+    "external_identifier": "sale.mail_activity_plan_action_sale_order",
+    "package": "sale",
+    "name": "Sale Order Plans",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "mail.mail_activity_plan_view_search",
+    "domain": "[('res_model', '=', 'sale.order')]",
+    "context": "{'default_res_model': 'sale.order'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a Sale Order Activity Plan\n            </p>\n            <p>\n                Activity plans are used to assign a list of activities in just a few clicks\n                (e.g. \"Delivery scheduling\", \"Order Payment Follow-up\", ...)\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mail.activity.plan"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

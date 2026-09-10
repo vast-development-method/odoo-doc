@@ -1,0 +1,306 @@
+{
+ "catalog": {
+  "name": "entity:mail.alias.mixin.optional",
+  "description": "Complete definition of entity Email Aliases Mixin (light) (mail.alias.mixin.optional).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.alias.mixin.optional",
+  "storage_name": "mail_alias_mixin_optional",
+  "full_name": "Email Aliases Mixin (light)",
+  "kind": "abstract",
+  "description": "Email Aliases Mixin (light)",
+  "defined_by_package": "mail",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "alias_id",
+    "type": "Many2one",
+    "comodel": "mail.alias",
+    "string": "Alias",
+    "ondelete": "restrict",
+    "required": false,
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Alias",
+    "target_entity": "mail.alias"
+   },
+   {
+    "name": "alias_name",
+    "type": "Char",
+    "related": "alias_id.alias_name",
+    "readonly": false,
+    "defined_in_package": "mail",
+    "string": "Alias Name",
+    "full_name": "Alias Name"
+   },
+   {
+    "name": "alias_domain_id",
+    "type": "Many2one",
+    "comodel": "mail.alias.domain",
+    "string": "Alias Domain",
+    "related": "alias_id.alias_domain_id",
+    "readonly": false,
+    "defined_in_package": "mail",
+    "full_name": "Alias Domain",
+    "target_entity": "mail.alias.domain"
+   },
+   {
+    "name": "alias_domain",
+    "type": "Char",
+    "string": "Alias Domain Name",
+    "related": "alias_id.alias_domain",
+    "defined_in_package": "mail",
+    "full_name": "Alias Domain Name"
+   },
+   {
+    "name": "alias_defaults",
+    "type": "Text",
+    "related": "alias_id.alias_defaults",
+    "defined_in_package": "mail",
+    "string": "Alias Defaults",
+    "full_name": "Alias Defaults"
+   },
+   {
+    "name": "alias_email",
+    "type": "Char",
+    "string": "Email Alias",
+    "compute": "_compute_alias_email",
+    "search": "_search_alias_email",
+    "defined_in_package": "mail",
+    "full_name": "Email Alias"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_alias_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "alias_domain",
+         "alias_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Alias email can be used in views, as it is Falsy when having no domain\nor no name. Alias display name itself contains more info and cannot be\nused as it is in views. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_alias_email",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create aliases using sudo if an alias is required, notably if its\nname is given. ",
+      "size_in_lines": 55,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Split writable fields of mail.alias and other fields alias fields will\nwrite with sudo and the other normally. Also handle alias_domain_id\nupdate. If alias does not exist and we try to set a name, create the\nalias automatically. ",
+      "size_in_lines": 34,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Delete the given records, and cascade-delete their corresponding alias. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_require_new_alias",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "record_vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create only if no existing alias, and if a name is given, to avoid\ncreating inactive aliases (falsy name). ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alias_get_alias_domain_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return alias domain value to synchronize with owner's company.\nImplementing it with a compute is complicated, as its 'alias_domain_id'\nis a field on 'mail.alias' model, coming from 'alias_id' field and due\nto current implementation of the mixin, notably the create / write\noverrides, compute is not called in all cases. We therefore use a tool\nmethod to call in the mixin. ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alias_get_creation_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return values to create an alias, or to write on the alias after its\ncreation.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alias_filter_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values",
+     "filters"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Split the vals dict into two dictionnary of vals, one for alias\nfield and the other for other fields ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

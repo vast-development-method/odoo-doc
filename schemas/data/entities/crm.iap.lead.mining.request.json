@@ -1,0 +1,1297 @@
+{
+ "catalog": {
+  "name": "entity:crm.iap.lead.mining.request",
+  "description": "Complete definition of entity customer relationship management Lead Mining Request (crm.iap.lead.mining.request).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "crm.iap.lead.mining.request",
+  "storage_name": "crm_iap_lead_mining_request",
+  "full_name": "customer relationship management Lead Mining Request",
+  "kind": "persistent",
+  "description": "CRM Lead Mining Request",
+  "defined_by_package": "crm_iap_mine",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Request Number",
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: _('New')"
+    },
+    "copy": false,
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Request Number"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "error",
+      "Error"
+     ],
+     [
+      "done",
+      "Done"
+     ]
+    ],
+    "string": "Status",
+    "required": true,
+    "default": "draft",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Status"
+   },
+   {
+    "name": "lead_number",
+    "type": "Integer",
+    "string": "Number of Leads",
+    "required": true,
+    "default": 3,
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Number of Leads"
+   },
+   {
+    "name": "search_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "companies",
+      "Companies"
+     ],
+     [
+      "people",
+      "Companies and their Contacts"
+     ]
+    ],
+    "string": "Target",
+    "required": true,
+    "default": "companies",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Target"
+   },
+   {
+    "name": "error_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "credits",
+      "Insufficient Credits"
+     ],
+     [
+      "no_result",
+      "No Result"
+     ]
+    ],
+    "string": "Error Type",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Error Type"
+   },
+   {
+    "name": "lead_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "lead",
+      "Leads"
+     ],
+     [
+      "opportunity",
+      "Opportunities"
+     ]
+    ],
+    "string": "Type",
+    "required": true,
+    "default": {
+     "dynamic": "_default_lead_type"
+    },
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Type"
+   },
+   {
+    "name": "team_id",
+    "type": "Many2one",
+    "comodel": "crm.team",
+    "string": "Sales Team",
+    "ondelete": "set null",
+    "domain": "[('use_opportunities', '=', True)]",
+    "readonly": false,
+    "compute": "_compute_team_id",
+    "store": true,
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Sales Team",
+    "target_entity": "crm.team"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Salesperson",
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Salesperson",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "crm.tag",
+    "string": "Tags",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Tags",
+    "target_entity": "crm.tag"
+   },
+   {
+    "name": "lead_ids",
+    "type": "One2many",
+    "comodel": "crm.lead",
+    "inverse_name": "lead_mining_request_id",
+    "string": "Generated Lead / Opportunity",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Generated Lead / Opportunity",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "lead_count",
+    "type": "Integer",
+    "compute": "_compute_lead_count",
+    "string": "Number of Generated Leads",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Number of Generated Leads"
+   },
+   {
+    "name": "filter_on_size",
+    "type": "Boolean",
+    "string": "Filter on Size",
+    "default": false,
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Filter on Size"
+   },
+   {
+    "name": "company_size_min",
+    "type": "Integer",
+    "string": "Size",
+    "default": 1,
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Size"
+   },
+   {
+    "name": "company_size_max",
+    "type": "Integer",
+    "default": 1000,
+    "defined_in_package": "crm_iap_mine",
+    "string": "Company Size Max",
+    "full_name": "Company Size Max"
+   },
+   {
+    "name": "country_ids",
+    "type": "Many2many",
+    "comodel": "res.country",
+    "string": "Countries",
+    "default": {
+     "dynamic": "_default_country_ids"
+    },
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Countries",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "state_ids",
+    "type": "Many2many",
+    "comodel": "res.country.state",
+    "string": "States",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "States",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "available_state_ids",
+    "type": "One2many",
+    "comodel": "res.country.state",
+    "compute": "_compute_available_state_ids",
+    "defined_in_package": "crm_iap_mine",
+    "string": "Available State",
+    "full_name": "Available State",
+    "target_entity": "res.country.state"
+   },
+   {
+    "name": "industry_ids",
+    "type": "Many2many",
+    "comodel": "crm.iap.lead.industry",
+    "string": "Industries",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Industries",
+    "target_entity": "crm.iap.lead.industry"
+   },
+   {
+    "name": "contact_number",
+    "type": "Integer",
+    "string": "Number of Contacts",
+    "default": 10,
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Number of Contacts"
+   },
+   {
+    "name": "contact_filter_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "role",
+      "Role"
+     ],
+     [
+      "seniority",
+      "Seniority"
+     ]
+    ],
+    "string": "Filter on",
+    "default": "role",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Filter on"
+   },
+   {
+    "name": "preferred_role_id",
+    "type": "Many2one",
+    "comodel": "crm.iap.lead.role",
+    "string": "Preferred Role",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Preferred Role",
+    "target_entity": "crm.iap.lead.role"
+   },
+   {
+    "name": "role_ids",
+    "type": "Many2many",
+    "comodel": "crm.iap.lead.role",
+    "string": "Other Roles",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Other Roles",
+    "target_entity": "crm.iap.lead.role"
+   },
+   {
+    "name": "seniority_id",
+    "type": "Many2one",
+    "comodel": "crm.iap.lead.seniority",
+    "string": "Seniority",
+    "defined_in_package": "crm_iap_mine",
+    "full_name": "Seniority",
+    "target_entity": "crm.iap.lead.seniority"
+   },
+   {
+    "name": "lead_credits",
+    "type": "Char",
+    "compute": "_compute_tooltip",
+    "readonly": true,
+    "defined_in_package": "crm_iap_mine",
+    "string": "Lead Credits",
+    "full_name": "Lead Credits"
+   },
+   {
+    "name": "lead_contacts_credits",
+    "type": "Char",
+    "compute": "_compute_tooltip",
+    "readonly": true,
+    "defined_in_package": "crm_iap_mine",
+    "string": "Lead Contacts Credits",
+    "full_name": "Lead Contacts Credits"
+   },
+   {
+    "name": "lead_total_credits",
+    "type": "Char",
+    "compute": "_compute_tooltip",
+    "readonly": true,
+    "defined_in_package": "crm_iap_mine",
+    "string": "Lead Total Credits",
+    "full_name": "Lead Total Credits"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_lead_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_country_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tooltip",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "lead_number",
+         "contact_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lead_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lead_ids.lead_mining_request_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_team_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "user_id",
+         "lead_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "When changing the user, also set a team_id or restrict team id\nto the ones user_id is member of. ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_state_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "country_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "States for some specific countries should not be offered as filtering options because\nthey drastically reduce the amount of IAP reveal results.\n\nFor example, in Belgium, only 11% of companies have a defined state within the\nreveal service while the rest of them have no state defined at all.\n\nMeaning specifying states for that country will yield a lot less results than what you could\nexpect, which is not the desired behavior.\nObviously all companies are active within a state, it's just a lack of data in the reveal\nservice side.\n\nTo help users create meaningful iap searches, we only keep the states filtering for several\nwhitelisted countries (based on their country code).\nThe complete list and reasons for this change can be found on task-2471703. ",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_available_state_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "available_state_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_lead_number",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "lead_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_contact_number",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "contact_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_country_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "country_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_company_size_min",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "company_size_min"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_company_size_max",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "company_size_max"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_empty_list_help",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "help_message"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_iap_payload",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": "This will prepare the data to send to the server",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_perform_request",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": "This will perform the request and create the corresponding leads.\nThe user will be notified if they don't have enough credits.",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Your request could not be executed: %s",
+        "line": 264
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_iap_contact_mining",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "params",
+     "timeout"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_leads_from_response",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "result"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": "This method will get the response from the service and create the leads accordingly ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_lead_vals_from_response",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_draft",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_submit",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_get_lead_action",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_get_opportunity_action",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_buy_credits",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_iap_mine",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_perform_request",
+    "package": "crm_iap_mine",
+    "kind": "UserError",
+    "message": "Your request could not be executed: %s"
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "crm_iap_mine.access_crm_iap_lead_mining_request",
+    "package": "crm_iap_mine",
+    "name": "access_crm_iap_lead_mining_request",
+    "entity": "crm.iap.lead.mining.request",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "crm_iap_mine.crm_iap_lead_mining_request_view_form",
+    "package": "crm_iap_mine",
+    "name": "crm.iap.lead.mining.request.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "invisible": "context.get('is_modal')"
+      },
+      {
+       "name": "error_type",
+       "invisible": "1"
+      },
+      {
+       "name": "lead_type",
+       "invisible": "1"
+      },
+      {
+       "name": "lead_count"
+      },
+      {
+       "name": "lead_count"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "lead_number",
+       "readonly": "state == 'done'",
+       "nolabel": "1"
+      },
+      {
+       "name": "search_type",
+       "widget": "selection",
+       "readonly": "state == 'done'",
+       "nolabel": "1"
+      },
+      {
+       "name": "country_ids",
+       "widget": "many2many_tags",
+       "readonly": "state == 'done'",
+       "required": "True",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "available_state_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "state_ids",
+       "widget": "many2many_tags",
+       "invisible": "not country_ids or not available_state_ids",
+       "readonly": "state == 'done'",
+       "domain": "[('id', 'in', available_state_ids)]",
+       "options": "{'no_create': True, 'no_open': True}",
+       "placeholder": "Pick States..."
+      },
+      {
+       "name": "industry_ids",
+       "widget": "many2many_tags",
+       "readonly": "state == 'done'",
+       "required": "1",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "filter_on_size",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "company_size_min",
+       "readonly": "state == 'done'",
+       "required": "filter_on_size"
+      },
+      {
+       "name": "company_size_max",
+       "readonly": "state == 'done'",
+       "required": "filter_on_size"
+      },
+      {
+       "name": "lead_type",
+       "invisible": "context.get('is_modal')",
+       "readonly": "state == 'done'",
+       "groups": "crm.group_use_lead"
+      },
+      {
+       "name": "team_id",
+       "readonly": "state == 'done'",
+       "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "readonly": "state == 'done'",
+       "string": "Default Tags",
+       "options": "{'color_field': 'color', 'no_create_edit': True}"
+      },
+      {
+       "name": "contact_number",
+       "readonly": "state == 'done'",
+       "required": "search_type == 'people'",
+       "nolabel": "1"
+      },
+      {
+       "name": "contact_filter_type",
+       "widget": "radio",
+       "readonly": "state == 'done'",
+       "options": "{'horizontal': true}"
+      },
+      {
+       "name": "preferred_role_id",
+       "invisible": "contact_filter_type != 'role'",
+       "readonly": "state == 'done'",
+       "required": "search_type == 'people' and contact_filter_type == 'role'",
+       "options": "{'no_create_edit': True, 'no_quick_create': True, 'no_open': True}"
+      },
+      {
+       "name": "role_ids",
+       "widget": "many2many_tags",
+       "invisible": "not preferred_role_id or contact_filter_type != 'role'",
+       "readonly": "state == 'done'",
+       "options": "{'color_field': 'color', 'no_create_edit': True, 'no_quick_create': True}"
+      },
+      {
+       "name": "seniority_id",
+       "invisible": "contact_filter_type != 'seniority'",
+       "readonly": "state == 'done'",
+       "required": "search_type == 'people' and contact_filter_type == 'seniority'",
+       "options": "{'no_create_edit': True, 'no_quick_create': True, 'no_open': True}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_submit",
+       "string": "Submit",
+       "type": "object",
+       "invisible": "context.get('is_modal') or state != 'draft'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_submit",
+       "string": "Retry",
+       "type": "object",
+       "invisible": "context.get('is_modal') or state != 'error'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_buy_credits",
+       "type": "object",
+       "class": "oe_inline p-0 border-0 align-top text-primary"
+      },
+      {
+       "name": "action_get_opportunity_action",
+       "type": "object",
+       "invisible": "lead_type != 'opportunity' or state != 'done'",
+       "class": "oe_stat_button",
+       "context": "{'create': False}",
+       "icon": "fa-star"
+      },
+      {
+       "name": "action_get_lead_action",
+       "type": "object",
+       "invisible": "lead_type != 'lead' or state != 'done'",
+       "class": "oe_stat_button",
+       "context": "{'create': False}",
+       "groups": "crm.group_use_lead",
+       "icon": "fa-star"
+      },
+      {
+       "name": "action_submit",
+       "string": "Generate Leads",
+       "type": "object",
+       "invisible": "not context.get('is_modal')",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "invisible": "not context.get('is_modal')",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1,
+      "selection": 1,
+      "many2many_tags": 5,
+      "many2one_avatar_user": 1,
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_submit",
+       "type": "object",
+       "string": "Submit",
+       "class": "oe_highlight",
+       "invisible": "context.get('is_modal') or state != 'draft'"
+      },
+      {
+       "name": "action_submit",
+       "type": "object",
+       "string": "Retry",
+       "class": "oe_highlight",
+       "invisible": "context.get('is_modal') or state != 'error'"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,done",
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_get_opportunity_action",
+       "class": "oe_stat_button",
+       "type": "object",
+       "icon": "fa-star",
+       "context": "{'create': False}",
+       "invisible": "lead_type != 'opportunity' or state != 'done'"
+      },
+      {
+       "name": "action_get_lead_action",
+       "class": "oe_stat_button",
+       "type": "object",
+       "icon": "fa-star",
+       "groups": "crm.group_use_lead",
+       "context": "{'create': False}",
+       "invisible": "lead_type != 'lead' or state != 'done'"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "crm_iap_mine.crm_iap_lead_mining_request_view_tree",
+    "package": "crm_iap_mine",
+    "name": "crm.iap.lead.mining.request.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "decoration-bf": "1"
+      },
+      {
+       "name": "lead_number",
+       "string": "Number of Leads"
+      },
+      {
+       "name": "search_type"
+      },
+      {
+       "name": "country_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "industry_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "team_id",
+       "optional": "hide"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "optional": "hide"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}",
+       "optional": "hide"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "readonly": "1",
+       "decoration-danger": "state == 'error'",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state == 'draft'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 3,
+      "many2one_avatar_user": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "crm_iap_mine.crm_iap_lead_mining_request_view_search",
+    "package": "crm_iap_mine",
+    "name": "crm.iap.lead.mining.request.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Lead Mining Request"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "industry_ids"
+      },
+      {
+       "name": "country_ids"
+      },
+      {
+       "name": "team_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "tag_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "state_is_draft",
+       "string": "Draft",
+       "domain": "[('state', '=', 'draft')]"
+      },
+      {
+       "name": "state_is_done",
+       "string": "Done",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "state_is_error",
+       "string": "Error",
+       "domain": "[('state', '=', 'error')]"
+      },
+      {
+       "name": "type_is_lead",
+       "string": "Leads",
+       "domain": "[('lead_type', '=', 'lead')]"
+      },
+      {
+       "name": "type_is_opportunity",
+       "string": "Opportunities",
+       "domain": "[('lead_type', '=', 'opportunity')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_lead_type",
+       "string": "Type",
+       "domain": "[]",
+       "context": "{'group_by':'lead_type'}"
+      },
+      {
+       "name": "groupby_team_id",
+       "string": "Sales Team",
+       "domain": "[]",
+       "context": "{'group_by':'team_id'}"
+      },
+      {
+       "name": "groupby_user_id",
+       "string": "Salesperson",
+       "domain": "[]",
+       "context": "{'group_by':'user_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "crm_iap_mine.crm_iap_lead_mining_request_action",
+    "package": "crm_iap_mine",
+    "name": "Lead Mining Requests",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "crm.iap.lead.mining.request"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

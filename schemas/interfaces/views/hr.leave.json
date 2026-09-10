@@ -1,0 +1,1595 @@
+{
+ "catalog": {
+  "name": "views:hr.leave",
+  "description": "View declarations for entity hr.leave.",
+  "record_count": 23,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr_holidays.view_evaluation_report_graph",
+   "package": "hr_holidays",
+   "name": "hr.holidays.graph",
+   "entity": "hr.leave",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Appraisal Analysis",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "holiday_status_id"
+     },
+     {
+      "name": "date_from"
+     },
+     {
+      "name": "number_of_days"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "holiday_status_id"
+     },
+     {
+      "name": "date_from"
+     },
+     {
+      "name": "number_of_days",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Appraisal Analysis\" sample=\"1\">\n                <field name=\"employee_id\"/>\n                <field name=\"holiday_status_id\"/>\n                <field name=\"date_from\"/>\n                <field name=\"number_of_days\" type=\"measure\"/>\n            </graph>\n         </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.view_hr_holidays_filter",
+   "package": "hr_holidays",
+   "name": "hr.holidays.filter",
+   "entity": "hr.leave",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Time Off"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "holiday_status_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "activity_user_id",
+      "string": "Activities of"
+     },
+     {
+      "name": "activity_type_id",
+      "string": "Activity type"
+     },
+     {
+      "name": "state",
+      "string": "Status"
+     },
+     {
+      "name": "department_id",
+      "string": "Department"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "waiting_for_me",
+      "string": "Waiting For Me",
+      "domain": "[                         ('state','in',['confirm']),                         '|',                         ('employee_id.user_id', '!=', uid),                         '&',                         ('employee_id.user_id', '=', uid),                         ('employee_id.leave_manager_id', '=', uid)]",
+      "groups": "hr_holidays.group_hr_holidays_responsible,!hr_holidays.group_hr_holidays_user"
+     },
+     {
+      "name": "waiting_for_me_manager",
+      "string": "Waiting For Me",
+      "domain": "[                         ('state','in',['confirm','validate1']),                         '|',                             ('employee_id.user_id', '!=', uid),                             '|',                                 '&',                                     ('state','=','confirm'),                                     ('holiday_status_id.leave_validation_type','=','hr'),                                 ('state','=','validate1')]",
+      "groups": "hr_holidays.group_hr_holidays_user"
+     },
+     {
+      "name": "approve",
+      "string": "First Approval",
+      "domain": "[('state', '=', 'confirm')]"
+     },
+     {
+      "name": "second_approval",
+      "string": "Second Approval",
+      "domain": "[('state', '=', 'validate1')]"
+     },
+     {
+      "name": "to_approve",
+      "string": "To Approve",
+      "domain": "[('state','in',('confirm','validate1'))]"
+     },
+     {
+      "name": "validated",
+      "string": "Approved",
+      "domain": "[('state', '=', 'validate')]"
+     },
+     {
+      "name": "cancelled_leaves",
+      "string": "Cancelled",
+      "domain": "[('state', '=', 'cancel')]"
+     },
+     {
+      "name": "refused_leaves",
+      "string": "Refused",
+      "domain": "[('state', '=', 'refuse')]"
+     },
+     {
+      "name": "my_leaves",
+      "string": "My Time Off",
+      "domain": "[('employee_id.user_id', '=', uid)]"
+     },
+     {
+      "name": "my_team",
+      "string": "My Team",
+      "domain": "['|', ('employee_id.leave_manager_id', '=', uid), ('employee_id.user_id', '=', uid)]",
+      "help": "Time off of people you are manager of"
+     },
+     {
+      "name": "department",
+      "string": "My Department",
+      "domain": "[('employee_id.member_of_department', '=', True)]",
+      "help": "My Department"
+     },
+     {
+      "name": "filter_date_from",
+      "string": "Start Date",
+      "date": "date_from",
+      "default_period": "year"
+     },
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')                         ]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_employee",
+      "string": "Employee",
+      "context": "{'group_by':'employee_id'}"
+     },
+     {
+      "name": "group_type",
+      "string": "Type",
+      "context": "{'group_by':'holiday_status_id'}"
+     },
+     {
+      "name": "group_state",
+      "string": "Status",
+      "context": "{'group_by': 'state'}"
+     },
+     {
+      "name": "group_date_from",
+      "string": "Date",
+      "context": "{'group_by':'date_from'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search Time Off\">\n                <field name=\"employee_id\"/>\n                <field name=\"holiday_status_id\"/>\n                <field name=\"name\"/>\n                <field name=\"activity_user_id\" string=\"Activities of\"/>\n                <field name=\"activity_type_id\" string=\"Activity type\"/>\n                <filter domain=\"[                         ('state','in',['confirm']),                         '|',                         ('employee_id.user_id', '!=', uid),                         '&amp;',                         ('employee_id.user_id', '=', uid),                         ('employee_id.leave_manager_id', '=', uid)]\" string=\"Waiting For Me\" name=\"waiting_for_me\" groups=\"hr_holidays.group_hr_holidays_responsible,!hr_holidays.group_hr_holidays_user\"/>\n                <filter domain=\"[                         ('state','in',['confirm','validate1']),                         '|',                             ('employee_id.user_id', '!=', uid),                             '|',                                 '&amp;',                                     ('state','=','confirm'),                                     ('holiday_status_id.leave_validation_type','=','hr'),                                 ('state','=','validate1')]\" string=\"Waiting For Me\" name=\"waiting_for_me_manager\" groups=\"hr_holidays.group_hr_holidays_user\"/>\n                <separator/>\n                <filter domain=\"[('state', '=', 'confirm')]\" string=\"First Approval\" name=\"approve\"/>\n                <filter domain=\"[('state', '=', 'validate1')]\" string=\"Second Approval\" name=\"second_approval\"/>\n                <filter domain=\"[('state','in',('confirm','validate1'))]\" string=\"To Approve\" name=\"to_approve\"/>\n                <filter string=\"Approved\" domain=\"[('state', '=', 'validate')]\" name=\"validated\"/>\n                <filter name=\"cancelled_leaves\" string=\"Cancelled\" domain=\"[('state', '=', 'cancel')]\"/>\n                <filter name=\"refused_leaves\" string=\"Refused\" domain=\"[('state', '=', 'refuse')]\"/>\n                <separator/>\n                <filter string=\"My Time Off\" name=\"my_leaves\" domain=\"[('employee_id.user_id', '=', uid)]\"/>\n                <filter string=\"My Team\" name=\"my_team\" domain=\"['|', ('employee_id.leave_manager_id', '=', uid), ('employee_id.user_id', '=', uid)]\" help=\"Time off of people you are manager of\"/>\n                <filter string=\"My Department\" name=\"department\" domain=\"[('employee_id.member_of_department', '=', True)]\" help=\"My Department\"/>\n                <separator/>\n                <filter name=\"filter_date_from\" date=\"date_from\" default_period=\"year\" string=\"Start Date\"/>\n                <separator/>\n                <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                <separator invisible=\"1\"/>\n                <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')                         ]\"/>\n                <group>\n                    <filter name=\"group_employee\" string=\"Employee\" context=\"{'group_by':'employee_id'}\"/>\n                    <filter name=\"group_type\" string=\"Type\" context=\"{'group_by':'holiday_status_id'}\"/>\n                    <filter name=\"group_state\" string=\"Status\" context=\"{'group_by': 'state'}\"/>\n                    <separator/>\n                    <filter name=\"group_date_from\" string=\"Date\" context=\"{'group_by':'date_from'}\"/>\n                </group>\n                <searchpanel>\n                    <field name=\"state\" string=\"Status\"/>\n                    <field name=\"department_id\" string=\"Department\" icon=\"fa-users\"/>\n                </searchpanel>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_kanban",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.kanban",
+   "entity": "hr.leave",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "sample": "1",
+     "class": "o_holidays_view_kanban",
+     "js_class": "time_off_kanban_dashboard"
+    },
+    "fields": [
+     {
+      "name": "supported_attachment_ids_count"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "leave_type_request_unit"
+     },
+     {
+      "name": "request_unit_hours"
+     },
+     {
+      "name": "request_unit_half"
+     },
+     {
+      "name": "request_date_from"
+     },
+     {
+      "name": "request_hour_from"
+     },
+     {
+      "name": "request_hour_to"
+     },
+     {
+      "name": "request_date_to"
+     },
+     {
+      "name": "can_approve"
+     },
+     {
+      "name": "can_validate"
+     },
+     {
+      "name": "can_refuse"
+     },
+     {
+      "name": "request_date_from_period"
+     },
+     {
+      "name": "request_date_to_period"
+     },
+     {
+      "name": "holiday_status_requires_allocation"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "holiday_status_id"
+     },
+     {
+      "name": "request_hour_from",
+      "widget": "float_time_selection"
+     },
+     {
+      "name": "request_hour_to",
+      "widget": "float_time_selection"
+     },
+     {
+      "name": "duration_display"
+     },
+     {
+      "name": "virtual_remaining_leaves",
+      "widget": "float"
+     },
+     {
+      "name": "max_leaves",
+      "widget": "float"
+     },
+     {
+      "name": "employee_id",
+      "widget": "many2one_avatar_employee"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "request_hour_from",
+      "widget": "float_time_selection"
+     },
+     {
+      "name": "request_hour_to",
+      "widget": "float_time_selection"
+     },
+     {
+      "name": "holiday_status_id"
+     },
+     {
+      "name": "duration_display"
+     },
+     {
+      "name": "supported_attachment_ids_count",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(hr_holidays.action_hr_leave_generate_multi_wizard)d",
+      "string": "New Group Time Off",
+      "type": "action",
+      "class": "btn btn-secondary",
+      "groups": "hr_holidays.group_hr_holidays_responsible"
+     },
+     {
+      "name": "action_approve",
+      "type": "object",
+      "class": "btn btn-primary"
+     },
+     {
+      "name": "action_approve",
+      "type": "object",
+      "class": "btn btn-primary"
+     },
+     {
+      "name": "action_refuse",
+      "type": "object",
+      "class": "btn btn-secondary"
+     },
+     {
+      "name": "action_approve",
+      "type": "object",
+      "class": "btn btn-sm btn-primary py-0",
+      "groups": "hr_holidays.group_hr_holidays_user"
+     },
+     {
+      "name": "action_approve",
+      "type": "object",
+      "class": "btn btn-sm btn-primary py-0",
+      "groups": "hr_holidays.group_hr_holidays_manager"
+     },
+     {
+      "name": "action_refuse",
+      "type": "object",
+      "class": "btn btn-sm btn-secondary py-0",
+      "groups": "hr_holidays.group_hr_holidays_user"
+     },
+     {
+      "name": "action_documents",
+      "type": "object",
+      "class": "btn btn-link btn-sm ps-0 text-danger"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "float_time_selection": 4,
+     "float": 2,
+     "many2one_avatar_employee": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban sample=\"1\" class=\"o_holidays_view_kanban\" js_class=\"time_off_kanban_dashboard\">\n                <header>\n                    <button type=\"action\" name=\"%(hr_holidays.action_hr_leave_generate_multi_wizard)d\" string=\"New Group Time Off\" class=\"btn btn-secondary\" groups=\"hr_holidays.group_hr_holidays_responsible\" display=\"always\"/>\n                </header>\n                <field name=\"supported_attachment_ids_count\"/>\n                <field name=\"state\"/>\n                <field name=\"employee_id\"/>\n                <field name=\"leave_type_request_unit\"/>\n                <field name=\"request_unit_hours\"/>\n                <field name=\"request_unit_half\"/>\n                <field name=\"request_date_from\"/>\n                <field name=\"request_hour_from\"/>\n                <field name=\"request_hour_to\"/>\n                <field name=\"request_date_to\"/>\n                <field name=\"can_approve\"/>\n                <field name=\"can_validate\"/>\n                <field name=\"can_refuse\"/>\n                <field name=\"request_date_from_period\"/>\n                <field name=\"request_date_to_period\"/>\n                <field name=\"holiday_status_requires_allocation\"/>\n                <templates>\n                    <t t-name=\"card\" class=\"g-0\">\n                        <div class=\"o_hr_holidays_kanban w-100\">\n                            <widget name=\"web_ribbon\" title=\"To Approve\" bg_color=\"text-bg-warning\" invisible=\"state != 'confirm'\"/>\n                            <widget name=\"web_ribbon\" title=\"To Validate\" bg_color=\"text-bg-warning\" invisible=\"state != 'validate1'\"/>\n                            <widget name=\"web_ribbon\" title=\"Cancelled\" bg_color=\"text-bg-danger\" invisible=\"state != 'cancel'\"/>\n                            <widget name=\"web_ribbon\" title=\"Refused\" bg_color=\"bg-danger\" invisible=\"state != 'refuse'\"/>\n                            <widget name=\"web_ribbon\" title=\"Approved\" bg_color=\"bg-success\" invisible=\"state != 'validate'\"/>\n                            <aside>\n                                <img t-att-src=\"'/web/image/hr.employee.public/' + record.employee_id.raw_value + '/avatar_128'\" class=\"o_image_64_cover float-start me-2\" alt=\"Employee's image\"/>\n                            </aside>\n                            <main class=\"h-100\">\n                                <div class=\"justify-content-center o_holidays_kanban_card\">\n                                    <div class=\"d-flex flex-row\">\n                                        <div class=\"col-12 align-items-center o_hr_holidays_value\">\n                                            <div class=\"col-4 o_hr_holidays_card\">\n                                                <field class=\"fw-bold fs-3 mb-2\" name=\"employee_id\"/>\n                                            </div>\n                                            <div class=\"col-2 o_hr_holidays_name\">\n                                                <field name=\"holiday_status_id\" class=\"fw-bold\"/>\n                                                <div class=\"d-flex flex-row\">\n                                                    <t t-set=\"same_day\" t-value=\"record.request_date_from.raw_value == record.request_date_to.raw_value\"/>\n                                                    <t t-set=\"leave_unit\" t-value=\"record.leave_type_request_unit.raw_value\"/>\n                                                    <t t-out=\"luxon.DateTime.fromISO(record.request_date_from.raw_value).toLocaleString({ month: 'short', day: 'numeric'})\"/>\n                                                    <t t-if=\"leave_unit == 'day'\">\n                                                        <t t-if=\"!same_day\">\n                                                            <span class=\"mx-1\">–</span>\n                                                            <t t-out=\"luxon.DateTime.fromISO(record.request_date_to.raw_value).toLocaleString({ month: 'short', day: 'numeric'})\"/>\n                                                        </t>\n                                                    </t>\n                                                    <t t-elif=\"leave_unit == 'half_day'\">\n                                                        <t t-set=\"same_period\" t-value=\"record.request_date_from_period.raw_value == record.request_date_to_period.raw_value\"/>\n                                                        <span class=\"mx-1\">-</span>\n                                                        <t t-out=\"record.request_date_from_period.value\"/>\n                                                        <t t-if=\"same_day\">\n                                                            <t t-if=\"!same_period\">\n                                                                <span class=\"mx-1\">–</span>\n                                                                <t t-out=\"record.request_date_to_period.value\"/>\n                                                            </t>\n                                                        </t>\n                                                        <t t-else=\"\">\n                                                            <span class=\"mx-1\">–</span>\n                                                            <t t-out=\"luxon.DateTime.fromISO(record.request_date_to.raw_value).toLocaleString({ month: 'short', day: 'numeric'})\"/>\n                                                            <span class=\"mx-1\">-</span>\n                                                            <t t-out=\"record.request_date_to_period.value\"/>\n                                                        </t>\n                                                    </t>\n                                                    <t t-elif=\"leave_unit == 'hour'\">\n                                                        <span class=\"mx-1\">-</span>\n                                                        <field name=\"request_hour_from\" widget=\"float_time_selection\"/>\n                                                        <span class=\"mx-1\">–</span>\n                                                        <t t-if=\"!same_day\">\n                                                            <t t-out=\"luxon.DateTime.fromISO(record.request_date_to.raw_value).toLocaleString({ month: 'short', day: 'numeric'})\"/>\n                                                            <span class=\"mx-1\">-</span>\n                                                        </t>\n                                                        <field name=\"request_hour_to\" widget=\"float_time_selection\"/>\n                                                    </t>\n                                                </div>\n                                            </div>\n                                            <div class=\"col-2 o_hr_holidays_card\">\n                                                <div class=\"fw-bold d-flex me-1\">\n                                                    <field name=\"duration_display\"/>\n                                                </div>\n                                                Amount\n                                            </div>\n                                            <div class=\"col-2 o_hr_holidays_card\">\n                                                <div t-if=\"record.holiday_status_requires_allocation.raw_value\"> \n                                                    <div class=\"fw-bold d-flex gap-1 me-1\">\n                                                        <field name=\"virtual_remaining_leaves\" widget=\"float\" digits=\"[3,2]\"/>\n                                                        /\n                                                        <field name=\"max_leaves\" widget=\"float\" digits=\"[3,2]\"/>\n                                                    </div>\n                                                    <span>\n                                                        Current balance\n                                                    </span>\n                                                </div>\n                                            </div>\n                                            <div class=\"col-2 o_hr_holidays_button flex-wrap d-flex pe-4 gap-2 justify-content-start\">\n                                                <button name=\"action_approve\" type=\"object\" class=\"btn btn-primary\" t-if=\"record.can_approve.raw_value\">\n                                                    Approve\n                                                </button>\n                                                <button name=\"action_approve\" type=\"object\" class=\"btn btn-primary\" t-if=\"record.can_validate.raw_value and !record.can_approve.raw_value\">\n                                                    Validate\n                                                </button>\n                                                <button name=\"action_refuse\" type=\"object\" class=\"btn btn-secondary\" t-if=\"record.can_refuse.raw_value\">\n                                                    Refuse\n                                                </button>\n                                            </div>\n                                        </div>\n                                    </div>\n                                </div>\n                            </main>\n                        </div>\n                        <div class=\"f-flex flex-row o_hr_holidays_kanban_mobile w-100\">\n                            <main>\n                                <div class=\"flex flex-grow-1 align-items-start mb-1\">\n                                    <div class=\"mb-1 d-flex align-items-center gap-2 hr_leave_kanban_title\">\n                                        <field name=\"employee_id\" widget=\"many2one_avatar_employee\"/>\n                                        <field name=\"employee_id\" class=\"fw-bold w-100\"/>\n                                        <span style=\"min-width: fit-content;\" t-attf-class=\"rounded-pill badge flex-shrink-1 text-bg-{{                                                 record.state.raw_value == 'validate' ? 'success' :                                                 ['confirm', 'validate1'].includes(record.state.raw_value) ?                                                 'warning' : 'danger' }}\" t-out=\"record.state.value\"/>\n                                    </div>\n                                    <div class=\"d-flex flex-row\">\n                                        <div id=\"date_part\" class=\"d-flex flex-row\"> \n                                                <t t-set=\"same_day\" t-value=\"record.request_date_from.raw_value == record.request_date_to.raw_value\"/>\n                                                <t t-set=\"leave_unit\" t-value=\"record.leave_type_request_unit.raw_value\"/>\n                                                <t t-out=\"luxon.DateTime.fromISO(record.request_date_from.raw_value).toLocaleString({ month: 'short', day: 'numeric'})\"/>\n                                                <t t-if=\"leave_unit == 'day'\">\n                                                    <t t-if=\"!same_day\">\n                                                        <span class=\"mx-1\">–</span>\n                                                        <t t-out=\"luxon.DateTime.fromISO(record.request_date_to.raw_value).toLocaleString({ month: 'short', day: 'numeric'})\"/>\n                                                    </t>\n                                                </t>\n                                                <t t-elif=\"leave_unit == 'half_day'\">\n                                                    <t t-set=\"same_period\" t-value=\"record.request_date_from_period.raw_value == record.request_date_to_period.raw_value\"/>\n                                                    <span class=\"mx-1\">-</span>\n                                                    <t t-out=\"record.request_date_from_period.value\"/>\n                                                    <t t-if=\"same_day\">\n                                                        <t t-if=\"!same_period\">\n                                                            <span class=\"mx-1\">–</span>\n                                                            <t t-out=\"record.request_date_to_period.value\"/>\n                                                        </t>\n                                                    </t>\n                                                    <t t-else=\"\">\n                                                        <span class=\"mx-1\">–</span>\n                                                        <t t-out=\"luxon.DateTime.fromISO(record.request_date_to.raw_value).toLocaleString({ month: 'short', day: 'numeric'})\"/>\n                                                        <span class=\"mx-1\"><t t-out=\"record.request_date_to_period.value\"/></span>\n                                                    </t>\n                                                </t>\n                                                <t t-elif=\"leave_unit == 'hour'\">\n                                                    <span class=\"mx-1\">-</span>\n                                                    <field name=\"request_hour_from\" widget=\"float_time_selection\"/>\n                                                    <span class=\"mx-1\">–</span>\n                                                    <t t-if=\"!same_day\">\n                                                        <t t-out=\"luxon.DateTime.fromISO(record.request_date_to.raw_value).toLocaleString({ month: 'short', day: 'numeric'})\"/>\n                                                        <span class=\"mx-1\">-</span>\n                                                    </t>\n                                                    <field name=\"request_hour_to\" widget=\"float_time_selection\"/>\n                                                </t>\n                                        </div>\n                                    </div>\n                                    <field name=\"holiday_status_id\" class=\"text-muted\"/>\n                                    <span class=\"text-muted\">\n                                        (<field name=\"duration_display\"/>)\n                                    </span>\n                                </div>\n                            </main>\n                            <bottom class=\"d-flex justify-content-end gap-2 mt-0\">\n                                <button t-if=\"record.can_approve.raw_value\" name=\"action_approve\" type=\"object\" class=\"btn btn-sm btn-primary py-0\" groups=\"hr_holidays.group_hr_holidays_user\">\n                                    Approve\n                                </button>\n                                <button t-if=\"record.can_validate.raw_value and !record.can_approve.raw_value\" name=\"action_approve\" type=\"object\" class=\"btn btn-sm btn-primary py-0\" groups=\"hr_holidays.group_hr_holidays_manager\">\n                                    Validate\n                                </button>\n                                <button t-if=\"record.can_refuse.raw_value\" name=\"action_refuse\" type=\"object\" class=\"btn btn-sm btn-secondary py-0\" groups=\"hr_holidays.group_hr_holidays_user\">\n                                    Refuse\n                                </button>\n                                <button t-if=\"record.supported_attachment_ids_count.raw_value &gt; 0\" name=\"action_documents\" type=\"object\" class=\"btn btn-link btn-sm ps-0 text-danger\">\n                                    <i class=\"fa fa-paperclip\"> <field name=\"supported_attachment_ids_count\" nolabel=\"1\"/></i>\n                                </button>\n                            </bottom>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_activity",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.activity",
+   "entity": "hr.leave",
+   "view_type": "activity",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "activity",
+    "root_attributes": {
+     "string": "Time Off Request"
+    },
+    "fields": [
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "number_of_days"
+     },
+     {
+      "name": "holiday_status_id"
+     },
+     {
+      "name": "date_from"
+     },
+     {
+      "name": "date_to"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <activity string=\"Time Off Request\">\n                <field name=\"employee_id\"/>\n                <templates>\n                    <div t-name=\"activity-box\">\n                        <img class=\"rounded\" t-att-src=\"activity_image('hr.employee', 'avatar_128', record.employee_id.raw_value)\" t-att-title=\"record.employee_id.value\" t-att-alt=\"record.employee_id.value\"/>\n                        <div class=\"ms-2 flex-grow-1\">\n                            <div class=\"d-flex justify-content-between\">\n                                <field name=\"name\" class=\"o_text_block o_text_bold\"/>\n                                <div class=\"text-muted text-nowrap\">(<field name=\"number_of_days\"/> days)</div>\n                            </div>\n                            <div class=\"text-muted\">\n                                <field name=\"holiday_status_id\" display=\"full\"/>\n                                <field name=\"date_from\"/> <i class=\"fa fa-long-arrow-right\" title=\"to\"/> <field name=\"date_to\"/>\n                            </div>\n                        </div>\n                    </div>\n                </templates>\n            </activity>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_form",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.form",
+   "entity": "hr.leave",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Time Off Request",
+     "class": "o_hr_leave_form",
+     "duplicate": "false"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "invisible": "1"
+     },
+     {
+      "name": "user_id",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "widget": "statusbar",
+      "invisible": "validation_type != 'both'"
+     },
+     {
+      "name": "state",
+      "widget": "statusbar",
+      "invisible": "validation_type == 'both'"
+     },
+     {
+      "name": "dashboard_warning_message",
+      "invisible": "not dashboard_warning_message"
+     },
+     {
+      "name": "leave_type_increases_duration",
+      "invisible": "not leave_type_increases_duration"
+     },
+     {
+      "name": "display_name",
+      "invisible": "not holiday_status_id"
+     },
+     {
+      "name": "holiday_status_id",
+      "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']",
+      "domain": "[                                     '|',                                         ('requires_allocation', '=', False),                                         '&',                                             ('has_valid_allocation', '=', True),                                             '|',                                                 ('allows_negative', '=', True),                                                 '&',                                                     ('virtual_remaining_leaves', '>', 0),                                                     ('allows_negative', '=', False),                                 ]",
+      "context": "{'employee_id': employee_id, 'default_date_from': date_from, 'default_date_to': date_to, 'leave_date_from': date_from}",
+      "options": "{'no_create': True, 'request_type': 'leave'}",
+      "force_save": "1"
+     },
+     {
+      "name": "request_date_from",
+      "widget": "daterange",
+      "readonly": "state != 'confirm'",
+      "required": "not date_from or not date_to",
+      "options": "{'end_date_field': 'request_date_to', 'always_range': '1'}"
+     },
+     {
+      "name": "request_date_to",
+      "invisible": "1"
+     },
+     {
+      "name": "duration_display",
+      "readonly": "1"
+     },
+     {
+      "name": "request_date_from_period",
+      "invisible": "not request_unit_half",
+      "readonly": "state != 'confirm'",
+      "required": "request_unit_half"
+     },
+     {
+      "name": "request_date_to_period",
+      "invisible": "not request_unit_half",
+      "readonly": "state != 'confirm'",
+      "required": "request_unit_half"
+     },
+     {
+      "name": "request_hour_from",
+      "widget": "float_time_selection",
+      "readonly": "state == 'validate'",
+      "required": "request_unit_hours"
+     },
+     {
+      "name": "request_hour_to",
+      "widget": "float_time_selection",
+      "readonly": "state == 'validate'",
+      "required": "request_unit_hours"
+     },
+     {
+      "name": "tz"
+     },
+     {
+      "name": "date_from",
+      "widget": "datetime",
+      "readonly": "1"
+     },
+     {
+      "name": "date_to",
+      "readonly": "1"
+     },
+     {
+      "name": "name",
+      "widget": "text",
+      "readonly": "state != 'confirm'",
+      "nolabel": "1",
+      "placeholder": "No description provided"
+     },
+     {
+      "name": "supported_attachment_ids",
+      "widget": "many2many_binary",
+      "invisible": "state != 'confirm'",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_approve",
+      "string": "Approve",
+      "type": "object",
+      "invisible": "not can_approve or not id",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_approve",
+      "string": "Validate",
+      "type": "object",
+      "invisible": "not can_validate or can_approve or not id",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_back_to_approval",
+      "string": "Back to Approval",
+      "type": "object",
+      "invisible": "not can_back_to_approve or not id"
+     },
+     {
+      "name": "action_refuse",
+      "string": "Refuse",
+      "type": "object",
+      "invisible": "not can_refuse or not id"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "not can_cancel or not id"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statusbar": 2,
+     "daterange": 1,
+     "float_time_selection": 2,
+     "datetime": 1,
+     "text": 1,
+     "many2many_binary": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "string": "Approve",
+      "name": "action_approve",
+      "type": "object",
+      "class": "oe_highlight",
+      "invisible": "not can_approve or not id"
+     },
+     {
+      "string": "Validate",
+      "name": "action_approve",
+      "invisible": "not can_validate or can_approve or not id",
+      "type": "object",
+      "class": "oe_highlight"
+     },
+     {
+      "string": "Back to Approval",
+      "name": "action_back_to_approval",
+      "type": "object",
+      "invisible": "not can_back_to_approve or not id"
+     },
+     {
+      "string": "Refuse",
+      "name": "action_refuse",
+      "type": "object",
+      "invisible": "not can_refuse or not id"
+     },
+     {
+      "string": "Cancel",
+      "name": "action_cancel",
+      "type": "object",
+      "invisible": "not can_cancel or not id"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": "confirm,validate,validate1",
+    "chatter": true,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Time Off Request\" class=\"o_hr_leave_form\" duplicate=\"false\">\n            <field name=\"employee_id\" invisible=\"1\"/> \n            <field name=\"user_id\" invisible=\"1\"/> \n            <header>\n                <button string=\"Approve\" name=\"action_approve\" type=\"object\" class=\"oe_highlight\" invisible=\"not can_approve or not id\"/>\n                <button string=\"Validate\" name=\"action_approve\" invisible=\"not can_validate or can_approve or not id\" type=\"object\" class=\"oe_highlight\"/>\n                <button string=\"Back to Approval\" name=\"action_back_to_approval\" type=\"object\" invisible=\"not can_back_to_approve or not id\"/>\n                <button string=\"Refuse\" name=\"action_refuse\" type=\"object\" invisible=\"not can_refuse or not id\"/>\n                <button string=\"Cancel\" name=\"action_cancel\" type=\"object\" invisible=\"not can_cancel or not id\"/>\n                <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"confirm,validate,validate1\" invisible=\"validation_type != 'both'\"/>\n                <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"confirm,validate\" invisible=\"validation_type == 'both'\"/>\n            </header>\n            <sheet>\n                <field name=\"dashboard_warning_message\" class=\"alert alert-danger d-flex mt-2\" role=\"alert\" style=\"white-space: pre-wrap;\" invisible=\"not dashboard_warning_message\"/>\n                <field name=\"leave_type_increases_duration\" class=\"alert alert-info d-flex mt-2\" role=\"alert\" style=\"white-space: pre-wrap;\" invisible=\"not leave_type_increases_duration\"/>\n                <div class=\"o_hr_leave_content row\">\n                    <div class=\"o_hr_leave_column col_left col-md-6 col-12\">\n                        <widget name=\"web_ribbon\" title=\"Cancelled\" bg_color=\"text-bg-danger\" invisible=\"state != 'cancel'\"/>\n                        <div name=\"title\" class=\"o_hr_leave_title\" invisible=\"1\">\n                            <field name=\"display_name\" invisible=\"not holiday_status_id\"/>\n                        </div>\n                        <group name=\"col_left\" class=\"m-0\">\n                            <field name=\"holiday_status_id\" force_save=\"1\" domain=\"[                                     '|',                                         ('requires_allocation', '=', False),                                         '&amp;',                                             ('has_valid_allocation', '=', True),                                             '|',                                                 ('allows_negative', '=', True),                                                 '&amp;',                                                     ('virtual_remaining_leaves', '&gt;', 0),                                                     ('allows_negative', '=', False),                                 ]\" context=\"{'employee_id': employee_id, 'default_date_from': date_from, 'default_date_to': date_to, 'leave_date_from': date_from}\" options=\"{'no_create': True, 'request_type': 'leave'}\" readonly=\"state in ['cancel', 'refuse', 'validate', 'validate1']\"/>\n                            <label for=\"request_date_from\" invisible=\"not request_unit_half and not request_unit_hours\" string=\"Date\"/>\n                            <label for=\"request_date_from\" invisible=\"request_unit_half or request_unit_hours\" string=\"Dates\"/>\n                            <div id=\"full_date\" class=\"o_row\">\n                                <field name=\"request_date_from\" widget=\"daterange\" readonly=\"state != 'confirm'\" required=\"not date_from or not date_to\" options=\"{'end_date_field': 'request_date_to', 'always_range': '1'}\"/>\n                                <field name=\"request_date_to\" invisible=\"1\"/> \n                                <div>\n                                    ( <field name=\"duration_display\" readonly=\"1\" class=\"w-auto\"/> )\n                                </div>\n                            </div>\n                            \n                            <label for=\"request_date_from_period\" invisible=\"not request_unit_half\" string=\"Day Period\"/>\n                            <div class=\"o_row\" invisible=\"not request_unit_half\">\n                                <field name=\"request_date_from_period\" invisible=\"not request_unit_half\" required=\"request_unit_half\" readonly=\"state != 'confirm'\" class=\"o_hr_narrow_field me-2\"/>\n                                <field name=\"request_date_to_period\" invisible=\"not request_unit_half\" required=\"request_unit_half\" readonly=\"state != 'confirm'\" class=\"o_hr_narrow_field\"/>\n                            </div>\n                            <label for=\"request_hour_from\" invisible=\"not request_unit_hours\" string=\"Hours\"/>\n                            <div class=\"o_row\" invisible=\"not request_unit_hours\">\n                                <field name=\"request_hour_from\" readonly=\"state == 'validate'\" required=\"request_unit_hours\" widget=\"float_time_selection\" class=\"o_hr_narrow_field me-2\"/>\n                                <field name=\"request_hour_to\" readonly=\"state == 'validate'\" required=\"request_unit_hours\" widget=\"float_time_selection\" class=\"o_hr_narrow_field\"/>\n                            </div>\n                            <div colspan=\"2\" class=\"alert alert-info\" role=\"alert\" invisible=\"not request_unit_hours or not tz_mismatch or dashboard_warning_message\">\n                                <span>The employee has a different timezone than yours! Here dates and times are displayed in the employee's work timezone</span>\n                                (<field name=\"tz\" class=\"oe_inline fw-bold\"/>).\n                                <div>For your reference, the equivalent times in your timezone are displayed below.</div>\n                            </div>\n                            <label for=\"date_from\" string=\"Your Timezone\" invisible=\"not request_unit_hours or not tz_mismatch\"/>\n                            <div class=\"o_row o_row_readonly\" invisible=\"not request_unit_hours or not tz_mismatch\">\n                                <label for=\"date_from\" string=\"From\"/>\n                                <field name=\"date_from\" readonly=\"1\" widget=\"datetime\"/>\n                                <label for=\"date_to\" string=\"To\"/>\n                                <field name=\"date_to\" readonly=\"1\"/>\n                            </div>\n                            <field name=\"name\" readonly=\"state != 'confirm'\" widget=\"text\" nolabel=\"1\" colspan=\"2\" placeholder=\"No description provided\"/>\n                        </group>\n                        <group>\n                            <field name=\"supported_attachment_ids\" widget=\"many2many_binary\" nolabel=\"1\" invisible=\"state != 'confirm'\" colspan=\"2\"/>\n                        </group>\n                    </div>\n                    <div class=\"o_hr_leave_column col_right col-md-6 col-12\">\n                        <widget name=\"hr_leave_stats\"/>\n                    </div>\n                </div>\n            </sheet>\n            <div class=\"o_attachment_preview\"/>\n            <chatter reload_on_post=\"True\" reload_on_attachment=\"True\"/>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_form_dashboard",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.form.dashboard",
+   "entity": "hr.leave",
+   "view_type": "field",
+   "inherits_view": "hr_holidays.hr_leave_view_form",
+   "mode": "primary",
+   "priority": "100",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "holiday_status_id",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "holiday_status_id",
+      "position": "before"
+     },
+     {
+      "name": "employee_id",
+      "widget": "many2one_avatar_employee",
+      "readonly": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_employee": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"holiday_status_id\" position=\"before\">\n                <field name=\"employee_id\" widget=\"many2one_avatar_employee\" readonly=\"1\"/>\n            </field>\n            <xpath expr=\"//header\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//div[hasclass('col_right')]\" position=\"replace\"/>\n            <xpath expr=\"//chatter\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//div[hasclass('o_attachment_preview')]\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_form_dashboard_new_time_off",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.form.dashboard.new.time.off",
+   "entity": "hr.leave",
+   "view_type": "xpath",
+   "inherits_view": "hr_holidays.hr_leave_view_form_dashboard",
+   "mode": "primary",
+   "priority": "17",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='col_left']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='col_left']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//group[@name='col_left']\" position=\"attributes\">\n                <attribute name=\"colspan\">5</attribute>\n            </xpath>\n            <xpath expr=\"//div[hasclass('o_hr_leave_content')]\" position=\"attributes\">\n                <attribute name=\"class\" remove=\"row my-n4\" separator=\" \"/>\n            </xpath>\n            <xpath expr=\"//div[hasclass('o_hr_leave_column')]\" position=\"attributes\">\n                <attribute name=\"class\" remove=\"col_left col-md-6\" separator=\" \"/>\n            </xpath>\n            <xpath expr=\"//div[hasclass('o_hr_leave_content')]\" position=\"before\">\n                <widget name=\"web_ribbon\" title=\"Refused\" bg_color=\"bg-danger\" invisible=\"state != 'refuse' or not id\"/>\n                <widget name=\"web_ribbon\" title=\"Approved\" bg_color=\"bg-success\" invisible=\"state != 'validate' or not id\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_form_dashboard_manager_new_time_off",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.form.dashboard.new.time.off",
+   "entity": "hr.leave",
+   "view_type": "xpath",
+   "inherits_view": "hr_holidays.hr_leave_view_form_dashboard_new_time_off",
+   "mode": "primary",
+   "priority": "17",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@widget='many2one_avatar_employee']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@widget='many2one_avatar_employee']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@widget='many2one_avatar_employee']\" position=\"attributes\"> \n                <attribute name=\"readonly\">0</attribute>\n            </xpath>\n            <field name=\"holiday_status_id\" position=\"before\">\n                <field name=\"user_id\" invisible=\"1\"/> \n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_dashboard",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.dashboard",
+   "entity": "hr.leave",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "js_class": "time_off_calendar_dashboard",
+     "string": "Time Off Request",
+     "form_view_id": "%(hr_holidays.hr_leave_view_form_dashboard_new_time_off)d",
+     "event_open_popup": "true",
+     "date_start": "date_from",
+     "date_stop": "date_to",
+     "quick_create": "0",
+     "show_date_picker": "0",
+     "show_unusual_days": "True",
+     "color": "color",
+     "hide_time": "True",
+     "mode": "year"
+    },
+    "fields": [
+     {
+      "name": "display_name",
+      "string": ""
+     },
+     {
+      "name": "holiday_status_id",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "invisible": "1"
+     },
+     {
+      "name": "is_hatched",
+      "invisible": "1"
+     },
+     {
+      "name": "is_striked",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "date_from",
+     "date_stop": "date_to",
+     "date_delay": null,
+     "color": "color",
+     "mode": "year",
+     "quick_create": "0",
+     "event_open_popup": "true",
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <calendar js_class=\"time_off_calendar_dashboard\" string=\"Time Off Request\" form_view_id=\"%(hr_holidays.hr_leave_view_form_dashboard_new_time_off)d\" event_open_popup=\"true\" date_start=\"date_from\" date_stop=\"date_to\" quick_create=\"0\" show_date_picker=\"0\" show_unusual_days=\"True\" color=\"color\" hide_time=\"True\" mode=\"year\">\n                <field name=\"display_name\" string=\"\"/>\n                <field name=\"holiday_status_id\" filters=\"1\" invisible=\"1\" color=\"color\"/>\n                <field name=\"state\" invisible=\"1\"/>\n                <field name=\"is_hatched\" invisible=\"1\"/>\n                <field name=\"is_striked\" invisible=\"1\"/>\n            </calendar>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_employee_view_dashboard",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.dashboard",
+   "entity": "hr.leave",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "string": "Time Off Request",
+     "js_class": "time_off_calendar_dashboard",
+     "form_view_id": "%(hr_holidays.hr_leave_view_form_dashboard_new_time_off)d",
+     "event_open_popup": "true",
+     "date_start": "date_from",
+     "date_stop": "date_to",
+     "mode": "year",
+     "quick_create": "0",
+     "show_date_picker": "0",
+     "show_unusual_days": "True",
+     "color": "color",
+     "hide_time": "True"
+    },
+    "fields": [
+     {
+      "name": "display_name",
+      "string": ""
+     },
+     {
+      "name": "holiday_status_id",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "invisible": "1"
+     },
+     {
+      "name": "is_hatched",
+      "invisible": "1"
+     },
+     {
+      "name": "is_striked",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "date_from",
+     "date_stop": "date_to",
+     "date_delay": null,
+     "color": "color",
+     "mode": "year",
+     "quick_create": "0",
+     "event_open_popup": "true",
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <calendar string=\"Time Off Request\" js_class=\"time_off_calendar_dashboard\" form_view_id=\"%(hr_holidays.hr_leave_view_form_dashboard_new_time_off)d\" event_open_popup=\"true\" date_start=\"date_from\" date_stop=\"date_to\" mode=\"year\" quick_create=\"0\" show_date_picker=\"0\" show_unusual_days=\"True\" color=\"color\" hide_time=\"True\">\n                <field name=\"display_name\" string=\"\"/>\n                <field name=\"holiday_status_id\" filters=\"1\" invisible=\"1\" color=\"color\"/>\n                <field name=\"state\" invisible=\"1\"/>\n                <field name=\"is_hatched\" invisible=\"1\"/>\n                <field name=\"is_striked\" invisible=\"1\"/>\n            </calendar>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_form_manager",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.form.manager",
+   "entity": "hr.leave",
+   "view_type": "xpath",
+   "inherits_view": "hr_leave_view_form",
+   "mode": "primary",
+   "priority": "16",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='title']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='title']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@name='title']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='holiday_status_id']\" position=\"before\">\n                <field name=\"employee_id\" groups=\"hr_holidays.group_hr_holidays_responsible\" readonly=\"state in ['cancel', 'refuse', 'validate', 'validate1']\" widget=\"many2one_avatar_employee\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n                <field name=\"department_id\" groups=\"hr_holidays.group_hr_holidays_responsible\" readonly=\"1\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_calendar",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.calendar",
+   "entity": "hr.leave",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "js_class": "time_off_calendar_hr_leave",
+     "string": "Time Off Request",
+     "form_view_id": "%(hr_holidays.hr_leave_view_form_dashboard_manager_new_time_off)d",
+     "event_open_popup": "true",
+     "date_start": "date_from",
+     "date_stop": "date_to",
+     "mode": "month",
+     "show_unusual_days": "True",
+     "quick_create": "0",
+     "color": "color"
+    },
+    "fields": [
+     {
+      "name": "holiday_status_id",
+      "invisible": "1"
+     },
+     {
+      "name": "employee_id",
+      "widget": "many2one_avatar_employee"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "state",
+      "invisible": "1"
+     },
+     {
+      "name": "is_hatched",
+      "invisible": "1"
+     },
+     {
+      "name": "is_striked",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_employee": 1
+    },
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "date_from",
+     "date_stop": "date_to",
+     "date_delay": null,
+     "color": "color",
+     "mode": "month",
+     "quick_create": "0",
+     "event_open_popup": "true",
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <calendar js_class=\"time_off_calendar_hr_leave\" string=\"Time Off Request\" form_view_id=\"%(hr_holidays.hr_leave_view_form_dashboard_manager_new_time_off)d\" event_open_popup=\"true\" date_start=\"date_from\" date_stop=\"date_to\" mode=\"month\" show_unusual_days=\"True\" quick_create=\"0\" color=\"color\">\n                <field name=\"holiday_status_id\" color=\"color\" filters=\"1\" invisible=\"1\"/>\n                <field name=\"employee_id\" filters=\"1\" widget=\"many2one_avatar_employee\"/>\n                <field name=\"name\"/>\n                <field name=\"state\" invisible=\"1\"/>\n                <field name=\"is_hatched\" invisible=\"1\"/>\n                <field name=\"is_striked\" invisible=\"1\"/>\n                <field name=\"state\" invisible=\"1\"/>\n            </calendar>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_tree",
+   "package": "hr_holidays",
+   "name": "hr.holidays.view.list",
+   "entity": "hr.leave",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Time Off Requests",
+     "sample": "1",
+     "duplicate": "false",
+     "js_class": "hr_holidays_payslip_list"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "widget": "many2one_avatar_employee",
+      "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']"
+     },
+     {
+      "name": "department_id",
+      "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']",
+      "optional": "hidden"
+     },
+     {
+      "name": "holiday_status_id",
+      "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']"
+     },
+     {
+      "name": "date_from",
+      "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']"
+     },
+     {
+      "name": "date_to",
+      "readonly": "state in ['cancel', 'refuse', 'validate', 'validate1']"
+     },
+     {
+      "name": "duration_display",
+      "string": "Duration"
+     },
+     {
+      "name": "name",
+      "optional": "hidden"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-danger": "state == 'refuse'",
+      "decoration-warning": "state in ('confirm','validate1')",
+      "decoration-success": "state == 'validate'"
+     },
+     {
+      "name": "active_employee",
+      "column_invisible": "True"
+     },
+     {
+      "name": "user_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "message_needaction",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "optional": "hidden",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "activity_exception_decoration",
+      "widget": "activity_exception"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(hr_holidays.action_hr_leave_generate_multi_wizard)d",
+      "string": "New Group Time Off",
+      "type": "action",
+      "class": "btn btn-secondary",
+      "groups": "hr_holidays.group_hr_holidays_responsible"
+     },
+     {
+      "name": "action_approve",
+      "string": "Approve",
+      "type": "object",
+      "class": "btn btn-outline-success",
+      "icon": "fa-thumbs-up"
+     },
+     {
+      "name": "action_refuse",
+      "string": "Refuse",
+      "type": "object",
+      "class": "btn btn-outline-danger",
+      "icon": "fa-times"
+     },
+     {
+      "name": "action_approve",
+      "string": "Approve",
+      "type": "object",
+      "invisible": "not can_approve",
+      "icon": "fa-thumbs-up"
+     },
+     {
+      "name": "action_approve",
+      "string": "Validate",
+      "type": "object",
+      "invisible": "not can_validate or can_approve",
+      "icon": "fa-check"
+     },
+     {
+      "name": "action_refuse",
+      "string": "Refuse",
+      "type": "object",
+      "invisible": "not can_refuse",
+      "icon": "fa-times"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_employee": 1,
+     "badge": 1,
+     "activity_exception": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Time Off Requests\" sample=\"1\" duplicate=\"false\" js_class=\"hr_holidays_payslip_list\">\n                <header>\n                    <button type=\"action\" name=\"%(hr_holidays.action_hr_leave_generate_multi_wizard)d\" string=\"New Group Time Off\" class=\"btn btn-secondary\" groups=\"hr_holidays.group_hr_holidays_responsible\" display=\"always\"/>\n                    <button type=\"object\" name=\"action_approve\" string=\"Approve\" icon=\"fa-thumbs-up\" class=\"btn btn-outline-success\"/>\n                    <button type=\"object\" name=\"action_refuse\" string=\"Refuse\" icon=\"fa-times\" class=\"btn btn-outline-danger\"/>\n                </header>\n                <field name=\"employee_id\" widget=\"many2one_avatar_employee\" readonly=\"state in ['cancel', 'refuse', 'validate', 'validate1']\"/>\n                <field name=\"department_id\" optional=\"hidden\" readonly=\"state in ['cancel', 'refuse', 'validate', 'validate1']\"/>\n                <field name=\"holiday_status_id\" class=\"fw-bold\" readonly=\"state in ['cancel', 'refuse', 'validate', 'validate1']\"/>\n                <field name=\"date_from\" readonly=\"state in ['cancel', 'refuse', 'validate', 'validate1']\"/>\n                <field name=\"date_to\" readonly=\"state in ['cancel', 'refuse', 'validate', 'validate1']\"/>\n                <field name=\"duration_display\" string=\"Duration\"/>\n                <field name=\"name\" optional=\"hidden\"/>\n                <field name=\"state\" widget=\"badge\" decoration-warning=\"state in ('confirm','validate1')\" decoration-success=\"state == 'validate'\" decoration-danger=\"state == 'refuse'\"/>\n                <field name=\"active_employee\" column_invisible=\"True\"/>\n                <field name=\"user_id\" column_invisible=\"True\"/>\n                <field name=\"message_needaction\" column_invisible=\"True\"/>\n                <button string=\"Approve\" name=\"action_approve\" type=\"object\" icon=\"fa-thumbs-up\" invisible=\"not can_approve\"/>\n                <button string=\"Validate\" name=\"action_approve\" type=\"object\" icon=\"fa-check\" invisible=\"not can_validate or can_approve\"/>\n                <button string=\"Refuse\" name=\"action_refuse\" type=\"object\" icon=\"fa-times\" invisible=\"not can_refuse\"/>\n                <field name=\"company_id\" optional=\"hidden\" groups=\"base.group_multi_company\"/>\n                <field name=\"activity_exception_decoration\" widget=\"activity_exception\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_tree_my",
+   "package": "hr_holidays",
+   "name": "hr.holidays.view.list",
+   "entity": "hr.leave",
+   "view_type": "xpath",
+   "inherits_view": "hr_leave_view_tree",
+   "mode": "primary",
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list\" position=\"attributes\">\n                <attribute name=\"default_order\">date_from DESC</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='employee_id']\" position=\"attributes\">\n                <attribute name=\"column_invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='department_id']\" position=\"attributes\">\n                <attribute name=\"column_invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//button[@name='%(hr_holidays.action_hr_leave_generate_multi_wizard)d']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_search_my",
+   "package": "hr_holidays",
+   "name": "hr.holidays.view.search.my",
+   "entity": "hr.leave",
+   "view_type": "xpath",
+   "inherits_view": "view_hr_holidays_filter",
+   "mode": "primary",
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//searchpanel",
+     "position": "replace"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//searchpanel",
+      "position": "replace"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//searchpanel\" position=\"replace\"/>\n            <xpath expr=\"//filter[@name='department']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//filter[@name='my_team']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//filter[@name='my_leaves']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//filter[@name='group_employee']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='employee_id']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_search_manager",
+   "package": "hr_holidays",
+   "name": "hr.holidays.view.search.manager",
+   "entity": "hr.leave",
+   "view_type": "field",
+   "inherits_view": "view_hr_holidays_filter",
+   "mode": "primary",
+   "priority": "33",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "employee_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "position": "after"
+     },
+     {
+      "name": "department_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"employee_id\" position=\"after\">\n                <field name=\"department_id\"/>\n            </field>\n            <xpath expr=\"//filter[@name='my_leaves']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//filter[@name='group_employee']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_search_report",
+   "package": "hr_holidays",
+   "name": "hr.holidays.view.search.report",
+   "entity": "hr.leave",
+   "view_type": "filter",
+   "inherits_view": "view_hr_holidays_filter",
+   "mode": "primary",
+   "priority": "34",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "filter",
+    "root_attributes": {
+     "name": "cancelled_leaves",
+     "position": "replace"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "cancelled_leaves",
+      "position": "replace"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <filter name=\"cancelled_leaves\" position=\"replace\"/>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.hr_leave_view_kanban_my",
+   "package": "hr_holidays",
+   "name": "hr.leave.view.kanban.my",
+   "entity": "hr.leave",
+   "view_type": "xpath",
+   "inherits_view": "hr_holidays.hr_leave_view_kanban",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@id='date_part']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[@id='date_part']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@id='date_part']\" position=\"attributes\">\n                <attribute name=\"class\" add=\"w-100 fw-bold\" separator=\" \"/>\n            </xpath>\n            <xpath expr=\"//div[@id='date_part']\" position=\"after\">\n                <span style=\"min-width: fit-content;\" t-attf-class=\"rounded-pill badge flex-shrink-1 text-bg-{{                     record.state.raw_value == 'validate' ? 'success' :                     ['confirm', 'validate1'].includes(record.state.raw_value) ?                     'warning' : 'danger' }}\" t-out=\"record.state.value\"/>\n            </xpath>\n            <xpath expr=\"//div[hasclass('hr_leave_kanban_title')]\" position=\"replace\"/>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.view_holiday_pivot",
+   "package": "hr_holidays",
+   "name": "hr.holidays.report_pivot",
+   "entity": "hr.leave",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Time Off Summary",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "request_hour_from",
+      "invisible": "1"
+     },
+     {
+      "name": "request_hour_to",
+      "invisible": "1"
+     },
+     {
+      "name": "color",
+      "invisible": "1"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "date_from"
+     },
+     {
+      "name": "number_of_days"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "request_hour_from",
+      "invisible": "1"
+     },
+     {
+      "name": "request_hour_to",
+      "invisible": "1"
+     },
+     {
+      "name": "color",
+      "invisible": "1"
+     },
+     {
+      "name": "employee_id",
+      "type": "row"
+     },
+     {
+      "name": "date_from",
+      "type": "col"
+     },
+     {
+      "name": "number_of_days",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <pivot string=\"Time Off Summary\" sample=\"1\">\n                <field name=\"request_hour_from\" invisible=\"1\"/>\n                <field name=\"request_hour_to\" invisible=\"1\"/>\n                <field name=\"color\" invisible=\"1\"/>\n                <field name=\"employee_id\" type=\"row\"/>\n                <field name=\"date_from\" type=\"col\"/>\n                <field name=\"number_of_days\" type=\"measure\"/>\n            </pivot>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.view_holiday_graph",
+   "package": "hr_holidays",
+   "name": "hr.holidays.report_graph",
+   "entity": "hr.leave",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Time Off Summary",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "request_hour_from",
+      "invisible": "1"
+     },
+     {
+      "name": "request_hour_to",
+      "invisible": "1"
+     },
+     {
+      "name": "color",
+      "invisible": "1"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "number_of_hours",
+      "widget": "float_time"
+     },
+     {
+      "name": "number_of_days"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "float_time": 1
+    },
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "request_hour_from",
+      "invisible": "1"
+     },
+     {
+      "name": "request_hour_to",
+      "invisible": "1"
+     },
+     {
+      "name": "color",
+      "invisible": "1"
+     },
+     {
+      "name": "employee_id"
+     },
+     {
+      "name": "number_of_hours",
+      "widget": "float_time"
+     },
+     {
+      "name": "number_of_days",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <graph string=\"Time Off Summary\" sample=\"1\">\n                <field name=\"request_hour_from\" invisible=\"1\"/>\n                <field name=\"request_hour_to\" invisible=\"1\"/>\n                <field name=\"color\" invisible=\"1\"/>\n                <field name=\"employee_id\"/>\n                <field name=\"number_of_hours\" widget=\"float_time\"/>\n                <field name=\"number_of_days\" type=\"measure\"/>\n            </graph>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays.view_holiday_list",
+   "package": "hr_holidays",
+   "name": "hr.holidays.report_list",
+   "entity": "hr.leave",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Time Off Summary",
+     "sample": "1",
+     "duplicate": "false"
+    },
+    "fields": [
+     {
+      "name": "employee_id",
+      "widget": "many2one_avatar_employee"
+     },
+     {
+      "name": "number_of_days",
+      "string": "# days"
+     },
+     {
+      "name": "date_from",
+      "string": "Start"
+     },
+     {
+      "name": "date_to",
+      "string": "Stop"
+     },
+     {
+      "name": "name",
+      "optional": "hide"
+     },
+     {
+      "name": "state"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_employee": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Time Off Summary\" sample=\"1\" duplicate=\"false\">\n                <field name=\"employee_id\" widget=\"many2one_avatar_employee\"/>\n                <field name=\"number_of_days\" string=\"# days\" type=\"measure\"/>\n                <field name=\"date_from\" string=\"Start\"/>\n                <field name=\"date_to\" string=\"Stop\"/>\n                <field name=\"name\" optional=\"hide\"/>\n                <field name=\"state\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "hr_holidays_attendance.hr_leave_view_form",
+   "package": "hr_holidays_attendance",
+   "name": null,
+   "entity": "hr.leave",
+   "view_type": "field",
+   "inherits_view": "hr_holidays.hr_leave_view_form_manager",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "holiday_status_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "holiday_status_id",
+      "position": "after"
+     },
+     {
+      "name": "employee_overtime",
+      "widget": "float_time",
+      "invisible": "not employee_id or not overtime_deductible or employee_overtime <= 0",
+      "string": "Extra Hours Available"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "float_time": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"holiday_status_id\" position=\"after\">\n                    <field name=\"employee_overtime\" string=\"Extra Hours Available\" widget=\"float_time\" class=\"text-success\" style=\"width: 6rem;\" invisible=\"not employee_id or not overtime_deductible or employee_overtime &lt;= 0\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_in_hr_holidays.hr_leave_view_form_inherit",
+   "package": "l10n_in_hr_holidays",
+   "name": "hr.leave.view.form.inherit",
+   "entity": "hr.leave",
+   "view_type": "xpath",
+   "inherits_view": "hr_holidays.hr_leave_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='dashboard_warning_message']",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='dashboard_warning_message']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='dashboard_warning_message']\" position=\"after\">\n                <div name=\"l10n_in_contains_sandwich_leaves\" invisible=\"not l10n_in_contains_sandwich_leaves\" class=\"alert alert-warning d-flex mt-2 mb-0\" role=\"alert\" style=\"white-space: pre-wrap;\">\n                    The requested time considers the sandwich leave policy.\n                </div>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

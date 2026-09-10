@@ -1,0 +1,1868 @@
+{
+ "catalog": {
+  "name": "entity:resource.calendar",
+  "description": "Complete definition of entity Resource Working Time (resource.calendar).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "resource.calendar",
+  "storage_name": "resource_calendar",
+  "full_name": "Resource Working Time",
+  "kind": "persistent",
+  "description": "Resource Working Time",
+  "defined_by_package": "resource",
+  "extended_by_packages": [
+   "hr",
+   "hr_holidays",
+   "hr_work_entry"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "defined_in_package": "resource",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "help": "If the active field is set to false, it will allow you to hide the Working Time without removing it.",
+    "defined_in_package": "resource",
+    "full_name": "Active"
+   },
+   {
+    "name": "attendance_ids",
+    "type": "One2many",
+    "comodel": "resource.calendar.attendance",
+    "inverse_name": "calendar_id",
+    "string": "Working Time",
+    "compute": "_compute_attendance_ids",
+    "store": true,
+    "readonly": false,
+    "copy": true,
+    "defined_in_package": "resource",
+    "full_name": "Working Time",
+    "target_entity": "resource.calendar.attendance"
+   },
+   {
+    "name": "attendance_ids_1st_week",
+    "type": "One2many",
+    "comodel": "resource.calendar.attendance",
+    "inverse_name": "calendar_id",
+    "string": "Working Time 1st Week",
+    "compute": "_compute_two_weeks_attendance",
+    "inverse": "_inverse_two_weeks_calendar",
+    "defined_in_package": "resource",
+    "full_name": "Working Time 1st Week",
+    "target_entity": "resource.calendar.attendance"
+   },
+   {
+    "name": "attendance_ids_2nd_week",
+    "type": "One2many",
+    "comodel": "resource.calendar.attendance",
+    "inverse_name": "calendar_id",
+    "string": "Working Time 2nd Week",
+    "compute": "_compute_two_weeks_attendance",
+    "inverse": "_inverse_two_weeks_calendar",
+    "defined_in_package": "resource",
+    "full_name": "Working Time 2nd Week",
+    "target_entity": "resource.calendar.attendance"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "domain": {
+     "dynamic": "lambda self: [('id', 'in', self.env.companies.ids)]"
+    },
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "index": "btree_not_null",
+    "defined_in_package": "resource",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "leave_ids",
+    "type": "One2many",
+    "comodel": "resource.calendar.leaves",
+    "inverse_name": "calendar_id",
+    "string": "Time Off",
+    "defined_in_package": "resource",
+    "full_name": "Time Off",
+    "target_entity": "resource.calendar.leaves"
+   },
+   {
+    "name": "schedule_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "flexible",
+      "Flexible"
+     ],
+     [
+      "fully_fixed",
+      "Fully Fixed"
+     ]
+    ],
+    "string": "Schedule Type",
+    "required": true,
+    "default": "fully_fixed",
+    "help": "Choose which level of definition you want to define on your Schedule\n- Flexible : Define an amount of hours to work on the week.\n- Fully Fixed : define the days, periods and the start & end time for each period of the day",
+    "defined_in_package": "resource",
+    "full_name": "Schedule Type"
+   },
+   {
+    "name": "duration_based",
+    "type": "Boolean",
+    "string": "Attendance based on duration",
+    "help": "The hours will be centered around 12:00 to cover the duration for the day",
+    "defined_in_package": "resource",
+    "full_name": "Attendance based on duration"
+   },
+   {
+    "name": "flexible_hours",
+    "type": "Boolean",
+    "string": "Flexible Hours",
+    "compute": "_compute_flexible_hours",
+    "inverse": "_inverse_flexible_hours",
+    "store": true,
+    "help": "When enabled, it will allow employees to work flexibly, without relying on the company's working schedule (working hours).",
+    "defined_in_package": "resource",
+    "full_name": "Flexible Hours"
+   },
+   {
+    "name": "full_time_required_hours",
+    "type": "Float",
+    "string": "Full Time Equivalent",
+    "compute": "_compute_full_time_required_hours",
+    "store": true,
+    "readonly": false,
+    "help": "Number of hours to work on the company schedule to be considered as fulltime.",
+    "defined_in_package": "resource",
+    "full_name": "Full Time Equivalent"
+   },
+   {
+    "name": "global_leave_ids",
+    "type": "One2many",
+    "comodel": "resource.calendar.leaves",
+    "inverse_name": "calendar_id",
+    "string": "Global Time Off",
+    "compute": "_compute_global_leave_ids",
+    "store": true,
+    "readonly": false,
+    "domain": [
+     [
+      "resource_id",
+      "=",
+      false
+     ]
+    ],
+    "copy": true,
+    "defined_in_package": "resource",
+    "full_name": "Global Time Off",
+    "target_entity": "resource.calendar.leaves"
+   },
+   {
+    "name": "hours_per_day",
+    "type": "Float",
+    "string": "Average Hour per Day",
+    "store": true,
+    "compute": "_compute_hours_per_day",
+    "digits": [
+     2,
+     2
+    ],
+    "readonly": false,
+    "help": "Average hours per day a resource is supposed to work with this calendar.",
+    "defined_in_package": "resource",
+    "full_name": "Average Hour per Day"
+   },
+   {
+    "name": "hours_per_week",
+    "type": "Float",
+    "string": "Hours per Week",
+    "compute": "_compute_hours_per_week",
+    "store": true,
+    "readonly": false,
+    "copy": false,
+    "defined_in_package": "resource",
+    "full_name": "Hours per Week"
+   },
+   {
+    "name": "is_fulltime",
+    "type": "Boolean",
+    "compute": "_compute_work_time_rate",
+    "string": "Is Full Time",
+    "defined_in_package": "resource",
+    "full_name": "Is Full Time"
+   },
+   {
+    "name": "two_weeks_calendar",
+    "type": "Boolean",
+    "string": "Calendar in 2 weeks mode",
+    "defined_in_package": "resource",
+    "full_name": "Calendar in 2 weeks mode"
+   },
+   {
+    "name": "two_weeks_explanation",
+    "type": "Char",
+    "string": "Explanation",
+    "compute": "_compute_two_weeks_explanation",
+    "defined_in_package": "resource",
+    "full_name": "Explanation"
+   },
+   {
+    "name": "tz",
+    "type": "Selection",
+    "selection": {
+     "expression": "_tz_get"
+    },
+    "string": "Timezone",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('tz') or self.env.user.tz or self.env.ref('base.user_admin').tz or 'UTC'"
+    },
+    "help": "This field is used in order to define in which timezone the resources will work.",
+    "defined_in_package": "resource",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "tz_offset",
+    "type": "Char",
+    "compute": "_compute_tz_offset",
+    "string": "Timezone offset",
+    "defined_in_package": "resource",
+    "full_name": "Timezone offset"
+   },
+   {
+    "name": "work_resources_count",
+    "type": "Integer",
+    "string": "Work Resources count",
+    "compute": "_compute_work_resources_count",
+    "defined_in_package": "resource",
+    "full_name": "Work Resources count"
+   },
+   {
+    "name": "work_time_rate",
+    "type": "Float",
+    "string": "Work Time Rate",
+    "compute": "_compute_work_time_rate",
+    "search": "_search_work_time_rate",
+    "help": "Work time rate versus full time working schedule, should be between 0 and 100 %.",
+    "defined_in_package": "resource",
+    "full_name": "Work Time Rate"
+   },
+   {
+    "name": "associated_leaves_count",
+    "type": "Integer",
+    "string": "Time Off Count",
+    "compute": "_compute_associated_leaves_count",
+    "defined_in_package": "hr_holidays",
+    "full_name": "Time Off Count"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_attendance_ids",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "attendance_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "In a calendar with 2 weeks mode, all periods need to be in the sections.",
+        "line": 129
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_two_weeks_attendance",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "two_weeks_calendar"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_two_weeks_calendar",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_full_time_required_hours",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "hours_per_week",
+         "company_id.resource_calendar_id.hours_per_week"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_flexible_hours",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "schedule_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_flexible_hours",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_attendance_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_attendance_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "attendance_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You can't delete section between weeks.",
+        "line": 191
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_global_leave_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_hours_per_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attendance_ids",
+         "attendance_ids.hour_from",
+         "attendance_ids.hour_to",
+         "two_weeks_calendar",
+         "flexible_hours"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the average hours per day.\nCannot directly depend on hours_per_week because of rounding issues. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_hours_per_week",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attendance_ids",
+         "attendance_ids.hour_from",
+         "attendance_ids.hour_to",
+         "two_weeks_calendar",
+         "flexible_hours"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the average hours per week ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "attendance_ids.work_entry_type_id.is_leave"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_two_weeks_explanation",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "two_weeks_calendar"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tz_offset",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "tz"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_work_resources_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_work_time_rate",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "hours_per_week",
+         "full_time_required_hours"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_work_time_rate",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "switch_calendar_type",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "switch_based_on_duration",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_attendance_intervals_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt",
+     "resources",
+     "domain",
+     "tz",
+     "lunch"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 160,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_handle_flexible_leave_interval",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "dt0",
+     "dt1",
+     "leave"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Hook method to handle flexible leave intervals. Can be overridden in other modules.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_leave_intervals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt",
+     "resource",
+     "domain",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_leave_intervals_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt",
+     "resources",
+     "domain",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Return the leave intervals in the given datetime range.\nThe returned intervals are expressed in specified tz or in the calendar's timezone.",
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_work_intervals_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt",
+     "resources",
+     "domain",
+     "tz",
+     "compute_leaves"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Return the effective work intervals between the given datetimes. ",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unavailable_intervals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt",
+     "resource",
+     "domain",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unavailable_intervals_batch",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt",
+     "resources",
+     "domain",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Return the unavailable intervals between the given datetimes. ",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_overlap",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "attendance_ids"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "attendance_ids correspond to attendance of a week,\nwill check for each day of week that there are no superimpose. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Attendances can't overlap.",
+        "line": 625
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_attendance_intervals_days_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attendance_intervals"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "helper function to compute duration of `intervals` that have\n'resource.calendar.attendance' records as payload (3rd element in tuple).\nexpressed in days and hours.\n\nresource.calendar.attendance records have durations associated\nwith them so this method merely calculates the proportion that is\ncovered by the intervals.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_closest_work_time",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "dt",
+     "match_end",
+     "resource",
+     "search_range",
+     "compute_leaves"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Return the closest work interval boundary within the search range.\nConsider only starts of intervals unless `match_end` is True. It will then only consider\nends of intervals.\n:param dt: reference datetime\n:param match_end: wether to search for the begining of an interval or the end.\n:param search_range: time interval considered. Defaults to the entire day of `dt`\n:rtype: datetime | None",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_days_per_week",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_hours_per_week",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Calculate the average hours worked per week. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_hours_per_day",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Calculate the average hours worked per workday. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_global_attendances",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_unusual_days",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt",
+     "company_id"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_attendance_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "return a copy of the company's calendar attendance or default 40 hours/week ",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_two_weeks_attendance",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_work_hours_count",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt",
+     "compute_leaves",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "`compute_leaves` controls whether or not this method is taking into\naccount the global leaves.\n\n`domain` controls the way leaves are recognized.\nNone means default value ('time_type', '=', 'leave')\n\nCounts the number of work hours between two datetimes.",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_work_duration_data",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "from_datetime",
+     "to_datetime",
+     "compute_leaves",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "Get the working duration (in days and hours) for a given period, only\nbased on the current calendar. This method does not use resource to\ncompute it.\n\n`domain` is used in order to recognise the leaves to take,\nNone means default value ('time_type', '=', 'leave')\n\nReturns a dict {'days': n, 'hours': h} containing the\nquantity of working time expressed as days and as hours.",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "plan_hours",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "hours",
+     "day_dt",
+     "compute_leaves",
+     "domain",
+     "resource"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "`compute_leaves` controls whether or not this method is taking into\naccount the global leaves.\n\n`domain` controls the way leaves are recognized.\nNone means default value ('time_type', '=', 'leave')\n\nReturn datetime after having planned hours",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "plan_days",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "days",
+     "day_dt",
+     "compute_leaves",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "`compute_leaves` controls whether or not this method is taking into\naccount the global leaves.\n\n`domain` controls the way leaves are recognized.\nNone means default value ('time_type', '=', 'leave')\n\nReturns the datetime of a days scheduling.",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_works_on_date",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_hours_for_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "target_date",
+     "day_period"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [],
+      "documentation": "An instance method on a calendar to get the start and end float hours for a given date.\n:param target_date: The date to find working hours.\n:param day_period: Optional string ('morning', 'afternoon') to filter for half-days.\n:return: A tuple of floats (hour_from, hour_to).",
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_working_hours",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "resource",
+      "decorators": [
+       {
+        "name": "ormcache",
+        "arguments": [
+         "self.id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "transfer_leaves_to",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "other_calendar",
+     "resources",
+     "from_date"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": "Transfer some resource.calendar.leaves from 'self' to another calendar 'other_calendar'.\nTransfered leaves linked to `resources` (or all if `resources` is None) and starting\nafter 'from_date' (or today if None).",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_associated_leaves_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_attendance_ids",
+    "package": "resource",
+    "kind": "ValidationError",
+    "message": "In a calendar with 2 weeks mode, all periods need to be in the sections."
+   },
+   {
+    "operation": "_onchange_attendance_ids",
+    "package": "resource",
+    "kind": "ValidationError",
+    "message": "You can't delete section between weeks."
+   },
+   {
+    "operation": "_check_overlap",
+    "package": "resource",
+    "kind": "ValidationError",
+    "message": "Attendances can't overlap."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr.access_hr_resource_calendar_user",
+    "package": "hr",
+    "name": "hr.employee.resource.calendar.user",
+    "entity": "resource.calendar",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mrp.access_resource_calendar_manufacturinguser",
+    "package": "mrp",
+    "name": "resource.calendar manufacturing.user",
+    "entity": "resource.calendar",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "project.access_resource_calendar",
+    "package": "project",
+    "name": "project.resource_calendar user",
+    "entity": "resource.calendar",
+    "group": "project.group_project_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "resource.access_resource_calendar_user",
+    "package": "resource",
+    "name": "resource.calendar.user",
+    "entity": "resource.calendar",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "resource.access_resource_calendar_system",
+    "package": "resource",
+    "name": "resource.calendar.system",
+    "entity": "resource.calendar",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_holidays.resource_calendar_form_inherit",
+    "package": "hr_holidays",
+    "name": "resource.calendar.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "resource.resource_calendar_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='%(resource.resource_calendar_leaves_action_from_calendar)d']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "associated_leaves_count",
+       "widget": "statinfo",
+       "string": "Public Holidays"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(resource_calendar_global_leaves_action_from_calendar)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-sun-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='%(resource.resource_calendar_leaves_action_from_calendar)d']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_holidays.resource_calendar_view_tree",
+    "package": "hr_holidays",
+    "name": "resource.calendar.view.list.inherit.hr.holidays",
+    "view_type": "field",
+    "inherits_view": "resource.view_resource_calendar_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "work_resources_count",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "work_resources_count",
+       "position": "after"
+      },
+      {
+       "name": "associated_leaves_count",
+       "string": "# Public Holidays",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "resource.view_resource_calendar_search",
+    "package": "resource",
+    "name": "resource.calendar.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Working Time"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Working Time"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      },
+      {
+       "name": "partial_working_schedules",
+       "string": "Partial working schedules",
+       "domain": "[('work_time_rate', '<', 100)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_flexible_hours",
+       "string": "Flexible",
+       "context": "{'group_by': 'flexible_hours'}"
+      },
+      {
+       "name": "groupby_company",
+       "context": "{'group_by': 'company_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "resource.resource_calendar_form",
+    "package": "resource",
+    "name": "resource.calendar.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Working Time"
+     },
+     "fields": [
+      {
+       "name": "work_resources_count",
+       "widget": "statinfo",
+       "string": "Work Resources"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "schedule_type",
+       "widget": "radio"
+      },
+      {
+       "name": "full_time_required_hours",
+       "widget": "float_time",
+       "readonly": "company_id"
+      },
+      {
+       "name": "work_time_rate",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "tz",
+       "widget": "timezone_mismatch",
+       "options": "{'tz_offset_field': 'tz_offset', 'mismatch_title': 'Timezone Mismatch : This timezone is different from that of your browser.\\nPlease, be mindful of this when setting the working hours or the time off.'}"
+      },
+      {
+       "name": "tz_offset",
+       "invisible": "1"
+      },
+      {
+       "name": "hours_per_day",
+       "widget": "float_time",
+       "nolabel": "1"
+      },
+      {
+       "name": "hours_per_week",
+       "widget": "float_time",
+       "nolabel": "1"
+      },
+      {
+       "name": "two_weeks_calendar",
+       "invisible": "1"
+      },
+      {
+       "name": "hours_per_day",
+       "widget": "float_time",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "hours_per_week",
+       "widget": "float_time",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "attendance_ids",
+       "widget": "section_one2many"
+      },
+      {
+       "name": "two_weeks_explanation"
+      },
+      {
+       "name": "hours_per_day",
+       "widget": "float_time",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "hours_per_week",
+       "widget": "float_time",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "attendance_ids_1st_week",
+       "widget": "section_one2many",
+       "context": "{'default_week_type':'0'}"
+      },
+      {
+       "name": "two_weeks_explanation"
+      },
+      {
+       "name": "hours_per_day",
+       "widget": "float_time",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "hours_per_week",
+       "widget": "float_time",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "attendance_ids_2nd_week",
+       "widget": "section_one2many",
+       "context": "{'default_week_type':'1'}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(resource_calendar_leaves_action_from_calendar)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "groups": "base.group_no_one",
+       "icon": "fa-plane"
+      },
+      {
+       "name": "%(resource_resource_action_from_calendar)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "groups": "base.group_user",
+       "icon": "fa-cogs"
+      },
+      {
+       "name": "switch_based_on_duration",
+       "type": "object",
+       "invisible": "duration_based or flexible_hours",
+       "class": "btn p-0",
+       "confirm": "If checked, the working schedule will be based on an amount of hours (defined for each day) and not a start & end time anymore.Do you confirm ?",
+       "icon": "fa-square-o"
+      },
+      {
+       "name": "switch_based_on_duration",
+       "type": "object",
+       "invisible": "not duration_based or flexible_hours",
+       "class": "btn p-0",
+       "confirm": "If unchecked, the working schedule will be based on a defined start and end hours.Do you confirm ?",
+       "icon": "fa-check-square"
+      },
+      {
+       "name": "switch_calendar_type",
+       "type": "object",
+       "invisible": "two_weeks_calendar",
+       "class": "btn p-0",
+       "confirm": "Are you sure you want to switch to a 2-week calendar? All work entries will be lost.",
+       "icon": "fa-square-o"
+      },
+      {
+       "name": "switch_calendar_type",
+       "type": "object",
+       "invisible": "not two_weeks_calendar",
+       "class": "btn p-0",
+       "confirm": "Are you sure you want to switch to a 1-week calendar? All work entries will be lost.",
+       "icon": "fa-check-square"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "working_hours",
+       "string": "Working Hours",
+       "invisible": "flexible_hours or two_weeks_calendar",
+       "groups": null
+      },
+      {
+       "name": "working_hours",
+       "string": "Week 1 Working Hours",
+       "invisible": "flexible_hours or not two_weeks_calendar",
+       "groups": null
+      },
+      {
+       "name": "working_hours",
+       "string": "Week 2 Working Hours",
+       "invisible": "flexible_hours or not two_weeks_calendar",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statinfo": 1,
+      "radio": 1,
+      "float_time": 9,
+      "timezone_mismatch": 1,
+      "section_one2many": 3
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "%(resource_calendar_leaves_action_from_calendar)d",
+       "type": "action",
+       "icon": "fa-plane",
+       "class": "oe_stat_button",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "%(resource_resource_action_from_calendar)d",
+       "type": "action",
+       "icon": "fa-cogs",
+       "class": "oe_stat_button",
+       "groups": "base.group_user"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "resource.view_resource_calendar_tree",
+    "package": "resource",
+    "name": "resource.calendar.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Working Time"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Working Time"
+      },
+      {
+       "name": "hours_per_week",
+       "string": "Schedule Total Time",
+       "optional": "hide"
+      },
+      {
+       "name": "work_time_rate"
+      },
+      {
+       "name": "schedule_type"
+      },
+      {
+       "name": "full_time_required_hours",
+       "widget": "float_time",
+       "optional": "hide"
+      },
+      {
+       "name": "work_resources_count",
+       "string": "# Work Resources",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "resource.action_resource_calendar_form",
+    "package": "resource",
+    "name": "Working Schedules",
+    "view_mode": "list,form",
+    "view_id": "False",
+    "search_view_id": "view_resource_calendar_search",
+    "domain": "['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Define working hours and time table that could be scheduled to your project members\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "resource.calendar"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "hr.menu_resource_calendar_view",
+    "package": "hr",
+    "name": "Working Schedules",
+    "parent_id": "menu_config_employee",
+    "action": "resource.action_resource_calendar_form",
+    "sequence": "6",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

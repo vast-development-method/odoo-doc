@@ -1,0 +1,362 @@
+{
+ "catalog": {
+  "name": "entity:base.module.uninstall",
+  "description": "Complete definition of entity Module Uninstall (base.module.uninstall).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "base.module.uninstall",
+  "storage_name": "base_module_uninstall",
+  "full_name": "Module Uninstall",
+  "kind": "transient",
+  "description": "Module Uninstall",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "mail",
+   "base_import_module"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "show_all",
+    "type": "Boolean",
+    "defined_in_package": "base",
+    "string": "Show All",
+    "full_name": "Show All"
+   },
+   {
+    "name": "module_ids",
+    "type": "Many2many",
+    "comodel": "ir.module.module",
+    "string": "Module(s)",
+    "required": true,
+    "domain": [
+     [
+      "state",
+      "in",
+      [
+       "installed",
+       "to upgrade",
+       "to install"
+      ]
+     ]
+    ],
+    "ondelete": "cascade",
+    "readonly": true,
+    "defined_in_package": "base",
+    "full_name": "Module(s)",
+    "target_entity": "ir.module.module"
+   },
+   {
+    "name": "impacted_module_ids",
+    "type": "Many2many",
+    "comodel": "ir.module.module",
+    "string": "Impacted modules",
+    "compute": "_compute_impacted_module_ids",
+    "defined_in_package": "base",
+    "full_name": "Impacted modules",
+    "target_entity": "ir.module.module"
+   },
+   {
+    "name": "model_ids",
+    "type": "Many2many",
+    "comodel": "ir.model",
+    "string": "Impacted data models",
+    "compute": "_compute_model_ids",
+    "defined_in_package": "base",
+    "full_name": "Impacted data models",
+    "target_entity": "ir.model"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_modules",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return all the modules impacted by self. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_impacted_module_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "module_ids",
+         "show_all"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_modules_to_display",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "modules"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "base_import_module",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_models",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return the models (ir.model) to consider for the impact. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_model_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "impacted_module_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_module_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "module_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_uninstall",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_base_module_uninstall",
+    "package": "base",
+    "name": "access.base.module.uninstall",
+    "entity": "base.module.uninstall",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.view_base_module_uninstall",
+    "package": "base",
+    "name": "Uninstall module",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Uninstall module"
+     },
+     "fields": [
+      {
+       "name": "show_all"
+      },
+      {
+       "name": "impacted_module_ids",
+       "mode": "kanban"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "icon",
+       "widget": "image_url",
+       "options": "{'size': [50, 50]}"
+      },
+      {
+       "name": "shortdesc"
+      },
+      {
+       "name": "summary",
+       "groups": "!base.group_no_one"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "model_ids",
+       "string": "Models",
+       "nolabel": "1"
+      },
+      {
+       "name": "name",
+       "string": "Document"
+      },
+      {
+       "name": "count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_uninstall",
+       "string": "Uninstall",
+       "type": "object",
+       "class": "btn-secondary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-primary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image_url": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

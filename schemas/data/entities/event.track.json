@@ -1,0 +1,2763 @@
+{
+ "catalog": {
+  "name": "entity:event.track",
+  "description": "Complete definition of entity Event Track (event.track).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.track",
+  "storage_name": "event_track",
+  "full_name": "Event Track",
+  "kind": "persistent",
+  "description": "Event Track",
+  "defined_by_package": "website_event_track",
+  "extended_by_packages": [
+   "mass_mailing_event_track",
+   "website_event_track_live",
+   "website_event_track_quiz"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "website.seo.metadata",
+   "website.published.mixin",
+   "website.searchable.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "priority desc, date",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": "contact_email",
+  "other_attributes": {
+   "_mailing_enabled": true
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Title",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Title"
+   },
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "required": true,
+    "index": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "website_event_track",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "tracking": true,
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "defined_in_package": "website_event_track",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "related": "event_id.company_id",
+    "defined_in_package": "website_event_track",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "event.track.tag",
+    "string": "Tags",
+    "defined_in_package": "website_event_track",
+    "full_name": "Tags",
+    "target_entity": "event.track.tag"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "translate": {
+     "expression": "html_translate"
+    },
+    "sanitize_attributes": false,
+    "sanitize_form": false,
+    "defined_in_package": "website_event_track",
+    "string": "Description",
+    "full_name": "Description"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Agenda Color",
+    "defined_in_package": "website_event_track",
+    "full_name": "Agenda Color"
+   },
+   {
+    "name": "priority",
+    "type": "Selection",
+    "selection": [
+     [
+      "0",
+      "Low"
+     ],
+     [
+      "1",
+      "Medium"
+     ],
+     [
+      "2",
+      "High"
+     ],
+     [
+      "3",
+      "Highest"
+     ]
+    ],
+    "string": "Priority",
+    "required": true,
+    "default": "1",
+    "defined_in_package": "website_event_track",
+    "full_name": "Priority"
+   },
+   {
+    "name": "stage_id",
+    "type": "Many2one",
+    "comodel": "event.track.stage",
+    "string": "Stage",
+    "ondelete": "restrict",
+    "index": true,
+    "copy": false,
+    "default": {
+     "dynamic": "_get_default_stage_id"
+    },
+    "group_expand": "_read_group_expand_full",
+    "required": true,
+    "tracking": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Stage",
+    "target_entity": "event.track.stage"
+   },
+   {
+    "name": "legend_blocked",
+    "type": "Char",
+    "related": "stage_id.legend_blocked",
+    "string": "Kanban Blocked Explanation",
+    "readonly": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Kanban Blocked Explanation"
+   },
+   {
+    "name": "legend_done",
+    "type": "Char",
+    "related": "stage_id.legend_done",
+    "string": "Kanban Valid Explanation",
+    "readonly": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Kanban Valid Explanation"
+   },
+   {
+    "name": "legend_normal",
+    "type": "Char",
+    "related": "stage_id.legend_normal",
+    "string": "Kanban Ongoing Explanation",
+    "readonly": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Kanban Ongoing Explanation"
+   },
+   {
+    "name": "kanban_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "normal",
+      "Grey"
+     ],
+     [
+      "done",
+      "Green"
+     ],
+     [
+      "blocked",
+      "Red"
+     ]
+    ],
+    "string": "Kanban State",
+    "copy": false,
+    "default": "normal",
+    "required": true,
+    "help": "A track's kanban state indicates special situations affecting it:\n * Grey is the default situation\n * Red indicates something is preventing the progress of this track\n * Green indicates the track is ready to be pulled to the next stage",
+    "defined_in_package": "website_event_track",
+    "full_name": "Kanban State"
+   },
+   {
+    "name": "kanban_state_label",
+    "type": "Char",
+    "string": "Kanban State Label",
+    "compute": "_compute_kanban_state_label",
+    "store": true,
+    "tracking": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Kanban State Label"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Contact",
+    "defined_in_package": "website_event_track",
+    "full_name": "Contact",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_name",
+    "type": "Char",
+    "string": "Name",
+    "compute": "_compute_partner_name",
+    "readonly": false,
+    "store": true,
+    "tracking": 10,
+    "defined_in_package": "website_event_track",
+    "full_name": "Name"
+   },
+   {
+    "name": "partner_email",
+    "type": "Char",
+    "string": "Email",
+    "compute": "_compute_partner_email",
+    "readonly": false,
+    "store": true,
+    "tracking": 20,
+    "defined_in_package": "website_event_track",
+    "full_name": "Email"
+   },
+   {
+    "name": "partner_phone",
+    "type": "Char",
+    "string": "Phone",
+    "compute": "_compute_partner_phone",
+    "readonly": false,
+    "store": true,
+    "tracking": 30,
+    "defined_in_package": "website_event_track",
+    "full_name": "Phone"
+   },
+   {
+    "name": "partner_biography",
+    "type": "Html",
+    "string": "Biography",
+    "compute": "_compute_partner_biography",
+    "sanitize_attributes": false,
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Biography"
+   },
+   {
+    "name": "partner_function",
+    "type": "Char",
+    "string": "Job Position",
+    "compute": "_compute_partner_function",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "website_event_track",
+    "full_name": "Job Position"
+   },
+   {
+    "name": "partner_company_name",
+    "type": "Char",
+    "string": "Company Name",
+    "compute": "_compute_partner_company_name",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Company Name"
+   },
+   {
+    "name": "partner_tag_line",
+    "type": "Char",
+    "string": "Tag Line",
+    "compute": "_compute_partner_tag_line",
+    "help": "Description of the partner (name, function and company name)",
+    "defined_in_package": "website_event_track",
+    "full_name": "Tag Line"
+   },
+   {
+    "name": "image",
+    "type": "Image",
+    "string": "Speaker Photo",
+    "compute": "_compute_partner_image",
+    "readonly": false,
+    "store": true,
+    "max_width": 256,
+    "max_height": 256,
+    "defined_in_package": "website_event_track",
+    "full_name": "Speaker Photo"
+   },
+   {
+    "name": "contact_email",
+    "type": "Char",
+    "string": "Contact Email",
+    "compute": "_compute_contact_email",
+    "readonly": false,
+    "store": true,
+    "tracking": 20,
+    "defined_in_package": "website_event_track",
+    "full_name": "Contact Email"
+   },
+   {
+    "name": "contact_phone",
+    "type": "Char",
+    "string": "Contact Phone",
+    "compute": "_compute_contact_phone",
+    "readonly": false,
+    "store": true,
+    "tracking": 30,
+    "defined_in_package": "website_event_track",
+    "full_name": "Contact Phone"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "event.track.location",
+    "string": "Location",
+    "defined_in_package": "website_event_track",
+    "full_name": "Location",
+    "target_entity": "event.track.location"
+   },
+   {
+    "name": "date",
+    "type": "Datetime",
+    "string": "Track Date",
+    "compute": "_compute_date",
+    "inverse": "_inverse_date",
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Track Date"
+   },
+   {
+    "name": "date_end",
+    "type": "Datetime",
+    "string": "Track End Date",
+    "compute": "_compute_end_date",
+    "inverse": "_inverse_end_date",
+    "store": true,
+    "defined_in_package": "website_event_track",
+    "full_name": "Track End Date"
+   },
+   {
+    "name": "duration",
+    "type": "Float",
+    "string": "Duration",
+    "default": 0.5,
+    "defined_in_package": "website_event_track",
+    "full_name": "Duration"
+   },
+   {
+    "name": "is_track_live",
+    "type": "Boolean",
+    "string": "Is Track Live",
+    "compute": "_compute_track_time_data",
+    "defined_in_package": "website_event_track",
+    "full_name": "Is Track Live"
+   },
+   {
+    "name": "is_track_soon",
+    "type": "Boolean",
+    "string": "Is Track Soon",
+    "compute": "_compute_track_time_data",
+    "defined_in_package": "website_event_track",
+    "full_name": "Is Track Soon"
+   },
+   {
+    "name": "is_track_today",
+    "type": "Boolean",
+    "string": "Is Track Today",
+    "compute": "_compute_track_time_data",
+    "defined_in_package": "website_event_track",
+    "full_name": "Is Track Today"
+   },
+   {
+    "name": "is_track_upcoming",
+    "type": "Boolean",
+    "string": "Is Track Upcoming",
+    "compute": "_compute_track_time_data",
+    "defined_in_package": "website_event_track",
+    "full_name": "Is Track Upcoming"
+   },
+   {
+    "name": "is_track_done",
+    "type": "Boolean",
+    "string": "Is Track Done",
+    "compute": "_compute_track_time_data",
+    "defined_in_package": "website_event_track",
+    "full_name": "Is Track Done"
+   },
+   {
+    "name": "is_one_day",
+    "type": "Boolean",
+    "compute": "_compute_field_is_one_day",
+    "defined_in_package": "website_event_track",
+    "string": "Is One Day",
+    "full_name": "Is One Day"
+   },
+   {
+    "name": "track_start_remaining",
+    "type": "Integer",
+    "string": "Minutes before track starts",
+    "compute": "_compute_track_time_data",
+    "help": "Remaining time before track starts (seconds)",
+    "defined_in_package": "website_event_track",
+    "full_name": "Minutes before track starts"
+   },
+   {
+    "name": "track_start_relative",
+    "type": "Integer",
+    "string": "Minutes compare to track start",
+    "compute": "_compute_track_time_data",
+    "help": "Relative time compared to track start (seconds)",
+    "defined_in_package": "website_event_track",
+    "full_name": "Minutes compare to track start"
+   },
+   {
+    "name": "website_image",
+    "type": "Image",
+    "string": "Website Image",
+    "max_width": 1024,
+    "max_height": 1024,
+    "defined_in_package": "website_event_track",
+    "full_name": "Website Image"
+   },
+   {
+    "name": "website_image_url",
+    "type": "Char",
+    "string": "Image URL",
+    "compute": "_compute_website_image_url",
+    "compute_sudo": true,
+    "store": false,
+    "defined_in_package": "website_event_track",
+    "full_name": "Image uniform resource locator"
+   },
+   {
+    "name": "header_visible",
+    "type": "Boolean",
+    "related": "event_id.header_visible",
+    "readonly": false,
+    "defined_in_package": "website_event_track",
+    "string": "Header Visible",
+    "full_name": "Header Visible"
+   },
+   {
+    "name": "footer_visible",
+    "type": "Boolean",
+    "related": "event_id.footer_visible",
+    "readonly": false,
+    "defined_in_package": "website_event_track",
+    "string": "Footer Visible",
+    "full_name": "Footer Visible"
+   },
+   {
+    "name": "event_track_visitor_ids",
+    "type": "One2many",
+    "comodel": "event.track.visitor",
+    "inverse_name": "track_id",
+    "string": "Track Visitors",
+    "groups": "event.group_event_user",
+    "defined_in_package": "website_event_track",
+    "full_name": "Track Visitors",
+    "target_entity": "event.track.visitor"
+   },
+   {
+    "name": "is_reminder_on",
+    "type": "Boolean",
+    "string": "Is Reminder On",
+    "compute": "_compute_is_reminder_on",
+    "defined_in_package": "website_event_track",
+    "full_name": "Is Reminder On"
+   },
+   {
+    "name": "wishlist_visitor_ids",
+    "type": "Many2many",
+    "comodel": "website.visitor",
+    "string": "Visitor Wishlist",
+    "compute": "_compute_wishlist_visitor_ids",
+    "compute_sudo": true,
+    "search": "_search_wishlist_visitor_ids",
+    "groups": "event.group_event_user",
+    "defined_in_package": "website_event_track",
+    "full_name": "Visitor Wishlist",
+    "target_entity": "website.visitor"
+   },
+   {
+    "name": "wishlist_visitor_count",
+    "type": "Integer",
+    "string": "# Wishlisted",
+    "compute": "_compute_wishlist_visitor_ids",
+    "compute_sudo": true,
+    "groups": "event.group_event_user",
+    "defined_in_package": "website_event_track",
+    "full_name": "# Wishlisted"
+   },
+   {
+    "name": "wishlisted_by_default",
+    "type": "Boolean",
+    "string": "Always Wishlisted",
+    "help": "If set, the talk will be set as favorite for each attendee registered to the event.",
+    "defined_in_package": "website_event_track",
+    "full_name": "Always Wishlisted"
+   },
+   {
+    "name": "website_cta",
+    "type": "Boolean",
+    "string": "Magic Button",
+    "help": "Display a Call to Action button to your Attendees while they watch your Track.",
+    "defined_in_package": "website_event_track",
+    "full_name": "Magic Button"
+   },
+   {
+    "name": "website_cta_title",
+    "type": "Char",
+    "string": "Button Title",
+    "defined_in_package": "website_event_track",
+    "full_name": "Button Title"
+   },
+   {
+    "name": "website_cta_url",
+    "type": "Char",
+    "string": "Button Target URL",
+    "defined_in_package": "website_event_track",
+    "full_name": "Button Target uniform resource locator"
+   },
+   {
+    "name": "website_cta_delay",
+    "type": "Integer",
+    "string": "Show Button",
+    "defined_in_package": "website_event_track",
+    "full_name": "Show Button"
+   },
+   {
+    "name": "is_website_cta_live",
+    "type": "Boolean",
+    "string": "Is CTA Live",
+    "compute": "_compute_cta_time_data",
+    "help": "CTA button is available",
+    "defined_in_package": "website_event_track",
+    "full_name": "Is call to action Live"
+   },
+   {
+    "name": "website_cta_start_remaining",
+    "type": "Integer",
+    "string": "Minutes before CTA starts",
+    "compute": "_compute_cta_time_data",
+    "help": "Remaining time before CTA starts (seconds)",
+    "defined_in_package": "website_event_track",
+    "full_name": "Minutes before call to action starts"
+   },
+   {
+    "name": "youtube_video_url",
+    "type": "Char",
+    "string": "YouTube Video Link",
+    "defined_in_package": "website_event_track_live",
+    "full_name": "YouTube Video Link"
+   },
+   {
+    "name": "youtube_video_id",
+    "type": "Char",
+    "string": "YouTube video ID",
+    "compute": "_compute_youtube_video_id",
+    "help": "Extracted from the video URL and used to infer various links (embed/thumbnail/...)",
+    "defined_in_package": "website_event_track_live",
+    "full_name": "YouTube video identifier"
+   },
+   {
+    "name": "is_youtube_replay",
+    "type": "Boolean",
+    "string": "Is YouTube Replay",
+    "help": "Check this option if the video is already available on YouTube to avoid showing 'Direct' options (Chat, ...)",
+    "defined_in_package": "website_event_track_live",
+    "full_name": "Is YouTube Replay"
+   },
+   {
+    "name": "is_youtube_chat_available",
+    "type": "Boolean",
+    "string": "Is Chat Available",
+    "compute": "_compute_is_youtube_chat_available",
+    "defined_in_package": "website_event_track_live",
+    "full_name": "Is Chat Available"
+   },
+   {
+    "name": "quiz_id",
+    "type": "Many2one",
+    "comodel": "event.quiz",
+    "string": "Quiz",
+    "compute": "_compute_quiz_id",
+    "store": true,
+    "groups": "event.group_event_user",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Quiz",
+    "target_entity": "event.quiz"
+   },
+   {
+    "name": "quiz_ids",
+    "type": "One2many",
+    "comodel": "event.quiz",
+    "inverse_name": "event_track_id",
+    "string": "Quizzes",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Quizzes",
+    "target_entity": "event.quiz"
+   },
+   {
+    "name": "quiz_questions_count",
+    "type": "Integer",
+    "string": "# Quiz Questions",
+    "compute": "_compute_quiz_questions_count",
+    "groups": "event.group_event_user",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "# Quiz Questions"
+   },
+   {
+    "name": "is_quiz_completed",
+    "type": "Boolean",
+    "string": "Is Quiz Done",
+    "compute": "_compute_quiz_data",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Is Quiz Done"
+   },
+   {
+    "name": "quiz_points",
+    "type": "Integer",
+    "string": "Quiz Points",
+    "compute": "_compute_quiz_data",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Quiz Points"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_stage_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_kanban_state_label",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "stage_id",
+         "kanban_state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_phone",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_biography",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_function",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_company_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "partner_id.company_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_tag_line",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_name",
+         "partner_function",
+         "partner_company_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_partner_image",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_contact_email",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "partner_id.email"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_contact_phone",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id",
+         "partner_id.phone"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_end",
+         "duration"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_date",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_end_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "duration"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_end_date",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_image_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "image",
+         "partner_id.image_256"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_event_track_live",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "youtube_video_id",
+         "is_youtube_replay",
+         "date_end",
+         "is_track_done"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_reminder_on",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "wishlisted_by_default",
+         "event_track_visitor_ids.visitor_id",
+         "event_track_visitor_ids.partner_id",
+         "event_track_visitor_ids.is_wishlisted",
+         "event_track_visitor_ids.is_blacklisted"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_wishlist_visitor_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "event_track_visitor_ids.visitor_id",
+         "event_track_visitor_ids.is_wishlisted"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_wishlist_visitor_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unsupported 'Not In' operation on track wishlist visitors",
+        "line": 381
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_track_time_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute start and remaining time for track itself. Do everything in\nUTC as we compute only time deltas here. ",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_cta_time_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "date_end",
+         "website_cta",
+         "website_cta_delay"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute start and remaining time for track itself. Do everything in\nUTC as we compute only time deltas here. ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_field_is_one_day",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date",
+         "date_end",
+         "event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_synchronize_with_stage",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "stage"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_get_detail",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "website",
+     "order",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mail_get_timezone",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_add_default_recipients",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_post_after_hook",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_template",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "changes"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_subtype",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "init_values"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_track_speakers_list",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_backend_menu_id",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_event_track_visitors",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "force_create"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ics_file",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": "Return iCalendar file for the event track.\n:return: a dict of .ics file content for each event track ",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_track_suggestions",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "restrict_domain",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": "Returns the next tracks suggested after going to the current one\ngiven by self. Tracks always belong to the same event.\n\nHeuristic is\n\n  * live first;\n  * then ordered by start date, finished being sent to the end;\n  * wishlisted (manually or by default);\n  * tag matching with current track;\n  * location matching with current track;\n  * finally a random to have an \"equivalent wave\" randomly given;\n\n:param restrict_domain: an additional domain to restrict candidates;\n:param limit: number of tracks to return;",
+      "size_in_lines": 50,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_track_calendar_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_track_calendar_reminder_dates",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": "Get dates of the event if the track does not have any. A warning is\nadded in elements that display times of the event instead of those of\nthe track. This way, visitors can add a reminder and check later if the\ntrack has been updated since the sending of the mail. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_track_calendar_reminder_times_warning",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": "Generate a warning indicating that the times displayed correspond to those of\nthe event because the track does not have any, to avoid misunderstanding from visitors. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_track_calendar_urls",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mailing_get_default_domain",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "mailing"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_event_track",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_youtube_video_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_live",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "youtube_video_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_youtube_chat_available",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_live",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "youtube_video_url",
+         "is_youtube_replay",
+         "date",
+         "date_end",
+         "is_track_upcoming",
+         "is_track_live"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_quiz_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quiz_ids.event_track_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_quiz_questions_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quiz_id.question_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_quiz_data",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quiz_id",
+         "event_track_visitor_ids.visitor_id",
+         "event_track_visitor_ids.partner_id",
+         "event_track_visitor_ids.quiz_completed",
+         "event_track_visitor_ids.quiz_points"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_add_quiz",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_quiz",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_search_wishlist_visitor_ids",
+    "package": "website_event_track",
+    "kind": "UserError",
+    "message": "Unsupported 'Not In' operation on track wishlist visitors"
+   }
+  ],
+  "state_fields": [
+   "kanban_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "website_event_track.access_event_track_public",
+    "package": "website_event_track",
+    "name": "event.track",
+    "entity": "event.track",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_track.access_event_track_portal",
+    "package": "website_event_track",
+    "name": "event.track",
+    "entity": "event.track",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_track.access_event_track_employee",
+    "package": "website_event_track",
+    "name": "event.track",
+    "entity": "event.track",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_track.access_event_track_user",
+    "package": "website_event_track",
+    "name": "event.track.user",
+    "entity": "event.track",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_event_track.access_event_track_manager",
+    "package": "website_event_track",
+    "name": "event.track.manager",
+    "entity": "event.track",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_event_track.event_track_public",
+    "package": "website_event_track",
+    "name": "Event Tracks: public/portal: published",
+    "entity": "event.track",
+    "domain": "[('website_published', '=', True)]",
+    "groups": "[(4, ref('base.group_public')), (4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "website_event_track.event_track_view_form_quick_create",
+    "package": "website_event_track",
+    "name": "event.track.view.form.quick.create",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "event_id",
+       "invisible": "context.get('default_event_id', False)",
+       "placeholder": "All Events"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Inspiring Business Talk"
+      },
+      {
+       "name": "date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_event_track.view_event_track_kanban",
+    "package": "website_event_track",
+    "name": "event.track.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "highlight_color": "color",
+      "default_group_by": "stage_id",
+      "quick_create_view": "website_event_track.event_track_view_form_quick_create"
+     },
+     "fields": [
+      {
+       "name": "website_url"
+      },
+      {
+       "name": "legend_blocked"
+      },
+      {
+       "name": "legend_normal"
+      },
+      {
+       "name": "legend_done"
+      },
+      {
+       "name": "color",
+       "widget": "kanban_color_picker"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "priority",
+       "widget": "priority"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "kanban_activity"
+      },
+      {
+       "name": "kanban_state",
+       "widget": "state_selection",
+       "groups": "base.group_user"
+      },
+      {
+       "name": "partner_id",
+       "widget": "image",
+       "options": "{'preview_image': 'avatar_128'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "kanban_color_picker": 1,
+      "float_time": 1,
+      "many2many_tags": 1,
+      "priority": 1,
+      "kanban_activity": 1,
+      "state_selection": 1,
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": "stage_id",
+     "quick_create": null,
+     "progressbar": [
+      {
+       "field": "kanban_state",
+       "colors": "{\"done\": \"success\", \"blocked\": \"danger\"}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track.view_event_track_calendar",
+    "package": "website_event_track",
+    "name": "event.track.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "date_start": "date",
+      "date_stop": "date_end",
+      "string": "Event Tracks",
+      "color": "location_id",
+      "event_limit": "5"
+     },
+     "fields": [
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "event_id"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "user_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date",
+      "date_stop": "date_end",
+      "date_delay": null,
+      "color": "location_id",
+      "mode": null,
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "website_event_track.view_event_track_search",
+    "package": "website_event_track",
+    "name": "event.track.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Event Tracks"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "tag_ids"
+      },
+      {
+       "name": "partner_id",
+       "string": "Speaker",
+       "filter_domain": "[                     '|', '|', '|', '|',                     ('partner_id', 'ilike', self), ('partner_name', 'ilike', self),                     ('contact_email', 'ilike', self), ('partner_email', 'ilike', self), ('partner_company_name', 'ilike', self)]"
+      },
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "event_id"
+      },
+      {
+       "name": "stage_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_tracks",
+       "string": "My Tracks",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "filter_published",
+       "string": "Published",
+       "domain": "[('website_published', '=', True)]"
+      },
+      {
+       "name": "message_needaction",
+       "string": "Unread Messages",
+       "domain": "[('message_needaction', '=', True)]",
+       "groups": "mail.group_mail_notification_type_inbox"
+      },
+      {
+       "name": "filter_wishlisted_by_default",
+       "string": "Always Wishlisted",
+       "domain": "[('wishlisted_by_default', '=', True)]"
+      },
+      {
+       "name": "filter_date",
+       "date": "date"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "responsible",
+       "string": "Responsible",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "stage",
+       "string": "Stage",
+       "context": "{'group_by': 'stage_id'}"
+      },
+      {
+       "name": "date",
+       "string": "Date",
+       "context": "{'group_by': 'date'}"
+      },
+      {
+       "name": "event",
+       "string": "Event",
+       "context": "{'group_by': 'event_id'}"
+      },
+      {
+       "name": "location",
+       "string": "Location",
+       "context": "{'group_by': 'location_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_track.view_event_track_form",
+    "package": "website_event_track",
+    "name": "event.track.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Event Track"
+     },
+     "fields": [
+      {
+       "name": "stage_id",
+       "widget": "statusbar",
+       "options": "{'clickable': '1'}"
+      },
+      {
+       "name": "website_url",
+       "invisible": "1"
+      },
+      {
+       "name": "wishlist_visitor_count",
+       "invisible": "1"
+      },
+      {
+       "name": "wishlist_visitor_count",
+       "widget": "statinfo",
+       "string": "Wishlisted By"
+      },
+      {
+       "name": "is_published",
+       "widget": "website_redirect_button"
+      },
+      {
+       "name": "legend_blocked",
+       "invisible": "1"
+      },
+      {
+       "name": "legend_normal",
+       "invisible": "1"
+      },
+      {
+       "name": "legend_done",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Inspiring Business Talk"
+      },
+      {
+       "name": "website_image",
+       "widget": "image"
+      },
+      {
+       "name": "kanban_state",
+       "widget": "state_selection"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "wishlisted_by_default"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "event_id",
+       "placeholder": "All Events"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "partner_id",
+       "context": "{'default_phone': contact_phone, 'default_email': contact_email}"
+      },
+      {
+       "name": "contact_email",
+       "readonly": "partner_id"
+      },
+      {
+       "name": "contact_phone",
+       "readonly": "partner_id"
+      },
+      {
+       "name": "partner_name"
+      },
+      {
+       "name": "partner_email"
+      },
+      {
+       "name": "partner_phone"
+      },
+      {
+       "name": "partner_function"
+      },
+      {
+       "name": "partner_company_name"
+      },
+      {
+       "name": "image",
+       "widget": "image",
+       "nolabel": "1"
+      },
+      {
+       "name": "partner_biography",
+       "string": "Biography",
+       "placeholder": "e.g. \"John Doe was born in...\""
+      },
+      {
+       "name": "description",
+       "placeholder": "e.g. \"This talk will be about...\""
+      },
+      {
+       "name": "website_cta"
+      },
+      {
+       "name": "website_cta_title",
+       "invisible": "not website_cta",
+       "required": "website_cta",
+       "placeholder": "e.g. Get Yours Now!"
+      },
+      {
+       "name": "website_cta_url",
+       "invisible": "not website_cta",
+       "required": "website_cta",
+       "placeholder": "e.g. http://www.example.com"
+      },
+      {
+       "name": "website_cta_delay",
+       "required": "website_cta"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(website_event_track.website_visitor_action_from_track)d",
+       "type": "action",
+       "invisible": "wishlist_visitor_count == 0",
+       "class": "oe_stat_button",
+       "groups": "event.group_event_user",
+       "icon": "fa-bell"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "speaker",
+       "string": "Speaker",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "description",
+       "string": "Description",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "interactivity",
+       "string": "Interactivity",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 1,
+      "website_redirect_button": 1,
+      "image": 2,
+      "state_selection": 1,
+      "float_time": 1,
+      "many2one_avatar_user": 1,
+      "many2many_tags": 1,
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "statusbar_field": "stage_id",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "%(website_event_track.website_visitor_action_from_track)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-bell",
+       "groups": "event.group_event_user",
+       "invisible": "wishlist_visitor_count == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track.view_event_track_tree",
+    "package": "website_event_track",
+    "name": "event.track.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Event Track",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "partner_name",
+       "string": "Speaker Name"
+      },
+      {
+       "name": "partner_id",
+       "optional": "hide"
+      },
+      {
+       "name": "partner_email",
+       "optional": "hide"
+      },
+      {
+       "name": "partner_phone",
+       "optional": "hide"
+      },
+      {
+       "name": "event_id",
+       "column_invisible": "context.get('default_event_id')"
+      },
+      {
+       "name": "wishlisted_by_default",
+       "optional": "hide"
+      },
+      {
+       "name": "wishlist_visitor_count",
+       "optional": "hide"
+      },
+      {
+       "name": "stage_id"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker",
+       "string": "Color"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      },
+      {
+       "name": "location_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_event_track.view_event_track_graph",
+    "package": "website_event_track",
+    "name": "event.track.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Tracks",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "duration",
+       "operator": "+"
+      },
+      {
+       "name": "website_cta_delay",
+       "invisible": "1"
+      },
+      {
+       "name": "color",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "duration",
+       "operator": "+"
+      },
+      {
+       "name": "website_cta_delay",
+       "invisible": "1"
+      },
+      {
+       "name": "color",
+       "invisible": "1"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track_live.event_track_view_form",
+    "package": "website_event_track_live",
+    "name": "event.track.view.form.inherit.live",
+    "view_type": "xpath",
+    "inherits_view": "website_event_track.view_event_track_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='active']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "youtube_video_url",
+       "widget": "url"
+      },
+      {
+       "name": "is_youtube_replay",
+       "invisible": "not youtube_video_url or youtube_video_url == ''"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "url": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='active']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track_live.event_track_view_list",
+    "package": "website_event_track_live",
+    "name": "event.track.view.list.inherit.live",
+    "view_type": "xpath",
+    "inherits_view": "website_event_track.view_event_track_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "youtube_video_url",
+       "widget": "CopyClipboardURL",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "CopyClipboardURL": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track_quiz.event_track_view_form",
+    "package": "website_event_track_quiz",
+    "name": "event.track.view.form.inherit.event.track.quiz",
+    "view_type": "field",
+    "inherits_view": "website_event_track.view_event_track_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "stage_id",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "stage_id",
+       "position": "before"
+      },
+      {
+       "name": "quiz_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_add_quiz",
+       "string": "Add Quiz",
+       "type": "object",
+       "invisible": "quiz_id",
+       "class": "btn btn-primary",
+       "groups": "event.group_event_user"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_event_track.action_event_track",
+    "package": "website_event_track",
+    "name": "Event Tracks",
+    "view_mode": "kanban,list,form,calendar,graph,activity",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n              Create a Track\n            </p><p>\n              Tracks define your event schedule. They can be talks, workshops or any similar activity.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.track"
+   },
+   {
+    "external_identifier": "website_event_track.action_event_track_from_event",
+    "package": "website_event_track",
+    "name": "Event Tracks",
+    "view_mode": "kanban,list,form,calendar,graph,activity",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_event_id': active_id, 'default_event_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Create a Track\n          </p><p>\n            Tracks define your event schedule. They can be talks, workshops or any similar activity.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.track"
+   },
+   {
+    "external_identifier": "website_event_track.event_track_action_from_visitor",
+    "package": "website_event_track",
+    "name": "Wishlisted Tracks",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('wishlist_visitor_ids', 'in', [active_id])]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No track favorited by this visitor\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.track"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "website_event_track.mail_template_data_track_confirmation",
+    "package": "website_event_track",
+    "name": "Event: Track Confirmation",
+    "subject": "Confirmation of {{ object.name }}"
+   },
+   {
+    "external_identifier": "website_event_track.mail_template_data_track_reminder",
+    "package": "website_event_track",
+    "name": "Add reminder via email",
+    "subject": "Add talk reminder: {{ object.name }}"
+   }
+  ]
+ }
+}

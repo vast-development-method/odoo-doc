@@ -1,0 +1,110 @@
+{
+ "catalog": {
+  "name": "views:product.image",
+  "description": "View declarations for entity product.image.",
+  "record_count": 2,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "website_sale.view_product_image_form",
+   "package": "website_sale",
+   "name": "product.image.view.form",
+   "entity": "product.image",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Product Images"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "placeholder": "Image Name"
+     },
+     {
+      "name": "video_url"
+     },
+     {
+      "name": "image_1920",
+      "widget": "image"
+     },
+     {
+      "name": "embed_code",
+      "widget": "video_preview"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "video_preview": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Product Images\">\n                <field name=\"sequence\" invisible=\"1\"/>\n                <div class=\"row o_website_sale_image_modal\">\n                    <div class=\"col-md-6 col-xl-5\">\n                        <label for=\"name\" string=\"Image Name\"/>\n                        <h2><field name=\"name\" placeholder=\"Image Name\"/></h2>\n                        <label for=\"video_url\" string=\"Video URL\"/><br/>\n                        <field name=\"video_url\"/><br/>\n                    </div>\n                    <div class=\"col-md-6 col-xl-7 text-center o_website_sale_image_modal_container\">\n                        <div class=\"row\">\n                            <div class=\"col\">\n                                <field name=\"image_1920\" widget=\"image\"/>\n                            </div>\n                            <div class=\"col\" invisible=\"video_url in ['', False]\">\n                                <div class=\"o_video_container p-2\">\n                                    <span>Video Preview</span>\n                                    <field name=\"embed_code\" class=\"mt-2\" widget=\"video_preview\"/>\n                                    <h4 class=\"o_invalid_warning text-muted text-center\" invisible=\"embed_code\">\n                                        Please enter a valid Video URL.\n                                    </h4>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale.product_image_view_kanban",
+   "package": "website_sale",
+   "name": "product.image.view.kanban",
+   "entity": "product.image",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "string": "Product Images",
+     "default_order": "sequence"
+    },
+    "fields": [
+     {
+      "name": "video_url",
+      "invisible": "1"
+     },
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "image_1920",
+      "widget": "x2_many_image"
+     },
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "x2_many_image": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban string=\"Product Images\" default_order=\"sequence\">\n                <field name=\"video_url\" invisible=\"1\"/>\n                <field name=\"sequence\" widget=\"handle\"/>\n                <templates>\n                    <t t-name=\"card\" class=\"p-0 border-0\">\n                        <div class=\"card\">\n                            <div class=\"o_squared_image\">\n                                <field class=\"card-img-top\" name=\"image_1920\" widget=\"x2_many_image\"/>\n                            </div>\n                            <div class=\"p-2 m-0 bg-200\" t-attf-title=\"#{record.name.value}\">\n                                <field name=\"name\" class=\"small fs-5 text-truncate d-block\"/>\n                            </div>\n                            \n                            <t t-if=\"record.image_1920.raw_value.length &lt; 100*1000\">\n                                <t t-set=\"size_status\" t-value=\"'text-bg-success'\"/>\n                                <t t-set=\"message\">Acceptable file size</t>\n                            </t>\n                            \n                            <t t-elif=\"record.image_1920.raw_value.length &lt; 1000*1000\">\n                                <t t-set=\"size_status\" t-value=\"'text-bg-warning'\"/>\n                                <t t-set=\"message\">Huge file size. The image should be optimized/reduced.</t>\n                            </t>\n                            \n                            <t t-else=\"1\">\n                                <t t-set=\"size_status\" t-value=\"'text-bg-danger'\"/>\n                                <t t-set=\"message\">Optimization required! Reduce the image size or increase your compression settings.</t>\n                            </t>\n                            <span t-attf-class=\"badge #{size_status} o_product_image_size\" t-att-title=\"message\"/>\n                        </div>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  }
+ ]
+}

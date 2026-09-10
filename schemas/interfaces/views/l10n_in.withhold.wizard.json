@@ -1,0 +1,103 @@
+{
+ "catalog": {
+  "name": "views:l10n_in.withhold.wizard",
+  "description": "View declarations for entity l10n_in.withhold.wizard.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "l10n_in.tds_entry_view_form",
+   "package": "l10n_in",
+   "name": "l10n_in.withhold.wizard.view.form",
+   "entity": "l10n_in.withhold.wizard",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "l10n_in_withholding_warning",
+      "widget": "actionable_errors"
+     },
+     {
+      "name": "date",
+      "string": "Entry Date"
+     },
+     {
+      "name": "tax_id",
+      "required": "True",
+      "domain": "[('l10n_in_tax_type', '=', l10n_in_tds_tax_type)]",
+      "options": "{'no_create': True, 'no_open': True}"
+     },
+     {
+      "name": "tds_deduction",
+      "invisible": "tds_deduction == 'normal' or l10n_in_tds_tax_type != 'tds_purchase'",
+      "decoration-danger": "tds_deduction == 'higher'",
+      "decoration-warning": "tds_deduction == 'no'",
+      "decoration-success": "tds_deduction == 'lower'"
+     },
+     {
+      "name": "base",
+      "widget": "monetary",
+      "required": "True",
+      "options": "{'currency_field': 'currency_id'}"
+     },
+     {
+      "name": "amount",
+      "widget": "monetary",
+      "options": "{'currency_field': 'currency_id'}"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "related_move_id",
+      "invisible": "1"
+     },
+     {
+      "name": "related_payment_id",
+      "invisible": "1"
+     },
+     {
+      "name": "journal_id",
+      "domain": "[('type', '=', 'general')]"
+     },
+     {
+      "name": "reference"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_create_and_post_withhold",
+      "string": "Apply TDS",
+      "type": "object",
+      "class": "btn-primary"
+     },
+     {
+      "string": "Discard",
+      "class": "btn-secondary",
+      "special": "cancel"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "actionable_errors": 1,
+     "monetary": 2
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form>\n                <div class=\"alert alert-warning mt-1 mb-1\" role=\"alert\" invisible=\"not l10n_in_withholding_warning\">\n                    <div>\n                        <field name=\"l10n_in_withholding_warning\" widget=\"actionable_errors\"/>\n                    </div>\n                </div>\n                <sheet>\n                    <group>\n                        <group id=\"header_left_group\">\n                            <field name=\"date\" string=\"Entry Date\"/>\n                            <label for=\"tax_id\" string=\"TDS Section\"/>\n                            <div>\n                                <field name=\"tax_id\" class=\"oe_inline\" domain=\"[('l10n_in_tax_type', '=', l10n_in_tds_tax_type)]\" required=\"True\" options=\"{'no_create': True, 'no_open': True}\"/>\n                                <field name=\"tds_deduction\" class=\"oe_inline\" decoration-success=\"tds_deduction == 'lower'\" decoration-danger=\"tds_deduction == 'higher'\" decoration-warning=\"tds_deduction == 'no'\" invisible=\"tds_deduction == 'normal' or l10n_in_tds_tax_type != 'tds_purchase'\"/>\n                            </div>\n                            <field name=\"base\" widget=\"monetary\" options=\"{'currency_field': 'currency_id'}\" required=\"True\"/>\n                            <field name=\"amount\" widget=\"monetary\" options=\"{'currency_field': 'currency_id'}\"/>\n                            <field name=\"currency_id\" invisible=\"1\"/> \n                            <field name=\"related_move_id\" invisible=\"1\"/> \n                            <field name=\"related_payment_id\" invisible=\"1\"/> \n                        </group>\n                        <group id=\"header_right_group\">\n                            <field name=\"journal_id\" domain=\"[('type', '=', 'general')]\"/>\n                            <field name=\"reference\"/>\n                        </group>\n                    </group>\n                </sheet>\n                <footer>\n                    <button string=\"Apply TDS\" type=\"object\" name=\"action_create_and_post_withhold\" class=\"btn-primary\"/>\n                    <button string=\"Discard\" special=\"cancel\" class=\"btn-secondary\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  }
+ ]
+}

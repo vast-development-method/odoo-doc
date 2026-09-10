@@ -1,0 +1,423 @@
+{
+ "catalog": {
+  "name": "entity:mrp.production.split",
+  "description": "Complete definition of entity Wizard to Split a Production (mrp.production.split).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mrp.production.split",
+  "storage_name": "mrp_production_split",
+  "full_name": "Wizard to Split a Production",
+  "kind": "transient",
+  "description": "Wizard to Split a Production",
+  "defined_by_package": "mrp",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "production_split_multi_id",
+    "type": "Many2one",
+    "comodel": "mrp.production.split.multi",
+    "string": "Split Productions",
+    "defined_in_package": "mrp",
+    "full_name": "Split Productions",
+    "target_entity": "mrp.production.split.multi"
+   },
+   {
+    "name": "production_id",
+    "type": "Many2one",
+    "comodel": "mrp.production",
+    "string": "Manufacturing Order",
+    "readonly": true,
+    "defined_in_package": "mrp",
+    "full_name": "Manufacturing Order",
+    "target_entity": "mrp.production"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "related": "production_id.product_id",
+    "defined_in_package": "mrp",
+    "string": "Product",
+    "full_name": "Product"
+   },
+   {
+    "name": "product_qty",
+    "type": "Float",
+    "related": "production_id.product_qty",
+    "defined_in_package": "mrp",
+    "string": "Product Qty",
+    "full_name": "Product Qty"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "related": "production_id.product_uom_id",
+    "defined_in_package": "mrp",
+    "string": "Product Unit of measure",
+    "full_name": "Product Unit of measure"
+   },
+   {
+    "name": "production_capacity",
+    "type": "Float",
+    "related": "production_id.production_capacity",
+    "defined_in_package": "mrp",
+    "string": "Production Capacity",
+    "full_name": "Production Capacity"
+   },
+   {
+    "name": "production_detailed_vals_ids",
+    "type": "One2many",
+    "comodel": "mrp.production.split.line",
+    "inverse_name": "mrp_production_split_id",
+    "string": "Split Details",
+    "compute": "_compute_details",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mrp",
+    "full_name": "Split Details",
+    "target_entity": "mrp.production.split.line"
+   },
+   {
+    "name": "valid_details",
+    "type": "Boolean",
+    "string": "Valid",
+    "compute": "_compute_valid_details",
+    "defined_in_package": "mrp",
+    "full_name": "Valid"
+   },
+   {
+    "name": "max_batch_size",
+    "type": "Float",
+    "string": "Max Batch Size",
+    "compute": "_compute_max_batch_size",
+    "digits": "Product Unit",
+    "readonly": false,
+    "defined_in_package": "mrp",
+    "full_name": "Max Batch Size"
+   },
+   {
+    "name": "num_splits",
+    "type": "Integer",
+    "string": "# Splits",
+    "compute": "_compute_num_splits",
+    "readonly": true,
+    "defined_in_package": "mrp",
+    "full_name": "# Splits"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_max_batch_size",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_num_splits",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "max_batch_size"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_details",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "num_splits"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_valid_details",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_detailed_vals_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_split",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_prepare_split",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_return_to_list",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_mrp_production_split",
+    "package": "mrp",
+    "name": "access.mrp.production.split",
+    "entity": "mrp.production.split",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp.view_mrp_production_split_form",
+    "package": "mrp",
+    "name": "Split Production",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Split Production"
+     },
+     "fields": [
+      {
+       "name": "production_id",
+       "readonly": "1"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "product_qty"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "max_batch_size"
+      },
+      {
+       "name": "product_uom_id",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "num_splits"
+      },
+      {
+       "name": "production_detailed_vals_ids",
+       "invisible": "max_batch_size <= 0"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "quantity"
+      },
+      {
+       "name": "production_split_multi_id",
+       "invisible": "1"
+      },
+      {
+       "name": "valid_details",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_split",
+       "string": "Split",
+       "type": "object",
+       "invisible": "not valid_details",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "invisible": "production_split_multi_id",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_return_to_list",
+       "string": "Discard",
+       "type": "object",
+       "invisible": "not production_split_multi_id",
+       "class": "btn-secondary",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mrp.action_mrp_production_split",
+    "package": "mrp",
+    "name": "Split production",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mrp.production.split"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

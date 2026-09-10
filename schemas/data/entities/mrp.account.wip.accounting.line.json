@@ -1,0 +1,177 @@
+{
+ "catalog": {
+  "name": "entity:mrp.account.wip.accounting.line",
+  "description": "Complete definition of entity Account move line to be created when posting work in progress account move (mrp.account.wip.accounting.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mrp.account.wip.accounting.line",
+  "storage_name": "mrp_account_wip_accounting_line",
+  "full_name": "Account move line to be created when posting work in progress account move",
+  "kind": "transient",
+  "description": "Account move line to be created when posting WIP account move",
+  "defined_by_package": "mrp_account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Account",
+    "defined_in_package": "mrp_account",
+    "full_name": "Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "label",
+    "type": "Char",
+    "string": "Label",
+    "defined_in_package": "mrp_account",
+    "full_name": "Label"
+   },
+   {
+    "name": "debit",
+    "type": "Monetary",
+    "string": "Debit",
+    "compute": "_compute_debit",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mrp_account",
+    "full_name": "Debit"
+   },
+   {
+    "name": "credit",
+    "type": "Monetary",
+    "string": "Credit",
+    "compute": "_compute_credit",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mrp_account",
+    "full_name": "Credit"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Currency",
+    "default": {
+     "dynamic": "lambda self: self.env.company.currency_id"
+    },
+    "defined_in_package": "mrp_account",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "wip_accounting_id",
+    "type": "Many2one",
+    "comodel": "mrp.account.wip.accounting",
+    "string": "WIP accounting wizard",
+    "defined_in_package": "mrp_account",
+    "full_name": "work in progress accounting wizard",
+    "target_entity": "mrp.account.wip.accounting"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_debit_credit",
+    "kind": "Constraint",
+    "definition": "CHECK ( debit = 0 OR credit = 0 )",
+    "message": "A single line cannot be both credit and debit.",
+    "defined_in_package": "mrp_account"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_debit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "credit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_credit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "debit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp_account.access_mrp_wip_accounting_line",
+    "package": "mrp_account",
+    "name": "access.wip.accounting.line",
+    "entity": "mrp.account.wip.accounting.line",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

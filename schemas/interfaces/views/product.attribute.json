@@ -1,0 +1,392 @@
+{
+ "catalog": {
+  "name": "views:product.attribute",
+  "description": "View declarations for entity product.attribute.",
+  "record_count": 7,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "product.attribute_tree_view",
+   "package": "product",
+   "name": "product.attribute.list",
+   "entity": "product.attribute",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Variant Values"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "display_type"
+     },
+     {
+      "name": "create_variant"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Variant Values\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\"/>\n                <field name=\"display_type\"/>\n                <field name=\"create_variant\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "product.product_attribute_view_form",
+   "package": "product",
+   "name": "product.attribute.form",
+   "entity": "product.attribute",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Product Attribute"
+    },
+    "fields": [
+     {
+      "name": "number_related_products",
+      "invisible": "1"
+     },
+     {
+      "name": "number_related_products"
+     },
+     {
+      "name": "name",
+      "nolabel": "1"
+     },
+     {
+      "name": "display_type",
+      "widget": "radio",
+      "options": "{'horizontal': True}"
+     },
+     {
+      "name": "create_variant",
+      "widget": "radio",
+      "readonly": "number_related_products != 0 or display_type == 'multi'",
+      "options": "{'horizontal': True}",
+      "force_save": "1"
+     },
+     {
+      "name": "value_ids",
+      "widget": "pavs_one2many",
+      "nolabel": "1"
+     },
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "display_type",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_custom",
+      "column_invisible": "parent.display_type == 'multi'"
+     },
+     {
+      "name": "html_color",
+      "widget": "color",
+      "invisible": "image",
+      "column_invisible": "parent.display_type != 'color'"
+     },
+     {
+      "name": "image",
+      "widget": "image",
+      "options": "{'size': [70, 70]}",
+      "column_invisible": "parent.display_type not in ['color', 'image']"
+     },
+     {
+      "name": "default_extra_price"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_product_template_attribute_lines",
+      "type": "object",
+      "invisible": "not number_related_products",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     },
+     {
+      "name": "action_add_to_products",
+      "string": "Add to products",
+      "type": "object",
+      "invisible": "pav_attribute_line_ids",
+      "icon": "fa-plus"
+     },
+     {
+      "name": "action_update_prices",
+      "string": "Update extra prices",
+      "type": "object",
+      "invisible": "not pav_attribute_line_ids or not default_extra_price_changed",
+      "icon": "fa-refresh"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "attribute_values",
+      "string": "Attribute Values",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "radio": 2,
+     "pavs_one2many": 1,
+     "handle": 1,
+     "color": 1,
+     "image": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": [
+     {
+      "name": "action_open_product_template_attribute_lines",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-bars",
+      "invisible": "not number_related_products"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Product Attribute\">\n            <field name=\"number_related_products\" invisible=\"1\"/>\n            <sheet>\n                <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                <div class=\"oe_button_box\" name=\"button_box\">\n                    <button name=\"action_open_product_template_attribute_lines\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-bars\" invisible=\"not number_related_products\">\n                        <div class=\"o_stat_info\">\n                            <span class=\"o_stat_value\"><field name=\"number_related_products\"/></span>\n                            <span class=\"o_stat_text\">Products</span>\n                        </div>\n                    </button>\n                </div>\n                <group name=\"main_fields\">\n                    <group name=\"sale_main_fields\">\n                        <label for=\"name\" string=\"Attribute Name\"/>\n                        <field name=\"name\" nolabel=\"1\"/>\n                        <field name=\"display_type\" widget=\"radio\" options=\"{'horizontal': True}\"/>\n                        <field name=\"create_variant\" widget=\"radio\" options=\"{'horizontal': True}\" readonly=\"number_related_products != 0 or display_type == 'multi'\" force_save=\"1\"/>\n                    </group>\n                </group>\n                <notebook>\n                    <page string=\"Attribute Values\" name=\"attribute_values\">\n                        <field name=\"value_ids\" widget=\"pavs_one2many\" nolabel=\"1\">\n                            <list string=\"Values\" editable=\"bottom\">\n                                <field name=\"sequence\" widget=\"handle\"/>\n                                <field name=\"name\"/>\n                                <field name=\"display_type\" column_invisible=\"True\"/>\n                                <field name=\"is_custom\" width=\"120px\" column_invisible=\"parent.display_type == 'multi'\"/>\n                                <field name=\"html_color\" widget=\"color\" column_invisible=\"parent.display_type != 'color'\" invisible=\"image\"/>\n                                <field name=\"image\" widget=\"image\" options=\"{'size': [70, 70]}\" class=\"oe_avatar text-start float-none\" column_invisible=\"parent.display_type not in ['color', 'image']\"/>\n                                <field name=\"default_extra_price\" width=\"160px\"/>\n                                <button name=\"action_add_to_products\" string=\"Add to products\" type=\"object\" icon=\"fa-plus\" column_invisible=\"parent.number_related_products &lt; 1\" invisible=\"pav_attribute_line_ids\"/>\n                                <button name=\"action_update_prices\" string=\"Update extra prices\" type=\"object\" icon=\"fa-refresh\" column_invisible=\"parent.number_related_products &lt; 1\" invisible=\"not pav_attribute_line_ids or not default_extra_price_changed\"/>\n                            </list>\n                        </field>\n                    </page>\n                </notebook>\n            </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "product.product_attribute_search",
+   "package": "product",
+   "name": "product.attribute.view.search",
+   "entity": "product.attribute",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Inactive",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search>\n                <filter string=\"Inactive\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n                <field name=\"name\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale.product_attribute_view_form",
+   "package": "website_sale",
+   "name": "product.attribute.view.form",
+   "entity": "product.attribute",
+   "view_type": "group",
+   "inherits_view": "product.product_attribute_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "group",
+    "root_attributes": {
+     "name": "main_fields",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "visibility",
+      "widget": "radio",
+      "string": "eCommerce Filter",
+      "options": "{'horizontal': True}"
+     },
+     {
+      "name": "preview_variants",
+      "widget": "radio",
+      "readonly": "create_variant != 'always' or display_type == 'multi'",
+      "options": "{'horizontal': True}",
+      "force_save": "1"
+     },
+     {
+      "name": "is_thumbnail_visible",
+      "widget": "boolean_toggle",
+      "invisible": "preview_variants == 'hidden'",
+      "readonly": "create_variant != 'always' or display_type == 'multi'",
+      "force_save": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "radio": 2,
+     "boolean_toggle": 1
+    },
+    "inheritance_operations": [
+     {
+      "element": "group",
+      "attributes": {
+       "name": "main_fields",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <group name=\"main_fields\" position=\"inside\">\n                <group name=\"ecommerce_main_fields\">\n                    <field name=\"visibility\" string=\"eCommerce Filter\" widget=\"radio\" options=\"{'horizontal': True}\"/>\n                    <field name=\"preview_variants\" widget=\"radio\" options=\"{'horizontal': True}\" readonly=\"create_variant != 'always' or display_type == 'multi'\" force_save=\"1\"/>\n                    <field name=\"is_thumbnail_visible\" widget=\"boolean_toggle\" readonly=\"create_variant != 'always' or display_type == 'multi'\" invisible=\"preview_variants == 'hidden'\" force_save=\"1\"/>\n                </group>\n            </group>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale.attribute_tree_view",
+   "package": "website_sale",
+   "name": "product.attribute.list",
+   "entity": "product.attribute",
+   "view_type": "field",
+   "inherits_view": "product.attribute_tree_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "create_variant",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "create_variant",
+      "position": "after"
+     },
+     {
+      "name": "visibility",
+      "string": "eCommerce Filter Visibility"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"create_variant\" position=\"after\">\n                <field name=\"visibility\" string=\"eCommerce Filter Visibility\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale_comparison.product_attribute_tree_view_inherit",
+   "package": "website_sale_comparison",
+   "name": "product.attribute.list.inherit",
+   "entity": "product.attribute",
+   "view_type": "field",
+   "inherits_view": "product.attribute_tree_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "name",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "position": "after"
+     },
+     {
+      "name": "category_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"name\" position=\"after\">\n               <field name=\"category_id\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_sale_comparison.product_attribute_view_form",
+   "package": "website_sale_comparison",
+   "name": "product.attribute.form.inherit",
+   "entity": "product.attribute",
+   "view_type": "group",
+   "inherits_view": "website_sale.product_attribute_view_form",
+   "mode": null,
+   "priority": "8",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "group",
+    "root_attributes": {
+     "name": "ecommerce_main_fields",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "category_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "group",
+      "attributes": {
+       "name": "ecommerce_main_fields",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <group name=\"ecommerce_main_fields\" position=\"inside\">\n                <field name=\"category_id\"/>\n            </group>\n        </field>\n    "
+  }
+ ]
+}

@@ -1,0 +1,573 @@
+{
+ "catalog": {
+  "name": "views:purchase.requisition",
+  "description": "View declarations for entity purchase.requisition.",
+  "record_count": 5,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "purchase_requisition.view_purchase_requisition_form",
+   "package": "purchase_requisition",
+   "name": "purchase.requisition.form",
+   "entity": "purchase.requisition",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Purchase Agreements"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "currency_id",
+      "invisible": "1"
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "widget": "statusbar",
+      "invisible": "requisition_type == 'purchase_template'"
+     },
+     {
+      "name": "order_count",
+      "widget": "statinfo",
+      "string": "RFQs/Orders"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "vendor_id",
+      "readonly": "state in ['confirmed', 'done'] and requisition_type == 'blanket_order'",
+      "required": "requisition_type == 'blanket_order'",
+      "context": "{'res_partner_search_mode': 'supplier'}"
+     },
+     {
+      "name": "user_id",
+      "readonly": "state != 'draft'",
+      "string": "Buyer",
+      "domain": "[('share', '=', False)]"
+     },
+     {
+      "name": "requisition_type",
+      "readonly": "state != 'draft'",
+      "options": "{'no_create': True}"
+     },
+     {
+      "name": "currency_id",
+      "groups": "base.group_multi_currency"
+     },
+     {
+      "name": "date_start",
+      "widget": "date",
+      "readonly": "state not in ('draft', 'confirmed')"
+     },
+     {
+      "name": "date_end",
+      "widget": "date",
+      "readonly": "state not in ('draft', 'confirmed')"
+     },
+     {
+      "name": "reference",
+      "placeholder": "e.g. PO0025"
+     },
+     {
+      "name": "company_id",
+      "readonly": "state != 'draft'",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "line_ids",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "product_id",
+      "domain": "[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+     },
+     {
+      "name": "product_description_variants",
+      "invisible": "product_description_variants == ''"
+     },
+     {
+      "name": "product_qty"
+     },
+     {
+      "name": "qty_ordered",
+      "column_invisible": "parent.requisition_type == 'purchase_template'",
+      "optional": "show"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "required": "product_id",
+      "optional": "show",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "analytic_distribution",
+      "widget": "analytic_distribution",
+      "options": "{'product_field': 'product_id', 'business_domain': 'purchase_order'}",
+      "optional": "hide",
+      "groups": "analytic.group_analytic_accounting"
+     },
+     {
+      "name": "price_unit"
+     },
+     {
+      "name": "product_id",
+      "domain": "[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+     },
+     {
+      "name": "product_qty"
+     },
+     {
+      "name": "qty_ordered"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "analytic_distribution",
+      "widget": "analytic_distribution",
+      "options": "{'product_field': 'product_id', 'business_domain': 'purchase_order'}",
+      "groups": "analytic.group_analytic_accounting"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "description"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(action_purchase_requisition_to_so)d",
+      "string": "New Quotation",
+      "type": "action",
+      "invisible": "state != 'confirmed'",
+      "class": "btn-primary",
+      "context": "{'default_currency_id': currency_id, 'default_user_id': user_id}"
+     },
+     {
+      "name": "action_confirm",
+      "string": "Confirm",
+      "type": "object",
+      "invisible": "state != 'draft'",
+      "class": "btn-primary"
+     },
+     {
+      "name": "action_done",
+      "string": "Close",
+      "type": "object",
+      "invisible": "state != 'confirmed' or requisition_type == 'purchase_template'",
+      "class": "btn-primary"
+     },
+     {
+      "name": "action_draft",
+      "string": "Reset to Draft",
+      "type": "object",
+      "invisible": "state != 'cancel'"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "state not in ('draft', 'confirmed')"
+     },
+     {
+      "name": "%(action_purchase_requisition_list)d",
+      "type": "action",
+      "invisible": "state == 'draft'",
+      "class": "oe_stat_button",
+      "context": "{'default_currency_id': currency_id}",
+      "icon": "fa-list-alt"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "products",
+      "string": "Products",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "statusbar": 1,
+     "statinfo": 1,
+     "date": 2,
+     "many2one_uom": 2,
+     "analytic_distribution": 2
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "%(action_purchase_requisition_to_so)d",
+      "type": "action",
+      "string": "New Quotation",
+      "class": "btn-primary",
+      "context": "{'default_currency_id': currency_id, 'default_user_id': user_id}",
+      "invisible": "state != 'confirmed'"
+     },
+     {
+      "name": "action_confirm",
+      "invisible": "state != 'draft'",
+      "string": "Confirm",
+      "type": "object",
+      "class": "btn-primary"
+     },
+     {
+      "name": "action_done",
+      "invisible": "state != 'confirmed' or requisition_type == 'purchase_template'",
+      "string": "Close",
+      "type": "object",
+      "class": "btn-primary"
+     },
+     {
+      "name": "action_draft",
+      "invisible": "state != 'cancel'",
+      "string": "Reset to Draft",
+      "type": "object"
+     },
+     {
+      "name": "action_cancel",
+      "invisible": "state not in ('draft', 'confirmed')",
+      "string": "Cancel",
+      "type": "object"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": "draft,confirmed,done",
+    "chatter": true,
+    "button_box": [
+     {
+      "name": "%(action_purchase_requisition_list)d",
+      "type": "action",
+      "class": "oe_stat_button",
+      "icon": "fa-list-alt",
+      "invisible": "state == 'draft'",
+      "context": "{'default_currency_id': currency_id}"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Purchase Agreements\">\n            <field name=\"company_id\" invisible=\"1\"/>\n            <field name=\"currency_id\" invisible=\"1\"/>\n            <field name=\"active\" invisible=\"1\"/>\n            <header>\n                <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                <button name=\"%(action_purchase_requisition_to_so)d\" type=\"action\" string=\"New Quotation\" class=\"btn-primary\" context=\"{'default_currency_id': currency_id, 'default_user_id': user_id}\" invisible=\"state != 'confirmed'\"/>\n                <button name=\"action_confirm\" invisible=\"state != 'draft'\" string=\"Confirm\" type=\"object\" class=\"btn-primary\"/>\n                <button name=\"action_done\" invisible=\"state != 'confirmed' or requisition_type == 'purchase_template'\" string=\"Close\" type=\"object\" class=\"btn-primary\"/>\n                <button name=\"action_draft\" invisible=\"state != 'cancel'\" string=\"Reset to Draft\" type=\"object\"/>\n                <button name=\"action_cancel\" invisible=\"state not in ('draft', 'confirmed')\" string=\"Cancel\" type=\"object\"/>\n                <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"draft,confirmed,done\" invisible=\"requisition_type == 'purchase_template'\"/>\n            </header>\n            <sheet>\n                <div class=\"oe_button_box\" name=\"button_box\">\n                    <button name=\"%(action_purchase_requisition_list)d\" type=\"action\" class=\"oe_stat_button\" icon=\"fa-list-alt\" invisible=\"state == 'draft'\" context=\"{'default_currency_id': currency_id}\">\n                        <field name=\"order_count\" widget=\"statinfo\" string=\"RFQs/Orders\"/>\n                    </button>\n                </div>\n                <div class=\"oe_title\">\n                    <label for=\"name\" class=\"oe_inline\"/>\n                    <h1>\n                        <field name=\"name\"/>\n                    </h1>\n                </div>\n                <group>\n                    <group>\n                        <field name=\"vendor_id\" context=\"{'res_partner_search_mode': 'supplier'}\" readonly=\"state in ['confirmed', 'done'] and requisition_type == 'blanket_order'\" required=\"requisition_type == 'blanket_order'\"/>\n                        <field name=\"user_id\" string=\"Buyer\" readonly=\"state != 'draft'\" domain=\"[('share', '=', False)]\"/>\n                        <field name=\"requisition_type\" readonly=\"state != 'draft'\" options=\"{'no_create': True}\"/>\n                        <field name=\"currency_id\" groups=\"base.group_multi_currency\"/>\n                    </group>\n                    <group>\n                        <label for=\"date_start\" string=\"Agreement Validity\" invisible=\"requisition_type == 'purchase_template'\"/>\n                        <div class=\"o_row\" invisible=\"requisition_type == 'purchase_template'\">\n                            <span><strong>From</strong></span>\n                            <field name=\"date_start\" widget=\"date\" readonly=\"state not in ('draft', 'confirmed')\"/>\n                            <span><strong>to</strong></span>\n                            <field name=\"date_end\" widget=\"date\" readonly=\"state not in ('draft', 'confirmed')\"/>\n                        </div>\n                        <field name=\"reference\" placeholder=\"e.g. PO0025\"/>\n                        <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\" readonly=\"state != 'draft'\"/>\n                    </group>\n                </group>\n                <notebook>\n                    <page string=\"Products\" name=\"products\">\n                        <field name=\"line_ids\" readonly=\"state == 'done'\">\n                            <list string=\"Products\" editable=\"bottom\">\n                                <field name=\"product_id\" domain=\"[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]\"/>\n                                <field name=\"product_description_variants\" invisible=\"product_description_variants == ''\"/>\n                                <field name=\"product_qty\"/>\n                                <field name=\"qty_ordered\" optional=\"show\" column_invisible=\"parent.requisition_type == 'purchase_template'\"/>\n                                <field name=\"product_uom_id\" groups=\"uom.group_uom\" optional=\"show\" required=\"product_id\" widget=\"many2one_uom\"/>\n                                <field name=\"analytic_distribution\" widget=\"analytic_distribution\" optional=\"hide\" groups=\"analytic.group_analytic_accounting\" options=\"{'product_field': 'product_id', 'business_domain': 'purchase_order'}\"/>\n                                <field name=\"price_unit\"/>\n                            </list>\n                            <form string=\"Products\">\n                                <group>\n                                    <field name=\"product_id\" domain=\"[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]\"/>\n                                    <field name=\"product_qty\"/>\n                                    <field name=\"qty_ordered\"/>\n                                    <field name=\"product_uom_id\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n                                    <field name=\"analytic_distribution\" widget=\"analytic_distribution\" groups=\"analytic.group_analytic_accounting\" options=\"{'product_field': 'product_id', 'business_domain': 'purchase_order'}\"/>\n                                    <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\"/>\n                                </group>\n                            </form>\n                        </field>\n                        <separator string=\"Terms and Conditions\"/>\n                        <field name=\"description\" class=\"oe-bordered-editor\"/>\n                    </page>\n                </notebook>\n            </sheet>\n            <chatter/>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "purchase_requisition.view_purchase_requisition_tree",
+   "package": "purchase_requisition",
+   "name": "purchase.requisition.list",
+   "entity": "purchase.requisition",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Purchase Agreements",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "message_needaction",
+      "column_invisible": "True"
+     },
+     {
+      "name": "name",
+      "decoration-bf": "1"
+     },
+     {
+      "name": "vendor_id",
+      "optional": "show"
+     },
+     {
+      "name": "requisition_type",
+      "optional": "show"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "optional": "show"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "date_start",
+      "optional": "show"
+     },
+     {
+      "name": "date_end",
+      "widget": "remaining_days",
+      "invisible": "state in ('done', 'cancel')",
+      "optional": "show",
+      "decoration-danger": "date_end and date_end<current_date"
+     },
+     {
+      "name": "reference",
+      "optional": "show"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "optional": "show",
+      "decoration-success": "state == 'done'",
+      "decoration-info": "state not in ('done', 'cancel')"
+     },
+     {
+      "name": "activity_exception_decoration",
+      "widget": "activity_exception"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "remaining_days": 1,
+     "badge": 1,
+     "activity_exception": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Purchase Agreements\" sample=\"1\">\n                <field name=\"message_needaction\" column_invisible=\"True\"/>\n                <field name=\"name\" decoration-bf=\"1\"/>\n                <field name=\"vendor_id\" optional=\"show\"/>\n                <field name=\"requisition_type\" optional=\"show\"/>\n                <field name=\"user_id\" optional=\"show\" widget=\"many2one_avatar_user\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\" optional=\"show\"/>\n                <field name=\"date_start\" optional=\"show\"/>\n                <field name=\"date_end\" optional=\"show\" widget=\"remaining_days\" decoration-danger=\"date_end and date_end&lt;current_date\" invisible=\"state in ('done', 'cancel')\"/>\n                <field name=\"reference\" optional=\"show\"/>\n                <field name=\"state\" optional=\"show\" widget=\"badge\" decoration-success=\"state == 'done'\" decoration-info=\"state not in ('done', 'cancel')\"/>\n                <field name=\"activity_exception_decoration\" widget=\"activity_exception\"/>\n            </list>\n      </field>\n    "
+  },
+  {
+   "external_identifier": "purchase_requisition.view_purchase_requisition_kanban",
+   "package": "purchase_requisition",
+   "name": "purchase.requisition.kanban",
+   "entity": "purchase.requisition",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "state",
+      "widget": "label_selection",
+      "readonly": "1",
+      "options": "{'classes': {'draft': 'default', 'done': 'success', 'close': 'danger'}}"
+     },
+     {
+      "name": "requisition_type"
+     },
+     {
+      "name": "vendor_id"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "label_selection": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\" sample=\"1\">\n                <templates>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex mb-1\">\n                            <field name=\"name\" class=\"fw-bolder fs-5\"/>\n                            <field name=\"state\" widget=\"label_selection\" options=\"{'classes': {'draft': 'default', 'done': 'success', 'close': 'danger'}}\" readonly=\"1\" class=\"ms-auto\"/>\n                        </div>\n                        <field name=\"requisition_type\" class=\"text-muted\"/>\n                        <footer>\n                            <field name=\"vendor_id\"/>\n                            <field name=\"user_id\" widget=\"many2one_avatar_user\" class=\"ms-auto\"/>\n                        </footer>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "purchase_requisition.view_purchase_requisition_filter",
+   "package": "purchase_requisition",
+   "name": "purchase.requisition.list.select",
+   "entity": "purchase.requisition",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Purchase Agreements"
+    },
+    "fields": [
+     {
+      "name": "vendor_id"
+     },
+     {
+      "name": "name",
+      "string": "Reference",
+      "filter_domain": "['|', ('name', 'ilike', self), ('reference', 'ilike', self)]"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "product_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "my_agreements",
+      "string": "My Agreements",
+      "domain": "[('user_id', '=', uid)]"
+     },
+     {
+      "name": "blanket_order",
+      "string": "Blanket Orders",
+      "domain": "[('requisition_type', '=', 'blanket_order')]"
+     },
+     {
+      "name": "purchase_template",
+      "string": "Purchase Templates",
+      "domain": "[('requisition_type', '=', 'purchase_template')]"
+     },
+     {
+      "name": "draft",
+      "string": "Draft",
+      "domain": "[('state', '=', 'draft')]",
+      "help": "New Agreements"
+     },
+     {
+      "name": "done",
+      "string": "Done",
+      "domain": "[('state', '=', 'done')]"
+     },
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active','=',False)]"
+     },
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "representative",
+      "string": "Purchase Representative",
+      "domain": "[]",
+      "context": "{'group_by': 'user_id'}"
+     },
+     {
+      "name": "status",
+      "string": "Status",
+      "domain": "[]",
+      "context": "{'group_by': 'state'}"
+     },
+     {
+      "name": "date_start",
+      "string": "Ordering Date",
+      "domain": "[]",
+      "context": "{'group_by': 'date_start'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search Purchase Agreements\">\n                    <field name=\"vendor_id\"/>\n                    <field name=\"name\" string=\"Reference\" filter_domain=\"['|', ('name', 'ilike', self), ('reference', 'ilike', self)]\"/>\n                    <field name=\"user_id\"/>\n                    <field name=\"product_id\"/>\n                    <filter string=\"My Agreements\" name=\"my_agreements\" domain=\"[('user_id', '=', uid)]\"/>\n                    <separator/>\n                    <filter string=\"Blanket Orders\" name=\"blanket_order\" domain=\"[('requisition_type', '=', 'blanket_order')]\"/>\n                    <filter string=\"Purchase Templates\" name=\"purchase_template\" domain=\"[('requisition_type', '=', 'purchase_template')]\"/>\n                    <filter string=\"Draft\" name=\"draft\" domain=\"[('state', '=', 'draft')]\" help=\"New Agreements\"/>\n                    <filter string=\"Done\" name=\"done\" domain=\"[('state', '=', 'done')]\"/>\n                    <filter string=\"Archived\" name=\"inactive\" domain=\"[('active','=',False)]\"/>\n                    <separator/>\n                    <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                    <separator invisible=\"1\"/>\n                    <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                    <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                    <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')]\"/>\n                    <group>\n                        <filter string=\"Purchase Representative\" name=\"representative\" domain=\"[]\" context=\"{'group_by': 'user_id'}\"/>\n                        <filter string=\"Status\" name=\"status\" domain=\"[]\" context=\"{'group_by': 'state'}\"/>\n                        <filter string=\"Ordering Date\" name=\"date_start\" domain=\"[]\" context=\"{'group_by': 'date_start'}\"/>\n                    </group>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "purchase_requisition_stock.view_purchase_requisition_form_inherit",
+   "package": "purchase_requisition_stock",
+   "name": "purchase.requisition.form.inherit",
+   "entity": "purchase.requisition",
+   "view_type": "field",
+   "inherits_view": "purchase_requisition.view_purchase_requisition_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "reference",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "reference",
+      "position": "after"
+     },
+     {
+      "name": "picking_type_id",
+      "readonly": "state != 'draft'",
+      "options": "{'no_open': True, 'no_create': True}",
+      "groups": "stock.group_adv_location"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <field name=\"reference\" position=\"after\">\n                    <field name=\"picking_type_id\" options=\"{'no_open': True, 'no_create': True}\" groups=\"stock.group_adv_location\" readonly=\"state != 'draft'\"/>\n                </field>\n            </field>\n        "
+  }
+ ]
+}

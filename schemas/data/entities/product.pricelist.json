@@ -1,0 +1,1522 @@
+{
+ "catalog": {
+  "name": "entity:product.pricelist",
+  "description": "Complete definition of entity Pricelist (product.pricelist).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.pricelist",
+  "storage_name": "product_pricelist",
+  "full_name": "Pricelist",
+  "kind": "persistent",
+  "description": "Pricelist",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "point_of_sale",
+   "website_sale",
+   "loyalty",
+   "partnership"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id, name",
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "name",
+   "currency_id"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Pricelist Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "product",
+    "full_name": "Pricelist Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "help": "If unchecked, it will allow you to hide the pricelist without removing it.",
+    "defined_in_package": "product",
+    "full_name": "Active"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 16,
+    "defined_in_package": "product",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "default": {
+     "dynamic": "_default_currency_id"
+    },
+    "required": true,
+    "tracking": 1,
+    "defined_in_package": "product",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "tracking": 5,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "product",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "country_group_ids",
+    "type": "Many2many",
+    "comodel": "res.country.group",
+    "relation": "res_country_group_pricelist_rel",
+    "column1": "pricelist_id",
+    "column2": "res_country_group_id",
+    "string": "Country Groups",
+    "tracking": 10,
+    "defined_in_package": "product",
+    "full_name": "Country Groups",
+    "target_entity": "res.country.group"
+   },
+   {
+    "name": "item_ids",
+    "type": "One2many",
+    "comodel": "product.pricelist.item",
+    "inverse_name": "pricelist_id",
+    "string": "Pricelist Rules",
+    "domain": {
+     "dynamic": "lambda self: self._domain_item_ids()"
+    },
+    "copy": true,
+    "defined_in_package": "product",
+    "full_name": "Pricelist Rules",
+    "target_entity": "product.pricelist.item"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "string": "Website",
+    "comodel": "website",
+    "ondelete": "restrict",
+    "default": {
+     "dynamic": "_default_website"
+    },
+    "domain": "[('company_id', '=?', company_id)]",
+    "tracking": 20,
+    "help": "If you want a pricelist to be available on a website,you must fill in this field or make it selectable.Otherwise, the pricelist will not apply to any website.",
+    "defined_in_package": "website_sale",
+    "full_name": "Website",
+    "target_entity": "website"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "string": "E-commerce Promotional Code",
+    "groups": "base.group_user",
+    "defined_in_package": "website_sale",
+    "full_name": "E-commerce Promotional Code"
+   },
+   {
+    "name": "selectable",
+    "type": "Boolean",
+    "help": "Allow the end user to choose this price list",
+    "defined_in_package": "website_sale",
+    "string": "Selectable",
+    "full_name": "Selectable"
+   },
+   {
+    "name": "partners_count",
+    "type": "Integer",
+    "compute": "_compute_partners_count",
+    "defined_in_package": "partnership",
+    "string": "Partners Count",
+    "full_name": "Partners Count"
+   },
+   {
+    "name": "partners_label",
+    "type": "Char",
+    "related": "company_id.partnership_label",
+    "defined_in_package": "partnership",
+    "string": "Partners Label",
+    "full_name": "Partners Label"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_currency_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_base_domain_item_ids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_item_ids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_products_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "products",
+     "*args",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Compute the pricelist prices for the specified products, quantity & uom.\n\nNote: self and self.ensure_one()\n\n:param products: recordset of products (product.product/product.template)\n:param float quantity: quantity of products requested (in given uom)\n:param currency: record of currency (res.currency) (optional)\n:param uom: unit of measure (uom.uom record) (optional)\n    If not specified, prices returned are expressed in product uoms\n:param date: date to use for price computation and currency conversions (optional)\n:type date: date or datetime\n\n:returns: {product_id: product price}, considering the current pricelist if any\n:rtype: dict(int, float)",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_price",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "*args",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Compute the pricelist price for the specified product, qty & uom.\n\nNote: self and self.ensure_one()\n\n:param product: product record (product.product/product.template)\n:param float quantity: quantity of products requested (in given uom)\n:param currency: record of currency (res.currency) (optional)\n:param uom: unit of measure (uom.uom record) (optional)\n    If not specified, prices returned are expressed in product uoms\n:param date: date to use for price computation and currency conversions (optional)\n:type date: date or datetime\n\n:returns: unit price of the product, considering pricelist rules if any\n:rtype: float",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_price_rule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "*args",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Compute the pricelist price & rule for the specified product, qty & uom.\n\nNote: self and self.ensure_one()\n\n:param product: product record (product.product/product.template)\n:param float quantity: quantity of products requested (in given uom)\n:param currency: record of currency (res.currency) (optional)\n:param uom: unit of measure (uom.uom record) (optional)\n    If not specified, prices returned are expressed in product uoms\n:param date: date to use for price computation and currency conversions (optional)\n:type date: date or datetime\n\n:returns: (product unit price, applied pricelist rule id)\n:rtype: tuple(float, int)",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_rule",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "*args",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Compute the pricelist price & rule for the specified product, qty & uom.\n\nNote: self and self.ensure_one()\n\n:param product: product record (product.product/product.template)\n:param float quantity: quantity of products requested (in given uom)\n:param currency: record of currency (res.currency) (optional)\n:param uom: unit of measure (uom.uom record) (optional)\n    If not specified, prices returned are expressed in product uoms\n:param date: date to use for price computation and currency conversions (optional)\n:type date: date or datetime\n\n:returns: applied pricelist rule id\n:rtype: int or False",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_rule",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "products",
+     "quantity",
+     "currency",
+     "uom",
+     "date",
+     "compute_price",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Low-level method - Mono pricelist, multi products\nReturns: dict{product_id: (price, suitable_rule) for the given pricelist}\n\nNote: self and self.ensure_one()\n\n:param products: recordset of products (product.product/product.template)\n:param float quantity: quantity of products requested (in given uom)\n:param currency: record of currency (res.currency)\n                 note: currency.ensure_one()\n:param uom: unit of measure (uom.uom record)\n    If not specified, prices returned are expressed in product uoms\n:param date: date to use for price computation and currency conversions\n:type date: date or datetime\n:param bool compute_price: whether the price should be computed (default: True)\n\n:returns: product_id: (price, pricelist_rule)\n:rtype: dict",
+      "size_in_lines": 68,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_applicable_rules",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "products",
+     "date",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_applicable_rules_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "products",
+     "date",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_price_get",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product",
+     "quantity",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Multi pricelist, mono product - returns price per pricelist ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_rule_multi",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "products",
+     "quantity",
+     "uom",
+     "date",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": "Low-level method - Multi pricelist, multi products\nReturns: dict{product_id: dict{pricelist_id: (price, suitable_rule)} }",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_country_pricelist_multi",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "country_ids"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_pricelist_multi",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "partner_ids"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Retrieve the applicable pricelist for given partners in a given company.\n\nIt will return the first found pricelist in this order:\nFirst, the pricelist of the specific property (res_id set), this one\n        is created when saving a pricelist on the partner form view.\nElse, it will return the pricelist of the partner country group\nElse, it will return the generic property (res_id not set)\nElse, it will return the first available pricelist if any\n\n:return: a dict {partner_id: pricelist}",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_pricelist_multi_search_domain_hook",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_partner_pricelist_multi_filter_hook",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_import_templates",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_used_as_rule_base",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete pricelist(s):\n(%(pricelists)s)\nThey are used within pricelist(s):\n%(other_pricelists)s",
+        "line": 401
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_open_pricelist_report",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_website",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Find the first company's website, if there is one. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_websites_in_company",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id",
+         "website_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Prevent misconfiguration multi-website/multi-companies.\n\nIf the record has a company, the website should be from that company.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Only the company's websites are allowed.\nLeave the Company field empty or select a website from that company.",
+        "line": 50
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_available_on_website",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "website"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "To be able to be used on a website, a pricelist should either:\n- Have its `website_id` set to current website (specific pricelist).\n- Have no `website_id` set and should be `selectable` (generic pricelist)\n  or should have a `code` (generic promotion).\n- Have no `company_id` or a `company_id` matching its website one.\n\nNote: A pricelist without a website_id, not selectable and without a\n      code is a backend pricelist.\n\nChange in this method should be reflected in `_get_website_pricelists_domain`.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_available_in_country",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "country_code"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_website_pricelists_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "website"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": "Check above `_is_available_on_website` for explanation.\nChange in this method should be reflected in `_is_available_on_website`.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_archive",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This pricelist may not be archived. It is being used for active promotion programs: %s",
+        "line": 14
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_partners_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "partnership",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_except_used_as_rule_base",
+    "package": "product",
+    "kind": "UserError",
+    "message": "You cannot delete pricelist(s):\n(%(pricelists)s)\nThey are used within pricelist(s):\n%(other_pricelists)s"
+   },
+   {
+    "operation": "_check_websites_in_company",
+    "package": "website_sale",
+    "kind": "ValidationError",
+    "message": "Only the company's websites are allowed.\nLeave the Company field empty or select a website from that company."
+   },
+   {
+    "operation": "action_archive",
+    "package": "loyalty",
+    "kind": "UserError",
+    "message": "This pricelist may not be archived. It is being used for active promotion programs: %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_product_pricelist_manager",
+    "package": "point_of_sale",
+    "name": "product.pricelist manager",
+    "entity": "product.pricelist",
+    "group": "group_pos_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "point_of_sale.access_product_pricelist_user",
+    "package": "point_of_sale",
+    "name": "product.pricelist user",
+    "entity": "product.pricelist",
+    "group": "group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_pricelist_user",
+    "package": "product",
+    "name": "product.pricelist.user",
+    "entity": "product.pricelist",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_pricelist_partner_manager",
+    "package": "product",
+    "name": "product.pricelist partner manager",
+    "entity": "product.pricelist",
+    "group": "base.group_partner_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_pricelist_manager",
+    "package": "product",
+    "name": "product.pricelist.manager",
+    "entity": "product.pricelist",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale.access_product_pricelist_sale_user",
+    "package": "sale",
+    "name": "product.pricelist.sale.user",
+    "entity": "product.pricelist",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale.access_product_pricelist_sale_manager",
+    "package": "sale",
+    "name": "product.pricelist salemanager",
+    "entity": "product.pricelist",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "stock.access_product_pricelist_stock_manager",
+    "package": "stock",
+    "name": "product.pricelist stock_manager",
+    "entity": "product.pricelist",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_sale.access_product_pricelist_public_public",
+    "package": "website_sale",
+    "name": "product.pricelist.public",
+    "entity": "product.pricelist",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_pricelist_public_portal",
+    "package": "website_sale",
+    "name": "product.pricelist.public",
+    "entity": "product.pricelist",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_pricelist_public_employee",
+    "package": "website_sale",
+    "name": "product.pricelist.public",
+    "entity": "product.pricelist",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "product.product_pricelist_comp_rule",
+    "package": "product",
+    "name": "product pricelist company rule",
+    "entity": "product.pricelist",
+    "domain": "['|', ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_sale.product_pricelist_comp_rule",
+    "package": "website_sale",
+    "name": "product pricelist company rule",
+    "entity": "product.pricelist",
+    "domain": "['|', ('company_id', 'in', [False, website.company_id.id]), ('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "partnership.view_partner_pricelist_form",
+    "package": "partnership",
+    "name": "res.partner.form.inherit",
+    "view_type": "sheet",
+    "inherits_view": "product.product_pricelist_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "sheet",
+     "root_attributes": {
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "partners_count",
+       "widget": "statinfo",
+       "nolabel": "1"
+      },
+      {
+       "name": "partners_label",
+       "widget": "statinfo",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "partnership.action_pricelist_partners",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-users"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 2
+     },
+     "inheritance_operations": [
+      {
+       "element": "sheet",
+       "attributes": {
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_view_search",
+    "package": "product",
+    "name": "product.pricelist.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Products Price Search"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Products Price"
+      },
+      {
+       "name": "currency_id",
+       "groups": "base.group_multi_currency"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_view_tree",
+    "package": "product",
+    "name": "product.pricelist.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Products Price List",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "country_group_ids",
+       "widget": "many2many_tags",
+       "placeholder": "All countries"
+      },
+      {
+       "name": "currency_id",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_view_kanban",
+    "package": "product",
+    "name": "product.pricelist.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "currency_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "product.product_pricelist_view",
+    "package": "product",
+    "name": "product.pricelist.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Products Price List"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. USD Retailers"
+      },
+      {
+       "name": "currency_id",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "country_group_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "item_ids",
+       "context": "{'default_base':'list_price'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "product_tmpl_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name",
+       "string": "Apply on"
+      },
+      {
+       "name": "price",
+       "string": "Price"
+      },
+      {
+       "name": "min_quantity"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "date_end"
+      },
+      {
+       "name": "base",
+       "column_invisible": "True"
+      },
+      {
+       "name": "price_discount",
+       "column_invisible": "True"
+      },
+      {
+       "name": "applied_on",
+       "column_invisible": "True"
+      },
+      {
+       "name": "compute_price",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_pricelist_report",
+       "string": "Print",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "pricelist_rules",
+       "string": "Sales Prices",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_open_pricelist_report",
+       "type": "object",
+       "string": "Print"
+      }
+     ],
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_sale.website_sale_pricelist_form_view",
+    "package": "website_sale",
+    "name": "website_sale.pricelist.form",
+    "view_type": "notebook",
+    "inherits_view": "product.product_pricelist_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "notebook",
+     "root_attributes": {
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "website_id",
+       "options": "{'no_create': True}",
+       "placeholder": "Select a website"
+      },
+      {
+       "name": "selectable"
+      },
+      {
+       "name": "code"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "pricelist_config",
+       "string": "Ecommerce",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "notebook",
+       "attributes": {
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_sale.website_sale_pricelist_tree_view",
+    "package": "website_sale",
+    "name": "product.pricelist.list.inherit.product",
+    "view_type": "field",
+    "inherits_view": "product.product_pricelist_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "currency_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "position": "after"
+      },
+      {
+       "name": "selectable"
+      },
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "product.product_pricelist_action2",
+    "package": "product",
+    "name": "Pricelists",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "product_pricelist_view_search",
+    "domain": null,
+    "context": "{\"default_base\":'list_price'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n            Create a new pricelist\n            </p><p>\n            A price is a set of sales prices or rules to compute the price of sales order lines based on products, product categories, dates and ordered quantities.\n            This is the perfect tool to handle several pricings, seasonal discounts, etc.\n            </p><p>\n            You can assign pricelists to your customers or select one when creating a new sales quotation.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "product.pricelist"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "point_of_sale.pos_config_menu_action_product_pricelist",
+    "package": "point_of_sale",
+    "name": null,
+    "parent_id": "point_of_sale.pos_config_menu_catalog",
+    "action": "product.product_pricelist_action2",
+    "sequence": "20",
+    "groups_id": "product.group_product_pricelist",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.menu_product_pricelist_main",
+    "package": "sale",
+    "name": "Pricelists",
+    "parent_id": null,
+    "action": "product.product_pricelist_action2",
+    "sequence": "30",
+    "groups_id": "product.group_product_pricelist",
+    "web_icon": null
+   },
+   {
+    "external_identifier": "website_sale.menu_catalog_pricelists",
+    "package": "website_sale",
+    "name": "Pricelists",
+    "parent_id": null,
+    "action": "product.product_pricelist_action2",
+    "sequence": "3",
+    "groups_id": "product.group_product_pricelist",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

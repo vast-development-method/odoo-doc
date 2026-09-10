@@ -1,0 +1,539 @@
+{
+ "catalog": {
+  "name": "entity:hr.work.entry.regeneration.wizard",
+  "description": "Complete definition of entity Regenerate Employee Work Entries (hr.work.entry.regeneration.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.work.entry.regeneration.wizard",
+  "storage_name": "hr_work_entry_regeneration_wizard",
+  "full_name": "Regenerate Employee Work Entries",
+  "kind": "transient",
+  "description": "Regenerate Employee Work Entries",
+  "defined_by_package": "hr_work_entry",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "earliest_available_date",
+    "type": "Date",
+    "string": "Earliest date",
+    "compute": "_compute_earliest_available_date",
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Earliest date"
+   },
+   {
+    "name": "earliest_available_date_message",
+    "type": "Char",
+    "readonly": true,
+    "store": false,
+    "default": "",
+    "defined_in_package": "hr_work_entry",
+    "string": "Earliest Available Date Message",
+    "full_name": "Earliest Available Date Message"
+   },
+   {
+    "name": "latest_available_date",
+    "type": "Date",
+    "string": "Latest date",
+    "compute": "_compute_latest_available_date",
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Latest date"
+   },
+   {
+    "name": "latest_available_date_message",
+    "type": "Char",
+    "readonly": true,
+    "store": false,
+    "default": "",
+    "defined_in_package": "hr_work_entry",
+    "string": "Latest Available Date Message",
+    "full_name": "Latest Available Date Message"
+   },
+   {
+    "name": "date_from",
+    "type": "Date",
+    "string": "From",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('date_start')"
+    },
+    "defined_in_package": "hr_work_entry",
+    "full_name": "From"
+   },
+   {
+    "name": "date_to",
+    "type": "Date",
+    "string": "To",
+    "required": true,
+    "compute": "_compute_date_to",
+    "store": true,
+    "readonly": false,
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('date_end')"
+    },
+    "defined_in_package": "hr_work_entry",
+    "full_name": "To"
+   },
+   {
+    "name": "employee_ids",
+    "type": "Many2many",
+    "comodel": "hr.employee",
+    "string": "Employees",
+    "domain": {
+     "dynamic": "lambda self: [('company_id', 'in', self.env.companies.ids)]"
+    },
+    "required": true,
+    "defined_in_package": "hr_work_entry",
+    "full_name": "Employees",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "validated_work_entry_employee_ids",
+    "type": "Many2many",
+    "comodel": "hr.employee",
+    "export_string_translation": false,
+    "compute": "_compute_validated_work_entry_employee_ids",
+    "defined_in_package": "hr_work_entry",
+    "string": "Validated Work Entry Employee",
+    "full_name": "Validated Work Entry Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "search_criteria_completed",
+    "type": "Boolean",
+    "compute": "_compute_search_criteria_completed",
+    "defined_in_package": "hr_work_entry",
+    "string": "Search Criteria Completed",
+    "full_name": "Search Criteria Completed"
+   },
+   {
+    "name": "valid",
+    "type": "Boolean",
+    "compute": "_compute_valid",
+    "defined_in_package": "hr_work_entry",
+    "string": "Valid",
+    "full_name": "Valid"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_date_to",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_from"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_earliest_available_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_latest_available_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_validated_work_entry_employee_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_from",
+         "date_to",
+         "employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_valid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "validated_work_entry_employee_ids",
+         "employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_search_criteria_completed",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_from",
+         "date_to",
+         "employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_dates",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "date_from",
+         "date_to",
+         "employee_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_date_to_string",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_work_entry_fields_to_nullify",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "regenerate_work_entries",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "slots",
+     "record_ids"
+    ],
+    "definitions": [
+     {
+      "package": "hr_work_entry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "In order to regenerate the work entries, you need to provide the wizard with an employee_id, a date_from and a date_to.",
+        "line": 101
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The from date must be >= '%(earliest_available_date)s' and the to date must be <= '%(latest_available_date)s', which correspond to the generated work entries time interval.",
+        "line": 104
+       },
+       {
+        "kind": "ValidationError",
+        "message": "No work entry can be regenerated in this range of dates and these employees.",
+        "line": 107
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "regenerate_work_entries",
+    "package": "hr_work_entry",
+    "kind": "ValidationError",
+    "message": "In order to regenerate the work entries, you need to provide the wizard with an employee_id, a date_from and a date_to."
+   },
+   {
+    "operation": "regenerate_work_entries",
+    "package": "hr_work_entry",
+    "kind": "ValidationError",
+    "message": "The from date must be >= '%(earliest_available_date)s' and the to date must be <= '%(latest_available_date)s', which correspond to the generated work entries time interval."
+   },
+   {
+    "operation": "regenerate_work_entries",
+    "package": "hr_work_entry",
+    "kind": "ValidationError",
+    "message": "No work entry can be regenerated in this range of dates and these employees."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_work_entry.access_hr_work_entry_regeneration_wizard",
+    "package": "hr_work_entry",
+    "name": "access_hr_work_entry_regeneration_wizard",
+    "entity": "hr.work.entry.regeneration.wizard",
+    "group": "hr.group_hr_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_regeneration_wizard",
+    "package": "hr_work_entry",
+    "name": "hr_work_entry_regeneration_wizard",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Regenerate Employee Work Entries"
+     },
+     "fields": [
+      {
+       "name": "employee_ids",
+       "widget": "many2many_avatar_employee_class",
+       "domain": "[('company_id', 'in', allowed_company_ids), ('version_ids.id','!=', False)]"
+      },
+      {
+       "name": "date_to",
+       "invisible": "1"
+      },
+      {
+       "name": "date_from",
+       "widget": "daterange",
+       "options": "{'end_date_field': 'date_to'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "earliest_available_date_message",
+       "nolabel": "1"
+      },
+      {
+       "name": "latest_available_date_message",
+       "nolabel": "1"
+      },
+      {
+       "name": "search_criteria_completed",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "regenerate_work_entries",
+       "string": "Regenerate Work Entries",
+       "type": "object",
+       "invisible": "not valid",
+       "class": "btn btn-primary oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "regenerate_work_entries_disabled",
+       "string": "Regenerate Work Entries",
+       "invisible": "valid",
+       "class": "btn btn-primary disabled"
+      },
+      {
+       "name": "cancel_button",
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_avatar_employee_class": 1,
+      "daterange": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_work_entry.hr_work_entry_regeneration_wizard_action",
+    "package": "hr_work_entry",
+    "name": "Work Entry Regeneration",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.work.entry.regeneration.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

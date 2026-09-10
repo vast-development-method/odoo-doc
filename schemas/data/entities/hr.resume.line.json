@@ -1,0 +1,1189 @@
+{
+ "catalog": {
+  "name": "entity:hr.resume.line",
+  "description": "Complete definition of entity Resume line of an employee (hr.resume.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.resume.line",
+  "storage_name": "hr_resume_line",
+  "full_name": "Resume line of an employee",
+  "kind": "persistent",
+  "description": "Resume line of an employee",
+  "defined_by_package": "hr_skills",
+  "extended_by_packages": [
+   "hr_skills_event",
+   "hr_skills_slides",
+   "hr_skills_survey"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "line_type_id, date_end desc, date_start desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "required": true,
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "hr_skills",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "avatar_128",
+    "type": "Image",
+    "related": "employee_id.avatar_128",
+    "defined_in_package": "hr_skills",
+    "string": "Avatar 128",
+    "full_name": "Avatar 128"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "employee_id.company_id",
+    "defined_in_package": "hr_skills",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "related": "employee_id.department_id",
+    "defined_in_package": "hr_skills",
+    "store": true,
+    "extended_in_packages": [
+     "hr_skills_survey"
+    ],
+    "string": "Department",
+    "full_name": "Department"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "hr_skills",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "date_start",
+    "type": "Date",
+    "required": true,
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "hr_skills",
+    "string": "Date Start",
+    "full_name": "Date Start"
+   },
+   {
+    "name": "date_end",
+    "type": "Date",
+    "defined_in_package": "hr_skills",
+    "string": "Date End",
+    "full_name": "Date End"
+   },
+   {
+    "name": "duration",
+    "type": "Integer",
+    "string": "Duration",
+    "defined_in_package": "hr_skills",
+    "compute": "_compute_duration",
+    "readonly": false,
+    "store": true,
+    "extended_in_packages": [
+     "hr_skills_slides"
+    ],
+    "full_name": "Duration"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "string": "Description",
+    "translate": true,
+    "defined_in_package": "hr_skills",
+    "full_name": "Description"
+   },
+   {
+    "name": "line_type_id",
+    "type": "Many2one",
+    "comodel": "hr.resume.line.type",
+    "string": "Type",
+    "defined_in_package": "hr_skills",
+    "full_name": "Type",
+    "target_entity": "hr.resume.line.type"
+   },
+   {
+    "name": "is_course",
+    "type": "Boolean",
+    "related": "line_type_id.is_course",
+    "defined_in_package": "hr_skills",
+    "string": "Is Course",
+    "full_name": "Is Course"
+   },
+   {
+    "name": "course_type",
+    "type": "Selection",
+    "string": "Course Type",
+    "selection": [
+     [
+      "external",
+      "External"
+     ],
+     [
+      "onsite",
+      "Onsite"
+     ],
+     [
+      "elearning",
+      "eLearning"
+     ]
+    ],
+    "default": "external",
+    "required": true,
+    "defined_in_package": "hr_skills",
+    "selection_added_by": [
+     "hr_skills_event",
+     "hr_skills_slides"
+    ],
+    "ondelete": {
+     "elearning": "cascade"
+    },
+    "extended_in_packages": [
+     "hr_skills_event",
+     "hr_skills_slides"
+    ],
+    "full_name": "Course Type"
+   },
+   {
+    "name": "color",
+    "type": "Char",
+    "compute": "_compute_color",
+    "default": "#000000",
+    "defined_in_package": "hr_skills",
+    "string": "Color",
+    "full_name": "Color"
+   },
+   {
+    "name": "external_url",
+    "type": "Char",
+    "string": "External URL",
+    "compute": "_compute_external_url",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "hr_skills",
+    "full_name": "External uniform resource locator"
+   },
+   {
+    "name": "certificate_filename",
+    "type": "Char",
+    "defined_in_package": "hr_skills",
+    "string": "Certificate Filename",
+    "full_name": "Certificate Filename"
+   },
+   {
+    "name": "certificate_file",
+    "type": "Binary",
+    "string": "Certificate",
+    "defined_in_package": "hr_skills",
+    "full_name": "Certificate"
+   },
+   {
+    "name": "resume_line_properties",
+    "type": "Properties",
+    "string": "Properties",
+    "definition": "line_type_id.resume_line_type_properties_definition",
+    "defined_in_package": "hr_skills",
+    "full_name": "Properties"
+   },
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Onsite Course",
+    "compute": "_compute_event_id",
+    "store": true,
+    "readonly": true,
+    "index": "btree_not_null",
+    "domain": "[('registration_ids', 'any', [('partner_id.employee', '=', True)])]",
+    "context": {
+     "hr_skills_event_add_employee": true
+    },
+    "defined_in_package": "hr_skills_event",
+    "full_name": "Onsite Course",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "slide.channel",
+    "string": "eLearning Course",
+    "compute": "_compute_channel_id",
+    "store": true,
+    "readonly": true,
+    "index": "btree_not_null",
+    "defined_in_package": "hr_skills_slides",
+    "full_name": "eLearning Course",
+    "target_entity": "slide.channel"
+   },
+   {
+    "name": "course_url",
+    "type": "Char",
+    "related": "channel_id.website_absolute_url",
+    "defined_in_package": "hr_skills_slides",
+    "string": "Course Uniform resource locator",
+    "full_name": "Course Uniform resource locator"
+   },
+   {
+    "name": "survey_id",
+    "type": "Many2one",
+    "comodel": "survey.survey",
+    "string": "Certification",
+    "readonly": true,
+    "defined_in_package": "hr_skills_survey",
+    "full_name": "Certification",
+    "target_entity": "survey.survey"
+   },
+   {
+    "name": "expiration_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "expired",
+      "Expired"
+     ],
+     [
+      "expiring",
+      "Expiring"
+     ],
+     [
+      "valid",
+      "Valid"
+     ]
+    ],
+    "compute": "_compute_expiration_status",
+    "store": true,
+    "defined_in_package": "hr_skills_survey",
+    "string": "Expiration Status",
+    "full_name": "Expiration Status"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_date_check",
+    "kind": "Constraint",
+    "definition": "CHECK ((date_start <= date_end OR date_end IS NULL))",
+    "message": "The start date must be anterior to the end date.",
+    "defined_in_package": "hr_skills"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_onchange_external_url",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "external_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_external_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "course_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_color",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "course_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_skills_event",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_skills_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_event_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills_event",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_event_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills_event",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "course_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_channel_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills_slides",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "channel_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_channel_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "course_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_expiration_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills_survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "expiration_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "hr_skills.access_hr_resume_line",
+    "package": "hr_skills",
+    "name": "hr.resume.line",
+    "entity": "hr.resume.line",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_skills.access_hr_resume_line_employee",
+    "package": "hr_skills",
+    "name": "hr.resume.line.employee",
+    "entity": "hr.resume.line",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_skills.hr_resume_rule_employee",
+    "package": "hr_skills",
+    "name": "Resume: employee: read all",
+    "entity": "hr.resume.line",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4,ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_skills.hr_resume_rule_employee_hr_user",
+    "package": "hr_skills",
+    "name": "Resume: HR user: all",
+    "entity": "hr.resume.line",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4,ref('hr.group_hr_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_skills.hr_skills_rule_employee_update",
+    "package": "hr_skills",
+    "name": "Resume: employee: create/write/unlink own",
+    "entity": "hr.resume.line",
+    "domain": "[('employee_id.user_id','=',user.id)]",
+    "groups": "[(4,ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_skills.resume_line_view_form",
+    "package": "hr_skills",
+    "name": "hr.resume.line.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Resume"
+     },
+     "fields": [
+      {
+       "name": "line_type_id",
+       "widget": "selection_badge"
+      },
+      {
+       "name": "name",
+       "required": "True",
+       "placeholder": "e.g. the system Inc."
+      },
+      {
+       "name": "course_type",
+       "widget": "radio",
+       "invisible": "1"
+      },
+      {
+       "name": "external_url",
+       "placeholder": "e.g. https://duolingo.com/course/xyz"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "date_end",
+       "placeholder": "Forever"
+      },
+      {
+       "name": "date_start",
+       "invisible": "not is_course",
+       "nolabel": "1"
+      },
+      {
+       "name": "duration"
+      },
+      {
+       "name": "certificate_filename",
+       "invisible": "1"
+      },
+      {
+       "name": "certificate_file"
+      },
+      {
+       "name": "resume_line_properties"
+      },
+      {
+       "name": "description",
+       "placeholder": "Description"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "selection_badge": 1,
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_skills.resume_line_view_form_inherit",
+    "package": "hr_skills",
+    "name": "hr.resume.line.inherit.form",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.resume_line_view_form",
+    "mode": "primary",
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='course_type']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "invisible": "not is_course",
+       "string": "Employee"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='course_type']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills.hr_resume_line_list_view",
+    "package": "hr_skills",
+    "name": "hr.resume.line.list.view",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "name": "Resume Lines",
+      "editable": "bottom",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "name",
+       "string": "Training Title"
+      },
+      {
+       "name": "date_start",
+       "string": "Date"
+      },
+      {
+       "name": "course_type",
+       "string": "Type",
+       "column_invisible": "1"
+      },
+      {
+       "name": "line_type_id",
+       "required": "1",
+       "string": "Resume Section",
+       "domain": "[('is_course', '=', True)]",
+       "optional": "show"
+      },
+      {
+       "name": "certificate_filename",
+       "column_invisible": "1"
+      },
+      {
+       "name": "certificate_file",
+       "widget": "binary"
+      },
+      {
+       "name": "duration",
+       "string": "Number of Hours",
+       "optional": "hide"
+      },
+      {
+       "name": "external_url",
+       "column_invisible": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "description",
+       "optional": "hide"
+      },
+      {
+       "name": "resume_line_properties",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "binary": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_skills.hr_resume_line_kanban_view",
+    "package": "hr_skills",
+    "name": "hr.resume.line.kanban.view",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_hr_employee_kanban"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "course_type",
+       "widget": "badge"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "date_start"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1,
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_skills.hr_resume_line_calendar_view",
+    "package": "hr_skills",
+    "name": "hr.resume.line.calendar.view",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "date_start": "date_start",
+      "mode": "year",
+      "color": "color"
+     },
+     "fields": [
+      {
+       "name": "course_type"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date_start",
+      "date_stop": null,
+      "date_delay": null,
+      "color": "color",
+      "mode": "year",
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_skills.view_resume_lines_filter",
+    "package": "hr_skills",
+    "name": "hr.resume.line.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Resume Lines"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "department_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_skills_event.resume_slides_line_view_form",
+    "package": "hr_skills_event",
+    "name": "hr.resume.line.form",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.resume_line_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='external_url']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "event_id",
+       "readonly": "0",
+       "context": "{'default_employee_id': context.get('default_employee_id')}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='external_url']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills_event.resume_slides_line_view_list",
+    "package": "hr_skills_event",
+    "name": "hr.resume.line.list",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.hr_resume_line_list_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='course_type']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='course_type']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills_event.resume_slides_line_view_kanban",
+    "package": "hr_skills_event",
+    "name": "hr.resume.line.kanban.view.inherited",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.hr_resume_line_kanban_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='course_type']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='course_type']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills_slides.resume_slides_line_view_form",
+    "package": "hr_skills_slides",
+    "name": "hr.resume.line.form",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.resume_line_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='external_url']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "channel_id",
+       "readonly": "0"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='external_url']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills_slides.resume_slides_line_view_list",
+    "package": "hr_skills_slides",
+    "name": "hr.resume.line.list",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.hr_resume_line_list_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='course_type']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='course_type']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills_slides.resume_slides_line_view_kanban",
+    "package": "hr_skills_slides",
+    "name": "hr.resume.line.kanban.view.inherited",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.hr_resume_line_kanban_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='course_type']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='course_type']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills_survey.resume_survey_line_view_form",
+    "package": "hr_skills_survey",
+    "name": "hr.resume.line.form",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.resume_line_view_form",
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='certificate_file']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "survey_id",
+       "invisible": "line_type_id != %(hr_skills_survey.resume_type_certification)d",
+       "readonly": "0",
+       "domain": "[('certification', '=', True)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='certificate_file']",
+       "position": "before"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_skills.hr_resume_lines_training_action",
+    "package": "hr_skills",
+    "name": "Training Attendances",
+    "view_mode": "list,kanban,form,calendar",
+    "view_id": null,
+    "search_view_id": "view_resume_lines_filter",
+    "domain": "[('line_type_id.is_course', '=', True)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.resume.line"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

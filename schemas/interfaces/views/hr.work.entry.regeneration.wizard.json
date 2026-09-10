@@ -1,0 +1,91 @@
+{
+ "catalog": {
+  "name": "views:hr.work.entry.regeneration.wizard",
+  "description": "View declarations for entity hr.work.entry.regeneration.wizard.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "hr_work_entry.hr_work_entry_regeneration_wizard",
+   "package": "hr_work_entry",
+   "name": "hr_work_entry_regeneration_wizard",
+   "entity": "hr.work.entry.regeneration.wizard",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Regenerate Employee Work Entries"
+    },
+    "fields": [
+     {
+      "name": "employee_ids",
+      "widget": "many2many_avatar_employee_class",
+      "domain": "[('company_id', 'in', allowed_company_ids), ('version_ids.id','!=', False)]"
+     },
+     {
+      "name": "date_to",
+      "invisible": "1"
+     },
+     {
+      "name": "date_from",
+      "widget": "daterange",
+      "options": "{'end_date_field': 'date_to'}",
+      "nolabel": "1"
+     },
+     {
+      "name": "earliest_available_date_message",
+      "nolabel": "1"
+     },
+     {
+      "name": "latest_available_date_message",
+      "nolabel": "1"
+     },
+     {
+      "name": "search_criteria_completed",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "regenerate_work_entries",
+      "string": "Regenerate Work Entries",
+      "type": "object",
+      "invisible": "not valid",
+      "class": "btn btn-primary oe_highlight",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "regenerate_work_entries_disabled",
+      "string": "Regenerate Work Entries",
+      "invisible": "valid",
+      "class": "btn btn-primary disabled"
+     },
+     {
+      "name": "cancel_button",
+      "string": "Cancel",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_avatar_employee_class": 1,
+     "daterange": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Regenerate Employee Work Entries\">\n                <group>\n                    <field name=\"employee_ids\" widget=\"many2many_avatar_employee_class\" in_error=\"validated_work_entry_employee_ids\" domain=\"[('company_id', 'in', allowed_company_ids), ('version_ids.id','!=', False)]\"/>\n                    <field name=\"date_to\" invisible=\"1\"/>\n                    <label for=\"date_from\" string=\"Period\"/>\n                    <field name=\"date_from\" style=\"width: 200px;\" nolabel=\"1\" widget=\"daterange\" options=\"{'end_date_field': 'date_to'}\"/>\n                    <div colspan=\"2\" class=\"text-info\" invisible=\"earliest_available_date_message == ''\">\n                        <i class=\"fa fa-info-circle me-1\" title=\"Hint\"/>\n                        <field name=\"earliest_available_date_message\" class=\"oe_inline\" nolabel=\"1\"/>\n                    </div>\n                    <div colspan=\"2\" class=\"text-info\" invisible=\"latest_available_date_message == ''\">\n                        <i class=\"fa fa-info-circle me-1\" title=\"Hint\"/>\n                        <field name=\"latest_available_date_message\" class=\"oe_inline\" nolabel=\"1\"/>\n                    </div>\n                </group>\n                <div>\n                    <span class=\"text-muted\">Warning: The work entry regeneration will delete all manual changes on the selected period.</span>\n                </div>\n                <field name=\"search_criteria_completed\" invisible=\"1\"/>\n                <div invisible=\"not search_criteria_completed or not validated_work_entry_employee_ids\">\n                    <div class=\"text-danger\"><i class=\"fa fa-exclamation-triangle me-1\" title=\"Warning\"/>Employees in red will be skipped because they have at least one validated work entry.</div>\n                </div>\n                <footer>\n                    <button name=\"regenerate_work_entries\" string=\"Regenerate Work Entries\" data-hotkey=\"q\" class=\"btn btn-primary oe_highlight\" type=\"object\" invisible=\"not valid\"/>\n                    <button name=\"regenerate_work_entries_disabled\" string=\"Regenerate Work Entries\" class=\"btn btn-primary disabled\" invisible=\"valid\"/>\n                    <button name=\"cancel_button\" string=\"Cancel\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  }
+ ]
+}

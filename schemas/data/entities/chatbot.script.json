@@ -1,0 +1,746 @@
+{
+ "catalog": {
+  "name": "entity:chatbot.script",
+  "description": "Complete definition of entity Chatbot Script (chatbot.script).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "chatbot.script",
+  "storage_name": "chatbot_script",
+  "full_name": "Chatbot Script",
+  "kind": "persistent",
+  "description": "Chatbot Script",
+  "defined_by_package": "im_livechat",
+  "extended_by_packages": [
+   "crm_livechat",
+   "website_livechat"
+  ],
+  "mixins": [
+   "image.mixin",
+   "utm.source.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "title, id",
+  "display_name_field": "title",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "title",
+    "type": "Char",
+    "string": "Title",
+    "required": true,
+    "translate": true,
+    "default": "Chatbot",
+    "defined_in_package": "im_livechat",
+    "full_name": "Title"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "im_livechat",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "image_1920",
+    "type": "Image",
+    "related": "operator_partner_id.image_1920",
+    "readonly": false,
+    "defined_in_package": "im_livechat",
+    "string": "Image 1920",
+    "full_name": "Image 1920"
+   },
+   {
+    "name": "script_step_ids",
+    "type": "One2many",
+    "comodel": "chatbot.script.step",
+    "inverse_name": "chatbot_script_id",
+    "copy": true,
+    "string": "Script Steps",
+    "defined_in_package": "im_livechat",
+    "full_name": "Script Steps",
+    "target_entity": "chatbot.script.step"
+   },
+   {
+    "name": "operator_partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Bot Operator",
+    "ondelete": "restrict",
+    "required": true,
+    "copy": false,
+    "index": true,
+    "defined_in_package": "im_livechat",
+    "full_name": "Bot Operator",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "livechat_channel_count",
+    "type": "Integer",
+    "string": "Livechat Channel Count",
+    "compute": "_compute_livechat_channel_count",
+    "defined_in_package": "im_livechat",
+    "full_name": "Livechat Channel Count"
+   },
+   {
+    "name": "first_step_warning",
+    "type": "Selection",
+    "selection": [
+     [
+      "first_step_operator",
+      "First Step Operator"
+     ],
+     [
+      "first_step_invalid",
+      "First Step Invalid"
+     ]
+    ],
+    "compute": "_compute_first_step_warning",
+    "defined_in_package": "im_livechat",
+    "string": "First Step Warning",
+    "full_name": "First Step Warning"
+   },
+   {
+    "name": "lead_count",
+    "type": "Integer",
+    "string": "Generated Lead Count",
+    "compute": "_compute_lead_count",
+    "defined_in_package": "crm_livechat",
+    "full_name": "Generated Lead Count"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_question_selection",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "script_step_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Step of type 'Question' must have answers.",
+        "line": 37
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_script_step_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "script_step_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_livechat_channel_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_first_step_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "script_step_ids.is_forward_operator",
+         "script_step_ids.step_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Correctly copy the 'triggering_answer_ids' field from the original script_step_ids to the clone.\nThis needs to be done in post-processing to make sure we get references to the newly created\nanswers from the copy instead of references to the answers of the original.\n\nThis implementation assumes that the order of created steps and answers will be kept between\nthe original and the clone, using 'zip()' to match the records between the two. ",
+      "size_in_lines": 33,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_welcome_steps",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Returns a sub-set of script_step_ids that only contains the \"welcoming steps\".\nWe consider those as all the steps the bot will say before expecting a first answer from\nthe end user.\n\nExample 1:\n- step 1 (question_selection): What do you want to do? - Create a Lead, -Create a Ticket\n- step 2 (text): Thank you for visiting our website!\n-> The welcoming steps will only contain step 1, since directly after that we expect an\ninput from the user\n\nExample 2:\n- step 1 (text): Hello! I'm a bot!\n- step 2 (text): I am here to help lost users.\n- step 3 (question_selection): What do you want to do? - Create a Lead, -Create a Ticket\n- step 4 (text): Thank you for visiting our website!\n-> The welcoming steps will contain steps 1, 2 and 3.\nMeaning the bot will have a small monologue with himself before expecting an input from the\nend user.\n\nThis is important because we need to display those welcoming steps in a special fashion on\nthe frontend, since those are not inserted into the discuss.channel as actual mail.messages,\nto avoid bloating the channels with bot messages if the end-user never interacts with it. ",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_welcome_steps",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "discuss_channel"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "Welcome messages are only posted after the visitor's first interaction with the chatbot.\nSee 'chatbot.script#_get_welcome_steps()' for more details.\n\nSide note: it is important to set the 'chatbot_current_step_id' on each iteration so that\nit's correctly set when going into 'discuss_channel#_message_post_after_hook()'. ",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_livechat_channels",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "email_address",
+     "discuss_channel"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_chatbot_language",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_lead_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_leads",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "crm_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_test_script",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_question_selection",
+    "package": "im_livechat",
+    "kind": "ValidationError",
+    "message": "Step of type 'Question' must have answers."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "im_livechat.access_chatbot_script_user",
+    "package": "im_livechat",
+    "name": "chatbot.script.user",
+    "entity": "chatbot.script",
+    "group": "im_livechat_group_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "crm_livechat.chatbot_script_view_form",
+    "package": "crm_livechat",
+    "name": "chatbot.script.view.form.inherit.crm.livechat",
+    "view_type": "div",
+    "inherits_view": "im_livechat.chatbot_script_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "lead_count",
+       "widget": "statinfo",
+       "string": "Leads"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_leads",
+       "type": "object",
+       "invisible": "lead_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-star"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "im_livechat.chatbot_script_view_form",
+    "package": "im_livechat",
+    "name": "chatbot.script.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "first_step_warning",
+       "invisible": "1"
+      },
+      {
+       "name": "livechat_channel_count",
+       "widget": "statinfo",
+       "string": "Channels"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "image_1920",
+       "widget": "image",
+       "options": "{'preview_image': 'image_128'}"
+      },
+      {
+       "name": "title",
+       "placeholder": "e.g. \"Meeting Scheduler Bot\""
+      },
+      {
+       "name": "script_step_ids",
+       "widget": "chatbot_steps_one2many",
+       "context": "{'chatbot_script_answer_display_short_name': 1}",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_livechat_channels",
+       "type": "object",
+       "invisible": "livechat_channel_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-comments"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_script",
+       "string": "Script",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statinfo": 1,
+      "image": 1,
+      "chatbot_steps_one2many": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_view_livechat_channels",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-comments",
+       "invisible": "livechat_channel_count == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "im_livechat.chatbot_script_view_tree",
+    "package": "im_livechat",
+    "name": "chatbot.script.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "title"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "im_livechat.chatbot_script_view_search",
+    "package": "im_livechat",
+    "name": "chatbot.script.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "title",
+       "string": "Name",
+       "filter_domain": "[('title', 'ilike', self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_livechat.chatbot_script_view_form",
+    "package": "website_livechat",
+    "name": "chatbot.script.view.form.inherit.website.livechat",
+    "view_type": "xpath",
+    "inherits_view": "im_livechat.chatbot_script_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_test_script",
+       "string": "Test",
+       "type": "object",
+       "invisible": "not active or not script_step_ids",
+       "class": "btn btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "im_livechat.chatbot_script_action",
+    "package": "im_livechat",
+    "name": "Chatbot",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a Chatbot\n            </p><p>\n                You can create a new Chatbot with a defined script to speak to your website visitors.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "chatbot.script"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

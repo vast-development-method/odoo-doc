@@ -1,0 +1,629 @@
+{
+ "catalog": {
+  "name": "entity:product.public.category",
+  "description": "Complete definition of entity Website Product Category (product.public.category).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.public.category",
+  "storage_name": "product_public_category",
+  "full_name": "Website Product Category",
+  "kind": "persistent",
+  "description": "Website Product Category",
+  "defined_by_package": "website_sale",
+  "extended_by_packages": [],
+  "mixins": [
+   "website.seo.metadata",
+   "website.multi.mixin",
+   "website.searchable.mixin",
+   "image.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": true,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "website_sale",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "cover_image",
+    "type": "Image",
+    "string": "Cover Image",
+    "help": "Displayed only in the Category List Snippet.",
+    "defined_in_package": "website_sale",
+    "full_name": "Cover Image"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": {
+     "dynamic": "_default_sequence"
+    },
+    "index": true,
+    "defined_in_package": "website_sale",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "string": "Parent",
+    "comodel": "product.public.category",
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "website_sale",
+    "full_name": "Parent",
+    "target_entity": "product.public.category"
+   },
+   {
+    "name": "child_id",
+    "type": "One2many",
+    "string": "Children Categories",
+    "comodel": "product.public.category",
+    "inverse_name": "parent_id",
+    "defined_in_package": "website_sale",
+    "full_name": "Children Categories",
+    "target_entity": "product.public.category"
+   },
+   {
+    "name": "parent_path",
+    "type": "Char",
+    "index": true,
+    "defined_in_package": "website_sale",
+    "string": "Parent Path",
+    "full_name": "Parent Path"
+   },
+   {
+    "name": "parents_and_self",
+    "type": "Many2many",
+    "comodel": "product.public.category",
+    "compute": "_compute_parents_and_self",
+    "defined_in_package": "website_sale",
+    "string": "Parents And Self",
+    "full_name": "Parents And Self",
+    "target_entity": "product.public.category"
+   },
+   {
+    "name": "product_tmpl_ids",
+    "type": "Many2many",
+    "comodel": "product.template",
+    "relation": "product_public_category_product_template_rel",
+    "defined_in_package": "website_sale",
+    "string": "Product Tmpl",
+    "full_name": "Product Tmpl",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "has_published_products",
+    "type": "Boolean",
+    "compute": "_compute_has_published_products",
+    "search": "_search_has_published_products",
+    "compute_sudo": true,
+    "defined_in_package": "website_sale",
+    "string": "Has Published Products",
+    "full_name": "Has Published Products"
+   },
+   {
+    "name": "website_description",
+    "type": "Html",
+    "string": "Description",
+    "sanitize_attributes": false,
+    "sanitize_form": false,
+    "sanitize_overridable": true,
+    "translate": {
+     "expression": "html_translate"
+    },
+    "defined_in_package": "website_sale",
+    "full_name": "Description"
+   },
+   {
+    "name": "website_footer",
+    "type": "Html",
+    "string": "Category Footer",
+    "sanitize_attributes": false,
+    "sanitize_form": false,
+    "translate": {
+     "expression": "html_translate"
+    },
+    "defined_in_package": "website_sale",
+    "full_name": "Category Footer"
+   },
+   {
+    "name": "show_category_title",
+    "type": "Boolean",
+    "string": "Show Category Title",
+    "default": false,
+    "help": "Display the category title on the shop page. Corresponds to the 'Show Title' editor option.",
+    "defined_in_package": "website_sale",
+    "full_name": "Show Category Title"
+   },
+   {
+    "name": "show_category_description",
+    "type": "Boolean",
+    "string": "Show Category Description",
+    "default": true,
+    "help": "Display the category description on the shop page. Corresponds to the 'Show Description' editor option.",
+    "defined_in_package": "website_sale",
+    "full_name": "Show Category Description"
+   },
+   {
+    "name": "align_category_content",
+    "type": "Boolean",
+    "string": "Align Category Content",
+    "default": false,
+    "help": "Align the category content on the shop page. Corresponds to the 'Center Content' editor option.",
+    "defined_in_package": "website_sale",
+    "full_name": "Align Category Content"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_sequence",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_parents_and_self",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_path"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parents_and_self"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_published_products",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company",
+         "website_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_parent_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_has_published_products",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_get_detail",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "website",
+     "order",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_render_results",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "fetch_fields",
+     "mapping",
+     "icon",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_available_snippet_categories",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "website_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return parent categories available for selection in the dynamic category snippet.\n\n:param int website_id: ID of the current website\n:return: Available parent categories\n:rtype: list[dict]",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_available_category_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "website_id"
+    ],
+    "definitions": [
+     {
+      "package": "website_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Build a search domain for product categories to be used in dynamic snippets.\n\n:param int website_id: ID of the current website\n:return: A domain to filter product categories for the given website\n:rtype: Domain",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_sale.access_product_category_pos_manager",
+    "package": "website_sale",
+    "name": "product.public.category manager",
+    "entity": "product.public.category",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_sale.access_product_public_category_designer",
+    "package": "website_sale",
+    "name": "product.public.category designer",
+    "entity": "product.public.category",
+    "group": "website.group_website_designer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_public_category_public_public",
+    "package": "website_sale",
+    "name": "product.category.public",
+    "entity": "product.public.category",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_public_category_public_portal",
+    "package": "website_sale",
+    "name": "product.category.public",
+    "entity": "product.public.category",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_public_category_public_employee",
+    "package": "website_sale",
+    "name": "product.category.public",
+    "entity": "product.public.category",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_sale.empty_public_categories_rule",
+    "package": "website_sale",
+    "name": "Hide empty eCommerce categories to public/portal users",
+    "entity": "product.public.category",
+    "domain": "[('has_published_products', '=', True)]",
+    "groups": "[             Command.link(ref('base.group_public')),             Command.link(ref('base.group_portal')),         ]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "website_sale.product_public_category_form_view",
+    "package": "website_sale",
+    "name": "product.public.category.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Website Public Categories"
+     },
+     "fields": [
+      {
+       "name": "image_1920",
+       "widget": "image",
+       "options": "{'convert_to_webp': True, 'preview_image': 'image_128'}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "parent_id"
+      },
+      {
+       "name": "website_id",
+       "options": "{'no_create': True}",
+       "groups": "website.group_multi_website"
+      },
+      {
+       "name": "sequence",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "website_description"
+      },
+      {
+       "name": "cover_image",
+       "widget": "image"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_sale.product_public_category_tree_view",
+    "package": "website_sale",
+    "name": "product.public.category.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Product Public Categories"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_sale.product_public_category_action",
+    "package": "website_sale",
+    "name": "eCommerce Categories",
+    "view_mode": "list,form",
+    "view_id": "False",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Define a new category\n            </p><p>\n                Categories are used to browse your products through the\n                touchscreen interface.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "product.public.category"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "website_sale.dynamic_snippet_category_list",
+    "package": "website_sale",
+    "name": "Category List",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

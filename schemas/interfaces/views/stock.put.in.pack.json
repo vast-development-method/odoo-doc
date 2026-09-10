@@ -1,0 +1,117 @@
+{
+ "catalog": {
+  "name": "views:stock.put.in.pack",
+  "description": "View declarations for entity stock.put.in.pack.",
+  "record_count": 2,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "stock.stock_put_in_pack_form",
+   "package": "stock",
+   "name": "stock.put.in.pack.form",
+   "entity": "stock.put.in.pack",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Put in Pack"
+    },
+    "fields": [
+     {
+      "name": "package_type_id",
+      "options": "{'no_create': True}",
+      "placeholder": "Select a Package Type"
+     },
+     {
+      "name": "result_package_id",
+      "widget": "package_m2o",
+      "domain": "[('package_type_id', '=?', package_type_id), '|', '|', ('location_id', '=', location_dest_id), ('id', 'in', origin_package_ids), '&', ('location_id', '=', False), '|', ('move_line_ids', '=', False), ('move_line_ids.location_dest_id', '=', location_dest_id)]",
+      "context": "{'default_package_type_id': package_type_id, 'show_src_package': 1}",
+      "placeholder": "Leave empty to create new"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_put_in_pack",
+      "string": "Put in Pack",
+      "type": "object",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Discard",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "package_m2o": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Put in Pack\">\n                <group>\n                    <field name=\"package_type_id\" placeholder=\"Select a Package Type\" options=\"{'no_create': True}\"/>\n                    <field name=\"result_package_id\" domain=\"[('package_type_id', '=?', package_type_id), '|', '|', ('location_id', '=', location_dest_id), ('id', 'in', origin_package_ids), '&amp;', ('location_id', '=', False), '|', ('move_line_ids', '=', False), ('move_line_ids.location_dest_id', '=', location_dest_id)]\" context=\"{'default_package_type_id': package_type_id, 'show_src_package': 1}\" widget=\"package_m2o\" placeholder=\"Leave empty to create new\"/>\n                </group>\n                <footer>\n                    <button name=\"action_put_in_pack\" type=\"object\" string=\"Put in Pack\" class=\"btn-primary\" data-hotkey=\"q\"/>\n                    <button string=\"Discard\" special=\"cancel\" data-hotkey=\"x\" class=\"btn-secondary\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_delivery.stock_put_in_pack_form",
+   "package": "stock_delivery",
+   "name": "stock.put.in.pack.form",
+   "entity": "stock.put.in.pack",
+   "view_type": "field",
+   "inherits_view": "stock.stock_put_in_pack_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "result_package_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "result_package_id",
+      "position": "after"
+     },
+     {
+      "name": "move_line_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "package_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "package_carrier_type",
+      "invisible": "1"
+     },
+     {
+      "name": "shipping_weight"
+     },
+     {
+      "name": "weight_uom_name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"result_package_id\" position=\"after\">\n                \n                <field name=\"move_line_ids\" invisible=\"1\"/>\n                <field name=\"package_ids\" invisible=\"1\"/>\n                <field name=\"package_carrier_type\" invisible=\"1\"/>\n\n                <label for=\"shipping_weight\" invisible=\"not package_carrier_type or (not package_type_id and not result_package_id)\"/>\n                <div class=\"o_row\" invisible=\"not package_carrier_type or (not package_type_id and not result_package_id)\" name=\"package_weight\">\n                    <field name=\"shipping_weight\"/>\n                    <field name=\"weight_uom_name\"/>\n                </div>\n            </field>\n            <field name=\"package_type_id\" position=\"attributes\">\n                <attribute name=\"domain\">[('package_carrier_type', '=?', package_carrier_type)]</attribute>\n            </field>\n            <field name=\"result_package_id\" position=\"attributes\">\n                <attribute name=\"domain\">\n                    [('package_carrier_type', '=?', package_carrier_type), ('package_type_id', '=?', package_type_id), '|', '|', ('location_id', '=', location_dest_id), ('id', 'in', origin_package_ids), '&amp;', ('location_id', '=', False), '|', ('move_line_ids', '=', False), ('move_line_ids.location_dest_id', '=', location_dest_id)]\n                </attribute>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

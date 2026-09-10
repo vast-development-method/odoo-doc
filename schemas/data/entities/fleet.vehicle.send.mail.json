@@ -1,0 +1,262 @@
+{
+ "catalog": {
+  "name": "entity:fleet.vehicle.send.mail",
+  "description": "Complete definition of entity Send mails to Drivers (fleet.vehicle.send.mail).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "fleet.vehicle.send.mail",
+  "storage_name": "fleet_vehicle_send_mail",
+  "full_name": "Send mails to Drivers",
+  "kind": "transient",
+  "description": "Send mails to Drivers",
+  "defined_by_package": "fleet",
+  "extended_by_packages": [],
+  "mixins": [
+   "mail.composer.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "vehicle_ids",
+    "type": "Many2many",
+    "comodel": "fleet.vehicle",
+    "string": "Vehicles",
+    "required": true,
+    "defined_in_package": "fleet",
+    "full_name": "Vehicles",
+    "target_entity": "fleet.vehicle"
+   },
+   {
+    "name": "author_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Author",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.user.partner_id.id"
+    },
+    "defined_in_package": "fleet",
+    "full_name": "Author",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "template_id",
+    "type": "Many2one",
+    "domain": {
+     "dynamic": "lambda self: [('model_id', '=', self.env['ir.model']._get('fleet.vehicle').id)]"
+    },
+    "defined_in_package": "fleet",
+    "string": "Template",
+    "full_name": "Template"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "relation": "fleet_vehicle_mail_compose_message_ir_attachments_rel",
+    "column1": "wizard_id",
+    "column2": "attachment_id",
+    "string": "Attachments",
+    "bypass_search_access": true,
+    "defined_in_package": "fleet",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "subject"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_template_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_save_as_template",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "fleet.access_fleet_vehicle_send_mail",
+    "package": "fleet",
+    "name": "access.fleet.vehicle.send.mail",
+    "entity": "fleet.vehicle.send.mail",
+    "group": "fleet_group_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "fleet.fleet_vehicle_send_mail_view_form",
+    "package": "fleet",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "subject",
+       "required": "1",
+       "placeholder": "Communication about your vehicle."
+      },
+      {
+       "name": "body",
+       "widget": "html_mail",
+       "nolabel": "1",
+       "placeholder": "Write your message here...",
+       "force_save": "1"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "many2many_binary"
+      },
+      {
+       "name": "template_id",
+       "string": "Load template"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send",
+       "string": "Send",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_save_as_template",
+       "string": "Save as new template",
+       "type": "object",
+       "class": "btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "html_mail": 1,
+      "many2many_binary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

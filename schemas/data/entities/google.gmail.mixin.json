@@ -1,0 +1,352 @@
+{
+ "catalog": {
+  "name": "entity:google.gmail.mixin",
+  "description": "Complete definition of entity Google Gmail Mixin (google.gmail.mixin).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "google.gmail.mixin",
+  "storage_name": "google_gmail_mixin",
+  "full_name": "Google Gmail Mixin",
+  "kind": "abstract",
+  "description": "Google Gmail Mixin",
+  "defined_by_package": "google_gmail",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_SERVICE_SCOPE": "https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email",
+   "_DEFAULT_GMAIL_IAP_ENDPOINT": "https://gmail.api.the system.com"
+  },
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "google_gmail",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "google_gmail_refresh_token",
+    "type": "Char",
+    "string": "Refresh Token",
+    "groups": "base.group_system",
+    "copy": false,
+    "defined_in_package": "google_gmail",
+    "full_name": "Refresh Token"
+   },
+   {
+    "name": "google_gmail_access_token",
+    "type": "Char",
+    "string": "Access Token",
+    "groups": "base.group_system",
+    "copy": false,
+    "defined_in_package": "google_gmail",
+    "full_name": "Access Token"
+   },
+   {
+    "name": "google_gmail_access_token_expiration",
+    "type": "Integer",
+    "string": "Access Token Expiration Timestamp",
+    "groups": "base.group_system",
+    "copy": false,
+    "defined_in_package": "google_gmail",
+    "full_name": "Access Token Expiration Timestamp"
+   },
+   {
+    "name": "google_gmail_uri",
+    "type": "Char",
+    "compute": "_compute_gmail_uri",
+    "string": "URI",
+    "help": "The URL to generate the authorization code from Google",
+    "groups": "base.group_system",
+    "defined_in_package": "google_gmail",
+    "full_name": "URI"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_gmail_uri",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_google_gmail_uri",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Open the URL to accept the Gmail permission.\n\nThis is done with an action, so we can force the user the save the form.\nWe need him to save the form so the current mail server record exist in DB, and\nwe can include the record ID in the URL.",
+      "size_in_lines": 68,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only the administrator can link a Gmail mail server.",
+        "line": 79
+       },
+       {
+        "kind": "UserError",
+        "message": "Please enter a valid email address.",
+        "line": 83
+       },
+       {
+        "kind": "UserError",
+        "message": "Please configure your Gmail credentials.",
+        "line": 130
+       },
+       {
+        "kind": "UserError",
+        "message": "Please configure your Gmail credentials.",
+        "line": 92
+       },
+       {
+        "kind": "UserError",
+        "message": "Oops, we could not authenticate you. Please try again later.",
+        "line": 117
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_fetch_gmail_refresh_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "authorization_code"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Request the refresh token and the initial access token from the authorization code.\n\n:return:\n    refresh_token, access_token, access_token_expiration",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_gmail_access_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "refresh_token"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Refresh the access token thanks to the refresh token.\n\n:return:\n    access_token, access_token_expiration",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_gmail_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "grant_type",
+     "**values"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Generic method to request an access token or a refresh token.\n\nReturn the JSON response of the GMail API and manage the errors which can occur.\n\n:param grant_type: Depends the action we want to do (refresh_token or authorization_code)\n:param values: Additional parameters that will be given to the GMail endpoint",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "An error occurred when fetching the access token.",
+        "line": 198
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_fetch_gmail_access_token_iap",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "refresh_token"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Fetch the access token using IAP.\n\nMake a HTTP request to IAP, that will make a HTTP request\nto the Gmail API and give us the result.\n\n:return:\n    access_token, access_token_expiration",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Oops, we could not authenticate you. Please try again later.",
+        "line": 225
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_raise_iap_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "error"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "get_iap_error_message(self.env, error)",
+        "line": 234
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_generate_oauth2_string",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user",
+     "refresh_token"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Generate a OAuth2 string which can be used for authentication.\n\n:param user: Email address of the Gmail account to authenticate\n:param refresh_token: Refresh token for the given Gmail account\n\n:return: The SASL argument for the OAuth2 mechanism.",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_gmail_csrf_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "google_gmail",
+      "decorators": [],
+      "documentation": "Generate a CSRF token that will be verified in `google_gmail_callback`.\n\nThis will prevent a malicious person to make an admin user disconnect the mail servers.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "open_google_gmail_uri",
+    "package": "google_gmail",
+    "kind": "AccessError",
+    "message": "Only the administrator can link a Gmail mail server."
+   },
+   {
+    "operation": "open_google_gmail_uri",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "Please enter a valid email address."
+   },
+   {
+    "operation": "open_google_gmail_uri",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "Please configure your Gmail credentials."
+   },
+   {
+    "operation": "open_google_gmail_uri",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "Please configure your Gmail credentials."
+   },
+   {
+    "operation": "open_google_gmail_uri",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "Oops, we could not authenticate you. Please try again later."
+   },
+   {
+    "operation": "_fetch_gmail_token",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "An error occurred when fetching the access token."
+   },
+   {
+    "operation": "_fetch_gmail_access_token_iap",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "Oops, we could not authenticate you. Please try again later."
+   },
+   {
+    "operation": "_raise_iap_error",
+    "package": "google_gmail",
+    "kind": "UserError",
+    "message": "get_iap_error_message(self.env, error)"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

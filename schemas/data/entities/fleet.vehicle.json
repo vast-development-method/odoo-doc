@@ -1,0 +1,3024 @@
+{
+ "catalog": {
+  "name": "entity:fleet.vehicle",
+  "description": "Complete definition of entity Vehicle (fleet.vehicle).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "fleet.vehicle",
+  "storage_name": "fleet_vehicle",
+  "full_name": "Vehicle",
+  "kind": "persistent",
+  "description": "Vehicle",
+  "defined_by_package": "fleet",
+  "extended_by_packages": [
+   "account_fleet",
+   "hr_fleet"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "avatar.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "license_plate asc, acquisition_date asc",
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "name",
+   "driver_id.name"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "compute": "_compute_vehicle_name",
+    "store": true,
+    "defined_in_package": "fleet",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "string": "Vehicle Description",
+    "defined_in_package": "fleet",
+    "full_name": "Vehicle Description"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Active"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Fleet Manager",
+    "domain": {
+     "dynamic": "lambda self: f\"[('share', '=', False), ('company_id', '=', company_id), ('all_group_ids', 'in', {self.env.ref('fleet.fleet_group_user').id})]\""
+    },
+    "defined_in_package": "fleet",
+    "full_name": "Fleet Manager",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "fleet",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "company_id.currency_id",
+    "defined_in_package": "fleet",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "comodel": "res.country",
+    "related": "company_id.country_id",
+    "defined_in_package": "fleet",
+    "string": "Country",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "country_id.code",
+    "depends": [
+     "country_id"
+    ],
+    "defined_in_package": "fleet",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "license_plate",
+    "type": "Char",
+    "tracking": true,
+    "help": "License plate number of the vehicle (i = plate number for a car)",
+    "defined_in_package": "fleet",
+    "string": "License Plate",
+    "full_name": "License Plate"
+   },
+   {
+    "name": "vin_sn",
+    "type": "Char",
+    "string": "Chassis Number",
+    "help": "Unique number written on the vehicle motor (VIN/SN number)",
+    "tracking": true,
+    "copy": false,
+    "defined_in_package": "fleet",
+    "full_name": "Chassis Number"
+   },
+   {
+    "name": "trailer_hook",
+    "type": "Boolean",
+    "default": false,
+    "string": "Trailer Hitch",
+    "compute": "_compute_trailer_hook",
+    "store": true,
+    "readonly": false,
+    "help": "A trailer hitch is a device attached to a vehicle's chassis for towing purposes,             such as pulling trailers, boats, or other vehicles.",
+    "defined_in_package": "fleet",
+    "full_name": "Trailer Hitch"
+   },
+   {
+    "name": "driver_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Driver",
+    "tracking": true,
+    "help": "Driver address of the vehicle",
+    "copy": false,
+    "defined_in_package": "fleet",
+    "full_name": "Driver",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "future_driver_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Future Driver",
+    "tracking": true,
+    "help": "Next Driver Address of the vehicle",
+    "copy": false,
+    "check_company": true,
+    "defined_in_package": "fleet",
+    "full_name": "Future Driver",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "model_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.model",
+    "string": "Model",
+    "tracking": true,
+    "required": true,
+    "defined_in_package": "fleet",
+    "full_name": "Model",
+    "target_entity": "fleet.vehicle.model"
+   },
+   {
+    "name": "brand_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.model.brand",
+    "string": "Brand",
+    "related": "model_id.brand_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "full_name": "Brand",
+    "target_entity": "fleet.vehicle.model.brand"
+   },
+   {
+    "name": "log_drivers",
+    "type": "One2many",
+    "comodel": "fleet.vehicle.assignation.log",
+    "inverse_name": "vehicle_id",
+    "string": "Assignment Logs",
+    "defined_in_package": "fleet",
+    "full_name": "Assignment Logs",
+    "target_entity": "fleet.vehicle.assignation.log"
+   },
+   {
+    "name": "log_services",
+    "type": "One2many",
+    "comodel": "fleet.vehicle.log.services",
+    "inverse_name": "vehicle_id",
+    "string": "Services Logs",
+    "defined_in_package": "fleet",
+    "full_name": "Services Logs",
+    "target_entity": "fleet.vehicle.log.services"
+   },
+   {
+    "name": "log_contracts",
+    "type": "One2many",
+    "comodel": "fleet.vehicle.log.contract",
+    "inverse_name": "vehicle_id",
+    "string": "Contracts",
+    "defined_in_package": "fleet",
+    "full_name": "Contracts",
+    "target_entity": "fleet.vehicle.log.contract"
+   },
+   {
+    "name": "contract_count",
+    "type": "Integer",
+    "compute": "_compute_count_all",
+    "string": "Contract Count",
+    "defined_in_package": "fleet",
+    "full_name": "Contract Count"
+   },
+   {
+    "name": "service_count",
+    "type": "Integer",
+    "compute": "_compute_count_all",
+    "string": "Services",
+    "defined_in_package": "fleet",
+    "full_name": "Services"
+   },
+   {
+    "name": "odometer_count",
+    "type": "Integer",
+    "compute": "_compute_count_all",
+    "string": "Odometer",
+    "defined_in_package": "fleet",
+    "full_name": "Odometer"
+   },
+   {
+    "name": "history_count",
+    "type": "Integer",
+    "compute": "_compute_count_all",
+    "string": "Drivers History Count",
+    "defined_in_package": "fleet",
+    "full_name": "Drivers History Count"
+   },
+   {
+    "name": "next_assignation_date",
+    "type": "Date",
+    "string": "Assignment Date",
+    "help": "This is the date at which the car will be available, if not set it means available instantly",
+    "defined_in_package": "fleet",
+    "full_name": "Assignment Date"
+   },
+   {
+    "name": "order_date",
+    "type": "Date",
+    "string": "Order Date",
+    "defined_in_package": "fleet",
+    "full_name": "Order Date"
+   },
+   {
+    "name": "acquisition_date",
+    "type": "Date",
+    "string": "Registration Date",
+    "required": false,
+    "default": {
+     "dynamic": "fields.Date.today"
+    },
+    "tracking": true,
+    "help": "Date of vehicle registration",
+    "defined_in_package": "fleet",
+    "full_name": "Registration Date"
+   },
+   {
+    "name": "write_off_date",
+    "type": "Date",
+    "string": "Cancellation Date",
+    "tracking": true,
+    "help": "Date when the vehicle's license plate has been cancelled/removed.",
+    "defined_in_package": "fleet",
+    "full_name": "Cancellation Date"
+   },
+   {
+    "name": "contract_date_start",
+    "type": "Date",
+    "string": "First Contract Date",
+    "default": {
+     "dynamic": "fields.Date.today"
+    },
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "First Contract Date"
+   },
+   {
+    "name": "color",
+    "type": "Char",
+    "help": "Color of the vehicle",
+    "compute": "_compute_color",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "string": "Color",
+    "full_name": "Color"
+   },
+   {
+    "name": "state_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.state",
+    "string": "State",
+    "default": {
+     "dynamic": "_get_default_state"
+    },
+    "group_expand": "_read_group_expand_full",
+    "tracking": true,
+    "help": "Current state of the vehicle",
+    "ondelete": "set null",
+    "defined_in_package": "fleet",
+    "full_name": "State",
+    "target_entity": "fleet.vehicle.state"
+   },
+   {
+    "name": "location",
+    "type": "Char",
+    "help": "Location of the vehicle (garage, ...)",
+    "defined_in_package": "fleet",
+    "string": "Location",
+    "full_name": "Location"
+   },
+   {
+    "name": "seats",
+    "type": "Integer",
+    "string": "Seating Capacity",
+    "help": "Number of seats of the vehicle",
+    "compute": "_compute_seats",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "full_name": "Seating Capacity"
+   },
+   {
+    "name": "model_year",
+    "type": "Selection",
+    "string": "Model Year",
+    "help": "Year of the model",
+    "compute": "_compute_model_year",
+    "store": true,
+    "readonly": false,
+    "selection_method": "_get_year_selection",
+    "defined_in_package": "fleet",
+    "full_name": "Model Year"
+   },
+   {
+    "name": "doors",
+    "type": "Integer",
+    "string": "Number of Doors",
+    "help": "Number of doors of the vehicle",
+    "compute": "_compute_doors",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "full_name": "Number of Doors"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "fleet.vehicle.tag",
+    "relation": "fleet_vehicle_vehicle_tag_rel",
+    "column1": "vehicle_tag_id",
+    "column2": "tag_id",
+    "string": "Tags",
+    "copy": false,
+    "defined_in_package": "fleet",
+    "full_name": "Tags",
+    "target_entity": "fleet.vehicle.tag"
+   },
+   {
+    "name": "odometer",
+    "type": "Float",
+    "compute": "_get_odometer",
+    "inverse": "_set_odometer",
+    "string": "Last Odometer",
+    "help": "Odometer measure of the vehicle at the moment of this log",
+    "defined_in_package": "fleet",
+    "full_name": "Last Odometer"
+   },
+   {
+    "name": "odometer_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "kilometers",
+      "km"
+     ],
+     [
+      "miles",
+      "mi"
+     ]
+    ],
+    "string": "Odometer Unit",
+    "default": "kilometers",
+    "required": true,
+    "defined_in_package": "fleet",
+    "full_name": "Odometer Unit"
+   },
+   {
+    "name": "transmission",
+    "type": "Selection",
+    "selection": [
+     [
+      "manual",
+      "Manual"
+     ],
+     [
+      "automatic",
+      "Automatic"
+     ]
+    ],
+    "string": "Transmission",
+    "compute": "_compute_transmission",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "full_name": "Transmission"
+   },
+   {
+    "name": "fuel_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "FUEL_TYPES"
+    },
+    "string": "Fuel Type",
+    "compute": "_compute_fuel_type",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "full_name": "Fuel Type"
+   },
+   {
+    "name": "power_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "power",
+      "kW"
+     ],
+     [
+      "horsepower",
+      "Horsepower"
+     ]
+    ],
+    "string": "Power Unit",
+    "default": "power",
+    "required": true,
+    "defined_in_package": "fleet",
+    "full_name": "Power Unit"
+   },
+   {
+    "name": "horsepower",
+    "type": "Float",
+    "compute": "_compute_horsepower",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "string": "Horsepower",
+    "full_name": "Horsepower"
+   },
+   {
+    "name": "horsepower_tax",
+    "type": "Float",
+    "string": "Horsepower Taxation",
+    "compute": "_compute_horsepower_tax",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "full_name": "Horsepower Taxation"
+   },
+   {
+    "name": "power",
+    "type": "Float",
+    "string": "Power",
+    "help": "Power in kW of the vehicle",
+    "compute": "_compute_power",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "full_name": "Power"
+   },
+   {
+    "name": "co2",
+    "type": "Float",
+    "string": "CO₂ Emissions",
+    "help": "CO2 emissions of the vehicle",
+    "compute": "_compute_co2",
+    "store": true,
+    "readonly": false,
+    "tracking": true,
+    "aggregator": null,
+    "defined_in_package": "fleet",
+    "full_name": "CO₂ Emissions"
+   },
+   {
+    "name": "co2_emission_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "g/km",
+      "g/km"
+     ],
+     [
+      "g/mi",
+      "g/mi"
+     ]
+    ],
+    "compute": "_compute_co2_emission_unit",
+    "store": true,
+    "default": "g/km",
+    "required": true,
+    "defined_in_package": "fleet",
+    "string": "Co2 Emission Unit",
+    "full_name": "Co2 Emission Unit"
+   },
+   {
+    "name": "co2_standard",
+    "type": "Char",
+    "string": "Emission Standard",
+    "compute": "_compute_co2_standard",
+    "store": true,
+    "readonly": false,
+    "help": "Emission Standard specifies the regulatory test procedure             or guideline under which a vehicle's emissions are measured.",
+    "defined_in_package": "fleet",
+    "full_name": "Emission Standard"
+   },
+   {
+    "name": "category_id",
+    "type": "Many2one",
+    "comodel": "fleet.vehicle.model.category",
+    "string": "Category",
+    "compute": "_compute_category",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "full_name": "Category",
+    "target_entity": "fleet.vehicle.model.category"
+   },
+   {
+    "name": "image_128",
+    "type": "Image",
+    "related": "model_id.image_128",
+    "readonly": true,
+    "defined_in_package": "fleet",
+    "string": "Image 128",
+    "full_name": "Image 128"
+   },
+   {
+    "name": "contract_renewal_due_soon",
+    "type": "Boolean",
+    "compute": "_compute_contract_reminder",
+    "search": "_search_contract_renewal_due_soon",
+    "string": "Has Contracts to renew",
+    "defined_in_package": "fleet",
+    "full_name": "Has Contracts to renew"
+   },
+   {
+    "name": "contract_renewal_overdue",
+    "type": "Boolean",
+    "compute": "_compute_contract_reminder",
+    "search": "_search_get_overdue_contract_reminder",
+    "string": "Has Contracts Overdue",
+    "defined_in_package": "fleet",
+    "full_name": "Has Contracts Overdue"
+   },
+   {
+    "name": "contract_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "futur",
+      "Incoming"
+     ],
+     [
+      "open",
+      "In Progress"
+     ],
+     [
+      "expired",
+      "Expired"
+     ],
+     [
+      "closed",
+      "Closed"
+     ]
+    ],
+    "string": "Last Contract State",
+    "compute": "_compute_contract_reminder",
+    "required": false,
+    "defined_in_package": "fleet",
+    "full_name": "Last Contract State"
+   },
+   {
+    "name": "car_value",
+    "type": "Float",
+    "string": "Catalog Value (VAT Incl.)",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "full_name": "Catalog Value (value-added tax Incl.)"
+   },
+   {
+    "name": "net_car_value",
+    "type": "Float",
+    "string": "Purchase Value",
+    "defined_in_package": "fleet",
+    "full_name": "Purchase Value"
+   },
+   {
+    "name": "residual_value",
+    "type": "Float",
+    "defined_in_package": "fleet",
+    "string": "Residual Value",
+    "full_name": "Residual Value"
+   },
+   {
+    "name": "plan_to_change_car",
+    "type": "Boolean",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "string": "Plan To Change Car",
+    "full_name": "Plan To Change Car"
+   },
+   {
+    "name": "plan_to_change_bike",
+    "type": "Boolean",
+    "tracking": true,
+    "defined_in_package": "fleet",
+    "string": "Plan To Change Bike",
+    "full_name": "Plan To Change Bike"
+   },
+   {
+    "name": "vehicle_type",
+    "type": "Selection",
+    "related": "model_id.vehicle_type",
+    "defined_in_package": "fleet",
+    "string": "Vehicle Type",
+    "full_name": "Vehicle Type"
+   },
+   {
+    "name": "frame_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "diamant",
+      "Diamant"
+     ],
+     [
+      "trapez",
+      "Trapez"
+     ],
+     [
+      "wave",
+      "Wave"
+     ]
+    ],
+    "string": "Bike Frame Type",
+    "defined_in_package": "fleet",
+    "full_name": "Bike Frame Type"
+   },
+   {
+    "name": "electric_assistance",
+    "type": "Boolean",
+    "compute": "_compute_electric_assistance",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "fleet",
+    "string": "Electric Assistance",
+    "full_name": "Electric Assistance"
+   },
+   {
+    "name": "frame_size",
+    "type": "Float",
+    "defined_in_package": "fleet",
+    "string": "Frame Size",
+    "full_name": "Frame Size"
+   },
+   {
+    "name": "service_activity",
+    "type": "Selection",
+    "selection": [
+     [
+      "none",
+      "None"
+     ],
+     [
+      "overdue",
+      "Overdue"
+     ],
+     [
+      "today",
+      "Today"
+     ]
+    ],
+    "compute": "_compute_service_activity",
+    "defined_in_package": "fleet",
+    "string": "Service Activity",
+    "full_name": "Service Activity"
+   },
+   {
+    "name": "vehicle_properties",
+    "type": "Properties",
+    "string": "Properties",
+    "definition": "model_id.vehicle_properties_definition",
+    "copy": true,
+    "defined_in_package": "fleet",
+    "full_name": "Properties"
+   },
+   {
+    "name": "vehicle_range",
+    "type": "Integer",
+    "string": "Range",
+    "defined_in_package": "fleet",
+    "full_name": "Range"
+   },
+   {
+    "name": "range_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "km",
+      "km"
+     ],
+     [
+      "mi",
+      "mi"
+     ]
+    ],
+    "compute": "_compute_range_unit",
+    "store": true,
+    "readonly": false,
+    "default": "km",
+    "required": true,
+    "defined_in_package": "fleet",
+    "string": "Range Unit",
+    "full_name": "Range Unit"
+   },
+   {
+    "name": "bill_count",
+    "type": "Integer",
+    "compute": "_compute_move_ids",
+    "string": "Bills Count",
+    "defined_in_package": "account_fleet",
+    "full_name": "Bills Count"
+   },
+   {
+    "name": "account_move_ids",
+    "type": "One2many",
+    "comodel": "account.move",
+    "compute": "_compute_move_ids",
+    "defined_in_package": "account_fleet",
+    "string": "Account Move",
+    "full_name": "Account Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "mobility_card",
+    "type": "Char",
+    "compute": "_compute_mobility_card",
+    "store": true,
+    "defined_in_package": "hr_fleet",
+    "string": "Mobility Card",
+    "full_name": "Mobility Card"
+   },
+   {
+    "name": "driver_employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Driver (Employee)",
+    "compute": "_compute_driver_employee_id",
+    "store": true,
+    "domain": "['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+    "tracking": true,
+    "index": "btree_not_null",
+    "defined_in_package": "hr_fleet",
+    "full_name": "Driver (Employee)",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "driver_employee_name",
+    "type": "Char",
+    "related": "driver_employee_id.name",
+    "defined_in_package": "hr_fleet",
+    "string": "Driver Employee Name",
+    "full_name": "Driver Employee Name"
+   },
+   {
+    "name": "future_driver_employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Future Driver (Employee)",
+    "compute": "_compute_future_driver_employee_id",
+    "store": true,
+    "domain": "['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+    "tracking": true,
+    "defined_in_package": "hr_fleet",
+    "full_name": "Future Driver (Employee)",
+    "target_entity": "hr.employee"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_state",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_year_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_service_activity",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "log_services"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_fields_from_model",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fields_to_load"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": "Copies the desired fields from the models to the vehicles",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_category",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_range_unit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_trailer_hook",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_vehicle_range",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_electric_assistance",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_co2_standard",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_co2",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_power",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_horsepower",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_horsepower_tax",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_fuel_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_transmission",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_doors",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_model_year",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_seats",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_color",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_vehicle_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model_id.brand_id.name",
+         "model_id.name",
+         "license_plate"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_co2_emission_unit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "range_unit"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_odometer",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_odometer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_count_all",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_contract_reminder",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "log_contracts"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_analytic_name",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_contract_renewal_due_soon",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_get_overdue_contract_reminder",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_fleet",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The odometer value cannot be lower than the previous one.",
+        "line": 402
+       }
+      ]
+     },
+     {
+      "package": "hr_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_driver_history_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_driver_history",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_accept_driver_change",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "return_action_to_open",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": "This opens the xml view specified in xml_id for the current vehicle ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "act_show_log_cost",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": "This opens log view to view and add new log for this vehicle, groupby default to only show effective costs\n@return: the costs log view",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_track_subtype",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "init_values"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_assignation_logs",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_email",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_odometer_report",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_move_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_bills",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_driver_employee_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "driver_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_future_driver_employee_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "future_driver_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mobility_card",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_fleet",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "driver_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_create_write_vals",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_employee",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "write",
+    "package": "fleet",
+    "kind": "UserError",
+    "message": "The odometer value cannot be lower than the previous one."
+   }
+  ],
+  "state_fields": [
+   "contract_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "fleet.fleet_vehicle_access_right_user",
+    "package": "fleet",
+    "name": "fleet_vehicle_access_right",
+    "entity": "fleet.vehicle",
+    "group": "fleet_group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_access_right",
+    "package": "fleet",
+    "name": "fleet_vehicle_access_right",
+    "entity": "fleet.vehicle",
+    "group": "fleet_group_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_fleet.hr_fleet_vehicle_access_right_hr_officer",
+    "package": "hr_fleet",
+    "name": "hr_fleet_vehicle_access_right_hr_officer",
+    "entity": "fleet.vehicle",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "fleet.fleet_rule_vehicle_visibility_manager",
+    "package": "fleet",
+    "name": "Administrator has all rights on vehicle",
+    "entity": "fleet.vehicle",
+    "domain": null,
+    "groups": "[Command.link(ref('fleet_group_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "fleet.ir_rule_fleet_vehicle",
+    "package": "fleet",
+    "name": "Fleet vehicle: Multi Company",
+    "entity": "fleet.vehicle",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_fleet.hr_fleet_rule_vehicle_visibility_hr_officier",
+    "package": "hr_fleet",
+    "name": "Hr Officer read rights on vehicle with employees assigned",
+    "entity": "fleet.vehicle",
+    "domain": "['|', ('driver_employee_id', '!=', False), ('future_driver_employee_id', '!=', False)]",
+    "groups": "[(4, ref('hr.group_hr_user'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account_fleet.fleet_vehicle_view_form",
+    "package": "account_fleet",
+    "name": "fleet.vehicle.form",
+    "view_type": "xpath",
+    "inherits_view": "fleet.fleet_vehicle_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='open_assignation_logs']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "bill_count",
+       "widget": "statinfo",
+       "string": "Bills"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_bills",
+       "type": "object",
+       "invisible": "bill_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='open_assignation_logs']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_view_form",
+    "package": "fleet",
+    "name": "fleet.vehicle.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Vehicle",
+      "js_class": "fleet_form"
+     },
+     "fields": [
+      {
+       "name": "service_activity",
+       "invisible": "1"
+      },
+      {
+       "name": "state_id",
+       "widget": "statusbar",
+       "options": "{'clickable': '1'}"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "country_code",
+       "invisible": "1"
+      },
+      {
+       "name": "history_count",
+       "widget": "statinfo",
+       "string": "Drivers History"
+      },
+      {
+       "name": "contract_count",
+       "widget": "statinfo",
+       "string": "Contracts"
+      },
+      {
+       "name": "service_count",
+       "widget": "statinfo",
+       "string": "Services"
+      },
+      {
+       "name": "service_count",
+       "widget": "statinfo",
+       "string": "Services"
+      },
+      {
+       "name": "service_count",
+       "widget": "statinfo",
+       "string": "Services"
+      },
+      {
+       "name": "odometer_count",
+       "widget": "statinfo",
+       "string": "Odometer"
+      },
+      {
+       "name": "image_128",
+       "widget": "image"
+      },
+      {
+       "name": "model_id",
+       "placeholder": "e.g. Model S"
+      },
+      {
+       "name": "license_plate",
+       "placeholder": "e.g. PAE 326"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color', 'no_create_edit': True}"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "vehicle_type",
+       "invisible": "1"
+      },
+      {
+       "name": "driver_id",
+       "widget": "many2one_avatar",
+       "domain": "['|', ('company_id', '=', False ), ('company_id', '=', company_id)]"
+      },
+      {
+       "name": "future_driver_id",
+       "widget": "many2one_avatar"
+      },
+      {
+       "name": "next_assignation_date"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "category_id"
+      },
+      {
+       "name": "order_date"
+      },
+      {
+       "name": "acquisition_date",
+       "invisible": "vehicle_type != 'car'"
+      },
+      {
+       "name": "write_off_date",
+       "invisible": "vehicle_type != 'car'"
+      },
+      {
+       "name": "vin_sn"
+      },
+      {
+       "name": "odometer"
+      },
+      {
+       "name": "odometer_unit"
+      },
+      {
+       "name": "manager_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "location"
+      },
+      {
+       "name": "plan_to_change_car",
+       "invisible": "vehicle_type != 'car'",
+       "groups": "fleet.fleet_group_user",
+       "nolabel": "1"
+      },
+      {
+       "name": "plan_to_change_bike",
+       "invisible": "vehicle_type != 'bike'",
+       "groups": "fleet.fleet_group_user",
+       "nolabel": "1"
+      },
+      {
+       "name": "vehicle_properties"
+      },
+      {
+       "name": "horsepower_tax",
+       "widget": "monetary"
+      },
+      {
+       "name": "contract_date_start"
+      },
+      {
+       "name": "car_value",
+       "widget": "monetary"
+      },
+      {
+       "name": "net_car_value",
+       "widget": "monetary"
+      },
+      {
+       "name": "residual_value",
+       "widget": "monetary"
+      },
+      {
+       "name": "model_year"
+      },
+      {
+       "name": "seats",
+       "invisible": "vehicle_type != 'car'"
+      },
+      {
+       "name": "doors",
+       "invisible": "vehicle_type != 'car'"
+      },
+      {
+       "name": "color"
+      },
+      {
+       "name": "trailer_hook",
+       "invisible": "vehicle_type != 'car'"
+      },
+      {
+       "name": "frame_type",
+       "invisible": "vehicle_type != 'bike'"
+      },
+      {
+       "name": "frame_size"
+      },
+      {
+       "name": "electric_assistance",
+       "invisible": "vehicle_type != 'bike'"
+      },
+      {
+       "name": "fuel_type"
+      },
+      {
+       "name": "transmission",
+       "invisible": "vehicle_type != 'car'"
+      },
+      {
+       "name": "power"
+      },
+      {
+       "name": "power_unit"
+      },
+      {
+       "name": "horsepower"
+      },
+      {
+       "name": "power_unit"
+      },
+      {
+       "name": "vehicle_range"
+      },
+      {
+       "name": "range_unit"
+      },
+      {
+       "name": "co2"
+      },
+      {
+       "name": "co2_emission_unit"
+      },
+      {
+       "name": "co2_standard",
+       "placeholder": "eg. WLTP, Euro 6, or EPA, ..."
+      },
+      {
+       "name": "description",
+       "nolabel": "1",
+       "placeholder": "Write here any other information related to this vehicle"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_accept_driver_change",
+       "string": "Apply New Driver",
+       "type": "object",
+       "invisible": "not future_driver_id",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "open_assignation_logs",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-history"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "class": "oe_stat_button",
+       "context": "{'xml_id':'fleet_vehicle_log_contract_action', 'search_default_inactive': not active}",
+       "icon": "fa-book"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "invisible": "service_activity != 'none'",
+       "class": "oe_stat_button",
+       "context": "{'xml_id':'fleet_vehicle_log_services_action', 'search_default_inactive': not active}",
+       "icon": "fa-wrench"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "invisible": "service_activity != 'overdue'",
+       "class": "oe_stat_button text-danger",
+       "context": "{'xml_id':'fleet_vehicle_log_services_action', 'search_default_inactive': not active}",
+       "icon": "fa-wrench"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "invisible": "service_activity != 'today'",
+       "class": "oe_stat_button text-warning",
+       "context": "{'xml_id':'fleet_vehicle_log_services_action', 'search_default_inactive': not active}",
+       "icon": "fa-wrench"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "invisible": "vehicle_type != 'car'",
+       "class": "oe_stat_button",
+       "context": "{'xml_id':'fleet_vehicle_odometer_action'}",
+       "icon": "fa-tachometer"
+      },
+      {
+       "name": "action_open_odometer_report",
+       "type": "object",
+       "class": "fa fa-line-chart me-1"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_tax_info",
+       "string": "Tax Info",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "page_model",
+       "string": "Model",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "note",
+       "string": "Note",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "statinfo": 6,
+      "image": 1,
+      "many2many_tags": 1,
+      "many2one_avatar": 2,
+      "many2one_avatar_user": 1,
+      "monetary": 4
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Apply New Driver",
+       "class": "btn btn-primary",
+       "type": "object",
+       "name": "action_accept_driver_change",
+       "invisible": "not future_driver_id"
+      }
+     ],
+     "statusbar_field": "state_id",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "open_assignation_logs",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-history"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-book",
+       "context": "{'xml_id':'fleet_vehicle_log_contract_action', 'search_default_inactive': not active}",
+       "help": "show the contract for this vehicle"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-wrench",
+       "context": "{'xml_id':'fleet_vehicle_log_services_action', 'search_default_inactive': not active}",
+       "invisible": "service_activity != 'none'",
+       "help": "show the services logs for this vehicle"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "class": "oe_stat_button text-danger",
+       "icon": "fa-wrench",
+       "context": "{'xml_id':'fleet_vehicle_log_services_action', 'search_default_inactive': not active}",
+       "invisible": "service_activity != 'overdue'",
+       "help": "show the services logs for this vehicle"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "class": "oe_stat_button text-warning",
+       "icon": "fa-wrench",
+       "context": "{'xml_id':'fleet_vehicle_log_services_action', 'search_default_inactive': not active}",
+       "invisible": "service_activity != 'today'",
+       "help": "show the services logs for this vehicle"
+      },
+      {
+       "name": "return_action_to_open",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-tachometer",
+       "context": "{'xml_id':'fleet_vehicle_odometer_action'}",
+       "help": "show the odometer logs for this vehicle",
+       "invisible": "vehicle_type != 'car'"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_view_tree",
+    "package": "fleet",
+    "name": "fleet.vehicle.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Vehicle",
+      "decoration-warning": "contract_renewal_due_soon and not contract_renewal_overdue",
+      "decoration-danger": "contract_renewal_overdue",
+      "multi_edit": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "license_plate",
+       "readonly": "1"
+      },
+      {
+       "name": "model_id",
+       "widget": "many2one_avatar",
+       "readonly": "1"
+      },
+      {
+       "name": "category_id"
+      },
+      {
+       "name": "manager_id",
+       "widget": "many2one_avatar_user",
+       "optional": "hide"
+      },
+      {
+       "name": "driver_id",
+       "widget": "many2one_avatar",
+       "readonly": "1",
+       "optional": "show"
+      },
+      {
+       "name": "future_driver_id",
+       "widget": "many2one_avatar",
+       "readonly": "1",
+       "optional": "show"
+      },
+      {
+       "name": "log_drivers",
+       "column_invisible": "True"
+      },
+      {
+       "name": "vin_sn",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "co2",
+       "readonly": "1",
+       "string": "CO2 Emissions",
+       "optional": "hide"
+      },
+      {
+       "name": "acquisition_date",
+       "readonly": "1"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "readonly": "1",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "state_id",
+       "widget": "badge",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "contract_renewal_due_soon",
+       "invisible": "1"
+      },
+      {
+       "name": "contract_renewal_overdue",
+       "invisible": "1"
+      },
+      {
+       "name": "vehicle_properties"
+      },
+      {
+       "name": "contract_state",
+       "widget": "badge",
+       "optional": "hide",
+       "decoration-danger": "contract_state == 'expired'",
+       "decoration-info": "contract_state == 'open'"
+      },
+      {
+       "name": "activity_exception_decoration",
+       "widget": "activity_exception"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar": 3,
+      "many2one_avatar_user": 1,
+      "many2many_tags": 1,
+      "badge": 2,
+      "activity_exception": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-warning": "contract_renewal_due_soon and not contract_renewal_overdue",
+      "decoration-danger": "contract_renewal_overdue"
+     }
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_view_search",
+    "package": "fleet",
+    "name": "fleet.vehicle.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "All vehicles"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Vehicle",
+       "filter_domain": "['|', ('name', 'ilike', self), ('license_plate', 'ilike', self)]"
+      },
+      {
+       "name": "log_drivers",
+       "string": "Drivers",
+       "filter_domain": "[                     '|', '|',                     ('log_drivers.driver_id', 'ilike', self),                     ('driver_id', 'ilike', self),                     ('future_driver_id', 'ilike', self),                 ]"
+      },
+      {
+       "name": "model_id",
+       "string": "Model"
+      },
+      {
+       "name": "license_plate",
+       "string": "License Plate"
+      },
+      {
+       "name": "tag_ids"
+      },
+      {
+       "name": "state_id",
+       "string": "Status"
+      },
+      {
+       "name": "vehicle_properties",
+       "string": "Properties"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "available",
+       "string": "Available",
+       "domain": "['&', ('future_driver_id', '=', False), '|', ('driver_id', '=', False), '|', '&', ('plan_to_change_car', '=', True), ('vehicle_type', '=', 'car'), '&', ('plan_to_change_bike', '=', True), ('vehicle_type', '=', 'bike')]"
+      },
+      {
+       "name": "bikes",
+       "string": "Bikes",
+       "domain": "[('vehicle_type', '=', 'bike')]"
+      },
+      {
+       "name": "cars",
+       "string": "Cars",
+       "domain": "[('vehicle_type', '=', 'car')]"
+      },
+      {
+       "name": "trailer_hook",
+       "string": "Trailer Hook",
+       "domain": "[('trailer_hook', '=', True)]"
+      },
+      {
+       "name": "planned",
+       "string": "Planned for Change",
+       "domain": "['|', '&', ('vehicle_type', '=', 'bike'), ('plan_to_change_bike', '=', True), '&', ('vehicle_type', '=', 'car'), ('plan_to_change_car', '=', True)]"
+      },
+      {
+       "name": "alert_true",
+       "string": "Need Action",
+       "domain": "['|', ('contract_renewal_due_soon', '=', True), ('contract_renewal_overdue', '=', True)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      },
+      {
+       "name": "filter_activities_my",
+       "string": "My Activities",
+       "domain": "[('activity_user_id', '=', uid)]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_overdue",
+       "string": "Late Activities",
+       "domain": "[('my_activity_date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_today",
+       "string": "Today Activities",
+       "domain": "[('my_activity_date_deadline', '=', 'today')]",
+       "invisible": "1"
+      },
+      {
+       "name": "activities_upcoming_all",
+       "string": "Future Activities",
+       "domain": "[('my_activity_date_deadline', '>', 'today')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_model",
+       "string": "Model",
+       "context": "{'group_by': 'model_id'}"
+      },
+      {
+       "name": "groupby_make",
+       "string": "Brand",
+       "context": "{'group_by': 'brand_id'}"
+      },
+      {
+       "name": "groupby_status",
+       "string": "Status",
+       "context": "{'group_by': 'state_id'}"
+      },
+      {
+       "name": "groupby_fueltype",
+       "string": "Fuel Type",
+       "context": "{'group_by': 'fuel_type'}"
+      },
+      {
+       "name": "group_by_vehicle_properties",
+       "string": "Properties",
+       "context": "{'group_by': 'vehicle_properties'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_view_form_quick_create",
+    "package": "fleet",
+    "name": "fleet.vehicle.form.quick.create",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "1000",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "model_id",
+       "placeholder": "e.g. Model S"
+      },
+      {
+       "name": "license_plate",
+       "placeholder": "e.g. PAE 326"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_view_kanban",
+    "package": "fleet",
+    "name": "fleet.vehicle.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "default_group_by": "state_id",
+      "sample": "1",
+      "quick_create_view": "fleet.fleet_vehicle_view_form_quick_create"
+     },
+     "fields": [
+      {
+       "name": "contract_renewal_due_soon"
+      },
+      {
+       "name": "contract_renewal_overdue"
+      },
+      {
+       "name": "image_128",
+       "widget": "image",
+       "options": "{'img_class': 'object-fit-cover'}"
+      },
+      {
+       "name": "license_plate"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "driver_id",
+       "widget": "many2one_avatar"
+      },
+      {
+       "name": "driver_id"
+      },
+      {
+       "name": "future_driver_id"
+      },
+      {
+       "name": "location"
+      },
+      {
+       "name": "vehicle_properties",
+       "widget": "properties"
+      },
+      {
+       "name": "contract_count"
+      },
+      {
+       "name": "activity_ids",
+       "widget": "kanban_activity"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "many2many_tags": 1,
+      "many2one_avatar": 1,
+      "properties": 1,
+      "kanban_activity": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": "state_id",
+     "quick_create": null,
+     "progressbar": [
+      {
+       "field": "activity_state",
+       "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_view_activity",
+    "package": "fleet",
+    "name": "fleet.vehicle.activity",
+    "view_type": "activity",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "activity",
+     "root_attributes": {
+      "string": "Vehicles"
+     },
+     "fields": [
+      {
+       "name": "license_plate"
+      },
+      {
+       "name": "id"
+      },
+      {
+       "name": "license_plate"
+      },
+      {
+       "name": "model_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "fleet.fleet_vehicle_view_pivot",
+    "package": "fleet",
+    "name": null,
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "state_id"
+      },
+      {
+       "name": "brand_id"
+      },
+      {
+       "name": "model_id"
+      },
+      {
+       "name": "license_plate"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "state_id",
+       "type": "col"
+      },
+      {
+       "name": "brand_id",
+       "type": "row"
+      },
+      {
+       "name": "model_id",
+       "type": "row"
+      },
+      {
+       "name": "license_plate",
+       "type": "row"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_fleet.fleet_vehicle_view_form_inherit_hr",
+    "package": "hr_fleet",
+    "name": "fleet.vehicle.form.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "fleet.fleet_vehicle_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='driver_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "driver_employee_id",
+       "invisible": "1"
+      },
+      {
+       "name": "mobility_card",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='driver_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_fleet.fleet_vehicle_view_search_inherit_hr",
+    "package": "hr_fleet",
+    "name": "fleet.vehicle.search.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "fleet.fleet_vehicle_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='license_plate']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mobility_card"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='license_plate']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_fleet.fleet_vehicle_view_tree_inherit_hr",
+    "package": "hr_fleet",
+    "name": null,
+    "view_type": "field",
+    "inherits_view": "fleet.fleet_vehicle_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "driver_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "driver_id",
+       "position": "after"
+      },
+      {
+       "name": "driver_employee_id",
+       "widget": "many2one_avatar_user",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "fleet.fleet_vehicle_action",
+    "package": "fleet",
+    "name": "Vehicles",
+    "view_mode": "kanban,list,form,pivot,activity",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Ready to manage your fleet more efficiently?\n          </p><p>\n            Let's create your first vehicle.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "fleet.vehicle"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "fleet.action_fleet_vehicle_send_mail",
+    "package": "fleet",
+    "name": "Mail to Driver",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

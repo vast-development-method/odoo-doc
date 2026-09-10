@@ -1,0 +1,3175 @@
+{
+ "catalog": {
+  "name": "entity:mail.message",
+  "description": "Complete definition of entity Message (mail.message).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.message",
+  "storage_name": "mail_message",
+  "full_name": "Message",
+  "kind": "persistent",
+  "description": "Message",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "portal",
+   "account",
+   "sms",
+   "rating",
+   "im_livechat",
+   "portal_rating",
+   "website_slides",
+   "project",
+   "snailmail"
+  ],
+  "mixins": [
+   "bus.listener.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": "subject",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "call_history_ids",
+    "type": "One2many",
+    "comodel": "discuss.call.history",
+    "inverse_name": "start_call_message_id",
+    "defined_in_package": "mail",
+    "string": "Call History",
+    "full_name": "Call History",
+    "target_entity": "discuss.call.history"
+   },
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "discuss.channel",
+    "compute": "_compute_channel_id",
+    "defined_in_package": "mail",
+    "string": "Channel",
+    "full_name": "Channel",
+    "target_entity": "discuss.channel"
+   },
+   {
+    "name": "subject",
+    "type": "Char",
+    "string": "Subject",
+    "defined_in_package": "mail",
+    "full_name": "Subject"
+   },
+   {
+    "name": "date",
+    "type": "Datetime",
+    "string": "Date",
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Date"
+   },
+   {
+    "name": "body",
+    "type": "Html",
+    "string": "Contents",
+    "default": "",
+    "sanitize_style": true,
+    "defined_in_package": "mail",
+    "full_name": "Contents"
+   },
+   {
+    "name": "preview",
+    "type": "Char",
+    "string": "Preview",
+    "compute": "_compute_preview",
+    "help": "The text-only beginning of the body used as email preview.",
+    "defined_in_package": "mail",
+    "full_name": "Preview"
+   },
+   {
+    "name": "linked_message_ids",
+    "type": "Many2many",
+    "comodel": "mail.message",
+    "compute": "_compute_linked_message_ids",
+    "defined_in_package": "mail",
+    "string": "Linked Message",
+    "full_name": "Linked Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "message_link_preview_ids",
+    "type": "One2many",
+    "comodel": "mail.message.link.preview",
+    "inverse_name": "message_id",
+    "groups": "base.group_erp_manager",
+    "defined_in_package": "mail",
+    "string": "Message Link Preview",
+    "full_name": "Message Link Preview",
+    "target_entity": "mail.message.link.preview"
+   },
+   {
+    "name": "reaction_ids",
+    "type": "One2many",
+    "comodel": "mail.message.reaction",
+    "inverse_name": "message_id",
+    "string": "Reactions",
+    "groups": "base.group_system",
+    "defined_in_package": "mail",
+    "full_name": "Reactions",
+    "target_entity": "mail.message.reaction"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "relation": "message_attachment_rel",
+    "column1": "message_id",
+    "column2": "attachment_id",
+    "string": "Attachments",
+    "bypass_search_access": true,
+    "defined_in_package": "mail",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "string": "Parent Message",
+    "index": "btree_not_null",
+    "ondelete": "set null",
+    "defined_in_package": "mail",
+    "full_name": "Parent Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "child_ids",
+    "type": "One2many",
+    "comodel": "mail.message",
+    "inverse_name": "parent_id",
+    "string": "Child Messages",
+    "defined_in_package": "mail",
+    "full_name": "Child Messages",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "model",
+    "type": "Char",
+    "string": "Related Document Model",
+    "defined_in_package": "mail",
+    "full_name": "Related Document Model"
+   },
+   {
+    "name": "res_id",
+    "type": "Many2oneReference",
+    "string": "Related Document ID",
+    "model_field": "model",
+    "defined_in_package": "mail",
+    "full_name": "Related Document identifier"
+   },
+   {
+    "name": "record_name",
+    "type": "Char",
+    "string": "Message Record Name",
+    "compute": "_compute_record_name",
+    "store": false,
+    "defined_in_package": "mail",
+    "full_name": "Message Record Name"
+   },
+   {
+    "name": "record_alias_domain_id",
+    "type": "Many2one",
+    "comodel": "mail.alias.domain",
+    "string": "Alias Domain",
+    "ondelete": "set null",
+    "defined_in_package": "mail",
+    "full_name": "Alias Domain",
+    "target_entity": "mail.alias.domain"
+   },
+   {
+    "name": "record_company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "ondelete": "set null",
+    "defined_in_package": "mail",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "message_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "email",
+      "Incoming Email"
+     ],
+     [
+      "comment",
+      "Comment"
+     ],
+     [
+      "email_outgoing",
+      "Outgoing Email"
+     ],
+     [
+      "notification",
+      "System notification"
+     ],
+     [
+      "auto_comment",
+      "Automated Targeted Notification"
+     ],
+     [
+      "out_of_office",
+      "Out-of-office Message"
+     ],
+     [
+      "user_notification",
+      "User Specific Notification"
+     ],
+     [
+      "sms",
+      "SMS"
+     ],
+     [
+      "snailmail",
+      "Snailmail"
+     ]
+    ],
+    "string": "Type",
+    "required": true,
+    "default": "comment",
+    "help": "Used to categorize message generator\n'email': generated by an incoming email e.g. mailgateway\n'comment': generated by user input e.g. through discuss or composer\n'email_outgoing': generated by a mailing\n'notification': generated by system e.g. tracking messages\n'auto_comment': generated by automated notification mechanism e.g. acknowledgment\n'user_notification': generated for a specific recipient",
+    "defined_in_package": "mail",
+    "selection_added_by": [
+     "sms",
+     "snailmail"
+    ],
+    "ondelete": {
+     "expression": "{'snailmail': lambda recs: recs.write({'message_type': ' comment'})}"
+    },
+    "extended_in_packages": [
+     "sms",
+     "snailmail"
+    ],
+    "full_name": "Type"
+   },
+   {
+    "name": "subtype_id",
+    "type": "Many2one",
+    "comodel": "mail.message.subtype",
+    "string": "Subtype",
+    "ondelete": "set null",
+    "index": true,
+    "defined_in_package": "mail",
+    "full_name": "Subtype",
+    "target_entity": "mail.message.subtype"
+   },
+   {
+    "name": "mail_activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Mail Activity Type",
+    "index": "btree_not_null",
+    "ondelete": "set null",
+    "defined_in_package": "mail",
+    "full_name": "Mail Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "is_internal",
+    "type": "Boolean",
+    "string": "Employee Only",
+    "help": "Hide to public / portal users, independently from subtype configuration.",
+    "defined_in_package": "mail",
+    "full_name": "Employee Only"
+   },
+   {
+    "name": "email_from",
+    "type": "Char",
+    "string": "From",
+    "help": "Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter.",
+    "defined_in_package": "mail",
+    "full_name": "From"
+   },
+   {
+    "name": "author_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Author",
+    "index": true,
+    "ondelete": "set null",
+    "help": "Author of the message. If not set, email_from may hold an email address that did not match any partner.",
+    "defined_in_package": "mail",
+    "full_name": "Author",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "author_avatar",
+    "type": "Binary",
+    "string": "Author's avatar",
+    "related": "author_id.avatar_128",
+    "depends": [
+     "author_id"
+    ],
+    "readonly": false,
+    "defined_in_package": "mail",
+    "full_name": "Author's avatar"
+   },
+   {
+    "name": "author_guest_id",
+    "type": "Many2one",
+    "string": "Guest",
+    "comodel": "mail.guest",
+    "defined_in_package": "mail",
+    "full_name": "Guest",
+    "target_entity": "mail.guest"
+   },
+   {
+    "name": "is_current_user_or_guest_author",
+    "type": "Boolean",
+    "compute": "_compute_is_current_user_or_guest_author",
+    "defined_in_package": "mail",
+    "string": "Is Current User Or Guest Author",
+    "full_name": "Is Current User Or Guest Author"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "string": "Recipients",
+    "context": {
+     "active_test": false
+    },
+    "defined_in_package": "mail",
+    "full_name": "Recipients",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "incoming_email_to",
+    "type": "Text",
+    "string": "Emails To",
+    "defined_in_package": "mail",
+    "full_name": "Emails To"
+   },
+   {
+    "name": "incoming_email_cc",
+    "type": "Char",
+    "string": "Emails Cc",
+    "defined_in_package": "mail",
+    "full_name": "Emails Cc"
+   },
+   {
+    "name": "outgoing_email_to",
+    "type": "Char",
+    "string": "emails To",
+    "defined_in_package": "mail",
+    "full_name": "emails To"
+   },
+   {
+    "name": "notified_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "mail_notification",
+    "string": "Partners with Need Action",
+    "context": {
+     "active_test": false
+    },
+    "depends": [
+     "notification_ids"
+    ],
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Partners with Need Action",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "needaction",
+    "type": "Boolean",
+    "string": "Need Action",
+    "compute": "_compute_needaction",
+    "search": "_search_needaction",
+    "defined_in_package": "mail",
+    "full_name": "Need Action"
+   },
+   {
+    "name": "has_error",
+    "type": "Boolean",
+    "string": "Has error",
+    "compute": "_compute_has_error",
+    "search": "_search_has_error",
+    "defined_in_package": "mail",
+    "full_name": "Has error"
+   },
+   {
+    "name": "notification_ids",
+    "type": "One2many",
+    "comodel": "mail.notification",
+    "inverse_name": "mail_message_id",
+    "string": "Notifications",
+    "bypass_search_access": true,
+    "copy": false,
+    "depends": [
+     "notified_partner_ids"
+    ],
+    "defined_in_package": "mail",
+    "full_name": "Notifications",
+    "target_entity": "mail.notification"
+   },
+   {
+    "name": "starred_partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "mail_message_res_partner_starred_rel",
+    "string": "Favorited By",
+    "defined_in_package": "mail",
+    "full_name": "Favorited By",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "pinned_at",
+    "type": "Datetime",
+    "string": "Pinned",
+    "help": "Datetime at which the message has been pinned",
+    "defined_in_package": "mail",
+    "full_name": "Pinned"
+   },
+   {
+    "name": "starred",
+    "type": "Boolean",
+    "string": "Starred",
+    "compute": "_compute_starred",
+    "search": "_search_starred",
+    "compute_sudo": false,
+    "help": "Current user has a starred notification linked to this message",
+    "defined_in_package": "mail",
+    "full_name": "Starred"
+   },
+   {
+    "name": "tracking_value_ids",
+    "type": "One2many",
+    "comodel": "mail.tracking.value",
+    "inverse_name": "mail_message_id",
+    "string": "Tracking values",
+    "groups": "base.group_system",
+    "help": "Tracked values are stored in a separate model. This field allow to reconstruct the tracking and to generate statistics on the model.",
+    "defined_in_package": "mail",
+    "full_name": "Tracking values",
+    "target_entity": "mail.tracking.value"
+   },
+   {
+    "name": "reply_to_force_new",
+    "type": "Boolean",
+    "string": "No threading for answers",
+    "help": "If true, answers do not go in the original document discussion thread. Instead, it will check for the reply_to in tracking message-id and redirected accordingly. This has an impact on the generated message-id.",
+    "defined_in_package": "mail",
+    "full_name": "No threading for answers"
+   },
+   {
+    "name": "message_id",
+    "type": "Char",
+    "string": "Message-Id",
+    "help": "Message unique identifier",
+    "index": "btree",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Message-Id"
+   },
+   {
+    "name": "reply_to",
+    "type": "Char",
+    "string": "Reply-To",
+    "help": "Reply email address. Setting the reply_to bypasses the automatic thread creation.",
+    "defined_in_package": "mail",
+    "full_name": "Reply-To"
+   },
+   {
+    "name": "mail_server_id",
+    "type": "Many2one",
+    "comodel": "ir.mail_server",
+    "string": "Outgoing mail server",
+    "defined_in_package": "mail",
+    "full_name": "Outgoing mail server",
+    "target_entity": "ir.mail_server"
+   },
+   {
+    "name": "email_layout_xmlid",
+    "type": "Char",
+    "string": "Layout",
+    "copy": false,
+    "defined_in_package": "mail",
+    "full_name": "Layout"
+   },
+   {
+    "name": "email_add_signature",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "mail",
+    "string": "Email Add Signature",
+    "full_name": "Email Add Signature"
+   },
+   {
+    "name": "mail_ids",
+    "type": "One2many",
+    "comodel": "mail.mail",
+    "inverse_name": "mail_message_id",
+    "string": "Mails",
+    "groups": "base.group_system",
+    "defined_in_package": "mail",
+    "full_name": "Mails",
+    "target_entity": "mail.mail"
+   },
+   {
+    "name": "account_audit_log_preview",
+    "type": "Text",
+    "string": "Description",
+    "compute": "_compute_account_audit_log_preview",
+    "search": "_search_account_audit_log_preview",
+    "defined_in_package": "account",
+    "full_name": "Description"
+   },
+   {
+    "name": "account_audit_log_move_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "string": "Journal Entry",
+    "compute": "_compute_account_audit_log_move_id",
+    "search": "_search_account_audit_log_move_id",
+    "defined_in_package": "account",
+    "full_name": "Journal Entry",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "account_audit_log_partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Partner",
+    "compute": "_compute_account_audit_log_partner_id",
+    "search": "_search_account_audit_log_partner_id",
+    "defined_in_package": "account",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "account_audit_log_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Account",
+    "compute": "_compute_account_audit_log_account_id",
+    "search": "_search_account_audit_log_account_id",
+    "defined_in_package": "account",
+    "full_name": "Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "account_audit_log_tax_id",
+    "type": "Many2one",
+    "comodel": "account.tax",
+    "string": "Tax",
+    "compute": "_compute_account_audit_log_tax_id",
+    "search": "_search_account_audit_log_tax_id",
+    "defined_in_package": "account",
+    "full_name": "Tax",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "account_audit_log_company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company ",
+    "compute": "_compute_account_audit_log_company_id",
+    "search": "_search_account_audit_log_company_id",
+    "defined_in_package": "account",
+    "full_name": "Company ",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "account_audit_log_restricted",
+    "type": "Boolean",
+    "string": "Protected by restricted Audit Logs",
+    "compute": "_compute_account_audit_log_restricted",
+    "search": "_search_account_audit_log_restricted",
+    "defined_in_package": "account",
+    "full_name": "Protected by restricted Audit Logs"
+   },
+   {
+    "name": "has_sms_error",
+    "type": "Boolean",
+    "string": "Has SMS error",
+    "compute": "_compute_has_sms_error",
+    "search": "_search_has_sms_error",
+    "defined_in_package": "sms",
+    "full_name": "Has text message error"
+   },
+   {
+    "name": "rating_ids",
+    "type": "One2many",
+    "comodel": "rating.rating",
+    "inverse_name": "message_id",
+    "string": "Related ratings",
+    "defined_in_package": "rating",
+    "full_name": "Related ratings",
+    "target_entity": "rating.rating"
+   },
+   {
+    "name": "rating_id",
+    "type": "Many2one",
+    "comodel": "rating.rating",
+    "compute": "_compute_rating_id",
+    "defined_in_package": "rating",
+    "string": "Rating",
+    "full_name": "Rating",
+    "target_entity": "rating.rating"
+   },
+   {
+    "name": "rating_value",
+    "type": "Float",
+    "string": "Rating Value",
+    "compute": "_compute_rating_value",
+    "compute_sudo": true,
+    "store": false,
+    "search": "_search_rating_value",
+    "defined_in_package": "rating",
+    "full_name": "Rating Value"
+   },
+   {
+    "name": "snailmail_error",
+    "type": "Boolean",
+    "string": "Snailmail message in error",
+    "compute": "_compute_snailmail_error",
+    "search": "_search_snailmail_error",
+    "defined_in_package": "snailmail",
+    "full_name": "Snailmail message in error"
+   },
+   {
+    "name": "letter_ids",
+    "type": "One2many",
+    "comodel": "snailmail.letter",
+    "inverse_name": "message_id",
+    "defined_in_package": "snailmail",
+    "string": "Letter",
+    "full_name": "Letter",
+    "target_entity": "snailmail.letter"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_model_res_id_idx",
+    "kind": "Index",
+    "definition": "(model, res_id)",
+    "message": null,
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_model_res_id_id_idx",
+    "kind": "Index",
+    "definition": "(model, res_id, id)",
+    "message": null,
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_date_res_id_id_for_burndown_chart",
+    "kind": "Index",
+    "definition": "(date, res_id, id) WHERE model = 'project.task' AND message_type = 'notification'",
+    "message": null,
+    "defined_in_package": "project"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_channel_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model",
+         "res_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 61,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "rating",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_extras_to_store",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "store",
+     "format_reply"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_bus_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_preview",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "body"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns an un-formatted version of the message body. Output is capped\nat 100 chars with a ' [...]' suffix if applicable. It is the longest\nknown mail client preview length (Outlook 2013).",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_linked_message_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "body"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the linked messages from the body of the message.",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_record_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "model",
+         "res_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_current_user_or_guest_author",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "author_id",
+         "author_guest_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "guest",
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_needaction",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Need action on a mail.message = notified on my channel ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_needaction",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_error",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_has_error",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_starred",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "starred_partner_ids"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute if the message is starred by the current user. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_starred",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "offset",
+     "limit",
+     "order",
+     "bypass_access",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override that adds specific access rights of mail.message, to remove\nids uid could not see according to our custom rules. Please refer to\n_check_access() for more details about those rules.\n\nNon employees users see only message with subtype, and cannot see\ninternal messages, either coming from message 'is_internal' flag,\nsubtype 'internal' flag, or being pure logs (no subtype). See\n`_get_search_domain_share` which generates the domain.\n\nAfter having received ids of a classic search, keep only:\n- if author_id == pid, uid is the author, OR\n- uid belongs to a notified channel, OR\n- uid is in the specified recipients, OR\n- uid has a notification on the message, OR\n- uid has acces to the message linked document for messages that are not\n  'user_notification'\n- otherwise: remove the id",
+      "size_in_lines": 79,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_search_domain_share",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_records_for_message_operation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "doc_model",
+     "doc_res_ids",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Helper returning records on which 'operation' on mail.message is\nallowed, based on '_mail_group_by_operation_for_mail_message_operation' behavior and potential\nmodel override. ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_find_allowed_doc_ids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Filters out messages user cannot read due to missing document access.\n\n:param dict model_ids: dictionary like {\n    'document_model_name': {\n        'document_id_1': set(message IDs),\n        'document_id_2': set(message IDs),\n    },\n    [...]\n}\n\n:return: set of allowed message IDs to read, based on document check\n:rtype: set",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_access",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Access rules of mail.message:\n    - read: if\n        - author_id == pid, uid is the author OR\n        - create_uid == uid, uid is the creator OR\n        - uid is in the recipients (partner_ids) OR\n        - uid has been notified (needaction) OR\n        - uid have read access to the related document if model, res_id\n        - otherwise: raise\n    - create: if\n        - no model, no res_id (private message) OR\n        - pid in message_follower_ids if model, res_id OR\n        - uid can read the parent OR\n        - uid have write or create access on the related document if model, res_id, OR\n        - otherwise: raise\n    - write: if\n        - author_id == pid, uid is the author, OR\n        - uid is in the recipients (partner_ids) OR\n        - uid has write or create access on the related document if model, res_id\n        - otherwise: raise\n    - unlink: if\n        - uid has write or create access on the related document\n        - otherwise: raise\n\nSpecific case: non employee users cannot see internal messages (aka logs):\n'is_internal' flag on message, 'internal' flag on subtype.",
+      "size_in_lines": 39,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_forbidden_access",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the subset of ``self`` that does not satisfy the specific\nconditions for messages.",
+      "size_in_lines": 149,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_make_access_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_with_access",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "message_id",
+     "mode",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 102,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "read",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields",
+     "load"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Override to explicitely call check_access(), that is not called\nby the ORM. It instead directly fetches ir.rules and apply them. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Make is symmetric to read, to avoid spurious issues with recordsets\ndifferences. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "fetch",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "field_names"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only administrators can modify 'model' and 'res_id' fields.",
+        "line": 816
+       }
+      ]
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "export_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields_to_export"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only administrators are allowed to export mail message",
+        "line": 851
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_open_document",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Opens the related record based on the model and ID ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "mark_all_as_read",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_message_done",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Remove the needaction from messages for the current partner. ",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unstar_all",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Unstar messages for the current partner. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "toggle_message_starred",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Toggle messages as (un)starred. Technically, the notifications related\nto uid are set to (un)starred.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_fetch",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "domain",
+     "thread",
+     "search_term",
+     "is_notification",
+     "before",
+     "after",
+     "around",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_tracking_values_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "search_term"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Get the domain to search for tracking values.",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_reaction",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "content",
+     "action",
+     "partner",
+     "guest",
+     "store"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_bus_send_reaction_group",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "content"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reaction_group_to_store",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "store",
+     "content"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_field_store_repr",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the default Store representation of the given field name, which can be passed as\nparam to the various Store methods.",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "store",
+     "fields",
+     "format_reply",
+     "msg_vals",
+     "add_followers",
+     "followers"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Add the messages to the given store.\n\n:param format_reply: if True, also get data about the parent message if it exists.\n    Only makes sense for discuss channel.\n\n:param msg_vals: dictionary of values used to create the message. If\n  given it may be used to access values related to ``message`` without\n  accessing it directly. It lessens query count in some optimized use\n  cases by avoiding access message content in db;\n\n:param add_followers: if True, also add followers of the current target for each thread of\n    each message. Only applicable if ``store.target`` is a specific user.\n\n:param followers: if given, use this pre-computed list of followers instead of fetching\n    them. It lessen query count in some optimized use cases.\n    Only applicable if ``add_followers`` is True.",
+      "size_in_lines": 121,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "rating",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": "If we are currently running a chatbot.script, we include the information about\nthe chatbot.message related to this mail.message.\nThis allows the frontend display to include the additional features\n(e.g: Show additional buttons with the available answers for this step).",
+      "size_in_lines": 62,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_store_partner_name_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "im_livechat",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_store_attachment_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_store_linked_messages_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Add the messages that are referenced by the current message's body to the given store.\nThis method should only return message data that are not sensitive to be broadcasted to\nother users, as it doesn't check store.target by simplicity and the target might not\nnecessarily have permission to read the linked messages.",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_message_notifications_to_store",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "store"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Returns the current messages and their corresponding notifications in\nthe format expected by the web client.\n\nNotifications hold the information about each recipient of a message: if\nthe message was successfully sent or if an exception or bounce occurred.",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_message_notification_update",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Send bus notifications to update status of notifications in the web\nclient. Purpose is to send the updated status per author.",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_empty",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return subset of \"void\" messages ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_empty",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "rating",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_reply_to",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return a specific reply_to for the document ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_message_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_thread_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals",
+     "thread"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Tool method to compute thread validity in notification methods. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_thread_message_visible",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals",
+     "thread"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "In addition to being a thread message, it should not be a user specific\nnotification that is recipient-specific. Used mainly for ACL purpose. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_invalidate_documents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model",
+     "res_id"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Invalidate the cache of the documents followed by ``self``. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_records_by_model_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_record_by_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "portal_message_format",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Simpler and portal-oriented version of 'message_format'. Purpose\nis to prepare, organize and format values required by frontend widget\n(frontend Chatter).\n\nThis public API asks for read access on messages before doing the\nactual computation in the private implementation.\n\n:param dict options: options, used notably for inheritance and adding\n  specific fields or properties to compute;\n\n:returns: list of dict, one per message in self. Each dict contains\n  values for either fields, either properties derived from fields.\n:rtype: list[dict]",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_portal_get_default_format_properties_names",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Fields and values to compute for portal format.\n\n:param dict options: options, used notably for inheritance and adding\n  specific fields or properties to compute;\n\n:returns: fields or properties derived from fields\n:rtype: set",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "portal_rating",
+      "decorators": [],
+      "documentation": "Add request for rating information\n\n:param dict options: supports 'rating_include' option allowing to\n  conditionally include rating information;",
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_portal_message_format",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "properties_names",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Format messages for portal frontend. This private implementation\ndoes not check for access that should be checked beforehand.\n\nNotes:\n  * when asking for attachments: ensure an access token is present then\n    access them (using sudo);\n\n:param set properties_names: fields or properties derived from fields\n  for which we are going to compute values;\n\n:returns: list of dict, one per message in self. Each dict contains\n  values for either fields, either properties derived from fields.\n:rtype: list[dict]",
+      "size_in_lines": 97,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "portal_rating",
+      "decorators": [],
+      "documentation": "If requested, add rating information to returned formatted values.\n\nNote: rating information combine both statistics (see 'rating_get_stats'\nif available on model) and rating / publication information. ",
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_portal_message_format_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attachment_values"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "From 'attachment_values' get an updated version formatted for\nfrontend display.\n\n:param dict attachment_values: values coming from reading attachments\n  in database;\n\n:returns: updated attachment_values\n:rtype: dict",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_audit_log_preview",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "tracking_value_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_account_audit_log_preview",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_audit_log_move_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_account_audit_log_move_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_audit_log_account_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_account_audit_log_account_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_audit_log_tax_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_account_audit_log_tax_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_audit_log_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_account_audit_log_company_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_audit_log_partner_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_account_audit_log_partner_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_audit_log_restricted",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_account_audit_log_restricted",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_audit_log_related_record_id",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "model",
+     "fname"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_audit_log_related_record_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "model",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_except_audit_log",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot remove parts of a restricted audit trail. Archive the record instead.",
+        "line": 188
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_sms_error",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_has_sms_error",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rating_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "rating",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "rating_ids.consumed"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_rating_value",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "rating",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "rating_ids",
+         "rating_ids.rating"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_rating_value",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "rating",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_portal_message_format_rating",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "rating_values"
+    ],
+    "definitions": [
+     {
+      "package": "portal_rating",
+      "decorators": [],
+      "documentation": "From 'rating_values' get an updated version formatted for frontend\ndisplay.\n\n:param dict rating_values: values coming from reading ratings\n  in database;\n\n:returns: updated rating_values\n:rtype: dict",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_snailmail_error",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "letter_ids",
+         "letter_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_snailmail_error",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "cancel_letter",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "send_letter",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "snailmail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "write",
+    "package": "mail",
+    "kind": "AccessError",
+    "message": "Only administrators can modify 'model' and 'res_id' fields."
+   },
+   {
+    "operation": "export_data",
+    "package": "mail",
+    "kind": "AccessError",
+    "message": "Only administrators are allowed to export mail message"
+   },
+   {
+    "operation": "_except_audit_log",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot remove parts of a restricted audit trail. Archive the record instead."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_message_all",
+    "package": "mail",
+    "name": "mail.message.all",
+    "entity": "mail.message",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_mail_message_portal",
+    "package": "mail",
+    "name": "mail.message.portal",
+    "entity": "mail.message",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.access_mail_message_user",
+    "package": "mail",
+    "name": "mail.message.user",
+    "entity": "mail.message",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_recruitment.mail_message_user_rule",
+    "package": "hr_recruitment",
+    "name": "User: All Chatter",
+    "entity": "mail.message",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.view_message_tree_audit_log",
+    "package": "account",
+    "name": "mail.message.list.inherit.audit.log",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": "primary",
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "edit": "0",
+      "delete": "0",
+      "create": "0",
+      "action": "action_open_document",
+      "type": "object"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "author_id",
+       "widget": "many2one_avatar"
+      },
+      {
+       "name": "res_id",
+       "string": "Name"
+      },
+      {
+       "name": "account_audit_log_preview"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": "0",
+     "edit": "0",
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "account.view_message_tree_audit_log_search",
+    "package": "account",
+    "name": "mail.message.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": "primary",
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Messages Search"
+     },
+     "fields": [
+      {
+       "name": "account_audit_log_move_id"
+      },
+      {
+       "name": "account_audit_log_account_id"
+      },
+      {
+       "name": "account_audit_log_tax_id"
+      },
+      {
+       "name": "account_audit_log_partner_id"
+      },
+      {
+       "name": "account_audit_log_company_id"
+      },
+      {
+       "name": "author_id"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "tracking_value_ids",
+       "string": "Field Value",
+       "filter_domain": "[                     '|', ('tracking_value_ids.old_value_char', 'ilike', self),                     '|', ('tracking_value_ids.new_value_char', 'ilike', self),                     '|', ('tracking_value_ids.old_value_text', 'ilike', self),                          ('tracking_value_ids.new_value_text', 'ilike', self),                 ]"
+      },
+      {
+       "name": "tracking_value_ids",
+       "string": "Field",
+       "filter_domain": "[('tracking_value_ids.field_id', 'ilike', self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "account_move",
+       "string": "Journal Entry",
+       "domain": "[('model', '=', 'account.move')]"
+      },
+      {
+       "name": "account_account",
+       "string": "Account",
+       "domain": "[('model', '=', 'account.account')]"
+      },
+      {
+       "name": "account_tax",
+       "string": "Taxes",
+       "domain": "[('model', '=', 'account.tax')]"
+      },
+      {
+       "name": "res_partner",
+       "string": "Partners",
+       "domain": "[('model', '=', 'res.partner')]"
+      },
+      {
+       "name": "res_company",
+       "string": "Company",
+       "domain": "[('model', '=', 'res.company')]"
+      },
+      {
+       "name": "update_only",
+       "string": "Update",
+       "domain": "[('tracking_value_ids', '!=', False)]",
+       "groups": "base.group_system"
+      },
+      {
+       "name": "create_only",
+       "string": "Create",
+       "domain": "[('tracking_value_ids', '=', False)]",
+       "groups": "base.group_system"
+      },
+      {
+       "name": "restricted_by_audit_trail",
+       "string": "Restricted",
+       "domain": "[('account_audit_log_restricted', '=', True)]"
+      },
+      {
+       "name": "date",
+       "string": "Date",
+       "date": "date"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_by_date",
+       "string": "Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date'}"
+      },
+      {
+       "name": "group_by_res_id",
+       "string": "Updated Data",
+       "domain": "[]",
+       "context": "{'group_by': 'res_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.view_message_tree",
+    "package": "mail",
+    "name": "mail.message.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Messages"
+     },
+     "fields": [
+      {
+       "name": "date"
+      },
+      {
+       "name": "subject"
+      },
+      {
+       "name": "author_id"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "res_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_message_view_form",
+    "package": "mail",
+    "name": "mail.message.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Message",
+      "duplicate": "0"
+     },
+     "fields": [
+      {
+       "name": "subject"
+      },
+      {
+       "name": "date"
+      },
+      {
+       "name": "email_from"
+      },
+      {
+       "name": "author_id"
+      },
+      {
+       "name": "message_type"
+      },
+      {
+       "name": "subtype_id"
+      },
+      {
+       "name": "is_internal"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "record_name"
+      },
+      {
+       "name": "parent_id"
+      },
+      {
+       "name": "body",
+       "widget": "html_mail"
+      },
+      {
+       "name": "reply_to"
+      },
+      {
+       "name": "reply_to_force_new"
+      },
+      {
+       "name": "message_id"
+      },
+      {
+       "name": "mail_server_id"
+      },
+      {
+       "name": "partner_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "incoming_email_to"
+      },
+      {
+       "name": "incoming_email_cc"
+      },
+      {
+       "name": "notified_partner_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "starred_partner_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "notification_ids"
+      },
+      {
+       "name": "res_partner_id"
+      },
+      {
+       "name": "is_read"
+      },
+      {
+       "name": "notification_type"
+      },
+      {
+       "name": "notification_status"
+      },
+      {
+       "name": "tracking_value_ids"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_document",
+       "type": "object",
+       "invisible": "not model or res_id == 0",
+       "class": "oe_link",
+       "icon": "fa-file-text-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "body",
+       "string": "Body",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "gateway",
+       "string": "Gateway",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "recipients",
+       "string": "Recipients",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "page_tracking",
+       "string": "Tracking",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "html_mail": 1,
+      "many2many_tags": 3
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_open_document",
+       "type": "object",
+       "class": "oe_link",
+       "icon": "fa-file-text-o",
+       "invisible": "not model or res_id == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.view_message_search",
+    "package": "mail",
+    "name": "mail.message.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "25",
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Messages Search"
+     },
+     "fields": [
+      {
+       "name": "body",
+       "string": "Content",
+       "filter_domain": "['|', ('subject', 'ilike', self), ('body', 'ilike', self)]"
+      },
+      {
+       "name": "subject"
+      },
+      {
+       "name": "message_type"
+      },
+      {
+       "name": "author_id"
+      },
+      {
+       "name": "partner_ids"
+      },
+      {
+       "name": "model"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "parent_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_has_mentions",
+       "string": "Has Mentions",
+       "domain": "[('partner_ids.user_ids', 'in', [uid])]"
+      },
+      {
+       "name": "message_needaction",
+       "string": "Need Action",
+       "domain": "[('needaction', '=', True)]",
+       "help": "Unread messages"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "rating.mail_message_view_form",
+    "package": "rating",
+    "name": "mail.message.view.form.inherit.rating",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_message_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//page[@name='page_tracking']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "rating_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_rating",
+       "string": "Ratings",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//page[@name='page_tracking']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_account_audit_trail_report",
+    "package": "account",
+    "name": "Audit Trail",
+    "view_mode": "list",
+    "view_id": "view_message_tree_audit_log",
+    "search_view_id": "view_message_tree_audit_log_search",
+    "domain": "[\n            ('message_type', '=', 'notification'),\n            ('model', 'in', ('account.move', 'account.account', 'account.tax', 'res.partner', 'res.company')),\n        ]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">This is the Audit Trail Report</p>\n        </field>\n        ",
+    "usage": null,
+    "entity": "mail.message"
+   },
+   {
+    "external_identifier": "mail.action_view_mail_message",
+    "package": "mail",
+    "name": "Messages",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_message_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.message"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

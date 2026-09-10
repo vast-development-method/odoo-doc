@@ -1,0 +1,560 @@
+{
+ "catalog": {
+  "name": "views:pos.config",
+  "description": "View declarations for entity pos.config.",
+  "record_count": 10,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "point_of_sale.pos_config_view_form",
+   "package": "point_of_sale",
+   "name": "pos.config.form.view",
+   "entity": "pos.config",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Point of Sale Configuration"
+    },
+    "fields": [
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "company_has_template",
+      "invisible": "1"
+     },
+     {
+      "name": "has_active_session",
+      "invisible": "1"
+     },
+     {
+      "name": "other_devices",
+      "invisible": "1"
+     },
+     {
+      "name": "is_posbox",
+      "invisible": "1"
+     },
+     {
+      "name": "module_pos_hr",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. NYC Shop"
+     },
+     {
+      "name": "module_pos_restaurant"
+     },
+     {
+      "name": "module_pos_hr",
+      "readonly": "has_active_session"
+     },
+     {
+      "name": "other_devices"
+     },
+     {
+      "name": "epson_printer_ip",
+      "placeholder": "Epson Receipt Printer IP Address"
+     },
+     {
+      "name": "iface_cashdrawer"
+     },
+     {
+      "name": "is_posbox"
+     },
+     {
+      "name": "proxy_ip"
+     },
+     {
+      "name": "iface_scan_via_proxy"
+     },
+     {
+      "name": "iface_electronic_scale"
+     },
+     {
+      "name": "iface_print_via_proxy"
+     },
+     {
+      "name": "iface_cashdrawer"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "close_ui",
+      "type": "object",
+      "class": "btn"
+     },
+     {
+      "string": "Save",
+      "class": "btn-primary",
+      "special": "save"
+     },
+     {
+      "string": "Discard",
+      "class": "btn-secondary",
+      "special": "cancel"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "configuration",
+      "string": "Configuration",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "checklist",
+      "string": "Check list",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {},
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Point of Sale Configuration\">\n                <sheet>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <field name=\"active\" invisible=\"1\"/>\n                    <field name=\"company_has_template\" invisible=\"1\"/>\n                    <field name=\"has_active_session\" invisible=\"1\"/>\n                    <field name=\"other_devices\" invisible=\"1\"/>\n                    <field name=\"is_posbox\" invisible=\"1\"/>\n                    <field name=\"module_pos_hr\" invisible=\"1\"/>\n\n                    <div class=\"oe_title\" id=\"title\">\n                        <label for=\"name\"/>\n                        <h1><field name=\"name\" placeholder=\"e.g. NYC Shop\"/></h1>\n                    </div>\n                    \n                    <div invisible=\"context.get('pos_config_create_mode', False)\">\n                        <div class=\"o_notification_alert alert alert-warning\" invisible=\"not has_active_session\" role=\"alert\">\n                            A session is currently opened for this PoS. Some settings can only be changed after the session is closed.\n                            <button class=\"btn\" style=\"padding:0\" name=\"close_ui\" type=\"object\">Click here to close the session</button>\n                        </div>\n                        <div class=\"o_notification_alert alert alert-warning\" invisible=\"company_has_template\" role=\"alert\">\n                            There is no Chart of Accounts configured on the company. Please go to the invoicing settings to install a Chart of Accounts.\n                        </div>\n                    </div>\n\n                    \n                    <div id=\"restaurant_on_create\" class=\"row mt16 o_settings_container\" invisible=\"not context.get('pos_config_create_mode', False)\">\n                        <setting>\n                                <field name=\"module_pos_restaurant\"/>\n                        </setting>\n                    </div>\n\n                    \n                    <div invisible=\"context.get('pos_config_create_mode', False)\">\n                        <notebook>\n                            <page string=\"Configuration\" name=\"configuration\">\n                                <div class=\"row mt16 o_settings_container\">\n                                    <setting title=\"Employees can scan their badge or enter a PIN to log in to a PoS session. These credentials are configurable in the *HR Settings* tab of the employee form.\" string=\"Log in with Employees\" help=\"Allow to log and switch between selected Employees\">\n                                        <field name=\"module_pos_hr\" readonly=\"has_active_session\"/>\n                                        <div class=\"content-group mt16\" invisible=\"not module_pos_hr\">\n                                            <div class=\"text-warning\" id=\"warning_text_employees\">\n                                                Save this page and come back here to set up the feature.\n                                            </div>\n                                        </div>\n                                    </setting>\n                                    <setting id=\"other_devices\" string=\"ePos Printer\" help=\"Connect device to your PoS without an IoT Box\">\n                                        <field name=\"other_devices\"/>\n                                        <div class=\"content-group\" invisible=\"not other_devices\">\n                                            <div class=\"row mb-2\">\n                                                <div class=\"col-lg-6\">\n                                                    <field name=\"epson_printer_ip\" placeholder=\"Epson Receipt Printer IP Address\" class=\"w-100 pt-1\"/>\n                                                </div>\n                                                <div class=\"col-lg-6\">\n                                                    <widget name=\"point_of_sale_test_epos\"/>\n                                                </div>\n                                            </div>\n                                            <div class=\"row\" invisible=\"epson_printer_ip in [False, '']\">\n                                                <div class=\"col-lg-6 o_light_label\">\n                                                    <label string=\"Link Cashdrawer\" for=\"iface_cashdrawer\"/>\n                                                </div>\n                                                <div class=\"col-lg-6\">\n                                                    <field name=\"iface_cashdrawer\"/>\n                                                </div>\n                                            </div>\n                                        </div>\n                                        <div role=\"alert\" class=\"alert alert-warning\" invisible=\"not iface_print_via_proxy or not other_devices or epson_printer_ip in [False, '']\">\n                                            The Epson receipt printer will be used instead of the receipt printer connected to the IoT Box.\n                                        </div>\n                                    </setting>\n                                    <setting string=\"IoT Box\" help=\"Connect devices using an IoT Box\">\n                                            <field name=\"is_posbox\"/>\n                                            <div class=\"content-group pos_iot_config ms-3\" invisible=\"not is_posbox\">\n                                                <div class=\"row\">\n                                                    <div class=\"col-lg-4 o_light_label\">\n                                                        <label string=\"IoT Box IP Address\" for=\"proxy_ip\"/>\n                                                    </div>\n                                                    <div class=\"col-lg-8\">\n                                                        <field name=\"proxy_ip\"/>\n                                                    </div>\n                                                </div>\n                                                <div class=\"row iot_barcode_scanner\">\n                                                    <div class=\"col-lg-5 o_light_label\">\n                                                        <label string=\"Scanner\" for=\"iface_scan_via_proxy\"/>\n                                                    </div>\n                                                    <div class=\"col-lg-7\">\n                                                        <field name=\"iface_scan_via_proxy\"/>\n                                                    </div>\n                                                </div>\n                                                <div class=\"row\">\n                                                    <div class=\"col-lg-5 o_light_label\">\n                                                        <label string=\"Electronic Scale\" for=\"iface_electronic_scale\"/>\n                                                    </div>\n                                                    <div class=\"col-lg-7\">\n                                                        <field name=\"iface_electronic_scale\"/>\n                                                    </div>\n                                                </div>\n                                                <div class=\"row\">\n                                                    <div class=\"col-lg-5 o_light_label\">\n                                                        <label string=\"Receipt Printer\" for=\"iface_print_via_proxy\"/>\n                                                    </div>\n                                                    <div class=\"col-lg-7\">\n                                                        <field name=\"iface_print_via_proxy\"/>\n                                                   </div>\n                                                </div>\n                                                <div class=\"row\" invisible=\"not iface_print_via_proxy\">\n                                                    <div class=\"col-lg-5 o_light_label ps-4\">\n                                                        <label string=\"Cashdrawer\" for=\"iface_cashdrawer\"/>\n                                                    </div>\n                                                    <div class=\"col-lg-7\">\n                                                        <field name=\"iface_cashdrawer\"/>\n                                                    </div>\n                                                </div>\n                                            </div>\n                                    </setting>\n                                </div>\n                            </page>\n                            <page name=\"checklist\" string=\"Check list\">\n                                <widget name=\"lna_checklist\"/>\n                            </page>\n                        </notebook>\n                        <div groups=\"base.group_system\">\n                            <p>\n                                More settings: <a href=\"#\" name=\"%(action_pos_configuration)d\" type=\"action\" class=\"btn-link o_form_uri\" role=\"button\">Configurations &gt; Settings</a>\n                            </p>\n                        </div>\n                    </div>\n                </sheet>\n\n                \n                <footer invisible=\"not context.get('pos_config_open_modal', False)\">\n                    <button string=\"Save\" special=\"save\" class=\"btn-primary\"/>\n                    <button string=\"Discard\" class=\"btn-secondary\" special=\"cancel\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.view_pos_config_tree",
+   "package": "point_of_sale",
+   "name": "pos.config.list.view",
+   "entity": "pos.config",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Point of Sale Configuration"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "last_session_closing_date",
+      "string": "Closing"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "last_session_closing_cash",
+      "widget": "monetary",
+      "string": "Balance"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "monetary": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Point of Sale Configuration\">\n                <field name=\"name\"/>\n                <field name=\"company_id\" options=\"{'no_create': True}\" groups=\"base.group_multi_company\"/>\n                <field name=\"last_session_closing_date\" string=\"Closing\"/>\n                <field name=\"currency_id\" column_invisible=\"True\"/>\n                <field name=\"last_session_closing_cash\" widget=\"monetary\" string=\"Balance\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.view_pos_config_search",
+   "package": "point_of_sale",
+   "name": "pos.config.search.view",
+   "entity": "pos.config",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Point of Sale Config"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "picking_type_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Point of Sale Config\">\n                <field name=\"name\"/>\n                <field name=\"picking_type_id\"/>\n                <filter string=\"Archived\" name=\"inactive\" domain=\"[('active', '=', False)]\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.view_pos_config_kanban",
+   "package": "point_of_sale",
+   "name": "pos.config.kanban.view",
+   "entity": "pos.config",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "create": "false",
+     "can_open": "0",
+     "class": "o_pos_kanban",
+     "js_class": "pos_config_kanban_view"
+    },
+    "fields": [
+     {
+      "name": "cash_control"
+     },
+     {
+      "name": "current_session_id"
+     },
+     {
+      "name": "current_session_state"
+     },
+     {
+      "name": "access_token"
+     },
+     {
+      "name": "pos_session_state"
+     },
+     {
+      "name": "pos_session_duration"
+     },
+     {
+      "name": "currency_id"
+     },
+     {
+      "name": "statistics_for_current_session"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "pos_session_username"
+     },
+     {
+      "name": "last_session_closing_date"
+     },
+     {
+      "name": "last_session_closing_cash",
+      "widget": "monetary"
+     },
+     {
+      "name": "number_of_rescue_session"
+     },
+     {
+      "name": "current_user_id",
+      "widget": "many2one_avatar_user"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "open_ui",
+      "type": "object",
+      "class": "btn btn-primary"
+     },
+     {
+      "name": "open_existing_session_cb",
+      "type": "object",
+      "class": "btn btn-secondary"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "monetary": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban create=\"false\" can_open=\"0\" class=\"o_pos_kanban\" js_class=\"pos_config_kanban_view\">\n                <field name=\"cash_control\"/>\n                <field name=\"current_session_id\"/>\n                <field name=\"current_session_state\"/>\n                <field name=\"access_token\"/>\n                <field name=\"pos_session_state\"/>\n                <field name=\"pos_session_duration\"/>\n                <field name=\"currency_id\"/>\n                <field name=\"statistics_for_current_session\"/>\n                <templates>\n                    <t t-name=\"menu\">\n                        <div class=\"container dropdown-pos-config\">\n                            <div class=\"row\" style=\"min-width:200px\">\n                                <div class=\"col-6 o_kanban_manage_view\">\n                                    <h5 role=\"menuitem\" class=\"o_kanban_card_manage_title\">\n                                        <span>View</span>\n                                    </h5>\n                                    <div role=\"menuitem\">\n                                        <a name=\"%(action_pos_order_filtered)d\" type=\"action\">Orders</a>\n                                    </div>\n                                    <div role=\"menuitem\">\n                                        <a name=\"%(action_pos_session_filtered)d\" type=\"action\">Sessions</a>\n                                    </div>\n                                </div>\n                                <div class=\"col-6\">\n                                    <h5 role=\"menuitem\" class=\"o_kanban_card_manage_title\">\n                                        <span>Reporting</span>\n                                    </h5>\n                                    <div role=\"menuitem\">\n                                        <a name=\"%(action_report_pos_order_all_filtered)d\" type=\"action\">Orders</a>\n                                    </div>\n                                </div>\n                            </div>\n\n                            <div t-if=\"widget.editable\" class=\"o_kanban_card_manage_settings row\" groups=\"point_of_sale.group_pos_manager\">\n                                <div role=\"menuitem\" class=\"col-12 align-items-center\">\n                                    <a name=\"action_pos_config_modal_edit\" class=\"text-center\" type=\"object\">Configure</a>\n                                </div>\n                            </div>\n                        </div>\n                    </t>\n                    <t t-name=\"card\">\n                        <div name=\"card_title\" class=\"mb-4 ms-2\">\n                            <field name=\"name\" class=\"fw-bold fs-4 d-block\"/>\n                            <div t-if=\"!record.current_session_id.raw_value &amp;&amp; record.pos_session_username.value\" class=\"badge text-bg-info d-inline-block\">Opened by <field name=\"pos_session_username\"/></div>\n                            <div t-if=\"record.pos_session_state.raw_value == 'opening_control'\" class=\"badge text-bg-info d-inline-block\">Opening Control</div>\n                            <div t-if=\"record.pos_session_state.raw_value == 'closing_control'\" class=\"badge text-bg-info d-inline-block\">Closing Control</div>\n                            <div t-if=\"record.pos_session_state.raw_value == 'opened' and record.pos_session_duration.raw_value &gt; 1\" t-attf-class=\"badge bg-#{record.pos_session_duration.raw_value &gt; 3 and 'danger' or 'warning'} d-inline-block\" title=\"The session has been opened for an unusually long period. Please consider closing.\">\n                                    To Close\n                            </div>\n                        </div>\n                        <div class=\"row g-0 pb-4 ms-2 mt-auto\">\n                            <div name=\"card_left\" class=\"col-12 col-md-6 d-flex flex-wrap align-items-center gap-2 mb-2 mb-md-0\">\n                                <button t-if=\"record.current_session_state.raw_value != 'closing_control'\" class=\"btn btn-primary\" name=\"open_ui\" type=\"object\">\n                                    <t t-if=\"record.current_session_state.raw_value === 'opened'\">Continue Selling</t>\n                                    <t t-else=\"\">Open Register</t>\n                                </button>\n                                <button t-else=\"\" class=\"btn btn-secondary\" name=\"open_existing_session_cb\" type=\"object\">Close</button>\n                            </div>\n                            <div class=\"col-12 col-md-6\">\n                                <t t-set=\"statistics\" t-value=\"record.statistics_for_current_session.raw_value\"/>\n                                <t t-if=\"statistics\">\n                                    <div t-if=\"statistics.date.is_started\" class=\"row\">\n                                        <div class=\"col-5\">\n                                            <span>Date</span>\n                                        </div>\n                                        <span t-esc=\"statistics.date.start_date\" class=\"col-7\"/>\n                                    </div>\n                                    <div class=\"row\">\n                                        <div class=\"col-5\">\n                                            <span>Opening</span>\n                                        </div>\n                                        <span name=\"opening_cash\" t-esc=\"statistics.cash.opening_cash\" class=\"col-7\"/>\n                                    </div>\n                                    <div t-if=\"statistics.orders.paid.display\" class=\"row\">\n                                        <div class=\"col-5\">\n                                            <span>Sold</span>\n                                        </div>\n                                        <span name=\"paid_orders\" t-esc=\"statistics.orders.paid.display\" class=\"col-7\"/>\n                                    </div>\n                                    <div t-if=\"statistics.orders.draft.display\" class=\"row\">\n                                        <div class=\"col-5\">\n                                            <span>Ongoing</span>\n                                        </div>\n                                        <span name=\"draft_orders\" t-esc=\"statistics.orders.draft.display\" class=\"col-7\"/>\n                                    </div>\n                                </t>\n\n                                <t t-elif=\"record.last_session_closing_date.value\">\n                                    <div class=\"row\">\n                                        <div class=\"col-6\">\n                                            <span>Closing</span>\n                                        </div>\n                                        <field name=\"last_session_closing_date\" class=\"col-6\"/>\n                                    </div>\n                                    <div class=\"row\" invisible=\"not cash_control\">\n                                        <div class=\"col-6\">\n                                            <span>Balance</span>\n                                        </div>\n                                        <field name=\"last_session_closing_cash\" widget=\"monetary\" class=\"col-6\"/>\n                                    </div>\n                                </t>\n                                \n                                <a t-if=\"record.number_of_rescue_session.value &gt; 0\" class=\"col-12\" name=\"open_opened_rescue_session_form\" type=\"object\">\n                                    <field name=\"number_of_rescue_session\"/> outstanding rescue session\n                                </a>\n                            </div>\n                        </div>\n                        <field name=\"current_user_id\" widget=\"many2one_avatar_user\" class=\"mt-auto ms-auto\"/>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_hr.pos_config_form_view_inherit",
+   "package": "pos_hr",
+   "name": "pos.config.form.view.inherit",
+   "entity": "pos.config",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_config_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@id='warning_text_employees']",
+     "position": "replace"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "advanced_employee_ids",
+      "widget": "many2many_tags",
+      "domain": "[('company_id', '=', company_id)]",
+      "placeholder": "Select Employee(s)"
+     },
+     {
+      "name": "basic_employee_ids",
+      "widget": "many2many_tags",
+      "domain": "[('company_id', '=', company_id)]",
+      "placeholder": "All Employees"
+     },
+     {
+      "name": "minimal_employee_ids",
+      "widget": "many2many_tags",
+      "domain": "[('company_id', '=', company_id)]",
+      "placeholder": "Select Employee(s)"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tags": 3
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//div[@id='warning_text_employees']",
+      "position": "replace"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@id='warning_text_employees']\" position=\"replace\">\n                <field name=\"company_id\" invisible=\"1\"/>\n                <div class=\"row\">\n                    <label for=\"advanced_employee_ids\" string=\"Advanced rights\" class=\"col-lg-5 o_light_label\"/>\n                    <field name=\"advanced_employee_ids\" widget=\"many2many_tags\" placeholder=\"Select Employee(s)\" domain=\"[('company_id', '=', company_id)]\"/>\n                </div>\n                <div class=\"row\">\n                    <label for=\"basic_employee_ids\" string=\"Basic rights\" class=\"col-lg-5 o_light_label\"/>\n                    <field name=\"basic_employee_ids\" widget=\"many2many_tags\" placeholder=\"All Employees\" domain=\"[('company_id', '=', company_id)]\"/>\n                </div>\n                <div class=\"row\">\n                    <label for=\"minimal_employee_ids\" string=\"Minimal rights\" class=\"col-lg-5 o_light_label\"/>\n                    <field name=\"minimal_employee_ids\" widget=\"many2many_tags\" placeholder=\"Select Employee(s)\" domain=\"[('company_id', '=', company_id)]\"/>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_imin.pos_config_view_form_inherit_pos_imin",
+   "package": "pos_imin",
+   "name": "pos.config.view.form.inherit.pos.imin",
+   "entity": "pos.config",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_config_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='iface_cashdrawer']/../..",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='iface_cashdrawer']/../..",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='iface_cashdrawer']/../..\" position=\"attributes\">\n                <attribute name=\"invisible\">False</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_sale.view_pos_config_search_inherit_pos_sale",
+   "package": "pos_sale",
+   "name": "pos.config.search.view",
+   "entity": "pos.config",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.view_pos_config_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "crm_team_id",
+      "context": "{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='name']\" position=\"after\">\n                <field name=\"crm_team_id\" context=\"{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_self_order.pos_self_view_pos_config_tree",
+   "package": "pos_self_order",
+   "name": "pos.self.pos.config.list.view",
+   "entity": "pos.config",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.view_pos_config_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "status"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list\" position=\"inside\">\n                <field name=\"status\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_self_order.pos_self_order_search_view",
+   "package": "pos_self_order",
+   "name": "pos.self.order.search.view",
+   "entity": "pos.config",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.view_pos_config_search",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//filter[@name='inactive']",
+     "position": "after"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "filter_kiosk_only",
+      "string": "Kiosk",
+      "domain": "[('self_ordering_mode', '=', 'kiosk')]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//filter[@name='inactive']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//filter[@name='inactive']\" position=\"after\">\n                <filter string=\"Kiosk\" name=\"filter_kiosk_only\" domain=\"[('self_ordering_mode', '=', 'kiosk')]\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_self_order.pos_self_order_menu_item",
+   "package": "pos_self_order",
+   "name": "pos.config.kanban.view.inherit.self_order",
+   "entity": "pos.config",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.view_pos_config_kanban",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='card_left']",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "self_ordering_mode",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "preview_self_order_app",
+      "type": "object",
+      "invisible": "not self_ordering_mode == 'mobile' and not self_ordering_mode == 'consultation'",
+      "class": "btn btn-secondary"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='card_left']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[@name='card_left']\" position=\"inside\">\n                <field name=\"self_ordering_mode\" invisible=\"1\"/>\n                 <button invisible=\"not self_ordering_mode == 'mobile' and not self_ordering_mode == 'consultation'\" class=\"btn btn-secondary\" name=\"preview_self_order_app\" type=\"object\">\n                        Mobile Menu\n                 </button>\n            </xpath>\n            <xpath expr=\"//div[@name='card_left']\" position=\"after\">\n                <field name=\"self_ordering_mode\" invisible=\"1\"/>\n                <field name=\"current_session_id\" invisible=\"1\"/>\n                <div class=\"col-6 d-flex flex-wrap align-items-center gap-2\" invisible=\"not self_ordering_mode == 'kiosk'\">\n                    <button t-if=\"!record.current_session_id.raw_value\" class=\"btn btn-primary pos_open_session_btn\" name=\"action_open_wizard\" type=\"object\">\n                        Start Kiosk\n                    </button>\n                    <button t-else=\"\" name=\"action_close_kiosk_session\" class=\"btn btn-secondary\" type=\"object\">\n                        Close Session\n                    </button>\n                    <button t-if=\"record.current_session_id.raw_value\" class=\"btn btn-secondary\" name=\"action_open_wizard\" type=\"object\">\n                        Open Kiosk\n                    </button>\n                </div>\n            </xpath>\n            <xpath expr=\"//div[@name='card_left']\" position=\"attributes\">\n                <field name=\"self_ordering_mode\" invisible=\"1\"/>\n                <attribute name=\"invisible\">self_ordering_mode == 'kiosk'</attribute>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

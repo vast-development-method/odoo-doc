@@ -1,0 +1,102 @@
+{
+ "catalog": {
+  "name": "views:pdp.registration",
+  "description": "View declarations for entity pdp.registration.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "l10n_fr_pdp.pdp_registration_form",
+   "package": "l10n_fr_pdp",
+   "name": "pdp.registration.form",
+   "entity": "pdp.registration",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "js_class": "pdp_status_listener"
+    },
+    "fields": [
+     {
+      "name": "warnings",
+      "widget": "actionable_errors"
+     },
+     {
+      "name": "pdp_identifier",
+      "readonly": "pdp_kyc_status in ('processing', 'success')",
+      "string": "Identifier"
+     },
+     {
+      "name": "contact_email",
+      "string": "Email"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "button_trigger_authentication",
+      "string": "Authenticate",
+      "type": "object",
+      "invisible": "pdp_kyc_status in ('processing', 'success')",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "button_refresh_authentication",
+      "string": "Refresh",
+      "type": "object",
+      "invisible": "pdp_kyc_status != 'processing'",
+      "class": "btn-primary",
+      "data-hotkey": "r"
+     },
+     {
+      "name": "button_cancel_authentication",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "pdp_kyc_status != 'processing'",
+      "class": "btn-secondary",
+      "data-hotkey": "x"
+     },
+     {
+      "name": "button_open_authentication_link",
+      "string": "Open link",
+      "type": "object",
+      "invisible": "pdp_kyc_status != 'processing'",
+      "class": "btn-primary ms-auto",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "button_register_pdp_participant",
+      "type": "object",
+      "invisible": "pdp_kyc_status != 'success'",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "button_deregister_pdp_participant",
+      "string": "Cancel Registration",
+      "type": "object",
+      "invisible": "pdp_kyc_status != 'success'",
+      "class": "btn-secondary",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "actionable_errors": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form js_class=\"pdp_status_listener\">\n                <div class=\"alert alert-warning\" role=\"alert\" invisible=\"pdp_kyc_status != 'processing'\">\n                    <i class=\"fa fa-warning me-2\"/>Authentication in progress. Clicking \"Cancel\" will abort the process.\n                </div>\n                <sheet>\n                    <div class=\"m-0\" name=\"warnings\" invisible=\"not warnings or not account_peppol_proxy_state\">\n                        <field name=\"warnings\" class=\"o_field_html\" widget=\"actionable_errors\"/>\n                    </div>\n\n                    <group name=\"pdp_registration\">\n                        <div colspan=\"2\" class=\"text-muted mb-3\">\n                            Send invoices and receive bills automatically on the French e-Invoicing network.\n                        </div>\n\n                        \n                        <field name=\"pdp_identifier\" string=\"Identifier\" readonly=\"pdp_kyc_status in ('processing', 'success')\"/>\n                        <field name=\"contact_email\" string=\"Email\"/>\n\n                    </group>\n\n                    \n                    <div colspan=\"2\" class=\"row\" invisible=\"account_peppol_proxy_state\">\n                        <div class=\"text-muted col\" invisible=\"edi_mode != 'prod'\">\n                            By clicking the button below I accept that the system may process my e-invoices.\n                        </div>\n                        <div class=\"text-muted col\" invisible=\"edi_mode != 'test'\">\n                            Test mode allows sending e-invoices through the test French e-Invoicing network.\n                            By clicking the button below I accept that the system may process my e-invoices.\n                        </div>\n                        <div class=\"text-muted col\" invisible=\"edi_mode != 'demo'\">\n                            In demo mode sending invoices is simulated.\n                            There will be no communication with the French e-Invoicing network.\n                        </div>\n                    </div>\n                </sheet>\n\n                <footer>\n                    <button name=\"button_trigger_authentication\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\" string=\"Authenticate\" invisible=\"pdp_kyc_status in ('processing', 'success')\"/>\n                    <button name=\"button_refresh_authentication\" type=\"object\" class=\"btn-primary\" data-hotkey=\"r\" string=\"Refresh\" invisible=\"pdp_kyc_status != 'processing'\"/>\n                    <button name=\"button_cancel_authentication\" type=\"object\" class=\"btn-secondary\" data-hotkey=\"x\" string=\"Cancel\" invisible=\"pdp_kyc_status != 'processing'\"/>\n                    <button name=\"button_open_authentication_link\" type=\"object\" class=\"btn-primary ms-auto\" data-hotkey=\"q\" string=\"Open link\" invisible=\"pdp_kyc_status != 'processing'\"/>\n                    <button name=\"button_register_pdp_participant\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\" invisible=\"pdp_kyc_status != 'success'\">\n                        <span invisible=\"edi_mode != 'prod'\">\n                            <span invisible=\"'company_pdp_annuaire_warning' in warnings\">Validate Registration</span>\n                            <span invisible=\"'company_pdp_annuaire_warning' not in warnings\">Migrate to the system</span>\n                        </span>\n                        <span invisible=\"edi_mode != 'test'\">\n                            <span invisible=\"'company_pdp_annuaire_warning' in warnings\">Validate Registration (Test)</span>\n                            <span invisible=\"'company_pdp_annuaire_warning' not in warnings\">Migrate to the system (Test)</span>\n                        </span>\n                        <span invisible=\"edi_mode != 'demo'\">\n                            <span invisible=\"'company_pdp_annuaire_warning' in warnings\">Validate Registration (Demo)</span>\n                            <span invisible=\"'company_pdp_annuaire_warning' not in warnings\">Migrate to the system (Demo)</span>\n                        </span>\n                    </button>\n                    <button name=\"button_deregister_pdp_participant\" string=\"Cancel Registration\" type=\"object\" class=\"btn-secondary\" data-hotkey=\"x\" invisible=\"pdp_kyc_status != 'success'\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  }
+ ]
+}

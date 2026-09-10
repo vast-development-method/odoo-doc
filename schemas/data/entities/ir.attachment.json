@@ -1,0 +1,3561 @@
+{
+ "catalog": {
+  "name": "entity:ir.attachment",
+  "description": "Complete definition of entity Attachment (ir.attachment).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "ir.attachment",
+  "storage_name": "ir_attachment",
+  "full_name": "Attachment",
+  "kind": "persistent",
+  "description": "Attachment",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "bus",
+   "html_editor",
+   "mail",
+   "mail",
+   "product",
+   "account",
+   "account_edi",
+   "api_doc",
+   "attachment_indexation",
+   "cloud_storage",
+   "cloud_storage_azure",
+   "cloud_storage_google",
+   "cloud_storage_migration",
+   "hr_expense",
+   "hr_fleet",
+   "hr_recruitment",
+   "website",
+   "website",
+   "l10n_fr_pdp",
+   "l10n_in_edi",
+   "l10n_in_ewaybill",
+   "l10n_jo_edi",
+   "l10n_sa",
+   "l10n_sa_edi",
+   "mrp",
+   "website_forum"
+  ],
+  "mixins": [
+   "bus.listener.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_cloud_storage_upload_url_time_to_expiry": 300,
+   "_cloud_storage_download_url_time_to_expiry": 300,
+   "_cloud_storage_azure_url_pattern": {
+    "expression": "re.compile('^https://(?P<account_name>[a-z\\\\d]{3,24})\\\\.blob\\\\.core\\\\.windows\\\\.net/(?P<container_name>[a-z\\\\d][a-z\\\\d-]{2,62})/(?P<blob_name>[^?]+)$')"
+   },
+   "_cloud_storage_google_url_pattern": {
+    "expression": "re.compile('^https://storage\\\\.googleapis\\\\.com/(?P<bucket_name>[\\\\w\\\\-.]+)/(?P<blob_name>[^?]+)$')"
+   }
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "defined_in_package": "base",
+    "full_name": "Name"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Description",
+    "defined_in_package": "base",
+    "full_name": "Description"
+   },
+   {
+    "name": "res_name",
+    "type": "Char",
+    "string": "Resource Name",
+    "compute": "_compute_res_name",
+    "defined_in_package": "base",
+    "full_name": "Resource Name"
+   },
+   {
+    "name": "res_model",
+    "type": "Char",
+    "string": "Resource Model",
+    "defined_in_package": "base",
+    "full_name": "Resource Model"
+   },
+   {
+    "name": "res_field",
+    "type": "Char",
+    "string": "Resource Field",
+    "defined_in_package": "base",
+    "full_name": "Resource Field"
+   },
+   {
+    "name": "res_id",
+    "type": "Many2oneReference",
+    "string": "Resource ID",
+    "model_field": "res_model",
+    "defined_in_package": "base",
+    "full_name": "Resource identifier"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "change_default": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "base",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "type",
+    "type": "Selection",
+    "selection": [
+     [
+      "url",
+      "URL"
+     ],
+     [
+      "binary",
+      "File"
+     ],
+     [
+      "cloud_storage",
+      "Cloud Storage"
+     ]
+    ],
+    "string": "Type",
+    "required": true,
+    "default": "binary",
+    "change_default": true,
+    "help": "You can either upload a file from your computer or copy/paste an internet link to your file.",
+    "defined_in_package": "base",
+    "selection_added_by": [
+     "cloud_storage"
+    ],
+    "ondelete": {
+     "cloud_storage": "set url"
+    },
+    "extended_in_packages": [
+     "cloud_storage"
+    ],
+    "full_name": "Type"
+   },
+   {
+    "name": "url",
+    "type": "Char",
+    "string": "Url",
+    "index": "btree_not_null",
+    "size": 1024,
+    "defined_in_package": "base",
+    "full_name": "Url"
+   },
+   {
+    "name": "public",
+    "type": "Boolean",
+    "string": "Is public document",
+    "defined_in_package": "base",
+    "full_name": "Is public document"
+   },
+   {
+    "name": "access_token",
+    "type": "Char",
+    "string": "Access Token",
+    "groups": "base.group_user",
+    "defined_in_package": "base",
+    "full_name": "Access Token"
+   },
+   {
+    "name": "raw",
+    "type": "Binary",
+    "string": "File Content (raw)",
+    "compute": "_compute_raw",
+    "inverse": "_inverse_raw",
+    "defined_in_package": "base",
+    "full_name": "File Content (raw)"
+   },
+   {
+    "name": "datas",
+    "type": "Binary",
+    "string": "File Content (base64)",
+    "compute": "_compute_datas",
+    "inverse": "_inverse_datas",
+    "defined_in_package": "base",
+    "full_name": "File Content (base64)"
+   },
+   {
+    "name": "db_datas",
+    "type": "Binary",
+    "string": "Database Data",
+    "attachment": false,
+    "defined_in_package": "base",
+    "full_name": "Database Data"
+   },
+   {
+    "name": "store_fname",
+    "type": "Char",
+    "string": "Stored Filename",
+    "index": true,
+    "defined_in_package": "base",
+    "full_name": "Stored Filename"
+   },
+   {
+    "name": "file_size",
+    "type": "Integer",
+    "string": "File Size",
+    "readonly": true,
+    "defined_in_package": "base",
+    "full_name": "File Size"
+   },
+   {
+    "name": "checksum",
+    "type": "Char",
+    "string": "Checksum/SHA1",
+    "size": 40,
+    "readonly": true,
+    "defined_in_package": "base",
+    "full_name": "Checksum/SHA1"
+   },
+   {
+    "name": "mimetype",
+    "type": "Char",
+    "string": "Mime Type",
+    "readonly": true,
+    "defined_in_package": "base",
+    "full_name": "Mime Type"
+   },
+   {
+    "name": "index_content",
+    "type": "Text",
+    "string": "Indexed Content",
+    "readonly": true,
+    "prefetch": false,
+    "defined_in_package": "base",
+    "full_name": "Indexed Content"
+   },
+   {
+    "name": "local_url",
+    "type": "Char",
+    "string": "Attachment URL",
+    "compute": "_compute_local_url",
+    "defined_in_package": "html_editor",
+    "full_name": "Attachment uniform resource locator"
+   },
+   {
+    "name": "image_src",
+    "type": "Char",
+    "compute": "_compute_image_src",
+    "defined_in_package": "html_editor",
+    "string": "Image Src",
+    "full_name": "Image Src"
+   },
+   {
+    "name": "image_width",
+    "type": "Integer",
+    "compute": "_compute_image_size",
+    "defined_in_package": "html_editor",
+    "string": "Image Width",
+    "full_name": "Image Width"
+   },
+   {
+    "name": "image_height",
+    "type": "Integer",
+    "compute": "_compute_image_size",
+    "defined_in_package": "html_editor",
+    "string": "Image Height",
+    "full_name": "Image Height"
+   },
+   {
+    "name": "original_id",
+    "type": "Many2one",
+    "comodel": "ir.attachment",
+    "string": "Original (unoptimized, unresized) attachment",
+    "index": "btree_not_null",
+    "defined_in_package": "html_editor",
+    "full_name": "Original (unoptimized, unresized) attachment",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "voice_ids",
+    "type": "One2many",
+    "comodel": "discuss.voice.metadata",
+    "inverse_name": "attachment_id",
+    "defined_in_package": "mail",
+    "string": "Voice",
+    "full_name": "Voice",
+    "target_entity": "discuss.voice.metadata"
+   },
+   {
+    "name": "thumbnail",
+    "type": "Image",
+    "defined_in_package": "mail",
+    "string": "Thumbnail",
+    "full_name": "Thumbnail"
+   },
+   {
+    "name": "has_thumbnail",
+    "type": "Boolean",
+    "compute": "_compute_has_thumbnail",
+    "defined_in_package": "mail",
+    "string": "Has Thumbnail",
+    "full_name": "Has Thumbnail"
+   },
+   {
+    "name": "key",
+    "type": "Char",
+    "defined_in_package": "website",
+    "copy": false,
+    "extended_in_packages": [
+     "website"
+    ],
+    "string": "Key",
+    "full_name": "Key"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "comodel": "website",
+    "defined_in_package": "website",
+    "string": "Website",
+    "full_name": "Website",
+    "target_entity": "website"
+   },
+   {
+    "name": "theme_template_id",
+    "type": "Many2one",
+    "comodel": "theme.ir.attachment",
+    "copy": false,
+    "index": "btree_not_null",
+    "defined_in_package": "website",
+    "string": "Theme Template",
+    "full_name": "Theme Template",
+    "target_entity": "theme.ir.attachment"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_res_idx",
+    "kind": "Index",
+    "definition": "(res_model, res_id)",
+    "message": null,
+    "defined_in_package": "base"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_res_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_storage",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filestore",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_storage_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "force_storage",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Force all attachments to be stored in the currently configured storage",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Only administrators can execute this action.",
+        "line": 107
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_migrate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_full_path",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "path"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_path",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "bin_data",
+     "sha"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The attachment collides with an existing file.",
+        "line": 143
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_file_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fname",
+     "size"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_file_write",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_value",
+     "checksum"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_file_delete",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fname"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mark_for_gc",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fname"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Add ``fname`` in a checklist for the filestore garbage collection. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_file_store",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Perform the garbage collection of the filestore. ",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_file_store_unsafe",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_datas",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "store_fname",
+         "db_datas",
+         "file_size"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "bin_size"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_raw",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "store_fname",
+         "db_datas"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pdf_raw",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_raw",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_datas",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_attachment_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "asbytes"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_datas_related_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "data",
+     "mimetype"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_checksum",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "bin_data"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "compute the checksum for the given datas\n:param bin_data : datas in its binary form",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_same_content",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_data",
+     "filepath"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mimetype",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "compute the mimetype of the given values\n:param values : dict of values to create or write an ir_attachment\n:return mime : string indicating the mimetype, or application/octet-stream by default",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_postprocess_contents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_contents",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_index",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_data",
+     "file_type",
+     "checksum"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "compute the index content of the given binary data.\nThis is a python implementation of the unix command 'strings'.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "attachment_indexation",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_serving_groups",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "An ir.attachment record may be used as a fallback in the\nhttp dispatch if its type field is set to \"binary\" and its url\nfield is set as the request's url. Only the groups returned by\nthis method are allowed to create and write on such records.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_serving_attachments",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Sorry, you are not allowed to write on this document",
+        "line": 492
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_circular_attachment",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "res_model",
+         "res_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot attach an attachment to itself.\nAttachment %(record)s cannot have res_id: %(res_id)s",
+        "line": 498
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "check",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "mode",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Restricts the access to an ir.attachment, according to referred mode ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Sorry, you are not allowed to access this document.",
+        "line": 509
+       },
+       {
+        "kind": "AccessError",
+        "message": "Sorry, you are not allowed to access this document.",
+        "line": 512
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_access",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Check access for attachments.\n\nRules:\n- `public` is always accessible for reading.\n- If we have `res_model and res_id`, the attachment is accessible if the\n  referenced model is accessible. Also, when `res_field != False` and\n  the user is not an administrator, we check the access on the field.\n- If we don't have a referenced record, the attachment is accessible to\n  the administrator and the creator of the attachment.",
+      "size_in_lines": 75,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inaccessible_comodel_records",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "model_and_ids",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "offset",
+     "limit",
+     "order",
+     "active_test",
+     "bypass_access"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 90,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Sorry, you are not allowed to access this document.",
+        "line": 721
+       }
+      ]
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 46,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Sorry, you are not allowed to access this document.",
+        "line": 793
+       }
+      ]
+     },
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Create product.document for attachments added in products chatters",
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You can't add attachments to an expense once it has been approved.",
+        "line": 27
+       }
+      ]
+     },
+     {
+      "package": "website",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_add_create",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Overrides behaviour when the attachment is created through the controller\n        ",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cloud Storage is not enabled",
+        "line": 40
+       }
+      ]
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "generate_access_token",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_raw_access_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Return a scoped access token for the `raw` field. The token can be\nused with `ir_binary._find_record` to bypass access rights.\n\n:rtype: str",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create_unique",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "values_list"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Attachment is not encoded in base64.",
+        "line": 833
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_generate_access_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_get",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_serve_attachment",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "url",
+     "extra_domain",
+     "order"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "regenerate_assets_bundles",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_from_request_file",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "file",
+     "mimetype",
+     "**vals"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Create an attachment out of a request file\n\n:param file: the request file\n:param str mimetype:\n    * \"TRUST\" to use the mimetype and file extension from the\n      request file with no verification.\n    * \"GUESS\" to determine the mimetype and file extension on\n      the file's content. The determined extension is added at\n      the end of the filename unless the filename already had a\n      valid extension.\n    * a mimetype in format \"{type}/{subtype}\" to force the\n      mimetype to the given value, it adds the corresponding\n      file extension at the end of the filename unless the\n      filename already had a valid extension.",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_http_stream",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": "Create a :class:`~Stream`: from an ir.attachment record. ",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_remote_source",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_return_content",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name",
+     "access_token"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Invalid access token",
+        "line": 969
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_migrate_remote_to_local",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "URL attachment (%s) shouldn't be migrated to local.",
+        "line": 984
+       }
+      ]
+     },
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Failed to download attachment (%(id)s) from cloud: %(code)s - %(reason)s",
+        "line": 57
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_bus_channel",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "bus",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_local_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "html_editor",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_image_src",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "html_editor",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mimetype",
+         "url",
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_image_size",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "html_editor",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "datas"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_media_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "html_editor",
+      "decorators": [],
+      "documentation": "Return a dict with the values that we need on the media dialog.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_bypass_rights_on_media_dialog",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "**attachment_data"
+    ],
+    "definitions": [
+     {
+      "package": "html_editor",
+      "decorators": [],
+      "documentation": "This method is meant to be overridden, for instance to allow to\ncreate image attachment despite the user not allowed to create\nattachment, eg:\n- Portal user uploading an image on the forum (bypass acl)\n- Non admin user uploading an unsplash image (bypass binary/url check)",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_forum",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_voice_metadata",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_thumbnail",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "thumbnail"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_attachments_ownership",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attachment_tokens"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Checks if the current user has ownership of all attachments in the recordset.\nOwnership is defined as either:\n- Having 'write' access to the attachment.\n- Providing a valid, scoped 'attachment_ownership' access token.\n\n:param list attachment_tokens: A list of access tokens",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "An access token must be provided for each attachment.",
+        "line": 32
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "register_as_main_attachment",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "force"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Registers this attachment as the main one of the model it is\nattached to.\n\n:param bool force: if set, the method always updates the existing main attachment\n    otherwise it only sets the main attachment if there is none.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_delete_and_notify",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_store_ownership_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ownership_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Returns a scoped limited access token that indicates ownership of the attachment when\nusing _has_attachments_ownership. If verified by verify_limited_field_access_token,\naccessing the attachment bypasses the ACLs.\n\n:rtype: str",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_thumbnail_token",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_zip_from_attachments",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Return the zip bytes content resulting from compressing the attachments in `self`",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_except_audit_trail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": true
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "re-raise",
+        "message": "ue",
+        "line": 39
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_government_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_edi",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't unlink an attachment being an EDI document sent to the government.",
+        "line": 16
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_gc_doc_index",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "api_doc",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Garbage collect the outdated /doc/index.json attachments. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_index_docx",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_data"
+    ],
+    "definitions": [
+     {
+      "package": "attachment_indexation",
+      "decorators": [],
+      "documentation": "Index Microsoft .docx documents",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_index_pptx",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_data"
+    ],
+    "definitions": [
+     {
+      "package": "attachment_indexation",
+      "decorators": [],
+      "documentation": "Index Microsoft .pptx documents",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_index_xlsx",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_data"
+    ],
+    "definitions": [
+     {
+      "package": "attachment_indexation",
+      "decorators": [],
+      "documentation": "Index Microsoft .xlsx documents",
+      "size_in_lines": 35,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_index_opendoc",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_data"
+    ],
+    "definitions": [
+     {
+      "package": "attachment_indexation",
+      "decorators": [],
+      "documentation": "Index OpenDocument documents (.odt, .ods...)",
+      "size_in_lines": 75,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_index_pdf",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bin_data"
+    ],
+    "definitions": [
+     {
+      "package": "attachment_indexation",
+      "decorators": [],
+      "documentation": "Index PDF documents",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "attachment_indexation",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_cloud_storage_blob_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": "Generate a unique blob name for the attachment\n\n:return: A unique blob name str",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_cloud_storage_url",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": "Generate a cloud blob url without signature or token for the attachment.\nThis url is only used to identify the cloud blob.\n\n:return: A cloud blob url str",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "cloud_storage_azure",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "cloud_storage_google",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_cloud_storage_download_url_time_to_expiry",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_cloud_storage_download_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": "Generate the download info for the public client to directly download\nthe attachment's blob from the cloud storage.\n\n:return: An download_info dictionary containing:\n\n    download_url\n        cloud storage url with permission to download the file\n    time_to_expiry\n        the time in seconds before the download url expires",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "cloud_storage_azure",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "cloud_storage_google",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_cloud_storage_upload_info",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": "Generate the upload info for the public client to directly upload a\nfile to the cloud storage.\n\n:return: An upload_info dictionary containing:\n\n    upload_url\n        cloud storage url with permission to upload the file\n    method\n        the request method used to upload the file\n    response_status\n        the status of the response for a successful upload request\n    [Optionally] headers\n        a dictionary of headers to be added to the upload request",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "cloud_storage_azure",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "cloud_storage_google",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_cloud_storage_unsupported_models",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_cloud_storage_azure_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage_azure",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "%s is not a valid Azure Blob Storage URL.",
+        "line": 72
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_generate_cloud_storage_azure_url",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "blob_name"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage_azure",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_cloud_storage_azure_sas_url",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage_azure",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_cloud_storage_google_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage_google",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "%s is not a valid Google Cloud Storage URL.",
+        "line": 38
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_generate_cloud_storage_google_url",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "blob_name"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage_google",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_cloud_storage_google_signed_url",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "bucket_name",
+     "blob_name",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage_google",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_migrate_local_to_cloud_storage",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "session"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage_migration",
+      "decorators": [],
+      "documentation": "Migrate attachment from local binary storage to cloud storage",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Attachment (%s) is not a binary attachment and cannot be migrated to cloud storage.",
+        "line": 27
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Attachment (%s) does not have a stored filename and cannot be migrated to cloud storage.",
+        "line": 29
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Failed to upload attachment %(id)s to cloud storage: %(code)s",
+        "line": 39
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_cron_migrate_local_to_cloud_storage",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "cloud_storage_migration",
+      "decorators": [
+       {
+        "name": "assert_log_admin_access",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "The Http server only reschedules the cron job asap without migrating any attachment.\nThe cron server will continue the migrating process stopped at the last time by using\n``cloud_storage_migration_min_attachment_id``",
+      "size_in_lines": 140,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cloud storage provider is not configured",
+        "line": 55
+       },
+       {
+        "kind": "UserError",
+        "message": "No model for cloud storage migration",
+        "line": 67
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prevent_delete_from_submitted_expense",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "You can't delete attachments from an expense once it has been submitted.",
+        "line": 17
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_preview_attachment",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_fleet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_fr_pdp_no_delete_fro_sent_flow",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_fr_pdp",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't delete an attachment linked to a sent Flow.",
+        "line": 16
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_l10n_in_government_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_edi",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Prevents the deletion of attachments related to government-issued documents.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't unlink an attachment that you received from the government",
+        "line": 19
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_ewaybill_government_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_ewaybill",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Prevents the deletion of attachments related to government-issued documents.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't unlink an attachment that you received from the government",
+        "line": 19
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_except_submitted_invoices_pdfs",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_jo_edi",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": true
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete this Invoice PDF as it has been submitted to JoFotara",
+        "line": 20
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_posted_pdf_invoices",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Prevents unlinking of invoice pdfs linked to an invoice that is posted.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The Invoice PDF(s) cannot be deleted according to ZATCA rules: %s",
+        "line": 15
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_posted_pdf_moves_to_check",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa",
+      "decorators": [],
+      "documentation": "Returns the moves to check whether they can be unlinked.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sa_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_rejected_zatca_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa_edi",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Prevents unlinking of rejected XML documents",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't unlink an attachment being an EDI document refused by the government.",
+        "line": 17
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_validated_pdf_invoices",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_sa_edi",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Prevents unlinking of invoice pdfs linked to an invoice\nwhere the pdf attachment was created after or at the same time as the edi_documents last write date.",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Oops! The invoice PDF(s) are linked to a validated EDI document and cannot be deleted according to ZATCA rules: %s",
+        "line": 40
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "force_storage",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "Only administrators can execute this action."
+   },
+   {
+    "operation": "_get_path",
+    "package": "base",
+    "kind": "UserError",
+    "message": "The attachment collides with an existing file."
+   },
+   {
+    "operation": "_check_serving_attachments",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "Sorry, you are not allowed to write on this document"
+   },
+   {
+    "operation": "_check_circular_attachment",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "You cannot attach an attachment to itself.\nAttachment %(record)s cannot have res_id: %(res_id)s"
+   },
+   {
+    "operation": "check",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "Sorry, you are not allowed to access this document."
+   },
+   {
+    "operation": "check",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "Sorry, you are not allowed to access this document."
+   },
+   {
+    "operation": "write",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "Sorry, you are not allowed to access this document."
+   },
+   {
+    "operation": "create",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "Sorry, you are not allowed to access this document."
+   },
+   {
+    "operation": "create_unique",
+    "package": "base",
+    "kind": "UserError",
+    "message": "Attachment is not encoded in base64."
+   },
+   {
+    "operation": "_can_return_content",
+    "package": "base",
+    "kind": "AccessError",
+    "message": "Invalid access token"
+   },
+   {
+    "operation": "_migrate_remote_to_local",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "URL attachment (%s) shouldn't be migrated to local."
+   },
+   {
+    "operation": "_has_attachments_ownership",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "An access token must be provided for each attachment."
+   },
+   {
+    "operation": "_unlink_except_government_document",
+    "package": "account_edi",
+    "kind": "UserError",
+    "message": "You can't unlink an attachment being an EDI document sent to the government."
+   },
+   {
+    "operation": "_post_add_create",
+    "package": "cloud_storage",
+    "kind": "UserError",
+    "message": "Cloud Storage is not enabled"
+   },
+   {
+    "operation": "_migrate_remote_to_local",
+    "package": "cloud_storage",
+    "kind": "ValidationError",
+    "message": "Failed to download attachment (%(id)s) from cloud: %(code)s - %(reason)s"
+   },
+   {
+    "operation": "_get_cloud_storage_azure_info",
+    "package": "cloud_storage_azure",
+    "kind": "ValidationError",
+    "message": "%s is not a valid Azure Blob Storage URL."
+   },
+   {
+    "operation": "_get_cloud_storage_google_info",
+    "package": "cloud_storage_google",
+    "kind": "ValidationError",
+    "message": "%s is not a valid Google Cloud Storage URL."
+   },
+   {
+    "operation": "_migrate_local_to_cloud_storage",
+    "package": "cloud_storage_migration",
+    "kind": "ValidationError",
+    "message": "Attachment (%s) is not a binary attachment and cannot be migrated to cloud storage."
+   },
+   {
+    "operation": "_migrate_local_to_cloud_storage",
+    "package": "cloud_storage_migration",
+    "kind": "ValidationError",
+    "message": "Attachment (%s) does not have a stored filename and cannot be migrated to cloud storage."
+   },
+   {
+    "operation": "_migrate_local_to_cloud_storage",
+    "package": "cloud_storage_migration",
+    "kind": "ValidationError",
+    "message": "Failed to upload attachment %(id)s to cloud storage: %(code)s"
+   },
+   {
+    "operation": "_cron_migrate_local_to_cloud_storage",
+    "package": "cloud_storage_migration",
+    "kind": "UserError",
+    "message": "Cloud storage provider is not configured"
+   },
+   {
+    "operation": "_cron_migrate_local_to_cloud_storage",
+    "package": "cloud_storage_migration",
+    "kind": "UserError",
+    "message": "No model for cloud storage migration"
+   },
+   {
+    "operation": "_prevent_delete_from_submitted_expense",
+    "package": "hr_expense",
+    "kind": "AccessError",
+    "message": "You can't delete attachments from an expense once it has been submitted."
+   },
+   {
+    "operation": "create",
+    "package": "hr_expense",
+    "kind": "AccessError",
+    "message": "You can't add attachments to an expense once it has been approved."
+   },
+   {
+    "operation": "_l10n_fr_pdp_no_delete_fro_sent_flow",
+    "package": "l10n_fr_pdp",
+    "kind": "UserError",
+    "message": "You can't delete an attachment linked to a sent Flow."
+   },
+   {
+    "operation": "_unlink_except_l10n_in_government_document",
+    "package": "l10n_in_edi",
+    "kind": "UserError",
+    "message": "You can't unlink an attachment that you received from the government"
+   },
+   {
+    "operation": "_unlink_except_ewaybill_government_document",
+    "package": "l10n_in_ewaybill",
+    "kind": "UserError",
+    "message": "You can't unlink an attachment that you received from the government"
+   },
+   {
+    "operation": "_except_submitted_invoices_pdfs",
+    "package": "l10n_jo_edi",
+    "kind": "UserError",
+    "message": "You cannot delete this Invoice PDF as it has been submitted to JoFotara"
+   },
+   {
+    "operation": "_unlink_except_posted_pdf_invoices",
+    "package": "l10n_sa",
+    "kind": "UserError",
+    "message": "The Invoice PDF(s) cannot be deleted according to ZATCA rules: %s"
+   },
+   {
+    "operation": "_unlink_except_rejected_zatca_document",
+    "package": "l10n_sa_edi",
+    "kind": "UserError",
+    "message": "You can't unlink an attachment being an EDI document refused by the government."
+   },
+   {
+    "operation": "_unlink_except_validated_pdf_invoices",
+    "package": "l10n_sa_edi",
+    "kind": "UserError",
+    "message": "Oops! The invoice PDF(s) are linked to a validated EDI document and cannot be deleted according to ZATCA rules: %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_ir_attachment_group_user",
+    "package": "base",
+    "name": "ir_attachment group_user",
+    "entity": "ir.attachment",
+    "group": "group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "base.access_ir_attachment_group_portal_public",
+    "package": "base",
+    "name": "ir_attachment group_portal_public",
+    "entity": "ir.attachment",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.view_attachment_form",
+    "package": "base",
+    "name": null,
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Attachments"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "type"
+      },
+      {
+       "name": "datas",
+       "invisible": "type == 'url'",
+       "nolabel": "1"
+      },
+      {
+       "name": "url",
+       "widget": "url",
+       "invisible": "type == 'binary'"
+      },
+      {
+       "name": "mimetype",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "res_model"
+      },
+      {
+       "name": "res_field"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "res_name"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "public"
+      },
+      {
+       "name": "create_uid",
+       "readonly": "1"
+      },
+      {
+       "name": "create_date",
+       "readonly": "1"
+      },
+      {
+       "name": "description",
+       "nolabel": "1"
+      },
+      {
+       "name": "index_content",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "url": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.view_attachment_tree",
+    "package": "base",
+    "name": null,
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Attachments"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "res_model"
+      },
+      {
+       "name": "res_field"
+      },
+      {
+       "name": "res_id"
+      },
+      {
+       "name": "type"
+      },
+      {
+       "name": "file_size"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "create_uid"
+      },
+      {
+       "name": "create_date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.view_attachment_search",
+    "package": "base",
+    "name": null,
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Attachments"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Attachment",
+       "filter_domain": "[('name','ilike',self)]"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "create_uid",
+       "string": "Created by"
+      },
+      {
+       "name": "type"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_documents_filter",
+       "string": "My Document(s)",
+       "domain": "[('create_uid','=',uid)]",
+       "help": "Filter on my documents"
+      },
+      {
+       "name": "url_filter",
+       "string": "URL",
+       "domain": "[('type', '=', 'url')]"
+      },
+      {
+       "name": "binary_filter",
+       "string": "Stored",
+       "domain": "[('type', '=', 'binary')]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "owner",
+       "string": "Owner",
+       "domain": "[]",
+       "context": "{'group_by':'create_uid'}"
+      },
+      {
+       "name": "type",
+       "string": "Type",
+       "domain": "[]",
+       "context": "{'group_by':'type'}",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by':'company_id'}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "creation_month",
+       "string": "Creation Date",
+       "domain": "[]",
+       "context": "{'group_by':'create_date'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_fleet.view_attachment_kanban_inherit_hr",
+    "package": "hr_fleet",
+    "name": "ir.attachment.kanban.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "mail.view_document_file_kanban",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//kanban",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//kanban",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.ir_attachment_view_search_inherit_hr_recruitment",
+    "package": "hr_recruitment",
+    "name": "ir.attachment.search.inherit.recruitment",
+    "view_type": "xpath",
+    "inherits_view": "base.view_attachment_search",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='create_date']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "index_content",
+       "string": "Content"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='create_date']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.ir_attachment_hr_recruitment_list_view",
+    "package": "hr_recruitment",
+    "name": null,
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name",
+       "column_invisible": "True"
+      },
+      {
+       "name": "res_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "res_model",
+       "column_invisible": "True"
+      },
+      {
+       "name": "datas",
+       "widget": "binary",
+       "string": "File"
+      },
+      {
+       "name": "res_name",
+       "widget": "applicant_char",
+       "invisible": "res_model != 'hr.applicant'",
+       "string": "Applicant"
+      },
+      {
+       "name": "create_date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "binary": 1,
+      "applicant_char": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.view_document_file_kanban",
+    "package": "mail",
+    "name": "ir.attachment kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "edit": "false",
+      "import": "false"
+     },
+     "fields": [
+      {
+       "name": "id"
+      },
+      {
+       "name": "mimetype"
+      },
+      {
+       "name": "type"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "url",
+       "widget": "url"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "url": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "website.view_attachment_form_inherit_website",
+    "package": "website",
+    "name": "ir.attachment.form.inherit.website",
+    "view_type": "field",
+    "inherits_view": "base.view_attachment_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "mimetype",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "mimetype",
+       "position": "after"
+      },
+      {
+       "name": "website_id",
+       "options": "{'no_create': True}",
+       "groups": "website.group_multi_website"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website.view_attachment_tree_inherit_website",
+    "package": "website",
+    "name": "ir.attachment.list.inherit.website",
+    "view_type": "field",
+    "inherits_view": "base.view_attachment_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "website_id",
+       "groups": "website.group_multi_website"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.action_attachment",
+    "package": "base",
+    "name": "Attachments",
+    "view_mode": null,
+    "view_id": "False",
+    "search_view_id": "view_attachment_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Create a new document\n                </p>\n                <p>\n                    Also you will find here all the related documents and download it by clicking on any individual document.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "ir.attachment"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "cloud_storage_migration.ir_cron_manual_migrate_local_to_cloud_storage",
+    "package": "cloud_storage_migration",
+    "name": "Migrate Local Attachment Binaries to Cloud Storage",
+    "interval_number": "9999",
+    "interval_type": "months",
+    "priority": null,
+    "active": null,
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "ir.attachment",
+    "operation": "_cron_migrate_local_to_cloud_storage",
+    "operation_call": "model._cron_migrate_local_to_cloud_storage()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

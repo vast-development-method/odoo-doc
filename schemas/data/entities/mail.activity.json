@@ -1,0 +1,2033 @@
+{
+ "catalog": {
+  "name": "entity:mail.activity",
+  "description": "Complete definition of entity Activity (mail.activity).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.activity",
+  "storage_name": "mail_activity",
+  "full_name": "Activity",
+  "kind": "persistent",
+  "description": "Activity",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "calendar",
+   "crm",
+   "website_slides"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "date_deadline ASC, id ASC",
+  "display_name_field": "summary",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "res_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Document Model",
+    "index": true,
+    "ondelete": "cascade",
+    "required": false,
+    "defined_in_package": "mail",
+    "full_name": "Document Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "res_model",
+    "type": "Char",
+    "string": "Related Document Model",
+    "index": true,
+    "related": "res_model_id.model",
+    "precompute": true,
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Related Document Model"
+   },
+   {
+    "name": "res_id",
+    "type": "Many2oneReference",
+    "string": "Related Document ID",
+    "index": true,
+    "model_field": "res_model",
+    "defined_in_package": "mail",
+    "full_name": "Related Document identifier"
+   },
+   {
+    "name": "res_name",
+    "type": "Char",
+    "string": "Document Name",
+    "compute": "_compute_res_name",
+    "compute_sudo": true,
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Document Name"
+   },
+   {
+    "name": "activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Activity Type",
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', res_model)]",
+    "ondelete": "restrict",
+    "default": {
+     "dynamic": "_default_activity_type"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "activity_category",
+    "type": "Selection",
+    "related": "activity_type_id.category",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "string": "Activity Category",
+    "full_name": "Activity Category"
+   },
+   {
+    "name": "activity_decoration",
+    "type": "Selection",
+    "related": "activity_type_id.decoration_type",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "string": "Activity Decoration",
+    "full_name": "Activity Decoration"
+   },
+   {
+    "name": "icon",
+    "type": "Char",
+    "string": "Icon",
+    "related": "activity_type_id.icon",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Icon"
+   },
+   {
+    "name": "summary",
+    "type": "Char",
+    "string": "Summary",
+    "defined_in_package": "mail",
+    "full_name": "Summary"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Note",
+    "sanitize_style": true,
+    "defined_in_package": "mail",
+    "full_name": "Note"
+   },
+   {
+    "name": "date_deadline",
+    "type": "Date",
+    "string": "Due Date",
+    "index": true,
+    "required": true,
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Due Date"
+   },
+   {
+    "name": "date_done",
+    "type": "Date",
+    "string": "Done Date",
+    "compute": "_compute_date_done",
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Done Date"
+   },
+   {
+    "name": "feedback",
+    "type": "Text",
+    "string": "Feedback",
+    "defined_in_package": "mail",
+    "full_name": "Feedback"
+   },
+   {
+    "name": "automated",
+    "type": "Boolean",
+    "string": "Automated activity",
+    "readonly": true,
+    "help": "Indicates this activity has been created automatically and not by any user.",
+    "defined_in_package": "mail",
+    "full_name": "Automated activity"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "relation": "activity_attachment_rel",
+    "column1": "activity_id",
+    "column2": "attachment_id",
+    "string": "Attachments",
+    "bypass_search_access": true,
+    "defined_in_package": "mail",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Assigned to",
+    "index": true,
+    "required": false,
+    "ondelete": "cascade",
+    "defined_in_package": "mail",
+    "full_name": "Assigned to",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "user_tz",
+    "type": "Selection",
+    "string": "Timezone",
+    "related": "user_id.tz",
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Timezone"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "overdue",
+      "Overdue"
+     ],
+     [
+      "today",
+      "Today"
+     ],
+     [
+      "planned",
+      "Planned"
+     ],
+     [
+      "done",
+      "Done"
+     ]
+    ],
+    "string": "State",
+    "compute": "_compute_state",
+    "defined_in_package": "mail",
+    "full_name": "State"
+   },
+   {
+    "name": "recommended_activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Recommended Activity Type",
+    "defined_in_package": "mail",
+    "full_name": "Recommended Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "previous_activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Previous Activity Type",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "full_name": "Previous Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "has_recommended_activities",
+    "type": "Boolean",
+    "string": "Next activities available",
+    "compute": "_compute_has_recommended_activities",
+    "defined_in_package": "mail",
+    "full_name": "Next activities available"
+   },
+   {
+    "name": "mail_template_ids",
+    "type": "Many2many",
+    "related": "activity_type_id.mail_template_ids",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "string": "Mail Template",
+    "full_name": "Mail Template"
+   },
+   {
+    "name": "chaining_type",
+    "type": "Selection",
+    "related": "activity_type_id.chaining_type",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "string": "Chaining Type",
+    "full_name": "Chaining Type"
+   },
+   {
+    "name": "can_write",
+    "type": "Boolean",
+    "compute": "_compute_can_write",
+    "defined_in_package": "mail",
+    "string": "Can Write",
+    "full_name": "Can Write"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "mail",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "calendar_event_id",
+    "type": "Many2one",
+    "comodel": "calendar.event",
+    "string": "Calendar Meeting",
+    "index": "btree_not_null",
+    "ondelete": "cascade",
+    "defined_in_package": "calendar",
+    "full_name": "Calendar Meeting",
+    "target_entity": "calendar.event"
+   },
+   {
+    "name": "request_partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Requesting Partner",
+    "ondelete": "cascade",
+    "defined_in_package": "website_slides",
+    "full_name": "Requesting Partner",
+    "target_entity": "res.partner"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_res_id_is_set_if_model",
+    "kind": "Constraint",
+    "definition": "CHECK(\n            (COALESCE(res_model, '') <> '' AND (res_id IS NOT NULL AND res_id != 0)) OR\n            (COALESCE(res_model, '') = '' AND (res_id IS NULL OR res_id = 0))\n        )",
+    "message": "Activities have to be linked to records with a not null res_id.",
+    "defined_in_package": "mail"
+   },
+   {
+    "name": "_check_user_id_is_set_if_model",
+    "kind": "Constraint",
+    "definition": "CHECK(\n            (COALESCE(res_model, '') <> '' OR user_id IS NOT NULL)\n        )",
+    "message": "Activities must be assigned if not attached to a document.",
+    "defined_in_package": "mail"
+   }
+  ],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_activity_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_activity_type_for_model",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "model"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Take first one found, ordered by sequence. Keep it simple. ",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_recommended_activities",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "previous_activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_previous_activity_type_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "previous_activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_done",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "active"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_res_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model",
+         "res_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "active",
+         "date_deadline"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_state_from_date",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "date_deadline",
+     "tz"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_write",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model",
+         "res_id",
+         "user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_activity_type_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_recommended_activity_type_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "recommended_activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_access",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Determine the subset of ``self`` for which ``operation`` is allowed.\nA custom implementation is done on activities as this document has some\naccess rules and is based on related document for activities that are\nnot covered by those rules.\n\nAccess on activities are the following :\n\n  * read: access rule AND (assigned to user OR read rights on related documents);\n  * write: access rule OR (``mail_post_access`` or write) rights on related documents);\n  * create: access rule AND (``mail_post_access`` or write) right on related documents;\n  * unlink: access rule OR (``mail_post_access`` or write) rights on related documents);",
+      "size_in_lines": 59,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_make_access_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "operation"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 43,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "offset",
+     "limit",
+     "order",
+     "bypass_access",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override that adds specific access rights of mail.activity, to remove\nids uid could not see according to our custom rules. Please refer to\n:meth:`_check_access` for more details about those rules.\n\nThe method is inspired by what has been done on mail.message. ",
+      "size_in_lines": 39,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "summary",
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_notify",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Wrapper without feedback because web button add context as\nparameter, therefore setting context to feedback ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_done_redirect_to_other",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Mark activity as done and return action mail.mail_activity_without_access_action.\n\nGoal: Unless \"keep done\" activity is enabled, when marking an activity as done,\nthe activity is deleted and can no more be displayed. To overcome this, we return\nan action that will launch the list view displaying the activities corresponding\nto the active_ids from the context (i.e.: the remaining \"other activities\"). If the\nright context is not available, we recompute the activities to display.",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_feedback",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "feedback",
+     "attachment_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_done_schedule_next",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Wrapper without feedback because web button add context as\nparameter, therefore setting context to feedback ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_feedback_schedule_next",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "feedback",
+     "attachment_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_done",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "feedback",
+     "attachment_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Private implementation of marking activity as done: posting a message, archiving activity\n(since done), and eventually create the automatical next activity (depending on config).\n:param feedback: optional feedback from user when marking activity as done\n:param attachment_ids: list of ir.attachment ids to attach to the posted mail.message\n:returns (messages, activities) where\n    - messages is a recordset of posted mail.message\n    - activities is a recordset of mail.activity of forced automically created activities",
+      "size_in_lines": 85,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_close_dialog",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_document",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Opens the related record based on the model and ID, or activity if user has no\naccess to the related record.",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reschedule_today",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reschedule_tomorrow",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reschedule_nextweek",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_format",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_to_store_defaults",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_activity_data",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "res_model",
+     "domain",
+     "limit",
+     "offset",
+     "fetch_done"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get aggregate data about records and their activities.\n\nThe goal is to fetch and compute aggregated data about records and their\nactivities to display them in the activity views and the chatter. For example,\nthe activity view displays it as a table with columns and rows being respectively\nthe activity_types and the activity_res_ids, and the grouped_activities being the\ntable entries with the aggregated data.\n\n:param str res_model: model of the records to fetch\n:param list domain: record search domain\n:param int limit: maximum number of records to fetch\n:param int offset: offset of the first record to fetch\n:param bool fetch_done: determines if \"done\" activities are integrated in the\n    aggregated data or not.\n:returns: {'activity_types': dict of activity type info\n                    {id: int, name: str, mail_template: list of {id:int, name:str}}\n               'activity_res_ids': list<int> of record id ordered by closest date\n                    (deadline for ongoing activities, and done date for done activities)\n               'grouped_activities': dict<dict>\n                    res_id -> activity_type_id -> aggregated info as:\n                        count_by_state dict: mapping state to count (ex.: 'planned': 2)\n                        ids list: activity ids for the res_id and activity_type_id\n                        reporting_date str: aggregated date of the related activities as\n                            oldest deadline of ongoing activities if there are any\n                            or most recent date done of completed activities\n                        state dict: aggregated state of the related activities\n                        user_assigned_ids list: activity responsible id ordered\n                            by closest deadline of the related activities\n                        attachments_info: dict with information about the attachments\n                            {'count': int, 'most_recent_id': int, 'most_recent_name': str}\n               }\n:rtype: dict",
+      "size_in_lines": 134,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_classify_by_model",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "To ease batch computation of various activities related methods they\nare classified by model. Activities not linked to a valid record through\nres_model / res_id are ignored.\n\n:returns: for each model having at least one activity in self, have\n  a sub-dict containing\n    * activities: activities related to that model;\n    * record IDs: record linked to the activities of that model, in same\n      order;\n:rtype: dict",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_next_activity_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Prepare the next activity values based on the current activity record and applies _onchange methods\n:returns a dict of values for the new activity",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_delete_old_overdue_activities",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Delete old overdue activities\n- If the config_parameter is deleted or 0, the user doesn't want to run this gc routine\n- If the config_parameter is set to a negative number, it's an invalid value, we skip the gc routine\n- If the config_parameter is set to a positive number, we delete only overdue activities which deadline is older than X years",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_calendar_event",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "crm",
+      "decorators": [],
+      "documentation": "Small override of the action that creates a calendar.\n\nIf the activity is linked to a crm.lead through the \"opportunity_id\" field, we include in\nthe action context the default values used when scheduling a meeting from the crm.lead form\nview.\ne.g: It will set the partner_id of the crm.lead as default attendee of the meeting. ",
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink_w_meeting",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_activity_user",
+    "package": "mail",
+    "name": "mail.activity.user",
+    "entity": "mail.activity",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mail.mail_activity_rule_user",
+    "package": "mail",
+    "name": "mail.activity: user: write/unlink only (created or assigned)",
+    "entity": "mail.activity",
+    "domain": "['|', ('user_id', '=', user.id), ('create_uid', '=', user.id)]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "False",
+    "applies_to_write": "True",
+    "applies_to_create": "False",
+    "applies_to_delete": "True"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "calendar.mail_activity_view_form_popup",
+    "package": "calendar",
+    "name": "mail.activity.form.inherit.calendar",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_view_form_popup",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='date_deadline']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='date_deadline']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_form_popup",
+    "package": "mail",
+    "name": "mail.activity.view.form.popup",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Log an Activity",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "activity_category",
+       "invisible": "1"
+      },
+      {
+       "name": "res_model",
+       "invisible": "1"
+      },
+      {
+       "name": "res_model_id",
+       "invisible": "1"
+      },
+      {
+       "name": "res_id",
+       "invisible": "1"
+      },
+      {
+       "name": "chaining_type",
+       "invisible": "1"
+      },
+      {
+       "name": "previous_activity_type_id"
+      },
+      {
+       "name": "has_recommended_activities"
+      },
+      {
+       "name": "recommended_activity_type_id",
+       "widget": "selection_badge",
+       "string": "Recommended Activities",
+       "domain": "[('previous_type_ids', '=', previous_activity_type_id)]"
+      },
+      {
+       "name": "activity_type_id",
+       "widget": "selection_badge_icons",
+       "required": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "summary",
+       "placeholder": "e.g. Discuss Proposal"
+      },
+      {
+       "name": "date_deadline"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "note",
+       "options": "{'embedded_components': false}",
+       "placeholder": "Log a note..."
+      },
+      {
+       "name": "id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_document",
+       "type": "object",
+       "invisible": "not res_model or res_id == 0",
+       "class": "oe_link",
+       "icon": "fa-file-text-o"
+      },
+      {
+       "name": "action_close_dialog",
+       "string": "Schedule",
+       "type": "object",
+       "invisible": "id",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_close_dialog",
+       "string": "Save",
+       "type": "object",
+       "invisible": "not id",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_done",
+       "string": "Mark Done",
+       "type": "object",
+       "invisible": "chaining_type == 'trigger'",
+       "class": "btn-secondary",
+       "context": "{'mail_activity_quick_update': True}",
+       "data-hotkey": "w"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "selection_badge": 1,
+      "selection_badge_icons": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "action_open_document",
+       "type": "object",
+       "class": "oe_link",
+       "icon": "fa-file-text-o",
+       "invisible": "not res_model or res_id == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_form",
+    "package": "mail",
+    "name": "mail.activity.view.form",
+    "view_type": "field",
+    "inherits_view": "mail.mail_activity_view_form_popup",
+    "mode": "primary",
+    "priority": "21",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "activity_type_id",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "activity_type_id",
+       "position": "before"
+      },
+      {
+       "name": "res_name",
+       "readonly": "1",
+       "string": "Document"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_form_without_record_access",
+    "package": "mail",
+    "name": "mail.activity.view.form.without.record.access",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Log an Activity",
+      "create": "false",
+      "delete": "false"
+     },
+     "fields": [
+      {
+       "name": "display_name",
+       "invisible": "1"
+      },
+      {
+       "name": "activity_type_id",
+       "widget": "selection_badge_icons",
+       "required": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "summary",
+       "placeholder": "e.g. Discuss proposal"
+      },
+      {
+       "name": "date_deadline"
+      },
+      {
+       "name": "note",
+       "options": "{'embedded_components': false}",
+       "placeholder": "Log a note..."
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_done_redirect_to_other",
+       "string": "Mark Done",
+       "type": "object",
+       "class": "btn-primary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "selection_badge_icons": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Mark Done",
+       "class": "btn-primary",
+       "name": "action_done_redirect_to_other",
+       "type": "object"
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_search",
+    "package": "mail",
+    "name": "mail.activity.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Activity"
+     },
+     "fields": [
+      {
+       "name": "res_name",
+       "string": "Name",
+       "filter_domain": "[                     '|',                         ('res_name', 'ilike', self),                         ('summary', 'ilike', self),                 ]"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "activity_type_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_user_id_uid",
+       "string": "My Activities",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "filter_user_id_no_user",
+       "string": "Unassigned Activities",
+       "domain": "[('user_id', '=', False)]"
+      },
+      {
+       "name": "filter_date_deadline_past",
+       "string": "Overdue",
+       "domain": "[('date_deadline', '<', 'today')]",
+       "help": "Show all records whose next activity date is past"
+      },
+      {
+       "name": "filter_date_deadline_today",
+       "string": "Today",
+       "domain": "[('date_deadline', '=', 'today')]"
+      },
+      {
+       "name": "filter_date_deadline_tomorrow",
+       "string": "Tomorrow",
+       "domain": "[('date_deadline', '=', 'today +1d')]",
+       "help": "Show all records whose next action date is tomorrow"
+      },
+      {
+       "name": "filter_date_deadline_week",
+       "string": "This week",
+       "domain": "[                             ('date_deadline', '>=', '=week_start'),                             ('date_deadline', '<', '=week_start +1w')                         ]",
+       "help": "Show all records whose next action date is this week"
+      },
+      {
+       "name": "filter_date_deadline_future",
+       "string": "Future",
+       "domain": "[('date_deadline', '>', 'today')                         ]"
+      },
+      {
+       "name": "filter_archived",
+       "string": "Done",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "date_deadline",
+       "string": "Deadline",
+       "context": "{'group_by': 'date_deadline'}"
+      },
+      {
+       "name": "group_by_res_model_id",
+       "string": "Document Model",
+       "context": "{'group_by': 'res_model_id'}"
+      },
+      {
+       "name": "group_by_user_id",
+       "string": "Assigned To",
+       "context": "{'group_by': 'user_id'}"
+      },
+      {
+       "name": "createdby",
+       "string": "Created By",
+       "context": "{'group_by': 'create_uid'}"
+      },
+      {
+       "name": "activittype",
+       "string": "Activity Type",
+       "context": "{'group_by': 'activity_type_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_tree",
+    "package": "mail",
+    "name": "mail.activity.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Next Activities",
+      "default_order": "date_deadline",
+      "create": "true"
+     },
+     "fields": [
+      {
+       "name": "summary",
+       "string": "Summary"
+      },
+      {
+       "name": "activity_type_id"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "res_name",
+       "string": "Linked to"
+      },
+      {
+       "name": "date_deadline",
+       "widget": "remaining_days"
+      },
+      {
+       "name": "date_done",
+       "string": "Done Date",
+       "optional": "hide"
+      },
+      {
+       "name": "feedback",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_done",
+       "string": "Done",
+       "type": "object",
+       "icon": "fa-check"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "icon": "fa-times"
+      },
+      {
+       "name": "action_reschedule_today",
+       "string": "Today",
+       "type": "object",
+       "icon": "fa-arrow-down"
+      },
+      {
+       "name": "action_reschedule_tomorrow",
+       "string": "Tomorrow",
+       "type": "object",
+       "icon": "fa-calendar-plus-o"
+      },
+      {
+       "name": "action_reschedule_nextweek",
+       "string": "Next Week",
+       "type": "object",
+       "icon": "fa-calendar-o"
+      },
+      {
+       "name": "action_done",
+       "string": "Done",
+       "type": "object",
+       "invisible": "active == False",
+       "icon": "fa-check"
+      },
+      {
+       "name": "unlink",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "active == False",
+       "class": "text-danger",
+       "icon": "fa-times"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "remaining_days": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "true",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_tree_without_record_access",
+    "package": "mail",
+    "name": "mail.activity.view.list.without.record.access",
+    "view_type": "xpath",
+    "inherits_view": "mail_activity_view_tree",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_tree_open_target",
+    "package": "mail",
+    "name": "mail.activity.view.list.open.target",
+    "view_type": "xpath",
+    "inherits_view": "mail_activity_view_tree",
+    "mode": "primary",
+    "priority": "32",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_kanban_open_target",
+    "package": "mail",
+    "name": "mail.activity.view.kanban.open.target",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "string": "Activity",
+      "action": "action_open_document",
+      "type": "object",
+      "js_class": "mail_activity_my_kanban"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "icon",
+       "invisible": "1"
+      },
+      {
+       "name": "res_name"
+      },
+      {
+       "name": "res_model_id"
+      },
+      {
+       "name": "summary",
+       "invisible": "res_name"
+      },
+      {
+       "name": "activity_type_id"
+      },
+      {
+       "name": "summary",
+       "invisible": "not res_name"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "date_deadline",
+       "widget": "remaining_days"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_done",
+       "type": "object",
+       "invisible": "active == False",
+       "class": "btn btn-link btn-sm ms-auto me-1"
+      },
+      {
+       "name": "unlink",
+       "type": "object",
+       "class": "btn btn-link text-danger btn-sm"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "remaining_days": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_view_calendar",
+    "package": "mail",
+    "name": "mail.activity.view.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "string": "Activity",
+      "date_start": "date_deadline",
+      "color": "activity_type_id",
+      "js_class": "activity_calendar",
+      "create": "0",
+      "mode": "month"
+     },
+     "fields": [
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "res_name",
+       "string": "Name"
+      },
+      {
+       "name": "date_deadline"
+      },
+      {
+       "name": "summary"
+      },
+      {
+       "name": "activity_type_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date_deadline",
+      "date_stop": null,
+      "date_delay": null,
+      "color": "activity_type_id",
+      "mode": "month",
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "website_slides.mail_activity_view_form",
+    "package": "website_slides",
+    "name": "mail.activity.view.form.inherit.slides",
+    "view_type": "field",
+    "inherits_view": "mail.mail_activity_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "summary",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "summary",
+       "position": "after"
+      },
+      {
+       "name": "request_partner_id",
+       "invisible": "res_model != 'slide.channel'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.mail_activity_action",
+    "package": "mail",
+    "name": "Activity Overview",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'force_search_count': 1,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.activity"
+   },
+   {
+    "external_identifier": "mail.mail_activity_without_access_action",
+    "package": "mail",
+    "name": "Other activities",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "mail.mail_activity_view_search",
+    "domain": "['|', ('id', 'in', context.get('active_ids')), '&', ('res_model', '=', False), ('user_id', '=', uid)]",
+    "context": null,
+    "target": "main",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No activities.\n            </p>\n        </field>\n        ",
+    "usage": null,
+    "entity": "mail.activity"
+   },
+   {
+    "external_identifier": "mail.mail_activity_action_my",
+    "package": "mail",
+    "name": "My Activities",
+    "view_mode": "list,kanban,calendar",
+    "view_id": null,
+    "search_view_id": "mail.mail_activity_view_search",
+    "domain": null,
+    "context": "{\n            'force_search_count': 1,\n            'search_default_filter_user_id_uid': 1,\n            'search_default_filter_date_deadline_past': 1,\n            'search_default_filter_date_deadline_today': 1,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.activity"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

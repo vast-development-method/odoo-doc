@@ -1,0 +1,1708 @@
+{
+ "catalog": {
+  "name": "entity:pos.order.line",
+  "description": "Complete definition of entity Point of Sale Order Lines (pos.order.line).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "pos.order.line",
+  "storage_name": "pos_order_line",
+  "full_name": "Point of Sale Order Lines",
+  "kind": "persistent",
+  "description": "Point of Sale Order Lines",
+  "defined_by_package": "point_of_sale",
+  "extended_by_packages": [
+   "pos_restaurant",
+   "pos_sale",
+   "l10n_fr_pos_cert",
+   "l10n_in_pos",
+   "pos_event",
+   "pos_loyalty",
+   "pos_mrp",
+   "pos_self_order"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "product_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "related": "order_id.company_id",
+    "store": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Line No",
+    "required": true,
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Line No"
+   },
+   {
+    "name": "notice",
+    "type": "Char",
+    "string": "Discount Notice",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Discount Notice"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "domain": [
+     [
+      "sale_ok",
+      "=",
+      true
+     ]
+    ],
+    "required": true,
+    "change_default": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "attribute_value_ids",
+    "type": "Many2many",
+    "comodel": "product.template.attribute.value",
+    "string": "Selected Attributes",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Selected Attributes",
+    "target_entity": "product.template.attribute.value"
+   },
+   {
+    "name": "custom_attribute_value_ids",
+    "type": "One2many",
+    "comodel": "product.attribute.custom.value",
+    "inverse_name": "pos_order_line_id",
+    "string": "Custom Values",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Custom Values",
+    "target_entity": "product.attribute.custom.value"
+   },
+   {
+    "name": "price_unit",
+    "type": "Float",
+    "string": "Unit Price",
+    "digits": 0,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Unit Price"
+   },
+   {
+    "name": "qty",
+    "type": "Float",
+    "string": "Quantity",
+    "digits": "Product Unit",
+    "default": 1,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "price_subtotal",
+    "type": "Monetary",
+    "string": "Tax Excl.",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Tax Excl."
+   },
+   {
+    "name": "price_subtotal_incl",
+    "type": "Monetary",
+    "string": "Tax Incl.",
+    "readonly": true,
+    "required": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Tax Incl."
+   },
+   {
+    "name": "price_extra",
+    "type": "Float",
+    "string": "Price extra",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Price extra"
+   },
+   {
+    "name": "price_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "original",
+      "Original"
+     ],
+     [
+      "manual",
+      "Manual"
+     ],
+     [
+      "automatic",
+      "Automatic"
+     ]
+    ],
+    "string": "Price Type",
+    "default": "original",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Price Type"
+   },
+   {
+    "name": "margin",
+    "type": "Monetary",
+    "string": "Margin",
+    "compute": "_compute_margin",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Margin"
+   },
+   {
+    "name": "margin_percent",
+    "type": "Float",
+    "string": "Margin (%)",
+    "compute": "_compute_margin",
+    "digits": [
+     12,
+     4
+    ],
+    "defined_in_package": "point_of_sale",
+    "full_name": "Margin (%)"
+   },
+   {
+    "name": "total_cost",
+    "type": "Float",
+    "string": "Total cost",
+    "min_display_digits": "Product Price",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Total cost"
+   },
+   {
+    "name": "is_total_cost_computed",
+    "type": "Boolean",
+    "help": "Allows to know if the total cost has already been computed or not",
+    "defined_in_package": "point_of_sale",
+    "string": "Is Total Cost Computed",
+    "full_name": "Is Total Cost Computed"
+   },
+   {
+    "name": "discount",
+    "type": "Float",
+    "string": "Discount (%)",
+    "digits": 0,
+    "default": 0.0,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Discount (%)"
+   },
+   {
+    "name": "order_id",
+    "type": "Many2one",
+    "comodel": "pos.order",
+    "string": "Order Ref",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Order Ref",
+    "target_entity": "pos.order"
+   },
+   {
+    "name": "tax_ids",
+    "type": "Many2many",
+    "comodel": "account.tax",
+    "relation": "account_tax_pos_order_line_rel",
+    "column1": "pos_order_line_id",
+    "column2": "account_tax_id",
+    "string": "Taxes",
+    "readonly": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Taxes",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "tax_ids_after_fiscal_position",
+    "type": "Many2many",
+    "comodel": "account.tax",
+    "compute": "_get_tax_ids_after_fiscal_position",
+    "string": "Taxes to Apply",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Taxes to Apply",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "pack_lot_ids",
+    "type": "One2many",
+    "comodel": "pos.pack.operation.lot",
+    "inverse_name": "pos_order_line_id",
+    "string": "Lot/serial Number",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Lot/serial Number",
+    "target_entity": "pos.pack.operation.lot"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Product Unit",
+    "related": "product_id.uom_id",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Product Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "order_id.currency_id",
+    "defined_in_package": "point_of_sale",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "full_product_name",
+    "type": "Char",
+    "string": "Full Product Name",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Full Product Name"
+   },
+   {
+    "name": "customer_note",
+    "type": "Char",
+    "string": "Customer Note",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Customer Note"
+   },
+   {
+    "name": "refund_orderline_ids",
+    "type": "One2many",
+    "comodel": "pos.order.line",
+    "inverse_name": "refunded_orderline_id",
+    "string": "Refund Order Lines",
+    "help": "Orderlines in this field are the lines that refunded this orderline.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Refund Order Lines",
+    "target_entity": "pos.order.line"
+   },
+   {
+    "name": "refunded_orderline_id",
+    "type": "Many2one",
+    "comodel": "pos.order.line",
+    "string": "Refunded Order Line",
+    "index": "btree_not_null",
+    "help": "If this orderline is a refund, then the refunded orderline is specified in this field.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Refunded Order Line",
+    "target_entity": "pos.order.line"
+   },
+   {
+    "name": "refunded_qty",
+    "type": "Float",
+    "string": "Refunded Quantity",
+    "compute": "_compute_refund_qty",
+    "help": "Number of items refunded in this orderline.",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Refunded Quantity"
+   },
+   {
+    "name": "uuid",
+    "type": "Char",
+    "string": "Uuid",
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: str(uuid4())"
+    },
+    "copy": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Uuid"
+   },
+   {
+    "name": "note",
+    "type": "Char",
+    "string": "Product Note",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Product Note"
+   },
+   {
+    "name": "combo_parent_id",
+    "type": "Many2one",
+    "comodel": "pos.order.line",
+    "string": "Combo Parent",
+    "index": "btree_not_null",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Combo Parent",
+    "target_entity": "pos.order.line"
+   },
+   {
+    "name": "combo_line_ids",
+    "type": "One2many",
+    "comodel": "pos.order.line",
+    "inverse_name": "combo_parent_id",
+    "string": "Combo Lines",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Combo Lines",
+    "target_entity": "pos.order.line"
+   },
+   {
+    "name": "combo_item_id",
+    "type": "Many2one",
+    "comodel": "product.combo.item",
+    "string": "Combo Item",
+    "defined_in_package": "point_of_sale",
+    "full_name": "Combo Item",
+    "target_entity": "product.combo.item"
+   },
+   {
+    "name": "is_edited",
+    "type": "Boolean",
+    "string": "Edited",
+    "default": false,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Edited"
+   },
+   {
+    "name": "extra_tax_data",
+    "type": "Json",
+    "defined_in_package": "point_of_sale",
+    "string": "Extra Tax Data",
+    "full_name": "Extra Tax Data"
+   },
+   {
+    "name": "course_id",
+    "type": "Many2one",
+    "comodel": "restaurant.order.course",
+    "string": "Course Ref",
+    "ondelete": "set null",
+    "index": "btree_not_null",
+    "defined_in_package": "pos_restaurant",
+    "full_name": "Course Ref",
+    "target_entity": "restaurant.order.course"
+   },
+   {
+    "name": "sale_order_origin_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "string": "Linked Sale Order",
+    "index": "btree_not_null",
+    "defined_in_package": "pos_sale",
+    "full_name": "Linked Sale Order",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "sale_order_line_id",
+    "type": "Many2one",
+    "comodel": "sale.order.line",
+    "string": "Source Sale Order Line",
+    "index": "btree_not_null",
+    "defined_in_package": "pos_sale",
+    "full_name": "Source Sale Order Line",
+    "target_entity": "sale.order.line"
+   },
+   {
+    "name": "down_payment_details",
+    "type": "Text",
+    "string": "Down Payment Details",
+    "defined_in_package": "pos_sale",
+    "full_name": "Down Payment Details"
+   },
+   {
+    "name": "qty_delivered",
+    "type": "Float",
+    "string": "Delivery Quantity",
+    "compute": "_compute_qty_delivered",
+    "store": true,
+    "readonly": false,
+    "copy": false,
+    "defined_in_package": "pos_sale",
+    "full_name": "Delivery Quantity"
+   },
+   {
+    "name": "l10n_in_hsn_code",
+    "type": "Char",
+    "string": "HSN/SAC Code",
+    "compute": "_compute_l10n_in_hsn_code",
+    "store": true,
+    "readonly": false,
+    "copy": false,
+    "defined_in_package": "l10n_in_pos",
+    "full_name": "harmonized system nomenclature/SAC Code"
+   },
+   {
+    "name": "event_ticket_id",
+    "type": "Many2one",
+    "comodel": "event.event.ticket",
+    "string": "Event Ticket",
+    "defined_in_package": "pos_event",
+    "full_name": "Event Ticket",
+    "target_entity": "event.event.ticket"
+   },
+   {
+    "name": "event_registration_ids",
+    "type": "One2many",
+    "comodel": "event.registration",
+    "inverse_name": "pos_order_line_id",
+    "string": "Event Registrations",
+    "defined_in_package": "pos_event",
+    "full_name": "Event Registrations",
+    "target_entity": "event.registration"
+   },
+   {
+    "name": "is_reward_line",
+    "type": "Boolean",
+    "help": "Whether this line is part of a reward or not.",
+    "defined_in_package": "pos_loyalty",
+    "string": "Is Reward Line",
+    "full_name": "Is Reward Line"
+   },
+   {
+    "name": "reward_id",
+    "type": "Many2one",
+    "comodel": "loyalty.reward",
+    "string": "Reward",
+    "ondelete": "restrict",
+    "help": "The reward associated with this line.",
+    "index": "btree_not_null",
+    "defined_in_package": "pos_loyalty",
+    "full_name": "Reward",
+    "target_entity": "loyalty.reward"
+   },
+   {
+    "name": "coupon_id",
+    "type": "Many2one",
+    "comodel": "loyalty.card",
+    "string": "Coupon",
+    "ondelete": "restrict",
+    "help": "The coupon used to claim that reward.",
+    "index": "btree_not_null",
+    "defined_in_package": "pos_loyalty",
+    "full_name": "Coupon",
+    "target_entity": "loyalty.card"
+   },
+   {
+    "name": "reward_identifier_code",
+    "type": "Char",
+    "help": "\n        Technical field used to link multiple reward lines from the same reward together.\n    ",
+    "defined_in_package": "pos_loyalty",
+    "string": "Reward Identifier Code",
+    "full_name": "Reward Identifier Code"
+   },
+   {
+    "name": "points_cost",
+    "type": "Float",
+    "help": "How many point this reward cost on the coupon.",
+    "defined_in_package": "pos_loyalty",
+    "string": "Points Cost",
+    "full_name": "Points Cost"
+   },
+   {
+    "name": "combo_id",
+    "type": "Many2one",
+    "comodel": "product.combo",
+    "string": "Combo reference",
+    "defined_in_package": "pos_self_order",
+    "full_name": "Combo reference",
+    "target_entity": "product.combo"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_uuid",
+    "kind": "Constraint",
+    "definition": "unique (uuid)",
+    "message": "An order line with this uuid already exists",
+    "defined_in_package": "point_of_sale"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_restaurant",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_in_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_event",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_field_accepted",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_refund_qty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "refund_orderline_ids",
+         "refund_orderline_ids.order_id.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_refund_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "refund_order",
+     "PosPackOperationLot"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "This prepares data for refund order line. Inheritance may inject more data here\n\n@param refund_order: the pre-created refund order\n@type refund_order: pos.order\n\n@param PosPackOperationLot: the pre-created Pack operation Lot\n@type PosPackOperationLot: pos.pack.operation.lot\n\n@return: dictionary of data which is for creating a refund order line from the original line\n@rtype: dict",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_fr_pos_cert",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "According to the French law, you cannot modify a point of sale order line. Forbidden fields: %s.",
+        "line": 233
+       }
+      ]
+     },
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_existing_lots",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "company_id",
+     "config_id",
+     "product_id"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the lots that are still available in the given company.\nThe lot is available if its quantity in the corresponding stock_quant and pos stock location is > 0.",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "No PoS configuration found",
+        "line": 1757
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_order_state",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only unlink PoS order lines that are related to orders in new or cancelled state.",
+        "line": 1791
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_amount_line_all",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "price_unit",
+         "tax_ids",
+         "qty",
+         "discount",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount_line_all",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_qty",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "qty",
+         "discount",
+         "price_unit",
+         "tax_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot refund more than the outstanding quantity for this product.",
+        "line": 1831
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_tax_ids_after_fiscal_position",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_id",
+         "order_id.fiscal_position_id",
+         "tax_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_reference_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_procurement_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Prepare specific key for moves or other components that will be created from a stock rule\ncoming from a sale order line. This method could be override in order to add other custom key that could\nbe used in move/po creation.",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_launch_stock_rule_from_pos_order_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_product_storable_fifo_avco",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_product_cost_with_moves",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "moves"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total_cost",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "stock_moves"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Compute the total cost of the order lines.\n:param stock_moves: recordset of `stock.move`, used for fifo/avco lines",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_stock_moves_to_consider",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "stock_moves",
+     "product"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_margin",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "price_subtotal",
+         "total_cost"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_base_line_for_taxes_computation",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 46,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please define income account for this product: '%(product)s' (id:%(id)d).",
+        "line": 1980
+       }
+      ]
+     },
+     {
+      "package": "l10n_in_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_tax_base_line_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": "Convert pos order lines into dictionaries that would be used to compute taxes later.\n\n:return: A list of python dictionaries (see '_prepare_base_line_for_taxes_computation' in account.tax).",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_discount_amount",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_discount_amount_for_report",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_has_discount",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "isRefund",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "pos_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_delivered",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "pos_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_id.state",
+         "order_id.picking_ids",
+         "order_id.picking_ids.state",
+         "order_id.picking_ids.move_ids.quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_in_hsn_code",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "get_existing_lots",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "No PoS configuration found"
+   },
+   {
+    "operation": "_unlink_except_order_state",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You can only unlink PoS order lines that are related to orders in new or cancelled state."
+   },
+   {
+    "operation": "_onchange_qty",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You cannot refund more than the outstanding quantity for this product."
+   },
+   {
+    "operation": "_prepare_base_line_for_taxes_computation",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "Please define income account for this product: '%(product)s' (id:%(id)d)."
+   },
+   {
+    "operation": "write",
+    "package": "l10n_fr_pos_cert",
+    "kind": "UserError",
+    "message": "According to the French law, you cannot modify a point of sale order line. Forbidden fields: %s."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_pos_order_line",
+    "package": "point_of_sale",
+    "name": "pos.order.line",
+    "entity": "pos.order.line",
+    "group": "group_pos_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "point_of_sale.rule_pos_order_line_multi_company",
+    "package": "point_of_sale",
+    "name": "Point Of Sale Order Line",
+    "entity": "pos.order.line",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "point_of_sale.view_pos_order_line",
+    "package": "point_of_sale",
+    "name": "pos.order.line.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "POS Order lines"
+     },
+     "fields": [
+      {
+       "name": "product_id",
+       "readonly": "1"
+      },
+      {
+       "name": "qty",
+       "readonly": "1",
+       "sum": "Total qty"
+      },
+      {
+       "name": "discount",
+       "readonly": "1"
+      },
+      {
+       "name": "price_unit",
+       "widget": "monetary",
+       "readonly": "1"
+      },
+      {
+       "name": "price_subtotal",
+       "widget": "monetary",
+       "readonly": "1",
+       "sum": "Sum of subtotals"
+      },
+      {
+       "name": "price_subtotal_incl",
+       "widget": "monetary",
+       "readonly": "1",
+       "sum": "Sum of subtotals"
+      },
+      {
+       "name": "create_date",
+       "readonly": "1"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 3
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_order_line_form",
+    "package": "point_of_sale",
+    "name": "pos.order.line.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "POS Order line"
+     },
+     "fields": [
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "qty"
+      },
+      {
+       "name": "discount"
+      },
+      {
+       "name": "price_unit",
+       "widget": "monetary"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "currency_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.view_pos_order_tree_all_sales_lines",
+    "package": "point_of_sale",
+    "name": "pos.order.line.all.sales.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "POS Orders lines"
+     },
+     "fields": [
+      {
+       "name": "order_id"
+      },
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "qty"
+      },
+      {
+       "name": "price_unit",
+       "widget": "monetary"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "point_of_sale.action_pos_order_line",
+    "package": "point_of_sale",
+    "name": "Sale line",
+    "view_mode": "list",
+    "view_id": "view_pos_order_line",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "pos.order.line"
+   },
+   {
+    "external_identifier": "point_of_sale.action_pos_order_line_form",
+    "package": "point_of_sale",
+    "name": "Sale line",
+    "view_mode": "form,list",
+    "view_id": "view_pos_order_line_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "pos.order.line"
+   },
+   {
+    "external_identifier": "point_of_sale.action_pos_order_line_day",
+    "package": "point_of_sale",
+    "name": "Sale line",
+    "view_mode": "list",
+    "view_id": "view_pos_order_line",
+    "search_view_id": null,
+    "domain": "[('create_date', '>=', 'today'), ('create_date', '<', 'today +1d')]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "pos.order.line"
+   },
+   {
+    "external_identifier": "point_of_sale.action_pos_all_sales_lines",
+    "package": "point_of_sale",
+    "name": "All sales lines",
+    "view_mode": null,
+    "view_id": "view_pos_order_tree_all_sales_lines",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "pos.order.line"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

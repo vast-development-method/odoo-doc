@@ -1,0 +1,183 @@
+{
+ "catalog": {
+  "name": "entity:res.users.deletion",
+  "description": "Complete definition of entity Users Deletion Request (res.users.deletion).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "res.users.deletion",
+  "storage_name": "res_users_deletion",
+  "full_name": "Users Deletion Request",
+  "kind": "persistent",
+  "description": "Users Deletion Request",
+  "defined_by_package": "base",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "user_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "ondelete": "set null",
+    "defined_in_package": "base",
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "user_id_int",
+    "type": "Integer",
+    "string": "User Id",
+    "compute": "_compute_user_id_int",
+    "store": true,
+    "defined_in_package": "base",
+    "full_name": "User Id"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "todo",
+      "To Do"
+     ],
+     [
+      "done",
+      "Done"
+     ],
+     [
+      "fail",
+      "Failed"
+     ]
+    ],
+    "string": "State",
+    "required": true,
+    "default": "todo",
+    "defined_in_package": "base",
+    "full_name": "State"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_user_id_int",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_portal_users",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "batch_size"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Remove the portal users that asked to deactivate their account.\n\n(see <res.users>::_deactivate_portal_user)\n\nRemoving a user can be an heavy operation on large database (because of\ncreate_uid, write_uid on each models, which are not always indexed). Because of\nthat, this operation is done in a CRON.",
+      "size_in_lines": 64,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_res_users_deletion_all",
+    "package": "base",
+    "name": "res_users_deletion all",
+    "entity": "res.users.deletion",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "base.access_res_users_deletion_group_erp_manager",
+    "package": "base",
+    "name": "res_users_deletion group_erp_manager",
+    "entity": "res.users.deletion",
+    "group": "group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "base.ir_cron_res_users_deletion",
+    "package": "base",
+    "name": "Base: Portal Users Deletion",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": "8",
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "res.users.deletion",
+    "operation": "_gc_portal_users",
+    "operation_call": "model._gc_portal_users(batch_size=50)"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,652 @@
+{
+ "catalog": {
+  "name": "entity:nemhandel.registration",
+  "description": "Complete definition of entity Nemhandel Registration (nemhandel.registration).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "nemhandel.registration",
+  "storage_name": "nemhandel_registration",
+  "full_name": "Nemhandel Registration",
+  "kind": "transient",
+  "description": "Nemhandel Registration",
+  "defined_by_package": "l10n_dk_nemhandel",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "l10n_dk_nemhandel",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "contact_email",
+    "type": "Char",
+    "related": "company_id.nemhandel_contact_email",
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "l10n_dk_nemhandel",
+    "string": "Contact Email",
+    "full_name": "Contact Email"
+   },
+   {
+    "name": "edi_mode",
+    "type": "Selection",
+    "string": "EDI mode",
+    "selection": [
+     [
+      "demo",
+      "Demo"
+     ],
+     [
+      "test",
+      "Test"
+     ],
+     [
+      "prod",
+      "Live"
+     ]
+    ],
+    "compute": "_compute_edi_mode",
+    "inverse": "_inverse_edi_mode",
+    "readonly": false,
+    "defined_in_package": "l10n_dk_nemhandel",
+    "full_name": "electronic data interchange mode"
+   },
+   {
+    "name": "edi_user_id",
+    "type": "Many2one",
+    "comodel": "account_edi_proxy_client.user",
+    "string": "EDI user",
+    "compute": "_compute_edi_user_id",
+    "defined_in_package": "l10n_dk_nemhandel",
+    "full_name": "electronic data interchange user",
+    "target_entity": "account_edi_proxy_client.user"
+   },
+   {
+    "name": "phone_number",
+    "type": "Char",
+    "related": "company_id.nemhandel_phone_number",
+    "readonly": false,
+    "inverse": "_inverse_phone_number",
+    "defined_in_package": "l10n_dk_nemhandel",
+    "string": "Phone Number",
+    "full_name": "Phone Number"
+   },
+   {
+    "name": "l10n_dk_nemhandel_proxy_state",
+    "type": "Selection",
+    "related": "company_id.l10n_dk_nemhandel_proxy_state",
+    "readonly": false,
+    "defined_in_package": "l10n_dk_nemhandel",
+    "string": "Localization Dk Nemhandel Proxy State",
+    "full_name": "Localization Dk Nemhandel Proxy State"
+   },
+   {
+    "name": "verification_code",
+    "type": "Char",
+    "related": "edi_user_id.nemhandel_verification_code",
+    "readonly": false,
+    "defined_in_package": "l10n_dk_nemhandel",
+    "string": "Verification Code",
+    "full_name": "Verification Code"
+   },
+   {
+    "name": "identifier_type",
+    "type": "Selection",
+    "related": "company_id.nemhandel_identifier_type",
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "l10n_dk_nemhandel",
+    "string": "Identifier Type",
+    "full_name": "Identifier Type"
+   },
+   {
+    "name": "identifier_value",
+    "type": "Char",
+    "related": "company_id.nemhandel_identifier_value",
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "l10n_dk_nemhandel",
+    "string": "Identifier Value",
+    "full_name": "Identifier Value"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_onchange_identifier_value",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "identifier_value"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_phone_number",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "phone_number"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_edi_user_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id.account_edi_proxy_client_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_edi_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "edi_user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_edi_mode",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_open_nemhandel_form",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "reopen"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_notification",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "title",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_nemhandel_registration_sms",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "handle_demo",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "The first step of the Nemhandel onboarding.\n- Creates an EDI proxy user on the iap side, then the client side\n- Calls /activate_participant to mark the EDI user as nemhandel user\n- Sends an SMS code",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cannot register a user with a %s application",
+        "line": 142
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Please enter a phone number to verify your application.",
+        "line": 145
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Please enter a primary contact email to verify your application.",
+        "line": 147
+       },
+       {
+        "kind": "RedirectWarning",
+        "message": "Please fill in your company's VAT",
+        "line": 149
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "button_nemhandel_receiver_registration",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "handle_demo",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "The user is registered on the Nemhandel network, i.e. can receive documents from other Nemhandel participants.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_update_nemhandel_user_data",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "handle_demo",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Action for the user to be able to update their contact details any time\nCalls /update_user on the iap server",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Contact email and phone number are required.",
+        "line": 210
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "send_nemhandel_verification_code",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [],
+      "documentation": "Request user verification via SMS\nCalls the /send_verification_code to activate the participant and send the 6-digit verification code",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_check_nemhandel_verification_code",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "handle_demo",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Calls /verify_phone_number to compare user's input and the\ncode generated on the IAP server",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please first verify your phone number by clicking on 'Send a registration code by SMS'.",
+        "line": 247
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The verification code should contain six digits.",
+        "line": 250
+       },
+       {
+        "kind": "UserError",
+        "message": "errors.get(error_code) or _('Connection error, please try again later.')",
+        "line": 264
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "button_deregister_nemhandel_participant",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk_nemhandel",
+      "decorators": [
+       {
+        "name": "handle_demo",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Deregister the edi user from Nemhandel network",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "button_nemhandel_registration_sms",
+    "package": "l10n_dk_nemhandel",
+    "kind": "UserError",
+    "message": "Cannot register a user with a %s application"
+   },
+   {
+    "operation": "button_nemhandel_registration_sms",
+    "package": "l10n_dk_nemhandel",
+    "kind": "ValidationError",
+    "message": "Please enter a phone number to verify your application."
+   },
+   {
+    "operation": "button_nemhandel_registration_sms",
+    "package": "l10n_dk_nemhandel",
+    "kind": "ValidationError",
+    "message": "Please enter a primary contact email to verify your application."
+   },
+   {
+    "operation": "button_nemhandel_registration_sms",
+    "package": "l10n_dk_nemhandel",
+    "kind": "RedirectWarning",
+    "message": "Please fill in your company's VAT"
+   },
+   {
+    "operation": "button_update_nemhandel_user_data",
+    "package": "l10n_dk_nemhandel",
+    "kind": "ValidationError",
+    "message": "Contact email and phone number are required."
+   },
+   {
+    "operation": "button_check_nemhandel_verification_code",
+    "package": "l10n_dk_nemhandel",
+    "kind": "ValidationError",
+    "message": "Please first verify your phone number by clicking on 'Send a registration code by SMS'."
+   },
+   {
+    "operation": "button_check_nemhandel_verification_code",
+    "package": "l10n_dk_nemhandel",
+    "kind": "ValidationError",
+    "message": "The verification code should contain six digits."
+   },
+   {
+    "operation": "button_check_nemhandel_verification_code",
+    "package": "l10n_dk_nemhandel",
+    "kind": "UserError",
+    "message": "errors.get(error_code) or _('Connection error, please try again later.')"
+   }
+  ],
+  "state_fields": [
+   "l10n_dk_nemhandel_proxy_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_dk_nemhandel.l10n_dk_nemhandel_registration",
+    "package": "l10n_dk_nemhandel",
+    "name": "l10n.dk.nemhandel.registration",
+    "entity": "nemhandel.registration",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_dk_nemhandel.nemhandel_registration_form",
+    "package": "l10n_dk_nemhandel",
+    "name": "nemhandel.registration.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "identifier_type",
+       "invisible": "l10n_dk_nemhandel_proxy_state != 'not_registered'",
+       "string": "Identifier Type",
+       "nolabel": "1"
+      },
+      {
+       "name": "identifier_value",
+       "invisible": "l10n_dk_nemhandel_proxy_state != 'not_registered'",
+       "string": "Identifier Value",
+       "nolabel": "1"
+      },
+      {
+       "name": "contact_email",
+       "invisible": "l10n_dk_nemhandel_proxy_state != 'not_registered'",
+       "string": "Email"
+      },
+      {
+       "name": "phone_number",
+       "invisible": "l10n_dk_nemhandel_proxy_state != 'not_registered'",
+       "required": "edi_mode != 'demo'",
+       "string": "Phone"
+      },
+      {
+       "name": "phone_number",
+       "readonly": "l10n_dk_nemhandel_proxy_state == 'in_verification'",
+       "nolabel": "1"
+      },
+      {
+       "name": "verification_code",
+       "widget": "nemhandel_verification_code"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_nemhandel_registration_sms",
+       "string": "Activate Nemhandel",
+       "type": "object",
+       "invisible": "edi_mode != 'prod'",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_nemhandel_registration_sms",
+       "string": "Activate Nemhandel (Test)",
+       "type": "object",
+       "invisible": "edi_mode != 'test'",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_check_nemhandel_verification_code",
+       "string": "Activate Nemhandel (Demo)",
+       "type": "object",
+       "invisible": "edi_mode != 'demo'",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_check_nemhandel_verification_code",
+       "string": "Confirm",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "send_nemhandel_verification_code",
+       "string": "Send again",
+       "type": "object",
+       "invisible": "l10n_dk_nemhandel_proxy_state != 'in_verification'",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "button_deregister_nemhandel_participant",
+       "string": "Cancel Registration",
+       "type": "object",
+       "class": "btn-secondary",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "nemhandel_verification_code": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

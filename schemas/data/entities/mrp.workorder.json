@@ -1,0 +1,3518 @@
+{
+ "catalog": {
+  "name": "entity:mrp.workorder",
+  "description": "Complete definition of entity Work Order (mrp.workorder).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mrp.workorder",
+  "storage_name": "mrp_workorder",
+  "full_name": "Work Order",
+  "kind": "persistent",
+  "description": "Work Order",
+  "defined_by_package": "mrp",
+  "extended_by_packages": [
+   "mrp_account",
+   "project_mrp_account"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, leave_id, date_start, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Work Order",
+    "required": true,
+    "defined_in_package": "mrp",
+    "full_name": "Work Order"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": {
+     "dynamic": "_default_sequence"
+    },
+    "defined_in_package": "mrp",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "barcode",
+    "type": "Char",
+    "compute": "_compute_barcode",
+    "store": true,
+    "defined_in_package": "mrp",
+    "string": "Barcode",
+    "full_name": "Barcode"
+   },
+   {
+    "name": "workcenter_id",
+    "type": "Many2one",
+    "comodel": "mrp.workcenter",
+    "string": "Work Center",
+    "required": true,
+    "index": true,
+    "group_expand": "_read_group_workcenter_id",
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "Work Center",
+    "target_entity": "mrp.workcenter"
+   },
+   {
+    "name": "working_state",
+    "type": "Selection",
+    "string": "Workcenter Status",
+    "related": "workcenter_id.working_state",
+    "defined_in_package": "mrp",
+    "full_name": "Workcenter Status"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "related": "production_id.product_id",
+    "defined_in_package": "mrp",
+    "string": "Product",
+    "full_name": "Product"
+   },
+   {
+    "name": "product_tracking",
+    "type": "Selection",
+    "related": "product_id.tracking",
+    "defined_in_package": "mrp",
+    "string": "Product Tracking",
+    "full_name": "Product Tracking"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "related": "production_id.product_uom_id",
+    "defined_in_package": "mrp",
+    "string": "Product Unit of measure",
+    "full_name": "Product Unit of measure"
+   },
+   {
+    "name": "product_variant_attributes",
+    "type": "Many2many",
+    "comodel": "product.template.attribute.value",
+    "related": "product_id.product_template_attribute_value_ids",
+    "defined_in_package": "mrp",
+    "string": "Product Variant Attributes",
+    "full_name": "Product Variant Attributes",
+    "target_entity": "product.template.attribute.value"
+   },
+   {
+    "name": "production_id",
+    "type": "Many2one",
+    "comodel": "mrp.production",
+    "string": "Manufacturing Order",
+    "required": true,
+    "check_company": true,
+    "readonly": true,
+    "index": "btree",
+    "defined_in_package": "mrp",
+    "full_name": "Manufacturing Order",
+    "target_entity": "mrp.production"
+   },
+   {
+    "name": "production_availability",
+    "type": "Selection",
+    "string": "Stock Availability",
+    "readonly": true,
+    "related": "production_id.reservation_state",
+    "store": true,
+    "defined_in_package": "mrp",
+    "full_name": "Stock Availability"
+   },
+   {
+    "name": "production_state",
+    "type": "Selection",
+    "string": "Production State",
+    "readonly": true,
+    "related": "production_id.state",
+    "defined_in_package": "mrp",
+    "full_name": "Production State"
+   },
+   {
+    "name": "production_bom_id",
+    "type": "Many2one",
+    "comodel": "mrp.bom",
+    "related": "production_id.bom_id",
+    "defined_in_package": "mrp",
+    "string": "Production Bill of materials",
+    "full_name": "Production Bill of materials",
+    "target_entity": "mrp.bom"
+   },
+   {
+    "name": "qty_production",
+    "type": "Float",
+    "string": "Original Production Quantity",
+    "readonly": true,
+    "related": "production_id.product_qty",
+    "defined_in_package": "mrp",
+    "full_name": "Original Production Quantity"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "production_id.company_id",
+    "defined_in_package": "mrp",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "qty_producing",
+    "type": "Float",
+    "compute": "_compute_qty_producing",
+    "inverse": "_set_qty_producing",
+    "string": "Currently Produced Quantity",
+    "digits": "Product Unit",
+    "defined_in_package": "mrp",
+    "full_name": "Currently Produced Quantity"
+   },
+   {
+    "name": "qty_remaining",
+    "type": "Float",
+    "string": "Quantity To Be Produced",
+    "compute": "_compute_qty_remaining",
+    "digits": "Product Unit",
+    "defined_in_package": "mrp",
+    "full_name": "Quantity To Be Produced"
+   },
+   {
+    "name": "qty_produced",
+    "type": "Float",
+    "string": "Quantity Done",
+    "default": 0.0,
+    "digits": "Product Unit",
+    "copy": false,
+    "help": "The number of products already handled by this work order",
+    "defined_in_package": "mrp",
+    "full_name": "Quantity Done"
+   },
+   {
+    "name": "qty_ready",
+    "type": "Float",
+    "string": "Quantity Ready",
+    "compute": "_compute_qty_ready",
+    "digits": "Product Unit",
+    "defined_in_package": "mrp",
+    "full_name": "Quantity Ready"
+   },
+   {
+    "name": "is_produced",
+    "type": "Boolean",
+    "string": "Has Been Produced",
+    "compute": "_compute_is_produced",
+    "defined_in_package": "mrp",
+    "full_name": "Has Been Produced"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "blocked",
+      "Blocked"
+     ],
+     [
+      "ready",
+      "To Do"
+     ],
+     [
+      "progress",
+      "In Progress"
+     ],
+     [
+      "done",
+      "Finished"
+     ],
+     [
+      "cancel",
+      "Cancelled"
+     ]
+    ],
+    "string": "Status",
+    "compute": "_compute_state",
+    "store": true,
+    "default": "ready",
+    "copy": false,
+    "index": true,
+    "defined_in_package": "mrp",
+    "full_name": "Status"
+   },
+   {
+    "name": "leave_id",
+    "type": "Many2one",
+    "comodel": "resource.calendar.leaves",
+    "help": "Slot into workcenter calendar once planned",
+    "check_company": true,
+    "copy": false,
+    "defined_in_package": "mrp",
+    "string": "Leave",
+    "full_name": "Leave",
+    "target_entity": "resource.calendar.leaves"
+   },
+   {
+    "name": "date_start",
+    "type": "Datetime",
+    "string": "Start",
+    "compute": "_compute_dates",
+    "inverse": "_set_dates",
+    "store": true,
+    "copy": false,
+    "defined_in_package": "mrp",
+    "full_name": "Start"
+   },
+   {
+    "name": "date_finished",
+    "type": "Datetime",
+    "string": "End",
+    "compute": "_compute_dates",
+    "inverse": "_set_dates",
+    "store": true,
+    "copy": false,
+    "defined_in_package": "mrp",
+    "full_name": "End"
+   },
+   {
+    "name": "duration_expected",
+    "type": "Float",
+    "string": "Expected Duration",
+    "digits": [
+     16,
+     2
+    ],
+    "compute": "_compute_duration_expected",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mrp",
+    "full_name": "Expected Duration"
+   },
+   {
+    "name": "duration",
+    "type": "Float",
+    "string": "Real Duration",
+    "compute": "_compute_duration",
+    "inverse": "_set_duration",
+    "readonly": false,
+    "store": true,
+    "copy": false,
+    "defined_in_package": "mrp",
+    "full_name": "Real Duration"
+   },
+   {
+    "name": "duration_unit",
+    "type": "Float",
+    "string": "Duration Per Unit",
+    "compute": "_compute_duration",
+    "aggregator": "avg",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "mrp",
+    "full_name": "Duration Per Unit"
+   },
+   {
+    "name": "duration_percent",
+    "type": "Integer",
+    "string": "Duration Deviation (%)",
+    "compute": "_compute_duration",
+    "aggregator": "avg",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "mrp",
+    "full_name": "Duration Deviation (%)"
+   },
+   {
+    "name": "progress",
+    "type": "Float",
+    "string": "Progress Done (%)",
+    "digits": [
+     16,
+     2
+    ],
+    "compute": "_compute_progress",
+    "defined_in_package": "mrp",
+    "full_name": "Progress Done (%)"
+   },
+   {
+    "name": "operation_id",
+    "type": "Many2one",
+    "comodel": "mrp.routing.workcenter",
+    "string": "Operation",
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "mrp",
+    "full_name": "Operation",
+    "target_entity": "mrp.routing.workcenter"
+   },
+   {
+    "name": "move_raw_ids",
+    "type": "One2many",
+    "comodel": "stock.move",
+    "inverse_name": "workorder_id",
+    "string": "Raw Moves",
+    "domain": [
+     [
+      "raw_material_production_id",
+      "!=",
+      false
+     ],
+     [
+      "production_id",
+      "=",
+      false
+     ]
+    ],
+    "defined_in_package": "mrp",
+    "full_name": "Raw Moves",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "move_finished_ids",
+    "type": "One2many",
+    "comodel": "stock.move",
+    "inverse_name": "workorder_id",
+    "string": "Finished Moves",
+    "domain": [
+     [
+      "raw_material_production_id",
+      "=",
+      false
+     ],
+     [
+      "production_id",
+      "!=",
+      false
+     ]
+    ],
+    "defined_in_package": "mrp",
+    "full_name": "Finished Moves",
+    "target_entity": "stock.move"
+   },
+   {
+    "name": "move_line_ids",
+    "type": "One2many",
+    "comodel": "stock.move.line",
+    "inverse_name": "workorder_id",
+    "string": "Moves to Track",
+    "help": "Inventory moves for which you must scan a lot number at this work order",
+    "defined_in_package": "mrp",
+    "full_name": "Moves to Track",
+    "target_entity": "stock.move.line"
+   },
+   {
+    "name": "finished_lot_ids",
+    "type": "Many2many",
+    "comodel": "stock.lot",
+    "string": "Lot/Serial Numbers",
+    "related": "production_id.lot_producing_ids",
+    "domain": "[('product_id', '=', product_id), ('company_id', '=', company_id)]",
+    "readonly": false,
+    "check_company": true,
+    "defined_in_package": "mrp",
+    "full_name": "Lot/Serial Numbers",
+    "target_entity": "stock.lot"
+   },
+   {
+    "name": "time_ids",
+    "type": "One2many",
+    "comodel": "mrp.workcenter.productivity",
+    "inverse_name": "workorder_id",
+    "copy": false,
+    "defined_in_package": "mrp",
+    "string": "Time",
+    "full_name": "Time",
+    "target_entity": "mrp.workcenter.productivity"
+   },
+   {
+    "name": "is_user_working",
+    "type": "Boolean",
+    "string": "Is the Current User Working",
+    "compute": "_compute_working_users",
+    "defined_in_package": "mrp",
+    "full_name": "Is the Current User Working"
+   },
+   {
+    "name": "working_user_ids",
+    "type": "One2many",
+    "comodel": "res.users",
+    "string": "Working user on this work order.",
+    "compute": "_compute_working_users",
+    "defined_in_package": "mrp",
+    "full_name": "Working user on this work order.",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "last_working_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Last user that worked on this work order.",
+    "compute": "_compute_working_users",
+    "defined_in_package": "mrp",
+    "full_name": "Last user that worked on this work order.",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "costs_hour",
+    "type": "Float",
+    "string": "Cost per hour",
+    "default": 0.0,
+    "aggregator": "avg",
+    "defined_in_package": "mrp",
+    "full_name": "Cost per hour"
+   },
+   {
+    "name": "cost_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "actual",
+      "Actual"
+     ],
+     [
+      "estimated",
+      "Estimated"
+     ]
+    ],
+    "default": "actual",
+    "defined_in_package": "mrp",
+    "string": "Cost Mode",
+    "full_name": "Cost Mode"
+   },
+   {
+    "name": "scrap_ids",
+    "type": "One2many",
+    "comodel": "stock.scrap",
+    "inverse_name": "workorder_id",
+    "defined_in_package": "mrp",
+    "string": "Scrap",
+    "full_name": "Scrap",
+    "target_entity": "stock.scrap"
+   },
+   {
+    "name": "scrap_count",
+    "type": "Integer",
+    "compute": "_compute_scrap_move_count",
+    "string": "Scrap Move",
+    "defined_in_package": "mrp",
+    "full_name": "Scrap Move"
+   },
+   {
+    "name": "production_date",
+    "type": "Datetime",
+    "string": "Production Date",
+    "compute": "_compute_production_date",
+    "store": true,
+    "defined_in_package": "mrp",
+    "full_name": "Production Date"
+   },
+   {
+    "name": "json_popover",
+    "type": "Char",
+    "string": "Popover Data JSON",
+    "compute": "_compute_json_popover",
+    "defined_in_package": "mrp",
+    "full_name": "Popover Data JavaScript Object Notation"
+   },
+   {
+    "name": "show_json_popover",
+    "type": "Boolean",
+    "string": "Show Popover?",
+    "compute": "_compute_json_popover",
+    "defined_in_package": "mrp",
+    "full_name": "Show Popover?"
+   },
+   {
+    "name": "consumption",
+    "type": "Selection",
+    "related": "production_id.consumption",
+    "defined_in_package": "mrp",
+    "string": "Consumption",
+    "full_name": "Consumption"
+   },
+   {
+    "name": "qty_reported_from_previous_wo",
+    "type": "Float",
+    "string": "Carried Quantity",
+    "digits": "Product Unit",
+    "copy": false,
+    "help": "The quantity already produced awaiting allocation in the backorders chain.",
+    "defined_in_package": "mrp",
+    "full_name": "Carried Quantity"
+   },
+   {
+    "name": "is_planned",
+    "type": "Boolean",
+    "related": "production_id.is_planned",
+    "defined_in_package": "mrp",
+    "string": "Is Planned",
+    "full_name": "Is Planned"
+   },
+   {
+    "name": "allow_workorder_dependencies",
+    "type": "Boolean",
+    "related": "production_id.allow_workorder_dependencies",
+    "defined_in_package": "mrp",
+    "string": "Allow Workorder Dependencies",
+    "full_name": "Allow Workorder Dependencies"
+   },
+   {
+    "name": "blocked_by_workorder_ids",
+    "type": "Many2many",
+    "comodel": "mrp.workorder",
+    "relation": "mrp_workorder_dependencies_rel",
+    "column1": "workorder_id",
+    "column2": "blocked_by_id",
+    "string": "Blocked By",
+    "domain": "[('allow_workorder_dependencies', '=', True), ('id', '!=', id), ('production_id', '=', production_id)]",
+    "copy": false,
+    "defined_in_package": "mrp",
+    "full_name": "Blocked By",
+    "target_entity": "mrp.workorder"
+   },
+   {
+    "name": "needed_by_workorder_ids",
+    "type": "Many2many",
+    "comodel": "mrp.workorder",
+    "relation": "mrp_workorder_dependencies_rel",
+    "column1": "blocked_by_id",
+    "column2": "workorder_id",
+    "string": "Blocks",
+    "domain": "[('allow_workorder_dependencies', '=', True), ('id', '!=', id), ('production_id', '=', production_id)]",
+    "copy": false,
+    "defined_in_package": "mrp",
+    "full_name": "Blocks",
+    "target_entity": "mrp.workorder"
+   },
+   {
+    "name": "mo_analytic_account_line_ids",
+    "type": "Many2many",
+    "comodel": "account.analytic.line",
+    "relation": "mrp_workorder_mo_analytic_rel",
+    "copy": false,
+    "defined_in_package": "mrp_account",
+    "string": "Manufacturing order Analytic Account Line",
+    "full_name": "Manufacturing order Analytic Account Line",
+    "target_entity": "account.analytic.line"
+   },
+   {
+    "name": "wc_analytic_account_line_ids",
+    "type": "Many2many",
+    "comodel": "account.analytic.line",
+    "relation": "mrp_workorder_wc_analytic_rel",
+    "copy": false,
+    "defined_in_package": "mrp_account",
+    "string": "Wc Analytic Account Line",
+    "full_name": "Wc Analytic Account Line",
+    "target_entity": "account.analytic.line"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_sequence",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group_workcenter_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "workcenters",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "qty_ready"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_state",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "state"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_production_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_id.date_start",
+         "date_start"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_json_popover",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_state",
+         "date_start",
+         "date_finished"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_producing",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_id.qty_producing"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_qty_producing",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_ready",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "blocked_by_workorder_ids.qty_produced",
+         "blocked_by_workorder_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_dates",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "leave_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_dates",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "It is not possible to unplan one single Work Order. You should unplan the Manufacturing Order instead in order to unplan all the linked operations.",
+        "line": 280
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_no_cyclic_dependencies",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "blocked_by_workorder_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot create cyclic dependency.",
+        "line": 301
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_barcode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_id.name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_id",
+         "product_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "prefix_product"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_produced",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_id.product_qty",
+         "qty_produced",
+         "production_id.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration_expected",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "operation_id",
+         "workcenter_id",
+         "qty_producing",
+         "qty_production"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "time_ids.duration",
+         "time_ids.loss_type",
+         "qty_produced"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_duration",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 54,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_progress",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "duration",
+         "duration_expected",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_working_users",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Checks whether the current user is working, all the users currently working and the last user that worked. ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_scrap_move_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_operation_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "operation_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_date_start",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "date_start",
+         "duration_expected",
+         "workcenter_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_calculate_date_finished",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date_start",
+     "new_workcenter"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_date_finished",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "date_finished"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "It is not possible to unplan one single Work Order. You should unplan the Manufacturing Order instead in order to unplan all the linked operations.",
+        "line": 471
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_calculate_duration_expected",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date_start",
+     "date_finished"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_finished_lot_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "finished_lot_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 65,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot link this work order to another manufacturing order.",
+        "line": 502
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot change the quantity produced of a work order that is in done or cancel state.",
+        "line": 496
+       },
+       {
+        "kind": "UserError",
+        "message": "The planned end date of the work order cannot be prior to the planned start date, please correct this to save the work order.",
+        "line": 518
+       },
+       {
+        "kind": "UserError",
+        "message": "The quantity produced must be positive.",
+        "line": 498
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot change the workcenter of a work order that is done.",
+        "line": 508
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_confirm",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_byproduct_move_to_update",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_plan_workorder",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "replan"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 55,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Impossible to plan the workorder. Please check the workcenter availabilities.",
+        "line": 625
+       },
+       {
+        "kind": "UserError",
+        "message": "There is no defined calendar on workcenter %s.",
+        "line": 604
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_cal_cost",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Returns total cost of time spent on workorder.\n\n:param datetime date: Only calculate for time_ids that ended before this date",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_start",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "raise_on_invalid_state"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please unblock the work center to start the work order.",
+        "line": 658
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot start a work order that is already done or cancelled",
+        "line": 665
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "button_finish",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "end_previous",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "doall"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "@param: doall:  This will close all open time lines on the open work orders when doall = True, otherwise\nonly the one of the current user",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "end_all",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_pending",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_unblock",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_replan",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Replan a work order.\n\nIt actually replans every  \"ready\" or \"blocked\"\nwork orders of the linked manufacturing orders.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "button_scrap",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_see_move_scrap",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_wizard",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_qty_remaining",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "qty_production",
+         "qty_reported_from_previous_wo",
+         "qty_produced",
+         "production_id.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_duration_expected",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "alternative_workcenter",
+     "ratio"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_conflicted_workorder_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Get conlicted workorder(s) with self.\n\nConflict means having two workorders in the same time in the same workcenter.\n\n:return: defaultdict with key as workorder id of self and value as related conflicted workorder",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_operation_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_timeline_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "duration",
+     "date_start",
+     "date_end"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You need to define at least one productivity loss in the category 'Productivity'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses.",
+        "line": 881
+       },
+       {
+        "kind": "UserError",
+        "message": "You need to define at least one productivity loss in the category 'Performance'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses.",
+        "line": 885
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_should_start_timer",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_estimate_cost",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_qty_producing",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "quantity"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_working_duration",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Get the additional duration for 'open times' i.e. productivity lines with no date_end.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_intervals_duration",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "intervals"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "Return merged interval duration (minutes). Overlapping intervals are counted once.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_duration",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mark_as_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please unblock the work center to validate the work order",
+        "line": 941
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_expected_operation_cost",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "without_employee_cost"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_operation_cost",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_current_theorical_operation_cost",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "without_employee_cost"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_cost_mode",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": "This should only be called once when the MO is confirmed. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_analytic_line_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "account_field_values",
+     "amount",
+     "unit_amount"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_or_update_analytic_entry",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_or_update_analytic_entry_for_record",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "value",
+     "hours"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "project_mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_set_dates",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "It is not possible to unplan one single Work Order. You should unplan the Manufacturing Order instead in order to unplan all the linked operations."
+   },
+   {
+    "operation": "_check_no_cyclic_dependencies",
+    "package": "mrp",
+    "kind": "ValidationError",
+    "message": "You cannot create cyclic dependency."
+   },
+   {
+    "operation": "_onchange_date_finished",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "It is not possible to unplan one single Work Order. You should unplan the Manufacturing Order instead in order to unplan all the linked operations."
+   },
+   {
+    "operation": "write",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You cannot link this work order to another manufacturing order."
+   },
+   {
+    "operation": "write",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You cannot change the quantity produced of a work order that is in done or cancel state."
+   },
+   {
+    "operation": "write",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "The planned end date of the work order cannot be prior to the planned start date, please correct this to save the work order."
+   },
+   {
+    "operation": "write",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "The quantity produced must be positive."
+   },
+   {
+    "operation": "write",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You cannot change the workcenter of a work order that is done."
+   },
+   {
+    "operation": "_plan_workorder",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "Impossible to plan the workorder. Please check the workcenter availabilities."
+   },
+   {
+    "operation": "_plan_workorder",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "There is no defined calendar on workcenter %s."
+   },
+   {
+    "operation": "button_start",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "Please unblock the work center to start the work order."
+   },
+   {
+    "operation": "button_start",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You cannot start a work order that is already done or cancelled"
+   },
+   {
+    "operation": "_prepare_timeline_vals",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You need to define at least one productivity loss in the category 'Productivity'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses."
+   },
+   {
+    "operation": "_prepare_timeline_vals",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You need to define at least one productivity loss in the category 'Performance'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses."
+   },
+   {
+    "operation": "action_mark_as_done",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "Please unblock the work center to validate the work order"
+   }
+  ],
+  "state_fields": [
+   "working_state",
+   "production_state",
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_mrp_workorder_mrp_user",
+    "package": "mrp",
+    "name": "mrp.workorder.user",
+    "entity": "mrp.workorder",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mrp.access_mrp_workorder_mrp_manager",
+    "package": "mrp",
+    "name": "mrp.workorder",
+    "entity": "mrp.workorder",
+    "group": "mrp.group_mrp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale_mrp.access_mrp_production_workcenter_line_salesman",
+    "package": "sale_mrp",
+    "name": "mrp.workorder salesman",
+    "entity": "mrp.workorder",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp.view_mrp_production_work_order_search",
+    "package": "mrp",
+    "name": "mrp.production.work.order.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "production_id"
+      },
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "finished_lot_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "ready",
+       "string": "To Do",
+       "domain": "[('state','=','ready')]"
+      },
+      {
+       "name": "blocked",
+       "string": "Blocked",
+       "domain": "[('state','=','blocked')]"
+      },
+      {
+       "name": "progress",
+       "string": "In Progress",
+       "domain": "[('state','=','progress')]"
+      },
+      {
+       "name": "done",
+       "string": "Done",
+       "domain": "[('state','=', 'done')]"
+      },
+      {
+       "name": "late",
+       "string": "Late",
+       "domain": "[('date_start', '<=', 'today')]"
+      },
+      {
+       "name": "date_start_filter",
+       "string": "Start Date",
+       "date": "date_start"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "workcenter",
+       "string": "Work center",
+       "domain": "[]",
+       "context": "{'group_by': 'workcenter_id'}"
+      },
+      {
+       "name": "product",
+       "string": "Product",
+       "domain": "[]",
+       "context": "{'group_by': 'product_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp.mrp_production_workorder_tree_editable_view",
+    "package": "mrp",
+    "name": "mrp.production.work.order.list.editable",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "consumption",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_produced",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_user_working",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_uom_id",
+       "readonly": "0",
+       "column_invisible": "True"
+      },
+      {
+       "name": "production_state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "production_bom_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "qty_producing",
+       "column_invisible": "True"
+      },
+      {
+       "name": "time_ids",
+       "column_invisible": "True"
+      },
+      {
+       "name": "working_state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "operation_id",
+       "domain": "['|', ('bom_id', '=', production_bom_id), ('bom_id', '=', False)]",
+       "context": "{'default_workcenter_id': workcenter_id, 'default_company_id': company_id}",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name",
+       "readonly": "state in ['cancel', 'done']",
+       "string": "Operation"
+      },
+      {
+       "name": "workcenter_id",
+       "readonly": "state in ['cancel', 'done', 'progress']"
+      },
+      {
+       "name": "product_id",
+       "optional": "show"
+      },
+      {
+       "name": "qty_remaining",
+       "string": "Quantity",
+       "optional": "show"
+      },
+      {
+       "name": "qty_ready",
+       "optional": "hide",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "finished_lot_ids",
+       "string": "Lot/Serial",
+       "optional": "hide"
+      },
+      {
+       "name": "date_start",
+       "readonly": "state in ['progress', 'done', 'cancel']",
+       "optional": "hide"
+      },
+      {
+       "name": "date_finished",
+       "readonly": "state in ['progress', 'done', 'cancel']",
+       "optional": "hide"
+      },
+      {
+       "name": "duration_expected",
+       "widget": "float_time",
+       "readonly": "state in ['cancel', 'done']",
+       "sum": "expected duration"
+      },
+      {
+       "name": "duration",
+       "widget": "mrp_timer",
+       "invisible": "production_state == 'draft'",
+       "readonly": "is_user_working",
+       "sum": "real duration"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "invisible": "production_state == 'draft'",
+       "column_invisible": "parent and parent.state == 'draft'",
+       "decoration-danger": "state == 'cancel'",
+       "decoration-warning": "state == 'blocked'",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state == 'progress'",
+       "decoration-muted": "state == 'ready'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_start",
+       "type": "object",
+       "invisible": "production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or state in ('done', 'cancel') or is_user_working",
+       "class": "btn-success px-2",
+       "icon": "fa-play"
+      },
+      {
+       "name": "button_pending",
+       "type": "object",
+       "invisible": "production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working",
+       "class": "btn-warning px-2",
+       "icon": "fa-pause"
+      },
+      {
+       "name": "button_finish",
+       "type": "object",
+       "invisible": "production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working",
+       "class": "btn-success px-2",
+       "icon": "fa-check"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 1,
+      "mrp_timer": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mrp.mrp_production_workorder_tree_editable_view_mo_form",
+    "package": "mrp",
+    "name": "mrp.production.work.order.list.editable",
+    "view_type": "xpath",
+    "inherits_view": "mrp_production_workorder_tree_editable_view",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list/field[@name='qty_remaining']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list/field[@name='qty_remaining']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.mrp_production_workorder_tree_view",
+    "package": "mrp",
+    "name": "mrp.production.work.order.list",
+    "view_type": "xpath",
+    "inherits_view": "mrp.mrp_production_workorder_tree_editable_view",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.mrp_production_workorder_form_view_inherit",
+    "package": "mrp",
+    "name": "mrp.production.work.order.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Production Workcenter",
+      "delete": "0",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "is_user_working",
+       "invisible": "1"
+      },
+      {
+       "name": "working_state",
+       "invisible": "1"
+      },
+      {
+       "name": "production_state",
+       "invisible": "1"
+      },
+      {
+       "name": "operation_id",
+       "invisible": "1"
+      },
+      {
+       "name": "sequence",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "scrap_count"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "product_tracking",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "invisible": "1"
+      },
+      {
+       "name": "finished_lot_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "readonly": "state in ['cancel', 'done']",
+       "force_save": "1"
+      },
+      {
+       "name": "workcenter_id",
+       "readonly": "state in ['cancel', 'done', 'progress']"
+      },
+      {
+       "name": "product_id",
+       "readonly": "1"
+      },
+      {
+       "name": "qty_remaining",
+       "invisible": "state == 'done'",
+       "readonly": "1",
+       "string": "Quantity"
+      },
+      {
+       "name": "qty_produced",
+       "readonly": "state == 'done' or product_tracking == 'serial'",
+       "string": "Produced Quantity",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "finished_lot_ids",
+       "widget": "many2many_tags",
+       "readonly": "1",
+       "options": "{'edit_tags': True}"
+      },
+      {
+       "name": "is_planned",
+       "invisible": "1"
+      },
+      {
+       "name": "date_start",
+       "readonly": "state in ['cancel', 'done']"
+      },
+      {
+       "name": "date_finished",
+       "readonly": "state in ['cancel', 'done']"
+      },
+      {
+       "name": "show_json_popover",
+       "invisible": "1"
+      },
+      {
+       "name": "json_popover",
+       "widget": "mrp_workorder_popover",
+       "invisible": "not show_json_popover"
+      },
+      {
+       "name": "duration_expected",
+       "widget": "float_time",
+       "readonly": "state in ['cancel', 'done']"
+      },
+      {
+       "name": "production_id",
+       "force_save": "1"
+      },
+      {
+       "name": "time_ids",
+       "context": "{'default_workcenter_id': workcenter_id, 'default_workorder_id': id}",
+       "nolabel": "1"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "readonly": "id"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "date_end"
+      },
+      {
+       "name": "workcenter_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "loss_id",
+       "string": "Productivity",
+       "optional": "show"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "date_end"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "loss_id"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "readonly": "1"
+      },
+      {
+       "name": "move_raw_ids",
+       "readonly": "1"
+      },
+      {
+       "name": "state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_id",
+       "readonly": "state == 'done'"
+      },
+      {
+       "name": "product_qty",
+       "string": "To Consume"
+      },
+      {
+       "name": "quantity",
+       "string": "Quantity"
+      },
+      {
+       "name": "picked",
+       "string": "Consumed"
+      },
+      {
+       "name": "product_qty_available",
+       "invisible": "not is_storable",
+       "string": "On Hand"
+      },
+      {
+       "name": "product_virtual_available",
+       "invisible": "not is_storable",
+       "string": "Forecasted"
+      },
+      {
+       "name": "allow_workorder_dependencies",
+       "invisible": "1"
+      },
+      {
+       "name": "blocked_by_workorder_ids",
+       "readonly": "1",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name",
+       "readonly": "state in ['cancel', 'done']",
+       "string": "Operation"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "workcenter_id",
+       "readonly": "state in ['cancel', 'done', 'progress']"
+      },
+      {
+       "name": "date_start",
+       "readonly": "1"
+      },
+      {
+       "name": "date_finished",
+       "readonly": "1"
+      },
+      {
+       "name": "duration_expected",
+       "widget": "float_time",
+       "readonly": "state in ['cancel', 'done']",
+       "sum": "expected duration"
+      },
+      {
+       "name": "production_state",
+       "column_invisible": "True"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "invisible": "production_state == 'draft'",
+       "column_invisible": "parent.state == 'draft'",
+       "decoration-warning": "state == 'progress'",
+       "decoration-success": "state == 'done'",
+       "decoration-info": "state not in ('progress', 'done', 'cancel')"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_see_move_scrap",
+       "type": "object",
+       "invisible": "scrap_count == 0",
+       "class": "oe_stat_button",
+       "icon": "oi-arrows-v"
+      },
+      {
+       "name": "action_open_wizard",
+       "string": "View WorkOrder",
+       "type": "object",
+       "class": "oe_link float-end"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "time_tracking",
+       "string": "Time Tracking",
+       "invisible": null,
+       "groups": "mrp.group_mrp_manager"
+      },
+      {
+       "name": "components",
+       "string": "Components",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "dependencies",
+       "string": "Blocked By",
+       "invisible": "not allow_workorder_dependencies",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "many2many_tags": 1,
+      "mrp_workorder_popover": 1,
+      "float_time": 5,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "statusbar_field": "state",
+     "statusbar_visible": "blocked,ready,progress,done",
+     "chatter": false,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "action_see_move_scrap",
+       "type": "object",
+       "icon": "oi-arrows-v",
+       "invisible": "scrap_count == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.view_mrp_production_workorder_form_view_filter",
+    "package": "mrp",
+    "name": "mrp.production.work.order.select",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Work Orders"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Work Order"
+      },
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "production_id"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "finished_lot_ids"
+      },
+      {
+       "name": "product_variant_attributes"
+      },
+      {
+       "name": "move_raw_ids",
+       "string": "Component",
+       "filter_domain": "[('move_raw_ids.product_id', 'ilike', self)]"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "progress",
+       "string": "In Progress",
+       "domain": "[('state', '=', 'progress')]"
+      },
+      {
+       "name": "ready",
+       "string": "To Do",
+       "domain": "[('state', '=', 'ready')]"
+      },
+      {
+       "name": "blocked",
+       "string": "Blocked",
+       "domain": "[('state', '=', 'blocked')]"
+      },
+      {
+       "name": "finish",
+       "string": "Finished",
+       "domain": "[('state', '=', 'done')]"
+      },
+      {
+       "name": "cancel",
+       "string": "Cancelled",
+       "domain": "[('state', '=', 'cancel')]"
+      },
+      {
+       "name": "late",
+       "string": "Late",
+       "domain": "['&', ('date_start', '<', 'now'), ('state', '=', 'ready')]",
+       "help": "Production started late"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "work_center",
+       "string": "Work Center",
+       "domain": "[]",
+       "context": "{'group_by': 'workcenter_id'}"
+      },
+      {
+       "name": "production",
+       "string": "Manufacturing Order",
+       "domain": "[]",
+       "context": "{'group_by': 'production_id'}"
+      },
+      {
+       "name": "status",
+       "string": "Status",
+       "domain": "[]",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "scheduled_month",
+       "string": "Date",
+       "domain": "[]",
+       "context": "{'group_by': 'date_start'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp.workcenter_line_calendar",
+    "package": "mrp",
+    "name": "mrp.production.work.order.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "date_stop": "date_finished",
+      "date_start": "date_start",
+      "string": "Operations",
+      "color": "workcenter_id",
+      "event_limit": "5",
+      "delete": "0",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "production_id"
+      },
+      {
+       "name": "state"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "date_start",
+      "date_stop": "date_finished",
+      "date_delay": null,
+      "color": "workcenter_id",
+      "mode": null,
+      "quick_create": null,
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "mrp.workcenter_line_graph",
+    "package": "mrp",
+    "name": "mrp.production.work.order.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Operations",
+      "stacked": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "production_id"
+      },
+      {
+       "name": "duration",
+       "string": "Duration (minutes)"
+      },
+      {
+       "name": "duration_unit"
+      },
+      {
+       "name": "duration_expected"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "production_id"
+      },
+      {
+       "name": "duration",
+       "type": "measure",
+       "string": "Duration (minutes)"
+      },
+      {
+       "name": "duration_unit",
+       "type": "measure"
+      },
+      {
+       "name": "duration_expected",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.workcenter_line_pivot",
+    "package": "mrp",
+    "name": "mrp.production.work.order.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Operations",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "operation_id"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "string": "Duration (minutes)"
+      },
+      {
+       "name": "duration_unit",
+       "widget": "float_time"
+      },
+      {
+       "name": "duration_expected",
+       "widget": "float_time"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 3
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "operation_id"
+      },
+      {
+       "name": "duration",
+       "type": "measure",
+       "string": "Duration (minutes)",
+       "widget": "float_time"
+      },
+      {
+       "name": "duration_unit",
+       "type": "measure",
+       "widget": "float_time"
+      },
+      {
+       "name": "duration_expected",
+       "type": "measure",
+       "widget": "float_time"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.workcenter_line_kanban",
+    "package": "mrp",
+    "name": "mrp.production.work.order.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_mrp_workorder_kanban",
+      "create": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "last_working_user_id"
+      },
+      {
+       "name": "workcenter_id",
+       "invisible": "True"
+      },
+      {
+       "name": "product_uom_id",
+       "invisible": "True",
+       "force_save": "True"
+      },
+      {
+       "name": "operation_id",
+       "invisible": "True"
+      },
+      {
+       "name": "working_user_ids"
+      },
+      {
+       "name": "working_state"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "production_date"
+      },
+      {
+       "name": "production_id"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "production_date"
+      },
+      {
+       "name": "state"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "qty_production"
+      },
+      {
+       "name": "product_uom_id",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "finished_lot_ids"
+      },
+      {
+       "name": "last_working_user_id",
+       "widget": "image",
+       "options": "{'preview_image': 'avatar_128'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "mrp.view_workcenter_load_pivot",
+    "package": "mrp",
+    "name": "report.workcenter.load.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Work Center Loads",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "duration_expected",
+       "string": "Expected Duration (minutes)"
+      },
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "production_date"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "duration_expected",
+       "type": "measure",
+       "string": "Expected Duration (minutes)"
+      },
+      {
+       "name": "workcenter_id",
+       "type": "row"
+      },
+      {
+       "name": "production_date",
+       "type": "row",
+       "interval": "day"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.view_work_center_load_graph",
+    "package": "mrp",
+    "name": "report.workcenter.load.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Work Center load",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "production_date"
+      },
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "duration_expected",
+       "string": "Expected Duration (minutes)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "production_date",
+       "interval": "day"
+      },
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "duration_expected",
+       "type": "measure",
+       "string": "Expected Duration (minutes)"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mrp.action_mrp_routing_time",
+    "package": "mrp",
+    "name": "Work Orders",
+    "view_mode": "graph,pivot,list,form,calendar",
+    "view_id": null,
+    "search_view_id": "view_mrp_production_work_order_search",
+    "domain": "[('operation_id.bom_id', '=', active_id), ('state', '=', 'done')]",
+    "context": "{'search_default_done': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No data yet!\n            </p><p>\n                Get statistics about the work orders duration related to this routing.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.action_mrp_workorder_production_specific",
+    "package": "mrp",
+    "name": "Work Orders",
+    "view_mode": "list,form,calendar,pivot,graph",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('production_id', '=', active_id)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            No work orders to do!\n          </p><p>\n            Work orders are operations to do as part of a manufacturing order.\n            Operations are defined in the bill of materials or added in the manufacturing order directly.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.action_mrp_workorder_workcenter",
+    "package": "mrp",
+    "name": "Work Orders Planning",
+    "view_mode": "list,form,calendar,pivot,graph",
+    "view_id": null,
+    "search_view_id": "view_mrp_production_workorder_form_view_filter",
+    "domain": null,
+    "context": "{'search_default_work_center': True, 'search_default_ready': True, 'search_default_blocked': True, 'search_default_progress': True, 'show_workcenter_status': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            No work orders to do!\n          </p><p>\n            Work orders are operations to do as part of a manufacturing order.\n            Operations are defined in the bill of materials or added in the manufacturing order directly.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.action_mrp_workorder_production",
+    "package": "mrp",
+    "name": "Work Orders Planning",
+    "view_mode": "list,form,calendar,pivot,graph",
+    "view_id": null,
+    "search_view_id": "view_mrp_production_workorder_form_view_filter",
+    "domain": "[('production_state','not in',('done','cancel'))]",
+    "context": "{'search_default_production': True, 'search_default_ready': True, 'search_default_blocked': True, 'search_default_progress': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            No work orders to do!\n          </p><p>\n            Work orders are operations to do as part of a manufacturing order.\n            Operations are defined in the bill of materials or added in the manufacturing order directly.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.mrp_workorder_mrp_production_form",
+    "package": "mrp",
+    "name": "Work Orders",
+    "view_mode": "form",
+    "view_id": "mrp_production_workorder_form_view_inherit",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.mrp_workorder_todo",
+    "package": "mrp",
+    "name": "Work Orders",
+    "view_mode": "list,kanban,form,calendar,pivot,graph",
+    "view_id": "mrp.mrp_production_workorder_tree_view",
+    "search_view_id": "view_mrp_production_workorder_form_view_filter",
+    "domain": null,
+    "context": "{'search_default_ready': True, 'search_default_progress': True, 'search_default_blocked': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            No work orders to do!\n          </p><p>\n            Work orders are operations to do as part of a manufacturing order.\n            Operations are defined in the bill of materials or added in the manufacturing order directly.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.action_mrp_workcenter_load_report_graph",
+    "package": "mrp",
+    "name": "Work Center Loads",
+    "view_mode": "graph,pivot",
+    "view_id": "view_workcenter_load_pivot",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No data yet!\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.action_work_orders",
+    "package": "mrp",
+    "name": "Work Orders",
+    "view_mode": "list,form,pivot,graph,calendar",
+    "view_id": null,
+    "search_view_id": "view_mrp_production_work_order_search",
+    "domain": "[('state', 'not in', ('done', 'cancel'))]",
+    "context": "{'search_default_workcenter_id': active_id}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    No work orders to do!\n                </p><p>\n                    Work orders are operations to do as part of a manufacturing order.\n                    Operations are defined in the bill of materials or added in the manufacturing order directly.\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.mrp_workorder_workcenter_report",
+    "package": "mrp",
+    "name": "Work Orders Performance",
+    "view_mode": "graph,pivot,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('workcenter_id','=', active_id),('state','=','done')]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a new work orders performance\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   },
+   {
+    "external_identifier": "mrp.mrp_workorder_report",
+    "package": "mrp",
+    "name": "Work Orders Analysis",
+    "view_mode": "graph,pivot,list,form",
+    "view_id": null,
+    "search_view_id": "view_mrp_production_work_order_search",
+    "domain": "[]",
+    "context": "{'search_default_workcenter': 1,\n                                   'search_default_ready': True,\n                                   'search_default_blocked': True,\n                                   'search_default_progress': True,}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a new work orders performance\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mrp.workorder"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "mrp.action_start_workorders",
+    "package": "mrp",
+    "name": "Start",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "mrp.action_pause_workorders",
+    "package": "mrp",
+    "name": "Pause",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [
+   {
+    "external_identifier": "mrp.action_report_workorder",
+    "package": "mrp",
+    "name": "Work Order",
+    "report_type": "qweb-pdf",
+    "report_name": "mrp.report_mrp_workorder",
+    "report_file": "mrp.report.mrp_workorder",
+    "print_report_name": "'Work Order - %s' % object.name",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_mrp_workorder",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": "True",
+    "entity": "mrp.workorder"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

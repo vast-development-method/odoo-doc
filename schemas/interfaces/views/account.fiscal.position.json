@@ -1,0 +1,400 @@
+{
+ "catalog": {
+  "name": "views:account.fiscal.position",
+  "description": "View declarations for entity account.fiscal.position.",
+  "record_count": 6,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account.view_account_position_form",
+   "package": "account",
+   "name": "account.fiscal.position.form",
+   "entity": "account.fiscal.position",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Fiscal Position"
+    },
+    "fields": [
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "states_count",
+      "invisible": "1"
+     },
+     {
+      "name": "company_country_id",
+      "invisible": "1"
+     },
+     {
+      "name": "fiscal_country_codes",
+      "invisible": "1"
+     },
+     {
+      "name": "foreign_vat_header_mode",
+      "invisible": "1"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "auto_apply"
+     },
+     {
+      "name": "vat_required",
+      "invisible": "not auto_apply"
+     },
+     {
+      "name": "foreign_vat"
+     },
+     {
+      "name": "country_group_id",
+      "invisible": "not auto_apply"
+     },
+     {
+      "name": "country_id",
+      "required": "foreign_vat",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "state_ids",
+      "widget": "many2many_tags",
+      "invisible": "(not auto_apply and not foreign_vat) or not country_id or states_count == 0",
+      "domain": "[('country_id', '=', country_id)]"
+     },
+     {
+      "name": "zip_from"
+     },
+     {
+      "name": "zip_to"
+     },
+     {
+      "name": "account_ids",
+      "widget": "one2many",
+      "nolabel": "1"
+     },
+     {
+      "name": "account_src_id",
+      "domain": "['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"
+     },
+     {
+      "name": "account_dest_id",
+      "domain": "['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"
+     },
+     {
+      "name": "account_src_id",
+      "domain": "['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"
+     },
+     {
+      "name": "account_dest_id",
+      "domain": "['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"
+     },
+     {
+      "name": "note",
+      "placeholder": "Legal Notes..."
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_create_foreign_taxes",
+      "string": "here",
+      "type": "object",
+      "class": "oe_link p-0 align-baseline"
+     },
+     {
+      "name": "action_open_related_taxes",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "account_mapping",
+      "string": "Account Mapping",
+      "invisible": null,
+      "groups": "account.group_account_readonly"
+     }
+    ],
+    "widgets": {
+     "many2many_tags": 1,
+     "one2many": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "name": "action_open_related_taxes",
+      "type": "object",
+      "icon": "fa-bars"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Fiscal Position\">\n                    <div groups=\"account.group_account_manager\" class=\"alert alert-info\" role=\"alert\" invisible=\"not foreign_vat_header_mode\">\n                        <div invisible=\"foreign_vat_header_mode not in ('templates_found', 'no_template')\">\n                            Click\n                            <button string=\"here\" type=\"object\" name=\"action_create_foreign_taxes\" class=\"oe_link p-0 align-baseline\"/>\n                            to create the taxes for this country.\n                        </div>\n                    </div>\n\n                    <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button class=\"oe_stat_button\" name=\"action_open_related_taxes\" type=\"object\" icon=\"fa-bars\">\n                            <div class=\"o_stat_info\">\n                                <span class=\"o_stat_text\">\n                                    Taxes\n                                </span>\n                            </div>\n                        </button>\n                    </div>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <group>\n                        <group>\n                            <field name=\"active\" invisible=\"1\"/>\n                            <field name=\"company_id\" invisible=\"1\"/>\n                            <field name=\"states_count\" invisible=\"1\"/>\n                            <field name=\"company_country_id\" invisible=\"1\"/>\n                            <field name=\"fiscal_country_codes\" invisible=\"1\"/>\n                            <field name=\"foreign_vat_header_mode\" invisible=\"1\"/>\n                            <field name=\"name\"/>\n                            <field name=\"company_id\" options=\"{'no_create': True}\" groups=\"base.group_multi_company\"/>\n                        </group>\n                        <group>\n                            <field name=\"auto_apply\"/>\n                            <field name=\"vat_required\" invisible=\"not auto_apply\"/>\n                            <field name=\"foreign_vat\"/>\n                            <field name=\"country_group_id\" invisible=\"not auto_apply\"/>\n                            <field name=\"country_id\" required=\"foreign_vat\" options=\"{'no_open': True, 'no_create': True}\"/>\n                            <field name=\"state_ids\" widget=\"many2many_tags\" domain=\"[('country_id', '=', country_id)]\" invisible=\"(not auto_apply and not foreign_vat) or not country_id or states_count == 0\"/>\n                            <label for=\"zip_from\" string=\"Zip Range\" invisible=\"not auto_apply or not country_id\"/>\n                            <div invisible=\"not auto_apply or not country_id\">\n                                <span> From </span>\n                                <field name=\"zip_from\" class=\"oe_inline\"/>\n                                <div class=\"oe_edit_only\"/>\n                                <span> To </span>\n                                <field name=\"zip_to\" class=\"oe_inline\"/>\n                            </div>\n                        </group>\n                    </group>\n                    <notebook>\n                        <page name=\"account_mapping\" string=\"Account Mapping\" groups=\"account.group_account_readonly\">\n                            <field name=\"account_ids\" widget=\"one2many\" nolabel=\"1\">\n                                <list string=\"Account Mapping\" editable=\"bottom\">\n                                    <field name=\"account_src_id\" domain=\"['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]\"/>\n                                    <field name=\"account_dest_id\" domain=\"['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]\"/>\n                                </list>\n                                <form string=\"Account Mapping\">\n                                    <field name=\"account_src_id\" domain=\"['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]\"/>\n                                    <field name=\"account_dest_id\" domain=\"['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]\"/>\n                                </form>\n                            </field>\n                        </page>\n                    </notebook>\n                    <field name=\"note\" class=\"oe-bordered-editor\" placeholder=\"Legal Notes...\"/>\n                    </sheet>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_position_filter",
+   "package": "account",
+   "name": "account.fiscal.position.filter",
+   "entity": "account.fiscal.position",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Fiscal Positions"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Fiscal Position"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "active",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     },
+     {
+      "name": "domestic",
+      "string": "Domestic",
+      "domain": "[('is_domestic', '=', True)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search Fiscal Positions\">\n                    <field name=\"name\" string=\"Fiscal Position\"/>\n                    <filter name=\"active\" string=\"Archived\" domain=\"[('active', '=', False)]\"/>\n                    <filter name=\"domestic\" string=\"Domestic\" domain=\"[('is_domestic', '=', True)]\"/>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_account_position_tree",
+   "package": "account",
+   "name": "account.fiscal.position.list",
+   "entity": "account.fiscal.position",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Fiscal Position"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Fiscal Position\">\n                    <field name=\"sequence\" widget=\"handle\"/>\n                    <field name=\"name\"/>\n                    <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "l10n_ar.view_account_position_form",
+   "package": "l10n_ar",
+   "name": "account.fiscal.position.form",
+   "entity": "account.fiscal.position",
+   "view_type": "field",
+   "inherits_view": "account.view_account_position_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "auto_apply",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "auto_apply",
+      "position": "after"
+     },
+     {
+      "name": "l10n_ar_afip_responsibility_type_ids",
+      "widget": "many2many_tags",
+      "invisible": "'AR' not in fiscal_country_codes or not auto_apply",
+      "options": "{'no_open': True, 'no_create': True}",
+      "groups": "base.group_no_one"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tags": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"auto_apply\" position=\"after\">\n                <field name=\"l10n_ar_afip_responsibility_type_ids\" options=\"{'no_open': True, 'no_create': True}\" invisible=\"'AR' not in fiscal_country_codes or not auto_apply\" groups=\"base.group_no_one\" widget=\"many2many_tags\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_br.view_account_position_form",
+   "package": "l10n_br",
+   "name": "account.fiscal.position.form",
+   "entity": "account.fiscal.position",
+   "view_type": "field",
+   "inherits_view": "account.view_account_position_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "auto_apply",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "auto_apply",
+      "position": "after"
+     },
+     {
+      "name": "l10n_br_fp_type",
+      "invisible": "country_id != %(base.br)d",
+      "options": "{'no_open': True, 'no_create': True}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"auto_apply\" position=\"after\">\n                <field name=\"l10n_br_fp_type\" options=\"{'no_open': True, 'no_create': True}\" invisible=\"country_id != %(base.br)d\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "l10n_gr_edi.view_account_position_form",
+   "package": "l10n_gr_edi",
+   "name": "account.fiscal.position.form",
+   "entity": "account.fiscal.position",
+   "view_type": "xpath",
+   "inherits_view": "account.view_account_position_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//page[@name='account_mapping']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "l10n_gr_edi_preferred_classification_ids"
+     },
+     {
+      "name": "priority",
+      "widget": "handle"
+     },
+     {
+      "name": "l10n_gr_edi_available_inv_type",
+      "column_invisible": "1"
+     },
+     {
+      "name": "l10n_gr_edi_available_cls_category",
+      "column_invisible": "1"
+     },
+     {
+      "name": "l10n_gr_edi_available_cls_type",
+      "column_invisible": "1"
+     },
+     {
+      "name": "l10n_gr_edi_inv_type",
+      "widget": "dynamic_selection",
+      "options": "{'available_field': 'l10n_gr_edi_available_inv_type'}"
+     },
+     {
+      "name": "l10n_gr_edi_cls_category",
+      "widget": "dynamic_selection",
+      "options": "{'available_field': 'l10n_gr_edi_available_cls_category'}"
+     },
+     {
+      "name": "l10n_gr_edi_cls_type",
+      "widget": "dynamic_selection",
+      "options": "{'available_field': 'l10n_gr_edi_available_cls_type'}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "l10n_gr_edi_classification",
+      "string": "myDATA",
+      "invisible": "'GR' not in fiscal_country_codes",
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "handle": 1,
+     "dynamic_selection": 3
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//page[@name='account_mapping']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//page[@name='account_mapping']\" position=\"after\">\n                <page name=\"l10n_gr_edi_classification\" string=\"myDATA\" invisible=\"'GR' not in fiscal_country_codes\">\n                    <field name=\"l10n_gr_edi_preferred_classification_ids\">\n                        <list editable=\"bottom\" default_order=\"priority desc\">\n                            <field name=\"priority\" widget=\"handle\"/>\n                            <field name=\"l10n_gr_edi_available_inv_type\" column_invisible=\"1\"/>\n                            <field name=\"l10n_gr_edi_available_cls_category\" column_invisible=\"1\"/>\n                            <field name=\"l10n_gr_edi_available_cls_type\" column_invisible=\"1\"/>\n                            <field name=\"l10n_gr_edi_inv_type\" widget=\"dynamic_selection\" options=\"{'available_field': 'l10n_gr_edi_available_inv_type'}\"/>\n                            <field name=\"l10n_gr_edi_cls_category\" widget=\"dynamic_selection\" options=\"{'available_field': 'l10n_gr_edi_available_cls_category'}\"/>\n                            <field name=\"l10n_gr_edi_cls_type\" widget=\"dynamic_selection\" options=\"{'available_field': 'l10n_gr_edi_available_cls_type'}\"/>\n                        </list>\n                    </field>\n                </page>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

@@ -1,0 +1,533 @@
+{
+ "catalog": {
+  "name": "entity:res.partner.category",
+  "description": "Complete definition of entity Partner Tags (res.partner.category).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "res.partner.category",
+  "storage_name": "res_partner_category",
+  "full_name": "Partner Tags",
+  "kind": "persistent",
+  "description": "Partner Tags",
+  "defined_by_package": "base",
+  "extended_by_packages": [
+   "l10n_tr_nilvera_einvoice"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "name, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": true,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "base",
+    "full_name": "Name"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "default": {
+     "dynamic": "_get_default_color"
+    },
+    "aggregator": false,
+    "defined_in_package": "base",
+    "full_name": "Color"
+   },
+   {
+    "name": "parent_id",
+    "type": "Many2one",
+    "comodel": "res.partner.category",
+    "string": "Category",
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "base",
+    "full_name": "Category",
+    "target_entity": "res.partner.category"
+   },
+   {
+    "name": "child_ids",
+    "type": "One2many",
+    "comodel": "res.partner.category",
+    "inverse_name": "parent_id",
+    "string": "Child Tags",
+    "defined_in_package": "base",
+    "full_name": "Child Tags",
+    "target_entity": "res.partner.category"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "help": "The active field allows you to hide the category without removing it.",
+    "defined_in_package": "base",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "parent_path",
+    "type": "Char",
+    "index": true,
+    "defined_in_package": "base",
+    "string": "Parent Path",
+    "full_name": "Parent Path"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "column1": "category_id",
+    "column2": "partner_id",
+    "string": "Partners",
+    "copy": false,
+    "defined_in_package": "base",
+    "full_name": "Partners",
+    "target_entity": "res.partner"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_color",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_parent_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You can not create recursive tags.",
+        "line": 159
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "parent_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the categories' display name, including their direct\nparent by default.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_display_name",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "base",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_categories_from_xml_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "xml_ids_list"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tr_nilvera_einvoice",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_l10n_tr_official_categories",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tr_nilvera_einvoice",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_l10n_tr_official_mandatory_categories",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tr_nilvera_einvoice",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_l10n_tr_official_category",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_tr_nilvera_einvoice",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Prevent the deletion of Nilvera official TR categories",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The Contact Tag(s) cannot be deleted because it is used in Türkiye electronic integrations.",
+        "line": 54
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_parent_id",
+    "package": "base",
+    "kind": "ValidationError",
+    "message": "You can not create recursive tags."
+   },
+   {
+    "operation": "_unlink_l10n_tr_official_category",
+    "package": "l10n_tr_nilvera_einvoice",
+    "kind": "UserError",
+    "message": "The Contact Tag(s) cannot be deleted because it is used in Türkiye electronic integrations."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "base.access_res_partner_category_group_user",
+    "package": "base",
+    "name": "res_partner_category group_user",
+    "entity": "res.partner.category",
+    "group": "group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "base.access_res_partner_category_group_partner_manager",
+    "package": "base",
+    "name": "res_partner_category group_partner_manager",
+    "entity": "res.partner.category",
+    "group": "group_partner_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "crm.access_res_partner_category_manager",
+    "package": "crm",
+    "name": "res.partner.category.crm.manager",
+    "entity": "res.partner.category",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "crm.access_res_partner_category",
+    "package": "crm",
+    "name": "res.partner.category.crm.user",
+    "entity": "res.partner.category",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "base.view_partner_category_form",
+    "package": "base",
+    "name": "Contact Tags",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Contact Tag"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. \"Consulting Services\""
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "parent_id"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1,
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "base.view_partner_category_list",
+    "package": "base",
+    "name": "Contact Tags",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "6",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Contact Tags",
+      "editable": "bottom",
+      "multi_edit": "1",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. \"Roadshow\""
+      },
+      {
+       "name": "parent_id",
+       "string": "Category",
+       "domain": "[('id', '!=', id)]"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "base.res_partner_category_view_search",
+    "package": "base",
+    "name": "res.partner.category.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Partner Category"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name"
+      },
+      {
+       "name": "display_name",
+       "string": "Category"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_parent_id",
+       "string": "Category",
+       "context": "{'group_by': 'parent_id'}"
+      },
+      {
+       "name": "group_color",
+       "string": "Color",
+       "context": "{'group_by': 'color'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "base.action_partner_category_form",
+    "package": "base",
+    "name": "Contact Tags",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": "res_partner_category_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a Contact Tag\n              </p><p>\n                Assign tags to your contacts to organize, filter and track them.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "res.partner.category"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "contacts.menu_partner_category_form",
+    "package": "contacts",
+    "name": "Contact Tags",
+    "parent_id": "res_partner_menu_config",
+    "action": "base.action_partner_category_form",
+    "sequence": "1",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

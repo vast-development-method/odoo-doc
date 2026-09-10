@@ -1,0 +1,230 @@
+{
+ "catalog": {
+  "name": "views:lunch.alert",
+  "description": "View declarations for entity lunch.alert.",
+  "record_count": 4,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "lunch.lunch_alert_view_search",
+   "package": "lunch",
+   "name": "lunch.alert.search",
+   "entity": "lunch.alert",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search"
+    },
+    "fields": [
+     {
+      "name": "message"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "inactive_today",
+      "string": "Currently inactive",
+      "domain": "[('available_today', '=', False)]"
+     },
+     {
+      "name": "active",
+      "string": "Active",
+      "domain": "[('active', '=', True)]"
+     },
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Search\">\n                <field name=\"message\"/>\n                <filter name=\"inactive_today\" string=\"Currently inactive\" domain=\"[('available_today', '=', False)]\"/>\n                <separator/>\n                <filter name=\"active\" string=\"Active\" domain=\"[('active', '=', True)]\"/>\n                <filter name=\"inactive\" string=\"Archived\" domain=\"[('active', '=', False)]\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "lunch.lunch_alert_view_tree",
+   "package": "lunch",
+   "name": "lunch.alert.list",
+   "entity": "lunch.alert",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "mode"
+     },
+     {
+      "name": "message",
+      "column_invisible": "True"
+     },
+     {
+      "name": "available_today"
+     },
+     {
+      "name": "active",
+      "widget": "boolean_toggle"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "boolean_toggle": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list>\n                <field name=\"name\"/>\n                <field name=\"mode\"/>\n                <field name=\"message\" column_invisible=\"True\"/>\n                <field name=\"available_today\"/>\n                <field name=\"active\" widget=\"boolean_toggle\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "lunch.lunch_alert_view_form",
+   "package": "lunch",
+   "name": "lunch.alert.form",
+   "entity": "lunch.alert",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "alert form"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "placeholder": "e.g. Order before 11am"
+     },
+     {
+      "name": "mode",
+      "widget": "radio"
+     },
+     {
+      "name": "recipients",
+      "widget": "radio",
+      "invisible": "mode != 'chat'"
+     },
+     {
+      "name": "location_ids",
+      "widget": "many2many_tags",
+      "required": "1"
+     },
+     {
+      "name": "until"
+     },
+     {
+      "name": "active",
+      "widget": "boolean_toggle"
+     },
+     {
+      "name": "notification_time",
+      "widget": "float_time",
+      "required": "mode == 'chat'"
+     },
+     {
+      "name": "notification_moment"
+     },
+     {
+      "name": "tz",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "message"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "radio": 2,
+     "many2many_tags": 1,
+     "boolean_toggle": 1,
+     "float_time": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"alert form\">\n                <sheet>\n                    <div class=\"oe_title\" name=\"title\">\n                        <label for=\"name\"/>\n                        <h1>\n                            <field name=\"name\" placeholder=\"e.g. Order before 11am\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <group>\n                            <field name=\"mode\" widget=\"radio\"/>\n                            <field name=\"recipients\" invisible=\"mode != 'chat'\" widget=\"radio\"/>\n                            <field name=\"location_ids\" widget=\"many2many_tags\" required=\"1\"/>\n                            <field name=\"until\"/>\n                            <field name=\"active\" widget=\"boolean_toggle\"/>\n                        </group>\n                        <group>\n                            <div class=\"o_td_label\">\n                                <label for=\"notification_time\" invisible=\"mode != 'chat'\"/>\n                            </div>\n                            <div class=\"o_col\">\n                                <widget name=\"week_days\"/>\n                                <div class=\"o_row\" invisible=\"mode != 'chat'\">\n                                    <field name=\"notification_time\" required=\"mode == 'chat'\" widget=\"float_time\"/>\n                                    <field name=\"notification_moment\"/>\n                                </div>\n                            </div>\n                            <field name=\"tz\" groups=\"base.group_no_one\"/>\n                        </group>\n                        <group>\n                            <field name=\"message\"/>\n                        </group>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "lunch.lunch_alert_view_kanban",
+   "package": "lunch",
+   "name": "lunch.alert.kanban",
+   "entity": "lunch.alert",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "mode"
+     },
+     {
+      "name": "recipients"
+     },
+     {
+      "name": "notification_time"
+     },
+     {
+      "name": "notification_moment"
+     },
+     {
+      "name": "location_ids",
+      "widget": "many2many_tags"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban class=\"o_kanban_mobile\">\n                <templates>\n                    <t t-name=\"card\">\n                        <field class=\"fw-bold fs-5\" name=\"name\"/>\n                        <div>\n                            <field name=\"mode\"/>\n                            <span invisible=\"mode != 'chat'\">\n                                to <field name=\"recipients\"/>\n                                on <field name=\"notification_time\"/>\n                                <field name=\"notification_moment\"/>\n                            </span>\n                        </div>\n                        <field name=\"location_ids\" widget=\"many2many_tags\"/>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  }
+ ]
+}

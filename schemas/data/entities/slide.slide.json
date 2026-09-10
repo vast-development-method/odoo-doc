@@ -1,0 +1,3543 @@
+{
+ "catalog": {
+  "name": "entity:slide.slide",
+  "description": "Complete definition of entity Slides (slide.slide).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "slide.slide",
+  "storage_name": "slide_slide",
+  "full_name": "Slides",
+  "kind": "persistent",
+  "description": "Slides",
+  "defined_by_package": "website_slides",
+  "extended_by_packages": [
+   "website_slides_survey"
+  ],
+  "mixins": [
+   "mail.thread",
+   "image.mixin",
+   "website.seo.metadata",
+   "website.published.mixin",
+   "website.searchable.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence asc, is_category asc, id asc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": "read",
+  "primary_email_field": null,
+  "other_attributes": {
+   "_order_by_strategy": {
+    "sequence": "sequence asc, id asc",
+    "most_viewed": "total_views desc",
+    "most_voted": "likes desc",
+    "latest": "date_published desc"
+   },
+   "_partner_unfollow_enabled": true
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Title",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "website_slides",
+    "compute": "_compute_name",
+    "readonly": false,
+    "store": true,
+    "extended_in_packages": [
+     "website_slides_survey"
+    ],
+    "full_name": "Title"
+   },
+   {
+    "name": "image_1920",
+    "type": "Image",
+    "compute": "_compute_image_1920",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "website_slides",
+    "string": "Image 1920",
+    "full_name": "Image 1920"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "tracking": 100,
+    "defined_in_package": "website_slides",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 0,
+    "defined_in_package": "website_slides",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Uploaded by",
+    "default": {
+     "dynamic": "lambda self: self.env.uid"
+    },
+    "defined_in_package": "website_slides",
+    "full_name": "Uploaded by",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "string": "Description",
+    "translate": true,
+    "sanitize_attributes": false,
+    "sanitize_overridable": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Description"
+   },
+   {
+    "name": "channel_id",
+    "type": "Many2one",
+    "comodel": "slide.channel",
+    "string": "Course",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "website_slides",
+    "full_name": "Course",
+    "target_entity": "slide.channel"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "slide.tag",
+    "relation": "rel_slide_tag",
+    "column1": "slide_id",
+    "column2": "tag_id",
+    "string": "Tags",
+    "defined_in_package": "website_slides",
+    "full_name": "Tags",
+    "target_entity": "slide.tag"
+   },
+   {
+    "name": "is_preview",
+    "type": "Boolean",
+    "string": "Allow Preview",
+    "default": false,
+    "help": "The course is accessible by anyone : the users don't need to join the channel to access the content of the course.",
+    "defined_in_package": "website_slides",
+    "compute": "_compute_is_preview",
+    "readonly": false,
+    "store": true,
+    "extended_in_packages": [
+     "website_slides_survey"
+    ],
+    "full_name": "Allow Preview"
+   },
+   {
+    "name": "is_new_slide",
+    "type": "Boolean",
+    "string": "Is New Slide",
+    "compute": "_compute_is_new_slide",
+    "defined_in_package": "website_slides",
+    "full_name": "Is New Slide"
+   },
+   {
+    "name": "completion_time",
+    "type": "Float",
+    "string": "Duration",
+    "digits": [
+     10,
+     4
+    ],
+    "compute": "_compute_category_completion_time",
+    "recursive": true,
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Duration"
+   },
+   {
+    "name": "is_category",
+    "type": "Boolean",
+    "string": "Is a category",
+    "default": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Is a category"
+   },
+   {
+    "name": "category_id",
+    "type": "Many2one",
+    "comodel": "slide.slide",
+    "string": "Section",
+    "compute": "_compute_category_id",
+    "store": true,
+    "index": "btree_not_null",
+    "defined_in_package": "website_slides",
+    "full_name": "Section",
+    "target_entity": "slide.slide"
+   },
+   {
+    "name": "slide_ids",
+    "type": "One2many",
+    "comodel": "slide.slide",
+    "inverse_name": "category_id",
+    "string": "Content",
+    "defined_in_package": "website_slides",
+    "full_name": "Content",
+    "target_entity": "slide.slide"
+   },
+   {
+    "name": "partner_ids",
+    "type": "Many2many",
+    "comodel": "res.partner",
+    "relation": "slide_slide_partner",
+    "column1": "slide_id",
+    "column2": "partner_id",
+    "string": "Subscribers",
+    "groups": "website_slides.group_website_slides_officer",
+    "copy": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Subscribers",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "slide_partner_ids",
+    "type": "One2many",
+    "comodel": "slide.slide.partner",
+    "inverse_name": "slide_id",
+    "string": "Subscribers information",
+    "groups": "website_slides.group_website_slides_officer",
+    "copy": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Subscribers information",
+    "target_entity": "slide.slide.partner"
+   },
+   {
+    "name": "user_membership_id",
+    "type": "Many2one",
+    "comodel": "slide.slide.partner",
+    "string": "Subscriber information",
+    "compute": "_compute_user_membership_id",
+    "compute_sudo": false,
+    "help": "Subscriber information for the current logged in user",
+    "defined_in_package": "website_slides",
+    "full_name": "Subscriber information",
+    "target_entity": "slide.slide.partner"
+   },
+   {
+    "name": "user_vote",
+    "type": "Integer",
+    "string": "User vote",
+    "compute": "_compute_user_membership_id",
+    "compute_sudo": false,
+    "defined_in_package": "website_slides",
+    "full_name": "User vote"
+   },
+   {
+    "name": "user_has_completed",
+    "type": "Boolean",
+    "string": "Is Member",
+    "compute": "_compute_user_membership_id",
+    "compute_sudo": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Is Member"
+   },
+   {
+    "name": "user_has_completed_category",
+    "type": "Boolean",
+    "string": "Is Category Completed",
+    "compute": "_compute_category_completed",
+    "defined_in_package": "website_slides",
+    "full_name": "Is Category Completed"
+   },
+   {
+    "name": "question_ids",
+    "type": "One2many",
+    "comodel": "slide.question",
+    "inverse_name": "slide_id",
+    "string": "Questions",
+    "copy": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Questions",
+    "target_entity": "slide.question"
+   },
+   {
+    "name": "questions_count",
+    "type": "Integer",
+    "string": "Numbers of Questions",
+    "compute": "_compute_questions_count",
+    "defined_in_package": "website_slides",
+    "full_name": "Numbers of Questions"
+   },
+   {
+    "name": "quiz_first_attempt_reward",
+    "type": "Integer",
+    "string": "Reward: first attempt",
+    "default": 10,
+    "defined_in_package": "website_slides",
+    "full_name": "Reward: first attempt"
+   },
+   {
+    "name": "quiz_second_attempt_reward",
+    "type": "Integer",
+    "string": "Reward: second attempt",
+    "default": 7,
+    "defined_in_package": "website_slides",
+    "full_name": "Reward: second attempt"
+   },
+   {
+    "name": "quiz_third_attempt_reward",
+    "type": "Integer",
+    "string": "Reward: third attempt",
+    "default": 5,
+    "defined_in_package": "website_slides",
+    "full_name": "Reward: third attempt"
+   },
+   {
+    "name": "quiz_fourth_attempt_reward",
+    "type": "Integer",
+    "string": "Reward: every attempt after the third try",
+    "default": 2,
+    "defined_in_package": "website_slides",
+    "full_name": "Reward: every attempt after the third try"
+   },
+   {
+    "name": "can_self_mark_completed",
+    "type": "Boolean",
+    "string": "Can Mark Completed",
+    "compute": "_compute_mark_complete_actions",
+    "help": "The slide can be marked as completed even without opening it",
+    "defined_in_package": "website_slides",
+    "full_name": "Can Mark Completed"
+   },
+   {
+    "name": "can_self_mark_uncompleted",
+    "type": "Boolean",
+    "string": "Can Mark Uncompleted",
+    "compute": "_compute_mark_complete_actions",
+    "help": "The slide can be marked as not completed and the progression",
+    "defined_in_package": "website_slides",
+    "full_name": "Can Mark Uncompleted"
+   },
+   {
+    "name": "slide_category",
+    "type": "Selection",
+    "selection": [
+     [
+      "infographic",
+      "Image"
+     ],
+     [
+      "article",
+      "Article"
+     ],
+     [
+      "document",
+      "Document"
+     ],
+     [
+      "video",
+      "Video"
+     ],
+     [
+      "quiz",
+      "Quiz"
+     ],
+     [
+      "certification",
+      "Certification"
+     ]
+    ],
+    "string": "Category",
+    "required": true,
+    "default": "document",
+    "defined_in_package": "website_slides",
+    "selection_added_by": [
+     "website_slides_survey"
+    ],
+    "ondelete": {
+     "certification": "set default"
+    },
+    "extended_in_packages": [
+     "website_slides_survey"
+    ],
+    "full_name": "Category"
+   },
+   {
+    "name": "source_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "local_file",
+      "Upload from Device"
+     ],
+     [
+      "external",
+      "Retrieve from Google Drive"
+     ]
+    ],
+    "default": "local_file",
+    "required": true,
+    "defined_in_package": "website_slides",
+    "string": "Source Type",
+    "full_name": "Source Type"
+   },
+   {
+    "name": "url",
+    "type": "Char",
+    "string": "External URL",
+    "help": "URL of the Google Drive file or URL of the YouTube video",
+    "defined_in_package": "website_slides",
+    "full_name": "External uniform resource locator"
+   },
+   {
+    "name": "binary_content",
+    "type": "Binary",
+    "string": "File",
+    "attachment": true,
+    "defined_in_package": "website_slides",
+    "full_name": "File"
+   },
+   {
+    "name": "slide_resource_ids",
+    "type": "One2many",
+    "comodel": "slide.slide.resource",
+    "inverse_name": "slide_id",
+    "string": "Additional Resource for this slide",
+    "copy": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Additional Resource for this slide",
+    "target_entity": "slide.slide.resource"
+   },
+   {
+    "name": "slide_resource_downloadable",
+    "type": "Boolean",
+    "string": "Allow Download",
+    "default": false,
+    "help": "Allow the user to download the content of the slide.",
+    "defined_in_package": "website_slides",
+    "full_name": "Allow Download"
+   },
+   {
+    "name": "google_drive_id",
+    "type": "Char",
+    "string": "Google Drive ID of the external URL",
+    "compute": "_compute_google_drive_id",
+    "defined_in_package": "website_slides",
+    "full_name": "Google Drive identifier of the external uniform resource locator"
+   },
+   {
+    "name": "html_content",
+    "type": "Html",
+    "string": "HTML Content",
+    "translate": true,
+    "sanitize_attributes": false,
+    "sanitize_form": false,
+    "sanitize_overridable": true,
+    "help": "Custom HTML content for slides of category 'Article'.",
+    "defined_in_package": "website_slides",
+    "full_name": "hypertext markup language Content"
+   },
+   {
+    "name": "image_binary_content",
+    "type": "Binary",
+    "string": "Image Content",
+    "related": "binary_content",
+    "readonly": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Image Content"
+   },
+   {
+    "name": "image_google_url",
+    "type": "Char",
+    "string": "Image Link",
+    "related": "url",
+    "readonly": false,
+    "help": "Link of the image (we currently only support Google Drive as source)",
+    "defined_in_package": "website_slides",
+    "full_name": "Image Link"
+   },
+   {
+    "name": "slide_icon_class",
+    "type": "Char",
+    "string": "Slide Icon fa-class",
+    "compute": "_compute_slide_icon_class",
+    "defined_in_package": "website_slides",
+    "full_name": "Slide Icon fa-class"
+   },
+   {
+    "name": "slide_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "image",
+      "Image"
+     ],
+     [
+      "article",
+      "Article"
+     ],
+     [
+      "quiz",
+      "Quiz"
+     ],
+     [
+      "pdf",
+      "PDF"
+     ],
+     [
+      "sheet",
+      "Sheet (Excel, Google Sheet, ...)"
+     ],
+     [
+      "doc",
+      "Document (Word, Google Doc, ...)"
+     ],
+     [
+      "slides",
+      "Slides (PowerPoint, Google Slides, ...)"
+     ],
+     [
+      "youtube_video",
+      "YouTube Video"
+     ],
+     [
+      "google_drive_video",
+      "Google Drive Video"
+     ],
+     [
+      "vimeo_video",
+      "Vimeo Video"
+     ],
+     [
+      "certification",
+      "Certification"
+     ]
+    ],
+    "string": "Slide Type",
+    "compute": "_compute_slide_type",
+    "store": true,
+    "readonly": false,
+    "help": "Subtype of the slide category, allows more precision on the actual file type / source type.",
+    "defined_in_package": "website_slides",
+    "selection_added_by": [
+     "website_slides_survey"
+    ],
+    "ondelete": {
+     "certification": "set null"
+    },
+    "extended_in_packages": [
+     "website_slides_survey"
+    ],
+    "full_name": "Slide Type"
+   },
+   {
+    "name": "document_google_url",
+    "type": "Char",
+    "string": "Document Link",
+    "related": "url",
+    "readonly": false,
+    "help": "Link of the document (we currently only support Google Drive as source)",
+    "defined_in_package": "website_slides",
+    "full_name": "Document Link"
+   },
+   {
+    "name": "document_binary_content",
+    "type": "Binary",
+    "string": "PDF Content",
+    "related": "binary_content",
+    "readonly": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Portable Document Format Content"
+   },
+   {
+    "name": "video_url",
+    "type": "Char",
+    "string": "Video Link",
+    "related": "url",
+    "readonly": false,
+    "help": "Link of the video (we support YouTube, Google Drive and Vimeo as sources)",
+    "defined_in_package": "website_slides",
+    "full_name": "Video Link"
+   },
+   {
+    "name": "video_source_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "youtube",
+      "YouTube"
+     ],
+     [
+      "google_drive",
+      "Google Drive"
+     ],
+     [
+      "vimeo",
+      "Vimeo"
+     ]
+    ],
+    "string": "Video Source",
+    "compute": "_compute_video_source_type",
+    "defined_in_package": "website_slides",
+    "full_name": "Video Source"
+   },
+   {
+    "name": "youtube_id",
+    "type": "Char",
+    "string": "Video YouTube ID",
+    "compute": "_compute_youtube_id",
+    "defined_in_package": "website_slides",
+    "full_name": "Video YouTube identifier"
+   },
+   {
+    "name": "vimeo_id",
+    "type": "Char",
+    "string": "Video Vimeo ID",
+    "compute": "_compute_vimeo_id",
+    "defined_in_package": "website_slides",
+    "full_name": "Video Vimeo identifier"
+   },
+   {
+    "name": "website_id",
+    "type": "Many2one",
+    "related": "channel_id.website_id",
+    "readonly": true,
+    "defined_in_package": "website_slides",
+    "string": "Website",
+    "full_name": "Website"
+   },
+   {
+    "name": "date_published",
+    "type": "Datetime",
+    "string": "Publish Date",
+    "readonly": true,
+    "tracking": false,
+    "copy": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Publish Date"
+   },
+   {
+    "name": "likes",
+    "type": "Integer",
+    "string": "Likes",
+    "compute": "_compute_like_info",
+    "store": true,
+    "compute_sudo": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Likes"
+   },
+   {
+    "name": "dislikes",
+    "type": "Integer",
+    "string": "Dislikes",
+    "compute": "_compute_like_info",
+    "store": true,
+    "compute_sudo": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Dislikes"
+   },
+   {
+    "name": "embed_code",
+    "type": "Html",
+    "string": "Embed Code",
+    "readonly": true,
+    "compute": "_compute_embed_code",
+    "sanitize": false,
+    "defined_in_package": "website_slides",
+    "full_name": "Embed Code"
+   },
+   {
+    "name": "embed_code_external",
+    "type": "Html",
+    "string": "External Embed Code",
+    "readonly": true,
+    "compute": "_compute_embed_code",
+    "sanitize": false,
+    "help": "Same as 'Embed Code' but used to embed the content on an external website.",
+    "defined_in_package": "website_slides",
+    "full_name": "External Embed Code"
+   },
+   {
+    "name": "website_share_url",
+    "type": "Char",
+    "string": "Share URL",
+    "compute": "_compute_website_share_url",
+    "defined_in_package": "website_slides",
+    "full_name": "Share uniform resource locator"
+   },
+   {
+    "name": "embed_ids",
+    "type": "One2many",
+    "comodel": "slide.embed",
+    "inverse_name": "slide_id",
+    "string": "External Slide Embeds",
+    "defined_in_package": "website_slides",
+    "full_name": "External Slide Embeds",
+    "target_entity": "slide.embed"
+   },
+   {
+    "name": "embed_count",
+    "type": "Integer",
+    "string": "# of Embeds",
+    "compute": "_compute_embed_counts",
+    "defined_in_package": "website_slides",
+    "full_name": "# of Embeds"
+   },
+   {
+    "name": "slide_views",
+    "type": "Integer",
+    "string": "# of Website Views",
+    "store": true,
+    "compute": "_compute_slide_views",
+    "defined_in_package": "website_slides",
+    "full_name": "# of Website Views"
+   },
+   {
+    "name": "public_views",
+    "type": "Integer",
+    "string": "# of Public Views",
+    "copy": false,
+    "default": 0,
+    "readonly": true,
+    "defined_in_package": "website_slides",
+    "full_name": "# of Public Views"
+   },
+   {
+    "name": "total_views",
+    "type": "Integer",
+    "string": "# Total Views",
+    "default": "0",
+    "compute": "_compute_total",
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "# Total Views"
+   },
+   {
+    "name": "comments_count",
+    "type": "Integer",
+    "string": "Number of comments",
+    "compute": "_compute_comments_count",
+    "defined_in_package": "website_slides",
+    "full_name": "Number of comments"
+   },
+   {
+    "name": "channel_type",
+    "type": "Selection",
+    "related": "channel_id.channel_type",
+    "string": "Channel type",
+    "defined_in_package": "website_slides",
+    "full_name": "Channel type"
+   },
+   {
+    "name": "channel_allow_comment",
+    "type": "Boolean",
+    "related": "channel_id.allow_comment",
+    "string": "Allows comment",
+    "defined_in_package": "website_slides",
+    "full_name": "Allows comment"
+   },
+   {
+    "name": "nbr_document",
+    "type": "Integer",
+    "string": "Number of Documents",
+    "compute": "_compute_slides_statistics",
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Number of Documents"
+   },
+   {
+    "name": "nbr_video",
+    "type": "Integer",
+    "string": "Number of Videos",
+    "compute": "_compute_slides_statistics",
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Number of Videos"
+   },
+   {
+    "name": "nbr_infographic",
+    "type": "Integer",
+    "string": "Number of Images",
+    "compute": "_compute_slides_statistics",
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Number of Images"
+   },
+   {
+    "name": "nbr_article",
+    "type": "Integer",
+    "string": "Number of Articles",
+    "compute": "_compute_slides_statistics",
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Number of Articles"
+   },
+   {
+    "name": "nbr_quiz",
+    "type": "Integer",
+    "string": "Number of Quizs",
+    "compute": "_compute_slides_statistics",
+    "store": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Number of Quizs"
+   },
+   {
+    "name": "total_slides",
+    "type": "Integer",
+    "compute": "_compute_slides_statistics",
+    "store": true,
+    "defined_in_package": "website_slides",
+    "string": "Total Slides",
+    "full_name": "Total Slides"
+   },
+   {
+    "name": "is_published",
+    "type": "Boolean",
+    "tracking": 1,
+    "defined_in_package": "website_slides",
+    "string": "Is Published",
+    "full_name": "Is Published"
+   },
+   {
+    "name": "website_published",
+    "type": "Boolean",
+    "tracking": false,
+    "defined_in_package": "website_slides",
+    "string": "Website Published",
+    "full_name": "Website Published"
+   },
+   {
+    "name": "survey_id",
+    "type": "Many2one",
+    "comodel": "survey.survey",
+    "string": "Certification",
+    "index": "btree_not_null",
+    "defined_in_package": "website_slides_survey",
+    "full_name": "Certification",
+    "target_entity": "survey.survey"
+   },
+   {
+    "name": "nbr_certification",
+    "type": "Integer",
+    "string": "Number of Certifications",
+    "compute": "_compute_slides_statistics",
+    "store": true,
+    "defined_in_package": "website_slides_survey",
+    "full_name": "Number of Certifications"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_exclusion_html_content_and_url",
+    "kind": "Constraint",
+    "definition": "CHECK(html_content IS NULL OR url IS NULL)",
+    "message": "A slide is either filled with a url or HTML content. Not both.",
+    "defined_in_package": "website_slides"
+   },
+   {
+    "name": "_check_survey_id",
+    "kind": "Constraint",
+    "definition": "CHECK(slide_category != 'certification' OR survey_id IS NOT NULL)",
+    "message": "A slide of type 'certification' requires a certification.",
+    "defined_in_package": "website_slides_survey"
+   },
+   {
+    "name": "_check_certification_preview",
+    "kind": "Constraint",
+    "definition": "CHECK(slide_category != 'certification' OR is_preview = False)",
+    "message": "A slide of type certification cannot be previewed.",
+    "defined_in_package": "website_slides_survey"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_image_1920",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_category",
+         "source_type",
+         "image_binary_content"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_new_slide",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_published",
+         "is_published"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_placeholder_filename",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_category_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id.slide_ids.is_category",
+         "channel_id.slide_ids.sequence",
+         "channel_id.slide_ids.slide_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Will take all the slides of the channel for which the index is higher\nthan the index of this category and lower than the index of the next category.\n\nLists are manually sorted because when adding a new browse record order\nwill not be correct as the added slide would actually end up at the\nfirst place no matter its sequence.",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mark_complete_actions",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_category",
+         "question_ids",
+         "channel_id.is_member"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Determine if the slide can be marked as (un)completed.\n\nWe can't mark a slide with questions as completed manually because we need to\ncomplete the quiz first. But we can mark as uncompleted a slide with questions,\nand the answers will be reset, the karma removed, etc (see mark_uncompleted).",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_questions_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "question_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_comments_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_message_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_views",
+         "public_views"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_like_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_partner_ids.vote"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_slide_views",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_partner_ids.slide_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_embed_counts",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "embed_ids.slide_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_slides_statistics",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_ids.sequence",
+         "slide_ids.active",
+         "slide_ids.slide_category",
+         "slide_ids.is_published",
+         "slide_ids.is_category"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_category_completed",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "category_id",
+         "category_id.slide_ids",
+         "category_id.slide_ids.user_has_completed"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_category_completion_time",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_ids.sequence",
+         "slide_ids.active",
+         "slide_ids.completion_time",
+         "slide_ids.is_published",
+         "slide_ids.is_category"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_slide_icon_class",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides_survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_slide_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_category",
+         "source_type",
+         "video_source_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "For 'local content' or specific slide categories, the slide type is directly derived\nfrom the slide category.\n\nFor external content, the slide type is determined from the metadata and the mime_type.\n(See #_fetch_google_drive_metadata() for more details).",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides_survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_category",
+         "source_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_membership_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_partner_ids.partner_id",
+         "slide_partner_ids.vote",
+         "slide_partner_ids.completed"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_embed_code",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_category",
+         "google_drive_id",
+         "video_source_type",
+         "youtube_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_video_source_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "video_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_youtube_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "video_url",
+         "video_source_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_vimeo_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "video_url",
+         "video_source_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_google_drive_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "url",
+         "document_google_url",
+         "image_google_url",
+         "video_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Extracts the Google Drive ID from the url based on the slide category. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_on_change_url",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "url",
+         "document_google_url",
+         "image_google_url",
+         "video_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Keeping a 'onchange' because we want this behavior for the frontend.\nChanging the document / video external URL will populate some metadata on the form view.\nWe only populate the field that are empty to avoid overriding user assigned values.\nThe slide metadata are also fetched in create / write overrides to ensure consistency. ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_on_change_document_binary_content",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "document_binary_content"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_on_change_slide_category",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "slide_category"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Prevents mis-match when ones uploads an image and then a pdf without saving the form. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "channel_id.website_id.domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_absolute_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id.website_id.domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_share_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "is_published"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_can_publish",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "channel_id.can_publish"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_can_publish_error_message",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 35,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides_survey",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Sets the sequence to zero so that it always lands at the beginning\nof the newly selected course as an uncategorized slide",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "website_slides_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_return_content",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name",
+     "access_token"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "message_post",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "message_type",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Not enough karma to comment",
+        "line": 676
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_access_action",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "access_uid",
+     "force_website"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Instead of the classic form view, redirect to website if it is published. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_get_recipients_groups",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "model_description",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_embed_increment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "url"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Increment the view count of the record we have based on the passed url.\nIf the url is empty, which typically happens if the browser does not pass the 'referer'\nheader properly, then we increment the entry that has 'False' as url value. ",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_post_publication",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_share_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "email",
+     "fullscreen"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Impossible to send emails. Select a \"Share Template\" for courses %(course_names)s first",
+        "line": 760
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_like",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_dislike",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_vote",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "upvote"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Private implementation of voting. It does not check for any real access\nrights; public methods should grant access before calling this method.\n\n  :param upvote: if True, is a like; if False, is a dislike",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_viewed",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "quiz_attempts_inc"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot mark a slide as viewed if you are not among its members.",
+        "line": 815
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_set_viewed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "target_partner",
+     "quiz_attempts_inc"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mark_completed",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot mark a slide as completed if you are not among its members.",
+        "line": 840
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_mark_completed",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_mark_uncompleted",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot mark a slide as uncompleted if you are not among its members.",
+        "line": 866
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_set_quiz_done",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "completed"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Add or remove karma point related to the quiz.\n\n:param completed:\n    True if the quiz will be marked as completed (karma will be increased)\n    If set to False, we will remove the karma instead of increasing it,\n    so that the user can take the quiz multiple times but not gain karma infinitely",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "_('You cannot mark a slide quiz as completed if you are not among its members or it is unpublished.') if completed else _('You cannot mark a slide quiz as not completed if you are not among its members or it is unpublished.')",
+        "line": 887
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_view_embeds",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_quiz_info",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "target_partner",
+     "quiz_done"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_external_metadata",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "image_url_only"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_youtube_metadata",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "image_url_only"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Fetches video metadata from the YouTube API.\n\nReturns a dict containing video metadata with the following keys (matching slide.slide fields):\n- 'name' matching the video title\n- 'description' matching the video description\n- 'image_1920' binary data of the video thumbnail\n  OR 'image_url' containing an external link to the thumbnail when 'image_url_only' param is True\n- 'completion_time' matching the video duration\n  The received duration is under a special format (e.g: PT1M21S15, meaning 1h 21m 15s).\n\n:param image_url_only: if True, will return 'image_url' instead of binary data\n  Typically used when displaying a slide preview to the end user.\n:return a tuple (values, error) containing the values of the slide and a potential error\n  (e.g: 'Video could not be found') ",
+      "size_in_lines": 78,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_google_drive_metadata",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "image_url_only"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Fetches document / video metadata from the Google Drive API.\n\nReturns a dict containing metadata with the following keys (matching slide.slide fields):\n- 'name' matching the external file title\n- 'image_1920' binary data of the file thumbnail\n  OR 'image_url' containing an external link to the thumbnail when 'image_url_only' param is True\n- 'completion_time' which is computed for 2 types of files:\n  - pdf files where we download the content and then use slide.slide#_get_completion_time_pdf()\n  - videos where we use the 'videoMediaMetadata' to extract the 'durationMillis'\n\n:param image_url_only: if True, will return 'image_url' instead of binary data\n  Typically used when displaying a slide preview to the end user.\n:return a tuple (values, error) containing the values of the slide and a potential error\n  (e.g: 'File could not be found') ",
+      "size_in_lines": 129,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fetch_vimeo_metadata",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "image_url_only"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "Fetches video metadata from the Vimeo API.\nSee https://developer.vimeo.com/api/oembed/showcases for more information.\n\nReturns a dict containing video metadata with the following keys (matching slide.slide fields):\n- 'name' matching the video title\n- 'description' matching the video description\n- 'image_1920' binary data of the video thumbnail\n  OR 'image_url' containing an external link to the thumbnail when 'fetch_image' param is False\n- 'completion_time' matching the video duration\n\n:param image_url_only: if False, will return 'image_url' instead of binary data\n  Typically used when displaying a slide preview to the end user.\n:return a tuple (values, error) containing the values of the slide and a potential error\n  (e.g: 'Video could not be found') ",
+      "size_in_lines": 66,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_website_meta",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_completion_time_pdf",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "data_bytes"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "For PDFs, we assume that it takes 5 minutes to read a page.\nThis method receives the data of the PDF as bytes. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_category",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_backend_menu_id",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_get_detail",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "website",
+     "order",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_render_results",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "fetch_fields",
+     "mapping",
+     "icon",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_base_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": "As website_id is not defined on this record, we rely on channel website_id for base URL.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mail_get_partner_fields",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "introspect_fields"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides_survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "survey_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_preview",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides_survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_category"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_challenge_category",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "old_surveys",
+     "unlink"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides_survey",
+      "decorators": [],
+      "documentation": "If a slide is linked to a survey that gives a badge, the challenge category of this badge must be\nset to 'slides' in order to appear under the certification badge list on ranks_badges page.\nIf the survey is unlinked from the slide, the challenge category must be reset to 'certification'",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_certification_url",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides_survey",
+      "decorators": [],
+      "documentation": "get a map of certification url for certification slide from `self`. The url will come from the survey user input:\n    1/ existing and not done user_input for member of the course\n    2/ create a new user_input for member\n    3/ for no member, a test user_input is created and the url is returned\nNote: the slide.slides.partner should already exist\n\nWe have to generate a new invite_token to differentiate pools of attempts since the\ncourse can be enrolled multiple times.",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "message_post",
+    "package": "website_slides",
+    "kind": "AccessError",
+    "message": "Not enough karma to comment"
+   },
+   {
+    "operation": "_send_share_email",
+    "package": "website_slides",
+    "kind": "UserError",
+    "message": "Impossible to send emails. Select a \"Share Template\" for courses %(course_names)s first"
+   },
+   {
+    "operation": "action_set_viewed",
+    "package": "website_slides",
+    "kind": "UserError",
+    "message": "You cannot mark a slide as viewed if you are not among its members."
+   },
+   {
+    "operation": "action_mark_completed",
+    "package": "website_slides",
+    "kind": "UserError",
+    "message": "You cannot mark a slide as completed if you are not among its members."
+   },
+   {
+    "operation": "action_mark_uncompleted",
+    "package": "website_slides",
+    "kind": "UserError",
+    "message": "You cannot mark a slide as uncompleted if you are not among its members."
+   },
+   {
+    "operation": "_action_set_quiz_done",
+    "package": "website_slides",
+    "kind": "UserError",
+    "message": "_('You cannot mark a slide quiz as completed if you are not among its members or it is unpublished.') if completed else _('You cannot mark a slide quiz as not completed if you are not among its members or it is unpublished.')"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_slides.access_slide_slide_public",
+    "package": "website_slides",
+    "name": "slide.slide.all",
+    "entity": "slide.slide",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_slide_portal",
+    "package": "website_slides",
+    "name": "slide.slide.all",
+    "entity": "slide.slide",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_slide_employee",
+    "package": "website_slides",
+    "name": "slide.slide.all",
+    "entity": "slide.slide",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_slide_officer",
+    "package": "website_slides",
+    "name": "slide.slide.officer",
+    "entity": "slide.slide",
+    "group": "website_slides.group_website_slides_officer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_slide_manager",
+    "package": "website_slides",
+    "name": "slide.slide.manager",
+    "entity": "slide.slide",
+    "group": "website_slides.group_website_slides_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "website_slides.rule_slide_slide_global",
+    "package": "website_slides",
+    "name": "Slide: always visible (sub rules exist)",
+    "entity": "slide.slide",
+    "domain": "[(1, '=', 1)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_slide_public_user",
+    "package": "website_slides",
+    "name": "Slide: public: restricted to published or public/link-based channel & (category or previewable)",
+    "entity": "slide.slide",
+    "domain": "[\n                    ('channel_id.website_published', '=', True),\n                    ('website_published', '=', True),\n                    ('channel_id.visibility', 'in', ['public', 'link']),\n                    '|',\n                        ('is_category','=', True),\n                        ('is_preview', '=', True),\n                ]",
+    "groups": "[(4, ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_slide_signed_in_user",
+    "package": "website_slides",
+    "name": "Slide: portal/user: restricted to published and connected user, (invited) attendee or link-based, if course visible to attendees only",
+    "entity": "slide.slide",
+    "domain": "[\n                '&',\n                    '|',\n                        ('user_id', '=', user.id),\n                        '&',\n                            ('website_published', '=', True),\n                            ('channel_id.website_published', '=', True),\n                    '|',\n                        '&',\n                            '|',\n                                ('channel_id.visibility', 'in', ('public', 'connected',  'link')),\n                                ('channel_id.is_member_invited', '=', True),\n                            '|',\n                                ('is_category', '=', True),\n                                ('is_preview', '=', True),\n                        ('channel_id.is_member', '=', True),\n                ]",
+    "groups": "[(4, ref('base.group_portal')), (4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_slide_officer_r",
+    "package": "website_slides",
+    "name": "Slide: officer: read all",
+    "entity": "slide.slide",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_slide_officer_cw",
+    "package": "website_slides",
+    "name": "Slide: officer: create/write own only",
+    "entity": "slide.slide",
+    "domain": "[('channel_id.user_id', '=', user.id)]",
+    "groups": "[(4, ref('group_website_slides_officer'))]",
+    "global": false,
+    "applies_to_read": "0",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "0"
+   },
+   {
+    "external_identifier": "website_slides.rule_slide_slide_manager",
+    "package": "website_slides",
+    "name": "Slide: manager: crud all",
+    "entity": "slide.slide",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('group_website_slides_manager'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "website_slides.view_slide_slide_form",
+    "package": "website_slides",
+    "name": "slide.slide.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Lesson"
+     },
+     "fields": [
+      {
+       "name": "channel_type",
+       "invisible": "1",
+       "readonly": "1"
+      },
+      {
+       "name": "channel_allow_comment",
+       "invisible": "1",
+       "readonly": "1"
+      },
+      {
+       "name": "slide_views",
+       "widget": "statinfo",
+       "string": "Attendees"
+      },
+      {
+       "name": "likes",
+       "widget": "statinfo",
+       "string": "Likes"
+      },
+      {
+       "name": "dislikes",
+       "widget": "statinfo",
+       "string": "Dislikes"
+      },
+      {
+       "name": "comments_count",
+       "widget": "statinfo",
+       "string": "Comments"
+      },
+      {
+       "name": "embed_count"
+      },
+      {
+       "name": "is_published",
+       "widget": "website_redirect_button",
+       "invisible": "is_category or not channel_id"
+      },
+      {
+       "name": "image_1920",
+       "widget": "image",
+       "invisible": "is_category",
+       "options": "{\"preview_image\": \"image_256\"}"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Setting up your computer"
+      },
+      {
+       "name": "is_category",
+       "invisible": "1"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "invisible": "is_category",
+       "placeholder": "Tags..."
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "slide_category",
+       "string": "Content Type"
+      },
+      {
+       "name": "slide_type",
+       "invisible": "1"
+      },
+      {
+       "name": "source_type",
+       "widget": "radio",
+       "invisible": "slide_category not in ['infographic', 'document']",
+       "nolabel": "1"
+      },
+      {
+       "name": "video_url",
+       "widget": "url",
+       "invisible": "slide_category != 'video'",
+       "readonly": "slide_category != 'video'",
+       "required": "slide_category == 'video'",
+       "placeholder": "e.g \"www.youtube.com/watch?v=ebBez6bcSEc\""
+      },
+      {
+       "name": "document_google_url",
+       "widget": "url",
+       "invisible": "source_type != 'external' or slide_category != 'document'",
+       "readonly": "source_type != 'external' or slide_category != 'document'",
+       "placeholder": "e.g \"https://drive.google.com/file/...\""
+      },
+      {
+       "name": "image_google_url",
+       "widget": "url",
+       "invisible": "source_type != 'external' or slide_category != 'infographic'",
+       "readonly": "source_type != 'external' or slide_category != 'infographic'",
+       "placeholder": "e.g \"https://drive.google.com/file/...\""
+      },
+      {
+       "name": "document_binary_content",
+       "invisible": "source_type == 'external' or slide_category != 'document'",
+       "readonly": "source_type == 'external' or slide_category != 'document'",
+       "string": "",
+       "options": "{'accepted_file_extensions': '.pdf'}"
+      },
+      {
+       "name": "image_binary_content",
+       "invisible": "source_type == 'external' or slide_category != 'infographic'",
+       "readonly": "source_type == 'external' or slide_category != 'infographic'",
+       "string": "",
+       "options": "{'accepted_file_extensions': 'image/*'}"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar",
+       "string": "Responsible",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "completion_time",
+       "widget": "float_time"
+      },
+      {
+       "name": "slide_resource_downloadable",
+       "invisible": "slide_category != 'document' or source_type != 'local_file'"
+      },
+      {
+       "name": "date_published",
+       "invisible": "not date_published",
+       "string": "Published Date",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "is_preview"
+      },
+      {
+       "name": "public_views"
+      },
+      {
+       "name": "total_views"
+      },
+      {
+       "name": "description",
+       "options": "{'embedded_components': false}",
+       "placeholder": "e.g. In this video, we'll give you the keys on how the system can help you to grow your business. At the end, we'll propose you a quiz to test your knowledge."
+      },
+      {
+       "name": "slide_resource_ids",
+       "widget": "one2many",
+       "nolabel": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "resource_type"
+      },
+      {
+       "name": "name",
+       "required": "1"
+      },
+      {
+       "name": "file_name",
+       "column_invisible": "True"
+      },
+      {
+       "name": "data",
+       "readonly": "resource_type == 'url'"
+      },
+      {
+       "name": "link",
+       "readonly": "resource_type == 'file'",
+       "required": "resource_type == 'url'",
+       "string": "Link"
+      },
+      {
+       "name": "quiz_first_attempt_reward",
+       "string": "First Try"
+      },
+      {
+       "name": "quiz_second_attempt_reward",
+       "string": "Second Try"
+      },
+      {
+       "name": "quiz_third_attempt_reward",
+       "string": "Third Try"
+      },
+      {
+       "name": "quiz_fourth_attempt_reward",
+       "string": "Fourth Try & More"
+      },
+      {
+       "name": "question_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "question",
+       "string": "Question"
+      },
+      {
+       "name": "answer_ids",
+       "widget": "many2many_tags",
+       "string": "Answers"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(slide_slide_partner_action_from_slide)d",
+       "type": "action",
+       "invisible": "slide_views == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-graduation-cap"
+      },
+      {
+       "invisible": "channel_type == 'training' or likes == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-thumbs-up"
+      },
+      {
+       "invisible": "channel_type == 'training' or dislikes == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-thumbs-down"
+      },
+      {
+       "invisible": "not channel_allow_comment or comments_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-comments"
+      },
+      {
+       "name": "action_view_embeds",
+       "type": "object",
+       "invisible": "embed_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-share-alt"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "document",
+       "string": "Document",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "description",
+       "string": "Description",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "external_links",
+       "string": "Additional Resources",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "quiz",
+       "string": "Quiz",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statinfo": 4,
+      "website_redirect_button": 1,
+      "image": 1,
+      "many2many_tags": 2,
+      "radio": 1,
+      "url": 3,
+      "many2one_avatar": 1,
+      "float_time": 1,
+      "one2many": 1,
+      "handle": 2
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "%(slide_slide_partner_action_from_slide)d",
+       "class": "oe_stat_button",
+       "type": "action",
+       "icon": "fa-graduation-cap",
+       "invisible": "slide_views == 0"
+      },
+      {
+       "disabled": "1",
+       "icon": "fa-thumbs-up",
+       "class": "oe_stat_button",
+       "invisible": "channel_type == 'training' or likes == 0"
+      },
+      {
+       "disabled": "1",
+       "icon": "fa-thumbs-down",
+       "class": "oe_stat_button",
+       "invisible": "channel_type == 'training' or dislikes == 0"
+      },
+      {
+       "disabled": "1",
+       "icon": "fa-comments",
+       "class": "oe_stat_button",
+       "invisible": "not channel_allow_comment or comments_count == 0"
+      },
+      {
+       "name": "action_view_embeds",
+       "class": "oe_stat_button",
+       "type": "object",
+       "icon": "fa-share-alt",
+       "invisible": "embed_count == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_slides.view_slide_slide_form_wo_channel_id",
+    "package": "website_slides",
+    "name": "slide.slide.form.wo.channel_id",
+    "view_type": "field",
+    "inherits_view": "view_slide_slide_form",
+    "mode": "primary",
+    "priority": "50",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "channel_id",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "channel_id",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_slide_view_kanban",
+    "package": "website_slides",
+    "name": "slide.slide.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "edit": "false",
+      "group_create": "0",
+      "records_draggable": "0",
+      "class": "o_slide_kanban",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "image_128",
+       "widget": "image",
+       "options": "{'img_class': 'object-fit-cover'}"
+      },
+      {
+       "name": "channel_id",
+       "widget": "image",
+       "options": "{'preview_image': 'image_128', 'img_class': 'object-fit-contain'}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "slide_category"
+      },
+      {
+       "name": "completion_time",
+       "widget": "float_time"
+      },
+      {
+       "name": "questions_count"
+      },
+      {
+       "name": "total_views"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 2,
+      "many2many_tags": 1,
+      "float_time": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "website_slides.view_slide_slide_tree",
+    "package": "website_slides",
+    "name": "slide.slide.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Contents",
+      "sample": "1",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "readonly": "1"
+      },
+      {
+       "name": "channel_id",
+       "readonly": "1"
+      },
+      {
+       "name": "category_id",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "is_published"
+      },
+      {
+       "name": "date_published",
+       "readonly": "1"
+      },
+      {
+       "name": "completion_time",
+       "widget": "float_time",
+       "readonly": "1",
+       "sum": "Total"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_slide_view_tree_report",
+    "package": "website_slides",
+    "name": "slide.slide.view.list.report",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Contents",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "category_id",
+       "optional": "hide"
+      },
+      {
+       "name": "date_published"
+      },
+      {
+       "name": "total_views",
+       "string": "# Views",
+       "sum": "Total Views"
+      },
+      {
+       "name": "questions_count",
+       "string": "# Questions",
+       "sum": "Total Questions"
+      },
+      {
+       "name": "completion_time",
+       "widget": "float_time",
+       "sum": "Total Duration"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "float_time": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_slides.view_slide_slide_search",
+    "package": "website_slides",
+    "name": "slide.slide.filter",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Contents"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "tag_ids"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_user_id_uid",
+       "string": "My Content",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "published",
+       "string": "Published",
+       "domain": "[('is_published', '=', True)]"
+      },
+      {
+       "name": "not_published",
+       "string": "Waiting for validation",
+       "domain": "[('is_published', '=', False)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_channel",
+       "string": "Course",
+       "domain": "[]",
+       "context": "{'group_by': 'channel_id'}"
+      },
+      {
+       "name": "groupby_category",
+       "string": "Category",
+       "domain": "[]",
+       "context": "{'group_by': 'category_id'}"
+      },
+      {
+       "name": "groupby_type",
+       "string": "Type",
+       "domain": "[]",
+       "context": "{'group_by': 'slide_category'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_slide_view_graph",
+    "package": "website_slides",
+    "name": "slide.slide.view.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Graph of Contents",
+      "stacked": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "slide_category"
+      },
+      {
+       "name": "total_views"
+      },
+      {
+       "name": "quiz_first_attempt_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "quiz_second_attempt_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "quiz_third_attempt_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "quiz_fourth_attempt_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "sequence",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "slide_category"
+      },
+      {
+       "name": "total_views",
+       "type": "measure"
+      },
+      {
+       "name": "quiz_first_attempt_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "quiz_second_attempt_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "quiz_third_attempt_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "quiz_fourth_attempt_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "sequence",
+       "invisible": "1"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_slide_view_pivot",
+    "package": "website_slides",
+    "name": "slide.slide.view.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "channel_id"
+      },
+      {
+       "name": "total_views"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "channel_id",
+       "type": "row"
+      },
+      {
+       "name": "total_views",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_slides_survey.slide_slide_view_form",
+    "package": "website_slides_survey",
+    "name": "slide.slide.view.form.inherit.survey",
+    "view_type": "xpath",
+    "inherits_view": "website_slides.view_slide_slide_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='slide_category']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "survey_id",
+       "invisible": "slide_category != 'certification'",
+       "required": "slide_category == 'certification'",
+       "domain": "[('certification', '=', True)]",
+       "context": "{'default_certification': True, 'default_scoring_type': 'scoring_without_answers'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='slide_category']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_slides.slide_slide_action",
+    "package": "website_slides",
+    "name": "Contents",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('is_category', '=', False)]",
+    "context": "{'search_default_own_publications':True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Add Content\n                </p>\n                <p>\n                    Content are the lessons that compose a course\n                    <br>and can be of different types (presentations, documents, videos, ...).\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "slide.slide"
+   },
+   {
+    "external_identifier": "website_slides.slide_slide_action_report",
+    "package": "website_slides",
+    "name": "Contents",
+    "view_mode": "graph,list,form,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('is_category', '=', False)]",
+    "context": "{\"search_default_published\": 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    No data yet!\n                </p><p>\n                    Create new content for your eLearning\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "slide.slide"
+   },
+   {
+    "external_identifier": "website_slides_survey.slide_slide_action_certification",
+    "package": "website_slides_survey",
+    "name": "Certifications",
+    "view_mode": "list,form,graph",
+    "view_id": "website_slides.view_slide_slide_tree",
+    "search_view_id": null,
+    "domain": "[('slide_category', '=', 'certification')]",
+    "context": "{'default_slide_category': 'certification'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Add a new certification\n            </p>\n        </field>\n        ",
+    "usage": null,
+    "entity": "slide.slide"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "website_slides.slide_template_published",
+    "package": "website_slides",
+    "name": "Elearning: New Course Content Notification",
+    "subject": "New {{ object.slide_category }} published on {{ object.channel_id.name }}"
+   },
+   {
+    "external_identifier": "website_slides.slide_template_shared",
+    "package": "website_slides",
+    "name": "Elearning: Course Share",
+    "subject": "{{ user.name }} shared a {{ object.slide_category }} with you!"
+   }
+  ]
+ }
+}

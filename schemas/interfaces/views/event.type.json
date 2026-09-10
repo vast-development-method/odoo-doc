@@ -1,0 +1,449 @@
+{
+ "catalog": {
+  "name": "views:event.type",
+  "description": "View declarations for entity event.type.",
+  "record_count": 9,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "event.view_event_type_form",
+   "package": "event",
+   "name": "event.type.form",
+   "entity": "event.type",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Event Category"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "placeholder": "e.g. Online Conferences"
+     },
+     {
+      "name": "default_timezone"
+     },
+     {
+      "name": "tag_ids",
+      "widget": "many2many_tags",
+      "options": "{'color_field': 'color', 'no_quick_create': True}"
+     },
+     {
+      "name": "has_seats_limitation"
+     },
+     {
+      "name": "seats_max"
+     },
+     {
+      "name": "event_type_ticket_ids",
+      "context": "{                                      'list_view_ref': 'event.event_type_ticket_view_tree_from_type',                                      'form_view_ref': 'event.event_type_ticket_view_form_from_type'                                   }"
+     },
+     {
+      "name": "event_type_mail_ids"
+     },
+     {
+      "name": "template_ref",
+      "widget": "EventMailTemplateReferenceField",
+      "context": "{'filter_template_on_event': True, 'default_model': 'event.registration'}",
+      "options": "{'no_quick_create': True}"
+     },
+     {
+      "name": "interval_nbr",
+      "readonly": "interval_unit == 'now'"
+     },
+     {
+      "name": "interval_unit"
+     },
+     {
+      "name": "interval_type"
+     },
+     {
+      "name": "question_ids",
+      "domain": "[('is_reusable', '=', True)]",
+      "context": "{'list_view_ref': 'event.event_question_view_list_add'}"
+     },
+     {
+      "name": "title"
+     },
+     {
+      "name": "is_mandatory_answer",
+      "string": "Mandatory"
+     },
+     {
+      "name": "once_per_order",
+      "string": "Once per Order"
+     },
+     {
+      "name": "question_type"
+     },
+     {
+      "name": "answer_ids",
+      "widget": "many2many_tags",
+      "invisible": "question_type != 'simple_choice'"
+     },
+     {
+      "name": "is_default",
+      "optional": "hide"
+     },
+     {
+      "name": "is_reusable",
+      "optional": "hide"
+     },
+     {
+      "name": "note",
+      "nolabel": "1",
+      "placeholder": "Add some internal notes (to do lists, contact info, ...)"
+     },
+     {
+      "name": "ticket_instructions",
+      "nolabel": "1",
+      "placeholder": "e.g. How to get to your event, door closing time, ..."
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "page_tickets",
+      "string": "Tickets",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "event_type_communication",
+      "string": "Communication",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "page_questions",
+      "string": "Questions",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "notes",
+      "string": "Notes",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "many2many_tags": 2,
+     "EventMailTemplateReferenceField": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Event Category\">\n               <sheet>\n                    <div class=\"oe_title\" name=\"event_type_title\">\n                        <label for=\"name\" string=\"Event Template\"/>\n                        <h1><field name=\"name\" placeholder=\"e.g. Online Conferences\" class=\"mb-2\"/></h1>\n                    </div>\n                   <group>\n                       <group>\n                           <field name=\"default_timezone\" class=\"w-100\"/>\n                           <field name=\"tag_ids\" widget=\"many2many_tags\" options=\"{'color_field': 'color', 'no_quick_create': True}\"/>\n                       </group>\n                       <group>\n                           <label for=\"has_seats_limitation\" string=\"Limit Registrations\"/>\n                           <div>\n                               <field name=\"has_seats_limitation\"/>\n                               <span invisible=\"not has_seats_limitation\" required=\"not has_seats_limitation\">\n                                   to <field name=\"seats_max\" class=\"oe_inline o_input_9ch\"/>\n                                   Attendees\n                               </span>\n                           </div>\n                       </group>\n                   </group>\n\n                   <notebook>\n                       <page string=\"Tickets\" name=\"page_tickets\">\n                           <field name=\"event_type_ticket_ids\" class=\"w-100\" context=\"{                                      'list_view_ref': 'event.event_type_ticket_view_tree_from_type',                                      'form_view_ref': 'event.event_type_ticket_view_form_from_type'                                   }\"/>\n                       </page>\n                       <page string=\"Communication\" name=\"event_type_communication\">\n                           <field name=\"event_type_mail_ids\" class=\"w-100\">\n                               <list string=\"Communication\" editable=\"bottom\">\n                                   <field name=\"template_ref\" options=\"{'no_quick_create': True}\" context=\"{'filter_template_on_event': True, 'default_model': 'event.registration'}\" widget=\"EventMailTemplateReferenceField\"/>\n                                   <field name=\"interval_nbr\" readonly=\"interval_unit == 'now'\"/>\n                                   <field name=\"interval_unit\"/>\n                                    <field name=\"interval_type\"/>\n                               </list>\n                           </field>\n                       </page>\n                        <page string=\"Questions\" name=\"page_questions\">\n                            <field name=\"question_ids\" class=\"w-100\" domain=\"[('is_reusable', '=', True)]\" context=\"{'list_view_ref': 'event.event_question_view_list_add'}\">\n                                <list sample=\"1\">\n                                    <field name=\"title\"/>\n                                    <field name=\"is_mandatory_answer\" string=\"Mandatory\"/>\n                                    <field name=\"once_per_order\" string=\"Once per Order\"/>\n                                    <field name=\"question_type\"/>\n                                    <field name=\"answer_ids\" widget=\"many2many_tags\" invisible=\"question_type != 'simple_choice'\"/>\n                                    <field name=\"is_default\" optional=\"hide\"/>\n                                    <field name=\"is_reusable\" optional=\"hide\"/>\n                                </list>\n                            </field>\n                        </page>\n                       <page string=\"Notes\" name=\"notes\">\n                           <group>\n                                <label for=\"note\" string=\"Note\"/>\n                                <br/>\n                                <field nolabel=\"1\" colspan=\"2\" name=\"note\" placeholder=\"Add some internal notes (to do lists, contact info, ...)\"/>\n                                <label for=\"ticket_instructions\" string=\"Ticket Instructions\"/>\n                                <br/>\n                                <field nolabel=\"1\" colspan=\"2\" name=\"ticket_instructions\" placeholder=\"e.g. How to get to your event, door closing time, ...\"/>\n                            </group>\n                       </page>\n                   </notebook>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.view_event_type_tree",
+   "package": "event",
+   "name": "event.type.list",
+   "entity": "event.type",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Event Template",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Event Template\" sample=\"1\">\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event.event_type_view_search",
+   "package": "event",
+   "name": "event.type.search",
+   "entity": "event.type",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Event Templates"
+    },
+    "fields": [
+     {
+      "name": "name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Event Templates\">\n                <field name=\"name\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "event_booth.event_type_view_form",
+   "package": "event_booth",
+   "name": "event.type.view.form.inherit.event.booth",
+   "entity": "event.type",
+   "view_type": "page",
+   "inherits_view": "event.view_event_type_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "page",
+    "root_attributes": {
+     "name": "event_type_communication",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "event_type_booth_ids",
+      "context": "{                                'list_view_ref': 'event_booth.event_type_booth_view_tree_from_type',                                'form_view_ref': 'event_booth.event_type_booth_view_form_from_type'                            }"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "event_type_communication",
+      "string": null,
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "page_booths",
+      "string": "Booths",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <page name=\"event_type_communication\" position=\"after\">\n                <page string=\"Booths\" name=\"page_booths\">\n                    <field name=\"event_type_booth_ids\" class=\"w-100\" context=\"{                                'list_view_ref': 'event_booth.event_type_booth_view_tree_from_type',                                'form_view_ref': 'event_booth.event_type_booth_view_form_from_type'                            }\"/>\n                </page>\n            </page>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event.event_type_view_form",
+   "package": "website_event",
+   "name": "event.type.view.form.inherit.website",
+   "entity": "event.type",
+   "view_type": "xpath",
+   "inherits_view": "event.view_event_type_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[hasclass('oe_title')]",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "website_menu"
+     },
+     {
+      "name": "community_menu"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[hasclass('oe_title')]",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[hasclass('oe_title')]\" position=\"after\">\n                    <span name=\"website_menu\">\n                        <label for=\"website_menu\" string=\"Website Submenu\" class=\"me-1\"/>\n                        <field name=\"website_menu\" class=\"me-3\"/>\n                    </span>\n                    <span name=\"community_menu\" invisible=\"1\">\n                        <label for=\"community_menu\" string=\"Community\" class=\"me-1\"/>\n                        <field name=\"community_menu\" class=\"me-3\"/>\n                    </span>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event_booth.event_type_view_form",
+   "package": "website_event_booth",
+   "name": "event.type.view.form.inherit.website.event.booth",
+   "entity": "event.type",
+   "view_type": "xpath",
+   "inherits_view": "website_event.event_type_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//span[@name='website_menu']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "booth_menu"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//span[@name='website_menu']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//span[@name='website_menu']\" position=\"after\">\n                <span>\n                    <label for=\"booth_menu\" string=\"Booth Menu Item\" class=\"me-1\"/>\n                    <field name=\"booth_menu\" class=\"me-3\"/>\n                </span>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event_exhibitor.event_type_view_form",
+   "package": "website_event_exhibitor",
+   "name": "event.type.view.form.inherit.exhibitor",
+   "entity": "event.type",
+   "view_type": "xpath",
+   "inherits_view": "website_event.event_type_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//span[@name='community_menu']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "exhibitor_menu"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//span[@name='community_menu']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//span[@name='community_menu']\" position=\"before\">\n                <span name=\"exhibitor_menu\">\n                    <label for=\"exhibitor_menu\" string=\"Exhibitors Menu Item\" class=\"me-1\"/>\n                    <field name=\"exhibitor_menu\" class=\"me-3\"/>\n                </span>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event_track.event_type_view_form_inherit_track",
+   "package": "website_event_track",
+   "name": "event.type.view.form.inherit.track",
+   "entity": "event.type",
+   "view_type": "xpath",
+   "inherits_view": "website_event.event_type_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//span[@name='website_menu']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "website_track"
+     },
+     {
+      "name": "website_track_proposal"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//span[@name='website_menu']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//span[@name='website_menu']\" position=\"after\">\n                <span>\n                    <label for=\"website_track\" string=\"Tracks Menu Item\" class=\"me-1\"/>\n                    <field name=\"website_track\" class=\"me-3\"/>\n                </span>\n                <span name=\"website_track_proposal\">\n                    <label for=\"website_track_proposal\" string=\"Track Proposals Menu Item\" class=\"me-1\"/>\n                    <field name=\"website_track_proposal\" class=\"me-3\"/>\n                </span>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_event_track_quiz.event_type_view_form",
+   "package": "website_event_track_quiz",
+   "name": "event.type.view.form.inherit.track.quiz",
+   "entity": "event.type",
+   "view_type": "xpath",
+   "inherits_view": "website_event.event_type_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//span[@name='community_menu']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//span[@name='community_menu']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//span[@name='community_menu']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

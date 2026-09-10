@@ -1,0 +1,517 @@
+{
+ "catalog": {
+  "name": "entity:portal.wizard.user",
+  "description": "Complete definition of entity Portal User Config (portal.wizard.user).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "portal.wizard.user",
+  "storage_name": "portal_wizard_user",
+  "full_name": "Portal User Config",
+  "kind": "transient",
+  "description": "Portal User Config",
+  "defined_by_package": "portal",
+  "extended_by_packages": [
+   "website"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "wizard_id",
+    "type": "Many2one",
+    "comodel": "portal.wizard",
+    "string": "Wizard",
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "portal",
+    "full_name": "Wizard",
+    "target_entity": "portal.wizard"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Contact",
+    "required": true,
+    "readonly": true,
+    "ondelete": "cascade",
+    "defined_in_package": "portal",
+    "full_name": "Contact",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "email",
+    "type": "Char",
+    "string": "Email",
+    "defined_in_package": "portal",
+    "full_name": "Email"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "compute": "_compute_user_id",
+    "compute_sudo": true,
+    "defined_in_package": "portal",
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "login_date",
+    "type": "Datetime",
+    "related": "user_id.login_date",
+    "string": "Latest Authentication",
+    "defined_in_package": "portal",
+    "full_name": "Latest Authentication"
+   },
+   {
+    "name": "is_portal",
+    "type": "Boolean",
+    "string": "Is Portal",
+    "compute": "_compute_group_details",
+    "defined_in_package": "portal",
+    "full_name": "Is Portal"
+   },
+   {
+    "name": "is_internal",
+    "type": "Boolean",
+    "string": "Is Internal",
+    "compute": "_compute_group_details",
+    "defined_in_package": "portal",
+    "full_name": "Is Internal"
+   },
+   {
+    "name": "email_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "ok",
+      "Valid"
+     ],
+     [
+      "ko",
+      "Invalid"
+     ],
+     [
+      "exist",
+      "Already Registered"
+     ]
+    ],
+    "string": "Status",
+    "compute": "_compute_email_state",
+    "default": "ok",
+    "defined_in_package": "portal",
+    "full_name": "Status"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_email_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "email"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_user_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_group_details",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "user_id",
+         "user_id.active",
+         "user_id.group_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_grant_access",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Grant the portal access to the partner.\n\nIf the partner has no linked user, we will create a new one in the same company\nas the partner (or in the current company if not set).\n\nAn invitation email will be sent to the partner.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The partner \"%s\" already has the portal access.",
+        "line": 145
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_revoke_access",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Archive the portal user of the partner.\n\nUser is kept in `group_portal` as `group_public` should only be\nused for automated tasks and guest interactions.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The partner \"%s\" has no portal access or is internal.",
+        "line": 175
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_invite_again",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Re-send the invitation email to the partner.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You should first grant the portal access to the partner \"%s\".",
+        "line": 195
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_refresh_modal",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Refresh the portal wizard modal and keep it open. Used as fallback action of email state icon buttons,\nrequired as they must be non-disabled buttons to fire mouse events to show tooltips on email state.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_user",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "create a new user for wizard_user.partner_id\n:returns record of res.users",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "send notification email to a new portal user ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The template \"Portal: new user\" not found for sending email to the portal user.",
+        "line": 225
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_assert_user_email_uniqueness",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Check that the email can be used to create a new user.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The contact \"%s\" does not have a valid email.",
+        "line": 239
+       },
+       {
+        "kind": "UserError",
+        "message": "The contact \"%s\" has the same email as an existing user",
+        "line": 241
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_update_partner_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Update partner email on portal action, if a new one was introduced and is valid.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_similar_users_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "portal_users_with_email"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Returns the domain needed to find the users that have the same email\nas portal users.\n:param portal_users_with_email: portal users that have an email address.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Returns the domain needed to find the users that have the same email\nas portal users depending on their linked website characteristics.\n:param portal_users_with_email: portal users that have an email address.",
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_similar_users_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Returns a list of field elements to extract from users.\n        ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Returns a list of field elements to extract from users.\n        ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_portal_similar_than_user",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user",
+     "portal_user"
+    ],
+    "definitions": [
+     {
+      "package": "portal",
+      "decorators": [],
+      "documentation": "Checks if the credentials of a portal user and a user are the same\n(users are distinct and their emails are similar).",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "website",
+      "decorators": [],
+      "documentation": "Checks if the credentials of a portal user and a user are the same\n(users are distinct, their emails are similar and their linked websites\nare incompatible).",
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_grant_access",
+    "package": "portal",
+    "kind": "UserError",
+    "message": "The partner \"%s\" already has the portal access."
+   },
+   {
+    "operation": "action_revoke_access",
+    "package": "portal",
+    "kind": "UserError",
+    "message": "The partner \"%s\" has no portal access or is internal."
+   },
+   {
+    "operation": "action_invite_again",
+    "package": "portal",
+    "kind": "UserError",
+    "message": "You should first grant the portal access to the partner \"%s\"."
+   },
+   {
+    "operation": "_send_email",
+    "package": "portal",
+    "kind": "UserError",
+    "message": "The template \"Portal: new user\" not found for sending email to the portal user."
+   },
+   {
+    "operation": "_assert_user_email_uniqueness",
+    "package": "portal",
+    "kind": "UserError",
+    "message": "The contact \"%s\" does not have a valid email."
+   },
+   {
+    "operation": "_assert_user_email_uniqueness",
+    "package": "portal",
+    "kind": "UserError",
+    "message": "The contact \"%s\" has the same email as an existing user"
+   }
+  ],
+  "state_fields": [
+   "email_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "portal.access_portal_wizard_user",
+    "package": "portal",
+    "name": "access.portal.wizard.user",
+    "entity": "portal.wizard.user",
+    "group": "base.group_partner_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

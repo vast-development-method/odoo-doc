@@ -1,0 +1,2958 @@
+{
+ "catalog": {
+  "name": "entity:hr.job",
+  "description": "Complete definition of entity Job Position (hr.job).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.job",
+  "storage_name": "hr_job",
+  "full_name": "Job Position",
+  "kind": "persistent",
+  "description": "Job Position",
+  "defined_by_package": "hr",
+  "extended_by_packages": [
+   "hr_recruitment",
+   "hr_skills",
+   "hr_recruitment_skills",
+   "hr_recruitment_survey",
+   "website_hr_recruitment"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.alias.mixin",
+   "mail.activity.mixin",
+   "website.seo.metadata",
+   "website.published.multi.mixin",
+   "website.searchable.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, name asc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "hr",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Job Position",
+    "required": true,
+    "index": "trigram",
+    "translate": true,
+    "defined_in_package": "hr",
+    "full_name": "Job Position"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "hr",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "expected_employees",
+    "type": "Integer",
+    "compute": "_compute_employees",
+    "string": "Total Forecasted Employees",
+    "help": "Expected number of employees for this job position after new recruitment.",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user",
+    "defined_in_package": "hr",
+    "extended_in_packages": [
+     "hr_recruitment"
+    ],
+    "full_name": "Total Forecasted Employees"
+   },
+   {
+    "name": "no_of_employee",
+    "type": "Integer",
+    "compute": "_compute_employees",
+    "string": "Current Number of Employees",
+    "help": "Number of employees currently occupying this job position.",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user",
+    "defined_in_package": "hr",
+    "extended_in_packages": [
+     "hr_recruitment"
+    ],
+    "full_name": "Current Number of Employees"
+   },
+   {
+    "name": "no_of_recruitment",
+    "type": "Integer",
+    "string": "Target",
+    "copy": false,
+    "help": "Number of new employees you expect to recruit.",
+    "default": 1,
+    "defined_in_package": "hr",
+    "full_name": "Target"
+   },
+   {
+    "name": "employee_ids",
+    "type": "One2many",
+    "comodel": "hr.employee",
+    "inverse_name": "job_id",
+    "string": "Employees",
+    "groups": "base.group_user",
+    "defined_in_package": "hr",
+    "full_name": "Employees",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "string": "Job Description",
+    "sanitize_attributes": false,
+    "defined_in_package": "hr",
+    "translate": {
+     "expression": "html_translate"
+    },
+    "prefetch": false,
+    "sanitize_overridable": true,
+    "sanitize_form": false,
+    "extended_in_packages": [
+     "website_hr_recruitment"
+    ],
+    "full_name": "Job Description"
+   },
+   {
+    "name": "requirements",
+    "type": "Text",
+    "string": "Requirements",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user",
+    "defined_in_package": "hr",
+    "extended_in_packages": [
+     "hr_recruitment"
+    ],
+    "full_name": "Requirements"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Recruiter",
+    "domain": "[('share', '=', False), ('company_ids', '=?', company_id)]",
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user",
+    "tracking": true,
+    "help": "The Recruiter will be the default value for all Applicants in this job             position. The Recruiter is automatically added to all meetings with the Applicant.",
+    "defined_in_package": "hr",
+    "extended_in_packages": [
+     "hr_recruitment"
+    ],
+    "full_name": "Recruiter",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "allowed_user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "compute": "_compute_allowed_user_ids",
+    "readonly": true,
+    "defined_in_package": "hr",
+    "string": "Allowed User",
+    "full_name": "Allowed User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "string": "Department",
+    "check_company": true,
+    "tracking": true,
+    "index": "btree_not_null",
+    "defined_in_package": "hr",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "tracking": true,
+    "domain": {
+     "dynamic": "lambda self: [('id', 'in', self.env.companies.ids)]"
+    },
+    "defined_in_package": "hr",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "contract_type_id",
+    "type": "Many2one",
+    "comodel": "hr.contract.type",
+    "string": "Employment Type",
+    "tracking": true,
+    "defined_in_package": "hr",
+    "full_name": "Employment Type",
+    "target_entity": "hr.contract.type"
+   },
+   {
+    "name": "address_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Job Location",
+    "default": {
+     "dynamic": "_default_address_id"
+    },
+    "domain": {
+     "dynamic": "lambda self: self._address_id_domain()"
+    },
+    "tracking": true,
+    "help": "Select the location where the applicant will work. Addresses listed here are defined on the company's contact information.",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Job Location",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "application_ids",
+    "type": "One2many",
+    "comodel": "hr.applicant",
+    "inverse_name": "job_id",
+    "string": "Job Applications",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Job Applications",
+    "target_entity": "hr.applicant"
+   },
+   {
+    "name": "application_count",
+    "type": "Integer",
+    "compute": "_compute_application_count",
+    "string": "Application Count",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Application Count"
+   },
+   {
+    "name": "open_application_count",
+    "type": "Integer",
+    "compute": "_compute_open_application_count",
+    "string": "Open Application Count",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "help": "Number of applications that are still ongoing (not hired or refused)",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Open Application Count"
+   },
+   {
+    "name": "all_application_count",
+    "type": "Integer",
+    "compute": "_compute_all_application_count",
+    "string": "All Application Count",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "All Application Count"
+   },
+   {
+    "name": "new_application_count",
+    "type": "Integer",
+    "compute": "_compute_new_application_count",
+    "string": "New Application",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "help": "Number of applications that are new in the flow (typically at first step of the flow)",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "New Application"
+   },
+   {
+    "name": "old_application_count",
+    "type": "Integer",
+    "compute": "_compute_old_application_count",
+    "string": "Old Application",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Old Application"
+   },
+   {
+    "name": "applicant_hired",
+    "type": "Integer",
+    "compute": "_compute_applicant_hired",
+    "string": "Applicants Hired",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Applicants Hired"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "related": "department_id.manager_id",
+    "string": "Department Manager",
+    "readonly": true,
+    "store": true,
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Department Manager",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "document_ids",
+    "type": "One2many",
+    "comodel": "ir.attachment",
+    "compute": "_compute_document_ids",
+    "string": "Documents",
+    "readonly": true,
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Documents",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "documents_count",
+    "type": "Integer",
+    "compute": "_compute_document_ids",
+    "string": "Document Count",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Document Count"
+   },
+   {
+    "name": "employee_count",
+    "type": "Integer",
+    "compute": "_compute_employee_count",
+    "defined_in_package": "hr_recruitment",
+    "string": "Employee Count",
+    "full_name": "Employee Count"
+   },
+   {
+    "name": "alias_id",
+    "type": "Many2one",
+    "help": "Email alias for this job position. New emails will automatically create new applicants for this job position.",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "string": "Alias",
+    "full_name": "Alias"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color Index",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Color Index"
+   },
+   {
+    "name": "is_favorite",
+    "type": "Boolean",
+    "compute": "_compute_is_favorite",
+    "inverse": "_inverse_is_favorite",
+    "defined_in_package": "hr_recruitment",
+    "string": "Is Favorite",
+    "full_name": "Is Favorite"
+   },
+   {
+    "name": "favorite_user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "relation": "job_favorite_user_rel",
+    "column1": "job_id",
+    "column2": "user_id",
+    "default": {
+     "dynamic": "_get_default_favorite_user_ids"
+    },
+    "defined_in_package": "hr_recruitment",
+    "string": "Favorite User",
+    "full_name": "Favorite User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "interviewer_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "domain": "[('share', '=', False), ('company_ids', '=?', company_id)]",
+    "string": "Interviewers",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "help": "The Interviewers set on the job position can see all Applicants in it. They have access to the information, the attachments, the meeting management and they can refuse him. You don't need to have Recruitment rights to be set as an interviewer.",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Interviewers",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "extended_interviewer_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "relation": "hr_job_extended_interviewer_res_users",
+    "compute": "_compute_extended_interviewer_ids",
+    "store": true,
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "string": "Extended Interviewer",
+    "full_name": "Extended Interviewer",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "industry_id",
+    "type": "Many2one",
+    "comodel": "res.partner.industry",
+    "string": "Industry",
+    "tracking": true,
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Industry",
+    "target_entity": "res.partner.industry"
+   },
+   {
+    "name": "expected_degree",
+    "type": "Many2one",
+    "comodel": "hr.recruitment.degree",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "string": "Expected Degree",
+    "full_name": "Expected Degree",
+    "target_entity": "hr.recruitment.degree"
+   },
+   {
+    "name": "activity_count",
+    "type": "Integer",
+    "compute": "_compute_activities",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "string": "Activity Count",
+    "full_name": "Activity Count"
+   },
+   {
+    "name": "job_properties",
+    "type": "Properties",
+    "string": "Properties",
+    "definition": "company_id.job_properties_definition",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Properties"
+   },
+   {
+    "name": "applicant_properties_definition",
+    "type": "PropertiesDefinition",
+    "string": "Applicant Properties",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Applicant Properties"
+   },
+   {
+    "name": "no_of_hired_employee",
+    "type": "Integer",
+    "compute": "_compute_no_of_hired_employee",
+    "string": "Hired",
+    "copy": false,
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "help": "Number of hired employees for this job position during recruitment phase.",
+    "store": true,
+    "defined_in_package": "hr_recruitment",
+    "full_name": "Hired"
+   },
+   {
+    "name": "job_source_ids",
+    "type": "One2many",
+    "comodel": "hr.recruitment.source",
+    "inverse_name": "job_id",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment",
+    "string": "Job Source",
+    "full_name": "Job Source",
+    "target_entity": "hr.recruitment.source"
+   },
+   {
+    "name": "job_skill_ids",
+    "type": "One2many",
+    "comodel": "hr.job.skill",
+    "inverse_name": "job_id",
+    "string": "Skills",
+    "domain": [
+     [
+      "skill_type_id.active",
+      "=",
+      true
+     ]
+    ],
+    "defined_in_package": "hr_skills",
+    "full_name": "Skills",
+    "target_entity": "hr.job.skill"
+   },
+   {
+    "name": "current_job_skill_ids",
+    "type": "One2many",
+    "comodel": "hr.job.skill",
+    "compute": "_compute_current_job_skill_ids",
+    "search": "_search_current_job_skill_ids",
+    "readonly": false,
+    "defined_in_package": "hr_skills",
+    "string": "Current Job Skill",
+    "full_name": "Current Job Skill",
+    "target_entity": "hr.job.skill"
+   },
+   {
+    "name": "skill_ids",
+    "type": "Many2many",
+    "comodel": "hr.skill",
+    "compute": "_compute_skill_ids",
+    "store": true,
+    "defined_in_package": "hr_skills",
+    "string": "Skill",
+    "full_name": "Skill",
+    "target_entity": "hr.skill"
+   },
+   {
+    "name": "applicant_matching_score",
+    "type": "Float",
+    "string": "Matching Score(%)",
+    "compute": "_compute_applicant_matching_score",
+    "groups": "hr_recruitment.group_hr_recruitment_interviewer",
+    "defined_in_package": "hr_recruitment_skills",
+    "full_name": "Matching Score(%)"
+   },
+   {
+    "name": "survey_id",
+    "type": "Many2one",
+    "comodel": "survey.survey",
+    "string": "Interview Form",
+    "index": "btree_not_null",
+    "help": "Choose an interview form for this job position and you will be able to print/answer this interview from all applicants who apply for this job",
+    "defined_in_package": "hr_recruitment_survey",
+    "full_name": "Interview Form",
+    "target_entity": "survey.survey"
+   },
+   {
+    "name": "website_published",
+    "type": "Boolean",
+    "help": "Set if the application is published on the website of the company.",
+    "tracking": true,
+    "defined_in_package": "website_hr_recruitment",
+    "string": "Website Published",
+    "full_name": "Website Published"
+   },
+   {
+    "name": "website_description",
+    "type": "Html",
+    "string": "Website description",
+    "translate": {
+     "expression": "html_translate"
+    },
+    "default": {
+     "dynamic": "_get_default_website_description"
+    },
+    "prefetch": false,
+    "sanitize_overridable": true,
+    "sanitize_attributes": false,
+    "sanitize_form": false,
+    "defined_in_package": "website_hr_recruitment",
+    "full_name": "Website description"
+   },
+   {
+    "name": "job_details",
+    "type": "Html",
+    "string": "Process Details",
+    "translate": true,
+    "help": "Complementary information that will appear on the job submission page",
+    "sanitize_attributes": false,
+    "default": {
+     "dynamic": "_get_default_job_details"
+    },
+    "defined_in_package": "website_hr_recruitment",
+    "full_name": "Process Details"
+   },
+   {
+    "name": "published_date",
+    "type": "Date",
+    "compute": "_compute_published_date",
+    "store": true,
+    "defined_in_package": "website_hr_recruitment",
+    "string": "Published Date",
+    "full_name": "Published Date"
+   },
+   {
+    "name": "full_url",
+    "type": "Char",
+    "string": "job URL",
+    "compute": "_compute_full_url",
+    "defined_in_package": "website_hr_recruitment",
+    "full_name": "job uniform resource locator"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_name_company_uniq",
+    "kind": "Constraint",
+    "definition": "unique(name, company_id, department_id)",
+    "message": "The name of the job position must be unique per department in company!",
+    "defined_in_package": "hr"
+   },
+   {
+    "name": "_no_of_recruitment_positive",
+    "kind": "Constraint",
+    "definition": "CHECK(no_of_recruitment >= 0)",
+    "message": "The expected number of new employees must be positive.",
+    "defined_in_package": "hr"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_compute_employees",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "no_of_recruitment",
+         "employee_ids.job_id",
+         "employee_ids.active"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_user_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "We don't want the current user to be follower of all created job ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_skills",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_default_address_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_address_id_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_favorite_user_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_no_of_hired_employee",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "application_ids.date_closed"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activities",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_extended_interviewer_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "application_ids.interviewer_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_favorite",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_is_favorite",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_document_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_all_application_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_application_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_open_application_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_employee_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_first_stage",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_new_application_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_applicant_hired",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_old_application_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "application_count",
+         "new_application_count"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alias_get_creation_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_order_field_to_sql",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "alias",
+     "field_name",
+     "direction",
+     "nulls",
+     "query"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_creation_subtype",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_attachments",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_activities",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_load_recruitment_scenario",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_employees",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_job_skill_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "job_skill_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_current_job_skill_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_skill_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "job_skill_ids.skill_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_applicant_matching_score",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment_skills",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "active_applicant_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_search_matching_applicants",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment_skills",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_test_survey",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_new_survey",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment_survey",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_website_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [
+       {
+        "name": "mute_logger",
+        "arguments": [
+         "the system.addons.base.models.ir_qweb"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_job_details",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_full_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_url"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_published_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "website_published"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_website_published",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "website_published"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_website_url",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "set_open",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_backend_menu_id",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_archive",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_get_detail",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "website",
+     "order",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "website_hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 52,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr.access_hr_job_user",
+    "package": "hr",
+    "name": "hr.job user",
+    "entity": "hr.job",
+    "group": "group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr.access_hr_job_employee",
+    "package": "hr",
+    "name": "hr.job.employee",
+    "entity": "hr.job",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_recruitment.access_hr_job_interviewer",
+    "package": "hr_recruitment",
+    "name": "hr.job.interviewer",
+    "entity": "hr.job",
+    "group": "group_hr_recruitment_interviewer",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_recruitment.access_hr_job_user",
+    "package": "hr_recruitment",
+    "name": "hr.job user",
+    "entity": "hr.job",
+    "group": "group_hr_recruitment_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment.hr.access_hr_job_user",
+    "package": "hr_recruitment",
+    "name": "hr.job user",
+    "entity": "hr.job",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_hr_recruitment.access_hr_job_public_public",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.public",
+    "entity": "hr.job",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_hr_recruitment.access_hr_job_public_portal",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.public",
+    "entity": "hr.job",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_hr_recruitment.access_hr_job_public_employee",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.public",
+    "entity": "hr.job",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr.hr_job_comp_rule",
+    "package": "hr",
+    "name": "Job multi company rule",
+    "entity": "hr.job",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_job_user_rule",
+    "package": "hr_recruitment",
+    "name": "User: All Applicants",
+    "entity": "hr.job",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "website_hr_recruitment.hr_job_public",
+    "package": "website_hr_recruitment",
+    "name": "Job Positions: Public",
+    "entity": "hr.job",
+    "domain": "[('website_published', '=', True)]",
+    "groups": "[(4, ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "website_hr_recruitment.hr_job_portal",
+    "package": "website_hr_recruitment",
+    "name": "Job Positions: Portal",
+    "entity": "hr.job",
+    "domain": "[('website_published', '=', True)]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "website_hr_recruitment.hr_job_officer",
+    "package": "website_hr_recruitment",
+    "name": "Job Positions: HR Officer",
+    "entity": "hr.job",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[(4, ref('hr_recruitment.group_hr_recruitment_user'))]",
+    "global": false,
+    "applies_to_read": "True",
+    "applies_to_write": "False",
+    "applies_to_create": "False",
+    "applies_to_delete": "False"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr.view_hr_job_form",
+    "package": "hr",
+    "name": "hr.job.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Job"
+     },
+     "fields": [
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "widget": "text",
+       "options": "{'line_breaks': False}",
+       "placeholder": "e.g. Sales Manager"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "no_of_recruitment"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "department_id"
+      },
+      {
+       "name": "contract_type_id"
+      },
+      {
+       "name": "description",
+       "options": "{'collaborative': true}",
+       "placeholder": "e.g. Summarize the position in one or two lines..."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "recruitment_page",
+       "string": "Details",
+       "invisible": "1",
+       "groups": "hr.group_hr_user"
+      },
+      {
+       "name": "job_description_page",
+       "string": "Summary",
+       "invisible": "1",
+       "groups": "hr.group_hr_user"
+      }
+     ],
+     "widgets": {
+      "text": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr.view_hr_job_tree",
+    "package": "hr",
+    "name": "hr.job.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Job",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "no_of_employee",
+       "string": "Number of Employees",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr.hr_job_view_kanban",
+    "package": "hr",
+    "name": "hr.job.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "department_id"
+      },
+      {
+       "name": "expected_employees"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr.view_job_filter",
+    "package": "hr",
+    "name": "hr.job.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Jobs"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Job Position"
+      },
+      {
+       "name": "department_id",
+       "operator": "child_of"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "message_needaction",
+       "string": "Unread Messages",
+       "domain": "[('message_needaction', '=', True)]",
+       "groups": "mail.group_mail_notification_type_inbox"
+      },
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "department",
+       "string": "Department",
+       "domain": "[]",
+       "context": "{'group_by': 'department_id'}"
+      },
+      {
+       "name": "company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by': 'company_id'}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "employment_type",
+       "string": "Employment Type",
+       "domain": "[]",
+       "context": "{'group_by': 'contract_type_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.view_hr_job_kanban",
+    "package": "hr_recruitment",
+    "name": "hr.job.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "highlight_color": "color",
+      "class": "o_hr_recruitment_kanban",
+      "on_create": "hr_recruitment.create_job_simple",
+      "sample": "1",
+      "limit": "40",
+      "action": "%(action_hr_job_applications)d",
+      "type": "action",
+      "js_class": "recruitment_kanban_view"
+     },
+     "fields": [
+      {
+       "name": "active"
+      },
+      {
+       "name": "alias_email"
+      },
+      {
+       "name": "company_id"
+      },
+      {
+       "name": "color",
+       "widget": "kanban_color_picker"
+      },
+      {
+       "name": "is_favorite",
+       "widget": "boolean_favorite",
+       "nolabel": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "alias_id",
+       "groups": "hr_recruitment.group_hr_recruitment_interviewer"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "options": "{'display_avatar_name': True}"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "options": "{'display_avatar_name': False}"
+      },
+      {
+       "name": "company_id"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "options": "{'display_avatar_name': True}"
+      },
+      {
+       "name": "no_of_recruitment"
+      },
+      {
+       "name": "new_application_count"
+      },
+      {
+       "name": "open_application_count"
+      },
+      {
+       "name": "activity_count"
+      },
+      {
+       "name": "is_favorite",
+       "widget": "boolean_favorite",
+       "nolabel": "1"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "alias_id",
+       "groups": "hr_recruitment.group_hr_recruitment_interviewer"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "options": "{'display_avatar_name': False}"
+      },
+      {
+       "name": "company_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "application_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_activities",
+       "type": "object",
+       "class": "ps-1 pe-1 pt-0 pb-0"
+      },
+      {
+       "name": "%(action_hr_job_applications)d",
+       "type": "action",
+       "class": "btn btn-primary"
+      },
+      {
+       "type": "open",
+       "class": "btn btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "kanban_color_picker": 1,
+      "boolean_favorite": 2,
+      "many2one_avatar_user": 4
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.view_job_filter_recruitment",
+    "package": "hr_recruitment",
+    "name": "Job",
+    "view_type": "xpath",
+    "inherits_view": "hr.view_job_filter",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='department_id']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_favorite_jobs",
+       "string": "My Favorites",
+       "domain": "[('favorite_user_ids', 'in', uid)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='department_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_job_simple_form",
+    "package": "hr_recruitment",
+    "name": "hr.job.simple.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "200",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Create a Job Position",
+      "class": "o_hr_job_simple_form"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. Sales Manager"
+      },
+      {
+       "name": "alias_id",
+       "required": "0",
+       "string": "Email Alias",
+       "groups": "hr_recruitment.group_hr_recruitment_interviewer"
+      },
+      {
+       "name": "alias_name",
+       "placeholder": "e.g. sales-manager"
+      },
+      {
+       "name": "alias_domain_id",
+       "options": "{'no_create': True, 'no_open': True}",
+       "placeholder": "e.g. mycompany.com"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(action_hr_job_applications)d",
+       "string": "Create",
+       "type": "action",
+       "class": "btn-primary o_create_job",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_job_survey",
+    "package": "hr_recruitment",
+    "name": "hr.job.form1",
+    "view_type": "xpath",
+    "inherits_view": "hr.view_hr_job_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//h1",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//h1",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_job_search_view",
+    "package": "hr_recruitment",
+    "name": "hr.job.search",
+    "view_type": "xpath",
+    "inherits_view": "hr_recruitment.view_job_filter_recruitment",
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='my_favorite_jobs']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "department_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_positions",
+       "string": "My Job Positions",
+       "domain": "[('user_id', '=', uid)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='my_favorite_jobs']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment.hr_job_view_tree_inherit",
+    "package": "hr_recruitment",
+    "name": null,
+    "view_type": "field",
+    "inherits_view": "hr.view_hr_job_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "department_id"
+      },
+      {
+       "name": "open_application_count",
+       "string": "Open Applications",
+       "groups": "hr_recruitment.group_hr_recruitment_interviewer"
+      },
+      {
+       "name": "no_of_recruitment"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment_skills.hr_job_list_inherit_hr_recruitment_skills",
+    "package": "hr_recruitment_skills",
+    "name": "hr.job.view.list.inherit",
+    "view_type": "field",
+    "inherits_view": "hr_recruitment.hr_job_view_tree_inherit",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "department_id",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "department_id",
+       "position": "after"
+      },
+      {
+       "name": "applicant_matching_score",
+       "widget": "progressbar",
+       "invisible": "not applicant_matching_score",
+       "column_invisible": "not context.get('active_applicant_id')",
+       "groups": "hr_recruitment.group_hr_recruitment_interviewer"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "progressbar": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment_skills.view_hr_job_form",
+    "package": "hr_recruitment_skills",
+    "name": "hr.job.view.form.inherit.hr.recruitment.skills",
+    "view_type": "xpath",
+    "inherits_view": "hr_skills.view_hr_job_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@id='job_skills']/field[@name='current_job_skill_ids']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@id='job_skills']/field[@name='current_job_skill_ids']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.hr_job_survey_inherit",
+    "package": "hr_recruitment_survey",
+    "name": "hr.job.form.inherit",
+    "view_type": "field",
+    "inherits_view": "hr_recruitment.hr_job_survey",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "interviewer_ids",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "interviewer_ids",
+       "position": "after"
+      },
+      {
+       "name": "survey_id",
+       "domain": "[('survey_type', '=', 'recruitment')]",
+       "context": "{'default_access_mode': 'token'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_recruitment_survey.view_hr_job_kanban_inherit",
+    "package": "hr_recruitment_survey",
+    "name": "hr.job.kanban.inherit",
+    "view_type": "xpath",
+    "inherits_view": "hr_recruitment.view_hr_job_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='active']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "survey_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='active']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_skills.view_hr_job_form",
+    "package": "hr_skills",
+    "name": "hr.job.view.form.inherit.hr.skills",
+    "view_type": "page",
+    "inherits_view": "hr.view_hr_job_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "page",
+     "root_attributes": {
+      "name": "recruitment_page",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "recruitment_page",
+       "string": null,
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.view_hr_job_form_website_published_button",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.form.inherit.published.button",
+    "view_type": "div",
+    "inherits_view": "hr_recruitment.hr_job_survey",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "is_published",
+       "widget": "website_redirect_button"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "website_redirect_button": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.view_hr_job_form_inherit_website",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.form",
+    "view_type": "field",
+    "inherits_view": "hr.view_hr_job_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "description",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "description",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.view_hr_job_tree_inherit_website",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.list",
+    "view_type": "field",
+    "inherits_view": "hr_recruitment.hr_job_view_tree_inherit",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "no_of_employee",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "no_of_employee",
+       "position": "before"
+      },
+      {
+       "name": "website_id",
+       "optional": "hide",
+       "groups": "website.group_multi_website"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.hr_job_website_inherit",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.kanban.inherit",
+    "view_type": "xpath",
+    "inherits_view": "hr_recruitment.view_hr_job_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//kanban",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//kanban",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.hr_job_form_inherit",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "hr.view_hr_job_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//page[@name='job_description_page']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "job_details",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "recruitment_page",
+       "string": "Application Info",
+       "invisible": null,
+       "groups": "hr_recruitment.group_hr_recruitment_interviewer,hr.group_hr_user"
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//page[@name='job_description_page']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.view_hr_job_kanban_referal_extends",
+    "package": "website_hr_recruitment",
+    "name": "hr.job.view.kanban",
+    "view_type": "xpath",
+    "inherits_view": "hr_recruitment.view_hr_job_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='menu_new_applications']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "full_url",
+       "widget": "CopyClipboardJobLinkButton"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "CopyClipboardJobLinkButton": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='menu_new_applications']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.hr_job_search_view_inherit",
+    "package": "website_hr_recruitment",
+    "name": null,
+    "view_type": "xpath",
+    "inherits_view": "hr.view_job_filter",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='message_needaction']",
+      "position": "before"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "published",
+       "string": "Published",
+       "domain": "[('is_published', '=', True)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='message_needaction']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.job_pages_tree_view",
+    "package": "website_hr_recruitment",
+    "name": "Job Pages List",
+    "view_type": "xpath",
+    "inherits_view": "hr.view_hr_job_tree",
+    "mode": "primary",
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_hr_recruitment.job_pages_kanban_view",
+    "package": "website_hr_recruitment",
+    "name": "Job Pages Kanban",
+    "view_type": "kanban",
+    "inherits_view": "hr_job_website_inherit",
+    "mode": "primary",
+    "priority": "99",
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "kanban",
+       "attributes": {
+        "position": "attributes"
+       },
+       "position": "attributes"
+      }
+     ],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr.action_create_job_position",
+    "package": "hr",
+    "name": "Create a Job Position",
+    "view_mode": "form",
+    "view_id": "hr.view_hr_job_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "current",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.job"
+   },
+   {
+    "external_identifier": "hr.action_hr_job",
+    "package": "hr",
+    "name": "Job Positions",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "view_job_filter",
+    "domain": null,
+    "context": "{\"search_default_Current\":1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Ready to recruit more efficiently?\n                </p>\n                <a name=\"%(hr.action_create_job_position)d\" class=\"btn btn-link\" type=\"action\">\n                    Let's create a job position\n                </a>\n            </field>\n        ",
+    "usage": null,
+    "entity": "hr.job"
+   },
+   {
+    "external_identifier": "hr_recruitment.create_job_simple",
+    "package": "hr_recruitment",
+    "name": "Create a Job Position",
+    "view_mode": "form",
+    "view_id": "hr_job_simple_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'dialog_size' : 'medium'}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.job"
+   },
+   {
+    "external_identifier": "hr_recruitment.action_hr_job_config",
+    "package": "hr_recruitment",
+    "name": "Job Positions",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_in_recruitment': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Ready to recruit more efficiently?\n            </p>\n            <p>\n                <a name=\"%(hr.action_create_job_position)d\" class=\"btn btn-link\" type=\"action\">\n                    Let's create a job position\n                </a>\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.job"
+   },
+   {
+    "external_identifier": "hr_recruitment.action_hr_job",
+    "package": "hr_recruitment",
+    "name": "Job Positions",
+    "view_mode": "kanban,list,form",
+    "view_id": "hr_recruitment.view_hr_job_kanban",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.job"
+   },
+   {
+    "external_identifier": "hr_recruitment.action_hr_job_interviewer",
+    "package": "hr_recruitment",
+    "name": "Job Positions",
+    "view_mode": "kanban,form",
+    "view_id": "hr_recruitment.view_hr_job_kanban",
+    "search_view_id": null,
+    "domain": "[\n            '|',\n                ('interviewer_ids', 'in', uid),\n                ('extended_interviewer_ids', 'in', uid),\n        ]",
+    "context": "{'create': False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.job"
+   },
+   {
+    "external_identifier": "hr_recruitment_skills.action_find_matching_job",
+    "package": "hr_recruitment_skills",
+    "name": "Matching Positions",
+    "view_mode": "list",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'active_applicant_id': active_id,}",
+    "target": "current",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "hr_recruitment.model_hr_applicant",
+    "binding_type": null,
+    "binding_view_types": "form",
+    "help": null,
+    "usage": null,
+    "entity": "hr.job"
+   },
+   {
+    "external_identifier": "website_hr_recruitment.action_job_pages_list",
+    "package": "website_hr_recruitment",
+    "name": "Job Pages",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'create_action': '/jobs/add'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.job"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "hr_recruitment.action_load_demo_data",
+    "package": "hr_recruitment",
+    "name": "Load demo data",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "hr_recruitment_skills.action_applicant_search_applicant",
+    "package": "hr_recruitment_skills",
+    "name": "Search Matching Applicants",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

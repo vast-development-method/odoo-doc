@@ -1,0 +1,609 @@
+{
+ "catalog": {
+  "name": "views:purchase.order.line",
+  "description": "View declarations for entity purchase.order.line.",
+  "record_count": 9,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "purchase.purchase_order_line_tree",
+   "package": "purchase",
+   "name": "purchase.order.line.list",
+   "entity": "purchase.order.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Purchase Order Lines",
+     "create": "false"
+    },
+    "fields": [
+     {
+      "name": "order_id"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "partner_id",
+      "string": "Vendor"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "price_unit"
+     },
+     {
+      "name": "product_qty"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "price_subtotal",
+      "widget": "monetary"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "date_planned"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1,
+     "monetary": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "false",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Purchase Order Lines\" create=\"false\">\n                    <field name=\"order_id\"/>\n                    <field name=\"name\"/>\n                    <field name=\"partner_id\" string=\"Vendor\"/>\n                    <field name=\"product_id\"/>\n                    <field name=\"price_unit\"/>\n                    <field name=\"product_qty\"/>\n                    <field name=\"product_uom_id\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n                    <field name=\"price_subtotal\" widget=\"monetary\"/>\n                    <field name=\"currency_id\" column_invisible=\"True\"/>\n                    <field name=\"date_planned\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "purchase.purchase_order_line_form2",
+   "package": "purchase",
+   "name": "purchase.order.line.form2",
+   "entity": "purchase.order.line",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Purchase Order Line",
+     "create": "false"
+    },
+    "fields": [
+     {
+      "name": "order_id"
+     },
+     {
+      "name": "date_order"
+     },
+     {
+      "name": "partner_id"
+     },
+     {
+      "name": "product_id",
+      "readonly": "1"
+     },
+     {
+      "name": "product_qty",
+      "readonly": "1"
+     },
+     {
+      "name": "product_uom_id",
+      "readonly": "1",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "price_unit"
+     },
+     {
+      "name": "tax_ids",
+      "widget": "many2many_tax_tags",
+      "domain": "[('type_tax_use', '=', 'purchase')]"
+     },
+     {
+      "name": "date_planned",
+      "readonly": "1"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "analytic_distribution",
+      "widget": "analytic_distribution",
+      "options": "{'product_field': 'product_id', 'business_domain': 'purchase_order'}",
+      "groups": "analytic.group_analytic_accounting"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "invoice_lines"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_tax_tags": 1,
+     "analytic_distribution": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Purchase Order Line\" create=\"false\">\n                    <sheet>\n                        <label for=\"order_id\"/>\n                        <h1>\n                            <field name=\"order_id\" class=\"oe_inline\"/>\n                            <label string=\",\" for=\"date_order\" invisible=\"not date_order\"/>\n                            <field name=\"date_order\" class=\"oe_inline\"/>\n                        </h1>\n                        <label for=\"partner_id\"/>\n                        <h2><field name=\"partner_id\"/></h2>\n                        <group>\n                            <group>\n                                <field name=\"product_id\" readonly=\"1\"/>\n                                <label for=\"product_qty\"/>\n                                <div class=\"o_row\">\n                                    <field name=\"product_qty\" readonly=\"1\"/>\n                                    <field name=\"product_uom_id\" readonly=\"1\" groups=\"uom.group_uom\"/>\n                                </div>\n                                <field name=\"price_unit\"/>\n                            </group>\n                            <group>\n                                <field name=\"tax_ids\" widget=\"many2many_tax_tags\" domain=\"[('type_tax_use', '=', 'purchase')]\"/>\n                                <field name=\"date_planned\" readonly=\"1\"/>\n                                <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\"/>\n                                <field name=\"analytic_distribution\" widget=\"analytic_distribution\" groups=\"analytic.group_analytic_accounting\" options=\"{'product_field': 'product_id', 'business_domain': 'purchase_order'}\"/>\n                            </group>\n                        </group>\n                        <field name=\"name\"/>\n                        <separator string=\"Manual Invoices\"/>\n                        <field name=\"invoice_lines\"/>\n                    </sheet>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "purchase.purchase_order_line_search",
+   "package": "purchase",
+   "name": "purchase.order.line.search",
+   "entity": "purchase.order.line",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Purchase Order"
+    },
+    "fields": [
+     {
+      "name": "order_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "partner_id",
+      "string": "Vendor"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "hide_cancelled",
+      "string": "Hide cancelled lines",
+      "domain": "[('state', '!=', 'cancel')]"
+     },
+     {
+      "name": "purchase_state",
+      "string": "Status",
+      "domain": "[('state', '=', 'purchase')]"
+     },
+     {
+      "name": "filter_date_order",
+      "date": "date_order",
+      "default_period": "month"
+     },
+     {
+      "name": "order_date_last_year",
+      "string": "Order Date: Last 365 Days",
+      "domain": "[                             ('date_order', '>', 'today -1y')                         ]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "groupby_supplier",
+      "string": "Vendor",
+      "domain": "[]",
+      "context": "{'group_by' : 'partner_id'}"
+     },
+     {
+      "name": "groupby_product",
+      "string": "Product",
+      "domain": "[]",
+      "context": "{'group_by' : 'product_id'}"
+     },
+     {
+      "name": "order_reference",
+      "string": "Order Reference",
+      "domain": "[]",
+      "context": "{'group_by' :'order_id'}"
+     },
+     {
+      "name": "group_by_date_order",
+      "string": "Order Date",
+      "context": "{'group_by': 'date_order'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search Purchase Order\">\n                    <field name=\"order_id\"/>\n                    <field name=\"product_id\"/>\n                    <field name=\"partner_id\" string=\"Vendor\"/>\n                    <filter name=\"hide_cancelled\" string=\"Hide cancelled lines\" domain=\"[('state', '!=', 'cancel')]\"/>\n                    <filter string=\"Status\" name=\"purchase_state\" domain=\"[('state', '=', 'purchase')]\"/>\n                    <separator/>\n                    <filter name=\"filter_date_order\" date=\"date_order\" default_period=\"month\"/>\n                    <filter name=\"order_date_last_year\" string=\"Order Date: Last 365 Days\" domain=\"[                             ('date_order', '&gt;', 'today -1y')                         ]\" invisible=\"1\"/>\n                    <group>\n                        <filter name=\"groupby_supplier\" string=\"Vendor\" domain=\"[]\" context=\"{'group_by' : 'partner_id'}\"/>\n                        <filter name=\"groupby_product\" string=\"Product\" domain=\"[]\" context=\"{'group_by' : 'product_id'}\"/>\n                        <filter string=\"Order Reference\" name=\"order_reference\" domain=\"[]\" context=\"{'group_by' :'order_id'}\"/>\n                        <separator/>\n                        <filter string=\"Order Date\" name=\"group_by_date_order\" context=\"{'group_by': 'date_order'}\"/>\n                    </group>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "purchase.purchase_history_tree",
+   "package": "purchase",
+   "name": "purchase.history.list",
+   "entity": "purchase.order.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "create": "false",
+     "default_order": "order_id asc",
+     "decoration-info": "order_id == context.get('active_id')",
+     "action": "action_open_order",
+     "type": "object"
+    },
+    "fields": [
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "order_id",
+      "widget": "many2one"
+     },
+     {
+      "name": "date_approve"
+     },
+     {
+      "name": "partner_id",
+      "string": "Vendor"
+     },
+     {
+      "name": "company_id",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "product_uom_qty",
+      "string": "Quantity"
+     },
+     {
+      "name": "price_unit_product_uom",
+      "widget": "monetary",
+      "string": "Unit Price"
+     },
+     {
+      "name": "price_subtotal",
+      "widget": "monetary",
+      "string": "Total Untaxed"
+     },
+     {
+      "name": "state",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one": 1,
+     "monetary": 2
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "false",
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-info": "order_id == context.get('active_id')"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list create=\"false\" default_order=\"order_id asc\" decoration-info=\"order_id == context.get('active_id')\" action=\"action_open_order\" type=\"object\">\n                <field name=\"currency_id\" column_invisible=\"True\"/>\n                <field name=\"order_id\" widget=\"many2one\"/>\n                <field name=\"date_approve\"/>\n                <field name=\"partner_id\" string=\"Vendor\"/>\n                <field name=\"company_id\" optional=\"show\" groups=\"base.group_multi_company\"/>\n                <field name=\"product_uom_qty\" string=\"Quantity\"/>\n                <field name=\"price_unit_product_uom\" widget=\"monetary\" string=\"Unit Price\"/>\n                <field name=\"price_subtotal\" widget=\"monetary\" string=\"Total Untaxed\"/>\n                <field name=\"state\" optional=\"hide\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "purchase.purchase_history_pivot",
+   "package": "purchase",
+   "name": "purchase.history.pivot",
+   "entity": "purchase.order.line",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "price_total",
+      "string": "Total purchased amount"
+     },
+     {
+      "name": "product_uom_qty",
+      "string": "Total Qty purchased"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "price_total",
+      "string": "Total purchased amount",
+      "type": "measure"
+     },
+     {
+      "name": "product_uom_qty",
+      "string": "Total Qty purchased",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n             <pivot>\n                <field name=\"price_total\" string=\"Total purchased amount\" type=\"measure\"/>\n                <field name=\"product_uom_qty\" string=\"Total Qty purchased\" type=\"measure\"/>\n             </pivot>\n         </field>\n    "
+  },
+  {
+   "external_identifier": "purchase.purchase_history_graph",
+   "package": "purchase",
+   "name": "purchase.history.graph",
+   "entity": "purchase.order.line",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "type": "line"
+    },
+    "fields": [
+     {
+      "name": "date_order"
+     },
+     {
+      "name": "product_uom_qty"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date_order",
+      "interval": "month"
+     },
+     {
+      "name": "product_uom_qty",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n             <graph type=\"line\">\n                <field name=\"date_order\" interval=\"month\"/>\n                <field name=\"product_uom_qty\" type=\"measure\"/>\n             </graph>\n         </field>\n    "
+  },
+  {
+   "external_identifier": "purchase_requisition.purchase_order_line_compare_tree",
+   "package": "purchase_requisition",
+   "name": "purchase.order.line.compare.list",
+   "entity": "purchase.order.line",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Purchase Order Lines",
+     "decoration-muted": "state in ['cancel', 'purchase']",
+     "create": "0",
+     "delete": "0",
+     "edit": "0",
+     "expand": "1",
+     "js_class": "purchase_order_line_compare"
+    },
+    "fields": [
+     {
+      "name": "product_id",
+      "readonly": "1"
+     },
+     {
+      "name": "partner_id",
+      "string": "Vendor"
+     },
+     {
+      "name": "order_id",
+      "readonly": "1",
+      "string": "Reference"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "name",
+      "readonly": "1"
+     },
+     {
+      "name": "date_planned",
+      "readonly": "1"
+     },
+     {
+      "name": "product_qty"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "price_unit",
+      "widget": "monetary"
+     },
+     {
+      "name": "price_subtotal",
+      "string": "Total"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "price_total_cc",
+      "widget": "monetary",
+      "string": "Company Total"
+     },
+     {
+      "name": "company_currency_id",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_clear_quantities",
+      "string": "Clear Selected",
+      "type": "object",
+      "class": "o_clear_qty_buttons"
+     },
+     {
+      "name": "action_choose",
+      "string": "Choose",
+      "type": "object",
+      "invisible": "product_qty <= 0.0",
+      "class": "o_clear_qty_buttons",
+      "icon": "fa-bullseye"
+     },
+     {
+      "name": "action_clear_quantities",
+      "string": "Clear",
+      "type": "object",
+      "invisible": "product_qty <= 0.0 or state in ['cancel', 'purchase']",
+      "class": "o_clear_qty_buttons",
+      "icon": "fa-times"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1,
+     "monetary": 2
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "0",
+    "delete": "0",
+    "edit": "0",
+    "decorations": {
+     "decoration-muted": "state in ['cancel', 'purchase']"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Purchase Order Lines\" decoration-muted=\"state in ['cancel', 'purchase']\" create=\"0\" delete=\"0\" edit=\"0\" expand=\"1\" js_class=\"purchase_order_line_compare\">\n                <header>\n                    <button name=\"action_clear_quantities\" string=\"Clear Selected\" type=\"object\" class=\"o_clear_qty_buttons\"/>\n                </header>\n                <field name=\"product_id\" readonly=\"1\"/>\n                <field name=\"partner_id\" string=\"Vendor\"/>\n                <field name=\"order_id\" string=\"Reference\" readonly=\"1\"/>\n                <field name=\"state\"/>\n                <field name=\"name\" readonly=\"1\"/>\n                <field name=\"date_planned\" readonly=\"1\"/>\n                <field name=\"product_qty\"/>\n                <field name=\"product_uom_id\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n                <field name=\"price_unit\" widget=\"monetary\"/>\n                <field name=\"price_subtotal\" string=\"Total\"/>\n                <field name=\"currency_id\" column_invisible=\"True\"/>\n                <field name=\"price_total_cc\" string=\"Company Total\" widget=\"monetary\"/>\n                <field name=\"company_currency_id\" column_invisible=\"True\"/>\n                <button name=\"action_choose\" string=\"Choose\" type=\"object\" class=\"o_clear_qty_buttons\" icon=\"fa-bullseye\" invisible=\"product_qty &lt;= 0.0\"/>\n                <button name=\"action_clear_quantities\" string=\"Clear\" type=\"object\" class=\"o_clear_qty_buttons\" icon=\"fa-times\" invisible=\"product_qty &lt;= 0.0 or state in ['cancel', 'purchase']\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "purchase_requisition_stock.purchase_order_line_compare_tree_inherit_purchase_requisition_stock",
+   "package": "purchase_requisition_stock",
+   "name": "purchase.order.line.compare.list.purchase.requisition.stock",
+   "entity": "purchase.order.line",
+   "view_type": "field",
+   "inherits_view": "purchase_requisition.purchase_order_line_compare_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "partner_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "partner_id",
+      "position": "after"
+     },
+     {
+      "name": "on_time_rate_perc",
+      "widget": "percentage",
+      "invisible": "on_time_rate_perc < 0"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "percentage": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"partner_id\" position=\"after\">\n                <field name=\"on_time_rate_perc\" widget=\"percentage\" invisible=\"on_time_rate_perc &lt; 0\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "purchase_stock.purchase_order_line_view_form_inherit",
+   "package": "purchase_stock",
+   "name": "purchase.order.line.form.inherit",
+   "entity": "purchase.order.line",
+   "view_type": "xpath",
+   "inherits_view": "purchase.purchase_order_line_form2",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='invoice_lines']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "move_ids"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='invoice_lines']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='invoice_lines']\" position=\"after\">\n                <separator string=\"Stock Moves\"/>\n                <field name=\"move_ids\"/>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

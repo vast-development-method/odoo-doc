@@ -1,0 +1,892 @@
+{
+ "catalog": {
+  "name": "entity:event.booth.category",
+  "description": "Complete definition of entity Event Booth Category (event.booth.category).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.booth.category",
+  "storage_name": "event_booth_category",
+  "full_name": "Event Booth Category",
+  "kind": "persistent",
+  "description": "Event Booth Category",
+  "defined_by_package": "event_booth",
+  "extended_by_packages": [
+   "event_booth_sale",
+   "website_event_booth_exhibitor"
+  ],
+  "mixins": [
+   "image.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence ASC",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "event_booth",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "event_booth",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 10,
+    "defined_in_package": "event_booth",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "string": "Description",
+    "translate": true,
+    "sanitize_attributes": false,
+    "defined_in_package": "event_booth",
+    "full_name": "Description"
+   },
+   {
+    "name": "booth_ids",
+    "type": "One2many",
+    "comodel": "event.booth",
+    "inverse_name": "booth_category_id",
+    "string": "Booths",
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "event_booth",
+    "full_name": "Booths",
+    "target_entity": "event.booth"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "required": true,
+    "domain": [
+     [
+      "service_tracking",
+      "=",
+      "event_booth"
+     ]
+    ],
+    "default": {
+     "dynamic": "_default_product_id"
+    },
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "price",
+    "type": "Float",
+    "string": "Price",
+    "compute": "_compute_price",
+    "min_display_digits": "Product Price",
+    "readonly": false,
+    "store": true,
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Price"
+   },
+   {
+    "name": "price_incl",
+    "type": "Float",
+    "string": "Price incl",
+    "compute": "_compute_price_incl",
+    "min_display_digits": "Product Price",
+    "readonly": false,
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Price incl"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "product_id.currency_id",
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "event_booth_sale",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "price_reduce",
+    "type": "Float",
+    "string": "Price Reduce",
+    "compute": "_compute_price_reduce",
+    "compute_sudo": true,
+    "min_display_digits": "Product Price",
+    "groups": "event.group_event_registration_desk",
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Price Reduce"
+   },
+   {
+    "name": "price_reduce_taxinc",
+    "type": "Float",
+    "string": "Price Reduce Tax inc",
+    "compute": "_compute_price_reduce_taxinc",
+    "compute_sudo": true,
+    "defined_in_package": "event_booth_sale",
+    "full_name": "Price Reduce Tax inc"
+   },
+   {
+    "name": "image_1920",
+    "type": "Image",
+    "compute": "_compute_image_1920",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "event_booth_sale",
+    "string": "Image 1920",
+    "full_name": "Image 1920"
+   },
+   {
+    "name": "use_sponsor",
+    "type": "Boolean",
+    "string": "Create Sponsor",
+    "help": "If set, when booking a booth a sponsor will be created for the user",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Create Sponsor"
+   },
+   {
+    "name": "sponsor_type_id",
+    "type": "Many2one",
+    "comodel": "event.sponsor.type",
+    "string": "Sponsor Level",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor Level",
+    "target_entity": "event.sponsor.type"
+   },
+   {
+    "name": "exhibitor_type",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_exhibitor_type"
+    },
+    "string": "Sponsor Type",
+    "defined_in_package": "website_event_booth_exhibitor",
+    "full_name": "Sponsor Type"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_product_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_service_tracking",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The product, %(product_name)s , is used for Event Booth, it must have service_tracking set to \"Event Booth\".",
+        "line": 43
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_image_1920",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "By default price comes from category but can be changed by event\npeople as product may be shared across various categories. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_incl",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.taxes_id",
+         "price"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_reduce",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         {
+          "expression": "*PRICE_CONTEXT_KEYS"
+         }
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "price"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_price_reduce_taxinc",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         {
+          "expression": "*PRICE_CONTEXT_KEYS"
+         }
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "price_reduce"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_init_column",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "column_name"
+    ],
+    "definitions": [
+     {
+      "package": "event_booth_sale",
+      "decorators": [],
+      "documentation": "Initialize product_id for existing columns when installing sale\nbridge, to ensure required attribute is fulfilled. ",
+      "size_in_lines": 38,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_exhibitor_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_booth_exhibitor",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_use_sponsor",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_booth_exhibitor",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "use_sponsor"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_service_tracking",
+    "package": "event_booth_sale",
+    "kind": "ValidationError",
+    "message": "The product, %(product_name)s , is used for Event Booth, it must have service_tracking set to \"Event Booth\"."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event_booth.access_event_booth_category",
+    "package": "event_booth",
+    "name": "event.booth.category",
+    "entity": "event.booth.category",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event_booth.access_event_booth_category_desk",
+    "package": "event_booth",
+    "name": "event.booth.category.desk",
+    "entity": "event.booth.category",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event_booth.access_event_booth_category_manager",
+    "package": "event_booth",
+    "name": "event.booth.category.manager",
+    "entity": "event.booth.category",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_event_booth.access_event_booth_category_public",
+    "package": "website_event_booth",
+    "name": "event.booth.category.public",
+    "entity": "event.booth.category",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "event_booth.event_booth_category_view_form",
+    "package": "event_booth",
+    "name": "event.booth.category.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Booth Type"
+     },
+     "fields": [
+      {
+       "name": "image_1920",
+       "widget": "image",
+       "options": "{\"preview_image\": \"image_128\"}"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Premium Booth"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "description",
+       "placeholder": "e.g. \"Those stands will be place near the entrance and...\""
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "description",
+       "string": "Description",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_category_view_tree",
+    "package": "event_booth",
+    "name": "event.booth.category.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event_booth.event_booth_category_view_search",
+    "package": "event_booth",
+    "name": "event.booth.category.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_booth_sale.event_booth_category_view_form",
+    "package": "event_booth_sale",
+    "name": "event.booth.category.view.form.inherit.sale",
+    "view_type": "group",
+    "inherits_view": "event_booth.event_booth_category_view_form",
+    "mode": null,
+    "priority": "1",
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "main",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "context": "{                             'default_type': 'service',                             'default_service_tracking': 'event_booth',                         }"
+      },
+      {
+       "name": "price",
+       "widget": "monetary",
+       "options": "{'currency_field': 'currency_id'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "main",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_booth_sale.event_booth_category_view_tree",
+    "package": "event_booth_sale",
+    "name": "event.booth.category.view.list.inherit.sale",
+    "view_type": "field",
+    "inherits_view": "event_booth.event_booth_category_view_tree",
+    "mode": null,
+    "priority": "3",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "price",
+       "widget": "monetary",
+       "options": "{'currency_field': 'currency_id'}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_booth_exhibitor.event_booth_category_view_form",
+    "package": "website_event_booth_exhibitor",
+    "name": "event.booth.category.view.form.inherit.website.event.booth.exhibitor",
+    "view_type": "group",
+    "inherits_view": "event_booth.event_booth_category_view_form",
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "group",
+     "root_attributes": {
+      "name": "main",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "use_sponsor"
+      },
+      {
+       "name": "sponsor_type_id",
+       "invisible": "not use_sponsor",
+       "required": "use_sponsor"
+      },
+      {
+       "name": "exhibitor_type",
+       "invisible": "not use_sponsor",
+       "required": "use_sponsor"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "group",
+       "attributes": {
+        "name": "main",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_booth_exhibitor.event_booth_category_view_tree",
+    "package": "website_event_booth_exhibitor",
+    "name": "event.booth.category.view.list.inherit.website.event.booth.exhibitor",
+    "view_type": "field",
+    "inherits_view": "event_booth.event_booth_category_view_tree",
+    "mode": null,
+    "priority": "5",
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "name",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "position": "after"
+      },
+      {
+       "name": "use_sponsor"
+      },
+      {
+       "name": "sponsor_type_id",
+       "optional": "hide"
+      },
+      {
+       "name": "exhibitor_type",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_booth_exhibitor.event_booth_category_view_search",
+    "package": "website_event_booth_exhibitor",
+    "name": "event.booth.category.view.search.inherit.website.event.booth.exhibitor",
+    "view_type": "xpath",
+    "inherits_view": "event_booth.event_booth_category_view_search",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "use_sponsor"
+      },
+      {
+       "name": "sponsor_type_id"
+      },
+      {
+       "name": "exhibitor_type"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "group_by_sponsor_type",
+       "string": "Sponsor type",
+       "context": "{'group_by': 'sponsor_type_id'}"
+      },
+      {
+       "name": "group_by_exhibitor_type",
+       "string": "Exhibitor type",
+       "context": "{'group_by':'exhibitor_type'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='name']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event_booth.event_booth_category_action",
+    "package": "event_booth",
+    "name": "Booth Category",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a Booth Category\n            </p>\n            <p>\n                Booth categories are used to represent the different types of booths you rent (Premium Booth, Table and Chairs, ...)\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.booth.category"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

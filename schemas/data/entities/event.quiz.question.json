@@ -1,0 +1,435 @@
+{
+ "catalog": {
+  "name": "entity:event.quiz.question",
+  "description": "Complete definition of entity Content Quiz Question (event.quiz.question).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.quiz.question",
+  "storage_name": "event_quiz_question",
+  "full_name": "Content Quiz Question",
+  "kind": "persistent",
+  "description": "Content Quiz Question",
+  "defined_by_package": "website_event_track_quiz",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "quiz_id, sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Question",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Question"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "quiz_id",
+    "type": "Many2one",
+    "comodel": "event.quiz",
+    "string": "Quiz",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Quiz",
+    "target_entity": "event.quiz"
+   },
+   {
+    "name": "correct_answer_id",
+    "type": "One2many",
+    "comodel": "event.quiz.answer",
+    "compute": "_compute_correct_answer_id",
+    "defined_in_package": "website_event_track_quiz",
+    "string": "Correct Answer",
+    "full_name": "Correct Answer",
+    "target_entity": "event.quiz.answer"
+   },
+   {
+    "name": "awarded_points",
+    "type": "Integer",
+    "string": "Number of Points",
+    "compute": "_compute_awarded_points",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Number of Points"
+   },
+   {
+    "name": "answer_ids",
+    "type": "One2many",
+    "comodel": "event.quiz.answer",
+    "inverse_name": "question_id",
+    "string": "Answer",
+    "defined_in_package": "website_event_track_quiz",
+    "full_name": "Answer",
+    "target_entity": "event.quiz.answer"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_awarded_points",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "answer_ids.awarded_points"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_correct_answer_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "answer_ids.is_correct"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_answers_integrity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_event_track_quiz",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "answer_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Question \"%s\" must have 1 correct answer to be valid.",
+        "line": 48
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Question \"%s\" must have 1 correct answer and at least 1 incorrect answer to be valid.",
+        "line": 50
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_answers_integrity",
+    "package": "website_event_track_quiz",
+    "kind": "ValidationError",
+    "message": "Question \"%s\" must have 1 correct answer to be valid."
+   },
+   {
+    "operation": "_check_answers_integrity",
+    "package": "website_event_track_quiz",
+    "kind": "ValidationError",
+    "message": "Question \"%s\" must have 1 correct answer and at least 1 incorrect answer to be valid."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_event_track_quiz.event_quiz_question_access_event_user",
+    "package": "website_event_track_quiz",
+    "name": "event.quiz.question.access.event.user",
+    "entity": "event.quiz.question",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "website_event_track_quiz.event_quiz_question_view_search",
+    "package": "website_event_track_quiz",
+    "name": "event.quiz.question.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Quiz Questions"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "quiz_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [
+      {
+       "name": "groupby_quiz_id",
+       "string": "Quiz",
+       "context": "{'group_by': 'quiz_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "website_event_track_quiz.event_quiz_question_view_tree",
+    "package": "website_event_track_quiz",
+    "name": "event.quiz.question.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Quiz Questions"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "quiz_id"
+      },
+      {
+       "name": "awarded_points"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_event_track_quiz.event_quiz_question_view_tree_from_quiz",
+    "package": "website_event_track_quiz",
+    "name": "event.quiz.question.view.list.from.quiz",
+    "view_type": "xpath",
+    "inherits_view": "website_event_track_quiz.event_quiz_question_view_tree",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='quiz_id']",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='quiz_id']",
+       "position": "replace"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_track_quiz.event_quiz_question_view_form",
+    "package": "website_event_track_quiz",
+    "name": "event.quiz.question.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Quiz Question"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. What is Joe's favorite motto?"
+      },
+      {
+       "name": "quiz_id"
+      },
+      {
+       "name": "awarded_points",
+       "invisible": "1"
+      },
+      {
+       "name": "answer_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "text_value"
+      },
+      {
+       "name": "is_correct"
+      },
+      {
+       "name": "awarded_points"
+      },
+      {
+       "name": "comment"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_event_track_quiz.event_quiz_question_view_form_from_quiz",
+    "package": "website_event_track_quiz",
+    "name": "event.quiz.question.view.form.from.quiz",
+    "view_type": "xpath",
+    "inherits_view": "website_event_track_quiz.event_quiz_question_view_form",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='quiz_id']",
+      "position": "replace"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='quiz_id']",
+       "position": "replace"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_event_track_quiz.event_quiz_question_action",
+    "package": "website_event_track_quiz",
+    "name": "Event Quiz Questions",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'create': False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Quiz Question yet!\n            </p><p>\n                From here you will be able to examine all quiz questions you have linked to Tracks.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.quiz.question"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

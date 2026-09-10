@@ -1,0 +1,710 @@
+{
+ "catalog": {
+  "name": "entity:event.lead.rule",
+  "description": "Complete definition of entity Event Lead Rules (event.lead.rule).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "event.lead.rule",
+  "storage_name": "event_lead_rule",
+  "full_name": "Event Lead Rules",
+  "kind": "persistent",
+  "description": "Event Lead Rules",
+  "defined_by_package": "event_crm",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Rule Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "event_crm",
+    "full_name": "Rule Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "event_crm",
+    "full_name": "Active"
+   },
+   {
+    "name": "lead_ids",
+    "type": "One2many",
+    "comodel": "crm.lead",
+    "inverse_name": "event_lead_rule_id",
+    "string": "Created Leads",
+    "groups": "sales_team.group_sale_salesman",
+    "defined_in_package": "event_crm",
+    "full_name": "Created Leads",
+    "target_entity": "crm.lead"
+   },
+   {
+    "name": "lead_creation_basis",
+    "type": "Selection",
+    "selection": [
+     [
+      "attendee",
+      "Per Attendee"
+     ],
+     [
+      "order",
+      "Per Order"
+     ]
+    ],
+    "string": "Create",
+    "default": "attendee",
+    "required": true,
+    "help": "Per Attendee: A Lead is created for each Attendee (B2C).\nPer Order: A single Lead is created per Ticket Batch/Sale Order (B2B)",
+    "defined_in_package": "event_crm",
+    "full_name": "Create"
+   },
+   {
+    "name": "lead_creation_trigger",
+    "type": "Selection",
+    "selection": [
+     [
+      "create",
+      "Attendees are created"
+     ],
+     [
+      "confirm",
+      "Attendees are registered"
+     ],
+     [
+      "done",
+      "Attendees attended"
+     ]
+    ],
+    "string": "When",
+    "default": "create",
+    "required": true,
+    "help": "Creation: at attendee creation;\nRegistered: at attendee registration, manually or automatically;\nAttended: when attendance is confirmed and registration set to done;",
+    "defined_in_package": "event_crm",
+    "full_name": "When"
+   },
+   {
+    "name": "event_type_ids",
+    "type": "Many2many",
+    "comodel": "event.type",
+    "string": "Event Templates",
+    "help": "Filter the attendees to include those of this specific event category. If not set, no event category restriction will be applied.",
+    "defined_in_package": "event_crm",
+    "full_name": "Event Templates",
+    "target_entity": "event.type"
+   },
+   {
+    "name": "event_id",
+    "type": "Many2one",
+    "comodel": "event.event",
+    "string": "Event",
+    "domain": "[('company_id', 'in', [company_id or current_company_id, False])]",
+    "help": "Filter the attendees to include those of this specific event. If not set, no event restriction will be applied.",
+    "defined_in_package": "event_crm",
+    "full_name": "Event",
+    "target_entity": "event.event"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "help": "Restrict the trigger of this rule to events belonging to a specific company.\nIf not set, no company restriction will be applied.",
+    "defined_in_package": "event_crm",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "event_registration_filter",
+    "type": "Text",
+    "string": "Registrations Domain",
+    "help": "Filter the attendees that will or not generate leads.",
+    "defined_in_package": "event_crm",
+    "full_name": "Registrations Domain"
+   },
+   {
+    "name": "lead_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "lead",
+      "Lead"
+     ],
+     [
+      "opportunity",
+      "Opportunity"
+     ]
+    ],
+    "string": "Lead Type",
+    "required": true,
+    "default": {
+     "dynamic": "lambda self: 'lead' if self.env.user.has_group('crm.group_use_lead') else 'opportunity'"
+    },
+    "help": "Default lead type when this rule is applied.",
+    "defined_in_package": "event_crm",
+    "full_name": "Lead Type"
+   },
+   {
+    "name": "lead_sales_team_id",
+    "type": "Many2one",
+    "comodel": "crm.team",
+    "string": "Sales Team",
+    "ondelete": "set null",
+    "help": "Automatically assign the created leads to this Sales Team.",
+    "defined_in_package": "event_crm",
+    "full_name": "Sales Team",
+    "target_entity": "crm.team"
+   },
+   {
+    "name": "lead_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Salesperson",
+    "help": "Automatically assign the created leads to this Salesperson.",
+    "defined_in_package": "event_crm",
+    "full_name": "Salesperson",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "lead_tag_ids",
+    "type": "Many2many",
+    "comodel": "crm.tag",
+    "string": "Tags",
+    "help": "Automatically add these tags to the created leads.",
+    "defined_in_package": "event_crm",
+    "full_name": "Tags",
+    "target_entity": "crm.tag"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_onchange_lead_sales_team_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "lead_sales_team_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_on_registrations",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "registrations"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Create or update leads based on rule configuration. Two main lead\nmanagement type exists\n\n  * per attendee: each registration creates a lead;\n  * per order: registrations are grouped per group and one lead is created\n    or updated with the batch (used mainly with sale order configuration\n    in event_sale);\n\nHeuristic\n\n  * first, check existing lead linked to registrations to ensure no\n    duplication. Indeed for example attendee status change may trigger\n    the same rule several times;\n  * then for each rule, get the subset of registrations matching its\n    filters;\n  * then for each order-based rule, get the grouping information. This\n    give a list of registrations by group (event, sale_order), with maybe\n    an already-existing lead to update instead of creating a new one;\n  * finally apply rules. Attendee-based rules create a lead for each\n    attendee, group-based rules use the grouping information to create\n    or update leads;\n\n:param registrations: event.registration recordset on which rules given by\n  self have to run. Triggers should already be checked, only filters are\n  applied here.\n\n:returns: newly-created leads. Updated leads are not returned.",
+      "size_in_lines": 79,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_execute_rule",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_registrations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "registrations"
+    ],
+    "definitions": [
+     {
+      "package": "event_crm",
+      "decorators": [],
+      "documentation": "Keep registrations matching rule conditions. Those are\n\n  * if a filter is set: filter registrations based on this filter. This is\n    done like a search, and filter is a domain;\n  * if a company is set on the rule, it must match event's company. Note\n    that multi-company rules apply on event_lead_rule;\n  * if an event category it set, it must match;\n  * if an event is set, it must match;\n  * if both event and category are set, one of them must match (OR). If none\n    of those are set, it is considered as OK;\n\n:param registrations: event.registration recordset on which rule filters\n  will be evaluated;\n:return: subset of registrations matching rules",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "event_crm.access_event_crm_registration",
+    "package": "event_crm",
+    "name": "event.lead.rule.user",
+    "entity": "event.lead.rule",
+    "group": "event.group_event_registration_desk",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event_crm.access_event_crm_user",
+    "package": "event_crm",
+    "name": "event.lead.rule.user",
+    "entity": "event.lead.rule",
+    "group": "event.group_event_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "event_crm.access_event_crm_manager",
+    "package": "event_crm",
+    "name": "event.lead.rule.manager",
+    "entity": "event.lead.rule",
+    "group": "event.group_event_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "event_crm.access_event_crm_salesman",
+    "package": "event_crm",
+    "name": "event.lead.rule.salesman",
+    "entity": "event.lead.rule",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "event_crm.ir_rule_event_crm",
+    "package": "event_crm",
+    "name": "Event CRM: Multi Company",
+    "entity": "event.lead.rule",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": "[(4, ref('base.group_multi_company'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "event_crm.event_lead_rule_view_search",
+    "package": "event_crm",
+    "name": "event.lead.rule.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Lead Generation Rules"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "filter_inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "filter_lead_creation_basis",
+       "string": "Creation Type",
+       "context": "{'group_by': 'lead_creation_basis'}"
+      },
+      {
+       "name": "filter_lead_creation_trigger",
+       "string": "Trigger Type",
+       "context": "{'group_by': 'lead_creation_trigger'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "event_crm.event_lead_rule_view_tree",
+    "package": "event_crm",
+    "name": "event.lead.rule.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Lead Generation Rules"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "lead_creation_basis",
+       "string": "Lead Creation Type",
+       "column_invisible": "True"
+      },
+      {
+       "name": "lead_creation_trigger"
+      },
+      {
+       "name": "event_type_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "event_id"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "event_crm.event_lead_rule_view_form",
+    "package": "event_crm",
+    "name": "event.lead.rule.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Lead Generation Rule"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. B2B Fairs"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "lead_creation_basis",
+       "widget": "radio"
+      },
+      {
+       "name": "lead_creation_trigger",
+       "widget": "radio"
+      },
+      {
+       "name": "event_type_ids",
+       "widget": "many2many_tags",
+       "placeholder": "All Event templates"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "event_id",
+       "options": "{'no_create': True}",
+       "placeholder": "All Events"
+      },
+      {
+       "name": "event_registration_filter",
+       "widget": "domain",
+       "options": "{'foldable': True, 'model': 'event.registration'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "lead_type",
+       "groups": "crm.group_use_lead"
+      },
+      {
+       "name": "lead_sales_team_id"
+      },
+      {
+       "name": "lead_user_id",
+       "widget": "many2one_avatar_leader_user"
+      },
+      {
+       "name": "lead_tag_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_execute_rule",
+       "string": "Execute Rule",
+       "type": "object",
+       "class": "btn btn-primary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 2,
+      "many2many_tags": 2,
+      "domain": 1,
+      "many2one_avatar_leader_user": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "class": "btn btn-primary",
+       "name": "action_execute_rule",
+       "type": "object",
+       "string": "Execute Rule",
+       "help": "Execute this rule for all ongoing and future events."
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "event_crm_sale.event_lead_rule_view_tree",
+    "package": "event_crm_sale",
+    "name": "event.lead.rule.view.list.inherit.event.crm.sale",
+    "view_type": "xpath",
+    "inherits_view": "event_crm.event_lead_rule_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lead_creation_basis']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lead_creation_basis']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "event_crm_sale.event_lead_rule_view_form",
+    "package": "event_crm_sale",
+    "name": "event.lead.rule.view.form.inherit.event.crm.sale",
+    "view_type": "xpath",
+    "inherits_view": "event_crm.event_lead_rule_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='lead_creation_basis']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='lead_creation_basis']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_crm.event_lead_rule_view_tree",
+    "package": "website_event_crm",
+    "name": "event.lead.rule.view.list.inherit.website.event.crm",
+    "view_type": "xpath",
+    "inherits_view": "event_crm.event_lead_rule_view_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lead_creation_basis']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lead_creation_basis']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "website_event_crm.event_lead_rule_view_form",
+    "package": "website_event_crm",
+    "name": "event.lead.rule.view.form.inherit.website.event.crm",
+    "view_type": "xpath",
+    "inherits_view": "event_crm.event_lead_rule_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='lead_creation_basis']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='lead_creation_basis']",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "event_crm.event_lead_rule_action",
+    "package": "event_crm",
+    "name": "Lead Generation Rule",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">Create a Lead Generation Rule</p>\n            <p>Those automatically create leads when attendees register.</p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "event.lead.rule"
+   },
+   {
+    "external_identifier": "event_crm.event_lead_rule_answer_action",
+    "package": "event_crm",
+    "name": "Event lead Rule",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "event.lead.rule"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

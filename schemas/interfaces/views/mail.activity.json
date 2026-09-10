@@ -1,0 +1,747 @@
+{
+ "catalog": {
+  "name": "views:mail.activity",
+  "description": "View declarations for entity mail.activity.",
+  "record_count": 11,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "calendar.mail_activity_view_form_popup",
+   "package": "calendar",
+   "name": "mail.activity.form.inherit.calendar",
+   "entity": "mail.activity",
+   "view_type": "xpath",
+   "inherits_view": "mail.mail_activity_view_form_popup",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='date_deadline']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='date_deadline']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='date_deadline']\" position=\"attributes\">\n                  <attribute name=\"invisible\">activity_category == 'meeting'</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='user_id']\" position=\"attributes\">\n                  <attribute name=\"invisible\">activity_category == 'meeting'</attribute>\n            </xpath>\n            <xpath expr=\"//button[@id='mail_activity_schedule']\" position=\"attributes\">\n                  <attribute name=\"invisible\">activity_category in ['meeting', 'phonecall'] or id</attribute>\n            </xpath>\n            <xpath expr=\"//button[@id='mail_activity_save']\" position=\"attributes\">\n                  <attribute name=\"invisible\">activity_category != 'phonecall' and not id</attribute>\n            </xpath>\n            <xpath expr=\"//button[@name='action_done']\" position=\"attributes\">\n                  <attribute name=\"invisible\">activity_category == 'meeting' or chaining_type == 'trigger'</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='note']\" position=\"attributes\">\n                  <attribute name=\"invisible\">activity_category == 'meeting'</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='summary']\" position=\"attributes\">\n                <attribute name=\"invisible\" add=\"activity_category == 'meeting'\" separator=\"or\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='note']\" position=\"before\">\n                <div invisible=\"activity_category != 'meeting'\" class=\"text-muted text-center w-100\">\n                    <div>\n                        <i class=\"fa fa-9x fa-calendar p-3\" title=\"Calendar\" aria-hidden=\"true\"/>\n                    </div>\n                    <p>Schedule a meeting in your calendar</p>\n                </div>\n            </xpath>\n            <xpath expr=\"//button[@name='action_close_dialog']\" position=\"before\">\n                  <field name=\"calendar_event_id\" invisible=\"1\"/>\n                  <button string=\"Schedule\" close=\"1\" invisible=\"activity_category != 'meeting' or calendar_event_id\" name=\"action_create_calendar_event\" type=\"object\" class=\"btn-primary\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_form_popup",
+   "package": "mail",
+   "name": "mail.activity.view.form.popup",
+   "entity": "mail.activity",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Log an Activity",
+     "create": "false"
+    },
+    "fields": [
+     {
+      "name": "activity_category",
+      "invisible": "1"
+     },
+     {
+      "name": "res_model",
+      "invisible": "1"
+     },
+     {
+      "name": "res_model_id",
+      "invisible": "1"
+     },
+     {
+      "name": "res_id",
+      "invisible": "1"
+     },
+     {
+      "name": "chaining_type",
+      "invisible": "1"
+     },
+     {
+      "name": "previous_activity_type_id"
+     },
+     {
+      "name": "has_recommended_activities"
+     },
+     {
+      "name": "recommended_activity_type_id",
+      "widget": "selection_badge",
+      "string": "Recommended Activities",
+      "domain": "[('previous_type_ids', '=', previous_activity_type_id)]"
+     },
+     {
+      "name": "activity_type_id",
+      "widget": "selection_badge_icons",
+      "required": "1",
+      "nolabel": "1"
+     },
+     {
+      "name": "summary",
+      "placeholder": "e.g. Discuss Proposal"
+     },
+     {
+      "name": "date_deadline"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "note",
+      "options": "{'embedded_components': false}",
+      "placeholder": "Log a note..."
+     },
+     {
+      "name": "id",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_open_document",
+      "type": "object",
+      "invisible": "not res_model or res_id == 0",
+      "class": "oe_link",
+      "icon": "fa-file-text-o"
+     },
+     {
+      "name": "action_close_dialog",
+      "string": "Schedule",
+      "type": "object",
+      "invisible": "id",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "action_close_dialog",
+      "string": "Save",
+      "type": "object",
+      "invisible": "not id",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "action_done",
+      "string": "Mark Done",
+      "type": "object",
+      "invisible": "chaining_type == 'trigger'",
+      "class": "btn-secondary",
+      "context": "{'mail_activity_quick_update': True}",
+      "data-hotkey": "w"
+     },
+     {
+      "string": "Discard",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "selection_badge": 1,
+     "selection_badge_icons": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": [
+     {
+      "name": "action_open_document",
+      "type": "object",
+      "class": "oe_link",
+      "icon": "fa-file-text-o",
+      "invisible": "not res_model or res_id == 0"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Log an Activity\" create=\"false\">\n                <sheet string=\"Activity\">\n                    <div class=\"oe_button_box\" name=\"button_box\" invisible=\"1\">\n                        <button name=\"action_open_document\" type=\"object\" class=\"oe_link\" icon=\"fa-file-text-o\" invisible=\"not res_model or res_id == 0\">\n                                <div class=\"o_field_widget o_stat_info\">\n                                    <span class=\"o_stat_text\">Open Document</span>\n                                </div>\n                        </button>\n                    </div>\n                    <group invisible=\"1\">\n                        <field name=\"activity_category\" invisible=\"1\"/>\n                        <field name=\"res_model\" invisible=\"1\"/>\n                        <field name=\"res_model_id\" invisible=\"1\"/>\n                        <field name=\"res_id\" invisible=\"1\"/>\n                        <field name=\"chaining_type\" invisible=\"1\"/>\n                        <field name=\"previous_activity_type_id\"/>\n                        <field name=\"has_recommended_activities\"/>\n                    </group>\n                    <group invisible=\"not has_recommended_activities\">\n                        <field name=\"recommended_activity_type_id\" widget=\"selection_badge\" domain=\"[('previous_type_ids', '=', previous_activity_type_id)]\" string=\"Recommended Activities\"/>\n                    </group>\n\n                    <group>\n                        <field name=\"activity_type_id\" required=\"1\" widget=\"selection_badge_icons\" iconField=\"icon\" nolabel=\"1\"/>\n                        <field name=\"summary\" placeholder=\"e.g. Discuss Proposal\" class=\"fs-3 pb-2\"/>\n                        <group>\n                            <field name=\"date_deadline\"/>\n                        </group>\n                        <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                    </group>\n                    <field name=\"note\" class=\"oe-bordered-editor embedded-editor-height-4\" placeholder=\"Log a note...\" options=\"{'embedded_components': false}\"/>\n                    <footer>\n                        <field name=\"id\" invisible=\"1\"/>\n                        <button id=\"mail_activity_schedule\" string=\"Schedule\" close=\"1\" name=\"action_close_dialog\" type=\"object\" class=\"btn-primary\" invisible=\"id\" data-hotkey=\"q\"/>\n                        <button id=\"mail_activity_save\" string=\"Save\" name=\"action_close_dialog\" type=\"object\" class=\"btn-primary\" invisible=\"not id\" data-hotkey=\"q\"/>\n                        <button invisible=\"chaining_type == 'trigger'\" string=\"Mark Done\" name=\"action_done\" type=\"object\" class=\"btn-secondary\" data-hotkey=\"w\" context=\"{'mail_activity_quick_update': True}\"/>\n                        <button string=\"Discard\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                    </footer>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_form",
+   "package": "mail",
+   "name": "mail.activity.view.form",
+   "entity": "mail.activity",
+   "view_type": "field",
+   "inherits_view": "mail.mail_activity_view_form_popup",
+   "mode": "primary",
+   "priority": "21",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "activity_type_id",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "activity_type_id",
+      "position": "before"
+     },
+     {
+      "name": "res_name",
+      "readonly": "1",
+      "string": "Document"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"activity_type_id\" position=\"before\">\n                <field name=\"res_name\" readonly=\"1\" string=\"Document\"/>\n            </field>\n            <footer position=\"replace\"/>\n            <xpath expr=\"//div[hasclass('oe_button_box')]\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_form_without_record_access",
+   "package": "mail",
+   "name": "mail.activity.view.form.without.record.access",
+   "entity": "mail.activity",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Log an Activity",
+     "create": "false",
+     "delete": "false"
+    },
+    "fields": [
+     {
+      "name": "display_name",
+      "invisible": "1"
+     },
+     {
+      "name": "activity_type_id",
+      "widget": "selection_badge_icons",
+      "required": "1",
+      "nolabel": "1"
+     },
+     {
+      "name": "summary",
+      "placeholder": "e.g. Discuss proposal"
+     },
+     {
+      "name": "date_deadline"
+     },
+     {
+      "name": "note",
+      "options": "{'embedded_components': false}",
+      "placeholder": "Log a note..."
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_done_redirect_to_other",
+      "string": "Mark Done",
+      "type": "object",
+      "class": "btn-primary"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "selection_badge_icons": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "string": "Mark Done",
+      "class": "btn-primary",
+      "name": "action_done_redirect_to_other",
+      "type": "object"
+     }
+    ],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Log an Activity\" create=\"false\" delete=\"false\">\n                <header>\n                    <button string=\"Mark Done\" class=\"btn-primary\" name=\"action_done_redirect_to_other\" type=\"object\"/>\n                </header>\n                <sheet string=\"Activity\">\n                    <field name=\"display_name\" invisible=\"1\"/>\n                    <group>\n                        <field name=\"activity_type_id\" required=\"1\" widget=\"selection_badge_icons\" iconField=\"icon\" nolabel=\"1\"/>\n                        <field name=\"summary\" placeholder=\"e.g. Discuss proposal\"/>\n                        <group>\n                            <field name=\"date_deadline\"/>\n                        </group>\n                    </group>\n                    <field name=\"note\" class=\"oe-bordered-editor embedded-editor-height-4\" placeholder=\"Log a note...\" options=\"{'embedded_components': false}\"/>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_search",
+   "package": "mail",
+   "name": "mail.activity.view.search",
+   "entity": "mail.activity",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Activity"
+    },
+    "fields": [
+     {
+      "name": "res_name",
+      "string": "Name",
+      "filter_domain": "[                     '|',                         ('res_name', 'ilike', self),                         ('summary', 'ilike', self),                 ]"
+     },
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "activity_type_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "filter_user_id_uid",
+      "string": "My Activities",
+      "domain": "[('user_id', '=', uid)]"
+     },
+     {
+      "name": "filter_user_id_no_user",
+      "string": "Unassigned Activities",
+      "domain": "[('user_id', '=', False)]"
+     },
+     {
+      "name": "filter_date_deadline_past",
+      "string": "Overdue",
+      "domain": "[('date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past"
+     },
+     {
+      "name": "filter_date_deadline_today",
+      "string": "Today",
+      "domain": "[('date_deadline', '=', 'today')]"
+     },
+     {
+      "name": "filter_date_deadline_tomorrow",
+      "string": "Tomorrow",
+      "domain": "[('date_deadline', '=', 'today +1d')]",
+      "help": "Show all records whose next action date is tomorrow"
+     },
+     {
+      "name": "filter_date_deadline_week",
+      "string": "This week",
+      "domain": "[                             ('date_deadline', '>=', '=week_start'),                             ('date_deadline', '<', '=week_start +1w')                         ]",
+      "help": "Show all records whose next action date is this week"
+     },
+     {
+      "name": "filter_date_deadline_future",
+      "string": "Future",
+      "domain": "[('date_deadline', '>', 'today')                         ]"
+     },
+     {
+      "name": "filter_archived",
+      "string": "Done",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "date_deadline",
+      "string": "Deadline",
+      "context": "{'group_by': 'date_deadline'}"
+     },
+     {
+      "name": "group_by_res_model_id",
+      "string": "Document Model",
+      "context": "{'group_by': 'res_model_id'}"
+     },
+     {
+      "name": "group_by_user_id",
+      "string": "Assigned To",
+      "context": "{'group_by': 'user_id'}"
+     },
+     {
+      "name": "createdby",
+      "string": "Created By",
+      "context": "{'group_by': 'create_uid'}"
+     },
+     {
+      "name": "activittype",
+      "string": "Activity Type",
+      "context": "{'group_by': 'activity_type_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Activity\">\n                <field name=\"res_name\" string=\"Name\" filter_domain=\"[                     '|',                         ('res_name', 'ilike', self),                         ('summary', 'ilike', self),                 ]\"/>\n                <field name=\"user_id\"/>\n                <field name=\"activity_type_id\"/>\n                <filter name=\"filter_user_id_uid\" string=\"My Activities\" domain=\"[('user_id', '=', uid)]\"/>\n                <filter name=\"filter_user_id_no_user\" string=\"Unassigned Activities\" domain=\"[('user_id', '=', False)]\"/>\n                <separator/>\n                <separator invisible=\"1\"/>\n                <filter string=\"Overdue\" name=\"filter_date_deadline_past\" domain=\"[('date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                <filter string=\"Today\" name=\"filter_date_deadline_today\" domain=\"[('date_deadline', '=', 'today')]\"/>\n                <filter string=\"Tomorrow\" name=\"filter_date_deadline_tomorrow\" help=\"Show all records whose next action date is tomorrow\" domain=\"[('date_deadline', '=', 'today +1d')]\"/>\n                <filter string=\"This week\" name=\"filter_date_deadline_week\" help=\"Show all records whose next action date is this week\" domain=\"[                             ('date_deadline', '&gt;=', '=week_start'),                             ('date_deadline', '&lt;', '=week_start +1w')                         ]\"/>\n                <filter string=\"Future\" name=\"filter_date_deadline_future\" domain=\"[('date_deadline', '&gt;', 'today')                         ]\"/>\n                <separator/>\n                <filter string=\"Done\" name=\"filter_archived\" domain=\"[('active', '=', False)]\"/>\n                <separator/>\n                <group>\n                    <filter string=\"Deadline\" name=\"date_deadline\" context=\"{'group_by': 'date_deadline'}\"/>\n                    <filter string=\"Document Model\" name=\"group_by_res_model_id\" context=\"{'group_by': 'res_model_id'}\"/>\n                    <filter string=\"Assigned To\" name=\"group_by_user_id\" context=\"{'group_by': 'user_id'}\"/>\n                    <filter string=\"Created By\" name=\"createdby\" context=\"{'group_by': 'create_uid'}\"/>\n                    <filter string=\"Activity Type\" name=\"activittype\" context=\"{'group_by': 'activity_type_id'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_tree",
+   "package": "mail",
+   "name": "mail.activity.view.list",
+   "entity": "mail.activity",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Next Activities",
+     "default_order": "date_deadline",
+     "create": "true"
+    },
+    "fields": [
+     {
+      "name": "summary",
+      "string": "Summary"
+     },
+     {
+      "name": "activity_type_id"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "res_name",
+      "string": "Linked to"
+     },
+     {
+      "name": "date_deadline",
+      "widget": "remaining_days"
+     },
+     {
+      "name": "date_done",
+      "string": "Done Date",
+      "optional": "hide"
+     },
+     {
+      "name": "feedback",
+      "optional": "hide"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_done",
+      "string": "Done",
+      "type": "object",
+      "icon": "fa-check"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "icon": "fa-times"
+     },
+     {
+      "name": "action_reschedule_today",
+      "string": "Today",
+      "type": "object",
+      "icon": "fa-arrow-down"
+     },
+     {
+      "name": "action_reschedule_tomorrow",
+      "string": "Tomorrow",
+      "type": "object",
+      "icon": "fa-calendar-plus-o"
+     },
+     {
+      "name": "action_reschedule_nextweek",
+      "string": "Next Week",
+      "type": "object",
+      "icon": "fa-calendar-o"
+     },
+     {
+      "name": "action_done",
+      "string": "Done",
+      "type": "object",
+      "invisible": "active == False",
+      "icon": "fa-check"
+     },
+     {
+      "name": "unlink",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "active == False",
+      "class": "text-danger",
+      "icon": "fa-times"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "remaining_days": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "true",
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Next Activities\" default_order=\"date_deadline\" create=\"true\">\n                <header>\n                    <button name=\"action_done\" type=\"object\" string=\"Done\" icon=\"fa-check\"/>\n                    <button name=\"action_cancel\" type=\"object\" string=\"Cancel\" icon=\"fa-times\"/>\n                    <button name=\"action_reschedule_today\" type=\"object\" string=\"Today\" icon=\"fa-arrow-down\"/>\n                    <button name=\"action_reschedule_tomorrow\" type=\"object\" string=\"Tomorrow\" icon=\"fa-calendar-plus-o\"/>\n                    <button name=\"action_reschedule_nextweek\" type=\"object\" string=\"Next Week\" icon=\"fa-calendar-o\"/>\n                </header>\n                <field name=\"summary\" string=\"Summary\"/>\n                <field name=\"activity_type_id\"/>\n                <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                <field name=\"res_name\" string=\"Linked to\"/>\n                <field name=\"date_deadline\" widget=\"remaining_days\"/>\n                <field name=\"date_done\" string=\"Done Date\" optional=\"hide\"/>\n                <field name=\"feedback\" optional=\"hide\"/>\n                <widget name=\"mail_activity_list_reschedule_dropdown\"/>\n                <button name=\"action_done\" type=\"object\" string=\"Done\" icon=\"fa-check\" invisible=\"active == False\"/>\n                <button name=\"unlink\" type=\"object\" string=\"Cancel\" icon=\"fa-times\" class=\"text-danger\" invisible=\"active == False\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_tree_without_record_access",
+   "package": "mail",
+   "name": "mail.activity.view.list.without.record.access",
+   "entity": "mail.activity",
+   "view_type": "xpath",
+   "inherits_view": "mail_activity_view_tree",
+   "mode": "primary",
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list\" position=\"attributes\">\n                <attribute name=\"delete\">0</attribute>\n                <attribute name=\"edit\">0</attribute>\n                <attribute name=\"duplicate\">0</attribute>\n                <attribute name=\"js_class\">archive_disabled_activity_list</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_tree_open_target",
+   "package": "mail",
+   "name": "mail.activity.view.list.open.target",
+   "entity": "mail.activity",
+   "view_type": "xpath",
+   "inherits_view": "mail_activity_view_tree",
+   "mode": "primary",
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list\" position=\"attributes\">\n                <attribute name=\"action\">action_open_document</attribute>\n                <attribute name=\"type\">object</attribute>\n                <attribute name=\"js_class\">archive_disabled_activity_list</attribute>\n                <attribute name=\"multi_edit\">1</attribute>\n            </xpath>\n            <xpath expr=\"//list//field[@name='activity_type_id']\" position=\"attributes\">\n                <attribute name=\"domain\">[('res_model', '=', False)]</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_kanban_open_target",
+   "package": "mail",
+   "name": "mail.activity.view.kanban.open.target",
+   "entity": "mail.activity",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "string": "Activity",
+     "action": "action_open_document",
+     "type": "object",
+     "js_class": "mail_activity_my_kanban"
+    },
+    "fields": [
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "icon",
+      "invisible": "1"
+     },
+     {
+      "name": "res_name"
+     },
+     {
+      "name": "res_model_id"
+     },
+     {
+      "name": "summary",
+      "invisible": "res_name"
+     },
+     {
+      "name": "activity_type_id"
+     },
+     {
+      "name": "summary",
+      "invisible": "not res_name"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "date_deadline",
+      "widget": "remaining_days"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_done",
+      "type": "object",
+      "invisible": "active == False",
+      "class": "btn btn-link btn-sm ms-auto me-1"
+     },
+     {
+      "name": "unlink",
+      "type": "object",
+      "class": "btn btn-link text-danger btn-sm"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "remaining_days": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <kanban string=\"Activity\" action=\"action_open_document\" type=\"object\" js_class=\"mail_activity_my_kanban\">\n                <templates>\n                    <field name=\"active\" invisible=\"1\"/>\n                    <field name=\"icon\" invisible=\"1\"/>\n                    <t t-name=\"card\">\n                        <div class=\"d-flex justify-content-between\">\n                            <span class=\"text-truncate\" invisible=\"not res_name\">\n                                <field name=\"res_name\" class=\"fw-bold\"/>\n                                (<field class=\"text-muted\" name=\"res_model_id\"/>)\n                            </span>\n                            <field name=\"summary\" class=\"text-truncate\" invisible=\"res_name\"/>\n                            <span class=\"badge rounded-pill text-bg-300\">\n                                <i t-if=\"record.icon\" t-attf-class=\"fa {{record.icon.raw_value}} me-1\"/>\n                                <field name=\"activity_type_id\"/>\n                            </span>\n                        </div>\n                        <field class=\"text-truncate\" name=\"summary\" invisible=\"not res_name\"/>\n                        <footer class=\"align-items-center\">\n                            <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                            <field name=\"date_deadline\" widget=\"remaining_days\" class=\"ms-2\"/>\n                            <button type=\"object\" name=\"action_done\" class=\"btn btn-link btn-sm ms-auto me-1\" invisible=\"active == False\">\n                                <i class=\"fa fa-check\"/> Done\n                            </button>\n                            <button type=\"object\" name=\"unlink\" class=\"btn btn-link text-danger btn-sm\">\n                                <i class=\"fa fa-times\"/> Cancel\n                            </button>\n                        </footer>\n                    </t>\n                </templates>\n            </kanban>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mail.mail_activity_view_calendar",
+   "package": "mail",
+   "name": "mail.activity.view.calendar",
+   "entity": "mail.activity",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "2",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "string": "Activity",
+     "date_start": "date_deadline",
+     "color": "activity_type_id",
+     "js_class": "activity_calendar",
+     "create": "0",
+     "mode": "month"
+    },
+    "fields": [
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "res_name",
+      "string": "Name"
+     },
+     {
+      "name": "date_deadline"
+     },
+     {
+      "name": "summary"
+     },
+     {
+      "name": "activity_type_id",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "date_deadline",
+     "date_stop": null,
+     "date_delay": null,
+     "color": "activity_type_id",
+     "mode": "month",
+     "quick_create": null,
+     "event_open_popup": null,
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <calendar string=\"Activity\" date_start=\"date_deadline\" color=\"activity_type_id\" js_class=\"activity_calendar\" create=\"0\" mode=\"month\">\n                <field name=\"user_id\" avatar_field=\"avatar_128\"/>\n                <field name=\"res_name\" string=\"Name\"/>\n                <field name=\"date_deadline\"/>\n                <field name=\"summary\"/>\n                <field name=\"activity_type_id\" filters=\"1\" invisible=\"1\"/>\n            </calendar>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "website_slides.mail_activity_view_form",
+   "package": "website_slides",
+   "name": "mail.activity.view.form.inherit.slides",
+   "entity": "mail.activity",
+   "view_type": "field",
+   "inherits_view": "mail.mail_activity_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "summary",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "summary",
+      "position": "after"
+     },
+     {
+      "name": "request_partner_id",
+      "invisible": "res_model != 'slide.channel'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"summary\" position=\"after\">\n                <field name=\"request_partner_id\" invisible=\"res_model != 'slide.channel'\"/>\n            </field>\n        </field>\n    "
+  }
+ ]
+}

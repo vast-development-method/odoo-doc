@@ -1,0 +1,728 @@
+{
+ "catalog": {
+  "name": "entity:onboarding.onboarding.step",
+  "description": "Complete definition of entity Onboarding Step (onboarding.onboarding.step).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "onboarding.onboarding.step",
+  "storage_name": "onboarding_onboarding_step",
+  "full_name": "Onboarding Step",
+  "kind": "persistent",
+  "description": "Onboarding Step",
+  "defined_by_package": "onboarding",
+  "extended_by_packages": [
+   "account"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence asc, id asc",
+  "display_name_field": "title",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "onboarding_ids",
+    "type": "Many2many",
+    "comodel": "onboarding.onboarding",
+    "string": "Onboardings",
+    "defined_in_package": "onboarding",
+    "full_name": "Onboardings",
+    "target_entity": "onboarding.onboarding"
+   },
+   {
+    "name": "title",
+    "type": "Char",
+    "string": "Title",
+    "translate": true,
+    "defined_in_package": "onboarding",
+    "full_name": "Title"
+   },
+   {
+    "name": "description",
+    "type": "Char",
+    "string": "Description",
+    "translate": true,
+    "defined_in_package": "onboarding",
+    "full_name": "Description"
+   },
+   {
+    "name": "button_text",
+    "type": "Char",
+    "string": "Button text",
+    "required": true,
+    "default": {
+     "dynamic": "lambda s: s.env._(\"Let's do it\")"
+    },
+    "translate": true,
+    "help": "Text on the panel's button to start this step",
+    "defined_in_package": "onboarding",
+    "full_name": "Button text"
+   },
+   {
+    "name": "done_icon",
+    "type": "Char",
+    "string": "Font Awesome Icon when completed",
+    "default": "fa-star",
+    "defined_in_package": "onboarding",
+    "full_name": "Font Awesome Icon when completed"
+   },
+   {
+    "name": "done_text",
+    "type": "Char",
+    "string": "Text to show when step is completed",
+    "default": {
+     "dynamic": "lambda s: s.env._('Step Completed!')"
+    },
+    "translate": true,
+    "defined_in_package": "onboarding",
+    "full_name": "Text to show when step is completed"
+   },
+   {
+    "name": "step_image",
+    "type": "Binary",
+    "string": "Step Image",
+    "defined_in_package": "onboarding",
+    "full_name": "Step Image"
+   },
+   {
+    "name": "step_image_filename",
+    "type": "Char",
+    "string": "Step Image Filename",
+    "defined_in_package": "onboarding",
+    "full_name": "Step Image Filename"
+   },
+   {
+    "name": "step_image_alt",
+    "type": "Char",
+    "string": "Alt Text for the Step Image",
+    "default": "Onboarding Step Image",
+    "translate": true,
+    "help": "Show when impossible to load the image",
+    "defined_in_package": "onboarding",
+    "full_name": "Alt Text for the Step Image"
+   },
+   {
+    "name": "panel_step_open_action_name",
+    "type": "Char",
+    "string": "Opening action",
+    "required": false,
+    "help": "Name of the onboarding step model action to execute when opening the step, e.g. action_open_onboarding_1_step_1",
+    "defined_in_package": "onboarding",
+    "full_name": "Opening action"
+   },
+   {
+    "name": "current_progress_step_id",
+    "type": "Many2one",
+    "comodel": "onboarding.progress.step",
+    "string": "Step Progress",
+    "compute": "_compute_current_progress",
+    "help": "Onboarding Progress Step for the current context (company).",
+    "defined_in_package": "onboarding",
+    "full_name": "Step Progress",
+    "target_entity": "onboarding.progress.step"
+   },
+   {
+    "name": "current_step_state",
+    "type": "Selection",
+    "selection": {
+     "expression": "ONBOARDING_PROGRESS_STATES"
+    },
+    "string": "Completion State",
+    "compute": "_compute_current_progress",
+    "defined_in_package": "onboarding",
+    "full_name": "Completion State"
+   },
+   {
+    "name": "progress_ids",
+    "type": "One2many",
+    "comodel": "onboarding.progress.step",
+    "inverse_name": "step_id",
+    "string": "Onboarding Progress Step Records",
+    "readonly": true,
+    "help": "All related Onboarding Progress Step Records (across companies)",
+    "defined_in_package": "onboarding",
+    "full_name": "Onboarding Progress Step Records",
+    "target_entity": "onboarding.progress.step"
+   },
+   {
+    "name": "is_per_company",
+    "type": "Boolean",
+    "string": "Is per company",
+    "default": true,
+    "defined_in_package": "onboarding",
+    "full_name": "Is per company"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "onboarding",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_current_progress",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "progress_ids",
+         "progress_ids.step_state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_step_on_onboarding_has_action",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "onboarding_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "An \"Opening Action\" is required for the following steps to be linked to an onboarding panel: %(step_titles)s",
+        "line": 68
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_just_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_validate_step",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "xml_id"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_placeholder_filename",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_progress_steps",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "onboarding",
+      "decorators": [],
+      "documentation": "Create progress step records as necessary to validate steps.\n\nOnly considers existing `onboarding.progress` records for the current\ncompany or without company (depending on `is_per_company`).",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_step_company_data",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Set company's basic information.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_step_base_document_layout",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_validate_step_base_document_layout",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Set the onboarding(s) step as done only if layout is set.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_step_bank_account",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_step_create_invoice",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_step_fiscal_year",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_step_chart_of_accounts",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Called by the 'Chart of Accounts' button of the dashboard onboarding panel.",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_step_sales_tax",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "check_step_on_onboarding_has_action",
+    "package": "onboarding",
+    "kind": "ValidationError",
+    "message": "An \"Opening Action\" is required for the following steps to be linked to an onboarding panel: %(step_titles)s"
+   }
+  ],
+  "state_fields": [
+   "current_step_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "onboarding.access_onboarding_step_all",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.step.all",
+    "entity": "onboarding.onboarding.step",
+    "group": null,
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "onboarding.access_onboarding_step_user",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.step.user",
+    "entity": "onboarding.onboarding.step",
+    "group": "base.group_user",
+    "read": false,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "onboarding.access_onboarding_step_manager",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.step.manager",
+    "entity": "onboarding.onboarding.step",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "onboarding.onboarding_onboarding_step_view_tree",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.step.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Onboarding Steps"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "title"
+      },
+      {
+       "name": "onboarding_ids",
+       "optional": "hide"
+      },
+      {
+       "name": "current_step_state"
+      },
+      {
+       "name": "is_per_company",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "onboarding.onboarding_onboarding_step_view_form",
+    "package": "onboarding",
+    "name": "onboarding.onboarding.step.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "title"
+      },
+      {
+       "name": "current_step_state"
+      },
+      {
+       "name": "panel_step_open_action_name"
+      },
+      {
+       "name": "is_per_company"
+      },
+      {
+       "name": "onboarding_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "button_text"
+      },
+      {
+       "name": "done_text"
+      },
+      {
+       "name": "done_icon"
+      },
+      {
+       "name": "step_image_filename",
+       "invisible": "1"
+      },
+      {
+       "name": "step_image"
+      },
+      {
+       "name": "step_image_alt"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "Onboardings using this step",
+       "string": null,
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "Step rendering",
+       "string": null,
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "onboarding.action_view_onboarding_step",
+    "package": "onboarding",
+    "name": "Onboarding Steps",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "onboarding.onboarding.step"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

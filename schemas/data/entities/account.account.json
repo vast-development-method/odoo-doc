@@ -1,0 +1,3518 @@
+{
+ "catalog": {
+  "name": "entity:account.account",
+  "description": "Complete definition of entity Account (account.account).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.account",
+  "storage_name": "account_account",
+  "full_name": "Account",
+  "kind": "persistent",
+  "description": "Account",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "stock_account",
+   "point_of_sale",
+   "l10n_de",
+   "l10n_dk",
+   "l10n_in",
+   "l10n_mx",
+   "l10n_pt",
+   "spreadsheet_account"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "code, placeholder_code",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_companies_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Account Name",
+    "required": true,
+    "index": "trigram",
+    "tracking": true,
+    "translate": true,
+    "defined_in_package": "account",
+    "full_name": "Account Name"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "translate": true,
+    "defined_in_package": "account",
+    "string": "Description",
+    "full_name": "Description"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "string": "Account Currency",
+    "tracking": true,
+    "help": "Forces all journal items in this account to have a specific currency (i.e. bank journals). If no currency is set, entries can use any currency.",
+    "defined_in_package": "account",
+    "full_name": "Account Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "company_currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "compute": "_compute_company_currency_id",
+    "defined_in_package": "account",
+    "string": "Company Currency",
+    "full_name": "Company Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "company_fiscal_country_code",
+    "type": "Char",
+    "compute": "_compute_company_fiscal_country_code",
+    "defined_in_package": "account",
+    "string": "Company Fiscal Country Code",
+    "full_name": "Company Fiscal Country Code"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "string": "Code",
+    "size": 64,
+    "tracking": true,
+    "compute": "_compute_code",
+    "search": "_search_code",
+    "inverse": "_inverse_code",
+    "defined_in_package": "account",
+    "full_name": "Code"
+   },
+   {
+    "name": "code_store",
+    "type": "Char",
+    "company_dependent": true,
+    "defined_in_package": "account",
+    "string": "Code Store",
+    "full_name": "Code Store"
+   },
+   {
+    "name": "placeholder_code",
+    "type": "Char",
+    "string": "Display code",
+    "compute": "_compute_placeholder_code",
+    "search": "_search_placeholder_code",
+    "defined_in_package": "account",
+    "full_name": "Display code"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "tracking": true,
+    "defined_in_package": "account",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "used",
+    "type": "Boolean",
+    "compute": "_compute_used",
+    "search": "_search_used",
+    "defined_in_package": "account",
+    "string": "Used",
+    "full_name": "Used"
+   },
+   {
+    "name": "account_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "asset_receivable",
+      "Receivable"
+     ],
+     [
+      "asset_cash",
+      "Bank and Cash"
+     ],
+     [
+      "asset_current",
+      "Current Assets"
+     ],
+     [
+      "asset_non_current",
+      "Non-current Assets"
+     ],
+     [
+      "asset_prepayments",
+      "Prepayments"
+     ],
+     [
+      "asset_fixed",
+      "Fixed Assets"
+     ],
+     [
+      "liability_payable",
+      "Payable"
+     ],
+     [
+      "liability_credit_card",
+      "Credit Card"
+     ],
+     [
+      "liability_current",
+      "Current Liabilities"
+     ],
+     [
+      "liability_non_current",
+      "Non-current Liabilities"
+     ],
+     [
+      "equity",
+      "Equity"
+     ],
+     [
+      "equity_unaffected",
+      "Current Year Earnings"
+     ],
+     [
+      "income",
+      "Income"
+     ],
+     [
+      "income_other",
+      "Other Income"
+     ],
+     [
+      "expense",
+      "Expenses"
+     ],
+     [
+      "expense_other",
+      "Other Expenses"
+     ],
+     [
+      "expense_depreciation",
+      "Depreciation"
+     ],
+     [
+      "expense_direct_cost",
+      "Cost of Revenue"
+     ],
+     [
+      "off_balance",
+      "Off-Balance Sheet"
+     ]
+    ],
+    "string": "Type",
+    "tracking": true,
+    "required": true,
+    "compute": "_compute_account_type",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "index": true,
+    "help": "Account Type is used for information purpose, to generate country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.",
+    "defined_in_package": "account",
+    "full_name": "Type"
+   },
+   {
+    "name": "include_initial_balance",
+    "type": "Boolean",
+    "string": "Bring Accounts Balance Forward",
+    "help": "Used in reports to know if we should consider journal items from the beginning of time instead of from the fiscal year only. Account types that should be reset to zero at each new fiscal year (like expenses, revenue..) should not have this option set.",
+    "compute": "_compute_include_initial_balance",
+    "search": "_search_include_initial_balance",
+    "defined_in_package": "account",
+    "full_name": "Bring Accounts Balance Forward"
+   },
+   {
+    "name": "internal_group",
+    "type": "Selection",
+    "selection": [
+     [
+      "equity",
+      "Equity"
+     ],
+     [
+      "asset",
+      "Asset"
+     ],
+     [
+      "liability",
+      "Liability"
+     ],
+     [
+      "income",
+      "Income"
+     ],
+     [
+      "expense",
+      "Expense"
+     ],
+     [
+      "off",
+      "Off Balance"
+     ]
+    ],
+    "string": "Internal Group",
+    "compute": "_compute_internal_group",
+    "search": "_search_internal_group",
+    "defined_in_package": "account",
+    "full_name": "Internal Group"
+   },
+   {
+    "name": "reconcile",
+    "type": "Boolean",
+    "string": "Allow Reconciliation",
+    "tracking": true,
+    "compute": "_compute_reconcile",
+    "store": true,
+    "readonly": false,
+    "precompute": true,
+    "help": "Check this box if this account allows invoices & payments matching of journal items.",
+    "defined_in_package": "account",
+    "full_name": "Allow Reconciliation"
+   },
+   {
+    "name": "tax_ids",
+    "type": "Many2many",
+    "comodel": "account.tax",
+    "relation": "account_account_tax_default_rel",
+    "column1": "account_id",
+    "column2": "tax_id",
+    "string": "Default Taxes",
+    "check_company": true,
+    "context": {
+     "append_fields": [
+      "type_tax_use",
+      "company_id"
+     ]
+    },
+    "defined_in_package": "account",
+    "full_name": "Default Taxes",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "note",
+    "type": "Text",
+    "string": "Internal Notes",
+    "tracking": true,
+    "defined_in_package": "account",
+    "full_name": "Internal Notes"
+   },
+   {
+    "name": "company_ids",
+    "type": "Many2many",
+    "comodel": "res.company",
+    "string": "Companies",
+    "required": true,
+    "readonly": false,
+    "depends_context": [
+     "uid"
+    ],
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "account",
+    "full_name": "Companies",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "code_mapping_ids",
+    "type": "One2many",
+    "comodel": "account.code.mapping",
+    "inverse_name": "account_id",
+    "defined_in_package": "account",
+    "string": "Code Mapping",
+    "full_name": "Code Mapping",
+    "target_entity": "account.code.mapping"
+   },
+   {
+    "name": "tag_ids",
+    "type": "Many2many",
+    "comodel": "account.account.tag",
+    "relation": "account_account_account_tag",
+    "compute": "_compute_account_tags",
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "string": "Tags",
+    "help": "Optional tags you may want to assign for custom reporting",
+    "ondelete": "restrict",
+    "tracking": true,
+    "defined_in_package": "account",
+    "full_name": "Tags",
+    "target_entity": "account.account.tag"
+   },
+   {
+    "name": "group_id",
+    "type": "Many2one",
+    "comodel": "account.group",
+    "compute": "_compute_account_group",
+    "help": "Account prefixes can determine account groups.",
+    "defined_in_package": "account",
+    "string": "Group",
+    "full_name": "Group",
+    "target_entity": "account.group"
+   },
+   {
+    "name": "root_id",
+    "type": "Many2one",
+    "comodel": "account.root",
+    "compute": "_compute_account_root",
+    "search": "_search_account_root",
+    "defined_in_package": "account",
+    "string": "Root",
+    "full_name": "Root",
+    "target_entity": "account.root"
+   },
+   {
+    "name": "opening_debit",
+    "type": "Monetary",
+    "string": "Opening Debit",
+    "compute": "_compute_opening_debit_credit",
+    "inverse": "_set_opening_debit",
+    "currency_field": "company_currency_id",
+    "defined_in_package": "account",
+    "full_name": "Opening Debit"
+   },
+   {
+    "name": "opening_credit",
+    "type": "Monetary",
+    "string": "Opening Credit",
+    "compute": "_compute_opening_debit_credit",
+    "inverse": "_set_opening_credit",
+    "currency_field": "company_currency_id",
+    "defined_in_package": "account",
+    "full_name": "Opening Credit"
+   },
+   {
+    "name": "opening_balance",
+    "type": "Monetary",
+    "string": "Opening Balance",
+    "compute": "_compute_opening_debit_credit",
+    "inverse": "_set_opening_balance",
+    "currency_field": "company_currency_id",
+    "defined_in_package": "account",
+    "full_name": "Opening Balance"
+   },
+   {
+    "name": "current_balance",
+    "type": "Float",
+    "compute": "_compute_current_balance",
+    "defined_in_package": "account",
+    "string": "Current Balance",
+    "full_name": "Current Balance"
+   },
+   {
+    "name": "related_taxes_amount",
+    "type": "Integer",
+    "compute": "_compute_related_taxes_amount",
+    "defined_in_package": "account",
+    "string": "Related Taxes Amount",
+    "full_name": "Related Taxes Amount"
+   },
+   {
+    "name": "non_trade",
+    "type": "Boolean",
+    "default": false,
+    "help": "If set, this account will belong to Non Trade Receivable/Payable in reports and filters.\nIf not, this account will belong to Trade Receivable/Payable in reports and filters.",
+    "defined_in_package": "account",
+    "string": "Non Trade",
+    "full_name": "Non Trade"
+   },
+   {
+    "name": "display_mapping_tab",
+    "type": "Boolean",
+    "default": {
+     "dynamic": "lambda self: len(self.env.user.company_ids) > 1"
+    },
+    "store": false,
+    "defined_in_package": "account",
+    "string": "Display Mapping Tab",
+    "full_name": "Display Mapping Tab"
+   },
+   {
+    "name": "account_stock_variation_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Variation Account",
+    "help": "At closing, register the inventory variation of the period into a specific account",
+    "defined_in_package": "stock_account",
+    "full_name": "Variation Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "account_stock_expense_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Expense Account",
+    "help": "Counterpart used at closing for accounting adjustments to inventory valuation.",
+    "defined_in_package": "stock_account",
+    "full_name": "Expense Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "l10n_in_tds_tcs_section_id",
+    "type": "Many2one",
+    "comodel": "l10n_in.section.alert",
+    "string": "TCS/TDS Section",
+    "defined_in_package": "l10n_in",
+    "full_name": "tax collected at source/tax deducted at source Section",
+    "target_entity": "l10n_in.section.alert"
+   },
+   {
+    "name": "l10n_in_tds_feature_enabled",
+    "type": "Boolean",
+    "compute": "_compute_tds_tcs_features",
+    "store": true,
+    "defined_in_package": "l10n_in",
+    "string": "Localization In Tax deducted at source Feature Enabled",
+    "full_name": "Localization In Tax deducted at source Feature Enabled"
+   },
+   {
+    "name": "l10n_in_tcs_feature_enabled",
+    "type": "Boolean",
+    "compute": "_compute_tds_tcs_features",
+    "store": true,
+    "defined_in_package": "l10n_in",
+    "string": "Localization In Tax collected at source Feature Enabled",
+    "full_name": "Localization In Tax collected at source Feature Enabled"
+   },
+   {
+    "name": "l10n_pt_taxonomy_code",
+    "type": "Integer",
+    "string": "Taxonomy code",
+    "defined_in_package": "l10n_pt",
+    "full_name": "Taxonomy code"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_reconcile",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "account_type",
+         "reconcile"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot have a receivable/payable account that is not reconcilable. (account code: %s)",
+        "line": 31
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_field_to_sql",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "alias",
+     "field_expr",
+     "query"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 56,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constrains_reconcile",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "reconcile",
+         "account_type",
+         "tax_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "An Off-Balance account can not be reconcilable",
+        "line": 192
+       },
+       {
+        "kind": "UserError",
+        "message": "An Off-Balance account can not have taxes",
+        "line": 194
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_journal_consistency",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "currency_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure the currency set on the journal is the same as the currency set on the\nlinked accounts.",
+      "size_in_lines": 71,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The foreign currency set on the journal '%(journal)s' and the account '%(account)s' must be the same.",
+        "line": 263
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_company_consistency",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_ids",
+         "account_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The following accounts must be assigned to at least one company:\n%(accounts)s",
+        "line": 273
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Bank & Cash accounts cannot be shared between companies.",
+        "line": 281
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't unlink this company from this account since there are some journal items linked to it.",
+        "line": 288
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_account_type_sales_purchase_journal",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "account_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The account is already in use in a 'sale' or 'purchase' journal. This means that the account's type couldn't be 'receivable' or 'payable'.",
+        "line": 308
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_account_code",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The account code can only contain alphanumeric characters and dots. (account code: %s)",
+        "line": 314
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_account_is_bank_journal_bank_account",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "account_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot change the type of an account set as Bank Account on a journal to Receivable or Payable.",
+        "line": 333
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_code",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code_store"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_code",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_code",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_placeholder_code",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_placeholder_code",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_root",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_account_root",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_panel_domain_image",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "field_name",
+     "domain",
+     "set_count",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_group",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_used_account_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_used",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_used",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_new_account_code",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "start_code",
+     "cache"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get an account code that is available for creating a new account in the active\ncompany by starting from an existing code and incrementing it.\n\nExamples:\n\n+--------------+-----------------------------------------------------------+\n|  start_code  | codes checked for availability                            |\n+==============+===========================================================+\n|    102100    | 102101, 102102, 102103, 102104, ...                       |\n+--------------+-----------------------------------------------------------+\n|     1598     | 1599, 1600, 1601, 1602, ...                               |\n+--------------+-----------------------------------------------------------+\n|   10.01.08   | 10.01.09, 10.01.10, 10.01.11, 10.01.12, ...               |\n+--------------+-----------------------------------------------------------+\n|   10.01.97   | 10.01.98, 10.01.99, 10.01.97.copy2, 10.01.97.copy3, ...   |\n+--------------+-----------------------------------------------------------+\n|    1021A     | 1021A, 1022A, 1023A, 1024A, ...                           |\n+--------------+-----------------------------------------------------------+\n|    hello     | hello.copy, hello.copy2, hello.copy3, hello.copy4, ...    |\n+--------------+-----------------------------------------------------------+\n|     9998     | 9999, 9998.copy, 9998.copy2, 9998.copy3, ...              |\n+--------------+-----------------------------------------------------------+\n\n:param str start_code: the code to increment until an available one is found\n:param set[str] cache: a set of codes which you know are already used\n                        (optional, to speed up the method).\n                        If none is given, the method will use cache = ``{start_code}``.\n                        i.e. the method will return the first available code\n                        *strictly* greater than start_code.\n                        If you want the method to start at start_code, you should\n                        explicitly pass cache={}.\n\n:return: an available new account code for the active company.\n         It will normally have length ``len(start_code)``.\n         If incrementing the last digits starting from ``start_code`` does\n         not work, the method will try as a fallback\n         ``'{start_code}.copy'``, ``'{start_code}.copy2'``, ...\n         ``'{start_code}.copy99'``.\n:rtype: str",
+      "size_in_lines": 79,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cannot generate an unused account code.",
+        "line": 546
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_current_balance",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_related_taxes_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_currency_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_fiscal_country_code",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_opening_debit_credit",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_account_tags",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_closest_parent_account",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "accounts_to_process",
+     "field_name",
+     "default_value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "This helper function retrieves the closest parent account based on account codes\nfor the given accounts to process and assigns the value of the parent to the specified field.\n\n:param accounts_to_process: Records of accounts to be processed.\n:param field_name: Name of the field to be updated with the closest parent account value.\n:param default_value: Default value to be assigned if no parent account is found.",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_include_initial_balance",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_include_initial_balance",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_internal_group",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "account_type"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_internal_group",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_internal_group",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reconcile",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "account_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_opening_debit",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_opening_credit",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_opening_balance",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_opening_debit_credit",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "amount",
+     "field"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Generic function called by both opening_debit and opening_credit's\ninverse function. 'Amount' parameter is the value to be set, and field\neither 'debit' or 'credit', depending on which one of these two fields\ngot assigned.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "If we're creating a new account through a many2one, there are chances that we typed the account code\ninstead of its name. In that case, switch both fields values.",
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_most_frequent_accounts_for_partner",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "partner_id",
+     "move_type",
+     "filter_never_user_accounts",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns the accounts ordered from most frequent to least frequent for a given partner\nand filtered according to the move type\n:param company_id: the company id\n:param partner_id: the partner id for which we want to retrieve the most frequent accounts\n:param move_type: the type of the move to know which type of accounts to retrieve\n:param filter_never_user_accounts: True if we should filter out accounts never used for the partner\n:param limit: the maximum number of accounts to retrieve\n:returns: List of account ids, ordered by frequency (from most to least frequent)",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_most_frequent_account_for_partner",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "partner_id",
+     "move_type"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_order_accounts_by_frequency_for_partner",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "partner_id",
+     "move_type"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_order_to_sql",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "order",
+     "query",
+     "alias",
+     "reverse"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_name_search_account_types",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move_type"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "name_search",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "name",
+     "domain",
+     "operator",
+     "limit"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_display_name",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_account_type",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "account_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_code_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "code_name"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_name",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_code",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company",
+         "formatted_display_name"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_translations",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "new",
+     "excluded"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_precommit_update_opening_move",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "precommit callback to recompute the opening move according the opening balances that changed.\nThis is particularly useful when importing a csv containing the 'opening_balance' column.\nIn that case, we don't want to use the inverse method set on field since it will be\ncalled for each account separately. That would be quite costly in terms of performances.\nInstead, the opening balances are collected and this method is called once at the end\nto update the opening move accordingly.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_toggle_reconcile_to_true",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Toggle the `reconcile´ boolean from False -> True\n\nNote that: lines with debit = credit = amount_currency = 0 are set to `reconciled´ = True",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_toggle_reconcile_to_false",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Toggle the `reconcile´ boolean from True -> False\n\nNote that it is disallowed if some lines are partially reconciled.",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot switch an account to prevent the reconciliation if some partial reconciliations are still pending.",
+        "line": 998
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "name_create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Split the account name into account code and account name in import.\nWhen importing a file with accounts, the account code and name may be both entered in the name column.\nIn this case, the name will be split into code and name.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please create new accounts from the Chart of Accounts menu.",
+        "line": 1019
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_mx",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot deprecate an account that is used in a tax distribution.",
+        "line": 1076
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot set a currency on this account as it already has some journal entries having a different foreign currency.",
+        "line": 1073
+       }
+      ]
+     },
+     {
+      "package": "l10n_de",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can not change the code of an account.",
+        "line": 18
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "load",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields",
+     "data"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_ensure_code_is_unique",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Check account codes per companies. These are the checks:\n\n1. Check that the code is set for each of the account's companies.\n\n2. Check that no child or parent companies have another account with the same code\n   as the account.\n\n   The definition of availability is the same as the one used by _search_new_account_code\n   and both methods need to be kept in sync.",
+      "size_in_lines": 51,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Account codes must be unique. You can't create accounts with these duplicate codes: %s",
+        "line": 1144
+       },
+       {
+        "kind": "ValidationError",
+        "message": "The code must be set for every company to which this account belongs.",
+        "line": 1111
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_load_records_write",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_contains_journal_items",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot perform this action on an account that contains journal items.",
+        "line": 1157
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_linked_to_fiscal_position",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot remove/deactivate the accounts \"%s\" which are set on the account mapping of a fiscal position.",
+        "line": 1162
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_linked_to_tax_repartition_line",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot remove/deactivate the accounts \"%s\" which are set on a tax repartition line.",
+        "line": 1167
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_open_related_taxes",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_import_templates",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_merge_method",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "destination",
+     "source"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot merge accounts.",
+        "line": 1189
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_unmerge",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Split the account `self` into several accounts, one per company.\nThe original account's codes are assigned respectively to the account created in each company.\n\nFrom an accounting perspective, this does not change anything to the journal items, since their\naccount codes will remain unchanged. ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_action_unmerge_possible",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Raises an error if the recordset `self` cannot be unmerged. ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You do not have the right to perform this operation as you do not have access to the following companies: %s.",
+        "line": 1213
+       },
+       {
+        "kind": "UserError",
+        "message": "Account %s cannot be unmerged as it already belongs to a single company. The unmerge operation only splits an account based on its companies.",
+        "line": 1219
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_unmerge_get_user_confirmation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Open a RedirectWarning asking the user whether to proceed with the merge. ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "RedirectWarning",
+        "message": "msg",
+        "line": 1239
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_unmerge",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Unmerge `self` into one account per company in `self.company_ids`.\nThis will modify:\n    - the many2many and company-dependent fields on `self`\n    - the records with relational fields pointing to `self`",
+      "size_in_lines": 271,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_bank_cash_accounts",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_dk",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You must keep at least one bank and cash account for %(company)s!",
+        "line": 32
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_tds_tcs_features",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_ids.l10n_in_tds_feature",
+         "company_ids.l10n_in_tcs_feature"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_date_period_boundaries",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date_period",
+     "company"
+    ],
+    "definitions": [
+     {
+      "package": "spreadsheet_account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_build_spreadsheet_formula_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "formula_params",
+     "default_accounts"
+    ],
+    "definitions": [
+     {
+      "package": "spreadsheet_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 48,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "spreadsheet_move_line_action",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "args"
+    ],
+    "definitions": [
+     {
+      "package": "spreadsheet_account",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "spreadsheet_fetch_debit_credit",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "args_list"
+    ],
+    "definitions": [
+     {
+      "package": "spreadsheet_account",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Fetch data for THE SYSTEM.CREDIT, THE SYSTEM.DEBIT and THE SYSTEM.BALANCE formulas\nThe input list looks like this::\n\n    [{\n        date_range: {\n            range_type: \"year\"\n            year: int\n        },\n        company_id: int\n        codes: str[]\n        include_unposted: bool\n    }]",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "spreadsheet_fetch_residual_amount",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "args_list"
+    ],
+    "definitions": [
+     {
+      "package": "spreadsheet_account",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Fetch data for THE SYSTEM.RESUDUAL formulas\nThe input list looks like this::\n\n    [{\n        date_range: {\n            range_type: \"year\"\n            year: int\n        },\n        company_id: int\n        codes: str[]\n        include_unposted: bool\n    }]",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "spreadsheet_fetch_partner_balance",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "args_list"
+    ],
+    "definitions": [
+     {
+      "package": "spreadsheet_account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Fetch data for THE SYSTEM.PARTNER.BALANCE formulas\nThe input list looks like this::\n\n    [{\n        date_range: {\n            range_type: \"year\"\n            year: int\n        },\n        company_id: int\n        codes: str[]\n        include_unposted: bool\n        partner_ids: int[]\n    }]",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_account_group",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "account_types"
+    ],
+    "definitions": [
+     {
+      "package": "spreadsheet_account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "spreadsheet_fetch_balance_tag",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "args_list"
+    ],
+    "definitions": [
+     {
+      "package": "spreadsheet_account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Fetch data for THE SYSTEM.BALANCE.TAG formulas\nThe input list looks like this::\n\n    [{\n        account_tag_ids: str[]\n        date_range: {\n            range_type: \"year\"\n            year: int\n        },\n        company_id: int\n        include_unposted: bool\n    }]",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_reconcile",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "You cannot have a receivable/payable account that is not reconcilable. (account code: %s)"
+   },
+   {
+    "operation": "_constrains_reconcile",
+    "package": "account",
+    "kind": "UserError",
+    "message": "An Off-Balance account can not be reconcilable"
+   },
+   {
+    "operation": "_constrains_reconcile",
+    "package": "account",
+    "kind": "UserError",
+    "message": "An Off-Balance account can not have taxes"
+   },
+   {
+    "operation": "_check_journal_consistency",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The foreign currency set on the journal '%(journal)s' and the account '%(account)s' must be the same."
+   },
+   {
+    "operation": "_check_company_consistency",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The following accounts must be assigned to at least one company:\n%(accounts)s"
+   },
+   {
+    "operation": "_check_company_consistency",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Bank & Cash accounts cannot be shared between companies."
+   },
+   {
+    "operation": "_check_company_consistency",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can't unlink this company from this account since there are some journal items linked to it."
+   },
+   {
+    "operation": "_check_account_type_sales_purchase_journal",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The account is already in use in a 'sale' or 'purchase' journal. This means that the account's type couldn't be 'receivable' or 'payable'."
+   },
+   {
+    "operation": "_check_account_code",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The account code can only contain alphanumeric characters and dots. (account code: %s)"
+   },
+   {
+    "operation": "_check_account_is_bank_journal_bank_account",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "You cannot change the type of an account set as Bank Account on a journal to Receivable or Payable."
+   },
+   {
+    "operation": "_search_new_account_code",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Cannot generate an unused account code."
+   },
+   {
+    "operation": "_toggle_reconcile_to_false",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot switch an account to prevent the reconciliation if some partial reconciliations are still pending."
+   },
+   {
+    "operation": "name_create",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Please create new accounts from the Chart of Accounts menu."
+   },
+   {
+    "operation": "write",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot deprecate an account that is used in a tax distribution."
+   },
+   {
+    "operation": "write",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot set a currency on this account as it already has some journal entries having a different foreign currency."
+   },
+   {
+    "operation": "_ensure_code_is_unique",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Account codes must be unique. You can't create accounts with these duplicate codes: %s"
+   },
+   {
+    "operation": "_ensure_code_is_unique",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The code must be set for every company to which this account belongs."
+   },
+   {
+    "operation": "_unlink_except_contains_journal_items",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot perform this action on an account that contains journal items."
+   },
+   {
+    "operation": "_unlink_except_linked_to_fiscal_position",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot remove/deactivate the accounts \"%s\" which are set on the account mapping of a fiscal position."
+   },
+   {
+    "operation": "_unlink_except_linked_to_tax_repartition_line",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot remove/deactivate the accounts \"%s\" which are set on a tax repartition line."
+   },
+   {
+    "operation": "_merge_method",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot merge accounts."
+   },
+   {
+    "operation": "_check_action_unmerge_possible",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You do not have the right to perform this operation as you do not have access to the following companies: %s."
+   },
+   {
+    "operation": "_check_action_unmerge_possible",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Account %s cannot be unmerged as it already belongs to a single company. The unmerge operation only splits an account based on its companies."
+   },
+   {
+    "operation": "_action_unmerge_get_user_confirmation",
+    "package": "account",
+    "kind": "RedirectWarning",
+    "message": "msg"
+   },
+   {
+    "operation": "write",
+    "package": "l10n_de",
+    "kind": "UserError",
+    "message": "You can not change the code of an account."
+   },
+   {
+    "operation": "_unlink_bank_cash_accounts",
+    "package": "l10n_dk",
+    "kind": "UserError",
+    "message": "You must keep at least one bank and cash account for %(company)s!"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_account_manager",
+    "package": "account",
+    "name": "account.account",
+    "entity": "account.account",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "account.access_account_account",
+    "package": "account",
+    "name": "account.account.readonly",
+    "entity": "account.account",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_account_user",
+    "package": "account",
+    "name": "account.account user",
+    "entity": "account.account",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_account_partner_manager",
+    "package": "account",
+    "name": "account.account partner manager",
+    "entity": "account.account",
+    "group": "base.group_partner_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_account_invoice",
+    "package": "account",
+    "name": "account.account invoice",
+    "entity": "account.account",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase.access_account_account_purchase_manager",
+    "package": "purchase",
+    "name": "account.account purchase manager",
+    "entity": "account.account",
+    "group": "purchase.group_purchase_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale.access_account_account_salesman",
+    "package": "sale",
+    "name": "account_account salesman",
+    "entity": "account.account",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock_account.access_account_account_stock_manager",
+    "package": "stock_account",
+    "name": "account.account stock manager",
+    "entity": "account.account",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "account.account_comp_rule",
+    "package": "account",
+    "name": "Account multi-company",
+    "entity": "account.account",
+    "domain": "[('company_ids', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.init_accounts_tree",
+    "package": "account",
+    "name": "account.setup.opening.move.line.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "top",
+      "create": "1",
+      "delete": "1",
+      "decoration-muted": "opening_debit == 0 and opening_credit == 0",
+      "open_form_view": "True"
+     },
+     "fields": [
+      {
+       "name": "code"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "company_ids",
+       "column_invisible": "True"
+      },
+      {
+       "name": "account_type",
+       "widget": "account_type_selection"
+      },
+      {
+       "name": "reconcile",
+       "widget": "boolean_toggle",
+       "optional": "hide"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle",
+       "optional": "show"
+      },
+      {
+       "name": "opening_debit",
+       "options": "{'no_symbol': True}"
+      },
+      {
+       "name": "opening_credit",
+       "options": "{'no_symbol': True}"
+      },
+      {
+       "name": "opening_balance",
+       "options": "{'no_symbol': True}",
+       "optional": "hide"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "optional": "hide"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "account_type_selection": 1,
+      "boolean_toggle": 2,
+      "many2many_tax_tags": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": "1",
+     "delete": "1",
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "opening_debit == 0 and opening_credit == 0"
+     }
+    }
+   },
+   {
+    "external_identifier": "account.view_account_form",
+    "package": "account",
+    "name": "account.account.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Account"
+     },
+     "fields": [
+      {
+       "name": "related_taxes_amount"
+      },
+      {
+       "name": "current_balance"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Current Assets"
+      },
+      {
+       "name": "placeholder_code",
+       "invisible": "1"
+      },
+      {
+       "name": "code",
+       "options": "{'placeholder_field': 'placeholder_code'}",
+       "placeholder": "e.g. 101000"
+      },
+      {
+       "name": "account_type",
+       "widget": "account_type_selection"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "invisible": "account_type == 'off_balance'",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "domain": "[('applicability', '=', 'accounts')]",
+       "context": "{'default_applicability': 'accounts'}",
+       "options": "{'no_create_edit': True}"
+      },
+      {
+       "name": "internal_group",
+       "invisible": "1",
+       "readonly": "1"
+      },
+      {
+       "name": "currency_id",
+       "string": "Currency",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_currency",
+       "placeholder": "Any currency"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "group_id",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "company_ids",
+       "widget": "many2many_tags",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "code_mapping_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "company_id",
+       "force_save": "1"
+      },
+      {
+       "name": "code"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_open_related_taxes",
+       "type": "object",
+       "invisible": "related_taxes_amount == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-bars"
+      },
+      {
+       "name": "account.action_move_line_select",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-bars"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "accounting",
+       "string": "Accounting",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "Description",
+       "string": null,
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "mapping",
+       "string": "Mapping",
+       "invisible": "not display_mapping_tab",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "widgets": {
+      "account_type_selection": 1,
+      "many2many_tax_tags": 1,
+      "many2many_tags": 2,
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "action_open_related_taxes",
+       "type": "object",
+       "icon": "fa-bars",
+       "invisible": "related_taxes_amount == 0"
+      },
+      {
+       "class": "oe_stat_button",
+       "name": "account.action_move_line_select",
+       "type": "action",
+       "icon": "fa-bars"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.view_account_list",
+    "package": "account",
+    "name": "account.account.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "create": "1",
+      "delete": "1",
+      "multi_edit": "1",
+      "string": "Chart of accounts"
+     },
+     "fields": [
+      {
+       "name": "placeholder_code",
+       "column_invisible": "1"
+      },
+      {
+       "name": "code",
+       "widget": "char_with_placeholder_field",
+       "string": "Code",
+       "options": "{'placeholder_field': 'placeholder_code'}"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "account_type",
+       "widget": "account_type_selection"
+      },
+      {
+       "name": "group_id",
+       "optional": "hide"
+      },
+      {
+       "name": "internal_group",
+       "column_invisible": "True"
+      },
+      {
+       "name": "reconcile",
+       "widget": "boolean_toggle",
+       "invisible": "account_type in ('asset_cash', 'liability_credit_card', 'off_balance')"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle",
+       "optional": "hide"
+      },
+      {
+       "name": "non_trade",
+       "widget": "boolean_toggle",
+       "invisible": "account_type not in ('liability_payable', 'asset_receivable')",
+       "optional": "hide"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tax_tags",
+       "optional": "hide"
+      },
+      {
+       "name": "tag_ids",
+       "widget": "many2many_tags",
+       "domain": "[('applicability', '=', 'accounts')]",
+       "optional": "hide"
+      },
+      {
+       "name": "currency_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_currency"
+      },
+      {
+       "name": "company_ids",
+       "widget": "many2many_tags",
+       "readonly": "True",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "char_with_placeholder_field": 1,
+      "account_type_selection": 1,
+      "boolean_toggle": 3,
+      "many2many_tax_tags": 1,
+      "many2many_tags": 2
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "1",
+     "delete": "1",
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "account.view_account_account_kanban",
+    "package": "account",
+    "name": "account.account.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "code"
+      },
+      {
+       "name": "account_type"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "account.view_account_search",
+    "package": "account",
+    "name": "account.account.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Accounts"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Account",
+       "filter_domain": "['|', '|', ('name', 'ilike', self), ('code', '=ilike', self + '%'), ('description', 'ilike', self)]"
+      },
+      {
+       "name": "account_type"
+      },
+      {
+       "name": "root_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "receivableacc",
+       "string": "Receivable",
+       "domain": "[('account_type','=','asset_receivable')]"
+      },
+      {
+       "name": "payableacc",
+       "string": "Payable",
+       "domain": "[('account_type','=','liability_payable')]"
+      },
+      {
+       "name": "equityacc",
+       "string": "Equity",
+       "domain": "[('internal_group','=', 'equity')]"
+      },
+      {
+       "name": "assetsacc",
+       "string": "Assets",
+       "domain": "[('internal_group','=', 'asset')]"
+      },
+      {
+       "name": "liabilityacc",
+       "string": "Liability",
+       "domain": "[('internal_group','=', 'liability')]"
+      },
+      {
+       "name": "incomeacc",
+       "string": "Income",
+       "domain": "[('internal_group','=', 'income')]"
+      },
+      {
+       "name": "expensesacc",
+       "string": "Expenses",
+       "domain": "[('internal_group','=', 'expense')]"
+      },
+      {
+       "name": "type_asset_fixed",
+       "string": "Fixed Assets",
+       "domain": "[('account_type', '=', 'asset_fixed')]",
+       "invisible": "True"
+      },
+      {
+       "name": "type_expense",
+       "string": "Frequent Expenses",
+       "domain": "[('account_type', '=', 'expense')]",
+       "invisible": "True"
+      },
+      {
+       "name": "type_expense_direct_cost",
+       "string": "Cost of revenue",
+       "domain": "[('account_type', '=', 'expense_direct_cost')]",
+       "invisible": "True"
+      },
+      {
+       "name": "used",
+       "string": "Account with Entries",
+       "domain": "[('used', '=', True)]"
+      },
+      {
+       "name": "inactiveacc",
+       "string": "Inactive Accounts",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "accounttype",
+       "string": "Account Type",
+       "domain": "",
+       "context": "{'group_by':'account_type'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_in.account_account_tds_tcs_view_form_inherit",
+    "package": "l10n_in",
+    "name": "account.account.tds.tcs.view.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='tax_ids']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_in_tds_tcs_section_id",
+       "invisible": "company_fiscal_country_code != 'IN' or (not l10n_in_tds_feature_enabled and not l10n_in_tcs_feature_enabled)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='tax_ids']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_in.account_account_tds_tcs_view_tree_inherit",
+    "package": "l10n_in",
+    "name": "account.account.tds.tcs.view.list.inherit",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_list",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='account_type']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_in_tds_tcs_section_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='account_type']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_account.view_account_form",
+    "package": "stock_account",
+    "name": "account.account.form",
+    "view_type": "field",
+    "inherits_view": "account.view_account_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "tag_ids",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "tag_ids",
+       "position": "after"
+      },
+      {
+       "name": "account_stock_variation_id",
+       "invisible": "account_type != 'asset_current'"
+      },
+      {
+       "name": "account_stock_expense_id",
+       "invisible": "account_type != 'asset_current'",
+       "groups": "base.group_no_one",
+       "placeholder": "For Perpetual Continental Only"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_account_form",
+    "package": "account",
+    "name": "Chart of Accounts",
+    "view_mode": "list,kanban,form",
+    "view_id": "view_account_list",
+    "search_view_id": "view_account_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Add a new account\n              </p><p>\n                An account is part of a ledger allowing your company\n                to register all kinds of debit and credit transactions.\n                Companies present their annual accounts in two main parts: the\n                balance sheet and the income statement (profit and loss\n                account). The annual accounts of a company are required by law\n                to disclose a certain amount of information.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.account"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "account.action_unmerge_accounts",
+    "package": "account",
+    "name": "Unmerge account",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

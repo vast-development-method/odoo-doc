@@ -1,0 +1,281 @@
+{
+ "catalog": {
+  "name": "entity:l10n_id.qris.transaction",
+  "description": "Complete definition of entity Record of QRIS transactions (l10n_id.qris.transaction).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_id.qris.transaction",
+  "storage_name": "l10n_id_qris_transaction",
+  "full_name": "Record of QRIS transactions",
+  "kind": "persistent",
+  "description": "Record of QRIS transactions",
+  "defined_by_package": "l10n_id",
+  "extended_by_packages": [
+   "l10n_id_pos"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "model",
+    "type": "Char",
+    "string": "Model",
+    "defined_in_package": "l10n_id",
+    "full_name": "Model"
+   },
+   {
+    "name": "model_id",
+    "type": "Char",
+    "string": "Model ID",
+    "defined_in_package": "l10n_id",
+    "full_name": "Model identifier"
+   },
+   {
+    "name": "qris_invoice_id",
+    "type": "Char",
+    "readonly": true,
+    "defined_in_package": "l10n_id",
+    "string": "Qris Invoice",
+    "full_name": "Qris Invoice"
+   },
+   {
+    "name": "qris_amount",
+    "type": "Integer",
+    "readonly": true,
+    "defined_in_package": "l10n_id",
+    "string": "Qris Amount",
+    "full_name": "Qris Amount"
+   },
+   {
+    "name": "qris_content",
+    "type": "Char",
+    "readonly": true,
+    "defined_in_package": "l10n_id",
+    "string": "Qris Content",
+    "full_name": "Qris Content"
+   },
+   {
+    "name": "qris_creation_datetime",
+    "type": "Datetime",
+    "readonly": true,
+    "defined_in_package": "l10n_id",
+    "string": "Qris Creation Datetime",
+    "full_name": "Qris Creation Datetime"
+   },
+   {
+    "name": "bank_id",
+    "type": "Many2one",
+    "comodel": "res.partner.bank",
+    "help": "Bank used to generate the current QRIS transaction",
+    "defined_in_package": "l10n_id",
+    "string": "Bank",
+    "full_name": "Bank",
+    "target_entity": "res.partner.bank"
+   },
+   {
+    "name": "paid",
+    "type": "Boolean",
+    "help": "Payment Status of QRIS",
+    "defined_in_package": "l10n_id",
+    "string": "Paid",
+    "full_name": "Paid"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_supported_models",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_id",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_id_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_constraint_model",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_id",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "QRIS capability is not extended to model %s yet!",
+        "line": 34
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_record",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_id",
+      "decorators": [],
+      "documentation": "Get the backend invoice record that the qris transaction is handling\nTo be overriden in other modules",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_id_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_latest_transaction",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "model",
+     "model_id"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_id",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Find latest transaction associated to the model and model_id ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_l10n_id_get_qris_qr_statuses",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_id",
+      "decorators": [],
+      "documentation": "Fetch the result of the transaction\n\n:param invoice_bank_id (Model <res.partner.bank>): bank (with QRIS configuration)\n:returns tuple(bool, dict): paid/unpaid status and status_response from QRIS",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gc_remove_pointless_qris_transactions",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_id",
+      "decorators": [
+       {
+        "name": "api.autovacuum",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Removes unpaid transactions that have been for more than 35 minutes.\nThese can no longer be paid and status will no longer change",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_constraint_model",
+    "package": "l10n_id",
+    "kind": "ValidationError",
+    "message": "QRIS capability is not extended to model %s yet!"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_id.access_l10n_id_qris_transaction",
+    "package": "l10n_id",
+    "name": "access_l10n_id_qris_transaction",
+    "entity": "l10n_id.qris.transaction",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,1614 @@
+{
+ "catalog": {
+  "name": "entity:account.analytic.account",
+  "description": "Complete definition of entity Analytic Account (account.analytic.account).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.analytic.account",
+  "storage_name": "account_analytic_account",
+  "full_name": "Analytic Account",
+  "kind": "persistent",
+  "description": "Analytic Account",
+  "defined_by_package": "analytic",
+  "extended_by_packages": [
+   "account",
+   "stock_account",
+   "hr_expense",
+   "project",
+   "purchase",
+   "mrp_account"
+  ],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "plan_id, name asc",
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "name",
+   "code"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Analytic Account",
+    "index": "trigram",
+    "required": true,
+    "tracking": true,
+    "translate": true,
+    "defined_in_package": "analytic",
+    "full_name": "Analytic Account"
+   },
+   {
+    "name": "code",
+    "type": "Char",
+    "string": "Reference",
+    "index": "btree",
+    "tracking": true,
+    "defined_in_package": "analytic",
+    "full_name": "Reference"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "help": "Deactivate the account.",
+    "default": true,
+    "tracking": true,
+    "defined_in_package": "analytic",
+    "full_name": "Active"
+   },
+   {
+    "name": "plan_id",
+    "type": "Many2one",
+    "comodel": "account.analytic.plan",
+    "string": "Plan",
+    "required": true,
+    "index": true,
+    "defined_in_package": "analytic",
+    "full_name": "Plan",
+    "target_entity": "account.analytic.plan"
+   },
+   {
+    "name": "root_plan_id",
+    "type": "Many2one",
+    "comodel": "account.analytic.plan",
+    "string": "Root Plan",
+    "related": "plan_id.root_id",
+    "store": true,
+    "defined_in_package": "analytic",
+    "full_name": "Root Plan",
+    "target_entity": "account.analytic.plan"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color Index",
+    "related": "plan_id.color",
+    "defined_in_package": "analytic",
+    "full_name": "Color Index"
+   },
+   {
+    "name": "line_ids",
+    "type": "One2many",
+    "comodel": "account.analytic.line",
+    "inverse_name": "auto_account_id",
+    "string": "Analytic Lines",
+    "defined_in_package": "analytic",
+    "full_name": "Analytic Lines",
+    "target_entity": "account.analytic.line"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "analytic",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Customer",
+    "bypass_search_access": true,
+    "tracking": true,
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "analytic",
+    "full_name": "Customer",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "balance",
+    "type": "Monetary",
+    "compute": "_compute_debit_credit_balance",
+    "string": "Balance",
+    "defined_in_package": "analytic",
+    "full_name": "Balance"
+   },
+   {
+    "name": "debit",
+    "type": "Monetary",
+    "compute": "_compute_debit_credit_balance",
+    "string": "Debit",
+    "defined_in_package": "analytic",
+    "full_name": "Debit"
+   },
+   {
+    "name": "credit",
+    "type": "Monetary",
+    "compute": "_compute_debit_credit_balance",
+    "string": "Credit",
+    "defined_in_package": "analytic",
+    "full_name": "Credit"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "company_id.currency_id",
+    "string": "Currency",
+    "defined_in_package": "analytic",
+    "full_name": "Currency"
+   },
+   {
+    "name": "invoice_count",
+    "type": "Integer",
+    "string": "Invoice Count",
+    "compute": "_compute_invoice_count",
+    "defined_in_package": "account",
+    "full_name": "Invoice Count"
+   },
+   {
+    "name": "vendor_bill_count",
+    "type": "Integer",
+    "string": "Vendor Bill Count",
+    "compute": "_compute_vendor_bill_count",
+    "defined_in_package": "account",
+    "full_name": "Vendor Bill Count"
+   },
+   {
+    "name": "project_ids",
+    "type": "One2many",
+    "comodel": "project.project",
+    "inverse_name": "account_id",
+    "string": "Projects",
+    "export_string_translation": false,
+    "defined_in_package": "project",
+    "full_name": "Projects",
+    "target_entity": "project.project"
+   },
+   {
+    "name": "project_count",
+    "type": "Integer",
+    "string": "Project Count",
+    "compute": "_compute_project_count",
+    "export_string_translation": false,
+    "defined_in_package": "project",
+    "full_name": "Project Count"
+   },
+   {
+    "name": "purchase_order_count",
+    "type": "Integer",
+    "string": "Purchase Order Count",
+    "compute": "_compute_purchase_order_count",
+    "defined_in_package": "purchase",
+    "full_name": "Purchase Order Count"
+   },
+   {
+    "name": "production_ids",
+    "type": "Many2many",
+    "comodel": "mrp.production",
+    "defined_in_package": "mrp_account",
+    "string": "Production",
+    "full_name": "Production",
+    "target_entity": "mrp.production"
+   },
+   {
+    "name": "production_count",
+    "type": "Integer",
+    "string": "Manufacturing Orders Count",
+    "compute": "_compute_production_count",
+    "defined_in_package": "mrp_account",
+    "full_name": "Manufacturing Orders Count"
+   },
+   {
+    "name": "bom_ids",
+    "type": "Many2many",
+    "comodel": "mrp.bom",
+    "defined_in_package": "mrp_account",
+    "string": "Bill of materials",
+    "full_name": "Bill of materials",
+    "target_entity": "mrp.bom"
+   },
+   {
+    "name": "bom_count",
+    "type": "Integer",
+    "string": "BoM Count",
+    "compute": "_compute_bom_count",
+    "defined_in_package": "mrp_account",
+    "full_name": "bill of materials Count"
+   },
+   {
+    "name": "workcenter_ids",
+    "type": "Many2many",
+    "comodel": "mrp.workcenter",
+    "defined_in_package": "mrp_account",
+    "string": "Workcenter",
+    "full_name": "Workcenter",
+    "target_entity": "mrp.workcenter"
+   },
+   {
+    "name": "workorder_count",
+    "type": "Integer",
+    "string": "Work Order Count",
+    "compute": "_compute_workorder_count",
+    "defined_in_package": "mrp_account",
+    "full_name": "Work Order Count"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_company_consistency",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't change the company of an analytic account that already has analytic items! It's a recipe for an analytical disaster!",
+        "line": 102
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "code",
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "web_read",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "specification"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group_select",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "aggregate_spec",
+     "query"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group_postprocess_aggregate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "aggregate_spec",
+     "raw_values"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_debit_credit_balance",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids.amount"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_accounts_in_analytic_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "new_fname",
+     "current_fname",
+     "accounts"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "RedirectWarning",
+        "message": null,
+        "line": 213
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoice_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_vendor_bill_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_invoice",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_vendor_bill",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_perform_analytic_distribution",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "distribution",
+     "amount",
+     "unit_amount",
+     "lines",
+     "obj",
+     "additive"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": "Redistributes the analytic lines to match the given distribution:\n    - For account_ids where lines already exist, the amount and unit_amount of these lines get updated,\n      lines where the updated amount becomes zero get unlinked.\n    - For account_ids where lines don't exist yet, the line values to create them are returned,\n      lines where the amount becomes zero are not included.\n\n:param distribution:    the desired distribution to match the analytic lines to\n:param amount:          the total amount to distribute over the analytic lines\n:param unit_amount:     the total unit amount (will not be distributed)\n:param lines:           the (current) analytic account lines that need to be matched to the new distribution\n:param obj:             the object on which _prepare_analytic_line_values(account_id, amount, unit_amount) will be\n                        called to get the template for the values of new analytic line objects\n:param additive:        if True, the unit_amount and (distributed) amount get added to the existing lines\n\n:returns: a list of dicts containing the values for new analytic lines that need to be created\n:rtype:   dict",
+      "size_in_lines": 79,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_account_in_analytic_distribution",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete an analytic account that is used in an expense.",
+        "line": 45
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_project_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "project_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_existing_tasks",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Before we can bid farewell to these accounts, you need to tidy up the projects linked to them by removing their existing tasks!",
+        "line": 29
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_view_projects",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "project",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_purchase_order_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_purchase_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_production_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "production_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_bom_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "bom_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_workorder_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "workcenter_ids.order_ids",
+         "production_ids.workorder_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_mrp_production",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_mrp_bom",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_workorder",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_company_consistency",
+    "package": "analytic",
+    "kind": "UserError",
+    "message": "You can't change the company of an analytic account that already has analytic items! It's a recipe for an analytical disaster!"
+   },
+   {
+    "operation": "_unlink_except_account_in_analytic_distribution",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You cannot delete an analytic account that is used in an expense."
+   },
+   {
+    "operation": "_unlink_except_existing_tasks",
+    "package": "project",
+    "kind": "UserError",
+    "message": "Before we can bid farewell to these accounts, you need to tidy up the projects linked to them by removing their existing tasks!"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_analytic_account",
+    "package": "account",
+    "name": "account.analytic.account",
+    "entity": "account.analytic.account",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_analytic_accountant",
+    "package": "account",
+    "name": "account.analytic.account accountant",
+    "entity": "account.analytic.account",
+    "group": "account.group_account_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "analytic.access_account_analytic_account",
+    "package": "analytic",
+    "name": "access_account_analytic_account",
+    "entity": "account.analytic.account",
+    "group": "group_analytic_accounting",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_timesheet.access_account_analytic_user",
+    "package": "hr_timesheet",
+    "name": "analytic.account.analytic.timesheet.user",
+    "entity": "account.analytic.account",
+    "group": "hr_timesheet.group_hr_timesheet_user",
+    "read": true,
+    "write": true,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mrp_subcontracting_account.access_subcontracting_portal_analytic_account",
+    "package": "mrp_subcontracting_account",
+    "name": "subcontracting.portal.analytic_account",
+    "entity": "account.analytic.account",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "project.access_account_analytic_account_user",
+    "package": "project",
+    "name": "account.analytic.account",
+    "entity": "account.analytic.account",
+    "group": "project.group_project_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "project.access_account_analytic_account_manager",
+    "package": "project",
+    "name": "account.analytic.account",
+    "entity": "account.analytic.account",
+    "group": "project.group_project_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "project_timesheet_holidays.access_account_analytic_account_leaves_manager",
+    "package": "project_timesheet_holidays",
+    "name": "account.analytic.account",
+    "entity": "account.analytic.account",
+    "group": "hr_holidays.group_hr_holidays_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale.access_account_analytic_account_salesman",
+    "package": "sale",
+    "name": "account_analytic_account salesman",
+    "entity": "account.analytic.account",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "analytic.analytic_comp_rule",
+    "package": "analytic",
+    "name": "Analytic multi company rule",
+    "entity": "account.analytic.account",
+    "domain": "['|',('company_id','=',False),('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "mrp_subcontracting_account.analytic_accout_subcontractor_rule",
+    "package": "mrp_subcontracting_account",
+    "name": "Analytic Account Subcontractor",
+    "entity": "account.analytic.account",
+    "domain": "[('bom_ids', 'in', user.partner_id.commercial_partner_id.bom_ids.ids)]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.account_analytic_account_view_form_inherit",
+    "package": "account",
+    "name": "account.analytic.account.form.inherit",
+    "view_type": "div",
+    "inherits_view": "analytic.view_account_analytic_account_form",
+    "mode": null,
+    "priority": "9",
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "invoice_count",
+       "widget": "statinfo",
+       "string": "Customer Invoices"
+      },
+      {
+       "name": "vendor_bill_count",
+       "widget": "statinfo",
+       "string": "Vendor Bills"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_invoice",
+       "type": "object",
+       "invisible": "invoice_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      },
+      {
+       "name": "action_view_vendor_bill",
+       "type": "object",
+       "invisible": "vendor_bill_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-file-text-o"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 2
+     },
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.account_analytic_account_view_list_inherit",
+    "package": "account",
+    "name": "account.analytic.account.list.inherit",
+    "view_type": "field",
+    "inherits_view": "analytic.view_account_analytic_account_list",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "debit",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "debit",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_account_form",
+    "package": "analytic",
+    "name": "analytic.analytic.account.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Analytic Account"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "balance",
+       "widget": "monetary"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Project XYZ"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "code"
+      },
+      {
+       "name": "plan_id",
+       "options": "{'no_quick_create': True}"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "currency_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_currency"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(account_analytic_line_action)d",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-usd"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": true,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "type": "action",
+       "name": "%(account_analytic_line_action)d",
+       "icon": "fa-usd"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_account_list",
+    "package": "analytic",
+    "name": "account.analytic.account.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "8",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Analytic Accounts",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name",
+       "string": "Name"
+      },
+      {
+       "name": "code"
+      },
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "plan_id"
+      },
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "debit",
+       "column_invisible": "True",
+       "sum": "Debit"
+      },
+      {
+       "name": "credit",
+       "column_invisible": "True",
+       "sum": "Credit"
+      },
+      {
+       "name": "balance",
+       "sum": "Balance"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_account_list_select",
+    "package": "analytic",
+    "name": "account.analytic.account.list.select",
+    "view_type": "list",
+    "inherits_view": "analytic.view_account_analytic_account_list",
+    "mode": "primary",
+    "priority": "18",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "list",
+       "attributes": {
+        "position": "attributes"
+       },
+       "position": "attributes"
+      }
+     ],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_account_kanban",
+    "package": "analytic",
+    "name": "account.analytic.account.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "currency_id"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "balance",
+       "widget": "monetary"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "analytic.view_account_analytic_account_search",
+    "package": "analytic",
+    "name": "account.analytic.account.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Analytic Account"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Analytic Account",
+       "filter_domain": "['|', ('name', 'ilike', self), ('code', 'ilike', self)]"
+      },
+      {
+       "name": "partner_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "associatedpartner",
+       "string": "Associated Partner",
+       "domain": "[]",
+       "context": "{'group_by': 'partner_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp_account.account_analytic_account_view_form_mrp",
+    "package": "mrp_account",
+    "name": "account.analytic.account.form.mrp",
+    "view_type": "div",
+    "inherits_view": "analytic.view_account_analytic_account_form",
+    "mode": null,
+    "priority": "14",
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "production_count",
+       "widget": "statinfo",
+       "string": "Manufacturing Orders"
+      },
+      {
+       "name": "bom_count",
+       "widget": "statinfo",
+       "string": "Bills of Materials"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_mrp_production",
+       "type": "object",
+       "invisible": "production_count == 0",
+       "class": "oe_stat_button",
+       "groups": "mrp.group_mrp_user",
+       "icon": "fa-wrench"
+      },
+      {
+       "name": "action_view_mrp_bom",
+       "type": "object",
+       "invisible": "bom_count == 0",
+       "class": "oe_stat_button",
+       "groups": "mrp.group_mrp_user",
+       "icon": "fa-flask"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 2
+     },
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "project.account_analytic_account_view_form_inherit",
+    "package": "project",
+    "name": "account.analytic.account.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "analytic.view_account_analytic_account_form",
+    "mode": null,
+    "priority": "40",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='%(analytic.account_analytic_line_action)d']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "project_count",
+       "widget": "statinfo",
+       "string": "Projects"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_projects",
+       "type": "object",
+       "invisible": "project_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-puzzle-piece"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='%(analytic.account_analytic_line_action)d']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "project.view_account_analytic_account_list_inherit",
+    "package": "project",
+    "name": "account.analytic.account.list.inherit",
+    "view_type": "xpath",
+    "inherits_view": "analytic.view_account_analytic_account_list",
+    "mode": null,
+    "priority": "40",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase.account_analytic_account_view_form_purchase",
+    "package": "purchase",
+    "name": "account.analytic.account.form.purchase",
+    "view_type": "div",
+    "inherits_view": "analytic.view_account_analytic_account_form",
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "purchase_order_count",
+       "widget": "statinfo",
+       "string": "Purchase Orders"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_purchase_orders",
+       "type": "object",
+       "invisible": "purchase_order_count == 0",
+       "class": "oe_stat_button",
+       "groups": "purchase.group_purchase_user",
+       "icon": "fa-credit-card"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "analytic.action_analytic_account_form",
+    "package": "analytic",
+    "name": "Chart of Analytic Accounts",
+    "view_mode": "list,kanban,form",
+    "view_id": "view_account_analytic_account_list",
+    "search_view_id": "view_account_analytic_account_search",
+    "domain": null,
+    "context": "{'search_default_active':1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Add a new analytic account\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.analytic.account"
+   },
+   {
+    "external_identifier": "analytic.action_account_analytic_account_form",
+    "package": "analytic",
+    "name": "Analytic Accounts",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": "view_account_analytic_account_search",
+    "domain": null,
+    "context": "{'search_default_active':1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Add a new analytic account\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.analytic.account"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "account.account_analytic_def_account",
+    "package": "account",
+    "name": null,
+    "parent_id": null,
+    "action": "analytic.action_account_analytic_account_form",
+    "sequence": "20",
+    "groups_id": "analytic.group_analytic_accounting",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

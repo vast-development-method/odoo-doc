@@ -1,0 +1,1460 @@
+{
+ "catalog": {
+  "name": "entity:sms.composer",
+  "description": "Complete definition of entity Send text message Wizard (sms.composer).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sms.composer",
+  "storage_name": "sms_composer",
+  "full_name": "Send text message Wizard",
+  "kind": "transient",
+  "description": "Send SMS Wizard",
+  "defined_by_package": "sms",
+  "extended_by_packages": [
+   "mass_mailing_sms",
+   "sms_twilio"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "composition_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "numbers",
+      "Send to numbers"
+     ],
+     [
+      "comment",
+      "Post on a document"
+     ],
+     [
+      "mass",
+      "Send SMS in batch"
+     ]
+    ],
+    "string": "Composition Mode",
+    "compute": "_compute_composition_mode",
+    "precompute": true,
+    "readonly": false,
+    "required": true,
+    "store": true,
+    "defined_in_package": "sms",
+    "full_name": "Composition Mode"
+   },
+   {
+    "name": "res_model",
+    "type": "Char",
+    "string": "Document Model Name",
+    "defined_in_package": "sms",
+    "full_name": "Document Model Name"
+   },
+   {
+    "name": "res_model_description",
+    "type": "Char",
+    "string": "Document Model Description",
+    "compute": "_compute_res_model_description",
+    "defined_in_package": "sms",
+    "full_name": "Document Model Description"
+   },
+   {
+    "name": "res_id",
+    "type": "Integer",
+    "string": "Document ID",
+    "defined_in_package": "sms",
+    "full_name": "Document identifier"
+   },
+   {
+    "name": "res_ids",
+    "type": "Char",
+    "string": "Document IDs",
+    "defined_in_package": "sms",
+    "full_name": "Document identifiers"
+   },
+   {
+    "name": "res_ids_count",
+    "type": "Integer",
+    "string": "Visible records count",
+    "compute": "_compute_res_ids_count",
+    "compute_sudo": false,
+    "help": "Number of recipients that will receive the SMS if sent in mass mode, without applying the Active Domain value",
+    "defined_in_package": "sms",
+    "full_name": "Visible records count"
+   },
+   {
+    "name": "comment_single_recipient",
+    "type": "Boolean",
+    "string": "Single Mode",
+    "compute": "_compute_comment_single_recipient",
+    "compute_sudo": false,
+    "help": "Indicates if the SMS composer targets a single specific recipient",
+    "defined_in_package": "sms",
+    "full_name": "Single Mode"
+   },
+   {
+    "name": "mass_keep_log",
+    "type": "Boolean",
+    "string": "Keep a note on document",
+    "default": true,
+    "defined_in_package": "sms",
+    "full_name": "Keep a note on document"
+   },
+   {
+    "name": "mass_force_send",
+    "type": "Boolean",
+    "string": "Send directly",
+    "default": false,
+    "defined_in_package": "sms",
+    "full_name": "Send directly"
+   },
+   {
+    "name": "use_exclusion_list",
+    "type": "Boolean",
+    "string": "Use Exclusion List",
+    "default": true,
+    "copy": false,
+    "help": "Prevent sending messages to blacklisted contacts. Disable only when absolutely necessary.",
+    "defined_in_package": "sms",
+    "full_name": "Use Exclusion List"
+   },
+   {
+    "name": "recipient_valid_count",
+    "type": "Integer",
+    "string": "# Valid recipients",
+    "compute": "_compute_recipients",
+    "compute_sudo": false,
+    "defined_in_package": "sms",
+    "full_name": "# Valid recipients"
+   },
+   {
+    "name": "recipient_invalid_count",
+    "type": "Integer",
+    "string": "# Invalid recipients",
+    "compute": "_compute_recipients",
+    "compute_sudo": false,
+    "defined_in_package": "sms",
+    "full_name": "# Invalid recipients"
+   },
+   {
+    "name": "recipient_single_description",
+    "type": "Text",
+    "string": "Recipients (Partners)",
+    "compute": "_compute_recipient_single_non_stored",
+    "compute_sudo": false,
+    "defined_in_package": "sms",
+    "full_name": "Recipients (Partners)"
+   },
+   {
+    "name": "recipient_single_number",
+    "type": "Char",
+    "string": "Stored Recipient Number",
+    "compute": "_compute_recipient_single_non_stored",
+    "compute_sudo": false,
+    "defined_in_package": "sms",
+    "full_name": "Stored Recipient Number"
+   },
+   {
+    "name": "recipient_single_number_itf",
+    "type": "Char",
+    "string": "Recipient Number",
+    "compute": "_compute_recipient_single_stored",
+    "readonly": false,
+    "compute_sudo": false,
+    "store": true,
+    "help": "Phone number of the recipient. If changed, it will be recorded on recipient's profile.",
+    "defined_in_package": "sms",
+    "full_name": "Recipient Number"
+   },
+   {
+    "name": "recipient_single_valid",
+    "type": "Boolean",
+    "string": "Is valid",
+    "compute": "_compute_recipient_single_valid",
+    "compute_sudo": false,
+    "defined_in_package": "sms",
+    "full_name": "Is valid"
+   },
+   {
+    "name": "number_field_name",
+    "type": "Char",
+    "string": "Number Field",
+    "defined_in_package": "sms",
+    "full_name": "Number Field"
+   },
+   {
+    "name": "numbers",
+    "type": "Char",
+    "string": "Recipients (Numbers)",
+    "defined_in_package": "sms",
+    "full_name": "Recipients (Numbers)"
+   },
+   {
+    "name": "sanitized_numbers",
+    "type": "Char",
+    "string": "Sanitized Number",
+    "compute": "_compute_sanitized_numbers",
+    "compute_sudo": false,
+    "defined_in_package": "sms",
+    "full_name": "Sanitized Number"
+   },
+   {
+    "name": "template_id",
+    "type": "Many2one",
+    "comodel": "sms.template",
+    "string": "Use Template",
+    "domain": "[('model', '=', res_model)]",
+    "defined_in_package": "sms",
+    "full_name": "Use Template",
+    "target_entity": "sms.template"
+   },
+   {
+    "name": "body",
+    "type": "Text",
+    "string": "Message",
+    "compute": "_compute_body",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "required": true,
+    "defined_in_package": "sms",
+    "full_name": "Message"
+   },
+   {
+    "name": "mass_sms_allow_unsubscribe",
+    "type": "Boolean",
+    "string": "Include opt-out link",
+    "default": true,
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Include opt-out link"
+   },
+   {
+    "name": "mailing_id",
+    "type": "Many2one",
+    "comodel": "mailing.mailing",
+    "string": "Mailing",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Mailing",
+    "target_entity": "mailing.mailing"
+   },
+   {
+    "name": "utm_campaign_id",
+    "type": "Many2one",
+    "comodel": "utm.campaign",
+    "string": "Campaign",
+    "ondelete": "set null",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Campaign",
+    "target_entity": "utm.campaign"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_composition_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_ids_count"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "sms_composition_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_res_model_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_res_ids_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model",
+         "res_id",
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_comment_single_recipient",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_id",
+         "composition_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_recipients",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model",
+         "res_id",
+         "res_ids",
+         "composition_mode",
+         "number_field_name",
+         "sanitized_numbers"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_recipient_single_stored",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model",
+         "number_field_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_recipient_single_non_stored",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model",
+         "number_field_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_recipient_single_valid",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "recipient_single_number",
+         "recipient_single_number_itf"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sanitized_numbers",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "numbers",
+         "res_model",
+         "res_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Following numbers are not correctly encoded: %s",
+        "line": 164
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_body",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "composition_mode",
+         "res_model",
+         "res_id",
+         "template_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_sms",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Invalid recipient number. Please update it.",
+        "line": 185
+       },
+       {
+        "kind": "UserError",
+        "message": "%s invalid recipients",
+        "line": 187
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_send_sms_mass_now",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_sms",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_sms_numbers",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_sms_comment_single",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_sms_comment",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_sms_mass",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_filter_out_and_handle_revoked_sms_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "sms_values_all"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Meant to be overridden to filter out and handle sms that must not be sent.\n\n:param dict sms_values_all: sms values by res_id\n:returns: filtered sms_vals_all\n:rtype: dict",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_blacklist_record_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records",
+     "recipients_info"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Get a list of blacklisted records. Those will be directly canceled\nwith the right error code. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_optout_record_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records",
+     "recipients_info"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Compute opt-outed contacts, not necessarily blacklisted. Void by default\nas no opt-out mechanism exist in SMS, see SMS Marketing. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": "Fetch opt-out records based on mailing. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_done_record_ids",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records",
+     "recipients_info"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Get a list of already-done records. Order of record set is used to\nspot duplicates so pay attention to it if necessary. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": "A/B testing could lead to records having been already mailed. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_recipient_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_body_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mass_sms_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "sms_twilio",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mass_sms",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records",
+     "sms_record_values"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_log_body_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "sms_records_values"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mass_log_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "records",
+     "sms_records_values"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_additional_render_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": "Return a dict associating fields with their relevant render context if any.\n\ne.g. {'body': {'additional_value': self.env.context.get('additional_value')}}",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_composer_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "composition_mode",
+     "res_model",
+     "res_id",
+     "body",
+     "template_id"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_records",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_unsubscribe_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "mailing_id",
+     "trace_code"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_unsubscribe_info",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "url"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_mass_sms_trace_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "record",
+     "sms_values"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_mass_sms",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_compute_sanitized_numbers",
+    "package": "sms",
+    "kind": "UserError",
+    "message": "Following numbers are not correctly encoded: %s"
+   },
+   {
+    "operation": "action_send_sms",
+    "package": "sms",
+    "kind": "UserError",
+    "message": "Invalid recipient number. Please update it."
+   },
+   {
+    "operation": "action_send_sms",
+    "package": "sms",
+    "kind": "UserError",
+    "message": "%s invalid recipients"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "sms.access_sms_composer",
+    "package": "sms",
+    "name": "access.sms.composer",
+    "entity": "sms.composer",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mass_mailing_sms.sms_composer_view_form",
+    "package": "mass_mailing_sms",
+    "name": "sms.composer.views.inherit.sms",
+    "view_type": "xpath",
+    "inherits_view": "sms.sms_composer_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='res_model']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "utm_campaign_id",
+       "invisible": "1",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      },
+      {
+       "name": "mailing_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='res_model']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "sms.sms_composer_view_form",
+    "package": "sms",
+    "name": "sms.composer.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Send an SMS"
+     },
+     "fields": [
+      {
+       "name": "res_model_description"
+      },
+      {
+       "name": "recipient_invalid_count"
+      },
+      {
+       "name": "res_ids_count"
+      },
+      {
+       "name": "composition_mode",
+       "invisible": "1"
+      },
+      {
+       "name": "comment_single_recipient",
+       "invisible": "1"
+      },
+      {
+       "name": "res_id",
+       "invisible": "1"
+      },
+      {
+       "name": "res_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "res_model",
+       "invisible": "1"
+      },
+      {
+       "name": "mass_force_send",
+       "invisible": "1"
+      },
+      {
+       "name": "recipient_single_valid",
+       "invisible": "1"
+      },
+      {
+       "name": "recipient_single_number",
+       "invisible": "1"
+      },
+      {
+       "name": "number_field_name",
+       "invisible": "1"
+      },
+      {
+       "name": "numbers",
+       "invisible": "1"
+      },
+      {
+       "name": "sanitized_numbers",
+       "invisible": "1"
+      },
+      {
+       "name": "template_id",
+       "invisible": "1"
+      },
+      {
+       "name": "recipient_single_description",
+       "invisible": "not recipient_single_description"
+      },
+      {
+       "name": "recipient_single_number_itf",
+       "nolabel": "1",
+       "placeholder": "e.g. +1 415 555 0100"
+      },
+      {
+       "name": "body",
+       "widget": "sms_widget",
+       "invisible": "comment_single_recipient or recipient_single_valid",
+       "options": "{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'res_model'}",
+       "placeholder": "Write a message..."
+      },
+      {
+       "name": "body",
+       "widget": "sms_widget",
+       "invisible": "comment_single_recipient or not recipient_single_valid",
+       "options": "{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'res_model'}",
+       "placeholder": "Write a message..."
+      },
+      {
+       "name": "body",
+       "widget": "sms_widget",
+       "invisible": "not comment_single_recipient",
+       "placeholder": "Write a message..."
+      },
+      {
+       "name": "mass_keep_log",
+       "invisible": "1"
+      },
+      {
+       "name": "use_exclusion_list",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_send_sms",
+       "string": "Send",
+       "type": "object",
+       "invisible": "composition_mode not in ('comment', 'numbers') or not recipient_single_valid",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_send_sms",
+       "string": "Send",
+       "type": "object",
+       "invisible": "composition_mode not in ('comment', 'numbers') or recipient_single_valid",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_send_sms",
+       "string": "Put in queue",
+       "type": "object",
+       "invisible": "composition_mode != 'mass'",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_send_sms_mass_now",
+       "string": "Send now",
+       "type": "object",
+       "invisible": "composition_mode != 'mass'",
+       "data-hotkey": "w"
+      },
+      {
+       "string": "Discard",
+       "class": "btn btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "sms_widget": 3
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "crm_sms.crm_lead_act_window_sms_composer_single",
+    "package": "crm_sms",
+    "name": "Send SMS",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'default_composition_mode': 'mass',\n            'default_mass_keep_log': True,\n            'default_res_ids': active_ids\n        }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "crm.model_crm_lead",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "sms.composer"
+   },
+   {
+    "external_identifier": "crm_sms.crm_lead_act_window_sms_composer_multi",
+    "package": "crm_sms",
+    "name": "Send SMS",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'default_composition_mode': 'comment',\n            'default_res_id': active_id,\n        }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "crm.model_crm_lead",
+    "binding_type": null,
+    "binding_view_types": "form",
+    "help": null,
+    "usage": null,
+    "entity": "sms.composer"
+   },
+   {
+    "external_identifier": "project_sms.project_project_act_window_sms_composer",
+    "package": "project_sms",
+    "name": "Send SMS",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'default_composition_mode': 'mass',\n            'default_mass_keep_log': True,\n            'default_res_ids': active_ids,\n        }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_project_project",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "sms.composer"
+   },
+   {
+    "external_identifier": "project_sms.project_task_act_window_sms_composer",
+    "package": "project_sms",
+    "name": "Send SMS",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'default_composition_mode': 'mass',\n            'default_mass_keep_log': True,\n            'default_res_ids': active_ids,\n        }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "model_project_task",
+    "binding_type": null,
+    "binding_view_types": "list,kanban,form",
+    "help": null,
+    "usage": null,
+    "entity": "sms.composer"
+   },
+   {
+    "external_identifier": "sms.sms_composer_action_form",
+    "package": "sms",
+    "name": "Send SMS",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "sms.composer"
+   },
+   {
+    "external_identifier": "sms.res_partner_act_window_sms_composer_multi",
+    "package": "sms",
+    "name": "Send SMS",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'default_composition_mode': 'mass',\n            'default_mass_keep_log': True,\n            'default_res_ids': active_ids\n        }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "base.model_res_partner",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "sms.composer"
+   },
+   {
+    "external_identifier": "sms.res_partner_act_window_sms_composer_single",
+    "package": "sms",
+    "name": "Send SMS",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'default_composition_mode': 'comment',\n            'default_res_id': active_id,\n        }",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "base.model_res_partner",
+    "binding_type": null,
+    "binding_view_types": "form",
+    "help": null,
+    "usage": null,
+    "entity": "sms.composer"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

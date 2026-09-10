@@ -1,0 +1,459 @@
+{
+ "catalog": {
+  "name": "entity:slide.question",
+  "description": "Complete definition of entity Content Quiz Question (slide.question).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "slide.question",
+  "storage_name": "slide_question",
+  "full_name": "Content Quiz Question",
+  "kind": "persistent",
+  "description": "Content Quiz Question",
+  "defined_by_package": "website_slides",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence",
+  "display_name_field": "question",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "defined_in_package": "website_slides",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "question",
+    "type": "Char",
+    "string": "Question Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Question Name"
+   },
+   {
+    "name": "slide_id",
+    "type": "Many2one",
+    "comodel": "slide.slide",
+    "string": "Content",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "website_slides",
+    "full_name": "Content",
+    "target_entity": "slide.slide"
+   },
+   {
+    "name": "answer_ids",
+    "type": "One2many",
+    "comodel": "slide.answer",
+    "inverse_name": "question_id",
+    "string": "Answer",
+    "copy": true,
+    "defined_in_package": "website_slides",
+    "full_name": "Answer",
+    "target_entity": "slide.answer"
+   },
+   {
+    "name": "answers_validation_error",
+    "type": "Char",
+    "string": "Error on Answers",
+    "compute": "_compute_answers_validation_error",
+    "defined_in_package": "website_slides",
+    "full_name": "Error on Answers"
+   },
+   {
+    "name": "attempts_count",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "groups": "website_slides.group_website_slides_officer",
+    "defined_in_package": "website_slides",
+    "string": "Attempts Count",
+    "full_name": "Attempts Count"
+   },
+   {
+    "name": "attempts_avg",
+    "type": "Float",
+    "compute": "_compute_statistics",
+    "digits": [
+     6,
+     2
+    ],
+    "groups": "website_slides.group_website_slides_officer",
+    "defined_in_package": "website_slides",
+    "string": "Attempts Avg",
+    "full_name": "Attempts Avg"
+   },
+   {
+    "name": "done_count",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "groups": "website_slides.group_website_slides_officer",
+    "defined_in_package": "website_slides",
+    "string": "Done Count",
+    "full_name": "Done Count"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_answers_integrity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "answer_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "All questions must have at least one correct answer and one incorrect answer: \n%s\n",
+        "line": 32
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_statistics",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "slide_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_answers_validation_error",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "website_slides",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "answer_ids",
+         "answer_ids.is_correct"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_answers_integrity",
+    "package": "website_slides",
+    "kind": "ValidationError",
+    "message": "All questions must have at least one correct answer and one incorrect answer: \n%s\n"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "website_slides.access_slide_question_public",
+    "package": "website_slides",
+    "name": "slide.question.all",
+    "entity": "slide.question",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_question_portal",
+    "package": "website_slides",
+    "name": "slide.question.all",
+    "entity": "slide.question",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_question_employee",
+    "package": "website_slides",
+    "name": "slide.question.all",
+    "entity": "slide.question",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_slides.access_slide_question_officer",
+    "package": "website_slides",
+    "name": "slide.question.officer",
+    "entity": "slide.question",
+    "group": "website_slides.group_website_slides_officer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "website_slides.slide_question_view_form",
+    "package": "website_slides",
+    "name": "slide.question.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Quiz"
+     },
+     "fields": [
+      {
+       "name": "answers_validation_error",
+       "readonly": "1"
+      },
+      {
+       "name": "question",
+       "widget": "text",
+       "options": "{'line_breaks': False}",
+       "placeholder": "e.g. What powers a computer?"
+      },
+      {
+       "name": "answer_ids"
+      },
+      {
+       "name": "display_name",
+       "column_invisible": "True"
+      },
+      {
+       "name": "text_value"
+      },
+      {
+       "name": "is_correct"
+      },
+      {
+       "name": "comment"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "text": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_question_view_tree",
+    "package": "website_slides",
+    "name": "slide.question.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Quizzes"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "question"
+      },
+      {
+       "name": "slide_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_question_view_tree_report",
+    "package": "website_slides",
+    "name": "slide.question.view.list.report",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Quizzes",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "question"
+      },
+      {
+       "name": "slide_id"
+      },
+      {
+       "name": "attempts_count"
+      },
+      {
+       "name": "attempts_avg"
+      },
+      {
+       "name": "done_count"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "website_slides.slide_question_view_search",
+    "package": "website_slides",
+    "name": "slide.question.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Quizzes"
+     },
+     "fields": [
+      {
+       "name": "question"
+      },
+      {
+       "name": "slide_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "website_slides.slide_question_action_report",
+    "package": "website_slides",
+    "name": "Quizzes",
+    "view_mode": "list,graph,pivot,form",
+    "view_id": "slide_question_view_tree_report",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Quiz data yet!\n            </p>\n            <p>\n                Come back later to oversee how well your Attendees are doing.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "slide.question"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

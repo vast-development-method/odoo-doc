@@ -1,0 +1,556 @@
+{
+ "catalog": {
+  "name": "entity:gamification.badge.user",
+  "description": "Complete definition of entity Gamification User Badge (gamification.badge.user).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "gamification.badge.user",
+  "storage_name": "gamification_badge_user",
+  "full_name": "Gamification User Badge",
+  "kind": "persistent",
+  "description": "Gamification User Badge",
+  "defined_by_package": "gamification",
+  "extended_by_packages": [
+   "hr_gamification"
+  ],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "create_date desc",
+  "display_name_field": "badge_name",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "required": true,
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "gamification",
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "user_partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "related": "user_id.partner_id",
+    "defined_in_package": "gamification",
+    "string": "User Partner",
+    "full_name": "User Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "sender_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Sender",
+    "defined_in_package": "gamification",
+    "full_name": "Sender",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "badge_id",
+    "type": "Many2one",
+    "comodel": "gamification.badge",
+    "string": "Badge",
+    "required": true,
+    "ondelete": "cascade",
+    "index": true,
+    "defined_in_package": "gamification",
+    "full_name": "Badge",
+    "target_entity": "gamification.badge"
+   },
+   {
+    "name": "challenge_id",
+    "type": "Many2one",
+    "comodel": "gamification.challenge",
+    "string": "Challenge",
+    "defined_in_package": "gamification",
+    "full_name": "Challenge",
+    "target_entity": "gamification.challenge"
+   },
+   {
+    "name": "comment",
+    "type": "Text",
+    "string": "Comment",
+    "defined_in_package": "gamification",
+    "full_name": "Comment"
+   },
+   {
+    "name": "badge_name",
+    "type": "Char",
+    "related": "badge_id.name",
+    "string": "Badge Name",
+    "readonly": false,
+    "defined_in_package": "gamification",
+    "full_name": "Badge Name"
+   },
+   {
+    "name": "level",
+    "type": "Selection",
+    "string": "Badge Level",
+    "related": "badge_id.level",
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "gamification",
+    "full_name": "Badge Level"
+   },
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "index": true,
+    "defined_in_package": "hr_gamification",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "has_edit_delete_access",
+    "type": "Boolean",
+    "compute": "_compute_has_edit_delete_access",
+    "defined_in_package": "hr_gamification",
+    "string": "Has Edit Delete Access",
+    "full_name": "Has Edit Delete Access"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_send_badge",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Send a notification to a user for receiving a badge\n\nDoes not verify constrains on badge granting.\nThe users are added to the owner_ids (create badge_user if needed)\nThe stats counters are incremented\n:param ids: list(int) of badge users that will receive the badge",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_get_recipients_groups",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "model_description",
+     "msg_vals"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_mail_get_partner_fields",
+    "kind": "messaging_hook",
+    "arguments": [
+     "self",
+     "introspect_fields"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_employee_related_user",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_gamification",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The selected employee does not correspond to the selected user.",
+        "line": 20
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_edit_delete_access",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_badge",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_employee_related_user",
+    "package": "hr_gamification",
+    "kind": "ValidationError",
+    "message": "The selected employee does not correspond to the selected user."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "gamification.badge_user_employee",
+    "package": "gamification",
+    "name": "Badge-user Employee",
+    "entity": "gamification.badge.user",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "gamification.badge_user_manager",
+    "package": "gamification",
+    "name": "Badge-user Manager",
+    "entity": "gamification.badge.user",
+    "group": "base.group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "gamification.badge_user_portal",
+    "package": "gamification",
+    "name": "Badge-user Portal",
+    "entity": "gamification.badge.user",
+    "group": "base.group_portal",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "gamification.badge_user_public",
+    "package": "gamification",
+    "name": "Badge-user Public",
+    "entity": "gamification.badge.user",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_gamification.badge_user_officer",
+    "package": "hr_gamification",
+    "name": "Badge-user Officer",
+    "entity": "gamification.badge.user",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_gamification.badge_base_user",
+    "package": "hr_gamification",
+    "name": "Badge-user Employee",
+    "entity": "gamification.badge.user",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_gamification.hr_gamification_badge_base_user_owned_access",
+    "package": "hr_gamification",
+    "name": "Base group user granted badge write/unlink access",
+    "entity": "gamification.badge.user",
+    "domain": "[('create_uid', '=', user.id)]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_gamification.hr_gamification_badge_base_user_not_owned_access",
+    "package": "hr_gamification",
+    "name": "Base group user not granted badge write/unlink access",
+    "entity": "gamification.badge.user",
+    "domain": "[('create_uid', '!=', user.id)]",
+    "groups": "[Command.link(ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": "False",
+    "applies_to_create": true,
+    "applies_to_delete": "False"
+   },
+   {
+    "external_identifier": "hr_gamification.hr_gamification_badge_group_hr_user_access",
+    "package": "hr_gamification",
+    "name": "Officer: Manage all employees- Badge Access",
+    "entity": "gamification.badge.user",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('hr.group_hr_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "gamification.badge_user_kanban_view",
+    "package": "gamification",
+    "name": "Badge User Kanban View",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "action": "action_open_badge",
+      "type": "object"
+     },
+     "fields": [
+      {
+       "name": "create_date"
+      },
+      {
+       "name": "badge_name"
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user",
+       "options": "{'no_open': True}"
+      },
+      {
+       "name": "create_uid",
+       "options": "{'no_open': True}"
+      },
+      {
+       "name": "badge_id",
+       "widget": "image",
+       "options": "{'preview_image': 'image_1024'}"
+      },
+      {
+       "name": "comment"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_gamification.view_current_badge_form",
+    "package": "hr_gamification",
+    "name": "gamification.badge.user.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "badge_id",
+       "readonly": "1",
+       "string": "Badge Name",
+       "options": "{'no_open': True}"
+      },
+      {
+       "name": "create_uid",
+       "widget": "many2one_avatar_user",
+       "options": "{'no_open': True}"
+      },
+      {
+       "name": "create_date",
+       "widget": "datetime",
+       "options": "{'show_time': false}"
+      },
+      {
+       "name": "badge_id",
+       "widget": "image",
+       "options": "{'preview_image': 'image_1024'}",
+       "nolabel": "1"
+      },
+      {
+       "name": "comment",
+       "readonly": "not has_edit_delete_access",
+       "string": "Description",
+       "placeholder": "Describe what they did and why it matters (will be public)"
+      }
+     ],
+     "buttons": [
+      {
+       "string": "Save",
+       "invisible": "not has_edit_delete_access",
+       "class": "btn-primary me-1",
+       "special": "save",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "unlink",
+       "string": "Delete",
+       "type": "object",
+       "invisible": "not has_edit_delete_access",
+       "class": "btn-danger w-fit",
+       "confirm": "Are you sure you want to delete this granted badge?"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "datetime": 1,
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": [
+   {
+    "external_identifier": "gamification.email_template_badge_received",
+    "package": "gamification",
+    "name": "Gamification: Badge Received",
+    "subject": "New badge {{ object.badge_id.name }} granted"
+   }
+  ]
+ }
+}

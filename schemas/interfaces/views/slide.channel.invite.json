@@ -1,0 +1,134 @@
+{
+ "catalog": {
+  "name": "views:slide.channel.invite",
+  "description": "View declarations for entity slide.channel.invite.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "website_slides.slide_channel_invite_view_form",
+   "package": "website_slides",
+   "name": "slide.channel.invite.view.form",
+   "entity": "slide.channel.invite",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Compose Email",
+     "class": "o_mail_composer_form"
+    },
+    "fields": [
+     {
+      "name": "channel_id",
+      "invisible": "1"
+     },
+     {
+      "name": "channel_published",
+      "invisible": "1"
+     },
+     {
+      "name": "channel_visibility",
+      "invisible": "1"
+     },
+     {
+      "name": "enroll_mode",
+      "invisible": "1"
+     },
+     {
+      "name": "channel_invite_url",
+      "widget": "CopyClipboardChar",
+      "readonly": "1"
+     },
+     {
+      "name": "send_email",
+      "widget": "boolean_toggle",
+      "options": "{'autosave': False}"
+     },
+     {
+      "name": "partner_ids",
+      "widget": "many2many_tags_email",
+      "required": "send_email",
+      "context": "{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}",
+      "options": "{'no_quick_create': True}",
+      "placeholder": "Add contacts..."
+     },
+     {
+      "name": "lang",
+      "invisible": "1"
+     },
+     {
+      "name": "render_model",
+      "invisible": "1"
+     },
+     {
+      "name": "subject",
+      "placeholder": "Subject..."
+     },
+     {
+      "name": "can_edit_body",
+      "invisible": "1"
+     },
+     {
+      "name": "body",
+      "widget": "html_mail",
+      "invisible": "not send_email",
+      "readonly": "not can_edit_body",
+      "force_save": "1"
+     },
+     {
+      "name": "attachment_ids",
+      "widget": "many2many_binary"
+     },
+     {
+      "name": "template_id",
+      "context": "{'default_model': 'slide.channel.partner'}"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_invite",
+      "string": "Send",
+      "type": "object",
+      "invisible": "not send_email",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Close",
+      "invisible": "send_email",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     },
+     {
+      "string": "Cancel",
+      "invisible": "not send_email",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "CopyClipboardChar": 1,
+     "boolean_toggle": 1,
+     "many2many_tags_email": 1,
+     "html_mail": 1,
+     "many2many_binary": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Compose Email\" class=\"o_mail_composer_form\">\n                    <div class=\"alert alert-warning text-center\" role=\"alert\" invisible=\"channel_published or not channel_id\">\n                        This course is not published. Attendees may not be able to access its contents.\n                    </div>\n                    <sheet>\n                        <field name=\"channel_id\" invisible=\"1\"/>\n                        <field name=\"channel_published\" invisible=\"1\"/>\n                        <field name=\"channel_visibility\" invisible=\"1\"/>\n                        <field name=\"enroll_mode\" invisible=\"1\"/>\n                        <group col=\"1\">\n                            <group col=\"2\" invisible=\"enroll_mode or channel_visibility != 'public'\">\n                                <field name=\"channel_invite_url\" readonly=\"1\" widget=\"CopyClipboardChar\"/>\n                                <field name=\"send_email\" widget=\"boolean_toggle\" options=\"{'autosave': False}\"/>\n                            </group>\n                            <group col=\"2\" invisible=\"not send_email\">\n                                <field name=\"partner_ids\" widget=\"many2many_tags_email\" placeholder=\"Add contacts...\" required=\"send_email\" options=\"{'no_quick_create': True}\" context=\"{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}\"/>\n                            </group>\n                            <group col=\"2\" invisible=\"not send_email\">\n                                <field name=\"lang\" invisible=\"1\"/>\n                                <field name=\"render_model\" invisible=\"1\"/>\n                                <field name=\"subject\" placeholder=\"Subject...\"/>\n                            </group>\n                            <field name=\"can_edit_body\" invisible=\"1\"/>\n                            <field name=\"body\" class=\"oe-bordered-editor\" widget=\"html_mail\" invisible=\"not send_email\" readonly=\"not can_edit_body\" force_save=\"1\"/>\n                            <group invisible=\"not send_email\">\n                                <group>\n                                    <field name=\"attachment_ids\" widget=\"many2many_binary\"/>\n                                </group>\n                                <group>\n                                    <field name=\"template_id\" label=\"Use template\" context=\"{'default_model': 'slide.channel.partner'}\"/>\n                                </group>\n                            </group>\n                        </group>\n                    </sheet>\n                    <footer>\n                        <button string=\"Send\" invisible=\"not send_email\" name=\"action_invite\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\"/>\n                        <button string=\"Close\" invisible=\"send_email\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                        <button string=\"Cancel\" invisible=\"not send_email\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                    </footer>\n                </form>\n            </field>\n        "
+  }
+ ]
+}

@@ -1,0 +1,608 @@
+{
+ "catalog": {
+  "name": "entity:account.analytic.distribution.model",
+  "description": "Complete definition of entity Analytic Distribution Model (account.analytic.distribution.model).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.analytic.distribution.model",
+  "storage_name": "account_analytic_distribution_model",
+  "full_name": "Analytic Distribution Model",
+  "kind": "persistent",
+  "description": "Analytic Distribution Model",
+  "defined_by_package": "analytic",
+  "extended_by_packages": [
+   "account"
+  ],
+  "mixins": [
+   "analytic.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id desc",
+  "display_name_field": "create_date",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_check_company_domain": {
+    "expression": "models.check_company_domain_parent_of"
+   }
+  },
+  "fields": [
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "analytic",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Partner",
+    "ondelete": "cascade",
+    "help": "Select a partner for which the analytic distribution will be used (e.g. create new customer invoice or Sales order if we select this partner, it will automatically take this as an analytic account)",
+    "defined_in_package": "analytic",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "partner_category_id",
+    "type": "Many2one",
+    "comodel": "res.partner.category",
+    "string": "Partner Category",
+    "ondelete": "cascade",
+    "help": "Select a partner category for which the analytic distribution will be used (e.g. create new customer invoice or Sales order if we select this partner, it will automatically take this as an analytic account)",
+    "defined_in_package": "analytic",
+    "full_name": "Partner Category",
+    "target_entity": "res.partner.category"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "ondelete": "cascade",
+    "help": "Select a company for which the analytic distribution will be used (e.g. create new customer invoice or Sales order if we select this company, it will automatically take this as an analytic account)",
+    "defined_in_package": "analytic",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "account_prefix",
+    "type": "Char",
+    "string": "Accounts Prefix",
+    "help": "This analytic distribution will apply to all financial accounts sharing the prefix specified.",
+    "defined_in_package": "account",
+    "full_name": "Accounts Prefix"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "ondelete": "cascade",
+    "check_company": true,
+    "help": "Select a product for which the analytic distribution will be used (e.g. create new customer invoice or Sales order if we select this product, it will automatically take this as an analytic account)",
+    "defined_in_package": "account",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_categ_id",
+    "type": "Many2one",
+    "comodel": "product.category",
+    "string": "Product Category",
+    "ondelete": "cascade",
+    "help": "Select a product category which will use analytic account specified in analytic default (e.g. create new customer invoice or Sales order if we select this product, it will automatically take this as an analytic account)",
+    "defined_in_package": "account",
+    "full_name": "Product Category",
+    "target_entity": "product.category"
+   },
+   {
+    "name": "prefix_placeholder",
+    "type": "Char",
+    "compute": "_compute_prefix_placeholder",
+    "defined_in_package": "account",
+    "string": "Prefix Placeholder",
+    "full_name": "Prefix Placeholder"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_company_accounts",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Ensure accounts specific to a company isn't used in any distribution model that wouldn't be specific to the company",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You defined a distribution with analytic account(s) belonging to a specific company but a model shared between companies or with a different company",
+        "line": 58
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_distribution",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns the combined distribution from all matching models based on the vals dict provided\nThis method should be called to prefill analytic distribution field on several models ",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_search_domain_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_applicable_models",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "fname",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "analytic",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_prefix_placeholder",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "analytic_precision"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_company_accounts",
+    "package": "analytic",
+    "kind": "UserError",
+    "message": "You defined a distribution with analytic account(s) belonging to a specific company but a model shared between companies or with a different company"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_analytic_distribution_readonly",
+    "package": "account",
+    "name": "account.analytic.distribution invoice",
+    "entity": "account.analytic.distribution.model",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_analytic_distribution_invoice",
+    "package": "account",
+    "name": "account.analytic.distribution invoice",
+    "entity": "account.analytic.distribution.model",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "analytic.access_account_analytic_distribution_model",
+    "package": "analytic",
+    "name": "access_account_analytic_distribution_model",
+    "entity": "account.analytic.distribution.model",
+    "group": "group_analytic_accounting",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "analytic.analytic_distribution_model_comp_rule",
+    "package": "analytic",
+    "name": "Analytic distribution model multi company rule",
+    "entity": "account.analytic.distribution.model",
+    "domain": "['|',('company_id','=',False),('company_id', 'parent_of', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "account.account_analytic_distribution_model_tree_inherit",
+    "package": "account",
+    "name": "account.analytic.distribution.model.inherit.list",
+    "view_type": "data",
+    "inherits_view": "analytic.account_analytic_distribution_model_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "prefix_placeholder",
+       "column_invisible": "1"
+      },
+      {
+       "name": "account_prefix",
+       "widget": "char_with_placeholder_field",
+       "string": "Accounts Prefixes",
+       "options": "{'placeholder_field': 'prefix_placeholder'}",
+       "optional": "show"
+      },
+      {
+       "name": "product_id",
+       "optional": "show"
+      },
+      {
+       "name": "product_categ_id",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "char_with_placeholder_field": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='partner_id']",
+       "position": "before"
+      },
+      {
+       "expr": "//field[@name='company_id']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "account.account_analytic_distribution_model_form_inherit",
+    "package": "account",
+    "name": "account.analytic.distribution.model.inherit.form",
+    "view_type": "data",
+    "inherits_view": "analytic.account_analytic_distribution_model_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "data",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "prefix_placeholder",
+       "invisible": "1"
+      },
+      {
+       "name": "account_prefix",
+       "string": "Accounts Prefixes",
+       "options": "{'placeholder_field': 'prefix_placeholder'}"
+      },
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "product_categ_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='partner_category_id']",
+       "position": "after"
+      },
+      {
+       "expr": "//field[@name='company_id']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "analytic.account_analytic_distribution_model_tree_view",
+    "package": "analytic",
+    "name": "account.analytic.distribution.model.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Analytic Distribution Model",
+      "open_form_view": "True",
+      "editable": "top",
+      "multi_edit": "1",
+      "default_order": "sequence, id desc"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "partner_id",
+       "optional": "show"
+      },
+      {
+       "name": "partner_category_id",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "optional": "show",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "options": "{'force_applicability': 'optional', 'disable_save': true}",
+       "optional": "show"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "analytic_distribution": 1
+     },
+     "inheritance_operations": [],
+     "editable": "top",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "analytic.account_analytic_distribution_model_form_view",
+    "package": "analytic",
+    "name": "account.analytic.distribution.model.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Analytic Distribution Model"
+     },
+     "fields": [
+      {
+       "name": "partner_id"
+      },
+      {
+       "name": "partner_category_id"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "options": "{'force_applicability': 'optional', 'disable_save': true}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "analytic_distribution": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "analytic.action_analytic_distribution_model",
+    "package": "analytic",
+    "name": "Analytic Distribution Models",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "account.analytic.distribution.model"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "account.menu_analytic__distribution_model",
+    "package": "account",
+    "name": "Analytic Distribution Models",
+    "parent_id": null,
+    "action": "analytic.action_analytic_distribution_model",
+    "sequence": "10",
+    "groups_id": "analytic.group_analytic_accounting",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

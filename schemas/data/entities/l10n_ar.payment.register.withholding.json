@@ -1,0 +1,207 @@
+{
+ "catalog": {
+  "name": "entity:l10n_ar.payment.register.withholding",
+  "description": "Complete definition of entity Payment register withholding lines (l10n_ar.payment.register.withholding).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_ar.payment.register.withholding",
+  "storage_name": "l10n_ar_payment_register_withholding",
+  "full_name": "Payment register withholding lines",
+  "kind": "transient",
+  "description": "Payment register withholding lines",
+  "defined_by_package": "l10n_ar_withholding",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "payment_register_id",
+    "type": "Many2one",
+    "comodel": "account.payment.register",
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Payment Register",
+    "full_name": "Payment Register",
+    "target_entity": "account.payment.register"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "payment_register_id.company_id",
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "payment_register_id.currency_id",
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Currency",
+    "full_name": "Currency"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Number",
+    "defined_in_package": "l10n_ar_withholding",
+    "full_name": "Number"
+   },
+   {
+    "name": "tax_id",
+    "type": "Many2one",
+    "comodel": "account.tax",
+    "check_company": true,
+    "required": true,
+    "domain": "[('l10n_ar_withholding_payment_type', '=', parent.partner_type)]",
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Tax",
+    "full_name": "Tax",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "withholding_sequence_id",
+    "type": "Many2one",
+    "related": "tax_id.l10n_ar_withholding_sequence_id",
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Withholding Sequence",
+    "full_name": "Withholding Sequence"
+   },
+   {
+    "name": "base_amount",
+    "type": "Monetary",
+    "required": true,
+    "compute": "_compute_base_amount",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Base Amount",
+    "full_name": "Base Amount"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "required": true,
+    "compute": "_compute_amount",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_ar_withholding",
+    "string": "Amount",
+    "full_name": "Amount"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_tax_compute_all_helper",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "base_amount",
+         "tax_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_base_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_ar_withholding",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "payment_register_id.amount",
+         "tax_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_ar_withholding.access_l10n_ar_payment_register_withholding",
+    "package": "l10n_ar_withholding",
+    "name": "access_l10n_ar_payment_register_withholding",
+    "entity": "l10n_ar.payment.register.withholding",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

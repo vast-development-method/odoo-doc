@@ -1,0 +1,357 @@
+{
+ "catalog": {
+  "name": "entity:sale.loyalty.reward.wizard",
+  "description": "Complete definition of entity Sale Loyalty - Reward Selection Wizard (sale.loyalty.reward.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "sale.loyalty.reward.wizard",
+  "storage_name": "sale_loyalty_reward_wizard",
+  "full_name": "Sale Loyalty - Reward Selection Wizard",
+  "kind": "transient",
+  "description": "Sale Loyalty - Reward Selection Wizard",
+  "defined_by_package": "sale_loyalty",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "order_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "default": {
+     "dynamic": "lambda self: self.env.context.get('active_id')"
+    },
+    "required": true,
+    "defined_in_package": "sale_loyalty",
+    "string": "Order",
+    "full_name": "Order",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "reward_ids",
+    "type": "Many2many",
+    "comodel": "loyalty.reward",
+    "compute": "_compute_claimable_reward_ids",
+    "defined_in_package": "sale_loyalty",
+    "string": "Reward",
+    "full_name": "Reward",
+    "target_entity": "loyalty.reward"
+   },
+   {
+    "name": "selected_reward_id",
+    "type": "Many2one",
+    "comodel": "loyalty.reward",
+    "domain": "[('id', 'in', reward_ids)]",
+    "defined_in_package": "sale_loyalty",
+    "string": "Selected Reward",
+    "full_name": "Selected Reward",
+    "target_entity": "loyalty.reward"
+   },
+   {
+    "name": "multi_product_reward",
+    "type": "Boolean",
+    "related": "selected_reward_id.multi_product",
+    "defined_in_package": "sale_loyalty",
+    "string": "Multi Product Reward",
+    "full_name": "Multi Product Reward"
+   },
+   {
+    "name": "reward_product_ids",
+    "type": "Many2many",
+    "related": "selected_reward_id.reward_product_ids",
+    "defined_in_package": "sale_loyalty",
+    "string": "Reward Product",
+    "full_name": "Reward Product"
+   },
+   {
+    "name": "selected_product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "domain": "[('id', 'in', reward_product_ids)]",
+    "compute": "_compute_selected_product_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "sale_loyalty",
+    "string": "Selected Product",
+    "full_name": "Selected Product",
+    "target_entity": "product.product"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_claimable_reward_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "order_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_selected_product_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_loyalty",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reward_product_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_apply",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "No reward selected.",
+        "line": 44
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Coupon not found while trying to add the following reward: %s",
+        "line": 52
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_unused_coupon_ids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "sale_loyalty",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_apply",
+    "package": "sale_loyalty",
+    "kind": "ValidationError",
+    "message": "No reward selected."
+   },
+   {
+    "operation": "action_apply",
+    "package": "sale_loyalty",
+    "kind": "ValidationError",
+    "message": "Coupon not found while trying to add the following reward: %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "sale_loyalty.access_sale_coupon_apply_code_line",
+    "package": "sale_loyalty",
+    "name": "Loyalty Reward Wizard",
+    "entity": "sale.loyalty.reward.wizard",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "sale_loyalty.sale_loyalty_reward_wizard_view_form",
+    "package": "sale_loyalty",
+    "name": "sale.loyalty.reward.wizard.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "order_id",
+       "invisible": "1"
+      },
+      {
+       "name": "reward_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "multi_product_reward",
+       "invisible": "1"
+      },
+      {
+       "name": "reward_product_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "selected_reward_id",
+       "widget": "radio",
+       "invisible": "not reward_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "selected_product_id",
+       "widget": "radio",
+       "invisible": "not multi_product_reward",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_apply",
+       "string": "Apply",
+       "type": "object",
+       "invisible": "not reward_ids",
+       "class": "btn btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Discard",
+       "type": "object",
+       "invisible": "not reward_ids",
+       "class": "btn btn-secondary",
+       "data-hotkey": "x"
+      },
+      {
+       "string": "Discard",
+       "invisible": "reward_ids",
+       "class": "btn btn-primary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "%(loyalty.loyalty_program_discount_loyalty_action)d",
+       "string": "Coupons & Loyalty",
+       "type": "action",
+       "invisible": "reward_ids",
+       "class": "btn btn-secondary float-end",
+       "groups": "sales_team.group_sale_manager",
+       "data-hotkey": "q"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "sale_loyalty.sale_loyalty_reward_wizard_action",
+    "package": "sale_loyalty",
+    "name": "Available Rewards",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "sale.loyalty.reward.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,759 @@
+{
+ "catalog": {
+  "name": "entity:choose.delivery.carrier",
+  "description": "Complete definition of entity Delivery Carrier Selection Wizard (choose.delivery.carrier).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "choose.delivery.carrier",
+  "storage_name": "choose_delivery_carrier",
+  "full_name": "Delivery Carrier Selection Wizard",
+  "kind": "transient",
+  "description": "Delivery Carrier Selection Wizard",
+  "defined_by_package": "delivery",
+  "extended_by_packages": [
+   "stock_delivery",
+   "delivery_mondialrelay"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "order_id",
+    "type": "Many2one",
+    "comodel": "sale.order",
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "delivery",
+    "string": "Order",
+    "full_name": "Order",
+    "target_entity": "sale.order"
+   },
+   {
+    "name": "partner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "related": "order_id.partner_id",
+    "required": true,
+    "defined_in_package": "delivery",
+    "string": "Partner",
+    "full_name": "Partner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "carrier_id",
+    "type": "Many2one",
+    "comodel": "delivery.carrier",
+    "string": "Shipping Method",
+    "required": true,
+    "domain": "[('id', 'in', available_carrier_ids)]",
+    "defined_in_package": "delivery",
+    "full_name": "Shipping Method",
+    "target_entity": "delivery.carrier"
+   },
+   {
+    "name": "delivery_type",
+    "type": "Selection",
+    "related": "carrier_id.delivery_type",
+    "defined_in_package": "delivery",
+    "string": "Delivery Type",
+    "full_name": "Delivery Type"
+   },
+   {
+    "name": "delivery_price",
+    "type": "Float",
+    "defined_in_package": "delivery",
+    "string": "Delivery Price",
+    "full_name": "Delivery Price"
+   },
+   {
+    "name": "display_price",
+    "type": "Float",
+    "string": "Cost",
+    "readonly": true,
+    "defined_in_package": "delivery",
+    "full_name": "Cost"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "order_id.currency_id",
+    "defined_in_package": "delivery",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "related": "order_id.company_id",
+    "defined_in_package": "delivery",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "available_carrier_ids",
+    "type": "Many2many",
+    "comodel": "delivery.carrier",
+    "compute": "_compute_available_carrier",
+    "string": "Available Carriers",
+    "defined_in_package": "delivery",
+    "full_name": "Available Carriers",
+    "target_entity": "delivery.carrier"
+   },
+   {
+    "name": "invoicing_message",
+    "type": "Text",
+    "compute": "_compute_invoicing_message",
+    "defined_in_package": "delivery",
+    "string": "Invoicing Message",
+    "full_name": "Invoicing Message"
+   },
+   {
+    "name": "delivery_message",
+    "type": "Text",
+    "readonly": true,
+    "defined_in_package": "delivery",
+    "string": "Delivery Message",
+    "full_name": "Delivery Message"
+   },
+   {
+    "name": "total_weight",
+    "type": "Float",
+    "string": "Total Order Weight",
+    "related": "order_id.shipping_weight",
+    "readonly": false,
+    "defined_in_package": "delivery",
+    "full_name": "Total Order Weight"
+   },
+   {
+    "name": "weight_uom_name",
+    "type": "Char",
+    "readonly": true,
+    "default": {
+     "dynamic": "_get_default_weight_uom"
+    },
+    "defined_in_package": "delivery",
+    "string": "Weight Unit of measure Name",
+    "full_name": "Weight Unit of measure Name"
+   },
+   {
+    "name": "shipping_zip",
+    "type": "Char",
+    "related": "order_id.partner_shipping_id.zip",
+    "defined_in_package": "delivery_mondialrelay",
+    "string": "Shipping Zip",
+    "full_name": "Shipping Zip"
+   },
+   {
+    "name": "shipping_country_code",
+    "type": "Char",
+    "related": "order_id.partner_shipping_id.country_id.code",
+    "defined_in_package": "delivery_mondialrelay",
+    "string": "Shipping Country Code",
+    "full_name": "Shipping Country Code"
+   },
+   {
+    "name": "is_mondialrelay",
+    "type": "Boolean",
+    "compute": "_compute_is_mondialrelay",
+    "defined_in_package": "delivery_mondialrelay",
+    "string": "Is Mondialrelay",
+    "full_name": "Is Mondialrelay"
+   },
+   {
+    "name": "mondialrelay_last_selected",
+    "type": "Char",
+    "string": "Last Relay Selected",
+    "defined_in_package": "delivery_mondialrelay",
+    "full_name": "Last Relay Selected"
+   },
+   {
+    "name": "mondialrelay_last_selected_id",
+    "type": "Char",
+    "compute": "_compute_mr_last_selected_id",
+    "defined_in_package": "delivery_mondialrelay",
+    "string": "Mondialrelay Last Selected",
+    "full_name": "Mondialrelay Last Selected"
+   },
+   {
+    "name": "mondialrelay_brand",
+    "type": "Char",
+    "related": "carrier_id.mondialrelay_brand",
+    "defined_in_package": "delivery_mondialrelay",
+    "string": "Mondialrelay Brand",
+    "full_name": "Mondialrelay Brand"
+   },
+   {
+    "name": "mondialrelay_colLivMod",
+    "type": "Char",
+    "related": "carrier_id.mondialrelay_packagetype",
+    "defined_in_package": "delivery_mondialrelay",
+    "string": "Mondialrelay colLivMod",
+    "full_name": "Mondialrelay colLivMod"
+   },
+   {
+    "name": "mondialrelay_allowed_countries",
+    "type": "Char",
+    "compute": "_compute_mr_allowed_countries",
+    "defined_in_package": "delivery_mondialrelay",
+    "string": "Mondialrelay Allowed Countries",
+    "full_name": "Mondialrelay Allowed Countries"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_weight_uom",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_carrier_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "carrier_id",
+         "total_weight"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_order_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "order_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_invoicing_message",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "carrier_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_delivery",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "carrier_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_carrier",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "partner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_delivery_rate",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "update_price",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "vals.get('error_message')",
+        "line": 80
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "button_confirm",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "delivery_mondialrelay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please, choose a Parcel Point",
+        "line": 46
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_mondialrelay",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery_mondialrelay",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "carrier_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mr_last_selected_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery_mondialrelay",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "carrier_id",
+         "order_id.partner_shipping_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mr_allowed_countries",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "delivery_mondialrelay",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "carrier_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "update_price",
+    "package": "delivery",
+    "kind": "UserError",
+    "message": "vals.get('error_message')"
+   },
+   {
+    "operation": "button_confirm",
+    "package": "delivery_mondialrelay",
+    "kind": "ValidationError",
+    "message": "Please, choose a Parcel Point"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "delivery.access_choose_delivery_carrier",
+    "package": "delivery",
+    "name": "delivery.choose.delivery.carrier",
+    "entity": "choose.delivery.carrier",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock_delivery.access_choose_delivery_carrier_stock_user",
+    "package": "stock_delivery",
+    "name": "access.choose.delivery.carrier stock_user",
+    "entity": "choose.delivery.carrier",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "delivery.choose_delivery_carrier_view_form",
+    "package": "delivery",
+    "name": "choose.delivery.carrier.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "carrier_id"
+      },
+      {
+       "name": "total_weight"
+      },
+      {
+       "name": "weight_uom_name"
+      },
+      {
+       "name": "delivery_type",
+       "invisible": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "order_id",
+       "invisible": "1"
+      },
+      {
+       "name": "delivery_price",
+       "invisible": "1"
+      },
+      {
+       "name": "display_price",
+       "widget": "monetary",
+       "invisible": "not carrier_id",
+       "options": "{'currency_field': 'currency_id'}"
+      },
+      {
+       "name": "invoicing_message",
+       "nolabel": "1"
+      },
+      {
+       "name": "delivery_message",
+       "nolabel": "1"
+      },
+      {
+       "name": "delivery_message",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "update_price",
+       "type": "object",
+       "invisible": "delivery_type in ('fixed', 'base_on_rule')"
+      },
+      {
+       "name": "button_confirm",
+       "string": "Update",
+       "type": "object",
+       "invisible": "not context.get('carrier_recompute')",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_confirm",
+       "string": "Add",
+       "type": "object",
+       "invisible": "context.get('carrier_recompute') or not delivery_type in ('fixed', 'base_on_rule') and not display_price",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "button_confirm",
+       "string": "Add",
+       "type": "object",
+       "invisible": "context.get('carrier_recompute') or display_price or delivery_type in ('fixed', 'base_on_rule')",
+       "class": "btn-primary",
+       "confirm": "Are you sure you want the delivery to be free for this order? You might have forgotten to compute the rates.",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "monetary": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "delivery_mondialrelay.choose_delivery_carrier_view_form",
+    "package": "delivery_mondialrelay",
+    "name": "choose.delivery.carrier.form",
+    "view_type": "form",
+    "inherits_view": "delivery.choose_delivery_carrier_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "is_mondialrelay",
+       "invisible": "1"
+      },
+      {
+       "name": "mondialrelay_last_selected",
+       "widget": "mondialrelay_relay"
+      },
+      {
+       "name": "mondialrelay_last_selected_id",
+       "invisible": "1"
+      },
+      {
+       "name": "mondialrelay_brand",
+       "invisible": "1"
+      },
+      {
+       "name": "mondialrelay_colLivMod",
+       "invisible": "1"
+      },
+      {
+       "name": "mondialrelay_allowed_countries",
+       "invisible": "1"
+      },
+      {
+       "name": "shipping_zip",
+       "invisible": "1"
+      },
+      {
+       "name": "shipping_country_code",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "mondialrelay_relay": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "form",
+       "attributes": {
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "stock_delivery.choose_delivery_carrier_view_form",
+    "package": "stock_delivery",
+    "name": "choose.delivery.carrier.form",
+    "view_type": "xpath",
+    "inherits_view": "delivery.choose_delivery_carrier_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='carried_weight']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='carried_weight']",
+       "position": "attributes"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

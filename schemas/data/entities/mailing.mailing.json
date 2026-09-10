@@ -1,0 +1,4817 @@
+{
+ "catalog": {
+  "name": "entity:mailing.mailing",
+  "description": "Complete definition of entity Mass Mailing (mailing.mailing).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mailing.mailing",
+  "storage_name": "mailing_mailing",
+  "full_name": "Mass Mailing",
+  "kind": "persistent",
+  "description": "Mass Mailing",
+  "defined_by_package": "mass_mailing",
+  "extended_by_packages": [
+   "marketing_card",
+   "mass_mailing_crm",
+   "mass_mailing_sms",
+   "mass_mailing_sale"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "mail.render.mixin",
+   "utm.source.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "calendar_date DESC",
+  "display_name_field": "subject",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_systray_view": "list",
+   "_unrestricted_rendering": true
+  },
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "tracking": true,
+    "defined_in_package": "mass_mailing",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "subject",
+    "type": "Char",
+    "string": "Subject",
+    "required": true,
+    "translate": false,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Subject"
+   },
+   {
+    "name": "preview",
+    "type": "Char",
+    "string": "Preview",
+    "translate": false,
+    "render_engine": "inline_template",
+    "render_options": {
+     "post_process": true
+    },
+    "help": "Catchy preview sentence that encourages recipients to open this email.\nIn most inboxes, this is displayed next to the subject.\nKeep it empty if you prefer the first characters of your email content to appear instead.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Preview"
+   },
+   {
+    "name": "email_from",
+    "type": "Char",
+    "string": "Send From",
+    "compute": "_compute_email_from",
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Send From"
+   },
+   {
+    "name": "favorite",
+    "type": "Boolean",
+    "string": "Favorite",
+    "copy": false,
+    "tracking": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Favorite"
+   },
+   {
+    "name": "favorite_date",
+    "type": "Datetime",
+    "string": "Favorite Date",
+    "compute": "_compute_favorite_date",
+    "store": true,
+    "copy": false,
+    "help": "When this mailing was added in the favorites",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Favorite Date"
+   },
+   {
+    "name": "sent_date",
+    "type": "Datetime",
+    "string": "Sent Date",
+    "copy": false,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Sent Date"
+   },
+   {
+    "name": "schedule_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "now",
+      "Send now"
+     ],
+     [
+      "scheduled",
+      "Send on"
+     ]
+    ],
+    "string": "Schedule",
+    "default": "now",
+    "readonly": false,
+    "required": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Schedule"
+   },
+   {
+    "name": "schedule_date",
+    "type": "Datetime",
+    "string": "Scheduled for",
+    "compute": "_compute_schedule_date",
+    "readonly": false,
+    "store": true,
+    "copy": true,
+    "tracking": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Scheduled for"
+   },
+   {
+    "name": "calendar_date",
+    "type": "Datetime",
+    "string": "Calendar Date",
+    "compute": "_compute_calendar_date",
+    "store": true,
+    "copy": false,
+    "help": "Date at which the mailing was or will be sent.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Calendar Date"
+   },
+   {
+    "name": "body_arch",
+    "type": "Html",
+    "string": "Body",
+    "translate": false,
+    "sanitize": "email_outgoing",
+    "sanitize_output_method": "html",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Body"
+   },
+   {
+    "name": "body_html",
+    "type": "Html",
+    "string": "Body converted to be sent by mail",
+    "sanitize": "email_outgoing",
+    "render_engine": "qweb",
+    "render_options": {
+     "post_process": true
+    },
+    "defined_in_package": "mass_mailing",
+    "full_name": "Body converted to be sent by mail"
+   },
+   {
+    "name": "is_body_empty",
+    "type": "Boolean",
+    "compute": "_compute_is_body_empty",
+    "defined_in_package": "mass_mailing",
+    "string": "Is Body Empty",
+    "full_name": "Is Body Empty"
+   },
+   {
+    "name": "attachment_ids",
+    "type": "Many2many",
+    "comodel": "ir.attachment",
+    "relation": "mass_mailing_ir_attachments_rel",
+    "column1": "mass_mailing_id",
+    "column2": "attachment_id",
+    "string": "Attachments",
+    "bypass_search_access": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Attachments",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "keep_archives",
+    "type": "Boolean",
+    "string": "Keep Archives",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Keep Archives"
+   },
+   {
+    "name": "campaign_id",
+    "type": "Many2one",
+    "comodel": "utm.campaign",
+    "string": "UTM Campaign",
+    "index": true,
+    "ondelete": "set null",
+    "defined_in_package": "mass_mailing",
+    "full_name": "campaign tracking parameter Campaign",
+    "target_entity": "utm.campaign"
+   },
+   {
+    "name": "medium_id",
+    "type": "Many2one",
+    "comodel": "utm.medium",
+    "string": "Medium",
+    "compute": "_compute_medium_id",
+    "readonly": false,
+    "store": true,
+    "ondelete": "restrict",
+    "help": "UTM Medium: delivery method (email, sms, ...)",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Medium",
+    "target_entity": "utm.medium"
+   },
+   {
+    "name": "state",
+    "type": "Selection",
+    "selection": [
+     [
+      "draft",
+      "Draft"
+     ],
+     [
+      "in_queue",
+      "In Queue"
+     ],
+     [
+      "sending",
+      "Sending"
+     ],
+     [
+      "done",
+      "Sent"
+     ]
+    ],
+    "string": "Status",
+    "default": "draft",
+    "required": true,
+    "copy": false,
+    "tracking": true,
+    "group_expand": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Status"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color Index",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Color Index"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible",
+    "tracking": true,
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "defined_in_package": "mass_mailing",
+    "full_name": "Responsible",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "mailing_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "mail",
+      "Email"
+     ],
+     [
+      "sms",
+      "SMS"
+     ]
+    ],
+    "string": "Mailing Type",
+    "default": "mail",
+    "required": true,
+    "defined_in_package": "mass_mailing",
+    "selection_added_by": [
+     "mass_mailing_sms"
+    ],
+    "ondelete": {
+     "sms": "set default"
+    },
+    "extended_in_packages": [
+     "mass_mailing_sms"
+    ],
+    "full_name": "Mailing Type"
+   },
+   {
+    "name": "mailing_type_description",
+    "type": "Char",
+    "string": "Mailing Type Description",
+    "compute": "_compute_mailing_type_description",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mailing Type Description"
+   },
+   {
+    "name": "reply_to_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "update",
+      "Recipient Followers"
+     ],
+     [
+      "new",
+      "Specified Email Address"
+     ]
+    ],
+    "string": "Reply-To Mode",
+    "compute": "_compute_reply_to_mode",
+    "readonly": false,
+    "store": true,
+    "help": "Thread: replies go to target document. Email: replies are routed to a given email.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Reply-To Mode"
+   },
+   {
+    "name": "reply_to",
+    "type": "Char",
+    "string": "Reply To",
+    "compute": "_compute_reply_to",
+    "readonly": false,
+    "store": true,
+    "help": "Preferred Reply-To Address",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Reply To"
+   },
+   {
+    "name": "mailing_model_real",
+    "type": "Char",
+    "string": "Recipients Real Model",
+    "compute": "_compute_mailing_model_real",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Recipients Real Model"
+   },
+   {
+    "name": "mailing_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Recipients Model",
+    "ondelete": "cascade",
+    "required": true,
+    "domain": [
+     [
+      "is_mailing_enabled",
+      "=",
+      true
+     ]
+    ],
+    "default": {
+     "dynamic": "lambda self: self.env.ref('mass_mailing.model_mailing_list').id"
+    },
+    "defined_in_package": "mass_mailing",
+    "compute": "_compute_mailing_model_id",
+    "store": true,
+    "readonly": false,
+    "extended_in_packages": [
+     "marketing_card"
+    ],
+    "full_name": "Recipients Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "mailing_model_name",
+    "type": "Char",
+    "string": "Recipients Model Name",
+    "related": "mailing_model_id.model",
+    "readonly": true,
+    "related_sudo": true,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Recipients Model Name"
+   },
+   {
+    "name": "mailing_on_mailing_list",
+    "type": "Boolean",
+    "string": "Based on Mailing Lists",
+    "compute": "_compute_mailing_on_mailing_list",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Based on Mailing Lists"
+   },
+   {
+    "name": "mailing_domain",
+    "type": "Char",
+    "string": "Domain",
+    "compute": "_compute_mailing_domain",
+    "readonly": false,
+    "store": true,
+    "compute_sudo": false,
+    "defined_in_package": "mass_mailing",
+    "full_name": "Domain"
+   },
+   {
+    "name": "mail_server_available",
+    "type": "Boolean",
+    "compute": "_compute_mail_server_available",
+    "help": "Technical field used to know if the user has activated the outgoing mail server option in the settings",
+    "defined_in_package": "mass_mailing",
+    "string": "Mail Server Available",
+    "full_name": "Mail Server Available"
+   },
+   {
+    "name": "mail_server_id",
+    "type": "Many2one",
+    "comodel": "ir.mail_server",
+    "string": "Mail Server",
+    "index": "btree_not_null",
+    "default": {
+     "dynamic": "_get_default_mail_server_id"
+    },
+    "help": "Use a specific mail server in priority. Otherwise the system relies on the first outgoing mail server available (based on their sequencing) as it does for normal mails.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mail Server",
+    "target_entity": "ir.mail_server"
+   },
+   {
+    "name": "contact_list_ids",
+    "type": "Many2many",
+    "comodel": "mailing.list",
+    "relation": "mail_mass_mailing_list_rel",
+    "string": "Mailing Lists",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Mailing Lists",
+    "target_entity": "mailing.list"
+   },
+   {
+    "name": "use_exclusion_list",
+    "type": "Boolean",
+    "string": "Use Exclusion List",
+    "default": true,
+    "copy": false,
+    "help": "Prevent sending messages to blacklisted contacts. Disable only when absolutely necessary.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Use Exclusion List"
+   },
+   {
+    "name": "mailing_filter_id",
+    "type": "Many2one",
+    "comodel": "mailing.filter",
+    "string": "Favorite Filter",
+    "compute": "_compute_mailing_filter_id",
+    "readonly": false,
+    "store": true,
+    "domain": "[('mailing_model_name', '=', mailing_model_name)]",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Favorite Filter",
+    "target_entity": "mailing.filter"
+   },
+   {
+    "name": "mailing_filter_domain",
+    "type": "Char",
+    "string": "Favorite filter domain",
+    "related": "mailing_filter_id.mailing_domain",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Favorite filter domain"
+   },
+   {
+    "name": "mailing_filter_count",
+    "type": "Integer",
+    "string": "# Favorite Filters",
+    "compute": "_compute_mailing_filter_count",
+    "defined_in_package": "mass_mailing",
+    "full_name": "# Favorite Filters"
+   },
+   {
+    "name": "ab_testing_completed",
+    "type": "Boolean",
+    "related": "campaign_id.ab_testing_completed",
+    "defined_in_package": "mass_mailing",
+    "string": "Ab Testing Completed",
+    "full_name": "Ab Testing Completed"
+   },
+   {
+    "name": "ab_testing_description",
+    "type": "Html",
+    "string": "A/B Testing Description",
+    "compute": "_compute_ab_testing_description",
+    "defined_in_package": "mass_mailing",
+    "full_name": "A/B Testing Description"
+   },
+   {
+    "name": "ab_testing_enabled",
+    "type": "Boolean",
+    "string": "Allow A/B Testing",
+    "default": false,
+    "help": "If checked, recipients will be mailed only once for the whole campaign. This lets you send different mailings to randomly selected recipients and test the effectiveness of the mailings, without causing duplicate messages.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Allow A/B Testing"
+   },
+   {
+    "name": "ab_testing_is_winner_mailing",
+    "type": "Boolean",
+    "string": "Is the Winner of its Campaign",
+    "compute": "_compute_ab_testing_is_winner_mailing",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Is the Winner of its Campaign"
+   },
+   {
+    "name": "ab_testing_mailings_count",
+    "type": "Integer",
+    "related": "campaign_id.ab_testing_mailings_count",
+    "defined_in_package": "mass_mailing",
+    "string": "Ab Testing Mailings Count",
+    "full_name": "Ab Testing Mailings Count"
+   },
+   {
+    "name": "ab_testing_pc",
+    "type": "Integer",
+    "string": "A/B Testing percentage",
+    "default": 10,
+    "help": "Percentage of the contacts that will be mailed. Recipients will be chosen randomly.",
+    "defined_in_package": "mass_mailing",
+    "full_name": "A/B Testing percentage"
+   },
+   {
+    "name": "ab_testing_schedule_datetime",
+    "type": "Datetime",
+    "related": "campaign_id.ab_testing_schedule_datetime",
+    "readonly": false,
+    "default": {
+     "dynamic": "lambda self: fields.Datetime.now() + relativedelta(days=1)"
+    },
+    "defined_in_package": "mass_mailing",
+    "string": "Ab Testing Schedule Datetime",
+    "full_name": "Ab Testing Schedule Datetime"
+   },
+   {
+    "name": "ab_testing_winner_selection",
+    "type": "Selection",
+    "related": "campaign_id.ab_testing_winner_selection",
+    "readonly": false,
+    "default": "opened_ratio",
+    "copy": true,
+    "defined_in_package": "mass_mailing",
+    "string": "Ab Testing Winner Selection",
+    "full_name": "Ab Testing Winner Selection"
+   },
+   {
+    "name": "is_ab_test_sent",
+    "type": "Boolean",
+    "compute": "_compute_is_ab_test_sent",
+    "defined_in_package": "mass_mailing",
+    "string": "Is Ab Test Sent",
+    "full_name": "Is Ab Test Sent"
+   },
+   {
+    "name": "kpi_mail_required",
+    "type": "Boolean",
+    "string": "KPI mail required",
+    "copy": false,
+    "defined_in_package": "mass_mailing",
+    "full_name": "key performance indicator mail required"
+   },
+   {
+    "name": "mailing_trace_ids",
+    "type": "One2many",
+    "comodel": "mailing.trace",
+    "inverse_name": "mass_mailing_id",
+    "string": "Emails Statistics",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Emails Statistics",
+    "target_entity": "mailing.trace"
+   },
+   {
+    "name": "total",
+    "type": "Integer",
+    "compute": "_compute_total",
+    "defined_in_package": "mass_mailing",
+    "string": "Total",
+    "full_name": "Total"
+   },
+   {
+    "name": "scheduled",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Scheduled",
+    "full_name": "Scheduled"
+   },
+   {
+    "name": "expected",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Expected",
+    "full_name": "Expected"
+   },
+   {
+    "name": "canceled",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Canceled",
+    "full_name": "Canceled"
+   },
+   {
+    "name": "sent",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Sent",
+    "full_name": "Sent"
+   },
+   {
+    "name": "process",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Process",
+    "full_name": "Process"
+   },
+   {
+    "name": "pending",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Pending",
+    "full_name": "Pending"
+   },
+   {
+    "name": "delivered",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Delivered",
+    "full_name": "Delivered"
+   },
+   {
+    "name": "opened",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Opened",
+    "full_name": "Opened"
+   },
+   {
+    "name": "clicked",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Clicked",
+    "full_name": "Clicked"
+   },
+   {
+    "name": "replied",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Replied",
+    "full_name": "Replied"
+   },
+   {
+    "name": "bounced",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Bounced",
+    "full_name": "Bounced"
+   },
+   {
+    "name": "failed",
+    "type": "Integer",
+    "compute": "_compute_statistics",
+    "defined_in_package": "mass_mailing",
+    "string": "Failed",
+    "full_name": "Failed"
+   },
+   {
+    "name": "received_ratio",
+    "type": "Float",
+    "compute": "_compute_statistics",
+    "string": "Received Ratio",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Received Ratio"
+   },
+   {
+    "name": "opened_ratio",
+    "type": "Float",
+    "compute": "_compute_statistics",
+    "string": "Opened Ratio",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Opened Ratio"
+   },
+   {
+    "name": "replied_ratio",
+    "type": "Float",
+    "compute": "_compute_statistics",
+    "string": "Replied Ratio",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Replied Ratio"
+   },
+   {
+    "name": "bounced_ratio",
+    "type": "Float",
+    "compute": "_compute_statistics",
+    "string": "Bounced Ratio",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Bounced Ratio"
+   },
+   {
+    "name": "clicks_ratio",
+    "type": "Float",
+    "compute": "_compute_clicks_ratio",
+    "string": "Number of Clicks",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Number of Clicks"
+   },
+   {
+    "name": "link_trackers_count",
+    "type": "Integer",
+    "compute": "_compute_link_trackers_count",
+    "string": "Link Trackers Count",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Link Trackers Count"
+   },
+   {
+    "name": "next_departure",
+    "type": "Datetime",
+    "compute": "_compute_next_departure",
+    "string": "Scheduled date",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Scheduled date"
+   },
+   {
+    "name": "next_departure_is_past",
+    "type": "Boolean",
+    "compute": "_compute_next_departure",
+    "defined_in_package": "mass_mailing",
+    "string": "Next Departure Is Past",
+    "full_name": "Next Departure Is Past"
+   },
+   {
+    "name": "warning_message",
+    "type": "Char",
+    "string": "Warning Message",
+    "compute": "_compute_warning_message",
+    "help": "Warning message displayed in the mailing form view",
+    "defined_in_package": "mass_mailing",
+    "full_name": "Warning Message"
+   },
+   {
+    "name": "card_requires_sync_count",
+    "type": "Integer",
+    "compute": "_compute_card_requires_sync_count",
+    "defined_in_package": "marketing_card",
+    "string": "Card Requires Sync Count",
+    "full_name": "Card Requires Sync Count"
+   },
+   {
+    "name": "card_campaign_id",
+    "type": "Many2one",
+    "comodel": "card.campaign",
+    "index": "btree_not_null",
+    "defined_in_package": "marketing_card",
+    "string": "Card Campaign",
+    "full_name": "Card Campaign",
+    "target_entity": "card.campaign"
+   },
+   {
+    "name": "use_leads",
+    "type": "Boolean",
+    "string": "Use Leads",
+    "compute": "_compute_use_leads",
+    "defined_in_package": "mass_mailing_crm",
+    "full_name": "Use Leads"
+   },
+   {
+    "name": "crm_lead_count",
+    "type": "Integer",
+    "string": "Leads/Opportunities Count",
+    "compute": "_compute_crm_lead_count",
+    "defined_in_package": "mass_mailing_crm",
+    "full_name": "Leads/Opportunities Count"
+   },
+   {
+    "name": "sms_subject",
+    "type": "Char",
+    "string": "Title",
+    "related": "subject",
+    "readonly": false,
+    "translate": false,
+    "help": "For an email, the subject your recipients will see in their inbox.\nFor an SMS, the internal title of the message.",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Title"
+   },
+   {
+    "name": "body_plaintext",
+    "type": "Text",
+    "string": "SMS Body",
+    "compute": "_compute_body_plaintext",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "text message Body"
+   },
+   {
+    "name": "sms_template_id",
+    "type": "Many2one",
+    "comodel": "sms.template",
+    "string": "SMS Template",
+    "ondelete": "set null",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "text message Template",
+    "target_entity": "sms.template"
+   },
+   {
+    "name": "sms_has_insufficient_credit",
+    "type": "Boolean",
+    "string": "Insufficient IAP credits",
+    "compute": "_compute_sms_has_iap_failure",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Insufficient in-app purchase credits"
+   },
+   {
+    "name": "sms_has_unregistered_account",
+    "type": "Boolean",
+    "string": "Unregistered IAP account",
+    "compute": "_compute_sms_has_iap_failure",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Unregistered in-app purchase account"
+   },
+   {
+    "name": "sms_force_send",
+    "type": "Boolean",
+    "string": "Send Directly",
+    "help": "Immediately send the SMS Mailing instead of queuing up. Use at your own risk.",
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Send Directly"
+   },
+   {
+    "name": "sms_allow_unsubscribe",
+    "type": "Boolean",
+    "string": "Include opt-out link",
+    "default": false,
+    "defined_in_package": "mass_mailing_sms",
+    "full_name": "Include opt-out link"
+   },
+   {
+    "name": "ab_testing_sms_winner_selection",
+    "type": "Selection",
+    "related": "campaign_id.ab_testing_sms_winner_selection",
+    "default": "clicks_ratio",
+    "readonly": false,
+    "copy": true,
+    "defined_in_package": "mass_mailing_sms",
+    "string": "Ab Testing Text message Winner Selection",
+    "full_name": "Ab Testing Text message Winner Selection"
+   },
+   {
+    "name": "ab_testing_mailings_sms_count",
+    "type": "Integer",
+    "related": "campaign_id.ab_testing_mailings_sms_count",
+    "defined_in_package": "mass_mailing_sms",
+    "string": "Ab Testing Mailings Text message Count",
+    "full_name": "Ab Testing Mailings Text message Count"
+   },
+   {
+    "name": "sale_quotation_count",
+    "type": "Integer",
+    "string": "Quotation Count",
+    "compute": "_compute_sale_quotation_count",
+    "defined_in_package": "mass_mailing_sale",
+    "full_name": "Quotation Count"
+   },
+   {
+    "name": "sale_invoiced_amount",
+    "type": "Integer",
+    "string": "Invoiced Amount",
+    "compute": "_compute_sale_invoiced_amount",
+    "defined_in_package": "mass_mailing_sale",
+    "full_name": "Invoiced Amount"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_percentage_valid",
+    "kind": "Constraint",
+    "definition": "CHECK(ab_testing_pc >= 0 AND ab_testing_pc <= 100)",
+    "message": "The A/B Testing Percentage needs to be between 0 and 100%",
+    "defined_in_package": "mass_mailing"
+   },
+   {
+    "name": "_email_from",
+    "kind": "Constraint",
+    "definition": "CHECK(email_from IS NOT NULL OR mailing_type != 'mail')",
+    "message": "email from is required for mailing",
+    "defined_in_package": "mass_mailing"
+   }
+  ],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_mail_server_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_mailing_filter_model",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "mailing_model_id",
+         "mailing_filter_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check that if the favorite filter is set, it must contain the same recipient model as mailing",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The saved filter targets different recipients and is incompatible with this mailing.",
+        "line": 253
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_ab_testing_is_winner_mailing",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "campaign_id.ab_testing_winner_mailing_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_email_from",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mail_server_id",
+         "create_uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_favorite_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "favorite"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_total",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_clicks_ratio",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_statistics",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Compute statistics of the mass mailing ",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_next_departure",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "schedule_date",
+         "state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_link_trackers_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_warning_message",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "email_from",
+         "mail_server_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_medium_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reply_to_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "For main models not really using chatter to gather answers (contacts\nand mailing contacts), set reply-to as email-based. Otherwise answers\nby default go on the original discussion thread (business document). Note\nthat mailing_model being mailing.list means contacting mailing.contact\n(see mailing_model_name versus mailing_model_real). ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_reply_to",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "reply_to_mode"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mailing_filter_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_model_id",
+         "mailing_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mailing_model_real",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mailing_on_mailing_list",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mailing_domain",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_model_id",
+         "contact_list_ids",
+         "mailing_type",
+         "mailing_filter_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mailing_filter_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_model_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_schedule_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "schedule_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_calendar_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "state",
+         "schedule_date",
+         "sent_date",
+         "next_departure"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_body_empty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "body_arch"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mail_server_available",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_render_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_model_real"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_mailing_type_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_ab_testing_description",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         {
+          "expression": "lambda self: self._get_ab_testing_description_modifying_fields()"
+         }
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_ab_test_sent",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "campaign_id.mailing_mail_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ab_testing_description_modifying_fields",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 21,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A campaign should be set when A/B test is enabled",
+        "line": 546
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_create_ab_testing_utm_campaigns",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Creates the A/B test campaigns for the mailings that do not have campaign set already ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_fix_attachment_ownership",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_favorite",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Add the current mailing in the favorites list.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_remove_favorite",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Remove the current mailing from the favorites list.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_duplicate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_test",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_launch",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reload",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_schedule",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_put_in_queue",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Detect mismatches before scheduling.",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You should update all the cards for %(mailing)s before scheduling a mailing.",
+        "line": 46
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_cancel",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_retry_failed",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Remove all failed emails and their traces, and try sending them again.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_link_trackers",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_traces_scheduled",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_traces_canceled",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_traces_failed",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_traces_process",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_traces_sent",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_view_traces_filtered",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "view_filter"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_clicked",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_opened",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_replied",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_bounced",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_delivered",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_view_documents_filtered",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "view_filter"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 49,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_mailing_contacts",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Show the mailing contacts who are in a mailing list selected for this mailing.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_fetch_favorites",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "extra_domain"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return all mailings set as favorite and skip mailings with empty body.\n\nReturn archived mailing templates as well, so the user can archive the templates\nwhile keeping using it, without cluttering the Kanban view if they're a lot of\ntemplates.",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_compare_versions",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_winner_mailing",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Send the winner mailing based on the winner selection field.\nThis action is used in 2 cases:\n\n- When the user clicks on a button to send the winner mailing. There is only one mailing in self\n- When the cron is executed to send winner mailing based on the A/B testing schedule datetime. In this\n  case 'self' contains all the mailing for the campaigns so we just need to take the first to determine the\n  winner.\n\nIf the winner mailing is computed automatically, we sudo the mailings of the campaign in order to sort correctly\nthe mailings based on the selection that can be used with sub-modules like CRM and Sales",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "No mailing for this A/B testing campaign has been sent yet! Send one first and try again later.",
+        "line": 887
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_select_as_winner",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ab_testing_description_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ab_testing_siblings_mailings",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ab_testing_winner_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_ab_testing_campaign_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_opt_out_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Give list of opt-outed emails, depending on specific model-based\ncomputation if available.\n\n:returns: opt-outed emails, preferably normalized (aka not records)",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_link_tracker_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_seen_list",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Returns a set of emails already targeted by current mailing/campaign (no duplicates)",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_seen_list_extra",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_mass_mailing_context",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Returns extra context items with pre-filled blacklist and seen list for massmailing",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recipients",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recipients_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Overridable getter used to get the domain of the recipients at the time of sending.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Domain with an additional condition that the card must exist for the records.",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_remaining_recipients",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_recipient_base_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Base URL of the recipient record passed in context when sending,\nso links stay on the recipient's website in multi-website setups (see\nmail.mail). Only a recordset is used, never a plain value, so a context\nset from an RPC call cannot redirect the links to another host. ",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_unsubscribe_oneclick_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "email_to",
+     "res_id"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_unsubscribe_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "email_to",
+     "res_id"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_view_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "email_to",
+     "res_id"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_mail",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You should update all the cards for %(mailing)s before scheduling a mailing.",
+        "line": 55
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_send_mail",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 57,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "There are no recipients selected.",
+        "line": 1113
+       }
+      ]
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "convert_links",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_process_mass_mailing_queue",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_send_statistics",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Send an email to the responsible of each finished mailing with the statistics.",
+      "size_in_lines": 62,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_statistics_email_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Return some statistics that will be displayed in the mailing statistics email.\n\nEach item in the returned list will be displayed as a table, with a title and\n1, 2 or 3 columns.",
+      "size_in_lines": 67,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": "Return some statistics that will be displayed in the mailing statistics email.\n\nEach item in the returned list will be displayed as a table, with a title and\n1, 2 or 3 columns.",
+      "size_in_lines": 34,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_pretty_mailing_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_mailing_report_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "user_id"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Generate a secure token for this user. It allows to opt out from\nmailing reports while keeping some security in that process. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_convert_inline_images_to_urls",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "html_content"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Find inline base64 encoded images, make an attachement out of\nthem and replace the inline image with an url to the attachement.\nFind VML v:image elements, crop their source images, make an attachement\nout of them and replace their source with an url to the attachement.",
+      "size_in_lines": 69,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_attachments_from_inline_images",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "b64images"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_mailing_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_image_by_url",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "url",
+     "session"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_parse_mailing_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_mailing_recipient_token",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "document_id",
+     "email"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [],
+      "documentation": "Generate a secure token for a given mailing and recipient (based on\ntheir email). This allows notably to unsubscribe from the mailing or\nto blacklist their email entirely without need of a user account.\n\n:param int document_id: ID of the business document on which mailing\n  is performed;\n:param str email: recipient email, used to unsubscribe / blacklist;",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_mailing_domain",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "card_campaign_id",
+         "mailing_domain",
+         "mailing_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Card Campaign Mailing should target model %(model_name)s",
+        "line": 17
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_mailing_model_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "card_campaign_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_card_requires_sync_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "card_campaign_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check if there's any missing or outdated card.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_update_cards",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [],
+      "documentation": "Update the cards in batches, commiting after each batch.",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_leads",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_crm_lead_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_redirect_to_leads_and_opportunities",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_crm",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_body_plaintext",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "sms_template_id",
+         "mailing_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sms_has_iap_failure",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_trace_ids.failure_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_retry_failed_sms",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_buy_sms_credits",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_opt_out_list_sms",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": "Give list of opt-outed records, depending on specific model-based\ncomputation if available.\n\n:returns: opt-outed record IDs\n:rtype: list",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_seen_list_sms",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": "Returns a set of emails already targeted by current mailing/campaign (no duplicates)",
+      "size_in_lines": 55,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Unsupported %s for mass SMS",
+        "line": 189
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_send_sms_get_composer_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_send_sms",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "res_ids"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_sms_link_replacements_placeholders",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sms",
+      "decorators": [],
+      "documentation": "Get placeholders for replaced links in sms widget for accurate computation of sms counts.\n\nReminders and assumptions:\n\n* Links wille be transformed to the format ``\"[base_url]/r/[link_tracker_code]/s/[sms_id]\"``.\n* unsubscribe is formatted as: ``\"STOP SMS : [base_url]/sms/[mailing_id]/[trace_code]\"``.\n\n:returns: Character counts used for links, formatted as ``{link: str, unsubscribe: str}``.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_quotation_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sale_invoiced_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "mailing_domain"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_redirect_to_quotations",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_redirect_to_invoiced",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_mailing_filter_model",
+    "package": "mass_mailing",
+    "kind": "ValidationError",
+    "message": "The saved filter targets different recipients and is incompatible with this mailing."
+   },
+   {
+    "operation": "write",
+    "package": "mass_mailing",
+    "kind": "ValidationError",
+    "message": "A campaign should be set when A/B test is enabled"
+   },
+   {
+    "operation": "action_send_winner_mailing",
+    "package": "mass_mailing",
+    "kind": "ValidationError",
+    "message": "No mailing for this A/B testing campaign has been sent yet! Send one first and try again later."
+   },
+   {
+    "operation": "_action_send_mail",
+    "package": "mass_mailing",
+    "kind": "UserError",
+    "message": "There are no recipients selected."
+   },
+   {
+    "operation": "_check_mailing_domain",
+    "package": "marketing_card",
+    "kind": "ValidationError",
+    "message": "Card Campaign Mailing should target model %(model_name)s"
+   },
+   {
+    "operation": "action_put_in_queue",
+    "package": "marketing_card",
+    "kind": "UserError",
+    "message": "You should update all the cards for %(mailing)s before scheduling a mailing."
+   },
+   {
+    "operation": "action_send_mail",
+    "package": "marketing_card",
+    "kind": "UserError",
+    "message": "You should update all the cards for %(mailing)s before scheduling a mailing."
+   },
+   {
+    "operation": "_get_seen_list_sms",
+    "package": "mass_mailing_sms",
+    "kind": "UserError",
+    "message": "Unsupported %s for mass SMS"
+   }
+  ],
+  "state_fields": [
+   "state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mass_mailing.access_mailing_mailing_mm_user",
+    "package": "mass_mailing",
+    "name": "access.mailing.mailing.mm.user",
+    "entity": "mailing.mailing",
+    "group": "mass_mailing.group_mass_mailing_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mass_mailing.access_mailing_mailing_system",
+    "package": "mass_mailing",
+    "name": "access.mailing.mailing.system",
+    "entity": "mailing.mailing",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "marketing_card.mailing_mailing_view_form_inherit_marketing_card",
+    "package": "marketing_card",
+    "name": "mailing.mailing.view.form.inherit.marketing.card",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.view_mail_mass_mailing_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//header",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//header",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.view_mail_mass_mailing_search",
+    "package": "mass_mailing",
+    "name": "mailing.mailing.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Mailings"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Mailing",
+       "filter_domain": "['|', ('name', 'ilike', self), ('subject', 'ilike', self)]"
+      },
+      {
+       "name": "campaign_id",
+       "string": "Campaign",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "assigned_to_me",
+       "string": "My Mailings",
+       "domain": "[('user_id', '=', uid)]",
+       "help": "Mailings that are assigned to me"
+      },
+      {
+       "name": "filter_sent_date",
+       "date": "sent_date"
+      },
+      {
+       "name": "filter_ab_test",
+       "string": "A/B Tests",
+       "domain": "[('ab_testing_enabled', '=', True)]"
+      },
+      {
+       "name": "filter_ab_test_to_review",
+       "string": "A/B Tests to review",
+       "domain": "[('ab_testing_enabled', '=', True), ('ab_testing_winner_selection', '=', 'manual'), ('ab_testing_completed', '=', False)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "group_state",
+       "string": "Status",
+       "context": "{'group_by': 'state'}"
+      },
+      {
+       "name": "sent_by",
+       "string": "Sent By",
+       "domain": "[]",
+       "context": "{'group_by': 'email_from'}"
+      },
+      {
+       "name": "group_by_contact_list_ids",
+       "string": "Mailing List",
+       "domain": "[]",
+       "context": "{'group_by': 'contact_list_ids'}"
+      },
+      {
+       "name": "sent_date",
+       "string": "Sent Period",
+       "domain": "[]",
+       "context": "{'group_by': 'sent_date'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.view_mail_mass_mailing_tree",
+    "package": "mass_mailing",
+    "name": "mailing.mailing.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Mailings",
+      "sample": "1",
+      "class": "o_mass_mailing_mailing_tree"
+     },
+     "fields": [
+      {
+       "name": "calendar_date",
+       "widget": "datetime",
+       "string": "Date"
+      },
+      {
+       "name": "subject",
+       "readonly": "state in ('sending', 'done')"
+      },
+      {
+       "name": "mailing_model_id",
+       "string": "Recipients",
+       "optional": "hide"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "ab_testing_enabled",
+       "string": "A/B Test",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      },
+      {
+       "name": "campaign_id",
+       "string": "Campaign",
+       "optional": "hide",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      },
+      {
+       "name": "sent",
+       "sum": "Total"
+      },
+      {
+       "name": "received_ratio",
+       "widget": "progressbar",
+       "string": "Delivered (%)",
+       "avg": "Average"
+      },
+      {
+       "name": "opened_ratio",
+       "widget": "progressbar",
+       "string": "Opened (%)",
+       "avg": "Average"
+      },
+      {
+       "name": "bounced_ratio",
+       "string": "Bounced (%)",
+       "optional": "hide",
+       "avg": "Average"
+      },
+      {
+       "name": "clicks_ratio",
+       "string": "Clicked (%)",
+       "avg": "Average"
+      },
+      {
+       "name": "replied_ratio",
+       "string": "Replied (%)",
+       "avg": "Average"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state == 'sending' or state == 'done'",
+       "decoration-info": "state in ['draft', 'in_queue']"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "datetime": 1,
+      "many2one_avatar_user": 1,
+      "progressbar": 2,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.view_mail_mass_mailing_form",
+    "package": "mass_mailing",
+    "name": "mailing.mailing.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Mailing",
+      "class": "o_mass_mailing_mailing_form"
+     },
+     "fields": [
+      {
+       "name": "state",
+       "widget": "statusbar",
+       "readonly": "1"
+      },
+      {
+       "name": "canceled"
+      },
+      {
+       "name": "scheduled"
+      },
+      {
+       "name": "process"
+      },
+      {
+       "name": "sent"
+      },
+      {
+       "name": "failed"
+      },
+      {
+       "name": "next_departure"
+      },
+      {
+       "name": "next_departure_is_past",
+       "invisible": "1"
+      },
+      {
+       "name": "next_departure_is_past",
+       "invisible": "1"
+      },
+      {
+       "name": "schedule_type",
+       "invisible": "1"
+      },
+      {
+       "name": "warning_message"
+      },
+      {
+       "name": "opened_ratio",
+       "widget": "percentpie",
+       "string": "Opened"
+      },
+      {
+       "name": "replied_ratio",
+       "widget": "percentpie",
+       "string": "Replied"
+      },
+      {
+       "name": "clicks_ratio",
+       "widget": "percentpie",
+       "string": "Clicked"
+      },
+      {
+       "name": "received_ratio",
+       "widget": "percentpie",
+       "string": "Received"
+      },
+      {
+       "name": "bounced_ratio",
+       "widget": "percentpie",
+       "string": "Bounced"
+      },
+      {
+       "name": "link_trackers_count",
+       "widget": "statinfo",
+       "string": "Link Trackers"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "create_uid",
+       "invisible": "1"
+      },
+      {
+       "name": "mailing_type",
+       "widget": "radio",
+       "invisible": "1",
+       "readonly": "state != 'draft'",
+       "options": "{'horizontal': true}",
+       "force_save": "1"
+      },
+      {
+       "name": "subject",
+       "widget": "char_emojis",
+       "readonly": "state in ('sending', 'done')",
+       "options": "{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'mailing_model_real'}",
+       "placeholder": "e.g. New Sale on all T-shirts"
+      },
+      {
+       "name": "mailing_model_id",
+       "readonly": "state in ('sending', 'done')",
+       "options": "{'no_open': True, 'no_create': True}"
+      },
+      {
+       "name": "contact_list_ids",
+       "widget": "many2many_tags",
+       "readonly": "state in ('sending', 'done')",
+       "context": "{'form_view_ref': 'mass_mailing.mailing_list_view_form_simplified'}",
+       "placeholder": "Select recipients..."
+      },
+      {
+       "name": "mailing_filter_id",
+       "widget": "mailing_filter",
+       "readonly": "state in ('sending', 'done')",
+       "options": "{'no_create': 1, 'no_open': 1, 'domain_field': 'mailing_domain', 'model_field': 'mailing_model_id'}",
+       "placeholder": "Reload a favorite filter"
+      },
+      {
+       "name": "mailing_filter_count",
+       "invisible": "1"
+      },
+      {
+       "name": "mailing_model_name",
+       "invisible": "1"
+      },
+      {
+       "name": "mailing_on_mailing_list",
+       "invisible": "1"
+      },
+      {
+       "name": "mailing_model_real",
+       "invisible": "1"
+      },
+      {
+       "name": "mailing_domain",
+       "widget": "domain",
+       "invisible": "mailing_on_mailing_list",
+       "readonly": "state in ('sending', 'done')",
+       "options": "{'model': 'mailing_model_real', 'foldable': true}"
+      },
+      {
+       "name": "body_arch",
+       "widget": "mass_mailing_html",
+       "readonly": "state in ('sending', 'done')",
+       "options": "{                                             'inline_field': 'body_html',                                             'dynamic_placeholder': true,                                             'dynamic_placeholder_model_reference_field': 'mailing_model_real',                                         }"
+      },
+      {
+       "name": "body_html",
+       "invisible": "1",
+       "required": "body_arch"
+      },
+      {
+       "name": "is_body_empty",
+       "invisible": "1"
+      },
+      {
+       "name": "ab_testing_enabled",
+       "readonly": "state != 'draft'",
+       "force_save": "1"
+      },
+      {
+       "name": "ab_testing_pc",
+       "readonly": "state != 'draft'"
+      },
+      {
+       "name": "ab_testing_winner_selection",
+       "invisible": "not ab_testing_enabled or mailing_type != 'mail'",
+       "readonly": "state != 'draft'",
+       "required": "ab_testing_enabled and mailing_type == 'mail'"
+      },
+      {
+       "name": "ab_testing_schedule_datetime",
+       "invisible": "not ab_testing_enabled or ab_testing_winner_selection == 'manual'",
+       "readonly": "not ab_testing_enabled or state != 'draft'",
+       "required": "ab_testing_enabled and ab_testing_winner_selection != 'manual'"
+      },
+      {
+       "name": "is_ab_test_sent",
+       "invisible": "1"
+      },
+      {
+       "name": "ab_testing_mailings_count",
+       "invisible": "1"
+      },
+      {
+       "name": "ab_testing_completed",
+       "invisible": "1"
+      },
+      {
+       "name": "ab_testing_description",
+       "nolabel": "1"
+      },
+      {
+       "name": "preview",
+       "widget": "char_emojis",
+       "readonly": "state in ('sending', 'done')",
+       "string": "Preview Text",
+       "options": "{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'mailing_model_real'}",
+       "placeholder": "e.g. Check it out before it's too late!"
+      },
+      {
+       "name": "email_from",
+       "readonly": "state in ('sending', 'done')"
+      },
+      {
+       "name": "reply_to_mode",
+       "widget": "radio",
+       "invisible": "mailing_model_name in ['mailing.contact', 'res.partner', 'mailing.list']",
+       "readonly": "state in ('sending', 'done')"
+      },
+      {
+       "name": "reply_to",
+       "invisible": "reply_to_mode == 'update'",
+       "readonly": "state in ('sending', 'done')",
+       "required": "reply_to_mode == 'new'"
+      },
+      {
+       "name": "attachment_ids",
+       "widget": "many2many_binary",
+       "readonly": "state in ('sending', 'done')",
+       "string": "Attach a file"
+      },
+      {
+       "name": "campaign_id",
+       "readonly": "state in ('sending', 'done')",
+       "string": "Campaign",
+       "options": "{'create_name_field': 'title'}",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      },
+      {
+       "name": "medium_id",
+       "readonly": "state in ('sending', 'done')",
+       "required": "True",
+       "string": "Medium",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "source_id",
+       "readonly": "1",
+       "required": "False",
+       "string": "Source",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user",
+       "domain": "[('share', '=', False)]"
+      },
+      {
+       "name": "mail_server_available",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "readonly": "state in ('sending', 'done')",
+       "required": "False",
+       "string": "Name"
+      },
+      {
+       "name": "mail_server_id",
+       "invisible": "not mail_server_available",
+       "readonly": "state in ('sending', 'done')",
+       "domain": "[('owner_user_id', '=', False)]"
+      },
+      {
+       "name": "keep_archives",
+       "readonly": "state in ('sending', 'done')"
+      },
+      {
+       "name": "use_exclusion_list",
+       "invisible": "not mail_server_id and use_exclusion_list",
+       "readonly": "state != 'draft'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_launch",
+       "string": "Send",
+       "type": "object",
+       "invisible": "state in ('in_queue', 'sending', 'done')",
+       "class": "oe_highlight",
+       "confirm": "Once you send these emails, they'll be making a grand entrance in all the inboxes, creating quite the buzz!",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_schedule",
+       "string": "Schedule",
+       "type": "object",
+       "invisible": "state in ('in_queue', 'sending', 'done')",
+       "class": "btn-secondary",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_duplicate",
+       "string": "Duplicate",
+       "type": "object",
+       "invisible": "state != 'done'",
+       "class": "btn-secondary",
+       "data-hotkey": "d"
+      },
+      {
+       "name": "action_test",
+       "string": "Test",
+       "type": "object",
+       "class": "btn-secondary",
+       "data-hotkey": "k"
+      },
+      {
+       "name": "action_cancel",
+       "string": "Cancel",
+       "type": "object",
+       "invisible": "state != 'in_queue'",
+       "class": "btn-secondary",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_retry_failed",
+       "string": "Retry",
+       "type": "object",
+       "invisible": "state != 'done' or failed == 0",
+       "class": "oe_highlight",
+       "data-hotkey": "y"
+      },
+      {
+       "name": "action_set_favorite",
+       "string": "Add to Templates",
+       "type": "object",
+       "invisible": "favorite",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_remove_favorite",
+       "string": "Remove from Templates",
+       "type": "object",
+       "invisible": "not favorite",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_view_traces_canceled",
+       "type": "object",
+       "class": "btn btn-link py-0"
+      },
+      {
+       "name": "action_view_traces_scheduled",
+       "type": "object",
+       "class": "btn btn-link py-0"
+      },
+      {
+       "name": "action_view_traces_process",
+       "type": "object",
+       "class": "btn btn-link py-0"
+      },
+      {
+       "name": "action_view_traces_sent",
+       "type": "object",
+       "class": "btn btn-link py-0"
+      },
+      {
+       "name": "action_view_traces_failed",
+       "type": "object",
+       "class": "btn btn-link py-0"
+      },
+      {
+       "name": "action_reload",
+       "type": "object",
+       "class": "btn btn-link pe-0"
+      },
+      {
+       "name": "action_reload",
+       "type": "object",
+       "class": "btn btn-link pe-0"
+      },
+      {
+       "name": "action_view_opened",
+       "type": "object",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button",
+       "context": "{'search_default_filter_opened': True}"
+      },
+      {
+       "name": "action_view_replied",
+       "type": "object",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button",
+       "context": "{'search_default_filter_replied': True}"
+      },
+      {
+       "name": "action_view_clicked",
+       "type": "object",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button",
+       "context": "{'search_default_filter_clicked': True}"
+      },
+      {
+       "name": "action_view_delivered",
+       "type": "object",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button",
+       "context": "{'search_default_filter_delivered': True}"
+      },
+      {
+       "name": "action_view_bounced",
+       "type": "object",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button",
+       "context": "{'search_default_filter_bounced': True}"
+      },
+      {
+       "name": "action_view_link_trackers",
+       "type": "object",
+       "invisible": "state != 'done'",
+       "class": "oe_stat_button",
+       "icon": "fa-link"
+      },
+      {
+       "name": "action_view_mailing_contacts",
+       "type": "object",
+       "invisible": "not contact_list_ids or not contact_list_ids or state in ('sending', 'done')",
+       "class": "btn btn-secondary py-0 px-1 ms-1",
+       "icon": "fa-user-plus"
+      },
+      {
+       "name": "action_compare_versions",
+       "type": "object",
+       "class": "btn btn-link d-block"
+      },
+      {
+       "name": "action_duplicate",
+       "type": "object",
+       "invisible": "ab_testing_completed",
+       "class": "btn btn-link d-block"
+      },
+      {
+       "name": "action_send_winner_mailing",
+       "type": "object",
+       "invisible": "not is_ab_test_sent or ab_testing_completed or ab_testing_winner_selection == 'manual'",
+       "class": "btn btn-link d-block"
+      },
+      {
+       "name": "action_select_as_winner",
+       "type": "object",
+       "invisible": "ab_testing_completed or ab_testing_winner_selection != 'manual'",
+       "class": "btn btn-link d-block"
+      },
+      {
+       "name": "action_duplicate",
+       "type": "object",
+       "invisible": "ab_testing_mailings_count >= 2 or not ab_testing_enabled",
+       "class": "btn btn-primary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "mail_body",
+       "string": "Mail Body",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "ab_testing",
+       "string": "A/B Tests",
+       "invisible": null,
+       "groups": null
+      },
+      {
+       "name": "settings",
+       "string": "Settings",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "percentpie": 5,
+      "statinfo": 1,
+      "radio": 2,
+      "char_emojis": 2,
+      "many2many_tags": 1,
+      "mailing_filter": 1,
+      "domain": 1,
+      "mass_mailing_html": 1,
+      "many2many_binary": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_launch",
+       "type": "object",
+       "class": "oe_highlight",
+       "string": "Send",
+       "invisible": "state in ('in_queue', 'sending', 'done')",
+       "data-hotkey": "q",
+       "confirm": "Once you send these emails, they'll be making a grand entrance in all the inboxes, creating quite the buzz!",
+       "confirm-title": "Ready to unleash emails?",
+       "confirm-label": "Send to all"
+      },
+      {
+       "name": "action_schedule",
+       "type": "object",
+       "class": "btn-secondary",
+       "string": "Schedule",
+       "invisible": "state in ('in_queue', 'sending', 'done')",
+       "data-hotkey": "v"
+      },
+      {
+       "name": "action_duplicate",
+       "type": "object",
+       "class": "btn-secondary",
+       "string": "Duplicate",
+       "data-hotkey": "d",
+       "invisible": "state != 'done'"
+      },
+      {
+       "name": "action_test",
+       "type": "object",
+       "class": "btn-secondary",
+       "string": "Test",
+       "data-hotkey": "k"
+      },
+      {
+       "name": "action_cancel",
+       "type": "object",
+       "invisible": "state != 'in_queue'",
+       "class": "btn-secondary",
+       "string": "Cancel",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_retry_failed",
+       "type": "object",
+       "invisible": "state != 'done' or failed == 0",
+       "class": "oe_highlight",
+       "string": "Retry",
+       "data-hotkey": "y"
+      },
+      {
+       "type": "object",
+       "name": "action_set_favorite",
+       "class": "btn-secondary",
+       "invisible": "favorite",
+       "string": "Add to Templates"
+      },
+      {
+       "type": "object",
+       "name": "action_remove_favorite",
+       "class": "btn-secondary",
+       "invisible": "not favorite",
+       "string": "Remove from Templates"
+      }
+     ],
+     "statusbar_field": "state",
+     "statusbar_visible": "draft,in_queue,sending,done",
+     "chatter": true,
+     "button_box": [
+      {
+       "name": "action_view_opened",
+       "type": "object",
+       "context": "{'search_default_filter_opened': True}",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button"
+      },
+      {
+       "name": "action_view_replied",
+       "type": "object",
+       "context": "{'search_default_filter_replied': True}",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button"
+      },
+      {
+       "name": "action_view_clicked",
+       "type": "object",
+       "context": "{'search_default_filter_clicked': True}",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button"
+      },
+      {
+       "name": "action_view_delivered",
+       "id": "button_view_delivered",
+       "type": "object",
+       "context": "{'search_default_filter_delivered': True}",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button"
+      },
+      {
+       "name": "action_view_bounced",
+       "type": "object",
+       "context": "{'search_default_filter_bounced': True}",
+       "invisible": "state in ('draft', 'test')",
+       "class": "oe_stat_button"
+      },
+      {
+       "name": "action_view_link_trackers",
+       "invisible": "state != 'done'",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-link"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.view_mail_mass_mailing_kanban",
+    "package": "mass_mailing",
+    "name": "mailing.mailing.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "highlight_color": "color",
+      "default_group_by": "state",
+      "quick_create": "false",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "mailing_on_mailing_list"
+      },
+      {
+       "name": "next_departure"
+      },
+      {
+       "name": "active"
+      },
+      {
+       "name": "color",
+       "widget": "kanban_color_picker"
+      },
+      {
+       "name": "subject"
+      },
+      {
+       "name": "campaign_id",
+       "invisible": "not sent_date",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      },
+      {
+       "name": "mailing_model_id",
+       "invisible": "mailing_on_mailing_list"
+      },
+      {
+       "name": "sent_date"
+      },
+      {
+       "name": "schedule_date",
+       "readonly": "state not in ['draft', 'in_queue']"
+      },
+      {
+       "name": "total"
+      },
+      {
+       "name": "mailing_model_id",
+       "invisible": "mailing_on_mailing_list"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "kanban_color_picker": 1,
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": "state",
+     "quick_create": "false",
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "mass_mailing.mailing_mailing_view_calendar",
+    "package": "mass_mailing",
+    "name": "mailing.mailing.view.calendar",
+    "view_type": "calendar",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "calendar",
+     "root_attributes": {
+      "date_start": "calendar_date",
+      "string": "Mailings",
+      "hide_time": "true",
+      "mode": "month",
+      "color": "state",
+      "quick_create": "0"
+     },
+     "fields": [
+      {
+       "name": "mailing_model_id",
+       "string": "Recipient",
+       "options": "{'no_open': True}"
+      },
+      {
+       "name": "user_id",
+       "invisible": "1"
+      },
+      {
+       "name": "state",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "calendar": {
+      "date_start": "calendar_date",
+      "date_stop": null,
+      "date_delay": null,
+      "color": "state",
+      "mode": "month",
+      "quick_create": "0",
+      "event_open_popup": null,
+      "all_day": null
+     }
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_crm.mailing_mailing_view_form",
+    "package": "mass_mailing_crm",
+    "name": "mailing.mailing.view.form.inherit.crm",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.view_mail_mass_mailing_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@id='button_view_delivered']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "use_leads",
+       "invisible": "1"
+      },
+      {
+       "name": "crm_lead_count",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_redirect_to_leads_and_opportunities",
+       "type": "object",
+       "invisible": "state == 'draft'",
+       "class": "oe_stat_button",
+       "icon": "fa-star"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//button[@id='button_view_delivered']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sale.mailing_mailing_view_form",
+    "package": "mass_mailing_sale",
+    "name": "mailing.mailing.view.form.inherit.sale",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.view_mail_mass_mailing_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@id='button_view_delivered']",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "sale_quotation_count",
+       "widget": "statinfo",
+       "string": "Quotations"
+      },
+      {
+       "name": "sale_invoiced_amount",
+       "widget": "statinfo",
+       "string": "Invoiced"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_redirect_to_quotations",
+       "type": "object",
+       "invisible": "state == 'draft'",
+       "class": "oe_stat_button",
+       "icon": "fa-pencil-square-o"
+      },
+      {
+       "name": "action_redirect_to_invoiced",
+       "type": "object",
+       "invisible": "state == 'draft'",
+       "class": "oe_stat_button",
+       "icon": "fa-dollar"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 2
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//button[@id='button_view_delivered']",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_mailing_view_search_sms",
+    "package": "mass_mailing_sms",
+    "name": "mailing.mailing.search",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.view_mail_mass_mailing_search",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='assigned_to_me']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='assigned_to_me']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_mailing_view_form_sms",
+    "package": "mass_mailing_sms",
+    "name": "mailing.mailing.view.form.inherit.sms",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.view_mail_mass_mailing_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//button[@name='action_launch']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//button[@name='action_launch']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_mailing_view_form_mixed",
+    "package": "mass_mailing_sms",
+    "name": "mailing.mailing.view.form.mixed",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing_sms.mailing_mailing_view_form_sms",
+    "mode": "primary",
+    "priority": "30",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='mailing_type']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='mailing_type']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_mailing_view_kanban_sms",
+    "package": "mass_mailing_sms",
+    "name": "mailing.mailing.view.kanban.inherit.sms",
+    "view_type": "xpath",
+    "inherits_view": "mass_mailing.view_mail_mass_mailing_kanban",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='active']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "sms_has_insufficient_credit"
+      },
+      {
+       "name": "sms_has_unregistered_account"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='active']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_mailing_view_tree_sms",
+    "package": "mass_mailing_sms",
+    "name": "mailing.mailing.view.list.sms",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "SMS Marketing",
+      "sample": "1",
+      "decoration-info": "state == 'draft'"
+     },
+     "fields": [
+      {
+       "name": "calendar_date",
+       "string": "Date"
+      },
+      {
+       "name": "subject",
+       "string": "Title"
+      },
+      {
+       "name": "mailing_type",
+       "column_invisible": "True"
+      },
+      {
+       "name": "mailing_model_id",
+       "string": "Recipients",
+       "optional": "hide"
+      },
+      {
+       "name": "user_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "campaign_id",
+       "string": "Campaign",
+       "optional": "hide",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      },
+      {
+       "name": "ab_testing_enabled",
+       "string": "A/B Test",
+       "groups": "mass_mailing.group_mass_mailing_campaign"
+      },
+      {
+       "name": "sent",
+       "sum": "Total Sent"
+      },
+      {
+       "name": "clicked",
+       "widget": "progressbar",
+       "string": "Clicked (%)",
+       "avg": "Average of Clicked"
+      },
+      {
+       "name": "bounced",
+       "widget": "progressbar",
+       "string": "Bounced (%)",
+       "optional": "hide",
+       "avg": "Average of Bounced"
+      },
+      {
+       "name": "state",
+       "widget": "badge",
+       "decoration-success": "state in ('sending', 'done')",
+       "decoration-info": "state in ('draft', 'in_queue')"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1,
+      "progressbar": 2,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "state == 'draft'"
+     }
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mass_mailing.mailing_mailing_action_mail",
+    "package": "mass_mailing",
+    "name": "Mailings",
+    "view_mode": "list,kanban,form,calendar",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('mailing_type', '=', 'mail')]",
+    "context": "{\n                    'search_default_assigned_to_me': 1,\n                    'default_user_id': uid,\n                    'default_mailing_type': 'mail',\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a Mailing\n              </p><p>\n                Design a striking email, define recipients and track its results.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mailing.mailing"
+   },
+   {
+    "external_identifier": "mass_mailing.action_view_mass_mailings_from_campaign",
+    "package": "mass_mailing",
+    "name": "Mailings",
+    "view_mode": "kanban,list,form,calendar",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('mailing_type', '=', 'mail')]",
+    "context": "{\n                'search_default_assigned_to_me': 1,\n                'search_default_campaign_id': [active_id],\n                'default_campaign_id': active_id,\n                'default_user_id': uid,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a new mailing\n              </p><p>\n                You don't need to import your mailing lists, you can easily\n                send emails<br> to any contact saved in other the system apps.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mailing.mailing"
+   },
+   {
+    "external_identifier": "mass_mailing.action_create_mass_mailings_from_campaign",
+    "package": "mass_mailing",
+    "name": "Mailings",
+    "view_mode": "form,kanban,list",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n                'search_default_assigned_to_me': 1,\n                'search_default_campaign_id': [active_id],\n                'default_campaign_id': active_id,\n                'default_user_id': uid,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_smiling_face\">\n                Create a new mailing\n              </p><p>\n                You don't need to import your mailing lists, you can easily\n                send emails<br> to any contact saved in other the system apps.\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mailing.mailing"
+   },
+   {
+    "external_identifier": "mass_mailing.action_ab_testing_open_winner_mailing",
+    "package": "mass_mailing",
+    "name": "A/B Test Winner",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mailing.mailing"
+   },
+   {
+    "external_identifier": "mass_mailing_sms.mailing_mailing_action_sms",
+    "package": "mass_mailing_sms",
+    "name": "SMS Marketing",
+    "view_mode": "list,kanban,form,calendar,graph",
+    "view_id": null,
+    "search_view_id": "mailing_mailing_view_search_sms",
+    "domain": "[('mailing_type', '=', 'sms')]",
+    "context": "{\n                'search_default_assigned_to_me': 1,\n                'default_user_id': uid,\n                'default_mailing_type': 'sms',\n                'mailing_sms': True\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Create a SMS Marketing Mailing\n          </p><p>\n            Write an appealing SMS Text Message, define recipients and track its results.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mailing.mailing"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "mass_mailing.ir_cron_mass_mailing_queue",
+    "package": "mass_mailing",
+    "name": "Mail Marketing: Process queue",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": "6",
+    "active": null,
+    "user_id": "base.user_root",
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "mailing.mailing",
+    "operation": "_process_mass_mailing_queue",
+    "operation_call": "model._process_mass_mailing_queue()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

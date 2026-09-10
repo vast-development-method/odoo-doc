@@ -1,0 +1,3726 @@
+{
+ "catalog": {
+  "name": "entity:stock.quant",
+  "description": "Complete definition of entity Quants (stock.quant).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.quant",
+  "storage_name": "stock_quant",
+  "full_name": "Quants",
+  "kind": "persistent",
+  "description": "Quants",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "stock_account",
+   "mrp",
+   "product_expiry",
+   "mrp_subcontracting"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "product_id",
+  "display_name_search_fields": [
+   "location_id",
+   "lot_id",
+   "package_id",
+   "owner_id"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "domain": {
+     "dynamic": "lambda self: self._domain_product_id()"
+    },
+    "ondelete": "restrict",
+    "required": true,
+    "index": true,
+    "check_company": true,
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_tmpl_id",
+    "type": "Many2one",
+    "comodel": "product.template",
+    "string": "Product Template",
+    "related": "product_id.product_tmpl_id",
+    "defined_in_package": "stock",
+    "full_name": "Product Template",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unit",
+    "readonly": true,
+    "related": "product_id.uom_id",
+    "defined_in_package": "stock",
+    "full_name": "Unit",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "is_favorite",
+    "type": "Boolean",
+    "related": "product_tmpl_id.is_favorite",
+    "defined_in_package": "stock",
+    "string": "Is Favorite",
+    "full_name": "Is Favorite"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "location_id.company_id",
+    "string": "Company",
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "stock",
+    "full_name": "Company"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Location",
+    "domain": {
+     "dynamic": "lambda self: self._domain_location_id()"
+    },
+    "bypass_search_access": true,
+    "ondelete": "restrict",
+    "required": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "warehouse_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse",
+    "related": "location_id.warehouse_id",
+    "defined_in_package": "stock",
+    "string": "Warehouse",
+    "full_name": "Warehouse",
+    "target_entity": "stock.warehouse"
+   },
+   {
+    "name": "storage_category_id",
+    "type": "Many2one",
+    "related": "location_id.storage_category_id",
+    "defined_in_package": "stock",
+    "string": "Storage Category",
+    "full_name": "Storage Category"
+   },
+   {
+    "name": "cyclic_inventory_frequency",
+    "type": "Integer",
+    "related": "location_id.cyclic_inventory_frequency",
+    "defined_in_package": "stock",
+    "string": "Cyclic Inventory Frequency",
+    "full_name": "Cyclic Inventory Frequency"
+   },
+   {
+    "name": "lot_id",
+    "type": "Many2one",
+    "comodel": "stock.lot",
+    "string": "Lot/Serial Number",
+    "index": true,
+    "ondelete": "restrict",
+    "check_company": true,
+    "domain": {
+     "dynamic": "lambda self: self._domain_lot_id()"
+    },
+    "defined_in_package": "stock",
+    "full_name": "Lot/Serial Number",
+    "target_entity": "stock.lot"
+   },
+   {
+    "name": "lot_properties",
+    "type": "Properties",
+    "related": "lot_id.lot_properties",
+    "definition": "product_id.lot_properties_definition",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Lot Properties",
+    "full_name": "Lot Properties"
+   },
+   {
+    "name": "sn_duplicated",
+    "type": "Boolean",
+    "string": "Duplicated Serial Number",
+    "compute": "_compute_sn_duplicated",
+    "help": "If the same SN is in another Quant",
+    "defined_in_package": "stock",
+    "full_name": "Duplicated Serial Number"
+   },
+   {
+    "name": "package_id",
+    "type": "Many2one",
+    "comodel": "stock.package",
+    "string": "Package",
+    "domain": "['|', ('location_id', '=', location_id), '&', ('location_id', '=', False), ('quant_ids', '=', False)]",
+    "help": "The package containing this quant",
+    "ondelete": "restrict",
+    "check_company": true,
+    "index": true,
+    "defined_in_package": "stock",
+    "full_name": "Package",
+    "target_entity": "stock.package"
+   },
+   {
+    "name": "owner_id",
+    "type": "Many2one",
+    "comodel": "res.partner",
+    "string": "Owner",
+    "help": "This is the owner of the quant",
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "stock",
+    "full_name": "Owner",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "quantity",
+    "type": "Float",
+    "string": "Quantity",
+    "help": "Quantity of products in this quant, in the default unit of measure of the product",
+    "readonly": true,
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "reserved_quantity",
+    "type": "Float",
+    "string": "Reserved Quantity",
+    "default": 0.0,
+    "help": "Quantity of reserved products in this quant, in the default unit of measure of the product",
+    "readonly": true,
+    "required": true,
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "full_name": "Reserved Quantity"
+   },
+   {
+    "name": "available_quantity",
+    "type": "Float",
+    "string": "Available Quantity",
+    "help": "On hand quantity which hasn't been reserved on a transfer and is still fresh, in the default unit of measure of the product",
+    "compute": "_compute_available_quantity",
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "extended_in_packages": [
+     "product_expiry"
+    ],
+    "full_name": "Available Quantity"
+   },
+   {
+    "name": "in_date",
+    "type": "Datetime",
+    "string": "Incoming Date",
+    "readonly": true,
+    "required": true,
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "defined_in_package": "stock",
+    "full_name": "Incoming Date"
+   },
+   {
+    "name": "tracking",
+    "type": "Selection",
+    "related": "product_id.tracking",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Tracking",
+    "full_name": "Tracking"
+   },
+   {
+    "name": "on_hand",
+    "type": "Boolean",
+    "string": "On Hand",
+    "store": false,
+    "search": "_search_on_hand",
+    "defined_in_package": "stock",
+    "full_name": "On Hand"
+   },
+   {
+    "name": "product_categ_id",
+    "type": "Many2one",
+    "related": "product_tmpl_id.categ_id",
+    "defined_in_package": "stock",
+    "string": "Product Categ",
+    "full_name": "Product Categ"
+   },
+   {
+    "name": "inventory_quantity",
+    "type": "Float",
+    "string": "Counted",
+    "digits": "Product Unit",
+    "help": "The product's counted quantity.",
+    "defined_in_package": "stock",
+    "full_name": "Counted"
+   },
+   {
+    "name": "inventory_quantity_auto_apply",
+    "type": "Float",
+    "string": "Inventoried Quantity",
+    "digits": "Product Unit",
+    "compute": "_compute_inventory_quantity_auto_apply",
+    "inverse": "_set_inventory_quantity",
+    "groups": "stock.group_stock_user",
+    "defined_in_package": "stock",
+    "full_name": "Inventoried Quantity"
+   },
+   {
+    "name": "inventory_diff_quantity",
+    "type": "Float",
+    "string": "Difference",
+    "compute": "_compute_inventory_diff_quantity",
+    "store": true,
+    "help": "Indicates the gap between the product's theoretical quantity and its counted quantity.",
+    "readonly": true,
+    "digits": "Product Unit",
+    "defined_in_package": "stock",
+    "full_name": "Difference"
+   },
+   {
+    "name": "inventory_date",
+    "type": "Date",
+    "string": "Scheduled",
+    "compute": "_compute_inventory_date",
+    "store": true,
+    "readonly": false,
+    "help": "Next date the On Hand Quantity should be counted.",
+    "defined_in_package": "stock",
+    "full_name": "Scheduled"
+   },
+   {
+    "name": "last_count_date",
+    "type": "Date",
+    "compute": "_compute_last_count_date",
+    "help": "Last time the Quantity was Updated",
+    "defined_in_package": "stock",
+    "string": "Last Count Date",
+    "full_name": "Last Count Date"
+   },
+   {
+    "name": "inventory_quantity_set",
+    "type": "Boolean",
+    "store": true,
+    "compute": "_compute_inventory_quantity_set",
+    "readonly": false,
+    "defined_in_package": "stock",
+    "string": "Inventory Quantity Set",
+    "full_name": "Inventory Quantity Set"
+   },
+   {
+    "name": "is_outdated",
+    "type": "Boolean",
+    "string": "Quantity has been moved since last count",
+    "compute": "_compute_is_outdated",
+    "search": "_search_is_outdated",
+    "defined_in_package": "stock",
+    "full_name": "Quantity has been moved since last count"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Assigned To",
+    "help": "User assigned to do product count.",
+    "domain": {
+     "dynamic": "lambda self: [('all_group_ids', 'in', self.env.ref('stock.group_stock_user').id)]"
+    },
+    "defined_in_package": "stock",
+    "full_name": "Assigned To",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "value",
+    "type": "Monetary",
+    "string": "Value",
+    "compute": "_compute_value",
+    "groups": "stock.group_stock_manager",
+    "defined_in_package": "stock_account",
+    "full_name": "Value"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "company_id.currency_id",
+    "groups": "stock.group_stock_manager",
+    "defined_in_package": "stock_account",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "accounting_date",
+    "type": "Date",
+    "string": "Accounting Date",
+    "help": "Date at which the accounting entries will be created in case of automated inventory valuation. If empty, the inventory date will be used.",
+    "defined_in_package": "stock_account",
+    "full_name": "Accounting Date"
+   },
+   {
+    "name": "cost_method",
+    "type": "Selection",
+    "string": "Cost Method",
+    "selection": [
+     [
+      "standard",
+      "Standard Price"
+     ],
+     [
+      "fifo",
+      "First In First Out (FIFO)"
+     ],
+     [
+      "average",
+      "Average Cost (AVCO)"
+     ]
+    ],
+    "compute": "_compute_cost_method",
+    "defined_in_package": "stock_account",
+    "full_name": "Cost Method"
+   },
+   {
+    "name": "expiration_date",
+    "type": "Datetime",
+    "related": "lot_id.expiration_date",
+    "store": true,
+    "defined_in_package": "product_expiry",
+    "string": "Expiration Date",
+    "full_name": "Expiration Date"
+   },
+   {
+    "name": "removal_date",
+    "type": "Datetime",
+    "related": "lot_id.removal_date",
+    "store": true,
+    "defined_in_package": "product_expiry",
+    "string": "Removal Date",
+    "full_name": "Removal Date"
+   },
+   {
+    "name": "use_expiration_date",
+    "type": "Boolean",
+    "related": "product_id.use_expiration_date",
+    "defined_in_package": "product_expiry",
+    "string": "Use Expiration Date",
+    "full_name": "Use Expiration Date"
+   },
+   {
+    "name": "is_subcontract",
+    "type": "Boolean",
+    "store": false,
+    "search": "_search_is_subcontract",
+    "defined_in_package": "mrp_subcontracting",
+    "string": "Is Subcontract",
+    "full_name": "Is Subcontract"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_domain_location_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_lot_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_domain_product_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_quantity",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quantity",
+         "reserved_quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "removal_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_inventory_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "location_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_last_count_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "We look at the stock move lines associated with every quant to get the last count date.\n        ",
+      "size_in_lines": 47,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "domain",
+     "*args",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_inventory_diff_quantity",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "inventory_quantity",
+         "inventory_quantity_set"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_inventory_quantity_set",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "inventory_quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_outdated",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "inventory_quantity",
+         "quantity",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_outdated",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_inventory_quantity_auto_apply",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_sn_duplicated",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "lot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_inventory_quantity",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Inverse method to create stock move when `inventory_quantity` is set\n(`inventory_quantity` is only accessible in inventory mode).",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_on_hand",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Handle the \"on_hand\" filter, indirectly calling `_get_domain_locations`.",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot duplicate stock quants.",
+        "line": 246
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "name_create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Override to handle the \"inventory mode\" and create a quant as\nsuperuser the conditions are met.",
+      "size_in_lines": 61,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Quant's creation is restricted, you can't do this operation.",
+        "line": 269
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_load_records_create",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Add default location if import file did not fill it",
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_records_write",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "values"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Only allowed fields should be modified ",
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group_select",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "aggregate_spec",
+     "query"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_import_templates",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_forbidden_fields_write",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a list of fields user can't edit when he want to edit a quant in `inventory_mode`.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Override to handle the \"inventory mode\" and create the inventory move. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Quant's editing is restricted, you can't do this operation.",
+        "line": 359
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_wrong_permission",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Quants are auto-deleted when appropriate. If you must manually delete them, please ask a stock manager to do it.",
+        "line": 366
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_view_stock_moves",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_orderpoints",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_quants",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_inventory",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Similar to _get_quants_action except specific for inventory adjustments (i.e. inventory counts). ",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_apply_inventory",
+    "kind": "user_action",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_stock_quant_relocate",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only move positive quantities stored in locations used by a single company per relocation.",
+        "line": 454
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_inventory_history",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_inventory_quantity",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_apply_all",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reset",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_clear_inventory_quantity",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_set_inventory_quantity_zero",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "location_id",
+         "lot_id",
+         "package_id",
+         "owner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "name that will be displayed in the detailed operation",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_product_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Quants cannot be created for consumables or services.",
+        "line": 585
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "check_quantity",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The serial number has already been assigned: \n Product: %(product)s, Serial Number: %(serial_number)s",
+        "line": 603
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "check_location_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "location_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot take products from or deliver products to a location of type \"view\" (%s).",
+        "line": 609
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "check_lot_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "lot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The Lot/Serial number (%s) is linked to another product.",
+        "line": 615
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_removal_strategy",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "location_id"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_run_least_packages_removal_strategy_astar",
+    "kind": "background_operation",
+    "arguments": [
+     "self",
+     "domain",
+     "qty"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 109,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_removal_strategy_order",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "removal_strategy"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Removal strategy %s not implemented.",
+        "line": 748
+       }
+      ]
+     },
+     {
+      "package": "product_expiry",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_gather_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "location_id",
+     "lot_id",
+     "package_id",
+     "owner_id",
+     "strict"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_gather",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "location_id",
+     "lot_id",
+     "package_id",
+     "owner_id",
+     "strict",
+     "qty"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "if records in self, the records are filtered based on the wanted characteristics passed to this function\nif not, a search is done with all the characteristics passed.",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_available_quantity",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "location_id",
+     "lot_id",
+     "package_id",
+     "owner_id",
+     "strict",
+     "allow_negative"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Return the available quantity, i.e. the sum of `quantity` minus the sum of\n`reserved_quantity`, for the set of quants sharing the combination of `product_id,\nlocation_id` if `strict` is set to False or sharing the *exact same characteristics*\notherwise.\nThe set of quants to filter from can be in `self`, if not a search will be done\nThis method is called in the following usecases:\n    - when a stock move checks its availability\n    - when a stock move actually assign\n    - when editing a move line, to check if the new value is forced or not\n    - when validating a move line with some forced values and have to potentially unlink an\n      equivalent move line in another picking\nIn the two first usecases, `strict` should be set to `False`, as we don't know what exact\nquants we'll reserve, and the characteristics are meaningless in this context.\nIn the last ones, `strict` should be set to `True`, as we work on a specific set of\ncharacteristics.\n\n:return: available quantity as a float",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_reserve_quantity",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "location_id",
+     "quantity",
+     "uom_id",
+     "lot_id",
+     "package_id",
+     "owner_id",
+     "strict"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Get the quantity available to reserve for the set of quants\nsharing the combination of `product_id, location_id` if `strict` is set to False or sharing\nthe *exact same characteristics* otherwise. If no quants are in self, `_gather` will do a search to fetch the quants\nTypically, this method is called before the `stock.move.line` creation to know the reserved_qty that could be use.\nIt's also called by `_update_reserve_quantity` to find the quant to reserve.\n\n:return: a list of tuples (quant, quantity_reserved) showing on which quant the reservation\n    could be done and how much the system is able to reserve on it",
+      "size_in_lines": 81,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "It is not possible to unreserve more products of %s than you have in stock.",
+        "line": 882
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_quants_by_products_locations",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_ids",
+     "location_ids",
+     "extra_domain"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_location_or_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "location_id",
+         "product_id",
+         "lot_id",
+         "package_id",
+         "owner_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_inventory_quantity",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "inventory_quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_serial_number",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "lot_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_apply_inventory",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_available_quantity",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "location_id",
+     "quantity",
+     "reserved_quantity",
+     "lot_id",
+     "package_id",
+     "owner_id",
+     "in_date"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Increase or decrease `quantity` or 'reserved quantity' of a set of quants for a given set of\nproduct_id/location_id/lot_id/package_id/owner_id.\n\n:param product_id:\n:param location_id:\n:param quantity:\n:param lot_id:\n:param package_id:\n:param owner_id:\n:param datetime in_date: Should only be passed when calls to this method are done in\n                         order to move a quant. When creating a tracked quant, the\n                         current datetime will be used.\n:return: tuple (available_quantity, in_date as a datetime)",
+      "size_in_lines": 68,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Quantity or Reserved Quantity should be set.",
+        "line": 1054
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_update_reserved_quantity",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product_id",
+     "location_id",
+     "quantity",
+     "lot_id",
+     "package_id",
+     "owner_id",
+     "strict"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Increase or decrease `reserved_quantity` of a set of quants for a given set of\nproduct_id/location_id/lot_id/package_id/owner_id.\n\n:param product_id:\n:param location_id:\n:param quantity:\n:param lot_id:\n:param package_id:\n:param owner_id:\n:return: available_quantity",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_zero_quants",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "_update_available_quantity may leave quants with no\nquantity and no reserved_quantity. It used to directly unlink\nthese zero quants but this proved to hurt the performance as\nthis method is often called in batch and each unlink invalidate\nthe cache. We defer the calls to unlink in this method.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_clean_reservations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_merge_quants",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "In a situation where one transaction is updating a quant via\n`_update_available_quantity` and another concurrent one calls this function with the same\nargument, we’ll create a new quant in order for these transactions to not rollback. This\nmethod will find and deduplicate these quants.",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_quant_tasks",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_inventory_mode",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Used to control whether a quant was written on or created during an\n\"inventory session\", meaning a mode where we need to create the stock.move\nrecord necessary to be consistent with the `inventory_quantity` field.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_inventory_fields_create",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a list of fields user can edit when he want to create a quant in `inventory_mode`.\n        ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_inventory_fields_write",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a list of fields user can edit when he want to edit a quant in `inventory_mode`.\n        ",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns a list of fields user can edit when editing a quant in `inventory_mode`.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_inventory_move_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "qty",
+     "location_id",
+     "location_dest_id",
+     "package_id",
+     "package_dest_id"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Called when user manually set a new quantity (via `inventory_quantity`)\njust before creating the corresponding stock move.\n\n:param location_id: `stock.location`\n:param location_dest_id: `stock.location`\n:param package_id: `stock.package`\n:param package_dest_id: `stock.package`\n:return: dict with all values needed to create a new `stock.move` with its move line.",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_set_view_context",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Adds context when opening quants related views. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "product_expiry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_quants_action",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "extend"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Returns an action to open (non-inventory adjustment) quant view.\nDepending of the context (user have right to be inventory mode or not),\nthe list view will be editable or readonly.\n\n:param extend: If True, enables form, graph and pivot views. False by default.",
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_gs1_barcode",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "gs1_quantity_rules_ai_by_uom"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Generates a GS1 barcode for the quant's properties (product, quantity and LN/SN.)\n\n:param gs1_quantity_rules_ai_by_uom: contains the products' GS1 AI paired with the UoM id\n:type gs1_quantity_rules_ai_by_uom: dict\n:return: str",
+      "size_in_lines": 40,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "product_expiry",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_aggregate_barcodes",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Generates and aggregates quants' barcodes. This method uses the config parameters\n`stock.agg_barcode_max_length` to determine the length limit of a single aggregate barcode\n(400 by default) and `stock.barcode_separator` to determine which character to use to\nseparate individual encodings (this method can't work without this parameter and will return\nan empty list.) Depending on the number of quants, those parameters and the length of their\nbarcode encodings, there can be one or more aggregate barcodes.\n\n:return: list",
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_serial_number",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "product_id",
+     "lot_id",
+     "company_id",
+     "source_location_id",
+     "ref_doc_location_id"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Checks for duplicate serial numbers (SN) when assigning a SN (i.e. no source_location_id)\nand checks for potential incorrect location selection of a SN when using a SN (i.e.\nsource_location_id). Returns warning message of all locations the SN is located at and\n(optionally) a recommended source location of the SN (when using SN from incorrect location).\nThis function is designed to be used by onchange functions across differing situations including,\nbut not limited to scrap, incoming picking SN encoding, and outgoing picking SN selection.\n\n:param product_id: `product.product` product to check SN for\n:param lot_id: `stock.production.lot` SN to check\n:param company_id: `res.company` company to check against (i.e. we ignore duplicate SNs across\n    different companies for lots defined with a company)\n:param source_location_id: `stock.location` optional source location if using the SN rather\n    than assigning it\n:param ref_doc_location_id: `stock.location` optional reference document location for\n    determining recommended location. This is param expected to only be used when a\n    `source_location_id` is provided.\n:return: tuple(message, recommended_location) If not None, message is a string expected to be\n    used in warning message dict and recommended_location is a `location_id`",
+      "size_in_lines": 71,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "move_quants",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "location_dest_id",
+     "package_dest_id",
+     "message",
+     "unpack",
+     "up_to_parent_packages"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Directly move a stock.quant to another location and/or package by creating a stock.move.\n\n:param location_dest_id: `stock.location` destination location for the quants\n:param package_dest_id: `stock.package` destination package for the quants\n:param message: String to fill the reference field on the generated stock.move\n:param unpack: set to True when needing to unpack the quant\n:param up_to_parent_packages: `stock.package` that are the upper limit to keep the parents",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_bypass_product",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "product",
+     "location",
+     "reserved_quantity",
+     "lot_id",
+     "package_id",
+     "owner_id"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_cost_method",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "company"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_categ_id.property_cost_method"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_exclude_for_valuation",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Determines if a quant should be excluded from valuation based on its ownership.\n:return: True if the quant should be excluded from valuation, False otherwise.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_value",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "location_id",
+         "owner_id",
+         "product_id",
+         "quantity"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group_postprocess_aggregate",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "aggregate_spec",
+     "raw_values"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_kits",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You should update the components quantity instead of directly updating the quantity of the kit product.",
+        "line": 11
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_search_is_subcontract",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "copy",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You cannot duplicate stock quants."
+   },
+   {
+    "operation": "create",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Quant's creation is restricted, you can't do this operation."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Quant's editing is restricted, you can't do this operation."
+   },
+   {
+    "operation": "_unlink_except_wrong_permission",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Quants are auto-deleted when appropriate. If you must manually delete them, please ask a stock manager to do it."
+   },
+   {
+    "operation": "action_stock_quant_relocate",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You can only move positive quantities stored in locations used by a single company per relocation."
+   },
+   {
+    "operation": "check_product_id",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "Quants cannot be created for consumables or services."
+   },
+   {
+    "operation": "check_quantity",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "The serial number has already been assigned: \n Product: %(product)s, Serial Number: %(serial_number)s"
+   },
+   {
+    "operation": "check_location_id",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "You cannot take products from or deliver products to a location of type \"view\" (%s)."
+   },
+   {
+    "operation": "check_lot_id",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "The Lot/Serial number (%s) is linked to another product."
+   },
+   {
+    "operation": "_get_removal_strategy_order",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Removal strategy %s not implemented."
+   },
+   {
+    "operation": "_get_reserve_quantity",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "It is not possible to unreserve more products of %s than you have in stock."
+   },
+   {
+    "operation": "_update_available_quantity",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "Quantity or Reserved Quantity should be set."
+   },
+   {
+    "operation": "_check_kits",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You should update the components quantity instead of directly updating the quantity of the kit product."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "stock.access_stock_quant_user",
+    "package": "stock",
+    "name": "stock.quant user",
+    "entity": "stock.quant",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_stock_quant_all",
+    "package": "stock",
+    "name": "stock.quant all users",
+    "entity": "stock.quant",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "stock.stock_quant_rule",
+    "package": "stock",
+    "name": "stock_quant multi-company",
+    "entity": "stock.quant",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "mrp_subcontracting.quant_subcontracting_search_view",
+    "package": "mrp_subcontracting",
+    "name": "stock.quant.subcontracting.search",
+    "view_type": "xpath",
+    "inherits_view": "stock.quant_search_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='transit_loc']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "is_subcontract",
+       "string": "Subcontracting Locations",
+       "domain": "[('is_subcontract', '=', True)]",
+       "groups": "mrp.group_mrp_user"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='transit_loc']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.view_stock_quant_tree",
+    "package": "product_expiry",
+    "name": "stock.quant.list.inherit.expiry_date",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_quant_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.view_stock_quant_tree_editable",
+    "package": "product_expiry",
+    "name": "stock.quant.list.editable.inherit.expiry_date",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_quant_tree_editable",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lot_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "use_expiration_date",
+       "column_invisible": "True"
+      },
+      {
+       "name": "expiration_date",
+       "column_invisible": "not context.get('show_removal_date')",
+       "decoration-danger": "expiration_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+       "decoration-bf": "expiration_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')"
+      },
+      {
+       "name": "removal_date",
+       "column_invisible": "not context.get('show_removal_date')",
+       "decoration-danger": "removal_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+       "decoration-bf": "expiration_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lot_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.view_stock_quant_tree_inventory_editable",
+    "package": "product_expiry",
+    "name": "stock.quant.inventory.list.editable.inherit.expiry_date",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_quant_tree_inventory_editable",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='lot_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "use_expiration_date",
+       "column_invisible": "True"
+      },
+      {
+       "name": "expiration_date",
+       "column_invisible": "not context.get('show_removal_date')",
+       "decoration-danger": "expiration_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+       "decoration-bf": "expiration_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "removal_date",
+       "column_invisible": "not context.get('show_removal_date')",
+       "decoration-danger": "removal_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+       "decoration-bf": "removal_date < (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')",
+       "groups": "stock.group_production_lot"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='lot_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product_expiry.quant_search_view_inherit_product_expiry",
+    "package": "product_expiry",
+    "name": "stock.quant.search.inherit",
+    "view_type": "xpath",
+    "inherits_view": "stock.quant_search_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//filter[@name='negative']",
+      "position": "after"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "expired_lots",
+       "string": "Expired Lots",
+       "domain": "[('expiration_date', '<', 'today')]"
+      },
+      {
+       "name": "alert_lots",
+       "string": "Alert Lots",
+       "domain": "[('lot_id.alert_date', '<=', 'today')]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//filter[@name='negative']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.quant_search_view",
+    "package": "stock",
+    "name": "stock.quant.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Quants"
+     },
+     "fields": [
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "warehouse_id"
+      },
+      {
+       "name": "storage_category_id",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "inventory_date"
+      },
+      {
+       "name": "product_categ_id"
+      },
+      {
+       "name": "product_tmpl_id"
+      },
+      {
+       "name": "package_id",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "lot_id",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "owner_id",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "lot_properties"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "my_count",
+       "string": "My Counts",
+       "domain": "[('user_id', '=', uid)]"
+      },
+      {
+       "name": "internal_loc",
+       "string": "Internal Locations",
+       "domain": "[('location_id.usage','=', 'internal'), ('location_id.warehouse_id', '!=', False)]"
+      },
+      {
+       "name": "transit_loc",
+       "string": "Transit Locations",
+       "domain": "[('location_id.usage' ,'=', 'transit')]"
+      },
+      {
+       "name": "to_count",
+       "string": "To Count",
+       "domain": "[('inventory_date', '<=', 'today')]"
+      },
+      {
+       "name": "to_apply",
+       "string": "To Apply",
+       "domain": "[('inventory_quantity_set', '=', True)]"
+      },
+      {
+       "name": "conflicts",
+       "string": "Conflicts",
+       "domain": "[('is_outdated', '=', True)]"
+      },
+      {
+       "name": "negative",
+       "string": "Negative Stock",
+       "domain": "[('quantity', '<', 0.0)]"
+      },
+      {
+       "name": "filter_in_date",
+       "date": "in_date"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "productgroup",
+       "string": "Product",
+       "context": "{'group_by': 'product_id'}"
+      },
+      {
+       "name": "productcategorygroup",
+       "string": "Product Category",
+       "context": "{'group_by': 'product_categ_id'}"
+      },
+      {
+       "name": "locationgroup",
+       "string": "Location",
+       "domain": "[]",
+       "context": "{'group_by': 'location_id'}"
+      },
+      {
+       "name": "storagecategorygroup",
+       "string": "Storage Category",
+       "domain": "[]",
+       "context": "{'group_by': 'storage_category_id'}"
+      },
+      {
+       "name": "owner",
+       "string": "Owner",
+       "context": "{'group_by': 'owner_id'}",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "Lot_Serial_number",
+       "string": "Lot/Serial Number",
+       "context": "{'group_by': 'lot_id'}",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "package",
+       "string": "Package",
+       "domain": "[]",
+       "context": "{'group_by': 'package_id'}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "company",
+       "string": "Company",
+       "domain": "[]",
+       "context": "{'group_by': 'company_id'}",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_quant_form_editable",
+    "package": "stock",
+    "name": "stock.quant.form.editable",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "11",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Inventory Valuation",
+      "create": "false",
+      "edit": "false",
+      "delete": "false"
+     },
+     "fields": [
+      {
+       "name": "tracking",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "readonly": "0",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "location_id",
+       "readonly": "0",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "lot_id",
+       "readonly": "tracking not in ['serial', 'lot']",
+       "required": "tracking != 'none'",
+       "context": "{'default_product_id': product_id}",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "package_id",
+       "readonly": "0",
+       "context": "{'show_src_package': 1}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "readonly": "0",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "options": "{'no_open': True}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "available_quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "options": "{'no_open': True}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "reserved_quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "options": "{'no_open': True}",
+       "groups": "uom.group_uom"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_quant_tree_editable",
+    "package": "stock",
+    "name": "stock.quant.list.editable",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "5",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "editable": "bottom",
+      "create": "1",
+      "edit": "1",
+      "js_class": "inventory_report_list",
+      "sample": "1",
+      "duplicate": "0"
+     },
+     "fields": [
+      {
+       "name": "create_date",
+       "column_invisible": "True"
+      },
+      {
+       "name": "write_date",
+       "column_invisible": "True"
+      },
+      {
+       "name": "id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "tracking",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_id",
+       "readonly": "id",
+       "options": "{'no_create': True}",
+       "column_invisible": "context.get('hide_location', False)"
+      },
+      {
+       "name": "storage_category_id",
+       "optional": "hide"
+      },
+      {
+       "name": "product_id",
+       "widget": "many2one",
+       "readonly": "context.get('single_product', False) or id",
+       "options": "{'no_create': True}",
+       "force_save": "1"
+      },
+      {
+       "name": "product_categ_id",
+       "optional": "hide"
+      },
+      {
+       "name": "company_id",
+       "optional": "hidden",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "package_id",
+       "widget": "package_m2o",
+       "readonly": "id",
+       "context": "{'show_src_package': 1}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "lot_id",
+       "readonly": "id or tracking not in ['serial', 'lot']",
+       "context": "{'default_product_id': product_id}",
+       "column_invisible": "context.get('hide_lot', False)",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "owner_id",
+       "readonly": "id",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "inventory_quantity_auto_apply",
+       "readonly": "0",
+       "sum": "Total On Hand"
+      },
+      {
+       "name": "reserved_quantity",
+       "optional": "show",
+       "sum": "Total Reserved"
+      },
+      {
+       "name": "available_quantity",
+       "optional": "hide",
+       "sum": "Total Available"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "lot_properties",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_stock_quant_relocate",
+       "string": "Relocate",
+       "type": "object",
+       "invisible": "context.get('hide_location', False)",
+       "context": "{'action_ref': 'stock.action_view_quants'}",
+       "groups": "stock.group_stock_manager"
+      },
+      {
+       "name": "action_view_stock_moves",
+       "string": "History",
+       "type": "object",
+       "class": "btn-link",
+       "icon": "fa-history"
+      },
+      {
+       "name": "action_view_orderpoints",
+       "string": "Replenishment",
+       "type": "object",
+       "class": "btn-link",
+       "context": "{'default_product_id': product_id, 'search_default_location_id': location_id}",
+       "icon": "fa-refresh"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one": 1,
+      "package_m2o": 1,
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": "1",
+     "delete": null,
+     "edit": "1",
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_quant_tree_simple",
+    "package": "stock",
+    "name": "stock.quant.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "export_xlsx": "0"
+     },
+     "fields": [
+      {
+       "name": "product_id",
+       "column_invisible": "context.get('single_product', False)"
+      },
+      {
+       "name": "location_id",
+       "column_invisible": "context.get('hide_location', False)"
+      },
+      {
+       "name": "lot_id",
+       "column_invisible": "context.get('hide_lot', False)",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "lot_properties"
+      },
+      {
+       "name": "package_id",
+       "widget": "package_m2o",
+       "context": "{'show_src_package': 1}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "quantity",
+       "string": "On Hand"
+      },
+      {
+       "name": "available_quantity",
+       "string": "Available",
+       "column_invisible": "context.get('hide_available', False)"
+      },
+      {
+       "name": "product_uom_id",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "company_id",
+       "optional": "hidden",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "package_m2o": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_quant_tree",
+    "package": "stock",
+    "name": "stock.quant.list",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_quant_tree_simple",
+    "mode": "primary",
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_quant_pivot",
+    "package": "stock",
+    "name": "stock.quant.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Inventory",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "product_id"
+      },
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "quantity"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "product_id",
+       "type": "row"
+      },
+      {
+       "name": "location_id",
+       "type": "col"
+      },
+      {
+       "name": "quantity",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.stock_quant_view_graph",
+    "package": "stock",
+    "name": "stock.quant.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Stock Quant",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "quantity"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "location_id"
+      },
+      {
+       "name": "quantity",
+       "type": "measure"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_quant_form",
+    "package": "stock",
+    "name": "view.stock.quant.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Create Stock"
+     },
+     "fields": [
+      {
+       "name": "location_id",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "invisible": "1"
+      },
+      {
+       "name": "product_id",
+       "invisible": "1",
+       "force_save": "1"
+      },
+      {
+       "name": "lot_id",
+       "readonly": "context.get('readonly_form')",
+       "domain": "[('product_id', '=', product_id)]",
+       "context": "{'default_product_id': product_id, 'active_picking_id': context.get('active_picking_id')}",
+       "groups": "stock.group_production_lot"
+      },
+      {
+       "name": "location_id",
+       "readonly": "context.get('readonly_form')",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "package_id",
+       "invisible": "context.get('readonly_form')",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "invisible": "context.get('readonly_form')",
+       "groups": "stock.group_tracking_owner"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_quant_tree_inventory_editable",
+    "package": "stock",
+    "name": "stock.quant.inventory.list.editable",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "10",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "default_order": "location_id, inventory_date, product_id, package_id, lot_id, owner_id",
+      "decoration-warning": "is_outdated",
+      "multi_edit": "1",
+      "editable": "bottom",
+      "create": "1",
+      "edit": "1",
+      "import": "1",
+      "js_class": "inventory_report_list",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "create_date",
+       "column_invisible": "True"
+      },
+      {
+       "name": "write_date",
+       "column_invisible": "True"
+      },
+      {
+       "name": "id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "is_outdated",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sn_duplicated",
+       "column_invisible": "True"
+      },
+      {
+       "name": "tracking",
+       "column_invisible": "True"
+      },
+      {
+       "name": "inventory_quantity_set",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "location_id",
+       "readonly": "id",
+       "domain": "[('usage', 'in', ['internal', 'transit'])]",
+       "options": "{'no_create': True}",
+       "column_invisible": "context.get('hide_location', False)"
+      },
+      {
+       "name": "cyclic_inventory_frequency",
+       "options": "{'no_create': True}",
+       "column_invisible": "context.get('hide_location', False)",
+       "optional": "hidden"
+      },
+      {
+       "name": "product_id",
+       "readonly": "context.get('single_product', False) or id",
+       "options": "{'no_create': True}",
+       "force_save": "1"
+      },
+      {
+       "name": "product_categ_id",
+       "optional": "hide"
+      },
+      {
+       "name": "lot_id",
+       "readonly": "tracking not in ['serial', 'lot'] or (id and (lot_id or quantity != 0))",
+       "context": "{'default_product_id': product_id}",
+       "column_invisible": "context.get('hide_lot', False)",
+       "decoration-danger": "sn_duplicated",
+       "groups": "stock.group_production_lot",
+       "force_save": "1"
+      },
+      {
+       "name": "package_id",
+       "widget": "package_m2o",
+       "readonly": "id",
+       "context": "{'show_src_package': 1}",
+       "groups": "stock.group_tracking_lot"
+      },
+      {
+       "name": "owner_id",
+       "readonly": "id",
+       "options": "{'no_create': True}",
+       "groups": "stock.group_tracking_owner"
+      },
+      {
+       "name": "last_count_date",
+       "readonly": "1",
+       "optional": "hidden"
+      },
+      {
+       "name": "inventory_date",
+       "optional": "show",
+       "decoration-info": "inventory_date <= context_today().strftime('%Y-%m-%d')",
+       "decoration-bf": "inventory_date <= context_today().strftime('%Y-%m-%d')"
+      },
+      {
+       "name": "user_id",
+       "string": "User",
+       "optional": "show"
+      },
+      {
+       "name": "quantity",
+       "string": "On Hand",
+       "optional": "show",
+       "decoration-warning": "quantity < 0"
+      },
+      {
+       "name": "inventory_quantity",
+       "widget": "counted_quantity_widget"
+      },
+      {
+       "name": "inventory_diff_quantity",
+       "invisible": "not inventory_quantity_set",
+       "string": "Difference",
+       "decoration-danger": "inventory_diff_quantity < 0",
+       "decoration-success": "inventory_diff_quantity > 0",
+       "decoration-muted": "inventory_diff_quantity == 0",
+       "decoration-bf": "inventory_diff_quantity != 0"
+      },
+      {
+       "name": "product_uom_id",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "company_id",
+       "optional": "hide",
+       "groups": "base.group_multi_company"
+      },
+      {
+       "name": "lot_properties",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_apply_all",
+       "string": "Apply All",
+       "type": "object",
+       "invisible": "not context.get('inventory_mode') or context.get('inventory_report_mode')",
+       "class": "btn btn-primary"
+      },
+      {
+       "name": "stock.action_stock_inventory_adjustement_name",
+       "string": "Apply",
+       "type": "action"
+      },
+      {
+       "name": "action_reset",
+       "string": "Clear",
+       "type": "object",
+       "groups": "stock.group_stock_manager"
+      },
+      {
+       "name": "stock.action_stock_request_count",
+       "string": "Request a Count",
+       "type": "action",
+       "groups": "stock.group_stock_manager"
+      },
+      {
+       "name": "action_inventory_history",
+       "string": "History",
+       "type": "object",
+       "class": "btn btn-link text-info",
+       "icon": "fa-history"
+      },
+      {
+       "name": "action_apply_inventory",
+       "string": "Apply",
+       "type": "object",
+       "invisible": "not inventory_quantity_set",
+       "class": "btn btn-link",
+       "icon": "fa-save"
+      },
+      {
+       "name": "action_clear_inventory_quantity",
+       "string": "Clear",
+       "type": "object",
+       "invisible": "not inventory_quantity_set",
+       "class": "btn text-warning",
+       "icon": "fa-times"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "package_m2o": 1,
+      "counted_quantity_widget": 1
+     },
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": "1",
+     "delete": null,
+     "edit": "1",
+     "decorations": {
+      "decoration-warning": "is_outdated"
+     }
+    }
+   },
+   {
+    "external_identifier": "stock_account.view_stock_quant_tree_inherit",
+    "package": "stock_account",
+    "name": "stock.quant.list.inherit",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_quant_tree",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='product_uom_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "value",
+       "optional": "hidden"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='product_uom_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_account.view_stock_quant_tree_editable_inherit",
+    "package": "stock_account",
+    "name": "stock.quant.list.editable.inherit",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_quant_tree_editable",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='product_uom_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "cost_method",
+       "column_invisible": "True"
+      },
+      {
+       "name": "value",
+       "optional": "hidden",
+       "sum": "Total Value"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='product_uom_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_account.view_stock_quant_tree_inventory_editable_inherit_stock_account",
+    "package": "stock_account",
+    "name": "stock.quant.inventory.list.editable.inherit.stock.account",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_quant_tree_inventory_editable",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='product_uom_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "accounting_date",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='product_uom_id']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock.stock_quant_action",
+    "package": "stock",
+    "name": "Locations",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n            'search_default_internal_loc': 1,\n            'inventory_mode':True,\n        }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\nNo Stock On Hand. This analysis gives you an overview of the current stock level of your products.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "stock.quant"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "stock.action_view_inventory_tree",
+    "package": "stock",
+    "name": "Inventory",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "stock.action_view_quants",
+    "package": "stock",
+    "name": "Inventory",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "stock.action_view_set_quants_tree",
+    "package": "stock",
+    "name": "Set to quantity on hand",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "stock.action_view_set_to_zero_quants_tree",
+    "package": "stock",
+    "name": "Set to 0",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "stock.action_stock_quant_relocate",
+    "package": "stock",
+    "name": "Relocate",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [
+   {
+    "external_identifier": "stock.action_report_inventory",
+    "package": "stock",
+    "name": "Count Sheet",
+    "report_type": "qweb-pdf",
+    "report_name": "stock.report_inventory",
+    "report_file": "stock.report_inventory",
+    "print_report_name": "'Count Sheet'",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_stock_quant",
+    "binding_type": "report",
+    "paperformat_id": null,
+    "groups_id": null,
+    "multi": null,
+    "entity": "stock.quant"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

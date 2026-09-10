@@ -1,0 +1,269 @@
+{
+ "catalog": {
+  "name": "entity:product.combo.item",
+  "description": "Complete definition of entity Product Combo Item (product.combo.item).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.combo.item",
+  "storage_name": "product_combo_item",
+  "full_name": "Product Combo Item",
+  "kind": "persistent",
+  "description": "Product Combo Item",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "point_of_sale"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "related": "combo_id.company_id",
+    "precompute": true,
+    "store": true,
+    "defined_in_package": "product",
+    "string": "Company",
+    "full_name": "Company"
+   },
+   {
+    "name": "combo_id",
+    "type": "Many2one",
+    "comodel": "product.combo",
+    "ondelete": "cascade",
+    "required": true,
+    "index": true,
+    "defined_in_package": "product",
+    "string": "Combo",
+    "full_name": "Combo",
+    "target_entity": "product.combo"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "string": "Options",
+    "comodel": "product.product",
+    "ondelete": "restrict",
+    "domain": [
+     [
+      "type",
+      "!=",
+      "combo"
+     ]
+    ],
+    "required": true,
+    "check_company": true,
+    "defined_in_package": "product",
+    "full_name": "Options",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "product_id.currency_id",
+    "defined_in_package": "product",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "lst_price",
+    "type": "Float",
+    "string": "Original Price",
+    "min_display_digits": "Product Price",
+    "related": "product_id.lst_price",
+    "defined_in_package": "product",
+    "full_name": "Original Price"
+   },
+   {
+    "name": "extra_price",
+    "type": "Float",
+    "string": "Extra Price",
+    "min_display_digits": "Product Price",
+    "default": 0.0,
+    "defined_in_package": "product",
+    "full_name": "Extra Price"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_product_id_no_combo",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "A combo choice can't contain products of type \"combo\".",
+        "line": 33
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_read",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "records",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_product_id_no_combo",
+    "package": "product",
+    "kind": "ValidationError",
+    "message": "A combo choice can't contain products of type \"combo\"."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "point_of_sale.access_product_combo_item_pos_user",
+    "package": "point_of_sale",
+    "name": "product.combo.item user",
+    "entity": "product.combo.item",
+    "group": "group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_combo_item_user",
+    "package": "product",
+    "name": "product.combo.item.user",
+    "entity": "product.combo.item",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_combo_item_manager",
+    "package": "product",
+    "name": "product.combo.item.manager",
+    "entity": "product.combo.item",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,1453 @@
+{
+ "catalog": {
+  "name": "entity:mail.activity.schedule",
+  "description": "Complete definition of entity Activity schedule plan Wizard (mail.activity.schedule).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.activity.schedule",
+  "storage_name": "mail_activity_schedule",
+  "full_name": "Activity schedule plan Wizard",
+  "kind": "transient",
+  "description": "Activity schedule plan Wizard",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "calendar",
+   "hr",
+   "hr_recruitment"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_batch_size": 500
+  },
+  "fields": [
+   {
+    "name": "res_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Applies to",
+    "compute": "_compute_res_model_id",
+    "compute_sudo": true,
+    "ondelete": "cascade",
+    "precompute": true,
+    "readonly": false,
+    "required": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Applies to",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "res_model",
+    "type": "Char",
+    "string": "Model",
+    "readonly": false,
+    "required": false,
+    "defined_in_package": "mail",
+    "full_name": "Model"
+   },
+   {
+    "name": "res_ids",
+    "type": "Text",
+    "string": "Document IDs",
+    "compute": "_compute_res_ids",
+    "readonly": false,
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "mail",
+    "full_name": "Document identifiers"
+   },
+   {
+    "name": "is_batch_mode",
+    "type": "Boolean",
+    "string": "Use in batch",
+    "compute": "_compute_is_batch_mode",
+    "defined_in_package": "mail",
+    "full_name": "Use in batch"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "compute": "_compute_company_id",
+    "required": false,
+    "defined_in_package": "mail",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "error",
+    "type": "Html",
+    "compute": "_compute_error",
+    "defined_in_package": "mail",
+    "string": "Error",
+    "full_name": "Error"
+   },
+   {
+    "name": "has_error",
+    "type": "Boolean",
+    "compute": "_compute_error",
+    "defined_in_package": "mail",
+    "string": "Has Error",
+    "full_name": "Has Error"
+   },
+   {
+    "name": "warning",
+    "type": "Html",
+    "compute": "_compute_error",
+    "defined_in_package": "mail",
+    "string": "Warning",
+    "full_name": "Warning"
+   },
+   {
+    "name": "has_warning",
+    "type": "Boolean",
+    "compute": "_compute_error",
+    "defined_in_package": "mail",
+    "string": "Has Warning",
+    "full_name": "Has Warning"
+   },
+   {
+    "name": "plan_available_ids",
+    "type": "Many2many",
+    "comodel": "mail.activity.plan",
+    "compute": "_compute_plan_available_ids",
+    "store": true,
+    "compute_sudo": true,
+    "defined_in_package": "mail",
+    "string": "Plan Available",
+    "full_name": "Plan Available",
+    "target_entity": "mail.activity.plan"
+   },
+   {
+    "name": "plan_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.plan",
+    "domain": "[('id', 'in', plan_available_ids)]",
+    "compute": "_compute_plan_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mail",
+    "string": "Plan",
+    "full_name": "Plan",
+    "target_entity": "mail.activity.plan"
+   },
+   {
+    "name": "plan_has_user_on_demand",
+    "type": "Boolean",
+    "related": "plan_id.has_user_on_demand",
+    "defined_in_package": "mail",
+    "string": "Plan Has User On Demand",
+    "full_name": "Plan Has User On Demand"
+   },
+   {
+    "name": "plan_schedule_line_ids",
+    "type": "One2many",
+    "comodel": "mail.activity.schedule.line",
+    "inverse_name": "activity_schedule_id",
+    "string": "Schedule Lines",
+    "compute": "_compute_plan_schedule_line_ids",
+    "defined_in_package": "mail",
+    "full_name": "Schedule Lines",
+    "target_entity": "mail.activity.schedule.line"
+   },
+   {
+    "name": "plan_on_demand_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Assigned To",
+    "help": "Choose assignation for activities with on demand assignation.",
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Assigned To",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "plan_date",
+    "type": "Date",
+    "string": "Plan Date",
+    "compute": "_compute_plan_date",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "mail",
+    "full_name": "Plan Date"
+   },
+   {
+    "name": "activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Activity Type",
+    "compute": "_compute_activity_type_id",
+    "store": true,
+    "readonly": false,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', res_model)]",
+    "ondelete": "set null",
+    "defined_in_package": "mail",
+    "full_name": "Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "activity_category",
+    "type": "Selection",
+    "related": "activity_type_id.category",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "string": "Activity Category",
+    "full_name": "Activity Category"
+   },
+   {
+    "name": "date_deadline",
+    "type": "Date",
+    "string": "Due Date",
+    "compute": "_compute_date_deadline",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Due Date"
+   },
+   {
+    "name": "summary",
+    "type": "Char",
+    "string": "Summary",
+    "compute": "_compute_summary",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Summary"
+   },
+   {
+    "name": "note",
+    "type": "Html",
+    "string": "Note",
+    "compute": "_compute_note",
+    "readonly": false,
+    "store": true,
+    "sanitize_style": true,
+    "defined_in_package": "mail",
+    "full_name": "Note"
+   },
+   {
+    "name": "activity_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Assigned to",
+    "compute": "_compute_activity_user_id",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "mail",
+    "full_name": "Assigned to",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "chaining_type",
+    "type": "Selection",
+    "related": "activity_type_id.chaining_type",
+    "readonly": true,
+    "defined_in_package": "mail",
+    "string": "Chaining Type",
+    "full_name": "Chaining Type"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "compute": "_compute_department_id",
+    "defined_in_package": "hr",
+    "string": "Department",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "plan_department_filterable",
+    "type": "Boolean",
+    "compute": "_compute_plan_department_filterable",
+    "defined_in_package": "hr",
+    "string": "Plan Department Filterable",
+    "full_name": "Plan Department Filterable"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_res_model_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_res_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "active_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model_id",
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_error",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "res_model_id",
+         "res_ids",
+         "plan_id",
+         "plan_on_demand_user_id",
+         "plan_available_ids",
+         "activity_type_id",
+         "activity_user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 44,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_batch_mode",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_plan_available_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id",
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "department_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_plan_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "plan_mode"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends",
+        "arguments": [
+         "plan_available_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_plan_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "plan_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Reset UX ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_plan_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model",
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_plan_schedule_line_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "plan_date",
+         "plan_id",
+         "plan_on_demand_user_id",
+         "res_model",
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 63,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_type_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_activity_type_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Reset UX ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_deadline",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_summary",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_note",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_user_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_type_id",
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_consistency",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "res_model_id",
+         "res_ids",
+         "plan_id",
+         "plan_on_demand_user_id",
+         "activity_type_id",
+         "activity_user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "html2plaintext(scheduler.error)",
+        "line": 300
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_res_ids",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check res_ids is a valid list of integers (or Falsy). ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_model_options",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.readonly",
+        "arguments": [],
+        "options": {}
+       },
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Return a list of valid models for a user to define an activity on. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_schedule_plan",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_plan_templates_error",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "applied_on"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_plan_templates_warning",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "applied_on"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_schedule_activities",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_schedule_activities_done",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_schedule_activities",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_action_schedule_activities_personal",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_evaluate_res_ids",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Parse composer res_ids, which can be: an already valid list or\ntuple (generally in code), a list or tuple as a string (coming from\nactions). Void strings / missing values are evaluated as an empty list.\n\n:return: a list of IDs (empty list in case of falsy strings)",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_applied_on_records",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_plan_available_base_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_plan_filter_activity_templates_to_schedule",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_activity_user_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "activity_user_id",
+         "activity_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Selected user '%(user)s' cannot upload documents on model '%(model)s'",
+        "line": 467
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_create_calendar_event",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Scheduling an activity using the calendar is not possible on more than one record.",
+        "line": 14
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_plan_department_filterable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_recruitment",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_department_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model_id",
+         "res_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_consistency",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "html2plaintext(scheduler.error)"
+   },
+   {
+    "operation": "_onchange_activity_user_id",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Selected user '%(user)s' cannot upload documents on model '%(model)s'"
+   },
+   {
+    "operation": "action_create_calendar_event",
+    "package": "calendar",
+    "kind": "UserError",
+    "message": "Scheduling an activity using the calendar is not possible on more than one record."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_activity_schedule_user",
+    "package": "mail",
+    "name": "mail.activity.schedule.user",
+    "entity": "mail.activity.schedule",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "calendar.mail_activity_schedule_view_form",
+    "package": "calendar",
+    "name": "mail.activity.schedule.inherit.calendar",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_schedule_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='date_deadline']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='date_deadline']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr.mail_activity_schedule_view_form",
+    "package": "hr",
+    "name": "mail.activity.schedule.view.form.inherit.hr",
+    "view_type": "xpath",
+    "inherits_view": "mail.mail_activity_schedule_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='plan_available_ids']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "department_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='plan_available_ids']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_schedule_view_form",
+    "package": "mail",
+    "name": "Activity schedule",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "activity_category",
+       "invisible": "1"
+      },
+      {
+       "name": "chaining_type",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "has_error",
+       "invisible": "1"
+      },
+      {
+       "name": "has_warning",
+       "invisible": "1"
+      },
+      {
+       "name": "plan_has_user_on_demand",
+       "invisible": "1"
+      },
+      {
+       "name": "res_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "plan_available_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "plan_id",
+       "widget": "selection_badge",
+       "invisible": "not plan_available_ids",
+       "options": "{'no_open': True, 'no_create': True}",
+       "nolabel": "1"
+      },
+      {
+       "name": "activity_type_id",
+       "widget": "selection_badge_icons",
+       "required": "not plan_id",
+       "nolabel": "1"
+      },
+      {
+       "name": "plan_date",
+       "string": "Due Date",
+       "placeholder": "Default deadline for the activities..."
+      },
+      {
+       "name": "plan_on_demand_user_id",
+       "widget": "many2one_avatar_user",
+       "invisible": "not plan_has_user_on_demand",
+       "string": "Responsible"
+      },
+      {
+       "name": "plan_schedule_line_ids",
+       "nolabel": "1"
+      },
+      {
+       "name": "responsible_user_id",
+       "widget": "many2one_avatar_user",
+       "nolabel": "1"
+      },
+      {
+       "name": "line_description",
+       "nolabel": "1"
+      },
+      {
+       "name": "line_date_deadline",
+       "nolabel": "1"
+      },
+      {
+       "name": "summary",
+       "string": "Summary",
+       "nolabel": "1",
+       "placeholder": "e.g. Discuss Proposal"
+      },
+      {
+       "name": "date_deadline",
+       "string": "Due Date"
+      },
+      {
+       "name": "activity_user_id",
+       "widget": "many2one_avatar_user",
+       "placeholder": "Unassigned"
+      },
+      {
+       "name": "res_model",
+       "widget": "activity_model_selector",
+       "invisible": "id or context.get('active_model')",
+       "required": "activity_user_id != context.get('uid')",
+       "string": "Link to"
+      },
+      {
+       "name": "note",
+       "options": "{'embedded_components': false}",
+       "placeholder": "Log a note..."
+      },
+      {
+       "name": "error"
+      },
+      {
+       "name": "warning"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_schedule_activities",
+       "string": "Save",
+       "type": "object",
+       "invisible": "has_error",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_schedule_activities_done",
+       "string": "Mark Done",
+       "type": "object",
+       "invisible": "has_error or chaining_type == 'trigger'",
+       "class": "btn-secondary",
+       "context": "{'mail_activity_quick_update': True}",
+       "data-hotkey": "w"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      },
+      {
+       "name": "action_schedule_plan",
+       "string": "Schedule",
+       "type": "object",
+       "invisible": "has_error",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "selection_badge": 1,
+      "selection_badge_icons": 1,
+      "many2one_avatar_user": 3,
+      "activity_model_selector": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr.plan_wizard_action",
+    "package": "hr",
+    "name": "Launch Plan",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'plan_mode': True, 'active_model': 'hr.employee'}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.activity.schedule"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

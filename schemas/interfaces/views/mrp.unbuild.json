@@ -1,0 +1,485 @@
+{
+ "catalog": {
+  "name": "views:mrp.unbuild",
+  "description": "View declarations for entity mrp.unbuild.",
+  "record_count": 5,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "mrp.mrp_unbuild_search_view",
+   "package": "mrp",
+   "name": "mrp.unbuild.search",
+   "entity": "mrp.unbuild",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search"
+    },
+    "fields": [
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "mo_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "draft",
+      "string": "Draft",
+      "domain": "[('state', '=', 'draft')]"
+     },
+     {
+      "name": "done",
+      "string": "Done",
+      "domain": "[('state', '=', 'done')]"
+     },
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')]",
+      "invisible": "1"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "productgroup",
+      "string": "Product",
+      "context": "{'group_by': 'product_id'}"
+     },
+     {
+      "name": "mogroup",
+      "string": "Manufacturing Order",
+      "context": "{'group_by': 'mo_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search\">\n                    <field name=\"product_id\"/>\n                    <field name=\"mo_id\"/>\n                    <group>\n                        <filter name=\"draft\" string=\"Draft\" domain=\"[('state', '=', 'draft')]\"/>\n                        <filter name=\"done\" string=\"Done\" domain=\"[('state', '=', 'done')]\"/>\n                        <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                        <separator invisible=\"1\"/>\n                        <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                        <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                        <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')]\"/>\n                    </group>\n                    <group>\n                        <filter string=\"Product\" name=\"productgroup\" context=\"{'group_by': 'product_id'}\"/>\n                        <filter string=\"Manufacturing Order\" name=\"mogroup\" context=\"{'group_by': 'mo_id'}\"/>\n                    </group>\n               </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_unbuild_kanban_view",
+   "package": "mrp",
+   "name": "mrp.unbuild.kanban",
+   "entity": "mrp.unbuild",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "product_qty"
+     },
+     {
+      "name": "product_uom_id",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "state",
+      "widget": "label_selection",
+      "readonly": "1",
+      "options": "{'classes': {'draft': 'default', 'done': 'success'}}"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "label_selection": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": [
+     {
+      "field": "activity_state",
+      "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban class=\"o_kanban_mobile\" sample=\"1\">\n                    <progressbar field=\"activity_state\" colors=\"{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}\"/>\n                    <templates>\n                        <t t-name=\"card\">\n                            <div class=\"d-flex fw-bold mb-1\">\n                                <field name=\"name\" class=\"fs-5\"/>\n                                <field name=\"product_qty\" class=\"ms-auto me-1 fs-6\"/>\n                                <field name=\"product_uom_id\" class=\"small\" groups=\"uom.group_uom\"/>\n                            </div>\n                            <div class=\"d-flex text-muted\">\n                                <field name=\"product_id\"/>\n                                <field name=\"state\" class=\"ms-auto\" widget=\"label_selection\" options=\"{'classes': {'draft': 'default', 'done': 'success'}}\" readonly=\"1\"/>\n                            </div>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_unbuild_form_view",
+   "package": "mrp",
+   "name": "mrp.unbuild.form",
+   "entity": "mrp.unbuild",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Unbuild Orders"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "state",
+      "widget": "statusbar"
+     },
+     {
+      "name": "name",
+      "nolabel": "1",
+      "placeholder": "Unbuild Order"
+     },
+     {
+      "name": "product_id",
+      "readonly": "mo_id or state == 'done'",
+      "force_save": "1"
+     },
+     {
+      "name": "mo_bom_id",
+      "invisible": "1"
+     },
+     {
+      "name": "bom_id",
+      "invisible": "mo_id and not mo_bom_id",
+      "readonly": "mo_id or state == 'done'",
+      "required": "not mo_id",
+      "force_save": "1"
+     },
+     {
+      "name": "product_qty",
+      "readonly": "has_tracking == 'serial' or state == 'done'"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "mo_id or state == 'done'",
+      "options": "{'no_open': True, 'no_create': True}",
+      "groups": "uom.group_uom",
+      "force_save": "1"
+     },
+     {
+      "name": "mo_id",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "location_id",
+      "readonly": "state == 'done'",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "location_dest_id",
+      "readonly": "state == 'done'",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "has_tracking",
+      "invisible": "1"
+     },
+     {
+      "name": "lot_id",
+      "invisible": "has_tracking == 'none'",
+      "readonly": "state == 'done'",
+      "required": "has_tracking != 'none'",
+      "groups": "stock.group_production_lot",
+      "force_save": "1"
+     },
+     {
+      "name": "company_id",
+      "readonly": "state == 'done'",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_validate",
+      "string": "Unbuild",
+      "type": "object",
+      "invisible": "state != 'draft'",
+      "class": "oe_highlight",
+      "data-hotkey": "v"
+     },
+     {
+      "name": "%(action_mrp_unbuild_moves)d",
+      "type": "action",
+      "invisible": "state != 'done'",
+      "class": "oe_stat_button",
+      "icon": "fa-exchange"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statusbar": 1,
+     "many2one_uom": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "action_validate",
+      "string": "Unbuild",
+      "type": "object",
+      "invisible": "state != 'draft'",
+      "class": "oe_highlight",
+      "data-hotkey": "v"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": "draft,done",
+    "chatter": true,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "name": "%(action_mrp_unbuild_moves)d",
+      "type": "action",
+      "icon": "fa-exchange",
+      "invisible": "state != 'done'"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Unbuild Orders\">\n                    <field name=\"company_id\" invisible=\"1\" readonly=\"state == 'done'\"/>\n                    <header>\n                        <button name=\"action_validate\" string=\"Unbuild\" type=\"object\" invisible=\"state != 'draft'\" class=\"oe_highlight\" data-hotkey=\"v\"/>\n                        <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"draft,done\"/>\n                    </header>\n                    <sheet>\n                        <div class=\"oe_button_box\" name=\"button_box\">\n                            <button class=\"oe_stat_button\" name=\"%(action_mrp_unbuild_moves)d\" type=\"action\" icon=\"fa-exchange\" invisible=\"state != 'done'\">\n                                    <div class=\"o_stat_info\">\n                                        <span class=\"o_stat_text\">Product Moves</span>\n                                    </div>\n                            </button>\n                        </div>\n                        <div class=\"oe_title\">\n                            <h1><field name=\"name\" placeholder=\"Unbuild Order\" nolabel=\"1\"/></h1>\n                        </div>\n                        <group>\n                            <group>\n                                <field name=\"product_id\" readonly=\"mo_id or state == 'done'\" force_save=\"1\"/>\n                                <field name=\"mo_bom_id\" invisible=\"1\"/>\n                                <field name=\"bom_id\" invisible=\"mo_id and not mo_bom_id\" readonly=\"mo_id or state == 'done'\" required=\"not mo_id\" force_save=\"1\"/>\n                                <label for=\"product_qty\"/>\n                                <div class=\"o_row\">\n                                    <field name=\"product_qty\" readonly=\"has_tracking == 'serial' or state == 'done'\"/>\n                                    <field name=\"product_uom_id\" options=\"{'no_open': True, 'no_create': True}\" groups=\"uom.group_uom\" widget=\"many2one_uom\" readonly=\"mo_id or state == 'done'\" force_save=\"1\"/>\n                                </div>\n                            </group>\n                            <group>\n                                <field name=\"mo_id\" readonly=\"state == 'done'\"/>\n                                <field name=\"location_id\" options=\"{'no_create': True}\" groups=\"stock.group_stock_multi_locations\" readonly=\"state == 'done'\"/>\n                                <field name=\"location_dest_id\" options=\"{'no_create': True}\" groups=\"stock.group_stock_multi_locations\" readonly=\"state == 'done'\"/>\n                                <field name=\"has_tracking\" invisible=\"1\"/>\n                                <field name=\"lot_id\" invisible=\"has_tracking == 'none'\" readonly=\"state == 'done'\" required=\"has_tracking != 'none'\" groups=\"stock.group_production_lot\" force_save=\"1\"/>\n                                <field name=\"company_id\" groups=\"base.group_multi_company\" readonly=\"state == 'done'\"/>\n                            </group>\n                        </group>\n                    </sheet>\n                    <chatter/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_unbuild_form_view_simplified",
+   "package": "mrp",
+   "name": "mrp.unbuild.form.simplified",
+   "entity": "mrp.unbuild",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Unbuild Order"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "state",
+      "invisible": "1"
+     },
+     {
+      "name": "product_id",
+      "invisible": "1",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "bom_id",
+      "invisible": "1",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "product_qty",
+      "readonly": "has_tracking == 'serial'"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "mo_id",
+      "options": "{'no_open': True, 'no_create': True}",
+      "groups": "uom.group_uom",
+      "force_save": "1"
+     },
+     {
+      "name": "mo_id",
+      "invisible": "1",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "location_id",
+      "readonly": "state == 'done'",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "location_dest_id",
+      "readonly": "state == 'done'",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "has_tracking",
+      "invisible": "1"
+     },
+     {
+      "name": "lot_id",
+      "invisible": "has_tracking == 'none'",
+      "required": "has_tracking != 'none'",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "company_id",
+      "readonly": "1",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_validate",
+      "string": "Unbuild",
+      "type": "object",
+      "invisible": "state != 'draft'",
+      "class": "oe_highlight",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Discard",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Unbuild Order\">\n                    <sheet>\n                        <group>\n                            <group>\n                                <field name=\"company_id\" invisible=\"1\" readonly=\"state == 'done'\"/>\n                                <field name=\"state\" invisible=\"1\"/>\n                                <field name=\"product_id\" invisible=\"1\" readonly=\"state == 'done'\"/>\n                                <field name=\"bom_id\" invisible=\"1\" readonly=\"state == 'done'\"/>\n                                <label for=\"product_qty\"/>\n                                <div class=\"o_row\">\n                                    <field name=\"product_qty\" readonly=\"has_tracking == 'serial'\"/>\n                                    <field name=\"product_uom_id\" options=\"{'no_open': True, 'no_create': True}\" groups=\"uom.group_uom\" widget=\"many2one_uom\" readonly=\"mo_id\" force_save=\"1\"/>\n                                </div>\n                            </group>\n                            <group>\n                                <field name=\"mo_id\" invisible=\"1\" readonly=\"state == 'done'\"/>\n                                <field name=\"location_id\" options=\"{'no_create': True}\" groups=\"stock.group_stock_multi_locations\" readonly=\"state == 'done'\"/>\n                                <field name=\"location_dest_id\" options=\"{'no_create': True}\" groups=\"stock.group_stock_multi_locations\" readonly=\"state == 'done'\"/>\n                                <field name=\"has_tracking\" invisible=\"1\"/>\n                                <field name=\"lot_id\" invisible=\"has_tracking == 'none'\" required=\"has_tracking != 'none'\" groups=\"stock.group_production_lot\"/>\n                                <field name=\"company_id\" groups=\"base.group_multi_company\" readonly=\"1\"/>\n                            </group>\n                        </group>\n                    </sheet>\n                    <footer class=\"oe_edit_only\">\n                        <button name=\"action_validate\" string=\"Unbuild\" type=\"object\" invisible=\"state != 'draft'\" class=\"oe_highlight\" data-hotkey=\"q\"/>\n                        <button string=\"Discard\" special=\"cancel\" data-hotkey=\"x\"/>\n                    </footer>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_unbuild_tree_view",
+   "package": "mrp",
+   "name": "mrp.unbuild.list",
+   "entity": "mrp.unbuild",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "decoration-bf": "1"
+     },
+     {
+      "name": "product_id",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "bom_id",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "mo_id",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "lot_id",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "product_qty",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "state == 'done'",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "location_id",
+      "readonly": "state == 'done'",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "activity_exception_decoration",
+      "widget": "activity_exception"
+     },
+     {
+      "name": "company_id",
+      "readonly": "state == 'done'",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-success": "state == 'done'",
+      "decoration-info": "state == 'draft'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1,
+     "activity_exception": 1,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list sample=\"1\">\n                    <field name=\"name\" decoration-bf=\"1\"/>\n                    <field name=\"product_id\" readonly=\"state == 'done'\"/>\n                    <field name=\"bom_id\" readonly=\"state == 'done'\"/>\n                    <field name=\"mo_id\" readonly=\"state == 'done'\"/>\n                    <field name=\"lot_id\" groups=\"stock.group_production_lot\"/>\n                    <field name=\"product_qty\" readonly=\"state == 'done'\"/>\n                    <field name=\"product_uom_id\" groups=\"uom.group_uom\" widget=\"many2one_uom\" readonly=\"state == 'done'\"/>\n                    <field name=\"location_id\" options=\"{'no_create': True}\" groups=\"stock.group_stock_multi_locations\" readonly=\"state == 'done'\"/>\n                    <field name=\"activity_exception_decoration\" widget=\"activity_exception\"/>\n                    <field name=\"company_id\" groups=\"base.group_multi_company\" readonly=\"state == 'done'\"/>\n                    <field name=\"state\" widget=\"badge\" decoration-success=\"state == 'done'\" decoration-info=\"state == 'draft'\"/>\n                </list>\n            </field>\n        "
+  }
+ ]
+}

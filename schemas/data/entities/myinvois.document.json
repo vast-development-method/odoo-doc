@@ -1,0 +1,1625 @@
+{
+ "catalog": {
+  "name": "entity:myinvois.document",
+  "description": "Complete definition of entity MyInvois Document (myinvois.document).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "myinvois.document",
+  "storage_name": "myinvois_document",
+  "full_name": "MyInvois Document",
+  "kind": "persistent",
+  "description": "MyInvois Document",
+  "defined_by_package": "l10n_my_edi",
+  "extended_by_packages": [
+   "l10n_my_edi_pos"
+  ],
+  "mixins": [
+   "mail.thread",
+   "mail.activity.mixin",
+   "sequence.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "myinvois_issuance_date desc, id desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {
+   "_sequence_date_field": "myinvois_issuance_date"
+  },
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "compute": "_compute_name",
+    "store": true,
+    "copy": false,
+    "index": "trigram",
+    "defined_in_package": "l10n_my_edi",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Active"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "readonly": true,
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "defined_in_package": "l10n_my_edi",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "required": true,
+    "defined_in_package": "l10n_my_edi",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "company_currency_id",
+    "type": "Many2one",
+    "string": "Company Currency",
+    "related": "company_id.currency_id",
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Company Currency"
+   },
+   {
+    "name": "myinvois_issuance_date",
+    "type": "Date",
+    "string": "Issuance Date",
+    "readonly": true,
+    "copy": false,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Issuance Date"
+   },
+   {
+    "name": "myinvois_file_id",
+    "type": "Many2one",
+    "comodel": "ir.attachment",
+    "compute": "fields.Many2one(comodel_name='ir.attachment', compute=lambda self: self._compute_linked_attachment_id('myinvois_file_id', 'myinvois_file'), depends=['myinvois_file'], copy=False, export_string_translation=False)",
+    "depends": [
+     "myinvois_file"
+    ],
+    "copy": false,
+    "export_string_translation": false,
+    "defined_in_package": "l10n_my_edi",
+    "string": "Myinvois File",
+    "full_name": "Myinvois File",
+    "target_entity": "ir.attachment"
+   },
+   {
+    "name": "myinvois_file",
+    "type": "Binary",
+    "string": "MyInvois XML File",
+    "copy": false,
+    "readonly": true,
+    "export_string_translation": false,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "MyInvois extensible markup language File"
+   },
+   {
+    "name": "myinvois_state",
+    "type": "Selection",
+    "string": "MyInvois State",
+    "help": "State of this document on the MyInvois portal.\nA document awaiting validation will be automatically updated once the validation status is available.",
+    "selection": [
+     [
+      "in_progress",
+      "Validation In Progress"
+     ],
+     [
+      "valid",
+      "Valid"
+     ],
+     [
+      "rejected",
+      "Rejected"
+     ],
+     [
+      "invalid",
+      "Invalid"
+     ],
+     [
+      "cancelled",
+      "Cancelled"
+     ]
+    ],
+    "copy": false,
+    "readonly": true,
+    "tracking": true,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "MyInvois State"
+   },
+   {
+    "name": "myinvois_error_document_hash",
+    "type": "Char",
+    "string": "Document Hash",
+    "copy": false,
+    "readonly": true,
+    "export_string_translation": false,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Document Hash"
+   },
+   {
+    "name": "myinvois_retry_at",
+    "type": "Char",
+    "string": "Document Retry At",
+    "copy": false,
+    "readonly": true,
+    "export_string_translation": false,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Document Retry At"
+   },
+   {
+    "name": "myinvois_exemption_reason",
+    "type": "Char",
+    "string": "Tax Exemption Reason",
+    "help": "Buyer’s sales tax exemption certificate number, special exemption as per gazette orders, etc.\nOnly applicable if you are using a tax with a type 'Exempt'.",
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Tax Exemption Reason"
+   },
+   {
+    "name": "myinvois_custom_form_reference",
+    "type": "Char",
+    "string": "Customs Form Reference Number",
+    "help": "Reference Number of Customs Form No.1, 9, etc.",
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Customs Form Reference Number"
+   },
+   {
+    "name": "myinvois_submission_uid",
+    "type": "Char",
+    "string": "Submission UID",
+    "help": "Unique ID assigned to a batch of documents when sent to MyInvois.",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Submission UID"
+   },
+   {
+    "name": "myinvois_external_uuid",
+    "type": "Char",
+    "string": "MyInvois ID",
+    "help": "Unique ID assigned to a specific document when sent to MyInvois.",
+    "copy": false,
+    "index": true,
+    "readonly": true,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "MyInvois identifier"
+   },
+   {
+    "name": "myinvois_validation_time",
+    "type": "Datetime",
+    "string": "Validation Time",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "Validation Time"
+   },
+   {
+    "name": "myinvois_document_long_id",
+    "type": "Char",
+    "string": "MyInvois Long ID",
+    "copy": false,
+    "readonly": true,
+    "defined_in_package": "l10n_my_edi",
+    "full_name": "MyInvois Long identifier"
+   },
+   {
+    "name": "Invoices",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "relation": "myinvois_document_invoice_rel",
+    "column1": "document_id",
+    "column2": "invoice_id",
+    "check_company": true,
+    "defined_in_package": "l10n_my_edi",
+    "string": "Invoices",
+    "full_name": "Invoices",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "Orders",
+    "type": "Many2many",
+    "comodel": "pos.order",
+    "relation": "myinvois_document_pos_order_rel",
+    "column1": "document_id",
+    "column2": "order_id",
+    "check_company": true,
+    "defined_in_package": "l10n_my_edi_pos",
+    "string": "Orders",
+    "full_name": "Orders",
+    "target_entity": "pos.order"
+   },
+   {
+    "name": "pos_config_id",
+    "type": "Many2one",
+    "string": "PoS Config",
+    "comodel": "pos.config",
+    "readonly": true,
+    "defined_in_package": "l10n_my_edi_pos",
+    "full_name": "PoS Config",
+    "target_entity": "pos.config"
+   },
+   {
+    "name": "linked_order_count",
+    "type": "Integer",
+    "compute": "_compute_linked_order_count",
+    "defined_in_package": "l10n_my_edi_pos",
+    "string": "Linked Order Count",
+    "full_name": "Linked Order Count"
+   },
+   {
+    "name": "pos_order_date_range",
+    "type": "Char",
+    "string": "Date Range",
+    "compute": "_compute_pos_order_date_range",
+    "store": true,
+    "defined_in_package": "l10n_my_edi_pos",
+    "full_name": "Date Range"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "myinvois_issuance_date"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the name by using the sequence mixin. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_linked_attachment_id",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "attachment_field",
+     "binary_field"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Helper to retrieve Attachment from Binary fields\nThis is needed because fields.Many2one('ir.attachment') makes all\nattachments available to the user.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_starting_sequence",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Defines the default sequence to use by MyInvois Documents. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "In the PoS, a document represents a Consolidated INVoice. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_last_sequence_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "relaxed"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Returns the SQL WHERE statement to use when fetching the latest record with the same sequence, and its params. ",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_sequence_date_range",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "reset"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Make sure that the sequence date range follows the company's fiscal year ",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_check",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a document that is active on MyInvois.\nYou must cancel it first.",
+        "line": 247
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_submit_to_myinvois",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Submit all new documents in self to MyInvois.\nThis can also be used on invalid documents to re-submit them after correcting the error.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot send this document to MyInvois because the related invoice(s) %s are in draft or canceled state.",
+        "line": 265
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_update_submission_status",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Fetches the status of all the documents in self.\nNote that the endpoint reached to do so will differ based on the amount of documents in the recordset.",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_generate_xml_file",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Generate a xml file for each of the MyInvois documents in self.\nIf the document already as a file, the previous file's name is updated to include an (old) tag to avoid confusion in the attachment list.",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Error when generating the documents' files:\n\n- %(errors)s",
+        "line": 296
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_cancel_submission",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Cancel the document on the platform. ",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_show_myinvois_documents",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Open the documents in self in the correct view based on the amount of records. ",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "Open the documents in self in the correct view based on the amount of records.\nWhen the documents are linked to pos orders, we use a specific view for them.",
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_get_proxy_user",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Models implementing the mixin should define the logic to get the record's proxy user here.\nTypically, the one linked to the record's company.\n:return: The proxy user that should be used to send the record to MyInvois.",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please register for the E-Invoicing service in the settings first.",
+        "line": 353
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_log_message",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "bodies"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Small helper to use when logging in the chatter to automatically broadcast the message to the invoice.\n\nSupports receiving a simple message string, or a dict of bodies targeted to self.",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_map_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "error"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "This helper will take in an error code coming from the proxy, and return a translatable error message. ",
+      "size_in_lines": 74,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_myinvois_side_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "error"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Whether this error genuinely comes from MyInvois's own platform (a validation issue, rate limiting, a\ntechnical difficulty, ...), as opposed to anything else (our own pre-submission checks, an unexpected error, ...). ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_commit",
+    "kind": "internal_rule",
+    "arguments": [],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [
+       {
+        "name": "staticmethod",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Helper to know if we can commit the current transaction or not.\n\n:returns: True if commit is acceptable, False otherwise.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_mail_thread_data_attachments",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_active_myinvois_document",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "including_in_progress"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Returns the first document in self that is considered active on the platform.\nAn active document is a document that has been successfully sent, but no cancelled.\n\nThere are no flows at the moment where we intend to have more than one active document at a time\nfor a specific record.\n\n:param including_in_progress: if set to true, invoices of state in_progress will be included.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_myinvois_qr_code",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Generate the qr code for which can be used to access this document. ",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_refund_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": ":return: True if this document is linked to a single refund invoice.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_rounded_base_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "The base lines used when exporting the document will highly differ based on whether this is\nor not a consolidated invoice, as well as whether this is for PoS.\n\n:return: The rounded base lines to be used when exporting the document.",
+      "size_in_lines": 108,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_consolidated_invoice",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "In a few flows, we need to know if we're dealing with a consolidated invoice in order to set\nthe correct customer for example.\nThis method is here for that; in practice we will be dealing with a consolidated invoice when:\n- The document is linked to multiple records or;\n- The document is a refund/credit note of another document linked to multiple records.\n\n:return: True if this invoice is a consolidated invoice or the refund of one.",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "Extend the logic in order to also return true if the document is linked to multiple PoS orders,\nor is a refund of a consolidated invoice generated from the PoS\n\n:return: True if this invoice is a consolidated invoice or the refund of one.",
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_consolidated_invoice_refund",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": ":return: True if this document is a refund specifically for a consolidated invoice.",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": ":return: True if this document is a refund specifically for a consolidated invoice from the PoS.",
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_consolidated_invoice_record_in_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "When dealing with consolidated invoices, all continuous records are grouped in a single line,\nwith a split happening only when the continuity is broken (a document was sent individually,...)\n\nThe role of this method is to handle this grouping so that it can be used later when preparing the\nbase lines for export.\n\n:return: a list of recordset containing the related records split into one recordset per line.",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": ":return: A list of pos_order record sets, with one record set representing what would go in one line in the xml.",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_record_rounded_base_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "record"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Little helper to return the rounded base line for a record.\nIt is extracted in order to allow extending the logic to support other business models.\n:param record: The record from which to get the base lines.\n:return: The rounder base line for the provided record.",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "Little helper to return the rounded base line for a record.\nIt is extracted in order to allow extending the logic to support other business models.\n:param record: The record from which to get the base lines.\n:return: The rounder base line for the provided record.",
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_submit_documents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "submissions_content"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Contact our IAP service in order to send the current document's xml to the MyInvois API.\nOnly records in self having a xml_file_content in xml_contents will be sent.\n\nPlease mind that the logic will commit for each batch being sent to the platform.\n\n:param submissions_content: A dict of the format {record: {'name': '', 'xml': ''}}\n:return: a dict of potential errors in the format {record: errors_list}",
+      "size_in_lines": 106,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_get_submission_status",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Fetches the status of the submissions in self.\n\n:return: A dict of the format: {submission_uid: {'error': '', 'statuses': {record: document_statuses}}}",
+      "size_in_lines": 60,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_submission_statuses_update",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "with_commit"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Fetches and update the status of a group of documents.\n\n:param with_commit: If True, we will commit after retrieving the status if we can.",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_taxes",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Makes use of account.edi.xml.ubl_myinvois_my to validate the taxes for the records in self.",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "Makes use of account.edi.xml.ubl_myinvois_my to validate the taxes for the records in self.",
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_generate_xml_file",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Generate the xml file representing this record(s) attached to this document. ",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_submit_to_myinvois",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Submit the documents in self to MyInvois.\nThis action will re-generate a new XML file, in order to ensure that we always send an up-to-date version.",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "errors[self.id]['plain_text_error']",
+        "line": 949
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_check_can_update_status",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "The document status can only be updated (for rejection, or cancellation) up to 72h after the validation time.\nAfter that, any update will be rejected by the platform, as you are expected to issue a debit/credit note.\n\nThis helper will raise if the status cannot be updated.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "It has been more than 72h since the document validation, you can no longer cancel it.\nInstead, you should issue a debit or credit note.",
+        "line": 973
+       },
+       {
+        "kind": "UserError",
+        "message": "You can only change the state of a document in the valid or rejected states.",
+        "line": 976
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_action_myinvois_update_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "new_status"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Returns the action to open the status updated wizard for the mode passed in params.\n\nValid values for new status are 'cancelled' and 'rejected'.",
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_update_document",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "status",
+     "reason"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "This method will try to update the status of a document on the platform, and if needed also the status in the system.\n\nThere is no \"Rejected\" status on the platform. The document stays as 'valid' until action is taken by the vendor.\nAt that point, the invoice will be cancelled if need be by the call to _myinvois_set_state.",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_set_state",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "state",
+     "message"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Helper to call when the state of one or more documents change.\nIt will handle logging a message if needed, updating the state, cancelling the move when required, and update\nessential fields that should not be forgotten.",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_set_validation_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "validation_result"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_single_status_update",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [],
+      "documentation": "Fetches and update the status of a single document.\nMore efficient than using the submission status endpoint.",
+      "size_in_lines": 34,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "self._myinvois_map_error(result['error'])",
+        "line": 1088
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_myinvois_statuses_update_cron",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "This cron is based on the recommended method to fetch the status of the documents according to their doc.\nMAX_SUBMISSION_UPDATE defines how many submissions to process in a single cron run.",
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_linked_order_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_pos_order_date_range",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "pos_order_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_linked_orders",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "Return the action used to open the order(s) linked to the selected consolidated invoice. ",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_open_consolidate_invoice_wizard",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [],
+      "documentation": "Open the wizard, and set a default date_from/date_to based on the current date as well as already existing\nconsolidated invoices.",
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_split_pos_orders_in_lines",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "pos_order_ids"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_my_edi_pos",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Separate the orders in self into lines as represented in a consolidated invoice, taking care of splitting when\nneeded.\n\nThere is no requirement asking to split per sequence (and thus config), but we still do so to make it easier to\nsubmit per PoS if wanted.\n\n:param pos_order_ids: The orders to separate.\n:return: A dict of pos order per config, for each config having a list of recordset each representing a single line in the xml.",
+      "size_in_lines": 36,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_check",
+    "package": "l10n_my_edi",
+    "kind": "UserError",
+    "message": "You cannot delete a document that is active on MyInvois.\nYou must cancel it first."
+   },
+   {
+    "operation": "action_submit_to_myinvois",
+    "package": "l10n_my_edi",
+    "kind": "UserError",
+    "message": "You cannot send this document to MyInvois because the related invoice(s) %s are in draft or canceled state."
+   },
+   {
+    "operation": "action_generate_xml_file",
+    "package": "l10n_my_edi",
+    "kind": "UserError",
+    "message": "Error when generating the documents' files:\n\n- %(errors)s"
+   },
+   {
+    "operation": "_myinvois_get_proxy_user",
+    "package": "l10n_my_edi",
+    "kind": "UserError",
+    "message": "Please register for the E-Invoicing service in the settings first."
+   },
+   {
+    "operation": "_submit_to_myinvois",
+    "package": "l10n_my_edi",
+    "kind": "UserError",
+    "message": "errors[self.id]['plain_text_error']"
+   },
+   {
+    "operation": "_myinvois_check_can_update_status",
+    "package": "l10n_my_edi",
+    "kind": "UserError",
+    "message": "It has been more than 72h since the document validation, you can no longer cancel it.\nInstead, you should issue a debit or credit note."
+   },
+   {
+    "operation": "_myinvois_check_can_update_status",
+    "package": "l10n_my_edi",
+    "kind": "UserError",
+    "message": "You can only change the state of a document in the valid or rejected states."
+   },
+   {
+    "operation": "_myinvois_single_status_update",
+    "package": "l10n_my_edi",
+    "kind": "UserError",
+    "message": "self._myinvois_map_error(result['error'])"
+   }
+  ],
+  "state_fields": [
+   "myinvois_state"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_my_edi.access_myinvois_document_readonly",
+    "package": "l10n_my_edi",
+    "name": "l10n_my_edi.myinvois.document",
+    "entity": "myinvois.document",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "l10n_my_edi.access_myinvois_document_invoice",
+    "package": "l10n_my_edi",
+    "name": "l10n_my_edi.myinvois.document",
+    "entity": "myinvois.document",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "l10n_my_edi.myinvois_document_comp_rule",
+    "package": "l10n_my_edi",
+    "name": "MyInvois Document",
+    "entity": "myinvois.document",
+    "domain": "[('company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "l10n_my_edi.myinvois_document_form_view",
+    "package": "l10n_my_edi",
+    "name": "myinvois.document.form.view",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "MyInvois Document",
+      "create": "false"
+     },
+     "fields": [
+      {
+       "name": "myinvois_state",
+       "widget": "statusbar"
+      },
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "myinvois_issuance_date"
+      },
+      {
+       "name": "myinvois_submission_uid"
+      },
+      {
+       "name": "myinvois_external_uuid"
+      },
+      {
+       "name": "myinvois_validation_time"
+      },
+      {
+       "name": "myinvois_exemption_reason",
+       "invisible": "not myinvois_exemption_reason",
+       "readonly": "invoice_ids"
+      },
+      {
+       "name": "myinvois_custom_form_reference",
+       "invisible": "not myinvois_custom_form_reference",
+       "readonly": "invoice_ids"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_submit_to_myinvois",
+       "string": "Submit To MyInvois",
+       "type": "object",
+       "invisible": "myinvois_state and myinvois_state != 'invalid'",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_update_submission_status",
+       "string": "Update Submission Status",
+       "type": "object",
+       "invisible": "not myinvois_state or (myinvois_state not in ['in_progress', 'valid'])",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "action_cancel_submission",
+       "string": "Cancel Submission",
+       "type": "object",
+       "invisible": "myinvois_state not in ['valid', 'rejected']"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statusbar": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_submit_to_myinvois",
+       "type": "object",
+       "string": "Submit To MyInvois",
+       "class": "oe_highlight",
+       "invisible": "myinvois_state and myinvois_state != 'invalid'"
+      },
+      {
+       "name": "action_update_submission_status",
+       "type": "object",
+       "string": "Update Submission Status",
+       "class": "oe_highlight",
+       "invisible": "not myinvois_state or (myinvois_state not in ['in_progress', 'valid'])"
+      },
+      {
+       "name": "action_cancel_submission",
+       "type": "object",
+       "string": "Cancel Submission",
+       "invisible": "myinvois_state not in ['valid', 'rejected']"
+      }
+     ],
+     "statusbar_field": "myinvois_state",
+     "statusbar_visible": "in_progress,valid",
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "l10n_my_edi.myinvois_document_list_view",
+    "package": "l10n_my_edi",
+    "name": "myinvois.document.list.view",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "MyInvois Documents",
+      "create": "false",
+      "sample": "1",
+      "decoration-muted": "myinvois_state == 'cancelled'"
+     },
+     "fields": [
+      {
+       "name": "display_name"
+      },
+      {
+       "name": "myinvois_issuance_date"
+      },
+      {
+       "name": "myinvois_state"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_submit_to_myinvois",
+       "string": "Submit To MyInvois",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "name": "action_update_submission_status",
+       "string": "Fetch Status From MyInvois",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "false",
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "myinvois_state == 'cancelled'"
+     }
+    }
+   },
+   {
+    "external_identifier": "l10n_my_edi_pos.myinvois_document_pos_form_view",
+    "package": "l10n_my_edi_pos",
+    "name": "myinvois.document.pos.form.view",
+    "view_type": "div",
+    "inherits_view": "l10n_my_edi.myinvois_document_form_view",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "linked_order_count",
+       "widget": "statinfo",
+       "string": "PoS Orders"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_linked_orders",
+       "type": "object",
+       "invisible": "linked_order_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-shopping-basket"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_my_edi_pos.myinvois_document_pos_list_view",
+    "package": "l10n_my_edi_pos",
+    "name": "myinvois.document.list.view",
+    "view_type": "header",
+    "inherits_view": "l10n_my_edi.myinvois_document_list_view",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "header",
+     "root_attributes": {
+      "position": "inside"
+     },
+     "fields": [],
+     "buttons": [
+      {
+       "name": "action_open_consolidate_invoice_wizard",
+       "string": "Consolidate Orders",
+       "type": "object",
+       "class": "btn-primary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "header",
+       "attributes": {
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "l10n_my_edi_pos.action_consolidated_invoices",
+    "package": "l10n_my_edi_pos",
+    "name": "Consolidated Invoices",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('pos_config_id', '!=', False)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "myinvois.document"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "l10n_my_edi.action_generate_myinvois_document_file",
+    "package": "l10n_my_edi",
+    "name": "Generate Document File",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "l10n_my_edi_pos.menu_consolidated_invoices",
+    "package": "l10n_my_edi_pos",
+    "name": "Consolidated Invoice",
+    "parent_id": "point_of_sale.menu_point_of_sale",
+    "action": "l10n_my_edi_pos.action_consolidated_invoices",
+    "sequence": "50",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "l10n_my_edi.ir_cron_myinvois_document_sync",
+    "package": "l10n_my_edi",
+    "name": "MyInvois: Document Synchronization",
+    "interval_number": "1",
+    "interval_type": "hours",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "myinvois.document",
+    "operation": "_myinvois_statuses_update_cron",
+    "operation_call": "model._myinvois_statuses_update_cron()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

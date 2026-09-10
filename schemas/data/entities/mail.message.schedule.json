@@ -1,0 +1,387 @@
+{
+ "catalog": {
+  "name": "entity:mail.message.schedule",
+  "description": "Complete definition of entity Scheduled Messages (mail.message.schedule).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.message.schedule",
+  "storage_name": "mail_message_schedule",
+  "full_name": "Scheduled Messages",
+  "kind": "persistent",
+  "description": "Scheduled Messages",
+  "defined_by_package": "mail",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "scheduled_datetime DESC, id DESC",
+  "display_name_field": "mail_message_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "mail_message_id",
+    "type": "Many2one",
+    "comodel": "mail.message",
+    "string": "Message",
+    "ondelete": "cascade",
+    "required": true,
+    "defined_in_package": "mail",
+    "full_name": "Message",
+    "target_entity": "mail.message"
+   },
+   {
+    "name": "notification_parameters",
+    "type": "Text",
+    "string": "Notification Parameter",
+    "defined_in_package": "mail",
+    "full_name": "Notification Parameter"
+   },
+   {
+    "name": "scheduled_datetime",
+    "type": "Datetime",
+    "string": "Scheduled Send Date",
+    "required": true,
+    "help": "Datetime at which notification should be sent.",
+    "defined_in_package": "mail",
+    "full_name": "Scheduled Send Date"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_notifications_cron",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "force_send",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Launch notification process independently from the expected date. ",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_notifications",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "default_notify_kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Send notification for scheduled messages.\n\n:param dict default_notify_kwargs: optional parameters to propagate to\n  ``notify_thread``. Those are default values overridden by content of\n  ``notification_parameters`` field.",
+      "size_in_lines": 31,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_message_notifications",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "messages",
+     "default_notify_kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Send scheduled notification for given messages.\n\n:param <mail.message> messages: scheduled sending related to those messages\n  will be sent now;\n:param dict default_notify_kwargs: optional parameters to propagate to\n  ``notify_thread``. Those are default values overridden by content of\n  ``notification_parameters`` field.\n\n:returns: False if no schedule has been found, True otherwise\n:rtype: bool",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_message_scheduled_datetime",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "messages",
+     "new_datetime"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Update scheduled datetime for scheduled sending related to messages.\n\n:param <mail.message> messages: scheduled sending related to those messages\n  will be updated. Missing one are skipped;\n:param datetime new_datetime: new datetime for sending. New triggers\n  are created based on it;\n\n:returns: False if no schedule has been found, True otherwise\n:rtype: bool",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_group_by_model",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_message_scheduled_system",
+    "package": "mail",
+    "name": "mail.message.scheduled.system",
+    "entity": "mail.message.schedule",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mail.mail_message_schedule_view_form",
+    "package": "mail",
+    "name": "mail.message.schedule.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Scheduled Message",
+      "duplicate": "0"
+     },
+     "fields": [
+      {
+       "name": "mail_message_id"
+      },
+      {
+       "name": "scheduled_datetime"
+      },
+      {
+       "name": "notification_parameters"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "force_send",
+       "string": "Force Send",
+       "type": "object"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "force_send",
+       "string": "Force Send",
+       "type": "object"
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_message_schedule_view_tree",
+    "package": "mail",
+    "name": "mail.message.schedule.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Emails"
+     },
+     "fields": [
+      {
+       "name": "mail_message_id"
+      },
+      {
+       "name": "scheduled_datetime"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_message_schedule_view_search",
+    "package": "mail",
+    "name": "mail.message.schedule.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Scheduled Messages"
+     },
+     "fields": [
+      {
+       "name": "mail_message_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.mail_message_schedule_action",
+    "package": "mail",
+    "name": "Scheduled Messages",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.message.schedule"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "mail.ir_cron_send_scheduled_message",
+    "package": "mail",
+    "name": "Notification: Notify scheduled messages",
+    "interval_number": "1",
+    "interval_type": "hours",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "mail.message.schedule",
+    "operation": "_send_notifications_cron",
+    "operation_call": "model._send_notifications_cron()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

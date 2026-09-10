@@ -1,0 +1,1405 @@
+{
+ "catalog": {
+  "name": "entity:account.move.reversal",
+  "description": "Complete definition of entity Account Move Reversal (account.move.reversal).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.move.reversal",
+  "storage_name": "account_move_reversal",
+  "full_name": "Account Move Reversal",
+  "kind": "transient",
+  "description": "Account Move Reversal",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "l10n_latam_invoice_document",
+   "l10n_br",
+   "l10n_es_edi_facturae",
+   "l10n_es_edi_tbai",
+   "l10n_es_edi_verifactu",
+   "l10n_gr_edi",
+   "l10n_hu_edi",
+   "l10n_sa",
+   "l10n_tw_edi_ecpay",
+   "l10n_vn_edi_viettel",
+   "sale_timesheet"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "move_ids",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "relation": "account_move_reversal_move",
+    "column1": "reversal_id",
+    "column2": "move_id",
+    "domain": [
+     [
+      "state",
+      "=",
+      "posted"
+     ]
+    ],
+    "defined_in_package": "account",
+    "string": "Move",
+    "full_name": "Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "new_move_ids",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "relation": "account_move_reversal_new_move",
+    "column1": "reversal_id",
+    "column2": "new_move_id",
+    "defined_in_package": "account",
+    "string": "New Move",
+    "full_name": "New Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Reversal date",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "account",
+    "full_name": "Reversal date"
+   },
+   {
+    "name": "reason",
+    "type": "Char",
+    "string": "Reason displayed on Credit Note",
+    "defined_in_package": "account",
+    "full_name": "Reason displayed on Credit Note"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Journal",
+    "required": true,
+    "compute": "_compute_journal_id",
+    "readonly": false,
+    "store": true,
+    "check_company": true,
+    "help": "If empty, uses the journal of the journal entry to be reversed.",
+    "defined_in_package": "account",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "readonly": true,
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "available_journal_ids",
+    "type": "Many2many",
+    "comodel": "account.journal",
+    "compute": "_compute_available_journal_ids",
+    "defined_in_package": "account",
+    "string": "Available Journal",
+    "full_name": "Available Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "country_code",
+    "type": "Char",
+    "related": "company_id.country_id.code",
+    "defined_in_package": "account",
+    "string": "Country Code",
+    "full_name": "Country Code"
+   },
+   {
+    "name": "residual",
+    "type": "Monetary",
+    "compute": "_compute_from_moves",
+    "defined_in_package": "account",
+    "string": "Residual",
+    "full_name": "Residual"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "compute": "_compute_from_moves",
+    "defined_in_package": "account",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   },
+   {
+    "name": "move_type",
+    "type": "Char",
+    "compute": "_compute_from_moves",
+    "defined_in_package": "account",
+    "string": "Move Type",
+    "full_name": "Move Type"
+   },
+   {
+    "name": "l10n_latam_use_documents",
+    "type": "Boolean",
+    "compute": "_compute_documents_info",
+    "defined_in_package": "l10n_latam_invoice_document",
+    "string": "Localization Latam Use Documents",
+    "full_name": "Localization Latam Use Documents"
+   },
+   {
+    "name": "l10n_latam_document_type_id",
+    "type": "Many2one",
+    "comodel": "l10n_latam.document.type",
+    "string": "Document Type",
+    "ondelete": "cascade",
+    "domain": "[('id', 'in', l10n_latam_available_document_type_ids)]",
+    "compute": "_compute_document_type",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "l10n_latam_invoice_document",
+    "full_name": "Document Type",
+    "target_entity": "l10n_latam.document.type"
+   },
+   {
+    "name": "l10n_latam_available_document_type_ids",
+    "type": "Many2many",
+    "comodel": "l10n_latam.document.type",
+    "compute": "_compute_documents_info",
+    "defined_in_package": "l10n_latam_invoice_document",
+    "string": "Localization Latam Available Document Type",
+    "full_name": "Localization Latam Available Document Type",
+    "target_entity": "l10n_latam.document.type"
+   },
+   {
+    "name": "l10n_latam_document_number",
+    "type": "Char",
+    "string": "Document Number",
+    "defined_in_package": "l10n_latam_invoice_document",
+    "full_name": "Document Number"
+   },
+   {
+    "name": "l10n_latam_manual_document_number",
+    "type": "Boolean",
+    "compute": "_compute_l10n_latam_manual_document_number",
+    "string": "Manual Number",
+    "defined_in_package": "l10n_latam_invoice_document",
+    "full_name": "Manual Number"
+   },
+   {
+    "name": "l10n_es_edi_facturae_reason_code",
+    "type": "Selection",
+    "selection": {
+     "expression": "lambda self: self.env['account.move']._fields['l10n_es_edi_facturae_reason_code']._description_selection(self.env)"
+    },
+    "string": "Spanish Facturae EDI Reason Code",
+    "default": "10",
+    "defined_in_package": "l10n_es_edi_facturae",
+    "full_name": "Spanish Facturae electronic data interchange Reason Code"
+   },
+   {
+    "name": "l10n_es_tbai_is_required",
+    "type": "Boolean",
+    "compute": "_compute_l10n_es_tbai_is_required",
+    "readonly": true,
+    "string": "Is TicketBai required for this reversal",
+    "defined_in_package": "l10n_es_edi_tbai",
+    "full_name": "Is TicketBai required for this reversal"
+   },
+   {
+    "name": "l10n_es_tbai_refund_reason",
+    "type": "Selection",
+    "selection": {
+     "expression": "TBAI_REFUND_REASONS"
+    },
+    "string": "Invoice Refund Reason Code (TicketBai)",
+    "help": "BOE-A-1992-28740. Ley 37/1992, de 28 de diciembre, del Impuesto sobre el Valor Añadido. Artículo 80. Modificación de la base imponible.",
+    "defined_in_package": "l10n_es_edi_tbai",
+    "full_name": "Invoice Refund Reason Code (TicketBai)"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_required",
+    "type": "Boolean",
+    "string": "Veri*Factu Required",
+    "compute": "_compute_l10n_es_edi_verifactu_required",
+    "store": true,
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Veri*Factu Required"
+   },
+   {
+    "name": "l10n_es_edi_verifactu_refund_reason",
+    "type": "Selection",
+    "selection": [
+     [
+      "R1",
+      "R1: Art 80.1 and 80.2 and error of law"
+     ],
+     [
+      "R2",
+      "R2: Art. 80.3"
+     ],
+     [
+      "R3",
+      "R3: Art. 80.4"
+     ],
+     [
+      "R4",
+      "R4: Rest"
+     ],
+     [
+      "R5",
+      "R5: Corrective invoices concerning simplified invoices"
+     ]
+    ],
+    "string": "Veri*Factu Refund Reason",
+    "compute": "_compute_l10n_es_edi_verifactu_refund_reason",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_es_edi_verifactu",
+    "full_name": "Veri*Factu Refund Reason"
+   },
+   {
+    "name": "l10n_sa_reason",
+    "type": "Selection",
+    "string": "ZATCA Reason",
+    "selection": {
+     "expression": "ADJUSTMENT_REASONS"
+    },
+    "defined_in_package": "l10n_sa",
+    "full_name": "ZATCA Reason"
+   },
+   {
+    "name": "l10n_tw_edi_refund_agreement_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "offline",
+      "Offline"
+     ],
+     [
+      "online",
+      "Online"
+     ]
+    ],
+    "string": "Agreement Type",
+    "defined_in_package": "l10n_tw_edi_ecpay",
+    "full_name": "Agreement Type"
+   },
+   {
+    "name": "l10n_tw_edi_allowance_notify_way",
+    "type": "Selection",
+    "selection": [
+     [
+      "email",
+      "Email"
+     ],
+     [
+      "phone",
+      "Phone"
+     ]
+    ],
+    "string": "Allowance Notify Way",
+    "defined_in_package": "l10n_tw_edi_ecpay",
+    "full_name": "Allowance Notify Way"
+   },
+   {
+    "name": "l10n_tw_edi_ecpay_invoice_id",
+    "type": "Char",
+    "compute": "_compute_from_moves",
+    "defined_in_package": "l10n_tw_edi_ecpay",
+    "string": "Localization Tw Electronic data interchange Ecpay Invoice",
+    "full_name": "Localization Tw Electronic data interchange Ecpay Invoice"
+   },
+   {
+    "name": "l10n_tw_edi_is_b2b",
+    "type": "Boolean",
+    "compute": "_compute_from_moves",
+    "defined_in_package": "l10n_tw_edi_ecpay",
+    "string": "Localization Tw Electronic data interchange Is Business to business",
+    "full_name": "Localization Tw Electronic data interchange Is Business to business"
+   },
+   {
+    "name": "l10n_vn_edi_adjustment_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "1",
+      "Money adjustment"
+     ],
+     [
+      "2",
+      "Information adjustment"
+     ]
+    ],
+    "string": "Adjustment type",
+    "required": true,
+    "default": "1",
+    "defined_in_package": "l10n_vn_edi_viettel",
+    "full_name": "Adjustment type"
+   },
+   {
+    "name": "l10n_vn_edi_agreement_document_name",
+    "type": "Char",
+    "string": "Agreement Name",
+    "defined_in_package": "l10n_vn_edi_viettel",
+    "full_name": "Agreement Name"
+   },
+   {
+    "name": "l10n_vn_edi_agreement_document_date",
+    "type": "Datetime",
+    "string": "Agreement Date",
+    "defined_in_package": "l10n_vn_edi_viettel",
+    "full_name": "Agreement Date"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_journal_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_available_journal_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_journal_type",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "journal_id",
+         "move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Journal should be the same type as the reversed entry.",
+        "line": 64
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "All selected moves for reversal must belong to the same company.",
+        "line": 72
+       },
+       {
+        "kind": "UserError",
+        "message": "To reverse a journal entry, it has to be posted first.",
+        "line": 75
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_from_moves",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_tw_edi_ecpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_default_reversal",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_latam_invoice_document",
+      "decorators": [],
+      "documentation": "Set the default document type and number in the new revsersal move taking into account the ones selected in\nthe wizard ",
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_tbai",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_gr_edi",
+      "decorators": [],
+      "documentation": "When reversing an invoice, set the greece correlated move field on the new credit note",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hu_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_sa",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_tw_edi_ecpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn_edi_viettel",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "reverse_moves",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "is_modify"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 65,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_facturae",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_hu_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_tw_edi_ecpay",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn_edi_viettel",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot adjust/replace invoice %s, it has not been approved by the tax authorities.\nPlease cancel/reverse it and create a new invoice instead.",
+        "line": 59
+       }
+      ]
+     },
+     {
+      "package": "sale_timesheet",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "refund_moves",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "modify_moves",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_modify_default_reverse_values",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "origin_move"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_vn_edi_viettel",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_latam_manual_document_number",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_invoice_document",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_latam_document_type_id",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_reverse_type_map",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "move_type"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_invoice_document",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_document_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_invoice_document",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_latam_available_document_type_ids",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_br",
+      "decorators": [],
+      "documentation": "If a l10n_latam_document_type_id was set, change it in the case of Brazil to be\nthe same as the move that is being reversed.",
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_documents_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_invoice_document",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids",
+         "journal_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only reverse documents with legal invoicing documents from Latin America one at a time.\nProblematic documents: %s",
+        "line": 56
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_l10n_latam_document_number",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_latam_invoice_document",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "l10n_latam_document_number",
+         "l10n_latam_document_type_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_ref_string",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_facturae",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_es_tbai_is_required",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_tbai",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Reversals mixing invoices with and without TicketBAI are not allowed.",
+        "line": 28
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_es_edi_verifactu_required",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids.l10n_es_edi_verifactu_required"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_es_edi_verifactu_refund_reason",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_es_edi_verifactu",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids.l10n_es_edi_verifactu_required"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_journal_type",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Journal should be the same type as the reversed entry."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "All selected moves for reversal must belong to the same company."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "To reverse a journal entry, it has to be posted first."
+   },
+   {
+    "operation": "_compute_documents_info",
+    "package": "l10n_latam_invoice_document",
+    "kind": "UserError",
+    "message": "You can only reverse documents with legal invoicing documents from Latin America one at a time.\nProblematic documents: %s"
+   },
+   {
+    "operation": "_compute_l10n_es_tbai_is_required",
+    "package": "l10n_es_edi_tbai",
+    "kind": "UserError",
+    "message": "Reversals mixing invoices with and without TicketBAI are not allowed."
+   },
+   {
+    "operation": "reverse_moves",
+    "package": "l10n_vn_edi_viettel",
+    "kind": "UserError",
+    "message": "You cannot adjust/replace invoice %s, it has not been approved by the tax authorities.\nPlease cancel/reverse it and create a new invoice instead."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_move_reversal",
+    "package": "account",
+    "name": "access.account.move.reversal",
+    "entity": "account.move.reversal",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.view_account_move_reversal",
+    "package": "account",
+    "name": "account.move.reversal.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Reverse Journal Entry"
+     },
+     "fields": [
+      {
+       "name": "residual",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "move_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "move_type",
+       "invisible": "1"
+      },
+      {
+       "name": "available_journal_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "reason",
+       "invisible": "move_type == 'entry'"
+      },
+      {
+       "name": "journal_id",
+       "domain": "[('id', 'in', available_journal_ids)]"
+      },
+      {
+       "name": "date",
+       "required": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "refund_moves",
+       "string": "Reverse",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "modify_moves",
+       "string": "Reverse and Create Invoice",
+       "type": "object",
+       "invisible": "move_type  == 'entry'",
+       "class": "btn-secondary"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_facturae.view_account_move_reversal_inherit_l10n_es_edi_facturae",
+    "package": "l10n_es_edi_facturae",
+    "name": "account.move.reversal.form.inherit.l10n_es_edi_facturae",
+    "view_type": "field",
+    "inherits_view": "account.view_account_move_reversal",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "reason",
+      "position": "replace"
+     },
+     "fields": [
+      {
+       "name": "reason",
+       "position": "replace"
+      },
+      {
+       "name": "country_code",
+       "invisible": "1"
+      },
+      {
+       "name": "l10n_es_edi_facturae_reason_code",
+       "invisible": "country_code != 'ES'",
+       "string": "Reason"
+      },
+      {
+       "name": "reason",
+       "invisible": "country_code == 'ES'",
+       "string": "Reason"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_tbai.view_account_move_reversal",
+    "package": "l10n_es_edi_tbai",
+    "name": "account.move.reversal.form.inherit.l10n_es_edi_tbai",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_move_reversal",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='journal_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_es_tbai_is_required",
+       "invisible": "1"
+      },
+      {
+       "name": "l10n_es_tbai_refund_reason",
+       "widget": "selection",
+       "invisible": "not l10n_es_tbai_is_required"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "selection": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='journal_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_es_edi_verifactu.view_account_move_reversal_inherit_l10n_es_edi_verifactu",
+    "package": "l10n_es_edi_verifactu",
+    "name": "account.move.reversal.form.inherit.l10n_es_edi_verifactu",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_move_reversal",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='reason']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_es_edi_verifactu_refund_reason",
+       "invisible": "not l10n_es_edi_verifactu_required"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='reason']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_latam_invoice_document.view_account_move_reversal",
+    "package": "l10n_latam_invoice_document",
+    "name": "account.move.reversal.form",
+    "view_type": "form",
+    "inherits_view": "account.view_account_move_reversal",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "l10n_latam_use_documents",
+       "invisible": "1"
+      },
+      {
+       "name": "l10n_latam_manual_document_number",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "l10n_sa.view_account_move_reversal_inherit_l10n_sa",
+    "package": "l10n_sa",
+    "name": "account.move.reversal.form.inherit.l10n_sa",
+    "view_type": "field",
+    "inherits_view": "account.view_account_move_reversal",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "journal_id",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "journal_id",
+       "position": "before"
+      },
+      {
+       "name": "l10n_sa_reason",
+       "invisible": "move_type == 'entry' or country_code != 'SA'",
+       "string": "ZATCA Reason"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "l10n_tw_edi_ecpay.view_account_move_reversal_inherit_ecpay",
+    "package": "l10n_tw_edi_ecpay",
+    "name": "ec_account_invoice_refund_form_inherit",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_move_reversal",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='reason']",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='reason']",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "l10n_vn_edi_viettel.view_account_move_reversal_inherit_l10n_vn_edi",
+    "package": "l10n_vn_edi_viettel",
+    "name": "account.move.reversal.form.inherit.l10n_vn_edi",
+    "view_type": "xpath",
+    "inherits_view": "account.view_account_move_reversal",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='reason']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "l10n_vn_edi_adjustment_type",
+       "invisible": "country_code != 'VN'",
+       "required": "country_code == 'VN'",
+       "placeholder": "Adjustment type..."
+      },
+      {
+       "name": "l10n_vn_edi_agreement_document_name",
+       "invisible": "country_code != 'VN'",
+       "placeholder": "Agreement document name..."
+      },
+      {
+       "name": "l10n_vn_edi_agreement_document_date",
+       "invisible": "country_code != 'VN'",
+       "placeholder": "Agreement document date..."
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='reason']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_view_account_move_reversal",
+    "package": "account",
+    "name": "Reverse",
+    "view_mode": "list,form",
+    "view_id": "view_account_move_reversal",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "account.model_account_move",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "account.move.reversal"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

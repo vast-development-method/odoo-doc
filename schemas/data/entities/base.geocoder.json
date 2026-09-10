@@ -1,0 +1,353 @@
+{
+ "catalog": {
+  "name": "entity:base.geocoder",
+  "description": "Complete definition of entity Geo Coder (base.geocoder).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "base.geocoder",
+  "storage_name": "base_geocoder",
+  "full_name": "Geo Coder",
+  "kind": "abstract",
+  "description": "Geo Coder",
+  "defined_by_package": "base_geolocalize",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_provider",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "geo_query_address",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "street",
+     "zip",
+     "city",
+     "state",
+     "country"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Converts address fields into a valid string for querying\ngeolocation APIs.\n:param street: street address\n:param zip: zip code\n:param city: city\n:param state: state\n:param country: country\n:return: formatted string",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "geo_find",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "addr",
+     "**kw"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Use a location provider API to convert an address string into a latitude, longitude tuple.\nHere we use Openstreetmap Nominatim by default.\n:param addr: Address string passed to API\n:return: (latitude, longitude) or None if not found",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Provider %s is not implemented for geolocation service.",
+        "line": 72
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_call_openstreetmap",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "addr",
+     "**kw"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Use Openstreemap Nominatim service to retrieve location\n:return: (latitude, longitude) or None if not found",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_call_openstreetmap_reverse",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "lat",
+     "lon"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Use Openstreemap Nominatim service to retrieve location from latitude and longitude\n:param lat: Latitude\n:param lon: Longitude\n:return: Address string or None if not found",
+      "size_in_lines": 33,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "OpenStreetMap calls disabled in testing environment.",
+        "line": 118
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_call_googlemap",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "addr",
+     "**kw"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Use google maps API. It won't work without a valid API key.\n:return: (latitude, longitude) or None if not found",
+      "size_in_lines": 37,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "API key for GeoCoding (Places) required.\nVisit https://developers.google.com/maps/documentation/geocoding/get-api-key for more information.",
+        "line": 147
+       },
+       {
+        "kind": "UserError",
+        "message": "error_msg",
+        "line": 172
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_geo_query_address_default",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "street",
+     "zip",
+     "city",
+     "state",
+     "country"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_geo_query_address_googlemap",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "street",
+     "zip",
+     "city",
+     "state",
+     "country"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_raise_query_error",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "error"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Error with geolocation server: %s",
+        "line": 199
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_localisation",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "latitude",
+     "longitude"
+    ],
+    "definitions": [
+     {
+      "package": "base_geolocalize",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "geo_find",
+    "package": "base_geolocalize",
+    "kind": "UserError",
+    "message": "Provider %s is not implemented for geolocation service."
+   },
+   {
+    "operation": "_call_openstreetmap_reverse",
+    "package": "base_geolocalize",
+    "kind": "UserError",
+    "message": "OpenStreetMap calls disabled in testing environment."
+   },
+   {
+    "operation": "_call_googlemap",
+    "package": "base_geolocalize",
+    "kind": "UserError",
+    "message": "API key for GeoCoding (Places) required.\nVisit https://developers.google.com/maps/documentation/geocoding/get-api-key for more information."
+   },
+   {
+    "operation": "_call_googlemap",
+    "package": "base_geolocalize",
+    "kind": "UserError",
+    "message": "error_msg"
+   },
+   {
+    "operation": "_raise_query_error",
+    "package": "base_geolocalize",
+    "kind": "UserError",
+    "message": "Error with geolocation server: %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

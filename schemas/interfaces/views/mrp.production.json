@@ -1,0 +1,2348 @@
+{
+ "catalog": {
+  "name": "views:mrp.production",
+  "description": "View declarations for entity mrp.production.",
+  "record_count": 19,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "mrp.mrp_production_view_activity",
+   "package": "mrp",
+   "name": "mrp.production.view.activity",
+   "entity": "mrp.production",
+   "view_type": "activity",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "activity",
+    "root_attributes": {
+     "string": "Manufacturing Orders"
+    },
+    "fields": [
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "date_start"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <activity string=\"Manufacturing Orders\">\n                    <templates>\n                        <div t-name=\"activity-box\" class=\"d-flex w-100\">\n                            <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                            <div class=\"flex-grow-1\">\n                                <field name=\"name\" class=\"o_text_block\"/>\n                                <field name=\"date_start\" class=\"d-block\"/>\n                            </div>\n                        </div>\n                    </templates>\n                </activity>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_production_tree_view",
+   "package": "mrp",
+   "name": "mrp.production.list",
+   "entity": "mrp.production",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Manufacturing Orders",
+     "multi_edit": "1",
+     "sample": "1",
+     "decoration-info": "state == 'draft'"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "priority",
+      "widget": "priority",
+      "optional": "show",
+      "nolabel": "1"
+     },
+     {
+      "name": "message_needaction",
+      "column_invisible": "True"
+     },
+     {
+      "name": "name",
+      "decoration-bf": "1"
+     },
+     {
+      "name": "date_start",
+      "widget": "remaining_days",
+      "optional": "show"
+     },
+     {
+      "name": "date_finished",
+      "widget": "remaining_days",
+      "optional": "hide"
+     },
+     {
+      "name": "date_deadline",
+      "widget": "mrp_remaining_days_unformatted",
+      "invisible": "state in ['done', 'cancel']",
+      "optional": "hide",
+      "decoration-danger": "is_delayed",
+      "decoration-bf": "is_delayed"
+     },
+     {
+      "name": "product_id",
+      "readonly": "1",
+      "optional": "show"
+     },
+     {
+      "name": "lot_producing_ids",
+      "widget": "many2many_tags",
+      "optional": "hide"
+     },
+     {
+      "name": "bom_id",
+      "readonly": "1",
+      "optional": "hide"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "list_activity",
+      "string": "Next Activity",
+      "optional": "show"
+     },
+     {
+      "name": "origin",
+      "readonly": "state in ['cancel', 'done']",
+      "optional": "show"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "readonly": "state in ['cancel', 'done']",
+      "optional": "hide"
+     },
+     {
+      "name": "components_availability_state",
+      "options": "{\"lazy\": true}",
+      "column_invisible": "True"
+     },
+     {
+      "name": "components_availability",
+      "invisible": "state not in ['confirmed', 'progress']",
+      "options": "{\"lazy\": true}",
+      "optional": "show",
+      "decoration-danger": "reservation_state != 'assigned' and components_availability_state in ('late', 'unavailable')",
+      "decoration-warning": "reservation_state != 'assigned' and components_availability_state in ('expected', 'available')",
+      "decoration-success": "reservation_state == 'assigned' or components_availability_state == 'available'"
+     },
+     {
+      "name": "reservation_state",
+      "optional": "hide",
+      "decoration-danger": "reservation_state == 'confirmed'",
+      "decoration-success": "reservation_state == 'assigned'"
+     },
+     {
+      "name": "product_qty",
+      "readonly": "1",
+      "string": "Quantity",
+      "optional": "show",
+      "sum": "Total Qty"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "1",
+      "options": "{'no_open':True,'no_create':True}",
+      "optional": "show",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "duration_expected",
+      "widget": "float_time",
+      "invisible": "duration_expected == 0",
+      "optional": "hide",
+      "sum": "Total expected duration",
+      "groups": "mrp.group_mrp_routings"
+     },
+     {
+      "name": "duration",
+      "widget": "float_time",
+      "invisible": "duration == 0",
+      "optional": "hide",
+      "sum": "Total real duration",
+      "groups": "mrp.group_mrp_routings"
+     },
+     {
+      "name": "company_id",
+      "readonly": "1",
+      "optional": "show",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "optional": "show",
+      "decoration-danger": "state == 'cancel'",
+      "decoration-warning": "state == 'progress'",
+      "decoration-success": "state in ('done', 'to_close')",
+      "decoration-info": "state == 'confirmed'",
+      "decoration-muted": "state == 'draft'"
+     },
+     {
+      "name": "activity_exception_decoration",
+      "widget": "activity_exception"
+     },
+     {
+      "name": "delay_alert_date",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_delayed",
+      "column_invisible": "True"
+     },
+     {
+      "name": "json_popover",
+      "widget": "stock_rescheduling_popover",
+      "invisible": "not json_popover",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "button_plan",
+      "string": "Plan",
+      "type": "object"
+     },
+     {
+      "name": "action_assign",
+      "string": "Check availability",
+      "type": "object"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "confirm": "Are you sure you want to cancel these manufacturing orders?"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "priority": 1,
+     "remaining_days": 2,
+     "mrp_remaining_days_unformatted": 1,
+     "many2many_tags": 1,
+     "list_activity": 1,
+     "many2one_avatar_user": 1,
+     "many2one_uom": 1,
+     "float_time": 2,
+     "badge": 1,
+     "activity_exception": 1,
+     "stock_rescheduling_popover": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-info": "state == 'draft'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Manufacturing Orders\" multi_edit=\"1\" sample=\"1\" decoration-info=\"state == 'draft'\">\n                    <header>\n                        <button name=\"button_plan\" type=\"object\" string=\"Plan\"/>\n                        <button name=\"action_assign\" type=\"object\" string=\"Check availability\"/>\n                        <button name=\"action_cancel\" type=\"object\" string=\"Cancel\" confirm=\"Are you sure you want to cancel these manufacturing orders?\"/>\n                    </header>\n                    <field name=\"company_id\" column_invisible=\"True\"/>\n                    <field name=\"priority\" optional=\"show\" widget=\"priority\" nolabel=\"1\"/>\n                    <field name=\"message_needaction\" column_invisible=\"True\"/>\n                    <field name=\"name\" decoration-bf=\"1\"/>\n                    <field name=\"date_start\" optional=\"show\" widget=\"remaining_days\"/>\n                    <field name=\"date_finished\" optional=\"hide\" widget=\"remaining_days\"/>\n                    <field name=\"date_deadline\" widget=\"mrp_remaining_days_unformatted\" invisible=\"state in ['done', 'cancel']\" optional=\"hide\" decoration-danger=\"is_delayed\" decoration-bf=\"is_delayed\"/>\n                    <field name=\"product_id\" readonly=\"1\" optional=\"show\"/>\n                    <field name=\"lot_producing_ids\" optional=\"hide\" widget=\"many2many_tags\"/>\n                    <field name=\"bom_id\" readonly=\"1\" optional=\"hide\"/>\n                    <field name=\"activity_ids\" string=\"Next Activity\" widget=\"list_activity\" optional=\"show\"/>\n                    <field name=\"origin\" optional=\"show\" readonly=\"state in ['cancel', 'done']\"/>\n                    <field name=\"user_id\" optional=\"hide\" widget=\"many2one_avatar_user\" readonly=\"state in ['cancel', 'done']\"/>\n                    <field name=\"components_availability_state\" column_invisible=\"True\" options=\"{&quot;lazy&quot;: true}\"/>\n                    <field name=\"components_availability\" options=\"{&quot;lazy&quot;: true}\" invisible=\"state not in ['confirmed', 'progress']\" optional=\"show\" decoration-success=\"reservation_state == 'assigned' or components_availability_state == 'available'\" decoration-warning=\"reservation_state != 'assigned' and components_availability_state in ('expected', 'available')\" decoration-danger=\"reservation_state != 'assigned' and components_availability_state in ('late', 'unavailable')\"/>\n                    <field name=\"reservation_state\" optional=\"hide\" decoration-danger=\"reservation_state == 'confirmed'\" decoration-success=\"reservation_state == 'assigned'\"/>\n                    <field name=\"product_qty\" sum=\"Total Qty\" string=\"Quantity\" readonly=\"1\" optional=\"show\"/>\n                    <field name=\"product_uom_id\" readonly=\"1\" options=\"{'no_open':True,'no_create':True}\" groups=\"uom.group_uom\" widget=\"many2one_uom\" optional=\"show\"/>\n                    <field name=\"duration_expected\" invisible=\"duration_expected == 0\" groups=\"mrp.group_mrp_routings\" widget=\"float_time\" sum=\"Total expected duration\" optional=\"hide\"/>\n                    <field name=\"duration\" invisible=\"duration == 0\" groups=\"mrp.group_mrp_routings\" widget=\"float_time\" sum=\"Total real duration\" optional=\"hide\"/>\n                    <field name=\"company_id\" readonly=\"1\" groups=\"base.group_multi_company\" optional=\"show\"/>\n                    <field name=\"state\" decoration-success=\"state in ('done', 'to_close')\" decoration-warning=\"state == 'progress'\" decoration-info=\"state == 'confirmed'\" decoration-danger=\"state == 'cancel'\" decoration-muted=\"state == 'draft'\" optional=\"show\" widget=\"badge\" class=\"text-dark\"/>\n                    <field name=\"activity_exception_decoration\" widget=\"activity_exception\"/>\n                    <field name=\"delay_alert_date\" column_invisible=\"True\"/>\n                    <field name=\"is_delayed\" column_invisible=\"True\"/>\n                    <field nolabel=\"1\" name=\"json_popover\" widget=\"stock_rescheduling_popover\" invisible=\"not json_popover\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_production_form_view",
+   "package": "mrp",
+   "name": "mrp.production.form",
+   "entity": "mrp.production",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Manufacturing Orders"
+    },
+    "fields": [
+     {
+      "name": "show_lock",
+      "invisible": "1"
+     },
+     {
+      "name": "show_produce",
+      "invisible": "1"
+     },
+     {
+      "name": "show_produce_all",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "widget": "statusbar"
+     },
+     {
+      "name": "reservation_state",
+      "invisible": "1"
+     },
+     {
+      "name": "date_finished",
+      "invisible": "1"
+     },
+     {
+      "name": "is_locked",
+      "invisible": "1"
+     },
+     {
+      "name": "qty_produced",
+      "invisible": "1"
+     },
+     {
+      "name": "unreserve_visible",
+      "invisible": "1"
+     },
+     {
+      "name": "reserve_visible",
+      "invisible": "1"
+     },
+     {
+      "name": "consumption",
+      "invisible": "1"
+     },
+     {
+      "name": "is_planned",
+      "invisible": "1"
+     },
+     {
+      "name": "show_allocation",
+      "invisible": "1"
+     },
+     {
+      "name": "workorder_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "mrp_production_child_count"
+     },
+     {
+      "name": "mrp_production_source_count"
+     },
+     {
+      "name": "mrp_production_backorder_count"
+     },
+     {
+      "name": "unbuild_count"
+     },
+     {
+      "name": "scrap_count"
+     },
+     {
+      "name": "delivery_count",
+      "widget": "statinfo",
+      "string": "Transfers"
+     },
+     {
+      "name": "serial_numbers_count"
+     },
+     {
+      "name": "priority",
+      "widget": "priority"
+     },
+     {
+      "name": "name",
+      "nolabel": "1",
+      "placeholder": "Manufacturing Reference"
+     },
+     {
+      "name": "id",
+      "invisible": "1"
+     },
+     {
+      "name": "use_create_components_lots",
+      "invisible": "1"
+     },
+     {
+      "name": "show_lot_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "product_tracking",
+      "invisible": "1"
+     },
+     {
+      "name": "allow_workorder_dependencies",
+      "invisible": "1"
+     },
+     {
+      "name": "product_id",
+      "readonly": "state != 'draft'",
+      "context": "{'default_is_storable': True}",
+      "placeholder": "Product to build..."
+     },
+     {
+      "name": "product_tmpl_id",
+      "invisible": "1"
+     },
+     {
+      "name": "forecasted_issue",
+      "invisible": "1"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "product_description_variants",
+      "invisible": "product_description_variants in (False, '')",
+      "readonly": "state != 'draft'"
+     },
+     {
+      "name": "qty_producing",
+      "readonly": "state == 'cancel' or (state == 'done' and is_locked) or product_tracking=='serial'",
+      "force_save": "1"
+     },
+     {
+      "name": "product_qty",
+      "invisible": "state not in ('draft', 'done')",
+      "readonly": "state != 'draft'"
+     },
+     {
+      "name": "product_qty",
+      "readonly": "state != 'draft'"
+     },
+     {
+      "name": "product_uom_id",
+      "widget": "many2one_uom",
+      "readonly": "state != 'draft'",
+      "options": "{'no_open': True, 'no_create': True, 'quantity_field': 'product_qty'}",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "is_outdated_bom",
+      "invisible": "1"
+     },
+     {
+      "name": "bom_id",
+      "invisible": "state != 'draft' and not bom_id",
+      "readonly": "state != 'draft'",
+      "context": "{'default_product_tmpl_id': product_tmpl_id}"
+     },
+     {
+      "name": "lot_producing_ids",
+      "widget": "many2many_tags",
+      "invisible": "product_tracking in ('none', False) or (product_tracking == 'serial' and (product_qty > 1 or serial_numbers_count > 1))",
+      "readonly": "lot_producing_ids",
+      "context": "{'default_product_id': product_id}",
+      "options": "{'edit_tags': True}",
+      "force_save": "1"
+     },
+     {
+      "name": "date_start",
+      "readonly": "state in ['done', 'to_close', 'cancel']",
+      "decoration-danger": "state not in ('done', 'cancel') and date_deadline and date_deadline < date_finished",
+      "decoration-warning": "state not in ('done', 'cancel') and date_start < now"
+     },
+     {
+      "name": "delay_alert_date",
+      "invisible": "1"
+     },
+     {
+      "name": "json_popover",
+      "widget": "stock_rescheduling_popover",
+      "invisible": "not json_popover",
+      "nolabel": "1"
+     },
+     {
+      "name": "components_availability_state",
+      "invisible": "1"
+     },
+     {
+      "name": "components_availability",
+      "invisible": "state not in ['confirmed', 'progress']",
+      "decoration-danger": "reservation_state != 'assigned' and components_availability_state in ('late', 'unavailable')",
+      "decoration-warning": "reservation_state != 'assigned' and components_availability_state in ('expected', 'available')",
+      "decoration-success": "reservation_state == 'assigned' or components_availability_state == 'available'"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar",
+      "readonly": "state in ['cancel', 'done']"
+     },
+     {
+      "name": "show_final_lots",
+      "invisible": "1"
+     },
+     {
+      "name": "production_location_id",
+      "invisible": "1",
+      "readonly": "1"
+     },
+     {
+      "name": "move_finished_ids",
+      "invisible": "1",
+      "readonly": "state == 'cancel' or (state == 'done' and is_locked)"
+     },
+     {
+      "name": "product_id",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "product_uom_qty",
+      "readonly": "state == 'done'"
+     },
+     {
+      "name": "product_uom",
+      "widget": "many2one_uom",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "operation_id"
+     },
+     {
+      "name": "byproduct_id"
+     },
+     {
+      "name": "date_deadline"
+     },
+     {
+      "name": "picking_type_id"
+     },
+     {
+      "name": "location_id"
+     },
+     {
+      "name": "location_dest_id"
+     },
+     {
+      "name": "company_id"
+     },
+     {
+      "name": "warehouse_id"
+     },
+     {
+      "name": "origin"
+     },
+     {
+      "name": "propagate_cancel"
+     },
+     {
+      "name": "move_dest_ids"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "allowed_operation_ids"
+     },
+     {
+      "name": "quantity"
+     },
+     {
+      "name": "picked"
+     },
+     {
+      "name": "cost_share"
+     },
+     {
+      "name": "move_raw_ids",
+      "readonly": "state == 'cancel' or (state == 'done' and is_locked)",
+      "context": "{'default_date': date_start, 'default_date_deadline': date_start, 'default_location_id': location_src_id, 'default_location_dest_id': production_location_id, 'default_warehouse_id': warehouse_id, 'default_state': 'draft', 'default_raw_material_production_id': id, 'default_picking_type_id': picking_type_id, 'default_company_id': company_id, 'form_view_ref': 'mrp.view_mrp_stock_move_operations', 'active_mo_id': id}"
+     },
+     {
+      "name": "product_id",
+      "readonly": "move_lines_count > 0 or state == 'cancel' or (state != 'draft' and not additional)",
+      "required": "1",
+      "domain": "[('type', '=', 'consu')]",
+      "context": "{'default_is_storable': True}",
+      "force_save": "1"
+     },
+     {
+      "name": "forecast_availability",
+      "widget": "forecast_widget",
+      "string": "",
+      "column_invisible": "parent.state in ['done', 'cancel']"
+     },
+     {
+      "name": "location_id",
+      "readonly": "1",
+      "string": "From",
+      "optional": "hide",
+      "groups": "stock.group_stock_multi_locations",
+      "force_save": "1"
+     },
+     {
+      "name": "product_uom",
+      "column_invisible": "True"
+     },
+     {
+      "name": "propagate_cancel",
+      "column_invisible": "True"
+     },
+     {
+      "name": "price_unit",
+      "column_invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "allowed_operation_ids",
+      "column_invisible": "True"
+     },
+     {
+      "name": "unit_factor",
+      "column_invisible": "True"
+     },
+     {
+      "name": "date_deadline",
+      "column_invisible": "True",
+      "force_save": "1"
+     },
+     {
+      "name": "date",
+      "column_invisible": "True"
+     },
+     {
+      "name": "additional",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_type_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_storable",
+      "column_invisible": "True"
+     },
+     {
+      "name": "has_tracking",
+      "column_invisible": "True"
+     },
+     {
+      "name": "operation_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "bom_line_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "sequence",
+      "column_invisible": "True"
+     },
+     {
+      "name": "warehouse_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_locked",
+      "column_invisible": "True"
+     },
+     {
+      "name": "move_lines_count",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_dest_id",
+      "domain": "[('id', 'child_of', parent.location_dest_id)]",
+      "column_invisible": "True"
+     },
+     {
+      "name": "state",
+      "column_invisible": "True",
+      "force_save": "1"
+     },
+     {
+      "name": "should_consume_qty",
+      "column_invisible": "True"
+     },
+     {
+      "name": "product_uom_qty",
+      "readonly": "parent.state != 'draft' and ((parent.state not in ('confirmed', 'progress', 'to_close') and not parent.is_planned) or (parent.is_locked and state != 'draft'))",
+      "string": "To Consume",
+      "column_invisible": "not parent.show_produce_all",
+      "force_save": "1"
+     },
+     {
+      "name": "product_uom_qty",
+      "widget": "mrp_should_consume",
+      "readonly": "parent.state != 'draft' and ((parent.state not in ('confirmed', 'progress', 'to_close') and not parent.is_planned) or (parent.is_locked and state != 'draft'))",
+      "string": "To Consume",
+      "column_invisible": "parent.show_produce_all",
+      "force_save": "1"
+     },
+     {
+      "name": "product_qty",
+      "readonly": "1",
+      "column_invisible": "True"
+     },
+     {
+      "name": "forecast_expected_date",
+      "column_invisible": "True"
+     },
+     {
+      "name": "quantity",
+      "string": "Consumed",
+      "column_invisible": "parent.state == 'draft'",
+      "decoration-warning": "(state not in ['done', 'cancel']) and (quantity - (should_consume_qty if parent.qty_producing else product_uom_qty) > 0.0001)",
+      "decoration-success": "(state not in ['done', 'cancel']) and (quantity - (should_consume_qty if parent.qty_producing else product_uom_qty) == 0)",
+      "decoration-info": "manual_consumption",
+      "decoration-muted": "not manual_consumption",
+      "decoration-bf": "manual_consumption",
+      "force_save": "1"
+     },
+     {
+      "name": "product_uom",
+      "widget": "many2one_uom",
+      "readonly": "state != 'draft' and id",
+      "options": "{'no_open': True, 'no_create': True}",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "picked",
+      "column_invisible": "True"
+     },
+     {
+      "name": "manual_consumption",
+      "column_invisible": "True",
+      "force_save": "1"
+     },
+     {
+      "name": "show_details_visible",
+      "column_invisible": "True"
+     },
+     {
+      "name": "lot_ids",
+      "widget": "many2many_tags",
+      "invisible": "not show_details_visible",
+      "readonly": "1",
+      "string": "Lot/Serial Numbers",
+      "domain": "[('product_id','=',product_id)]",
+      "context": "{'default_product_id': product_id}",
+      "options": "{'create': [('parent.use_create_components_lots', '!=', False)]}",
+      "column_invisible": "not parent.show_lot_ids or parent.state == 'draft'",
+      "optional": "hide",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "workorder_ids",
+      "context": "{'list_view_ref': 'mrp.mrp_production_workorder_tree_editable_view_mo_form', 'from_manufacturing_order': True}",
+      "options": "{'create': [('id', '!=', False), ('state', '!=', 'done')]}"
+     },
+     {
+      "name": "move_byproduct_ids",
+      "readonly": "state == 'cancel' or (state == 'done' and is_locked)",
+      "context": "{'default_date': date_finished, 'default_date_deadline': date_deadline, 'default_warehouse_id': warehouse_id, 'default_location_id': production_location_id, 'default_location_dest_id': location_dest_id, 'default_state': 'draft', 'default_production_id': id, 'default_picking_type_id': picking_type_id, 'default_company_id': company_id, 'form_view_ref': 'mrp.view_mrp_stock_move_operations'}",
+      "options": "{'delete': [('state', '=', 'draft')]}"
+     },
+     {
+      "name": "product_id",
+      "readonly": "move_lines_count > 0 or state == 'cancel' or (state != 'draft' and not additional)",
+      "required": "1",
+      "domain": "[('type', '=', 'consu')]",
+      "context": "{'default_is_storable': True}"
+     },
+     {
+      "name": "location_dest_id",
+      "readonly": "1",
+      "string": "To",
+      "groups": "stock.group_stock_multi_locations",
+      "force_save": "1"
+     },
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "allowed_operation_ids",
+      "column_invisible": "True"
+     },
+     {
+      "name": "unit_factor",
+      "column_invisible": "True"
+     },
+     {
+      "name": "date",
+      "column_invisible": "True"
+     },
+     {
+      "name": "date_deadline",
+      "column_invisible": "True",
+      "force_save": "1"
+     },
+     {
+      "name": "additional",
+      "column_invisible": "True"
+     },
+     {
+      "name": "picking_type_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "has_tracking",
+      "column_invisible": "True"
+     },
+     {
+      "name": "operation_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "bom_line_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "byproduct_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "sequence",
+      "column_invisible": "True"
+     },
+     {
+      "name": "location_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "warehouse_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_locked",
+      "column_invisible": "True"
+     },
+     {
+      "name": "move_lines_count",
+      "column_invisible": "True"
+     },
+     {
+      "name": "state",
+      "column_invisible": "True",
+      "force_save": "1"
+     },
+     {
+      "name": "product_uom_qty",
+      "readonly": "parent.state != 'draft' and ((parent.state not in ('confirmed', 'progress', 'to_close') and not parent.is_planned) or parent.is_locked)",
+      "string": "To Produce",
+      "force_save": "1"
+     },
+     {
+      "name": "quantity",
+      "readonly": "has_tracking != 'none'",
+      "column_invisible": "parent.state == 'draft'"
+     },
+     {
+      "name": "picked",
+      "string": "Produced",
+      "column_invisible": "parent.state == 'draft'",
+      "optional": "show"
+     },
+     {
+      "name": "product_uom",
+      "widget": "many2one_uom",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "cost_share",
+      "optional": "hide"
+     },
+     {
+      "name": "show_details_visible",
+      "column_invisible": "True"
+     },
+     {
+      "name": "lot_ids",
+      "widget": "many2many_tags",
+      "invisible": "not show_details_visible",
+      "readonly": "1",
+      "string": "Lot/Serial Numbers",
+      "domain": "[('product_id','=',product_id)]",
+      "context": "{'default_product_id': product_id}",
+      "options": "{'create': [('parent.use_create_components_lots', '!=', False)]}",
+      "column_invisible": "not parent.show_lot_ids or parent.state == 'draft'",
+      "optional": "hide",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "picking_type_id",
+      "readonly": "state not in ('draft', 'confirmed')"
+     },
+     {
+      "name": "location_src_id",
+      "readonly": "state != 'draft'",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "location_src_id",
+      "invisible": "1",
+      "groups": "!stock.group_stock_multi_locations"
+     },
+     {
+      "name": "warehouse_id",
+      "invisible": "1"
+     },
+     {
+      "name": "location_dest_id",
+      "readonly": "state != 'draft'",
+      "options": "{'no_create': True}",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "location_dest_id",
+      "invisible": "1",
+      "groups": "!stock.group_stock_multi_locations"
+     },
+     {
+      "name": "origin",
+      "readonly": "state in ['cancel', 'done']"
+     },
+     {
+      "name": "date_deadline"
+     },
+     {
+      "name": "is_delayed",
+      "invisible": "True"
+     },
+     {
+      "name": "company_id",
+      "readonly": "state != 'draft'",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company",
+      "force_save": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "button_mark_done",
+      "string": "Produce",
+      "type": "object",
+      "invisible": "not move_raw_ids or not show_produce",
+      "class": "oe_highlight",
+      "data-hotkey": "g"
+     },
+     {
+      "name": "button_mark_done",
+      "string": "Produce All",
+      "type": "object",
+      "invisible": "not move_raw_ids or not show_produce_all",
+      "class": "oe_highlight",
+      "data-hotkey": "g"
+     },
+     {
+      "name": "button_mark_done",
+      "string": "Produce",
+      "type": "object",
+      "invisible": "move_raw_ids or not show_produce",
+      "class": "oe_highlight",
+      "confirm": "There are no components to consume. Are you still sure you want to continue?",
+      "data-hotkey": "g"
+     },
+     {
+      "name": "button_mark_done",
+      "string": "Produce All",
+      "type": "object",
+      "invisible": "move_raw_ids or not show_produce_all",
+      "class": "oe_highlight",
+      "confirm": "There are no components to consume. Are you still sure you want to continue?",
+      "data-hotkey": "g"
+     },
+     {
+      "name": "action_confirm",
+      "string": "Confirm",
+      "type": "object",
+      "invisible": "state != 'draft'",
+      "class": "oe_highlight",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "button_plan",
+      "string": "Plan",
+      "type": "object",
+      "invisible": "state not in ('confirmed', 'progress', 'to_close') or not workorder_ids or is_planned",
+      "class": "oe_highlight",
+      "data-hotkey": "z"
+     },
+     {
+      "name": "button_unplan",
+      "string": "Unplan",
+      "type": "object",
+      "invisible": "not is_planned or state in ['cancel', 'done']",
+      "data-hotkey": "z"
+     },
+     {
+      "name": "action_start",
+      "string": "Start",
+      "type": "object",
+      "invisible": "state != 'confirmed'"
+     },
+     {
+      "name": "action_assign",
+      "string": "Check availability",
+      "type": "object",
+      "invisible": "state in ('draft', 'done', 'cancel') or not reserve_visible",
+      "data-hotkey": "c"
+     },
+     {
+      "name": "do_unreserve",
+      "string": "Unreserve",
+      "type": "object",
+      "invisible": "not unreserve_visible",
+      "data-hotkey": "w"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "not id or state in ('done', 'cancel')",
+      "confirm": "Are you sure you want to cancel this manufacturing order?",
+      "data-hotkey": "x"
+     },
+     {
+      "name": "button_unbuild",
+      "string": "Unbuild",
+      "type": "object",
+      "invisible": "state != 'done'",
+      "data-hotkey": "shift+v"
+     },
+     {
+      "name": "action_view_reception_report",
+      "string": "Allocation",
+      "type": "object",
+      "invisible": "not show_allocation",
+      "class": "oe_stat_button",
+      "groups": "mrp.group_mrp_reception_report",
+      "icon": "fa-list"
+     },
+     {
+      "name": "action_view_mrp_production_childs",
+      "type": "object",
+      "invisible": "mrp_production_child_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-wrench"
+     },
+     {
+      "name": "action_view_mrp_production_sources",
+      "type": "object",
+      "invisible": "mrp_production_source_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-wrench"
+     },
+     {
+      "name": "action_view_mrp_production_backorders",
+      "type": "object",
+      "invisible": "mrp_production_backorder_count < 2",
+      "class": "oe_stat_button",
+      "icon": "fa-wrench"
+     },
+     {
+      "name": "action_view_mrp_production_unbuilds",
+      "type": "object",
+      "invisible": "unbuild_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-undo"
+     },
+     {
+      "name": "action_see_move_scrap",
+      "type": "object",
+      "invisible": "scrap_count == 0",
+      "class": "oe_stat_button",
+      "icon": "oi-arrows-v"
+     },
+     {
+      "name": "action_view_mo_delivery",
+      "type": "object",
+      "invisible": "delivery_count == 0",
+      "class": "oe_stat_button",
+      "groups": "base.group_user",
+      "icon": "fa-truck"
+     },
+     {
+      "name": "%(stock.action_stock_report)d",
+      "string": "Traceability",
+      "type": "action",
+      "invisible": "state != 'done'",
+      "class": "oe_stat_button",
+      "groups": "stock.group_production_lot",
+      "icon": "oi-arrow-up"
+     },
+     {
+      "name": "%(action_mrp_production_moves)d",
+      "type": "action",
+      "invisible": "state not in ('progress', 'done')",
+      "class": "oe_stat_button",
+      "icon": "fa-exchange"
+     },
+     {
+      "name": "%(action_report_mo_overview)d",
+      "type": "action",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     },
+     {
+      "name": "action_view_serial_numbers",
+      "type": "object",
+      "invisible": "serial_numbers_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-wrench"
+     },
+     {
+      "name": "%(mrp.action_change_production_qty)d",
+      "type": "action",
+      "invisible": "state in ('draft', 'done', 'cancel') or not id",
+      "class": "oe_link oe_inline",
+      "context": "{'default_mo_id': id}"
+     },
+     {
+      "name": "action_product_forecast_report",
+      "type": "object",
+      "invisible": "forecasted_issue",
+      "icon": "fa-area-chart"
+     },
+     {
+      "name": "action_product_forecast_report",
+      "type": "object",
+      "invisible": "not forecasted_issue",
+      "class": "text-danger",
+      "icon": "fa-area-chart"
+     },
+     {
+      "name": "action_generate_bom",
+      "type": "object",
+      "invisible": "not show_generate_bom",
+      "groups": "mrp.group_mrp_manager",
+      "icon": "fa-plus"
+     },
+     {
+      "name": "action_update_bom",
+      "string": "Update BoM",
+      "type": "object",
+      "invisible": "not is_outdated_bom or state not in ['draft', 'confirmed']",
+      "class": "text-danger"
+     },
+     {
+      "name": "action_generate_serial",
+      "string": "Generate Serial",
+      "type": "object",
+      "invisible": "product_tracking in ('none', 'lot', False) or lot_producing_ids",
+      "class": "btn btn-primary o_right_alignment"
+     },
+     {
+      "name": "action_generate_serial",
+      "string": "Generate Serial",
+      "type": "object",
+      "invisible": "product_tracking in ('none', 'lot', False) or not lot_producing_ids or product_qty == 1",
+      "class": "btn btn-secondary o_right_alignment"
+     },
+     {
+      "name": "action_generate_serial",
+      "string": "Generate Lot",
+      "type": "object",
+      "invisible": "product_tracking in ('none', 'serial', False) or lot_producing_ids",
+      "class": "btn btn-primary o_right_alignment"
+     },
+     {
+      "name": "action_clear_lot_producing_ids",
+      "string": "Clear",
+      "type": "object",
+      "invisible": "state == 'done' or  (product_tracking == 'serial' and product_qty > 1) or not lot_producing_ids",
+      "class": "btn btn-secondary o_right_alignment"
+     },
+     {
+      "name": "action_add_from_catalog_raw",
+      "string": "Catalog",
+      "type": "object",
+      "class": "px-4 btn-link",
+      "context": "{'order_id': parent.id}"
+     },
+     {
+      "name": "action_show_details",
+      "string": "Details",
+      "type": "object",
+      "invisible": "not show_details_visible or has_tracking == 'none'",
+      "context": "{'default_product_uom_qty': 0}"
+     },
+     {
+      "name": "action_show_details",
+      "string": "Details",
+      "type": "object",
+      "invisible": "has_tracking != 'none' or not show_details_visible",
+      "class": "o_optional_button btn",
+      "context": "{'default_product_uom_qty': 0}"
+     },
+     {
+      "name": "action_add_from_catalog_byproduct",
+      "string": "Catalog",
+      "type": "object",
+      "class": "px-4 btn-link",
+      "context": "{'order_id': parent.id}"
+     },
+     {
+      "name": "action_show_details",
+      "type": "object",
+      "invisible": "has_tracking == 'none' or not show_details_visible",
+      "icon": "fa-list"
+     },
+     {
+      "name": "action_show_details",
+      "type": "object",
+      "invisible": "has_tracking != 'none' or not show_details_visible",
+      "class": "o_optional_button btn btn-light",
+      "icon": "fa-list"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "components",
+      "string": "Components",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "operations",
+      "string": "Work Orders",
+      "invisible": null,
+      "groups": "mrp.group_mrp_routings"
+     },
+     {
+      "name": "finished_products",
+      "string": "By-Products",
+      "invisible": null,
+      "groups": "mrp.group_mrp_byproducts"
+     },
+     {
+      "name": "miscellaneous",
+      "string": "Miscellaneous",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "statusbar": 1,
+     "statinfo": 1,
+     "priority": 1,
+     "many2one_uom": 4,
+     "many2many_tags": 3,
+     "stock_rescheduling_popover": 1,
+     "many2one_avatar": 1,
+     "forecast_widget": 1,
+     "mrp_should_consume": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "button_mark_done",
+      "invisible": "not move_raw_ids or not show_produce",
+      "string": "Produce",
+      "type": "object",
+      "class": "oe_highlight",
+      "data-hotkey": "g"
+     },
+     {
+      "name": "button_mark_done",
+      "invisible": "not move_raw_ids or not show_produce_all",
+      "string": "Produce All",
+      "type": "object",
+      "class": "oe_highlight",
+      "data-hotkey": "g"
+     },
+     {
+      "name": "button_mark_done",
+      "invisible": "move_raw_ids or not show_produce",
+      "string": "Produce",
+      "type": "object",
+      "class": "oe_highlight",
+      "data-hotkey": "g",
+      "confirm": "There are no components to consume. Are you still sure you want to continue?"
+     },
+     {
+      "name": "button_mark_done",
+      "invisible": "move_raw_ids or not show_produce_all",
+      "string": "Produce All",
+      "type": "object",
+      "class": "oe_highlight",
+      "data-hotkey": "g",
+      "confirm": "There are no components to consume. Are you still sure you want to continue?"
+     },
+     {
+      "name": "action_confirm",
+      "invisible": "state != 'draft'",
+      "string": "Confirm",
+      "type": "object",
+      "class": "oe_highlight",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "button_plan",
+      "invisible": "state not in ('confirmed', 'progress', 'to_close') or not workorder_ids or is_planned",
+      "type": "object",
+      "string": "Plan",
+      "class": "oe_highlight",
+      "data-hotkey": "z"
+     },
+     {
+      "name": "button_unplan",
+      "type": "object",
+      "string": "Unplan",
+      "invisible": "not is_planned or state in ['cancel', 'done']",
+      "data-hotkey": "z"
+     },
+     {
+      "name": "action_start",
+      "type": "object",
+      "string": "Start",
+      "invisible": "state != 'confirmed'"
+     },
+     {
+      "name": "action_assign",
+      "invisible": "state in ('draft', 'done', 'cancel') or not reserve_visible",
+      "string": "Check availability",
+      "type": "object",
+      "data-hotkey": "c"
+     },
+     {
+      "name": "do_unreserve",
+      "type": "object",
+      "string": "Unreserve",
+      "invisible": "not unreserve_visible",
+      "data-hotkey": "w"
+     },
+     {
+      "name": "action_cancel",
+      "type": "object",
+      "string": "Cancel",
+      "data-hotkey": "x",
+      "invisible": "not id or state in ('done', 'cancel')",
+      "confirm": "Are you sure you want to cancel this manufacturing order?",
+      "confirm-label": "Confirm",
+      "cancel-label": "Discard"
+     },
+     {
+      "name": "button_unbuild",
+      "type": "object",
+      "string": "Unbuild",
+      "invisible": "state != 'done'",
+      "data-hotkey": "shift+v"
+     }
+    ],
+    "statusbar_field": "show_lock",
+    "statusbar_visible": null,
+    "chatter": true,
+    "button_box": [
+     {
+      "name": "action_view_reception_report",
+      "string": "Allocation",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-list",
+      "invisible": "not show_allocation",
+      "groups": "mrp.group_mrp_reception_report"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "action_view_mrp_production_childs",
+      "type": "object",
+      "icon": "fa-wrench",
+      "invisible": "mrp_production_child_count == 0"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "action_view_mrp_production_sources",
+      "type": "object",
+      "icon": "fa-wrench",
+      "invisible": "mrp_production_source_count == 0"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "action_view_mrp_production_backorders",
+      "type": "object",
+      "icon": "fa-wrench",
+      "invisible": "mrp_production_backorder_count < 2"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "action_view_mrp_production_unbuilds",
+      "type": "object",
+      "icon": "fa-undo",
+      "invisible": "unbuild_count == 0"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "action_see_move_scrap",
+      "type": "object",
+      "icon": "oi-arrows-v",
+      "invisible": "scrap_count == 0"
+     },
+     {
+      "type": "object",
+      "name": "action_view_mo_delivery",
+      "class": "oe_stat_button",
+      "icon": "fa-truck",
+      "groups": "base.group_user",
+      "invisible": "delivery_count == 0"
+     },
+     {
+      "name": "%(stock.action_stock_report)d",
+      "icon": "oi-arrow-up",
+      "class": "oe_stat_button",
+      "string": "Traceability",
+      "type": "action",
+      "invisible": "state != 'done'",
+      "groups": "stock.group_production_lot"
+     },
+     {
+      "name": "%(action_mrp_production_moves)d",
+      "type": "action",
+      "class": "oe_stat_button",
+      "icon": "fa-exchange",
+      "invisible": "state not in ('progress', 'done')"
+     },
+     {
+      "name": "%(action_report_mo_overview)d",
+      "type": "action",
+      "class": "oe_stat_button",
+      "icon": "fa-bars"
+     },
+     {
+      "class": "oe_stat_button",
+      "name": "action_view_serial_numbers",
+      "type": "object",
+      "icon": "fa-wrench",
+      "invisible": "serial_numbers_count == 0"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Manufacturing Orders\">\n                <header>\n                    <field name=\"show_lock\" invisible=\"1\"/>\n                    <field name=\"show_produce\" invisible=\"1\"/>\n                    <field name=\"show_produce_all\" invisible=\"1\"/>\n                    <button name=\"button_mark_done\" invisible=\"not move_raw_ids or not show_produce\" string=\"Produce\" type=\"object\" class=\"oe_highlight\" data-hotkey=\"g\"/>\n                    <button name=\"button_mark_done\" invisible=\"not move_raw_ids or not show_produce_all\" string=\"Produce All\" type=\"object\" class=\"oe_highlight\" data-hotkey=\"g\"/>\n                    <button name=\"button_mark_done\" invisible=\"move_raw_ids or not show_produce\" string=\"Produce\" type=\"object\" class=\"oe_highlight\" data-hotkey=\"g\" confirm=\"There are no components to consume. Are you still sure you want to continue?\"/>\n                    <button name=\"button_mark_done\" invisible=\"move_raw_ids or not show_produce_all\" string=\"Produce All\" type=\"object\" class=\"oe_highlight\" data-hotkey=\"g\" confirm=\"There are no components to consume. Are you still sure you want to continue?\"/>\n                    <button name=\"action_confirm\" invisible=\"state != 'draft'\" string=\"Confirm\" type=\"object\" class=\"oe_highlight\" data-hotkey=\"q\"/>\n                    <button name=\"button_plan\" invisible=\"state not in ('confirmed', 'progress', 'to_close') or not workorder_ids or is_planned\" type=\"object\" string=\"Plan\" class=\"oe_highlight\" data-hotkey=\"z\"/>\n                    <button name=\"button_unplan\" type=\"object\" string=\"Unplan\" invisible=\"not is_planned or state in ['cancel', 'done']\" data-hotkey=\"z\"/>\n                    <button name=\"action_start\" type=\"object\" string=\"Start\" invisible=\"state != 'confirmed'\"/>\n                    <button name=\"action_assign\" invisible=\"state in ('draft', 'done', 'cancel') or not reserve_visible\" string=\"Check availability\" type=\"object\" data-hotkey=\"c\"/>\n                    <button name=\"do_unreserve\" type=\"object\" string=\"Unreserve\" invisible=\"not unreserve_visible\" data-hotkey=\"w\"/>\n                    <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"draft,confirmed,done\"/>\n                    <button name=\"action_cancel\" type=\"object\" string=\"Cancel\" data-hotkey=\"x\" invisible=\"not id or state in ('done', 'cancel')\" confirm=\"Are you sure you want to cancel this manufacturing order?\" confirm-label=\"Confirm\" cancel-label=\"Discard\"/>\n                    <button name=\"button_unbuild\" type=\"object\" string=\"Unbuild\" invisible=\"state != 'done'\" data-hotkey=\"shift+v\"/>\n                </header>\n                <sheet>\n                    <field name=\"reservation_state\" invisible=\"1\"/>\n                    <field name=\"date_finished\" invisible=\"1\"/>\n                    <field name=\"is_locked\" invisible=\"1\"/>\n                    <field name=\"qty_produced\" invisible=\"1\"/>\n                    <field name=\"unreserve_visible\" invisible=\"1\"/>\n                    <field name=\"reserve_visible\" invisible=\"1\"/>\n                    <field name=\"consumption\" invisible=\"1\"/>\n                    <field name=\"is_planned\" invisible=\"1\"/>\n                    <field name=\"show_allocation\" invisible=\"1\"/>\n                    <field name=\"workorder_ids\" invisible=\"1\"/>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button name=\"action_view_reception_report\" string=\"Allocation\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-list\" invisible=\"not show_allocation\" groups=\"mrp.group_mrp_reception_report\"/>\n                        <button class=\"oe_stat_button\" name=\"action_view_mrp_production_childs\" type=\"object\" icon=\"fa-wrench\" invisible=\"mrp_production_child_count == 0\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <span class=\"o_stat_value\"><field name=\"mrp_production_child_count\"/></span>\n                                <span class=\"o_stat_text\">Child MO</span>\n                            </div>\n                        </button>\n                        <button class=\"oe_stat_button\" name=\"action_view_mrp_production_sources\" type=\"object\" icon=\"fa-wrench\" invisible=\"mrp_production_source_count == 0\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <span class=\"o_stat_value\"><field name=\"mrp_production_source_count\"/></span>\n                                <span class=\"o_stat_text\">Source MO</span>\n                            </div>\n                        </button>\n                        <button class=\"oe_stat_button\" name=\"action_view_mrp_production_backorders\" type=\"object\" icon=\"fa-wrench\" invisible=\"mrp_production_backorder_count &lt; 2\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <span class=\"o_stat_value\"><field name=\"mrp_production_backorder_count\"/></span>\n                                <span class=\"o_stat_text\">Backorders</span>\n                            </div>\n                        </button>\n                        <button class=\"oe_stat_button\" name=\"action_view_mrp_production_unbuilds\" type=\"object\" icon=\"fa-undo\" invisible=\"unbuild_count == 0\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <span class=\"o_stat_value\"><field name=\"unbuild_count\"/></span>\n                                <span class=\"o_stat_text\">Unbuilds</span>\n                            </div>\n                        </button>\n                        <button class=\"oe_stat_button\" name=\"action_see_move_scrap\" type=\"object\" icon=\"oi-arrows-v\" invisible=\"scrap_count == 0\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <span class=\"o_stat_value\"><field name=\"scrap_count\"/></span>\n                                <span class=\"o_stat_text\">Scraps</span>\n                            </div>\n                        </button>\n                        <button type=\"object\" name=\"action_view_mo_delivery\" class=\"oe_stat_button\" icon=\"fa-truck\" groups=\"base.group_user\" invisible=\"delivery_count == 0\">\n                            <field name=\"delivery_count\" widget=\"statinfo\" string=\"Transfers\"/>\n                        </button>\n                        <button name=\"%(stock.action_stock_report)d\" icon=\"oi-arrow-up\" class=\"oe_stat_button\" string=\"Traceability\" type=\"action\" invisible=\"state != 'done'\" groups=\"stock.group_production_lot\">\n                            <div class=\"o_stat_info\">\n                                <span class=\"o_stat_text\">Traceability</span>\n                            </div>\n                        </button>\n                        <button name=\"%(action_mrp_production_moves)d\" type=\"action\" class=\"oe_stat_button\" icon=\"fa-exchange\" invisible=\"state not in ('progress', 'done')\">\n                            <div class=\"o_stat_info\">\n                                <span class=\"o_stat_text\">Product Moves</span>\n                            </div>\n                        </button>\n                        <button name=\"%(action_report_mo_overview)d\" type=\"action\" class=\"oe_stat_button\" icon=\"fa-bars\">\n                            <div class=\"o_stat_info\">\n                                <span class=\"o_stat_text\">Overview</span>\n                            </div>\n                        </button>\n                        <button class=\"oe_stat_button\" name=\"action_view_serial_numbers\" type=\"object\" icon=\"fa-wrench\" invisible=\"serial_numbers_count == 0\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <span class=\"o_stat_value\"><field name=\"serial_numbers_count\"/></span>\n                                <span class=\"o_stat_text\">Serial Numbers</span>\n                            </div>\n                        </button>\n                    </div>\n                    <div class=\"oe_title\">\n                        <h1 class=\"d-flex\">\n                            <field name=\"priority\" widget=\"priority\" class=\"me-3\"/>\n                            <field name=\"name\" placeholder=\"Manufacturing Reference\" nolabel=\"1\"/>\n                        </h1>\n                    </div>\n                    <group>\n                        <group>\n                            <field name=\"id\" invisible=\"1\"/>\n                            <field name=\"use_create_components_lots\" invisible=\"1\"/>\n                            <field name=\"show_lot_ids\" invisible=\"1\"/>\n                            <field name=\"product_tracking\" invisible=\"1\"/>\n                            <field name=\"allow_workorder_dependencies\" invisible=\"1\"/>\n                            <field name=\"product_id\" context=\"{'default_is_storable': True}\" readonly=\"state != 'draft'\" default_focus=\"1\" placeholder=\"Product to build...\"/>\n                            <field name=\"product_tmpl_id\" invisible=\"1\"/>\n                            <field name=\"forecasted_issue\" invisible=\"1\"/>\n                            <field name=\"company_id\" invisible=\"1\"/>\n                            <field name=\"product_description_variants\" invisible=\"product_description_variants in (False, '')\" readonly=\"state != 'draft'\"/>\n                            <label for=\"product_qty\" string=\"Quantity\"/>\n                            <div class=\"o_row g-0 d-flex\" name=\"qty\">\n                                <div invisible=\"state == 'draft'\" class=\"o_row flex-grow-1\">\n                                    <field name=\"qty_producing\" class=\"text-start text-truncate\" readonly=\"state == 'cancel' or (state == 'done' and is_locked) or product_tracking=='serial'\" force_save=\"1\"/>\n                                    /\n                                </div>\n                                <field name=\"product_qty\" class=\"oe_inline text-start text-truncate\" invisible=\"state not in ('draft', 'done')\" readonly=\"state != 'draft'\" style=\"width:auto!important\"/>\n                                <button type=\"action\" name=\"%(mrp.action_change_production_qty)d\" context=\"{'default_mo_id': id}\" class=\"oe_link oe_inline\" style=\"margin: 0px; padding: 0px;\" invisible=\"state in ('draft', 'done', 'cancel') or not id\">\n                                    <field name=\"product_qty\" class=\"oe_inline\" readonly=\"state != 'draft'\"/>\n                                </button>\n                                <label for=\"product_uom_id\" string=\"\" class=\"oe_inline\"/>\n                                <field name=\"product_uom_id\" options=\"{'no_open': True, 'no_create': True, 'quantity_field': 'product_qty'}\" groups=\"uom.group_uom\" widget=\"many2one_uom\" readonly=\"state != 'draft'\" class=\"flex-grow-0\" style=\"width:auto!important\"/>\n                                <span name=\"to_produce\" class=\"fw-bold text-nowrap\">To Produce</span>\n                                <button type=\"object\" name=\"action_product_forecast_report\" title=\"Forecast Report\" icon=\"fa-area-chart\" invisible=\"forecasted_issue\"/>\n                                <button type=\"object\" name=\"action_product_forecast_report\" title=\"Forecast Report\" icon=\"fa-area-chart\" invisible=\"not forecasted_issue\" class=\"text-danger\"/>\n                            </div>\n                            <label for=\"bom_id\" name=\"bom_label\"/>\n                            <div class=\"o_row\" name=\"bom_div\">\n                                <field name=\"is_outdated_bom\" invisible=\"1\"/>\n                                <field name=\"bom_id\" context=\"{'default_product_tmpl_id': product_tmpl_id}\" invisible=\"state != 'draft' and not bom_id\" readonly=\"state != 'draft'\"/>\n                                <button name=\"action_generate_bom\" type=\"object\" icon=\"fa-plus\" title=\"Generate a new BoM from this Manufacturing Order\" groups=\"mrp.group_mrp_manager\" invisible=\"not show_generate_bom\">\n                                    <span>Generate BOM</span>\n                                </button>\n                                <button name=\"action_update_bom\" string=\"Update BoM\" type=\"object\" title=\"Note that another version of this BOM is available.\" class=\"text-danger\" invisible=\"not is_outdated_bom or state not in ['draft', 'confirmed']\"/>\n                            </div>\n                            <label for=\"lot_producing_ids\" invisible=\"state in ('draft', 'cancel') or product_tracking in ('none', False) or (state == 'done' and product_tracking == 'serial' and product_qty &gt; 1)\"/>\n                            <div class=\"o_row\" invisible=\"state in ('draft', 'cancel') or product_tracking in ('none', False) or (state == 'done' and product_tracking == 'serial' and product_qty &gt; 1)\">\n                                <field name=\"lot_producing_ids\" widget=\"many2many_tags\" options=\"{'edit_tags': True}\" invisible=\"product_tracking in ('none', False) or (product_tracking == 'serial' and (product_qty &gt; 1 or serial_numbers_count &gt; 1))\" readonly=\"lot_producing_ids\" force_save=\"1\" context=\"{'default_product_id': product_id}\"/>\n                                <button name=\"action_generate_serial\" type=\"object\" class=\"btn btn-primary o_right_alignment\" string=\"Generate Serial\" aria-label=\"Creates a new serial number\" title=\"Creates a new serial number\" role=\"img\" invisible=\"product_tracking in ('none', 'lot', False) or lot_producing_ids\"/>\n                                <button name=\"action_generate_serial\" type=\"object\" class=\"btn btn-secondary o_right_alignment\" string=\"Generate Serial\" aria-label=\"Creates a new serial number\" title=\"Creates a new serial number\" role=\"img\" invisible=\"product_tracking in ('none', 'lot', False) or not lot_producing_ids or product_qty == 1\"/>\n                                <button name=\"action_generate_serial\" type=\"object\" class=\"btn btn-primary o_right_alignment\" string=\"Generate Lot\" aria-label=\"Creates a new lot number\" title=\"Creates a new lot number\" role=\"img\" invisible=\"product_tracking in ('none', 'serial', False) or lot_producing_ids\"/>\n                                <button name=\"action_clear_lot_producing_ids\" type=\"object\" class=\"btn btn-secondary o_right_alignment\" string=\"Clear\" aria-label=\"Clears the selected lot/serial number\" title=\"Clears the selected lot/serial number\" role=\"img\" invisible=\"state == 'done' or  (product_tracking == 'serial' and product_qty &gt; 1) or not lot_producing_ids\"/>\n                            </div>\n                        </group>\n                        <group name=\"group_extra_info\">\n                            <label name=\"scheduled_date\" for=\"date_start\" string=\"Scheduled Date\" invisible=\"state in ['progress', 'to_close', 'done', 'cancel']\"/>\n                            <label name=\"start_date\" for=\"date_start\" string=\"Start Date\" invisible=\"state not in ['progress', 'to_close', 'done', 'cancel']\"/>\n                            <div class=\"o_row\" name=\"date_start\">\n                                <field name=\"date_start\" readonly=\"state in ['done', 'to_close', 'cancel']\" decoration-warning=\"state not in ('done', 'cancel') and date_start &lt; now\" decoration-danger=\"state not in ('done', 'cancel') and date_deadline and date_deadline &lt; date_finished\" help=\"Date at which you plan to start.                                           Red if the scheduled end is forecasted after the production order deadline.                                           Orange if the scheduled date is in the past.\"/>\n                                <field name=\"delay_alert_date\" invisible=\"1\"/>\n                                <field nolabel=\"1\" name=\"json_popover\" widget=\"stock_rescheduling_popover\" invisible=\"not json_popover\"/>\n                            </div>\n                            <field name=\"components_availability_state\" invisible=\"1\"/>\n                            <field name=\"components_availability\" invisible=\"state not in ['confirmed', 'progress']\" decoration-success=\"reservation_state == 'assigned' or components_availability_state == 'available'\" decoration-warning=\"reservation_state != 'assigned' and components_availability_state in ('expected', 'available')\" decoration-danger=\"reservation_state != 'assigned' and components_availability_state in ('late', 'unavailable')\"/>\n                            <field name=\"user_id\" widget=\"many2one_avatar\" readonly=\"state in ['cancel', 'done']\"/>\n                            <field name=\"show_final_lots\" invisible=\"1\"/>\n                            <field name=\"production_location_id\" invisible=\"1\" readonly=\"1\"/>\n                            <field name=\"move_finished_ids\" invisible=\"1\" readonly=\"state == 'cancel' or (state == 'done' and is_locked)\">\n                                <list editable=\"bottom\">\n                                    <field name=\"product_id\" readonly=\"state == 'done'\"/>\n                                    <field name=\"product_uom_qty\" readonly=\"state == 'done'\"/>\n                                    <field name=\"product_uom\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n                                    <field name=\"operation_id\"/>\n                                    <field name=\"byproduct_id\"/>\n                                    <field name=\"date_deadline\"/>\n                                    <field name=\"picking_type_id\"/>\n                                    <field name=\"location_id\"/>\n                                    <field name=\"location_dest_id\"/>\n                                    <field name=\"company_id\"/>\n                                    <field name=\"warehouse_id\"/>\n                                    <field name=\"origin\"/>\n                                    <field name=\"propagate_cancel\"/>\n                                    <field name=\"move_dest_ids\"/>\n                                    <field name=\"state\"/>\n                                    \n                                    <field name=\"allowed_operation_ids\"/>\n                                    \n                                    <field name=\"quantity\"/>\n                                    <field name=\"picked\"/>\n                                    \n                                    <field name=\"cost_share\"/>\n                                </list>\n                            </field>\n                        </group>\n                    </group>\n                    <notebook>\n                        <page string=\"Components\" name=\"components\">\n                            <field name=\"move_raw_ids\" context=\"{'default_date': date_start, 'default_date_deadline': date_start, 'default_location_id': location_src_id, 'default_location_dest_id': production_location_id, 'default_warehouse_id': warehouse_id, 'default_state': 'draft', 'default_raw_material_production_id': id, 'default_picking_type_id': picking_type_id, 'default_company_id': company_id, 'form_view_ref': 'mrp.view_mrp_stock_move_operations', 'active_mo_id': id}\" readonly=\"state == 'cancel' or (state == 'done' and is_locked)\">\n                                <list editable=\"bottom\">\n                                    <control>\n                                        <create string=\"Add a line\"/>\n                                        <button name=\"action_add_from_catalog_raw\" string=\"Catalog\" type=\"object\" class=\"px-4 btn-link\" context=\"{'order_id': parent.id}\"/>\n                                    </control>\n                                    <field name=\"product_id\" force_save=\"1\" context=\"{'default_is_storable': True}\" required=\"1\" readonly=\"move_lines_count &gt; 0 or state == 'cancel' or (state != 'draft' and not additional)\" domain=\"[('type', '=', 'consu')]\"/>\n                                    <field name=\"forecast_availability\" column_invisible=\"parent.state in ['done', 'cancel']\" string=\"\" widget=\"forecast_widget\"/>\n                                    <field name=\"location_id\" string=\"From\" readonly=\"1\" force_save=\"1\" groups=\"stock.group_stock_multi_locations\" optional=\"hide\"/>\n                                    \n                                    <field name=\"product_uom\" column_invisible=\"True\"/>\n                                    <field name=\"propagate_cancel\" column_invisible=\"True\"/>\n                                    <field name=\"price_unit\" column_invisible=\"True\"/>\n                                    <field name=\"company_id\" column_invisible=\"True\"/>\n                                    <field name=\"allowed_operation_ids\" column_invisible=\"True\"/>\n                                    <field name=\"unit_factor\" column_invisible=\"True\"/>\n                                    <field name=\"date_deadline\" column_invisible=\"True\" force_save=\"1\"/>\n                                    <field name=\"date\" column_invisible=\"True\"/>\n                                    <field name=\"additional\" column_invisible=\"True\"/>\n                                    <field name=\"picking_type_id\" column_invisible=\"True\"/>\n                                    <field name=\"is_storable\" column_invisible=\"True\"/>\n                                    <field name=\"has_tracking\" column_invisible=\"True\"/>\n                                    <field name=\"operation_id\" column_invisible=\"True\"/>\n                                    <field name=\"bom_line_id\" column_invisible=\"True\"/>\n                                    <field name=\"sequence\" column_invisible=\"True\"/>\n                                    <field name=\"warehouse_id\" column_invisible=\"True\"/>\n                                    <field name=\"is_locked\" column_invisible=\"True\"/>\n                                    <field name=\"move_lines_count\" column_invisible=\"True\"/>\n                                    <field name=\"location_dest_id\" domain=\"[('id', 'child_of', parent.location_dest_id)]\" column_invisible=\"True\"/>\n                                    <field name=\"state\" column_invisible=\"True\" force_save=\"1\"/>\n                                    <field name=\"should_consume_qty\" column_invisible=\"True\"/>\n                                    <field name=\"product_uom_qty\" force_save=\"1\" string=\"To Consume\" column_invisible=\"not parent.show_produce_all\" readonly=\"parent.state != 'draft' and ((parent.state not in ('confirmed', 'progress', 'to_close') and not parent.is_planned) or (parent.is_locked and state != 'draft'))\"/>\n                                    <field name=\"product_uom_qty\" widget=\"mrp_should_consume\" force_save=\"1\" string=\"To Consume\" column_invisible=\"parent.show_produce_all\" readonly=\"parent.state != 'draft' and ((parent.state not in ('confirmed', 'progress', 'to_close') and not parent.is_planned) or (parent.is_locked and state != 'draft'))\"/>\n                                    <field name=\"product_qty\" readonly=\"1\" column_invisible=\"True\"/>\n                                    <field name=\"forecast_expected_date\" column_invisible=\"True\"/>\n                                    <field name=\"quantity\" string=\"Consumed\" decoration-success=\"(state not in ['done', 'cancel']) and (quantity - (should_consume_qty if parent.qty_producing else product_uom_qty) == 0)\" decoration-warning=\"(state not in ['done', 'cancel']) and (quantity - (should_consume_qty if parent.qty_producing else product_uom_qty) &gt; 0.0001)\" column_invisible=\"parent.state == 'draft'\" decoration-info=\"manual_consumption\" decoration-muted=\"not manual_consumption\" decoration-bf=\"manual_consumption\" force_save=\"1\"/>\n                                    <field name=\"product_uom\" readonly=\"state != 'draft' and id\" options=\"{'no_open': True, 'no_create': True}\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n                                    <field name=\"picked\" column_invisible=\"True\"/>\n                                    <field name=\"manual_consumption\" column_invisible=\"True\" force_save=\"1\"/>\n                                    <field name=\"show_details_visible\" column_invisible=\"True\"/>\n                                    <field name=\"lot_ids\" widget=\"many2many_tags\" optional=\"hide\" string=\"Lot/Serial Numbers\" help=\"Displays the consumed Lot/Serial Numbers.\" groups=\"stock.group_production_lot\" readonly=\"1\" column_invisible=\"not parent.show_lot_ids or parent.state == 'draft'\" invisible=\"not show_details_visible\" options=\"{'create': [('parent.use_create_components_lots', '!=', False)]}\" context=\"{'default_product_id': product_id}\" domain=\"[('product_id','=',product_id)]\"/>\n                                    <button name=\"action_show_details\" type=\"object\" title=\"Show Details\" string=\"Details\" context=\"{'default_product_uom_qty': 0}\" invisible=\"not show_details_visible or has_tracking == 'none'\"/>\n                                    <button class=\"o_optional_button btn\" name=\"action_show_details\" type=\"object\" title=\"Show Details\" string=\"Details\" context=\"{'default_product_uom_qty': 0}\" invisible=\"has_tracking != 'none' or not show_details_visible\"/>\n                                </list>\n                            </field>\n                        </page>\n                        <page string=\"Work Orders\" name=\"operations\" groups=\"mrp.group_mrp_routings\">\n                            <field name=\"workorder_ids\" context=\"{'list_view_ref': 'mrp.mrp_production_workorder_tree_editable_view_mo_form', 'from_manufacturing_order': True}\" options=\"{'create': [('id', '!=', False), ('state', '!=', 'done')]}\"/>\n                        </page>\n                        <page string=\"By-Products\" name=\"finished_products\" groups=\"mrp.group_mrp_byproducts\">\n                            <field name=\"move_byproduct_ids\" context=\"{'default_date': date_finished, 'default_date_deadline': date_deadline, 'default_warehouse_id': warehouse_id, 'default_location_id': production_location_id, 'default_location_dest_id': location_dest_id, 'default_state': 'draft', 'default_production_id': id, 'default_picking_type_id': picking_type_id, 'default_company_id': company_id, 'form_view_ref': 'mrp.view_mrp_stock_move_operations'}\" readonly=\"state == 'cancel' or (state == 'done' and is_locked)\" options=\"{'delete': [('state', '=', 'draft')]}\">\n                                <list decoration-muted=\"state in ['done', 'cancel']\" editable=\"bottom\">\n                                    <control>\n                                        <create string=\"Add a line\"/>\n                                        <button name=\"action_add_from_catalog_byproduct\" string=\"Catalog\" type=\"object\" class=\"px-4 btn-link\" context=\"{'order_id': parent.id}\"/>\n                                    </control>\n                                    <field name=\"product_id\" context=\"{'default_is_storable': True}\" domain=\"[('type', '=', 'consu')]\" required=\"1\" readonly=\"move_lines_count &gt; 0 or state == 'cancel' or (state != 'draft' and not additional)\"/>\n                                    <field name=\"location_dest_id\" string=\"To\" readonly=\"1\" force_save=\"1\" groups=\"stock.group_stock_multi_locations\"/>\n                                    <field name=\"company_id\" column_invisible=\"True\"/>\n                                    <field name=\"allowed_operation_ids\" column_invisible=\"True\"/>\n                                    <field name=\"unit_factor\" column_invisible=\"True\"/>\n                                    <field name=\"date\" column_invisible=\"True\"/>\n                                    <field name=\"date_deadline\" column_invisible=\"True\" force_save=\"1\"/>\n                                    <field name=\"additional\" column_invisible=\"True\"/>\n                                    <field name=\"picking_type_id\" column_invisible=\"True\"/>\n                                    <field name=\"has_tracking\" column_invisible=\"True\"/>\n                                    <field name=\"operation_id\" column_invisible=\"True\"/>\n                                    <field name=\"bom_line_id\" column_invisible=\"True\"/>\n                                    <field name=\"byproduct_id\" column_invisible=\"True\"/>\n                                    <field name=\"sequence\" column_invisible=\"True\"/>\n                                    <field name=\"location_id\" column_invisible=\"True\"/>\n                                    <field name=\"warehouse_id\" column_invisible=\"True\"/>\n                                    <field name=\"is_locked\" column_invisible=\"True\"/>\n                                    <field name=\"move_lines_count\" column_invisible=\"True\"/>\n                                    <field name=\"state\" column_invisible=\"True\" force_save=\"1\"/>\n                                    <field name=\"product_uom_qty\" string=\"To Produce\" force_save=\"1\" readonly=\"parent.state != 'draft' and ((parent.state not in ('confirmed', 'progress', 'to_close') and not parent.is_planned) or parent.is_locked)\"/>\n                                    <field name=\"quantity\" column_invisible=\"parent.state == 'draft'\" readonly=\"has_tracking != 'none'\"/>\n                                    <field name=\"picked\" string=\"Produced\" column_invisible=\"parent.state == 'draft'\" optional=\"show\"/>\n                                    <field name=\"product_uom\" groups=\"uom.group_uom\" widget=\"many2one_uom\"/>\n                                    <field name=\"cost_share\" optional=\"hide\"/>\n                                    <field name=\"show_details_visible\" column_invisible=\"True\"/>\n                                    <field name=\"lot_ids\" widget=\"many2many_tags\" optional=\"hide\" string=\"Lot/Serial Numbers\" help=\"Displays the produced Lot/Serial Numbers.\" groups=\"stock.group_production_lot\" readonly=\"1\" column_invisible=\"not parent.show_lot_ids or parent.state == 'draft'\" invisible=\"not show_details_visible\" options=\"{'create': [('parent.use_create_components_lots', '!=', False)]}\" context=\"{'default_product_id': product_id}\" domain=\"[('product_id','=',product_id)]\"/>\n                                    <button name=\"action_show_details\" type=\"object\" title=\"Show Details\" icon=\"fa-list\" invisible=\"has_tracking == 'none' or not show_details_visible\"/>\n                                    <button class=\"o_optional_button btn btn-light\" name=\"action_show_details\" type=\"object\" title=\"Show Details\" icon=\"fa-list\" invisible=\"has_tracking != 'none' or not show_details_visible\"/>\n                                </list>\n                            </field>\n                        </page>\n                        <page string=\"Miscellaneous\" name=\"miscellaneous\">\n                            <group>\n                                <group>\n                                    <field name=\"picking_type_id\" readonly=\"state not in ('draft', 'confirmed')\"/>\n                                    <field name=\"location_src_id\" groups=\"stock.group_stock_multi_locations\" options=\"{'no_create': True}\" readonly=\"state != 'draft'\"/>\n                                    <field name=\"location_src_id\" groups=\"!stock.group_stock_multi_locations\" invisible=\"1\"/>\n                                    <field name=\"warehouse_id\" invisible=\"1\"/>\n                                    <field name=\"location_dest_id\" groups=\"stock.group_stock_multi_locations\" options=\"{'no_create': True}\" readonly=\"state != 'draft'\"/>\n                                    <field name=\"location_dest_id\" groups=\"!stock.group_stock_multi_locations\" invisible=\"1\"/>\n                                </group>\n                                <group>\n                                    <field name=\"origin\" readonly=\"state in ['cancel', 'done']\"/>\n                                    <field name=\"date_deadline\"/>\n                                    <field name=\"is_delayed\" invisible=\"True\"/>\n                                    <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\" readonly=\"state != 'draft'\" force_save=\"1\"/>\n                                </group>\n                            </group>\n                        </page>\n                    </notebook>\n                </sheet>\n                <chatter/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.mrp_production_kanban_view",
+   "package": "mrp",
+   "name": "mrp.production.kanban",
+   "entity": "mrp.production",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "class": "o_kanban_mobile",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date_start"
+     },
+     {
+      "name": "state"
+     },
+     {
+      "name": "priority",
+      "widget": "priority"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "product_qty"
+     },
+     {
+      "name": "product_uom_id",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "date_start",
+      "widget": "datetime",
+      "options": "{'show_time': false}"
+     },
+     {
+      "name": "activity_ids",
+      "widget": "kanban_activity"
+     },
+     {
+      "name": "json_popover",
+      "widget": "stock_rescheduling_popover",
+      "invisible": "not json_popover"
+     },
+     {
+      "name": "state"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "priority": 1,
+     "datetime": 1,
+     "kanban_activity": 1,
+     "stock_rescheduling_popover": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": [
+     {
+      "field": "activity_state",
+      "colors": "{\"planned\": \"success\", \"today\": \"warning\", \"overdue\": \"danger\"}"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban class=\"o_kanban_mobile\" sample=\"1\">\n                    <field name=\"date_start\"/>\n                    <field name=\"state\"/>\n                    <progressbar field=\"activity_state\" colors=\"{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}\"/>\n                    <templates>\n                        <t t-name=\"card\">\n                            <div class=\"d-flex mb-1\">\n                                <field name=\"priority\" widget=\"priority\"/>\n                                <field name=\"product_id\" class=\"fw-bolder fs-6 ms-1\"/>\n                                <field name=\"product_qty\" class=\"ms-auto flex-shrink-0\"/>\n                                <field name=\"product_uom_id\" class=\"small ms-1 flex-shrink-0\" groups=\"uom.group_uom\"/>\n                            </div>\n                            <footer class=\"text-muted\">\n                                <div class=\"d-flex\">\n                                    <field name=\"name\" class=\"me-1\"/>\n                                    <field name=\"date_start\" widget=\"datetime\" options=\"{'show_time': false}\"/>\n                                    <field name=\"activity_ids\" widget=\"kanban_activity\"/>\n                                </div>\n                                <field name=\"json_popover\" widget=\"stock_rescheduling_popover\" invisible=\"not json_popover\"/>\n                                <span t-attf-class=\"ms-auto badge #{['cancel'].indexOf(record.state.raw_value) &gt; -1 ? 'text-bg-danger' : ['draft'].indexOf(record.state.raw_value) &gt; -1 ? 'bg-200' : ['progress'].indexOf(record.state.raw_value) &gt; -1 ? 'text-bg-warning' : ['done', 'to_close'].indexOf(record.state.raw_value) &gt; -1 ? 'text-bg-success' : 'text-bg-primary'}\"><field name=\"state\"/></span>\n                            </footer>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.view_production_calendar",
+   "package": "mrp",
+   "name": "mrp.production.calendar",
+   "entity": "mrp.production",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "2",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "date_start": "date_start",
+     "date_stop": "date_finished",
+     "string": "Manufacturing Orders",
+     "event_limit": "5",
+     "quick_create": "0"
+    },
+    "fields": [
+     {
+      "name": "user_id"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "product_qty"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "date_start",
+     "date_stop": "date_finished",
+     "date_delay": null,
+     "color": null,
+     "mode": null,
+     "quick_create": "0",
+     "event_open_popup": null,
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <calendar date_start=\"date_start\" date_stop=\"date_finished\" string=\"Manufacturing Orders\" event_limit=\"5\" quick_create=\"0\">\n                    <field name=\"user_id\" avatar_field=\"avatar_128\"/>\n                    <field name=\"product_id\"/>\n                    <field name=\"product_qty\"/>\n                </calendar>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.view_production_pivot",
+   "package": "mrp",
+   "name": "mrp.production.pivot",
+   "entity": "mrp.production",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Manufacturing Orders",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date_start"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date_start",
+      "type": "row"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <pivot string=\"Manufacturing Orders\" sample=\"1\">\n                    <field name=\"date_start\" type=\"row\"/>\n                </pivot>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.view_production_graph",
+   "package": "mrp",
+   "name": "mrp.production.graph",
+   "entity": "mrp.production",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Manufacturing Orders",
+     "stacked": "0",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date_finished"
+     },
+     {
+      "name": "product_uom_qty"
+     },
+     {
+      "name": "backorder_sequence",
+      "invisible": "1"
+     },
+     {
+      "name": "qty_producing",
+      "string": "Quantity Produced"
+     },
+     {
+      "name": "product_uom_qty",
+      "string": "Product Quantity"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date_finished"
+     },
+     {
+      "name": "product_uom_qty",
+      "type": "measure"
+     },
+     {
+      "name": "backorder_sequence",
+      "invisible": "1"
+     },
+     {
+      "name": "qty_producing",
+      "string": "Quantity Produced"
+     },
+     {
+      "name": "product_uom_qty",
+      "string": "Product Quantity"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <graph string=\"Manufacturing Orders\" stacked=\"0\" sample=\"1\">\n                    <field name=\"date_finished\"/>\n                    <field name=\"product_uom_qty\" type=\"measure\"/>\n                    <field name=\"backorder_sequence\" invisible=\"1\"/>\n                    <field name=\"qty_producing\" string=\"Quantity Produced\"/>\n                    <field name=\"product_uom_qty\" string=\"Product Quantity\"/>\n                </graph>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp.view_mrp_production_filter",
+   "package": "mrp",
+   "name": "mrp.production.select",
+   "entity": "mrp.production",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Production"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Manufacturing Order",
+      "filter_domain": "['|', ('name', 'ilike', self), ('origin', 'ilike', self)]"
+     },
+     {
+      "name": "product_id"
+     },
+     {
+      "name": "product_variant_attributes"
+     },
+     {
+      "name": "move_raw_ids",
+      "string": "Component",
+      "filter_domain": "[('move_raw_ids.product_id', 'ilike', self)]"
+     },
+     {
+      "name": "workcenter_id",
+      "string": "Work Center",
+      "filter_domain": "[('workorder_ids.workcenter_id', 'ilike', self)]"
+     },
+     {
+      "name": "origin"
+     },
+     {
+      "name": "picking_type_id"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "todo",
+      "string": "To Do",
+      "domain": "[('state', 'in', ('draft', 'confirmed', 'progress', 'to_close'))]",
+      "help": "Manufacturing Orders which are in confirmed state."
+     },
+     {
+      "name": "filter_unbuilt",
+      "string": "Unbuilt",
+      "domain": "[('unbuild_ids.state', '=', 'done')]"
+     },
+     {
+      "name": "filter_done",
+      "string": "Done",
+      "domain": "[('state', '=', 'done')]"
+     },
+     {
+      "name": "filter_cancel",
+      "string": "Cancelled",
+      "domain": "[('state', '=', 'cancel')]"
+     },
+     {
+      "name": "starred",
+      "string": "Starred",
+      "domain": "[('priority', '=', '1')]"
+     },
+     {
+      "name": "filter_draft",
+      "string": "Draft",
+      "domain": "[('state', '=', 'draft')]"
+     },
+     {
+      "name": "filter_confirmed",
+      "string": "Confirmed",
+      "domain": "[('state', '=', 'confirmed')]"
+     },
+     {
+      "name": "filter_planned",
+      "string": "Planned",
+      "domain": "[('is_planned', '=', True)]"
+     },
+     {
+      "name": "filter_in_progress",
+      "string": "In Progress",
+      "domain": "[('state', '=', 'progress')]"
+     },
+     {
+      "name": "filter_to_close",
+      "string": "To Close",
+      "domain": "[('state', '=', 'to_close')]"
+     },
+     {
+      "name": "waiting",
+      "string": "MO Pending",
+      "domain": "[('reservation_state', '=', 'waiting')]"
+     },
+     {
+      "name": "filter_ready",
+      "string": "MO Ready",
+      "domain": "[('reservation_state', '=', 'assigned')]"
+     },
+     {
+      "name": "before",
+      "string": "Before",
+      "domain": "[('search_date_category', '=', 'before')]",
+      "invisible": "1"
+     },
+     {
+      "name": "yesterday",
+      "string": "Yesterday",
+      "domain": "[('search_date_category', '=', 'yesterday')]",
+      "invisible": "1"
+     },
+     {
+      "name": "today",
+      "string": "Today",
+      "domain": "[('search_date_category', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "day_1",
+      "string": "Tomorrow",
+      "domain": "[('search_date_category', '=', 'day_1')]",
+      "invisible": "1"
+     },
+     {
+      "name": "day_2",
+      "string": "The day after tomorrow",
+      "domain": "[('search_date_category', '=', 'day_2')]",
+      "invisible": "1"
+     },
+     {
+      "name": "after",
+      "string": "After",
+      "domain": "[('search_date_category', '=', 'after')]",
+      "invisible": "1"
+     },
+     {
+      "name": "filter_late_mo",
+      "string": "Late",
+      "domain": "[('date_start', '<', 'now'), ('state', '=', 'confirmed')]",
+      "help": "Late"
+     },
+     {
+      "name": "planning_issues",
+      "string": "Delayed Productions",
+      "domain": "['|', ('delay_alert_date', '!=', False), ('is_delayed', '=', True)]",
+      "help": "Late MO or Late delivery of components"
+     },
+     {
+      "name": "available",
+      "string": "Components Available",
+      "domain": "[('components_availability_state', '=', 'available')]"
+     },
+     {
+      "name": "late",
+      "string": "Late Availability",
+      "domain": "[('components_availability_state', '=', 'late')]"
+     },
+     {
+      "name": "my_mos",
+      "string": "My MOs",
+      "domain": "[('user_id', '=', uid)]"
+     },
+     {
+      "name": "filter_activities_my",
+      "string": "My Activities",
+      "domain": "[('activity_user_id', '=', uid)]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_overdue",
+      "string": "Late Activities",
+      "domain": "[('my_activity_date_deadline', '<', 'today')]",
+      "help": "Show all records whose next activity date is past",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_today",
+      "string": "Today Activities",
+      "domain": "[('my_activity_date_deadline', '=', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_upcoming_all",
+      "string": "Future Activities",
+      "domain": "[('my_activity_date_deadline', '>', 'today')]",
+      "invisible": "1"
+     },
+     {
+      "name": "filter_date_start",
+      "string": "Date",
+      "date": "date_start"
+     },
+     {
+      "name": "filter_plan_date",
+      "string": "Date: Last 365 Days",
+      "domain": "[('date_start', '>', '-365d')]",
+      "invisible": "1"
+     },
+     {
+      "name": "activities_exception",
+      "string": "Warnings",
+      "domain": "[('activity_exception_decoration', '!=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "product",
+      "string": "Product",
+      "domain": "[]",
+      "context": "{'group_by': 'product_id'}"
+     },
+     {
+      "name": "status",
+      "string": "Status",
+      "domain": "[]",
+      "context": "{'group_by': 'state'}"
+     },
+     {
+      "name": "groupby_reservation_state",
+      "string": "Material Availability",
+      "domain": "[]",
+      "context": "{'group_by': 'reservation_state'}"
+     },
+     {
+      "name": "date",
+      "string": "Date",
+      "domain": "[]",
+      "context": "{'group_by': 'date_start'}",
+      "help": "Date by Month"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search Production\">\n                    <field name=\"name\" string=\"Manufacturing Order\" filter_domain=\"['|', ('name', 'ilike', self), ('origin', 'ilike', self)]\"/>\n                    <field name=\"product_id\"/>\n                    <field name=\"product_variant_attributes\"/>\n                    <field name=\"move_raw_ids\" string=\"Component\" filter_domain=\"[('move_raw_ids.product_id', 'ilike', self)]\"/>\n                    <field name=\"workcenter_id\" string=\"Work Center\" filter_domain=\"[('workorder_ids.workcenter_id', 'ilike', self)]\"/>\n                    <field name=\"origin\"/>\n                    <field name=\"picking_type_id\"/>\n                    <filter string=\"To Do\" name=\"todo\" domain=\"[('state', 'in', ('draft', 'confirmed', 'progress', 'to_close'))]\" help=\"Manufacturing Orders which are in confirmed state.\"/>\n                    <filter string=\"Unbuilt\" name=\"filter_unbuilt\" domain=\"[('unbuild_ids.state', '=', 'done')]\"/>\n                    <filter string=\"Done\" name=\"filter_done\" domain=\"[('state', '=', 'done')]\"/>\n                    <filter string=\"Cancelled\" name=\"filter_cancel\" domain=\"[('state', '=', 'cancel')]\"/>\n                    <separator/>\n                    <filter string=\"Starred\" name=\"starred\" domain=\"[('priority', '=', '1')]\"/>\n                    <separator/>\n                    <filter string=\"Draft\" name=\"filter_draft\" domain=\"[('state', '=', 'draft')]\"/>\n                    <filter string=\"Confirmed\" name=\"filter_confirmed\" domain=\"[('state', '=', 'confirmed')]\"/>\n                    <filter string=\"Planned\" name=\"filter_planned\" domain=\"[('is_planned', '=', True)]\"/>\n                    <filter string=\"In Progress\" name=\"filter_in_progress\" domain=\"[('state', '=', 'progress')]\"/>\n                    <filter string=\"To Close\" name=\"filter_to_close\" domain=\"[('state', '=', 'to_close')]\"/>\n                    <separator/>\n                    <filter string=\"MO Pending\" name=\"waiting\" domain=\"[('reservation_state', '=', 'waiting')]\"/>\n                    <filter string=\"MO Ready\" name=\"filter_ready\" domain=\"[('reservation_state', '=', 'assigned')]\"/>\n                    <separator/>\n                    <filter invisible=\"1\" name=\"before\" string=\"Before\" domain=\"[('search_date_category', '=', 'before')]\"/>\n                    <filter invisible=\"1\" name=\"yesterday\" string=\"Yesterday\" domain=\"[('search_date_category', '=', 'yesterday')]\"/>\n                    <filter invisible=\"1\" name=\"today\" string=\"Today\" domain=\"[('search_date_category', '=', 'today')]\"/>\n                    <filter invisible=\"1\" name=\"day_1\" string=\"Tomorrow\" domain=\"[('search_date_category', '=', 'day_1')]\"/>\n                    <filter invisible=\"1\" name=\"day_2\" string=\"The day after tomorrow\" domain=\"[('search_date_category', '=', 'day_2')]\"/>\n                    <filter invisible=\"1\" name=\"after\" string=\"After\" domain=\"[('search_date_category', '=', 'after')]\"/>\n                    <filter string=\"Late\" name=\"filter_late_mo\" help=\"Late\" domain=\"[('date_start', '&lt;', 'now'), ('state', '=', 'confirmed')]\"/>\n                    <filter string=\"Delayed Productions\" name=\"planning_issues\" help=\"Late MO or Late delivery of components\" domain=\"['|', ('delay_alert_date', '!=', False), ('is_delayed', '=', True)]\"/>\n                    <filter string=\"Components Available\" name=\"available\" domain=\"[('components_availability_state', '=', 'available')]\"/>\n                    <filter string=\"Late Availability\" name=\"late\" domain=\"[('components_availability_state', '=', 'late')]\"/>\n                    <separator/>\n                    <filter string=\"My MOs\" name=\"my_mos\" domain=\"[('user_id', '=', uid)]\"/>\n                    <separator/>\n                    <filter invisible=\"1\" string=\"My Activities\" name=\"filter_activities_my\" domain=\"[('activity_user_id', '=', uid)]\"/>\n                    <separator invisible=\"1\"/>\n                    <filter invisible=\"1\" string=\"Late Activities\" name=\"activities_overdue\" domain=\"[('my_activity_date_deadline', '&lt;', 'today')]\" help=\"Show all records whose next activity date is past\"/>\n                    <filter invisible=\"1\" string=\"Today Activities\" name=\"activities_today\" domain=\"[('my_activity_date_deadline', '=', 'today')]\"/>\n                    <filter invisible=\"1\" string=\"Future Activities\" name=\"activities_upcoming_all\" domain=\"[('my_activity_date_deadline', '&gt;', 'today')]\"/>\n                    <filter name=\"filter_date_start\" string=\"Date\" date=\"date_start\"/>\n                    <filter name=\"filter_plan_date\" invisible=\"1\" string=\"Date: Last 365 Days\" domain=\"[('date_start', '&gt;', '-365d')]\"/>\n                    <separator/>\n                    <filter string=\"Warnings\" name=\"activities_exception\" domain=\"[('activity_exception_decoration', '!=', False)]\"/>\n                    <group>\n                        <filter string=\"Product\" name=\"product\" domain=\"[]\" context=\"{'group_by': 'product_id'}\"/>\n                        <filter string=\"Status\" name=\"status\" domain=\"[]\" context=\"{'group_by': 'state'}\"/>\n                        <filter string=\"Material Availability\" name=\"groupby_reservation_state\" domain=\"[]\" context=\"{'group_by': 'reservation_state'}\"/>\n                        <filter string=\"Date\" name=\"date\" domain=\"[]\" context=\"{'group_by': 'date_start'}\" help=\"Date by Month\"/>\n                    </group>\n               </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp_account.mrp_production_form_view_inherited",
+   "package": "mrp_account",
+   "name": "mrp.production.view.inherited",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp.mrp_production_form_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='product_id']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "show_valuation",
+      "invisible": "1",
+      "groups": "stock.group_stock_manager"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='product_id']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='product_id']\" position=\"before\">\n                <field name=\"show_valuation\" invisible=\"1\" groups=\"stock.group_stock_manager\"/>\n            </xpath>\n            <xpath expr=\"//div[@name='button_box']\" position=\"inside\">\n                <button name=\"action_view_move_wip\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-book\" groups=\"account.group_account_user\" invisible=\"wip_move_count == 0\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_value\"><field name=\"wip_move_count\"/></span>\n                        <span class=\"o_stat_text\">WIP</span>\n                    </div>\n                </button>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp_account.view_production_graph_inherit_mrp_account",
+   "package": "mrp_account",
+   "name": "mrp.production.graph.inherited.mrp.account",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp.view_production_graph",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//graph",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "extra_cost",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//graph",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//graph\" position=\"inside\">\n                <field name=\"extra_cost\" invisible=\"1\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp_repair.mrp_production_form_view_inherit",
+   "package": "mrp_repair",
+   "name": "mrp.production.form.inherit",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp.mrp_production_form_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[@name='button_box']",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "repair_count",
+      "widget": "statinfo",
+      "string": "Repairs"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_repair_orders",
+      "type": "object",
+      "invisible": "repair_count == 0",
+      "class": "oe_stat_button",
+      "groups": "stock.group_stock_user",
+      "icon": "fa-wrench"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//div[@name='button_box']\" position=\"inside\">\n                    <button class=\"oe_stat_button\" name=\"action_view_repair_orders\" type=\"object\" icon=\"fa-wrench\" groups=\"stock.group_stock_user\" invisible=\"repair_count == 0\">\n                            <div class=\"o_field_widget o_stat_info\">\n                                <field name=\"repair_count\" string=\"Repairs\" widget=\"statinfo\"/>\n                            </div>\n                    </button>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mrp_subcontracting.mrp_production_subcontracting_form_view",
+   "package": "mrp_subcontracting",
+   "name": "mrp.production.subcontracting.form.view",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp.mrp_production_form_view",
+   "mode": "primary",
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//form",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//form",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//form\" position=\"attributes\">\n                <attribute name=\"js_class\">subcontracting_production_form</attribute>\n            </xpath>\n            <xpath expr=\"//header\" position=\"replace\">\n                <field name=\"state\" widget=\"statusbar\" statusbar_visible=\"draft,confirmed,done\"/>\n            </xpath>\n            <xpath expr=\"//div[@name='button_box']\" position=\"replace\"/>\n            <xpath expr=\"//div[hasclass('oe_title')]\" position=\"replace\"/>\n            <xpath expr=\"//div[@name='qty']\" position=\"replace\">\n                <div class=\"o_row g-0 d-flex\" name=\"qty\">\n                    <field name=\"product_qty\" readonly=\"state == 'done'\"/>\n                </div>\n            </xpath>\n            <xpath expr=\"//button[@name='action_generate_bom']\" position=\"replace\"/>\n            <xpath expr=\"//field[@name='is_outdated_bom']\" position=\"replace\"/>\n            <xpath expr=\"//button[@name='action_update_bom']\" position=\"replace\"/>\n            <xpath expr=\"//div[@name='date_start']\" position=\"replace\"/>\n            <xpath expr=\"//label[@name='start_date']\" position=\"replace\"/>\n            <xpath expr=\"//label[@name='scheduled_date']\" position=\"replace\"/>\n            <xpath expr=\"//field[@name='date_deadline']\" position=\"replace\"/>\n            <xpath expr=\"//field[@name='components_availability']\" position=\"replace\"/>\n            <xpath expr=\"//field[@name='user_id']\" position=\"replace\"/>\n            <xpath expr=\"//page[@name='operations']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='lot_producing_ids']\" position=\"attributes\">\n                <attribute name=\"invisible\">product_tracking in ('none', False)</attribute>\n            </xpath>\n            <xpath expr=\"//page[@name='miscellaneous']\" position=\"attributes\">\n                <attribute name=\"invisible\">1</attribute>\n            </xpath>\n\n            <xpath expr=\"//field[@name='move_byproduct_ids']\" position=\"replace\"/>\n            <xpath expr=\"//field[@name='forecast_availability']\" position=\"replace\"/>\n            <xpath expr=\"//field[@name='workorder_ids']\" position=\"replace\"/>\n\n            <xpath expr=\"//field[@name='move_finished_ids']\" position=\"replace\"/>\n            <xpath expr=\"//chatter\" position=\"replace\"/>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp_subcontracting.mrp_production_subcontracting_portal_form_view",
+   "package": "mrp_subcontracting",
+   "name": "mrp.production.subcontracting.portal.form.view",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp_production_subcontracting_form_view",
+   "mode": "primary",
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='product_id']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='product_id']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='product_id']\" position=\"attributes\">\n                <attribute name=\"options\">{'no_create_edit': True, 'no_open': True}</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='lot_producing_ids']\" position=\"attributes\">\n                <attribute name=\"domain\">[('id', '=', False)]</attribute>\n                <attribute name=\"options\">{'no_create_edit': True, 'no_open': True}</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='move_raw_ids']\" position=\"replace\">\n                <field name=\"bom_product_ids\" invisible=\"1\"/>\n                <field name=\"move_line_raw_ids\" force_save=\"1\" context=\"{'list_view_ref': 'mrp_subcontracting.mrp_subcontracting_portal_stock_move_line_tree_view', 'default_company_id': company_id, 'default_location_id': location_src_id, 'default_location_dest_id': production_location_id, 'bom_product_ids': bom_product_ids}\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='forecasted_issue']\" position=\"replace\"/>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp_subcontracting.mrp_production_subcontracting_tree_view",
+   "package": "mrp_subcontracting",
+   "name": "mrp.production.subcontracting.list",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp.mrp_production_tree_view",
+   "mode": "primary",
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//header",
+     "position": "replace"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//header",
+      "position": "replace"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//header\" position=\"replace\"/>\n            <xpath expr=\"//list\" position=\"attributes\">\n                <attribute name=\"create\">0</attribute>\n                <attribute name=\"js_class\">subcontracting_production_list</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='name']\" position=\"after\">\n                <field name=\"incoming_picking\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='activity_exception_decoration']\" position=\"replace\"/>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mrp_subcontracting.mrp_production_subcontracting_filter",
+   "package": "mrp_subcontracting",
+   "name": "mrp.production.subcontracting.select",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp.view_mrp_production_filter",
+   "mode": "primary",
+   "priority": "1000",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='name']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Incoming transfer",
+      "filter_domain": "[('incoming_picking.name', 'ilike', self)]"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='name']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='name']\" position=\"after\">\n                <field name=\"name\" string=\"Incoming transfer\" filter_domain=\"[('incoming_picking.name', 'ilike', self)]\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "project_mrp.view_production_tree_view_inherit_project_mrp",
+   "package": "project_mrp",
+   "name": "mrp.production.list.view.inherit.project_mrp",
+   "entity": "mrp.production",
+   "view_type": "field",
+   "inherits_view": "mrp.mrp_production_tree_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "name",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "position": "after"
+     },
+     {
+      "name": "project_id",
+      "optional": "hide",
+      "groups": "project.group_project_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"name\" position=\"after\">\n                <field name=\"project_id\" optional=\"hide\" groups=\"project.group_project_user\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "project_mrp.mrp_production_form_view_inherit_project_mrp",
+   "package": "project_mrp",
+   "name": "mrp.production.view.inherited",
+   "entity": "mrp.production",
+   "view_type": "div",
+   "inherits_view": "mrp.mrp_production_form_view",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "div",
+    "root_attributes": {
+     "name": "button_box",
+     "position": "inside"
+    },
+    "fields": [],
+    "buttons": [
+     {
+      "name": "action_open_project",
+      "type": "object",
+      "invisible": "not project_id",
+      "class": "oe_stat_button",
+      "groups": "project.group_project_user",
+      "icon": "fa-puzzle-piece"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "element": "div",
+      "attributes": {
+       "name": "button_box",
+       "position": "inside"
+      },
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <div name=\"button_box\" position=\"inside\">\n                <button name=\"action_open_project\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-puzzle-piece\" invisible=\"not project_id\" groups=\"project.group_project_user\">\n                    <div class=\"o_stat_info\">\n                        <span class=\"o_stat_text\">Project</span>\n                    </div>\n                </button>\n            </div>\n            <field name=\"bom_id\" position=\"attributes\">\n                <attribute name=\"context\">{\n                    'default_product_tmpl_id': product_tmpl_id,\n                    'default_project_id': project_id,\n                }</attribute>\n            </field>\n            <xpath expr=\"//page[@name='miscellaneous']//field[@name='is_delayed']\" position=\"after\">\n                <field name=\"project_id\" groups=\"project.group_project_user\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "purchase_mrp.mrp_production_form_view_purchase",
+   "package": "purchase_mrp",
+   "name": "mrp.production.inherited.form.purchase",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp.mrp_production_form_view",
+   "mode": null,
+   "priority": "32",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//button[@name='action_view_mrp_production_childs']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "purchase_order_count"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_purchase_orders",
+      "type": "object",
+      "invisible": "purchase_order_count == 0",
+      "class": "oe_stat_button",
+      "groups": "purchase.group_purchase_user",
+      "icon": "fa-credit-card"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//button[@name='action_view_mrp_production_childs']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//button[@name='action_view_mrp_production_childs']\" position=\"before\">\n                <button class=\"oe_stat_button\" name=\"action_view_purchase_orders\" type=\"object\" icon=\"fa-credit-card\" groups=\"purchase.group_purchase_user\" invisible=\"purchase_order_count == 0\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_value\"><field name=\"purchase_order_count\"/></span>\n                        <span class=\"o_stat_text\">Purchases</span>\n                    </div>\n                </button>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "sale_mrp.mrp_production_form_view_sale",
+   "package": "sale_mrp",
+   "name": "mrp.production.inherited.form.sale",
+   "entity": "mrp.production",
+   "view_type": "xpath",
+   "inherits_view": "mrp.mrp_production_form_view",
+   "mode": null,
+   "priority": "64",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//button[@name='action_view_mrp_production_childs']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "sale_order_count"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_sale_orders",
+      "type": "object",
+      "invisible": "sale_order_count == 0",
+      "class": "oe_stat_button",
+      "groups": "sales_team.group_sale_salesman",
+      "icon": "fa-dollar"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//button[@name='action_view_mrp_production_childs']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//button[@name='action_view_mrp_production_childs']\" position=\"before\">\n                <button class=\"oe_stat_button\" name=\"action_view_sale_orders\" type=\"object\" icon=\"fa-dollar\" invisible=\"sale_order_count == 0\" groups=\"sales_team.group_sale_salesman\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <span class=\"o_stat_value\"><field name=\"sale_order_count\"/></span>\n                        <span class=\"o_stat_text\">Sale</span>\n                    </div>\n                </button>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

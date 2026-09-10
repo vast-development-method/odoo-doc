@@ -1,0 +1,1148 @@
+{
+ "catalog": {
+  "name": "views:pos.payment.method",
+  "description": "View declarations for entity pos.payment.method.",
+  "record_count": 20,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "l10n_jo_edi_pos.pos_payment_method_view_form",
+   "package": "l10n_jo_edi_pos",
+   "name": "pos.payment.method.form",
+   "entity": "pos.payment.method",
+   "view_type": "field",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "company_id",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "position": "after"
+     },
+     {
+      "name": "l10n_jo_edi_pos_is_cash",
+      "invisible": "country_code != 'JO'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"company_id\" position=\"after\">\n                <field name=\"l10n_jo_edi_pos_is_cash\" invisible=\"country_code != 'JO'\"/>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.pos_payment_method_view_form",
+   "package": "point_of_sale",
+   "name": "pos.payment.method.form",
+   "entity": "pos.payment.method",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Payment Methods"
+    },
+    "fields": [
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "type",
+      "invisible": "1"
+     },
+     {
+      "name": "default_pos_receivable_account_name",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. Cash"
+     },
+     {
+      "name": "image",
+      "widget": "image"
+     },
+     {
+      "name": "split_transactions"
+     },
+     {
+      "name": "journal_id",
+      "required": "not split_transactions",
+      "placeholder": "Leave empty to use the receivable account of customer"
+     },
+     {
+      "name": "outstanding_account_id",
+      "invisible": "type != 'bank'",
+      "required": "type == 'bank'",
+      "groups": "account.group_account_readonly",
+      "placeholder": "Selection of outstanding account is required"
+     },
+     {
+      "name": "receivable_account_id",
+      "widget": "many2one",
+      "invisible": "split_transactions",
+      "options": "{'placeholder_field': 'default_pos_receivable_account_name'}",
+      "groups": "account.group_account_readonly"
+     },
+     {
+      "name": "company_id",
+      "readonly": "1",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "config_ids",
+      "widget": "many2many_tags",
+      "placeholder": "No Point of Sale"
+     },
+     {
+      "name": "hide_use_payment_terminal",
+      "invisible": "1"
+     },
+     {
+      "name": "hide_qr_code_method",
+      "invisible": "1"
+     },
+     {
+      "name": "payment_method_type"
+     },
+     {
+      "name": "use_payment_terminal",
+      "invisible": "hide_use_payment_terminal",
+      "string": "Integrate with"
+     },
+     {
+      "name": "qr_code_method",
+      "invisible": "hide_qr_code_method",
+      "required": "payment_method_type == 'qr_code'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "image": 1,
+     "many2one": 1,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Payment Methods\">\n                <sheet>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <field name=\"active\" invisible=\"1\"/>\n                    <field name=\"type\" invisible=\"1\"/>\n                    <field name=\"default_pos_receivable_account_name\" invisible=\"1\"/>\n                    <div class=\"d-flex justify-content-between\">\n                        <div class=\"oe_title\">\n                            <label for=\"name\"/>\n                            <h1><field name=\"name\" placeholder=\"e.g. Cash\" class=\"oe_inline\"/></h1>\n                        </div>\n                        <field name=\"image\" class=\"oe_avatar\" widget=\"image\"/>\n                    </div>\n                    <group name=\"Payment methods\">\n                        <group>\n                            <field name=\"split_transactions\"/>\n                            <field name=\"journal_id\" required=\"not split_transactions\" placeholder=\"Leave empty to use the receivable account of customer\"/>\n                            <field name=\"outstanding_account_id\" groups=\"account.group_account_readonly\" invisible=\"type != 'bank'\" required=\"type == 'bank'\" placeholder=\"Selection of outstanding account is required\"/>\n                            <field name=\"receivable_account_id\" groups=\"account.group_account_readonly\" invisible=\"split_transactions\" widget=\"many2one\" options=\"{'placeholder_field': 'default_pos_receivable_account_name'}\"/>\n                            <field name=\"company_id\" readonly=\"1\" groups=\"base.group_multi_company\"/>\n                            <field name=\"config_ids\" widget=\"many2many_tags\" placeholder=\"No Point of Sale\"/>\n                        </group>\n                        <div>\n                            <group>\n                                <field name=\"hide_use_payment_terminal\" invisible=\"1\"/>\n                                <field name=\"hide_qr_code_method\" invisible=\"1\"/>\n                                <field name=\"payment_method_type\"/>\n                                <field name=\"use_payment_terminal\" string=\"Integrate with\" invisible=\"hide_use_payment_terminal\"/>\n                                <field name=\"qr_code_method\" invisible=\"hide_qr_code_method\" required=\"payment_method_type == 'qr_code'\"/>\n                            </group>\n                            <widget name=\"pos_payment_provider_cards\" invisible=\"use_payment_terminal or payment_method_type != 'terminal'\"/>\n                        </div>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.pos_payment_method_view_tree",
+   "package": "point_of_sale",
+   "name": "pos.payment.method.list",
+   "entity": "pos.payment.method",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Payment Methods",
+     "create": "1",
+     "delete": "1"
+    },
+    "fields": [
+     {
+      "name": "type",
+      "column_invisible": "True"
+     },
+     {
+      "name": "sequence",
+      "widget": "handle"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "split_transactions",
+      "optional": "hide"
+     },
+     {
+      "name": "journal_id",
+      "required": "not split_transactions"
+     },
+     {
+      "name": "outstanding_account_id",
+      "invisible": "type != 'bank'",
+      "optional": "hide",
+      "groups": "account.group_account_readonly"
+     },
+     {
+      "name": "receivable_account_id",
+      "invisible": "split_transactions",
+      "optional": "hide",
+      "groups": "account.group_account_readonly"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "config_ids",
+      "widget": "many2many_tags"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "handle": 1,
+     "many2many_tags": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "1",
+    "delete": "1",
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Payment Methods\" create=\"1\" delete=\"1\">\n                <field name=\"type\" column_invisible=\"True\"/>\n                <field name=\"sequence\" widget=\"handle\"/>\n                <field name=\"name\"/>\n                <field name=\"split_transactions\" optional=\"hide\"/>\n                <field name=\"journal_id\" required=\"not split_transactions\"/>\n                <field name=\"outstanding_account_id\" groups=\"account.group_account_readonly\" optional=\"hide\" invisible=\"type != 'bank'\"/>\n                <field name=\"receivable_account_id\" groups=\"account.group_account_readonly\" optional=\"hide\" invisible=\"split_transactions\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n                <field name=\"config_ids\" widget=\"many2many_tags\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "point_of_sale.pos_payment_method_view_search",
+   "package": "point_of_sale",
+   "name": "pos.payment.search.view",
+   "entity": "pos.payment.method",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Payment Methods"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "receivable_account_id",
+      "groups": "account.group_account_readonly"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "active",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_by_receivable_account",
+      "string": "Account",
+      "domain": "[]",
+      "context": "{'group_by':'receivable_account_id'}"
+     },
+     {
+      "name": "group_by_pos_config",
+      "string": "Point of Sale",
+      "domain": "[]",
+      "context": "{'group_by':'config_ids'}"
+     },
+     {
+      "name": "group_by_method_name",
+      "string": "Method Name",
+      "domain": "[]",
+      "context": "{'group_by':'name'}"
+     },
+     {
+      "name": "group_by_journal_id",
+      "string": "Journal",
+      "domain": "[]",
+      "context": "{'group_by':'journal_id'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Payment Methods\">\n                <field name=\"name\"/>\n                <field name=\"receivable_account_id\" groups=\"account.group_account_readonly\"/>\n                <group>\n                    <filter name=\"group_by_receivable_account\" string=\"Account\" domain=\"[]\" context=\"{'group_by':'receivable_account_id'}\"/>\n                    <filter name=\"group_by_pos_config\" string=\"Point of Sale\" domain=\"[]\" context=\"{'group_by':'config_ids'}\"/>\n                    <filter name=\"group_by_method_name\" string=\"Method Name\" domain=\"[]\" context=\"{'group_by':'name'}\"/>\n                    <filter name=\"group_by_journal_id\" string=\"Journal\" domain=\"[]\" context=\"{'group_by':'journal_id'}\"/>\n                </group>\n                <filter string=\"Archived\" name=\"active\" domain=\"[('active', '=', False)]\"/>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_adyen.pos_payment_method_view_form_inherit_pos_adyen",
+   "package": "pos_adyen",
+   "name": "pos.payment.method.form.inherit.adyen",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "adyen_api_key",
+      "invisible": "use_payment_terminal != 'adyen'",
+      "required": "use_payment_terminal == 'adyen'"
+     },
+     {
+      "name": "adyen_terminal_identifier",
+      "invisible": "use_payment_terminal != 'adyen'",
+      "required": "use_payment_terminal == 'adyen'"
+     },
+     {
+      "name": "adyen_event_url",
+      "widget": "CopyClipboardChar",
+      "invisible": "use_payment_terminal != 'adyen'"
+     },
+     {
+      "name": "adyen_test_mode",
+      "invisible": "use_payment_terminal != 'adyen'",
+      "required": "use_payment_terminal == 'adyen'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "CopyClipboardChar": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                \n                <field name=\"adyen_api_key\" invisible=\"use_payment_terminal != 'adyen'\" required=\"use_payment_terminal == 'adyen'\" password=\"True\"/>\n                <field name=\"adyen_terminal_identifier\" invisible=\"use_payment_terminal != 'adyen'\" required=\"use_payment_terminal == 'adyen'\"/>\n                <field name=\"adyen_event_url\" invisible=\"use_payment_terminal != 'adyen'\" widget=\"CopyClipboardChar\"/>\n                <field name=\"adyen_test_mode\" invisible=\"use_payment_terminal != 'adyen'\" required=\"use_payment_terminal == 'adyen'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_cashdro.pos_payment_method_view_form_inherit_pos_cashdro",
+   "package": "pos_cashdro",
+   "name": "pos.payment.method.form.inherit.cashdro",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//sheet",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "cashdro_ip",
+      "required": "payment_method_type == 'cashdro'"
+     },
+     {
+      "name": "cashdro_username"
+     },
+     {
+      "name": "cashdro_password"
+     },
+     {
+      "name": "cashdro_use_lna"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "settings",
+      "string": "Cashdro Settings",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//sheet",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//sheet\" position=\"inside\">\n                <notebook invisible=\"payment_method_type != 'cashdro'\">\n                    <page name=\"settings\" string=\"Cashdro Settings\">\n                        <group>\n                            <group>\n                                <field name=\"cashdro_ip\" required=\"payment_method_type == 'cashdro'\"/>\n                                <field name=\"cashdro_username\"/>\n                                <field name=\"cashdro_password\" password=\"True\"/>\n                                <field name=\"cashdro_use_lna\"/>\n                            </group>\n                            <widget name=\"pos_cashdro_admin_buttons\"/>\n                        </group>\n                    </page>\n                </notebook>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_cashmatic.pos_payment_method_view_form_inherit_pos_cashmatic",
+   "package": "pos_cashmatic",
+   "name": "pos.payment.method.form.inherit.cashmatic",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//sheet",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "cashmatic_ip",
+      "required": "payment_method_type == 'cashmatic'"
+     },
+     {
+      "name": "cashmatic_username",
+      "required": "payment_method_type == 'cashmatic'"
+     },
+     {
+      "name": "cashmatic_password",
+      "required": "payment_method_type == 'cashmatic'"
+     },
+     {
+      "name": "cashmatic_use_lna"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "settings",
+      "string": "Cashmatic Settings",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//sheet",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//sheet\" position=\"inside\">\n                <notebook invisible=\"payment_method_type != 'cashmatic'\">\n                    <page name=\"settings\" string=\"Cashmatic Settings\">\n                        <group>\n                            <group>\n                                <field name=\"cashmatic_ip\" required=\"payment_method_type == 'cashmatic'\"/>\n                                <field name=\"cashmatic_username\" required=\"payment_method_type == 'cashmatic'\"/>\n                                <field name=\"cashmatic_password\" password=\"True\" required=\"payment_method_type == 'cashmatic'\"/>\n                                <field name=\"cashmatic_use_lna\"/>\n                            </group>\n                        </group>\n                    </page>\n                </notebook>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_dpopay.pos_payment_method_view_form_inherit_pos_dpopay",
+   "package": "pos_dpopay",
+   "name": "pos.payment.method.form.inherit.pos.dpopay",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//sheet",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "dpopay_client_id",
+      "required": "use_payment_terminal == 'dpopay'"
+     },
+     {
+      "name": "dpopay_client_secret",
+      "required": "use_payment_terminal == 'dpopay'"
+     },
+     {
+      "name": "dpopay_mid",
+      "required": "use_payment_terminal == 'dpopay'"
+     },
+     {
+      "name": "dpopay_tid",
+      "required": "use_payment_terminal == 'dpopay'"
+     },
+     {
+      "name": "dpopay_chain_id",
+      "required": "use_payment_terminal == 'dpopay'"
+     },
+     {
+      "name": "dpopay_payment_mode",
+      "required": "use_payment_terminal == 'dpopay'"
+     },
+     {
+      "name": "dpopay_test_mode",
+      "required": "use_payment_terminal == 'dpopay'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "settings",
+      "string": "DPO Pay",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//sheet",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//sheet\" position=\"inside\">\n                <notebook invisible=\"use_payment_terminal != 'dpopay'\">\n                    <page name=\"settings\" string=\"DPO Pay\">\n                        <group>\n                            <group>\n                                <field name=\"dpopay_client_id\" required=\"use_payment_terminal == 'dpopay'\"/>\n                                <field name=\"dpopay_client_secret\" required=\"use_payment_terminal == 'dpopay'\" password=\"1\"/>\n                                <field name=\"dpopay_mid\" required=\"use_payment_terminal == 'dpopay'\"/>\n                                <field name=\"dpopay_tid\" required=\"use_payment_terminal == 'dpopay'\"/>\n                                <field name=\"dpopay_chain_id\" required=\"use_payment_terminal == 'dpopay'\" password=\"1\"/>\n                            </group>\n                            <group>\n                                <field name=\"dpopay_payment_mode\" required=\"use_payment_terminal == 'dpopay'\"/>\n                                <field name=\"dpopay_test_mode\" required=\"use_payment_terminal == 'dpopay'\"/>\n                            </group>\n                        </group>\n                    </page>\n                </notebook>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_glory_cash.pos_payment_method_view_form_inherit_pos_glory_cash",
+   "package": "pos_glory_cash",
+   "name": "pos.payment.method.form.inherit.glory",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//sheet",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "glory_websocket_address",
+      "required": "payment_method_type == 'glory_cash'"
+     },
+     {
+      "name": "glory_username"
+     },
+     {
+      "name": "glory_password"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "settings",
+      "string": "Glory Settings",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//sheet",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//sheet\" position=\"inside\">\n                <notebook invisible=\"payment_method_type != 'glory_cash'\">\n                    <page name=\"settings\" string=\"Glory Settings\">\n                        <group>\n                            <group>\n                                <field name=\"glory_websocket_address\" required=\"payment_method_type == 'glory_cash'\"/>\n                                <field name=\"glory_username\"/>\n                                <field name=\"glory_password\" password=\"True\"/>\n                            </group>\n                            <widget name=\"pos_glory_cash_admin_buttons\"/>\n                        </group>\n                    </page>\n                </notebook>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_mercado_pago.pos_payment_method_view_form_inherit_pos_mercado_pago",
+   "package": "pos_mercado_pago",
+   "name": "pos.payment.method.form.inherit.mercado_pago",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "mp_bearer_token",
+      "invisible": "use_payment_terminal != 'mercado_pago'",
+      "required": "use_payment_terminal == 'mercado_pago'",
+      "placeholder": "APP_USR-..."
+     },
+     {
+      "name": "mp_webhook_secret_key",
+      "invisible": "use_payment_terminal != 'mercado_pago'",
+      "required": "use_payment_terminal == 'mercado_pago'",
+      "placeholder": "c2f3662..."
+     },
+     {
+      "name": "mp_id_point_smart",
+      "invisible": "use_payment_terminal != 'mercado_pago'",
+      "required": "use_payment_terminal == 'mercado_pago'",
+      "placeholder": "1494126963"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "force_pdv",
+      "string": "Force PDV",
+      "type": "object",
+      "invisible": "use_payment_terminal != 'mercado_pago'",
+      "class": "oe_highlight",
+      "groups": "base.group_no_one"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                \n                <field name=\"mp_bearer_token\" placeholder=\"APP_USR-...\" invisible=\"use_payment_terminal != 'mercado_pago'\" required=\"use_payment_terminal == 'mercado_pago'\"/>\n                <field name=\"mp_webhook_secret_key\" placeholder=\"c2f3662...\" invisible=\"use_payment_terminal != 'mercado_pago'\" required=\"use_payment_terminal == 'mercado_pago'\"/>\n                <field name=\"mp_id_point_smart\" placeholder=\"1494126963\" invisible=\"use_payment_terminal != 'mercado_pago'\" required=\"use_payment_terminal == 'mercado_pago'\"/>\n                <button string=\"Force PDV\" type=\"object\" name=\"force_pdv\" groups=\"base.group_no_one\" class=\"oe_highlight\" invisible=\"use_payment_terminal != 'mercado_pago'\" required=\"use_payment_terminal == 'mercado_pago'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_mollie.pos_payment_method_view_form_inherit_pos_mollie",
+   "package": "pos_mollie",
+   "name": "pos.payment.method.form.inherit.mollie",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "mollie_payment_provider_id",
+      "invisible": "use_payment_terminal != 'mollie'",
+      "required": "use_payment_terminal == 'mollie'"
+     },
+     {
+      "name": "mollie_terminal_id",
+      "invisible": "use_payment_terminal != 'mollie'",
+      "required": "use_payment_terminal == 'mollie'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                <field name=\"mollie_payment_provider_id\" invisible=\"use_payment_terminal != 'mollie'\" required=\"use_payment_terminal == 'mollie'\"/>\n                <field name=\"mollie_terminal_id\" invisible=\"use_payment_terminal != 'mollie'\" required=\"use_payment_terminal == 'mollie'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_online_payment.pos_payment_method_view_form_inherit_pos_online_payment",
+   "package": "pos_online_payment",
+   "name": "pos.payment.method.form.inherit.pos_online_payment",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//form/sheet",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "has_an_online_payment_provider",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//form/sheet",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//form/sheet\" position=\"before\">\n                <field name=\"has_an_online_payment_provider\" invisible=\"1\"/>\n                <div class=\"alert alert-danger\" role=\"alert\" invisible=\"not is_online_payment or has_an_online_payment_provider\">\n                    You have not activated any <bold><a type=\"action\" name=\"%(payment.action_payment_provider)d\" class=\"alert-link\" role=\"button\">payment provider</a></bold> to allow online payments.\n                </div>\n            </xpath>\n            <xpath expr=\"//form/sheet/group/group/field[@name='split_transactions']\" position=\"before\">\n                <field name=\"is_online_payment\"/>\n            </xpath>\n            <xpath expr=\"//form/sheet/group/group/field[@name='split_transactions']\" position=\"attributes\">\n                <attribute name=\"invisible\">is_online_payment</attribute>\n            </xpath>\n            <xpath expr=\"//form/sheet/group/div/group/field[@name='payment_method_type']\" position=\"attributes\">\n                <attribute name=\"invisible\">is_online_payment</attribute>\n            </xpath>\n            <xpath expr=\"//form/sheet/group/div/group/field[@name='qr_code_method']\" position=\"attributes\">\n                <attribute name=\"invisible\">is_online_payment or hide_qr_code_method</attribute>\n            </xpath>\n            <xpath expr=\"//form/sheet/group/group/field[@name='journal_id']\" position=\"attributes\">\n                <attribute name=\"invisible\">is_online_payment</attribute>\n                <attribute name=\"required\">not is_online_payment and not split_transactions</attribute>\n            </xpath>\n            <xpath expr=\"//form/sheet/group/group/field[@name='receivable_account_id']\" position=\"attributes\">\n                <attribute name=\"invisible\">is_online_payment or split_transactions</attribute>\n            </xpath>\n            <xpath expr=\"//form/sheet/group[@name='Payment methods']/group\" position=\"after\">\n                <group invisible=\"not is_online_payment\" groups=\"point_of_sale.group_pos_manager,base.group_system\">\n                    <div colspan=\"2\">\n                        <label for=\"online_payment_provider_ids\"/>\n                        <field name=\"online_payment_provider_ids\" widget=\"many2many_tags\" options=\"{'no_create': True}\" placeholder=\"All available providers\"/>\n                        <button name=\"%(payment.action_payment_provider)d\" icon=\"fa-arrow-right\" type=\"action\" string=\"Payment Providers\" class=\"btn-link\"/>\n                    </div>\n                </group>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_online_payment.pos_payment_method_view_tree_inherit_pos_online_payment",
+   "package": "pos_online_payment",
+   "name": "pos.payment.method.list.inherit.pos_online_payment",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_tree",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list\" position=\"attributes\">\n                <attribute name=\"decoration-danger\">is_online_payment and not has_an_online_payment_provider</attribute>\n            </xpath>\n            <xpath expr=\"//list\" position=\"inside\">\n                <field name=\"is_online_payment\" optional=\"hide\"/>\n                <field name=\"has_an_online_payment_provider\" column_invisible=\"True\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_pine_labs.pos_payment_method_view_form_inherit_pos_pine_labs",
+   "package": "pos_pine_labs",
+   "name": "pos.payment.method.form.inherit.pos.pine.labs",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "pine_labs_merchant",
+      "invisible": "use_payment_terminal != 'pine_labs'",
+      "required": "use_payment_terminal == 'pine_labs'"
+     },
+     {
+      "name": "pine_labs_store",
+      "invisible": "use_payment_terminal != 'pine_labs'",
+      "required": "use_payment_terminal == 'pine_labs'"
+     },
+     {
+      "name": "pine_labs_client",
+      "invisible": "use_payment_terminal != 'pine_labs'",
+      "required": "use_payment_terminal == 'pine_labs'"
+     },
+     {
+      "name": "pine_labs_security_token",
+      "invisible": "use_payment_terminal != 'pine_labs'",
+      "required": "use_payment_terminal == 'pine_labs'"
+     },
+     {
+      "name": "pine_labs_allowed_payment_mode",
+      "invisible": "use_payment_terminal != 'pine_labs'",
+      "required": "use_payment_terminal == 'pine_labs'"
+     },
+     {
+      "name": "pine_labs_test_mode",
+      "invisible": "use_payment_terminal != 'pine_labs'",
+      "required": "use_payment_terminal == 'pine_labs'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                <field name=\"pine_labs_merchant\" invisible=\"use_payment_terminal != 'pine_labs'\" required=\"use_payment_terminal == 'pine_labs'\"/>\n                <field name=\"pine_labs_store\" invisible=\"use_payment_terminal != 'pine_labs'\" required=\"use_payment_terminal == 'pine_labs'\"/>\n                <field name=\"pine_labs_client\" invisible=\"use_payment_terminal != 'pine_labs'\" required=\"use_payment_terminal == 'pine_labs'\"/>\n                <field name=\"pine_labs_security_token\" invisible=\"use_payment_terminal != 'pine_labs'\" required=\"use_payment_terminal == 'pine_labs'\" password=\"True\"/>\n                <field name=\"pine_labs_allowed_payment_mode\" invisible=\"use_payment_terminal != 'pine_labs'\" required=\"use_payment_terminal == 'pine_labs'\"/>\n                <field name=\"pine_labs_test_mode\" invisible=\"use_payment_terminal != 'pine_labs'\" required=\"use_payment_terminal == 'pine_labs'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_qfpay.pos_payment_method_view_form",
+   "package": "pos_qfpay",
+   "name": "pos.payment.method.form.inherit.pos_qfpay",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "qfpay_terminal_ip_address",
+      "invisible": "use_payment_terminal != 'qfpay'",
+      "required": "use_payment_terminal == 'qfpay'"
+     },
+     {
+      "name": "qfpay_pos_key",
+      "invisible": "use_payment_terminal != 'qfpay'",
+      "required": "use_payment_terminal == 'qfpay'"
+     },
+     {
+      "name": "qfpay_payment_type",
+      "invisible": "use_payment_terminal != 'qfpay'",
+      "required": "use_payment_terminal == 'qfpay'"
+     },
+     {
+      "name": "qfpay_notification_key",
+      "invisible": "use_payment_terminal != 'qfpay'",
+      "required": "use_payment_terminal == 'qfpay'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                <field name=\"qfpay_terminal_ip_address\" invisible=\"use_payment_terminal != 'qfpay'\" required=\"use_payment_terminal == 'qfpay'\"/>\n                <field name=\"qfpay_pos_key\" invisible=\"use_payment_terminal != 'qfpay'\" required=\"use_payment_terminal == 'qfpay'\"/>\n                <field name=\"qfpay_payment_type\" invisible=\"use_payment_terminal != 'qfpay'\" required=\"use_payment_terminal == 'qfpay'\"/>\n                <field name=\"qfpay_notification_key\" invisible=\"use_payment_terminal != 'qfpay'\" required=\"use_payment_terminal == 'qfpay'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_razorpay.pos_payment_method_view_form_inherit_pos_razorpay",
+   "package": "pos_razorpay",
+   "name": "pos.payment.method.form.inherit.razorpay",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "razorpay_username",
+      "invisible": "use_payment_terminal != 'razorpay'",
+      "required": "use_payment_terminal == 'razorpay'"
+     },
+     {
+      "name": "razorpay_tid",
+      "invisible": "use_payment_terminal != 'razorpay'",
+      "required": "use_payment_terminal == 'razorpay'"
+     },
+     {
+      "name": "razorpay_api_key",
+      "invisible": "use_payment_terminal != 'razorpay'",
+      "required": "use_payment_terminal == 'razorpay'"
+     },
+     {
+      "name": "razorpay_test_mode",
+      "invisible": "use_payment_terminal != 'razorpay'",
+      "required": "use_payment_terminal == 'razorpay'"
+     },
+     {
+      "name": "razorpay_allowed_payment_modes",
+      "invisible": "use_payment_terminal != 'razorpay'",
+      "required": "use_payment_terminal == 'razorpay'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                <field name=\"razorpay_username\" invisible=\"use_payment_terminal != 'razorpay'\" required=\"use_payment_terminal == 'razorpay'\"/>\n                <field name=\"razorpay_tid\" invisible=\"use_payment_terminal != 'razorpay'\" required=\"use_payment_terminal == 'razorpay'\"/>\n                <field name=\"razorpay_api_key\" invisible=\"use_payment_terminal != 'razorpay'\" required=\"use_payment_terminal == 'razorpay'\"/>\n                <field name=\"razorpay_test_mode\" invisible=\"use_payment_terminal != 'razorpay'\" required=\"use_payment_terminal == 'razorpay'\"/>\n                <field name=\"razorpay_allowed_payment_modes\" invisible=\"use_payment_terminal != 'razorpay'\" required=\"use_payment_terminal == 'razorpay'\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_restaurant_adyen.pos_payment_method_view_form_inherit_pos_restaurant_adyen",
+   "package": "pos_restaurant_adyen",
+   "name": "pos.payment.method.form.inherit.restaurant.adyen",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "pos_adyen.pos_payment_method_view_form_inherit_pos_adyen",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='adyen_terminal_identifier']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "adyen_merchant_account",
+      "invisible": "use_payment_terminal != 'adyen'",
+      "required": "use_payment_terminal == 'adyen'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='adyen_terminal_identifier']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n          <xpath expr=\"//field[@name='adyen_terminal_identifier']\" position=\"after\">\n                <field name=\"adyen_merchant_account\" invisible=\"use_payment_terminal != 'adyen'\" required=\"use_payment_terminal == 'adyen'\"/>\n          </xpath>\n      </field>\n    "
+  },
+  {
+   "external_identifier": "pos_safaricom.pos_payment_method_view_form_inherit_pos_safaricom",
+   "package": "pos_safaricom",
+   "name": "pos.payment.method.form.inherit.safaricom",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "safaricom_test_mode",
+      "widget": "boolean_toggle",
+      "invisible": "use_payment_terminal != 'safaricom'"
+     },
+     {
+      "name": "safaricom_payment_type",
+      "invisible": "use_payment_terminal != 'safaricom'",
+      "required": "use_payment_terminal == 'safaricom'"
+     },
+     {
+      "name": "consumer_key",
+      "invisible": "use_payment_terminal != 'safaricom'",
+      "required": "use_payment_terminal == 'safaricom'"
+     },
+     {
+      "name": "consumer_secret",
+      "invisible": "use_payment_terminal != 'safaricom'",
+      "required": "use_payment_terminal == 'safaricom'"
+     },
+     {
+      "name": "business_short_code",
+      "invisible": "use_payment_terminal != 'safaricom'",
+      "required": "use_payment_terminal == 'safaricom'"
+     },
+     {
+      "name": "passkey",
+      "invisible": "use_payment_terminal != 'safaricom' or safaricom_payment_type != 'mpesa_express'",
+      "required": "use_payment_terminal == 'safaricom' and safaricom_payment_type == 'mpesa_express'"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "lipa_na_mpesa_register_urls",
+      "string": "Register URLs",
+      "type": "object",
+      "class": "btn-secondary",
+      "icon": "fa-refresh"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "boolean_toggle": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                \n                <field name=\"safaricom_test_mode\" widget=\"boolean_toggle\" invisible=\"use_payment_terminal != 'safaricom'\"/>\n                <field name=\"safaricom_payment_type\" required=\"use_payment_terminal == 'safaricom'\" invisible=\"use_payment_terminal != 'safaricom'\"/>\n                <field name=\"consumer_key\" password=\"True\" required=\"use_payment_terminal == 'safaricom'\" invisible=\"use_payment_terminal != 'safaricom'\"/>\n                <field name=\"consumer_secret\" password=\"True\" required=\"use_payment_terminal == 'safaricom'\" invisible=\"use_payment_terminal != 'safaricom'\"/>\n                <field name=\"business_short_code\" required=\"use_payment_terminal == 'safaricom'\" invisible=\"use_payment_terminal != 'safaricom'\"/>\n                <field name=\"passkey\" password=\"True\" invisible=\"use_payment_terminal != 'safaricom' or safaricom_payment_type != 'mpesa_express'\" required=\"use_payment_terminal == 'safaricom' and safaricom_payment_type == 'mpesa_express'\"/>\n                <separator string=\"Lipa na M-PESA Configuration\" invisible=\"use_payment_terminal != 'safaricom' or safaricom_payment_type != 'lipa_na_mpesa'\"/>\n                \n                <div colspan=\"2\" invisible=\"use_payment_terminal != 'safaricom' or safaricom_payment_type != 'lipa_na_mpesa'\">\n                    <div class=\"text-muted\">\n                        C2B callback URLs must be registered with Safaricom for Lipa na M-PESA to work.\n                        This happens automatically on creation, but you can re-register if you deleted them from the business portal.\n                    </div>\n                </div>\n                <div invisible=\"use_payment_terminal != 'safaricom' or safaricom_payment_type != 'lipa_na_mpesa' or not id\">\n                    <button name=\"lipa_na_mpesa_register_urls\" string=\"Register URLs\" type=\"object\" class=\"btn-secondary\" icon=\"fa-refresh\" help=\"Register or re-register C2B callback URLs with Safaricom\"/>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_stripe.pos_payment_method_view_form_inherit_pos_stripe",
+   "package": "pos_stripe",
+   "name": "pos.payment.method.form.inherit.stripe",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "stripe_serial_number",
+      "invisible": "use_payment_terminal != 'stripe'",
+      "required": "use_payment_terminal == 'stripe'"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_stripe_key",
+      "string": "Don't forget to complete Stripe connect before using this payment method.",
+      "type": "object",
+      "class": "btn-link",
+      "icon": "oi-arrow-right"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                \n                <field name=\"stripe_serial_number\" invisible=\"use_payment_terminal != 'stripe'\" required=\"use_payment_terminal == 'stripe'\"/>\n                <div colspan=\"2\" class=\"mt16\" invisible=\"use_payment_terminal != 'stripe'\" required=\"use_payment_terminal == 'stripe'\">\n                    <button name=\"action_stripe_key\" type=\"object\" icon=\"oi-arrow-right\" string=\"Don't forget to complete Stripe connect before using this payment method.\" class=\"btn-link\"/>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "pos_viva_com.pos_payment_method_view_form_inherit_pos_viva_com",
+   "package": "pos_viva_com",
+   "name": "pos.payment.method.form.inherit.viva.com",
+   "entity": "pos.payment.method",
+   "view_type": "xpath",
+   "inherits_view": "point_of_sale.pos_payment_method_view_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='use_payment_terminal']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "viva_com_merchant_id",
+      "invisible": "use_payment_terminal != 'viva_com'",
+      "required": "use_payment_terminal == 'viva_com'"
+     },
+     {
+      "name": "viva_com_api_key",
+      "invisible": "use_payment_terminal != 'viva_com'",
+      "required": "use_payment_terminal == 'viva_com'"
+     },
+     {
+      "name": "viva_com_client_id",
+      "invisible": "use_payment_terminal != 'viva_com'",
+      "required": "use_payment_terminal == 'viva_com'"
+     },
+     {
+      "name": "viva_com_client_secret",
+      "invisible": "use_payment_terminal != 'viva_com'",
+      "required": "use_payment_terminal == 'viva_com'"
+     },
+     {
+      "name": "viva_com_test_mode",
+      "invisible": "use_payment_terminal != 'viva_com'",
+      "required": "use_payment_terminal == 'viva_com'"
+     },
+     {
+      "name": "viva_com_terminal_id",
+      "invisible": "use_payment_terminal != 'viva_com'",
+      "required": "use_payment_terminal == 'viva_com'"
+     },
+     {
+      "name": "viva_com_webhook_endpoint",
+      "widget": "CopyClipboardChar",
+      "invisible": "use_payment_terminal != 'viva_com' or not id",
+      "required": "use_payment_terminal == 'viva_com'"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "CopyClipboardChar": 1
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='use_payment_terminal']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='use_payment_terminal']\" position=\"after\">\n                \n                <field name=\"viva_com_merchant_id\" invisible=\"use_payment_terminal != 'viva_com'\" required=\"use_payment_terminal == 'viva_com'\"/>\n                <field name=\"viva_com_api_key\" invisible=\"use_payment_terminal != 'viva_com'\" required=\"use_payment_terminal == 'viva_com'\"/>\n                <field name=\"viva_com_client_id\" invisible=\"use_payment_terminal != 'viva_com'\" required=\"use_payment_terminal == 'viva_com'\"/>\n                <field name=\"viva_com_client_secret\" invisible=\"use_payment_terminal != 'viva_com'\" required=\"use_payment_terminal == 'viva_com'\"/>\n                <field name=\"viva_com_test_mode\" invisible=\"use_payment_terminal != 'viva_com'\" required=\"use_payment_terminal == 'viva_com'\"/>\n                <field name=\"viva_com_terminal_id\" invisible=\"use_payment_terminal != 'viva_com'\" required=\"use_payment_terminal == 'viva_com'\"/>\n                <field name=\"viva_com_webhook_endpoint\" invisible=\"use_payment_terminal != 'viva_com' or not id\" required=\"use_payment_terminal == 'viva_com'\" widget=\"CopyClipboardChar\"/>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

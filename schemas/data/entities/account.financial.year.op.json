@@ -1,0 +1,335 @@
+{
+ "catalog": {
+  "name": "entity:account.financial.year.op",
+  "description": "Complete definition of entity Opening Balance of Financial Year (account.financial.year.op).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.financial.year.op",
+  "storage_name": "account_financial_year_op",
+  "full_name": "Opening Balance of Financial Year",
+  "kind": "transient",
+  "description": "Opening Balance of Financial Year",
+  "defined_by_package": "account",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "defined_in_package": "account",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "opening_move_posted",
+    "type": "Boolean",
+    "string": "Opening Move Posted",
+    "compute": "_compute_opening_move_posted",
+    "defined_in_package": "account",
+    "full_name": "Opening Move Posted"
+   },
+   {
+    "name": "opening_date",
+    "type": "Date",
+    "string": "Opening Date",
+    "required": true,
+    "related": "company_id.account_opening_date",
+    "help": "Date from which the accounting is managed in the system. It is the date of the opening entry.",
+    "readonly": false,
+    "defined_in_package": "account",
+    "full_name": "Opening Date"
+   },
+   {
+    "name": "fiscalyear_last_day",
+    "type": "Integer",
+    "related": "company_id.fiscalyear_last_day",
+    "required": true,
+    "readonly": false,
+    "help": "The last day of the month will be used if the chosen day doesn't exist.",
+    "defined_in_package": "account",
+    "string": "Fiscalyear Last Day",
+    "full_name": "Fiscalyear Last Day"
+   },
+   {
+    "name": "fiscalyear_last_month",
+    "type": "Selection",
+    "related": "company_id.fiscalyear_last_month",
+    "readonly": false,
+    "required": true,
+    "help": "The last day of the month will be used if the chosen day doesn't exist.",
+    "defined_in_package": "account",
+    "string": "Fiscalyear Last Month",
+    "full_name": "Fiscalyear Last Month"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_opening_move_posted",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id.account_opening_move_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_fiscalyear",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "fiscalyear_last_day",
+         "fiscalyear_last_month"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Incorrect fiscal year date: day is out of range for month. Month: %(month)s; Day: %(day)s",
+        "line": 37
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_company_fields_to_update",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_company",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "company_id",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_save_onboarding_fiscal_year",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_fiscalyear",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Incorrect fiscal year date: day is out of range for month. Month: %(month)s; Day: %(day)s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_financial_year_op",
+    "package": "account",
+    "name": "access.account.financial.year.op",
+    "entity": "account.financial.year.op",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.setup_financial_year_opening_form",
+    "package": "account",
+    "name": "account.financial.year.op.setup.wizard.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "opening_move_posted",
+       "invisible": "1"
+      },
+      {
+       "name": "opening_date"
+      },
+      {
+       "name": "fiscalyear_last_day"
+      },
+      {
+       "name": "fiscalyear_last_month"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_save_onboarding_fiscal_year",
+       "string": "Apply",
+       "type": "object",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

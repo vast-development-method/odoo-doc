@@ -1,0 +1,137 @@
+{
+ "catalog": {
+  "name": "views:stock.return.picking",
+  "description": "View declarations for entity stock.return.picking.",
+  "record_count": 2,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "stock.view_stock_return_picking_form",
+   "package": "stock",
+   "name": "Return lines",
+   "entity": "stock.return.picking",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "picking_id",
+      "invisible": "1",
+      "force_save": "1"
+     },
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "product_return_moves"
+     },
+     {
+      "name": "move_quantity",
+      "column_invisible": "1"
+     },
+     {
+      "name": "product_id",
+      "force_save": "1"
+     },
+     {
+      "name": "quantity",
+      "decoration-danger": "move_quantity < quantity"
+     },
+     {
+      "name": "uom_id",
+      "widget": "many2one_uom",
+      "groups": "uom.group_uom"
+     },
+     {
+      "name": "move_id",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_create_returns",
+      "string": "Return",
+      "type": "object",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "action_create_returns_all",
+      "string": "Return All",
+      "type": "object",
+      "class": "btn-secondary"
+     },
+     {
+      "name": "action_create_exchanges",
+      "string": "Return for Exchange",
+      "type": "object",
+      "invisible": "picking_type_code not in ('incoming', 'outgoing')",
+      "class": "btn-secondary"
+     },
+     {
+      "string": "Discard",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_uom": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form>\n                <field name=\"picking_id\" invisible=\"1\" force_save=\"1\"/>\n                <field name=\"company_id\" invisible=\"1\"/>\n                <field name=\"product_return_moves\">\n                    <list editable=\"bottom\" create=\"1\" decoration-warning=\"not move_id\">\n                        <field name=\"move_quantity\" column_invisible=\"1\"/>\n                        <field name=\"product_id\" force_save=\"1\"/>\n                        <field name=\"quantity\" decoration-danger=\"move_quantity &lt; quantity\"/>\n                        <field name=\"uom_id\" widget=\"many2one_uom\" groups=\"uom.group_uom\"/>\n                        <field name=\"move_id\" column_invisible=\"True\"/>\n                    </list>\n                </field>\n                <footer>\n                    <button name=\"action_create_returns\" string=\"Return\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\"/>\n                    <button name=\"action_create_returns_all\" string=\"Return All\" type=\"object\" class=\"btn-secondary\"/>\n                    <button name=\"action_create_exchanges\" string=\"Return for Exchange\" invisible=\"picking_type_code not in ('incoming', 'outgoing')\" type=\"object\" class=\"btn-secondary\"/>\n                    <button string=\"Discard\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_account.view_stock_return_picking_form_inherit_stock_account",
+   "package": "stock_account",
+   "name": "stock.return.picking.stock.account.form",
+   "entity": "stock.return.picking",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_stock_return_picking_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='product_return_moves']/list",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "to_refund",
+      "optional": "hide",
+      "groups": "base.group_no_one"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='product_return_moves']/list",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//field[@name='product_return_moves']/list\" position=\"inside\">\n                    <field name=\"to_refund\" groups=\"base.group_no_one\" optional=\"hide\"/>\n                </xpath>\n            </field>\n        "
+  }
+ ]
+}

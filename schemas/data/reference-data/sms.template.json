@@ -1,0 +1,76 @@
+{
+ "catalog": {
+  "name": "reference_data:sms.template",
+  "description": "Shipped reference records of entity sms.template.",
+  "record_count": 6,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "calendar_sms.sms_template_data_calendar_reminder",
+   "package": "calendar_sms",
+   "values": {
+    "name": "Calendar Event: Reminder",
+    "model_id": {
+     "reference": "calendar.model_calendar_event"
+    },
+    "body": "Event reminder: {{ object.name }}, {{ object.get_display_time_tz(object.partner_id.tz) }}"
+   }
+  },
+  {
+   "external_identifier": "event_sms.sms_template_data_event_registration",
+   "package": "event_sms",
+   "values": {
+    "name": "Event: Registration",
+    "model_id": {
+     "reference": "event.model_event_registration"
+    },
+    "body": "{{ object.event_id.organizer_id.name or object.event_id.company_id.name or user.env.company.name }}: We are happy to confirm your registration for the {{ object.event_id.name }} event."
+   }
+  },
+  {
+   "external_identifier": "event_sms.sms_template_data_event_reminder",
+   "package": "event_sms",
+   "values": {
+    "name": "Event: Reminder",
+    "model_id": {
+     "reference": "event.model_event_registration"
+    },
+    "body": "Ready for \"{{ object.event_id.name }}\" {{ object.event_date_range }}?\n{{ 'It starts at %s' % format_time(time=object.event_begin_date, tz=object.event_id.date_tz, time_format='short', lang_code=object.partner_id.lang) + (', at %s' % object.event_id.address_inline if object.event_id.address_inline else '') + '.\\nSee you there!' if object.event_id.address_inline or 'website_published' not in object.event_id._fields else 'Join us on %s/event/%i!' % (object.get_base_url(), object.event_id.id) }}"
+   }
+  },
+  {
+   "external_identifier": "hr_presence.sms_template_data_hr_presence",
+   "package": "hr_presence",
+   "values": {
+    "name": "Employee: Presence Reminder",
+    "model_id": {
+     "reference": "hr.model_hr_employee"
+    },
+    "body": "Hi, we noticed you're not at work and no time-off was submitted. If this is an oversight from us, we apologize. Please contact your manager or HR ASAP. Thanks"
+   }
+  },
+  {
+   "external_identifier": "pos_sms.sms_template_data_point_of_sale",
+   "package": "pos_sms",
+   "values": {
+    "name": "POS: Sent Order Confirmation via Text",
+    "model_id": {
+     "reference": "point_of_sale.model_pos_order"
+    },
+    "body": "{{ object.company_id.name }} : Your order with reference: {{ object.pos_reference }} was processed succesfully with amount {{  object.currency_id.format(object.amount_total) }}. Use {{ object.pos_reference }}  for further reference"
+   }
+  },
+  {
+   "external_identifier": "stock_sms.sms_template_data_stock_delivery",
+   "package": "stock_sms",
+   "values": {
+    "name": "Delivery: Send by SMS Text Message",
+    "model_id": {
+     "reference": "stock.model_stock_picking"
+    },
+    "body": "{{ (object.company_id.name + ': We are glad to inform you that your order n° ' + object.origin + ' has been shipped.' if object.origin else object.company_id.name + ': We are glad to inform you that your order has been shipped.') + (' Your tracking reference is ' + (object.carrier_tracking_ref) + '.' if hasattr(object, 'carrier_tracking_ref') and object.carrier_tracking_ref else '') }}"
+   }
+  }
+ ]
+}

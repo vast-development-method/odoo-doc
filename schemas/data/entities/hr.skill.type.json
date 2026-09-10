@@ -1,0 +1,489 @@
+{
+ "catalog": {
+  "name": "entity:hr.skill.type",
+  "description": "Complete definition of entity Skill Type (hr.skill.type).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.skill.type",
+  "storage_name": "hr_skill_type",
+  "full_name": "Skill Type",
+  "kind": "persistent",
+  "description": "Skill Type",
+  "defined_by_package": "hr_skills",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, name",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "hr_skills",
+    "full_name": "Active"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "defined_in_package": "hr_skills",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "hr_skills",
+    "string": "Name",
+    "full_name": "Name"
+   },
+   {
+    "name": "skill_ids",
+    "type": "One2many",
+    "comodel": "hr.skill",
+    "inverse_name": "skill_type_id",
+    "string": "Skills",
+    "defined_in_package": "hr_skills",
+    "full_name": "Skills",
+    "target_entity": "hr.skill"
+   },
+   {
+    "name": "skill_level_ids",
+    "type": "One2many",
+    "comodel": "hr.skill.level",
+    "inverse_name": "skill_type_id",
+    "string": "Levels",
+    "copy": true,
+    "defined_in_package": "hr_skills",
+    "full_name": "Levels",
+    "target_entity": "hr.skill.level"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "string": "Color",
+    "default": {
+     "dynamic": "_get_default_color"
+    },
+    "defined_in_package": "hr_skills",
+    "full_name": "Color"
+   },
+   {
+    "name": "levels_count",
+    "type": "Integer",
+    "compute": "_compute_levels_count",
+    "store": true,
+    "readonly": false,
+    "help": "Number of levels linked to this skill type",
+    "defined_in_package": "hr_skills",
+    "string": "Levels Count",
+    "full_name": "Levels Count"
+   },
+   {
+    "name": "is_certification",
+    "type": "Boolean",
+    "string": "Certification",
+    "help": "if checked the skill type become a certification type",
+    "defined_in_package": "hr_skills",
+    "full_name": "Certification"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_color",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_no_null_skill_or_skill_level",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "skill_ids",
+         "skill_level_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The following skills type must contain at least one skill and one level: %s",
+        "line": 33
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_levels_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "skill_level_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_skill_level_ids",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "skill_level_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "hr_skills",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_no_null_skill_or_skill_level",
+    "package": "hr_skills",
+    "kind": "ValidationError",
+    "message": "The following skills type must contain at least one skill and one level: %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_skills.access_hr_skill_type",
+    "package": "hr_skills",
+    "name": "hr.skill.type",
+    "entity": "hr.skill.type",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_skills.access_hr_skill_type_employee",
+    "package": "hr_skills",
+    "name": "hr.skill.type.employee",
+    "entity": "hr.skill.type",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_skills.hr_skill_type_view_search",
+    "package": "hr_skills",
+    "name": "hr.skill.type.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Skill Type"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "string": "Skill Types"
+      },
+      {
+       "name": "skill_ids"
+      },
+      {
+       "name": "skill_level_ids"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_skills.hr_skill_type_view_tree",
+    "package": "hr_skills",
+    "name": "hr.skill.type.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Skill Types"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "display_name",
+       "string": "Skill Types"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker",
+       "optional": "show"
+      },
+      {
+       "name": "skill_ids",
+       "widget": "many2many_tags",
+       "options": "{'color_field': 'color'}"
+      },
+      {
+       "name": "skill_level_ids",
+       "widget": "many2many_tags_skills"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "color_picker": 1,
+      "many2many_tags": 1,
+      "many2many_tags_skills": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_skills.hr_employee_skill_type_view_form",
+    "package": "hr_skills",
+    "name": "hr.skill.type.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Skill Type"
+     },
+     "fields": [
+      {
+       "name": "id",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "required": "True",
+       "placeholder": "e.g. Languages"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "color",
+       "widget": "color_picker"
+      },
+      {
+       "name": "is_certification",
+       "widget": "boolean_toggle",
+       "options": "{'autosave': False}"
+      },
+      {
+       "name": "skill_ids",
+       "context": "{'default_skill_type_id': id}",
+       "nolabel": "1"
+      },
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "skill_level_ids",
+       "context": "{'default_skill_type_id': id}",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "color_picker": 1,
+      "boolean_toggle": 1,
+      "handle": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_skills.hr_skill_type_action",
+    "package": "hr_skills",
+    "name": "Skill Types",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "hr.skill.type"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "hr_recruitment_skills.hr_recruitment_skill_type_menu",
+    "package": "hr_recruitment_skills",
+    "name": "Skill Types",
+    "parent_id": "hr_recruitment.menu_hr_recruitment_config_employees",
+    "action": "hr_skills.hr_skill_type_action",
+    "sequence": "35",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

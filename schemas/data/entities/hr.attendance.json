@@ -1,0 +1,2480 @@
+{
+ "catalog": {
+  "name": "entity:hr.attendance",
+  "description": "Complete definition of entity Attendance (hr.attendance).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.attendance",
+  "storage_name": "hr_attendance",
+  "full_name": "Attendance",
+  "kind": "persistent",
+  "description": "Attendance",
+  "defined_by_package": "hr_attendance",
+  "extended_by_packages": [
+   "hr_holidays_attendance"
+  ],
+  "mixins": [
+   "mail.thread"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "check_in desc",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "employee_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "string": "Employee",
+    "default": {
+     "dynamic": "_default_employee"
+    },
+    "required": true,
+    "ondelete": "cascade",
+    "index": true,
+    "group_expand": "_read_group_employee_id",
+    "defined_in_package": "hr_attendance",
+    "full_name": "Employee",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "department_id",
+    "type": "Many2one",
+    "comodel": "hr.department",
+    "string": "Department",
+    "related": "employee_id.department_id",
+    "readonly": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Department",
+    "target_entity": "hr.department"
+   },
+   {
+    "name": "manager_id",
+    "type": "Many2one",
+    "comodel": "hr.employee",
+    "related": "employee_id.parent_id",
+    "readonly": true,
+    "export_string_translation": false,
+    "defined_in_package": "hr_attendance",
+    "string": "Manager",
+    "full_name": "Manager",
+    "target_entity": "hr.employee"
+   },
+   {
+    "name": "attendance_manager_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "related": "employee_id.attendance_manager_id",
+    "export_string_translation": false,
+    "defined_in_package": "hr_attendance",
+    "string": "Attendance Manager",
+    "full_name": "Attendance Manager",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "is_manager",
+    "type": "Boolean",
+    "compute": "_compute_is_manager",
+    "defined_in_package": "hr_attendance",
+    "string": "Is Manager",
+    "full_name": "Is Manager"
+   },
+   {
+    "name": "check_in",
+    "type": "Datetime",
+    "string": "Check In",
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "required": true,
+    "tracking": true,
+    "index": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Check In"
+   },
+   {
+    "name": "check_out",
+    "type": "Datetime",
+    "string": "Check Out",
+    "tracking": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Check Out"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Date",
+    "compute": "_compute_date",
+    "store": true,
+    "index": true,
+    "precompute": true,
+    "required": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Date"
+   },
+   {
+    "name": "worked_hours",
+    "type": "Float",
+    "string": "Worked Hours",
+    "compute": "_compute_worked_hours",
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Worked Hours"
+   },
+   {
+    "name": "color",
+    "type": "Integer",
+    "compute": "_compute_color",
+    "defined_in_package": "hr_attendance",
+    "string": "Color",
+    "full_name": "Color"
+   },
+   {
+    "name": "overtime_hours",
+    "type": "Float",
+    "string": "Worked Extra Hours",
+    "compute": "_compute_overtime_hours",
+    "store": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Worked Extra Hours"
+   },
+   {
+    "name": "overtime_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "to_approve",
+      "To Approve"
+     ],
+     [
+      "approved",
+      "Approved"
+     ],
+     [
+      "refused",
+      "Refused"
+     ]
+    ],
+    "compute": "_compute_overtime_status",
+    "store": true,
+    "tracking": true,
+    "readonly": false,
+    "defined_in_package": "hr_attendance",
+    "string": "Overtime Status",
+    "full_name": "Overtime Status"
+   },
+   {
+    "name": "validated_overtime_hours",
+    "type": "Float",
+    "string": "Validated Extra Hours",
+    "compute": "_compute_validated_overtime_hours",
+    "tracking": true,
+    "store": true,
+    "readonly": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Validated Extra Hours"
+   },
+   {
+    "name": "in_latitude",
+    "type": "Float",
+    "string": "Latitude",
+    "digits": [
+     10,
+     7
+    ],
+    "readonly": true,
+    "aggregator": null,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Latitude"
+   },
+   {
+    "name": "in_longitude",
+    "type": "Float",
+    "string": "Longitude",
+    "digits": [
+     10,
+     7
+    ],
+    "readonly": true,
+    "aggregator": null,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Longitude"
+   },
+   {
+    "name": "in_location",
+    "type": "Char",
+    "help": "Based on GPS-Coordinates if available or on IP Address",
+    "defined_in_package": "hr_attendance",
+    "string": "In Location",
+    "full_name": "In Location"
+   },
+   {
+    "name": "in_ip_address",
+    "type": "Char",
+    "string": "IP Address",
+    "readonly": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "internet protocol Address"
+   },
+   {
+    "name": "in_browser",
+    "type": "Char",
+    "string": "Browser",
+    "readonly": true,
+    "defined_in_package": "hr_attendance",
+    "full_name": "Browser"
+   },
+   {
+    "name": "in_mode",
+    "type": "Selection",
+    "string": "Mode",
+    "selection": [
+     [
+      "kiosk",
+      "Kiosk"
+     ],
+     [
+      "systray",
+      "Systray"
+     ],
+     [
+      "manual",
+      "Manual"
+     ],
+     [
+      "technical",
+      "Technical"
+     ]
+    ],
+    "readonly": true,
+    "default": "manual",
+    "defined_in_package": "hr_attendance",
+    "full_name": "Mode"
+   },
+   {
+    "name": "out_latitude",
+    "type": "Float",
+    "digits": [
+     10,
+     7
+    ],
+    "readonly": true,
+    "aggregator": null,
+    "defined_in_package": "hr_attendance",
+    "string": "Out Latitude",
+    "full_name": "Out Latitude"
+   },
+   {
+    "name": "out_longitude",
+    "type": "Float",
+    "digits": [
+     10,
+     7
+    ],
+    "readonly": true,
+    "aggregator": null,
+    "defined_in_package": "hr_attendance",
+    "string": "Out Longitude",
+    "full_name": "Out Longitude"
+   },
+   {
+    "name": "out_location",
+    "type": "Char",
+    "help": "Based on GPS-Coordinates if available or on IP Address",
+    "defined_in_package": "hr_attendance",
+    "string": "Out Location",
+    "full_name": "Out Location"
+   },
+   {
+    "name": "out_ip_address",
+    "type": "Char",
+    "readonly": true,
+    "defined_in_package": "hr_attendance",
+    "string": "Out Internet protocol Address",
+    "full_name": "Out Internet protocol Address"
+   },
+   {
+    "name": "out_browser",
+    "type": "Char",
+    "readonly": true,
+    "defined_in_package": "hr_attendance",
+    "string": "Out Browser",
+    "full_name": "Out Browser"
+   },
+   {
+    "name": "out_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "kiosk",
+      "Kiosk"
+     ],
+     [
+      "systray",
+      "Systray"
+     ],
+     [
+      "manual",
+      "Manual"
+     ],
+     [
+      "technical",
+      "Technical"
+     ],
+     [
+      "auto_check_out",
+      "Automatic Check-Out"
+     ]
+    ],
+    "readonly": true,
+    "default": "manual",
+    "defined_in_package": "hr_attendance",
+    "string": "Out Mode",
+    "full_name": "Out Mode"
+   },
+   {
+    "name": "expected_hours",
+    "type": "Float",
+    "string": "Regular Hours",
+    "compute": "_compute_expected_hours",
+    "store": true,
+    "aggregator": "sum",
+    "defined_in_package": "hr_attendance",
+    "full_name": "Regular Hours"
+   },
+   {
+    "name": "device_tracking_enabled",
+    "type": "Boolean",
+    "related": "employee_id.company_id.attendance_device_tracking",
+    "defined_in_package": "hr_attendance",
+    "string": "Device Tracking Enabled",
+    "full_name": "Device Tracking Enabled"
+   },
+   {
+    "name": "linked_overtime_ids",
+    "type": "Many2many",
+    "comodel": "hr.attendance.overtime.line",
+    "compute": "_compute_linked_overtime_ids",
+    "readonly": false,
+    "defined_in_package": "hr_attendance",
+    "string": "Linked Overtime",
+    "full_name": "Linked Overtime",
+    "target_entity": "hr.attendance.overtime.line"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_employee",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "check_in",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_expected_hours",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "worked_hours",
+         "overtime_hours"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_color",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_overtime_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "check_in",
+         "check_out",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_overtime_hours",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "check_in",
+         "check_out",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_validated_overtime_hours",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "check_in",
+         "check_out",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_linked_overtime_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "check_in",
+         "check_out",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id",
+         "check_in",
+         "check_out"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_manager",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_employee_calendar",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_worked_hours",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "check_in",
+         "check_out"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computes the worked hours of the attendance record.\nThe worked hours of resource with flexible calendar is computed as the difference\nbetween check_in and check_out, without taking into account the lunch_interval",
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_worked_hours_in_range",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "start_dt",
+     "end_dt"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": "Returns the amount of hours worked because of this attendance during the\ninterval defined by [start_dt, end_dt]\n\n:param start_dt: datetime starting the interval.\n:param end_dt: datetime ending the interval.\n:returns: float, hours worked",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_validity_check_in_check_out",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "check_in",
+         "check_out"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "verifies if check_in is earlier than check_out. ",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "\"Check Out\" time cannot be earlier than \"Check In\" time.",
+        "line": 203
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_validity",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "check_in",
+         "check_out",
+         "employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Verifies the validity of the attendance record compared to the others from the same employee.\nFor the same employee we must have :\n    * maximum 1 \"open\" attendance record (without check_out)\n    * no overlapping time slices with previous employee records",
+      "size_in_lines": 41,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s",
+        "line": 220
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Cannot create new attendance record for %(empl_name)s, the employee hasn't checked out since %(datetime)s",
+        "line": 232
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s",
+        "line": 244
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_day_start_and_day",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "employee",
+     "dt"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_week_date_range",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_overtimes_to_update_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_overtime_domain_from_attendance_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "attendance_domain"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_update_overtime",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "attendance_domain"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 46,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "AccessError",
+        "message": "Do not have access, user cannot edit the attendances that are not their own or if they are not the attendance manager of the employee.",
+        "line": 366
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot duplicate an attendance.",
+        "line": 383
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_in_attendance_maps",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_out_attendance_maps",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_kiosk_url",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "has_demo_data",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_demo_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 127,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_try_kiosk",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group_employee_id",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "resources",
+     "domain"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_linked_overtimes",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_approve_overtime",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_refuse_overtime",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_auto_check_out",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_absence_detection",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": "Objective is to create technical attendances on absence days to have negative overtime created for that day",
+      "size_in_lines": 38,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_localized_times",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_dates",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_attendance_by_periods_by_employee",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "init",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_holidays_attendance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_validity_check_in_check_out",
+    "package": "hr_attendance",
+    "kind": "ValidationError",
+    "message": "\"Check Out\" time cannot be earlier than \"Check In\" time."
+   },
+   {
+    "operation": "_check_validity",
+    "package": "hr_attendance",
+    "kind": "ValidationError",
+    "message": "Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s"
+   },
+   {
+    "operation": "_check_validity",
+    "package": "hr_attendance",
+    "kind": "ValidationError",
+    "message": "Cannot create new attendance record for %(empl_name)s, the employee hasn't checked out since %(datetime)s"
+   },
+   {
+    "operation": "_check_validity",
+    "package": "hr_attendance",
+    "kind": "ValidationError",
+    "message": "Cannot create new attendance record for %(empl_name)s, the employee was already checked in on %(datetime)s"
+   },
+   {
+    "operation": "write",
+    "package": "hr_attendance",
+    "kind": "AccessError",
+    "message": "Do not have access, user cannot edit the attendances that are not their own or if they are not the attendance manager of the employee."
+   },
+   {
+    "operation": "copy",
+    "package": "hr_attendance",
+    "kind": "UserError",
+    "message": "You cannot duplicate an attendance."
+   }
+  ],
+  "state_fields": [
+   "overtime_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "hr_attendance.access_hr_attendance_admin",
+    "package": "hr_attendance",
+    "name": "hr.attendance.admin",
+    "entity": "hr.attendance",
+    "group": "group_hr_attendance_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_attendance.access_hr_attendance_user",
+    "package": "hr_attendance",
+    "name": "hr.attendance.user",
+    "entity": "hr.attendance",
+    "group": "group_hr_attendance_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_attendance.access_hr_attendance_officer",
+    "package": "hr_attendance",
+    "name": "hr.attendance.officer",
+    "entity": "hr.attendance",
+    "group": "group_hr_attendance_officer",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_attendance.access_hr_attendance_own_reader",
+    "package": "hr_attendance",
+    "name": "hr.attendance.own.reader",
+    "entity": "hr.attendance",
+    "group": "group_hr_attendance_own_reader",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_attendance.hr_attendance_rule_employee_company",
+    "package": "hr_attendance",
+    "name": "Employee multi company rule",
+    "entity": "hr.attendance",
+    "domain": "['|',('employee_id.company_id','=',False),('employee_id.company_id', 'in', company_ids)]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_rule_attendance_admin",
+    "package": "hr_attendance",
+    "name": "Attendance Administrator: Full access",
+    "entity": "hr.attendance",
+    "domain": "[(1,'=',1)]",
+    "groups": "[(4, ref('hr_attendance.group_hr_attendance_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_rule_attendance_manager_restrict",
+    "package": "hr_attendance",
+    "name": "Attendance Officer: Restrict Attendances to managed employees",
+    "entity": "hr.attendance",
+    "domain": "[\n                '|',\n                '&',\n                 ('employee_id.attendance_manager_id', '=', user.id),\n                 ('employee_id.user_id', '=', user.id),\n                '&',\n                ('employee_id.user_id', '!=', user.id),\n                ('employee_id.attendance_manager_id', '=', user.id)\n                ]",
+    "groups": "[(4, ref('hr_attendance.group_hr_attendance_officer'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "1",
+    "applies_to_create": "1",
+    "applies_to_delete": "1"
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_rule_attendance_simple_user",
+    "package": "hr_attendance",
+    "name": "Attendance base user: Read his own attendances in other apps",
+    "entity": "hr.attendance",
+    "domain": "[('employee_id.user_id', '=', user.id)]",
+    "groups": "[(4, ref('hr_attendance.group_hr_attendance_own_reader'))]",
+    "global": false,
+    "applies_to_read": "1",
+    "applies_to_write": "0",
+    "applies_to_create": "0",
+    "applies_to_delete": "0"
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_attendance.view_attendance_tree",
+    "package": "hr_attendance",
+    "name": "hr.attendance.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "js_class": "attendance_list_view",
+      "string": "Employee attendances",
+      "decoration-success": "color == 10",
+      "decoration-danger": "color == 1",
+      "duplicate": "false"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee"
+      },
+      {
+       "name": "check_in"
+      },
+      {
+       "name": "check_out",
+       "options": "{}"
+      },
+      {
+       "name": "worked_hours",
+       "widget": "float_time",
+       "string": "Worked Hours"
+      },
+      {
+       "name": "overtime_hours",
+       "widget": "float_time",
+       "optional": "show"
+      },
+      {
+       "name": "validated_overtime_hours",
+       "widget": "float_time",
+       "optional": "show"
+      },
+      {
+       "name": "overtime_status",
+       "widget": "badge",
+       "optional": "hidden",
+       "decoration-danger": "overtime_status == 'refused'",
+       "decoration-warning": "overtime_status == 'to_approve'",
+       "decoration-success": "overtime_status == 'approved'"
+      },
+      {
+       "name": "in_mode",
+       "string": "Input Mode (In)",
+       "optional": "hidden"
+      },
+      {
+       "name": "out_mode",
+       "string": "Input Mode (Out)",
+       "optional": "hidden"
+      },
+      {
+       "name": "in_latitude",
+       "string": "Latitude (In)",
+       "optional": "hidden"
+      },
+      {
+       "name": "in_longitude",
+       "string": "Longitude (In)",
+       "optional": "hidden"
+      },
+      {
+       "name": "in_location",
+       "string": "Location (In)",
+       "optional": "hidden"
+      },
+      {
+       "name": "out_latitude",
+       "string": "Latitude (Out)",
+       "optional": "hidden"
+      },
+      {
+       "name": "out_longitude",
+       "string": "Longitude (Out)",
+       "optional": "hidden"
+      },
+      {
+       "name": "out_location",
+       "string": "Location (Out)",
+       "optional": "hidden"
+      },
+      {
+       "name": "create_uid",
+       "optional": "hidden"
+      },
+      {
+       "name": "write_uid",
+       "optional": "hidden"
+      },
+      {
+       "name": "write_date",
+       "optional": "hidden"
+      },
+      {
+       "name": "color",
+       "column_invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_approve_overtime",
+       "string": "Approve Extra Hours",
+       "type": "object",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_refuse_overtime",
+       "string": "Refuse Extra Hours",
+       "type": "object",
+       "class": "btn-secondary"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1,
+      "float_time": 3,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-success": "color == 10",
+      "decoration-danger": "color == 1"
+     }
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.view_hr_attendance_kanban",
+    "package": "hr_attendance",
+    "name": "hr.attendance.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "check_in"
+      },
+      {
+       "name": "check_out"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "options": "{'display_avatar_name': True}"
+      },
+      {
+       "name": "check_in"
+      },
+      {
+       "name": "check_out"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_view_form",
+    "package": "hr_attendance",
+    "name": "hr.attendance.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Employee attendances",
+      "duplicate": "false"
+     },
+     "fields": [
+      {
+       "name": "overtime_status",
+       "widget": "statusbar",
+       "invisible": "not overtime_status",
+       "readonly": "1",
+       "options": "{'clickable': '1'}"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "1",
+       "groups": "!hr_attendance.group_hr_attendance_officer"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "domain": "[                                         ('attendance_manager_id', '=', uid),                                         ('company_id', 'in', allowed_company_ids),                                     ]",
+       "groups": "hr_attendance.group_hr_attendance_officer,!hr_attendance.group_hr_attendance_user"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "domain": "[                                         ('company_id', 'in', allowed_company_ids),                                     ]",
+       "groups": "hr_attendance.group_hr_attendance_user"
+      },
+      {
+       "name": "check_in",
+       "readonly": "not is_manager",
+       "options": "{'rounding': 0}"
+      },
+      {
+       "name": "check_out",
+       "readonly": "not is_manager",
+       "options": "{'rounding': 0}",
+       "placeholder": "Currently Working"
+      },
+      {
+       "name": "worked_hours",
+       "widget": "float_time",
+       "string": "Worked Time"
+      },
+      {
+       "name": "overtime_hours",
+       "widget": "float_time",
+       "invisible": "overtime_hours == validated_overtime_hours"
+      },
+      {
+       "name": "validated_overtime_hours",
+       "widget": "float_time",
+       "readonly": "1"
+      },
+      {
+       "name": "in_mode"
+      },
+      {
+       "name": "in_ip_address",
+       "invisible": "in_mode == 'manual' or not device_tracking_enabled"
+      },
+      {
+       "name": "in_browser",
+       "invisible": "in_mode == 'manual' or not device_tracking_enabled"
+      },
+      {
+       "name": "in_location"
+      },
+      {
+       "name": "in_latitude"
+      },
+      {
+       "name": "in_longitude",
+       "nolabel": "1"
+      },
+      {
+       "name": "out_mode",
+       "string": "Mode"
+      },
+      {
+       "name": "out_ip_address",
+       "invisible": "in_mode == 'manual' or not device_tracking_enabled",
+       "string": "IP Address"
+      },
+      {
+       "name": "out_browser",
+       "invisible": "in_mode == 'manual' or not device_tracking_enabled",
+       "string": "Browser"
+      },
+      {
+       "name": "out_location"
+      },
+      {
+       "name": "out_latitude"
+      },
+      {
+       "name": "out_longitude",
+       "nolabel": "1"
+      },
+      {
+       "name": "linked_overtime_ids",
+       "readonly": "1"
+      },
+      {
+       "name": "rule_ids",
+       "widget": "many2many_tags",
+       "readonly": "1"
+      },
+      {
+       "name": "duration",
+       "widget": "float_time",
+       "readonly": "1"
+      },
+      {
+       "name": "manual_duration",
+       "widget": "float_time",
+       "readonly": "0",
+       "column_invisible": "1"
+      },
+      {
+       "name": "amount_rate",
+       "widget": "percentage"
+      },
+      {
+       "name": "status",
+       "widget": "badge",
+       "readonly": "1",
+       "decoration-danger": "status == 'refused'",
+       "decoration-warning": "status == 'to_approve'",
+       "decoration-success": "status == 'approved'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_approve_overtime",
+       "string": " ",
+       "type": "object",
+       "invisible": "not is_manager or overtime_status not in ['to_approve', 'refused'] or not overtime_status",
+       "class": "oe_stat_button flex-shrink-0",
+       "groups": "hr_attendance.group_hr_attendance_officer",
+       "icon": "fa-check"
+      },
+      {
+       "name": "action_refuse_overtime",
+       "string": " ",
+       "type": "object",
+       "invisible": "not is_manager or overtime_status not in ['to_approve', 'approved'] or not overtime_status",
+       "class": "oe_stat_button flex-shrink-0",
+       "groups": "hr_attendance.group_hr_attendance_officer",
+       "icon": "fa-times"
+      },
+      {
+       "name": "action_in_attendance_maps",
+       "string": "View on Maps",
+       "type": "object",
+       "class": "btn btn-link ps-0 pt-0 pb-2",
+       "icon": "oi-arrow-right"
+      },
+      {
+       "name": "action_out_attendance_maps",
+       "string": "View on Maps",
+       "type": "object",
+       "class": "btn btn-link ps-0 pt-0 pb-2",
+       "icon": "oi-arrow-right"
+      },
+      {
+       "name": "action_approve",
+       "string": "Approve",
+       "type": "object",
+       "invisible": "not is_manager or status not in ['to_approve', 'refused']",
+       "class": "oe_stat_button",
+       "groups": "hr_attendance.group_hr_attendance_officer",
+       "icon": "fa-check"
+      },
+      {
+       "name": "action_refuse",
+       "string": "Refuse",
+       "type": "object",
+       "invisible": "not is_manager or status not in ['to_approve', 'approved']",
+       "class": "oe_stat_button",
+       "groups": "hr_attendance.group_hr_attendance_officer",
+       "icon": "fa-times"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": null,
+       "string": "Overtime Details",
+       "invisible": null,
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "statusbar": 1,
+      "many2one_avatar_employee": 3,
+      "float_time": 5,
+      "many2many_tags": 1,
+      "percentage": 1,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [],
+     "statusbar_field": "overtime_status",
+     "statusbar_visible": null,
+     "chatter": true,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_view_graph",
+    "package": "hr_attendance",
+    "name": "hr.attendance.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Worked Hours",
+      "type": "line",
+      "stacked": "0",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "check_in"
+      },
+      {
+       "name": "overtime_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "worked_hours",
+       "widget": "float_time"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 2
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "employee_id",
+       "type": "row"
+      },
+      {
+       "name": "check_in",
+       "interval": "week",
+       "type": "col"
+      },
+      {
+       "name": "overtime_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "worked_hours",
+       "type": "measure",
+       "widget": "float_time"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_view_pivot",
+    "package": "hr_attendance",
+    "name": "hr.attendance.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Worked Hours"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "check_in"
+      },
+      {
+       "name": "worked_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "expected_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "overtime_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "validated_overtime_hours",
+       "widget": "float_time"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 4
+     },
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "employee_id",
+       "type": "row"
+      },
+      {
+       "name": "check_in",
+       "type": "col",
+       "interval": "month"
+      },
+      {
+       "name": "worked_hours",
+       "type": "measure",
+       "widget": "float_time"
+      },
+      {
+       "name": "expected_hours",
+       "type": "measure",
+       "widget": "float_time"
+      },
+      {
+       "name": "overtime_hours",
+       "type": "measure",
+       "widget": "float_time"
+      },
+      {
+       "name": "validated_overtime_hours",
+       "type": "measure",
+       "widget": "float_time"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_view_filter",
+    "package": "hr_attendance",
+    "name": "hr_attendance_view_filter",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Hr Attendance Search"
+     },
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "department_id",
+       "operator": "child_of"
+      },
+      {
+       "name": "check_in"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "myattendances",
+       "string": "My Attendances",
+       "domain": "[('employee_id.user_id', '=', uid)]"
+      },
+      {
+       "name": "myteam",
+       "string": "My Team",
+       "domain": "[('employee_id.parent_id.user_id', '=', uid)]"
+      },
+      {
+       "name": "nocheckout",
+       "string": "At Work",
+       "domain": "[('check_out', '=', False)]"
+      },
+      {
+       "name": "errors",
+       "string": "Errors",
+       "domain": "['|', ('worked_hours', '>=', 16), '&', ('check_out', '=', False), ('check_in', '<=', '-1d')]"
+      },
+      {
+       "name": "auto_check",
+       "string": "Automatically Checked-Out",
+       "domain": "[('out_mode', '=', 'auto_check_out')]"
+      },
+      {
+       "name": "check_in_filter",
+       "string": "Date",
+       "date": "check_in"
+      },
+      {
+       "name": "activeemployees",
+       "string": "Active Employees",
+       "domain": "[('employee_id.active', '=', True)]"
+      },
+      {
+       "name": "archivedemployees",
+       "string": "Archived Employees",
+       "domain": "[('employee_id.active', '=', False)]"
+      },
+      {
+       "name": "last_three_months",
+       "string": "Last 3 Months",
+       "domain": "[('check_in','>=', '-3m')]",
+       "invisible": "1"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "employee",
+       "string": "Employee",
+       "context": "{'group_by': 'employee_id'}"
+      },
+      {
+       "name": "departement",
+       "string": "Department",
+       "context": "{'group_by': 'department_id'}"
+      },
+      {
+       "name": "manager",
+       "string": "Manager",
+       "context": "{'group_by': 'manager_id'}"
+      },
+      {
+       "name": "groupby_mode_in",
+       "string": "Method",
+       "context": "{'group_by': 'in_mode'}"
+      },
+      {
+       "name": "groupby_name",
+       "string": "Date",
+       "context": "{'group_by': 'check_in:month'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_management_view_filter",
+    "package": "hr_attendance",
+    "name": "hr_attendance_management_view_filter",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "employee_id"
+      },
+      {
+       "name": "department_id",
+       "operator": "child_of"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "myattendances",
+       "string": "My Attendances",
+       "domain": "[('employee_id.user_id', '=', uid)]"
+      },
+      {
+       "name": "myteam",
+       "string": "My Team",
+       "domain": "[('employee_id.parent_id.user_id', '=', uid)]"
+      },
+      {
+       "name": "to_approve",
+       "string": "To Approve",
+       "domain": "[('overtime_status','=', 'to_approve')]"
+      },
+      {
+       "name": "approved",
+       "string": "Approved",
+       "domain": "[('overtime_status','=', 'approved')]"
+      },
+      {
+       "name": "refused",
+       "string": "Refused",
+       "domain": "[('overtime_status','=', 'refused')]"
+      },
+      {
+       "name": "check_in_filter",
+       "string": "Date",
+       "date": "check_in"
+      },
+      {
+       "name": "activeemployees",
+       "string": "Active Employees",
+       "domain": "[('employee_id.active', '=', True)]"
+      },
+      {
+       "name": "archivedemployees",
+       "string": "Archived Employees",
+       "domain": "[('employee_id.active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "employee",
+       "string": "Employee",
+       "context": "{'group_by': 'employee_id'}"
+      },
+      {
+       "name": "groupby_date",
+       "string": "Date",
+       "context": "{'group_by': 'check_in'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.view_attendance_tree_management",
+    "package": "hr_attendance",
+    "name": "hr.attendance.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Employee attendances",
+      "create": "0"
+     },
+     "fields": [
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_employee",
+       "readonly": "1"
+      },
+      {
+       "name": "check_in",
+       "readonly": "1"
+      },
+      {
+       "name": "check_out",
+       "readonly": "1"
+      },
+      {
+       "name": "worked_hours",
+       "widget": "float_time",
+       "readonly": "1",
+       "string": "Worked Time"
+      },
+      {
+       "name": "overtime_hours",
+       "widget": "float_time"
+      },
+      {
+       "name": "validated_overtime_hours",
+       "widget": "float_time",
+       "readonly": "overtime_status == 'refused'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_approve_overtime",
+       "string": "Approve",
+       "type": "object",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_refuse_overtime",
+       "string": "Refuse",
+       "type": "object",
+       "class": "btn-secondary"
+      },
+      {
+       "name": "action_approve_overtime",
+       "string": "Approve",
+       "type": "object",
+       "invisible": "not is_manager or overtime_status not in ['to_approve', 'refused']",
+       "class": "oe_stat_button",
+       "groups": "hr_attendance.group_hr_attendance_officer",
+       "icon": "fa-check"
+      },
+      {
+       "name": "action_refuse_overtime",
+       "string": "Refuse",
+       "type": "object",
+       "invisible": "not is_manager or overtime_status not in ['to_approve', 'approved']",
+       "class": "oe_stat_button",
+       "groups": "hr_attendance.group_hr_attendance_officer",
+       "icon": "fa-times"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_employee": 1,
+      "float_time": 3
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": "0",
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_employee_simple_tree_view",
+    "package": "hr_attendance",
+    "name": "hr.attendance.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "check_in"
+      },
+      {
+       "name": "check_out"
+      },
+      {
+       "name": "worked_hours",
+       "widget": "float_time",
+       "string": "Work Hours"
+      },
+      {
+       "name": "validated_overtime_hours",
+       "widget": "float_time",
+       "string": "Extra Hours",
+       "column_invisible": "not context.get('display_extra_hours')"
+      },
+      {
+       "name": "overtime_status",
+       "widget": "badge",
+       "string": "Status",
+       "column_invisible": "not context.get('display_extra_hours')",
+       "optional": "hide",
+       "decoration-danger": "overtime_status == 'refused'",
+       "decoration-warning": "overtime_status == 'to_approve'",
+       "decoration-success": "overtime_status == 'approved'"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "float_time": 2,
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_employee_simple_form_view",
+    "package": "hr_attendance",
+    "name": "hr.attendance.form",
+    "view_type": "field",
+    "inherits_view": "hr_attendance.hr_attendance_view_form",
+    "mode": "primary",
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "overtime_status",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "overtime_status",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.hr_attendance_employee_simple_tree_view",
+    "package": "hr_holidays_attendance",
+    "name": "hr.attendance.employee.simple.tree.view.inherit.hr_holidays_attendance",
+    "view_type": "list",
+    "inherits_view": "hr_attendance.hr_attendance_employee_simple_tree_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "element": "list",
+       "attributes": {
+        "position": "attributes"
+       },
+       "position": "attributes"
+      }
+     ],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "hr_holidays_attendance.view_attendance_overtime_line_list",
+    "package": "hr_holidays_attendance",
+    "name": "hr.attendance",
+    "view_type": "field",
+    "inherits_view": "hr_attendance.hr_attendance_view_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "duration",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "duration",
+       "position": "after"
+      },
+      {
+       "name": "compensable_as_leave",
+       "optional": "show"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "hr_attendance.hr_attendance_action",
+    "package": "hr_attendance",
+    "name": "Attendances",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": "hr_attendance_view_filter",
+    "domain": null,
+    "context": "{\n                \"search_default_groupby_name\": 1,\n                \"search_default_employee\": 2\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "",
+    "usage": null,
+    "entity": "hr.attendance"
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_reporting",
+    "package": "hr_attendance",
+    "name": "Attendances",
+    "view_mode": "pivot,graph",
+    "view_id": null,
+    "search_view_id": "hr_attendance_view_filter",
+    "domain": null,
+    "context": "{\n                \"search_default_employee\": 2,\n                \"search_default_activeemployees\": 1,\n                \"search_default_last_three_months\": 1\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No attendance records found\n            </p><p>\n                The attendance reporting of your employees will be displayed here.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.attendance"
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_management_action",
+    "package": "hr_attendance",
+    "name": "Management",
+    "view_mode": "list,form",
+    "view_id": "view_attendance_tree_management",
+    "search_view_id": "hr_attendance_management_view_filter",
+    "domain": "[('check_out', '!=', False)]",
+    "context": "{\n                \"search_default_to_approve\" : 1,\n                \"search_default_activeemployees\": 1,\n            }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No attendance records found\n            </p><p>\n                The attendance reporting of your employees will be displayed here.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "hr.attendance"
+   }
+  ],
+  "server_actions": [
+   {
+    "external_identifier": "hr_attendance.action_try_kiosk",
+    "package": "hr_attendance",
+    "name": "Try kiosk",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   },
+   {
+    "external_identifier": "hr_attendance.action_load_demo_data",
+    "package": "hr_attendance",
+    "name": "Load demo data",
+    "state": "code",
+    "binding_type": null,
+    "has_custom_logic": true
+   }
+  ],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "hr_attendance.hr_attendance_check_out_cron",
+    "package": "hr_attendance",
+    "name": "Attendance: Automatically check-out employees",
+    "interval_number": "4",
+    "interval_type": "hours",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "hr.attendance",
+    "operation": "_cron_auto_check_out",
+    "operation_call": "model._cron_auto_check_out()"
+   },
+   {
+    "external_identifier": "hr_attendance.hr_attendance_absence_cron",
+    "package": "hr_attendance",
+    "name": "Attendance: Detect Absences for employees",
+    "interval_number": "4",
+    "interval_type": "hours",
+    "priority": null,
+    "active": null,
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "hr.attendance",
+    "operation": "_cron_absence_detection",
+    "operation_call": "model._cron_absence_detection()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

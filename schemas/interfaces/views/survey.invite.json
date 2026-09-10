@@ -1,0 +1,165 @@
+{
+ "catalog": {
+  "name": "views:survey.invite",
+  "description": "View declarations for entity survey.invite.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "survey.survey_invite_view_form",
+   "package": "survey",
+   "name": "survey.invite.view.form",
+   "entity": "survey.invite",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Compose Email",
+     "class": "o_mail_composer_form"
+    },
+    "fields": [
+     {
+      "name": "author_id",
+      "invisible": "1"
+     },
+     {
+      "name": "survey_access_mode",
+      "invisible": "1"
+     },
+     {
+      "name": "survey_users_login_required",
+      "invisible": "1"
+     },
+     {
+      "name": "survey_users_can_signup",
+      "invisible": "1"
+     },
+     {
+      "name": "survey_id",
+      "invisible": "1"
+     },
+     {
+      "name": "existing_mode",
+      "widget": "radio",
+      "invisible": "1"
+     },
+     {
+      "name": "lang",
+      "invisible": "1"
+     },
+     {
+      "name": "render_model",
+      "invisible": "1"
+     },
+     {
+      "name": "survey_start_url",
+      "widget": "CopyClipboardChar",
+      "invisible": "survey_access_mode != 'public'",
+      "readonly": "1",
+      "nolabel": "1"
+     },
+     {
+      "name": "send_email",
+      "widget": "boolean_toggle",
+      "invisible": "survey_access_mode != 'public'",
+      "string": "Send by Email",
+      "options": "{'autosave': False}"
+     },
+     {
+      "name": "partner_ids",
+      "widget": "many2many_tags_email",
+      "invisible": "not send_email",
+      "required": "True",
+      "context": "{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}",
+      "options": "{'no_quick_create': True}",
+      "placeholder": "Add existing contacts..."
+     },
+     {
+      "name": "emails",
+      "invisible": "survey_users_login_required or not send_email",
+      "placeholder": "e.g.  'Rick Sanchez' <rick_sanchez@example.com>, hictor_vugo@example.com"
+     },
+     {
+      "name": "existing_partner_ids",
+      "invisible": "1"
+     },
+     {
+      "name": "existing_emails",
+      "invisible": "1"
+     },
+     {
+      "name": "existing_text"
+     },
+     {
+      "name": "existing_mode",
+      "nolabel": "1"
+     },
+     {
+      "name": "subject",
+      "invisible": "not send_email",
+      "placeholder": "Subject..."
+     },
+     {
+      "name": "can_edit_body",
+      "invisible": "1"
+     },
+     {
+      "name": "body",
+      "widget": "html_mail",
+      "invisible": "not send_email",
+      "readonly": "not can_edit_body",
+      "options": "{'height': 380}",
+      "force_save": "1"
+     },
+     {
+      "name": "attachment_ids",
+      "widget": "many2many_binary"
+     },
+     {
+      "name": "deadline"
+     },
+     {
+      "name": "template_id"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_invite",
+      "string": "Send",
+      "type": "object",
+      "invisible": "not send_email",
+      "class": "btn-primary",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Close",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "radio": 1,
+     "CopyClipboardChar": 1,
+     "boolean_toggle": 1,
+     "many2many_tags_email": 1,
+     "html_mail": 1,
+     "many2many_binary": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Compose Email\" class=\"o_mail_composer_form\">\n                    <group col=\"1\">\n                        <group col=\"2\">\n                            <field name=\"author_id\" invisible=\"1\"/>\n                            <field name=\"survey_access_mode\" invisible=\"1\"/>\n                            <field name=\"survey_users_login_required\" invisible=\"1\"/>\n                            <field name=\"survey_users_can_signup\" invisible=\"1\"/>\n                            <field name=\"survey_id\" invisible=\"1\"/>\n                            <field name=\"existing_mode\" widget=\"radio\" invisible=\"1\"/>\n                            <field name=\"lang\" invisible=\"1\"/>\n                            <field name=\"render_model\" invisible=\"1\"/>\n                            <label class=\"o_survey_label_survey_start_url\" for=\"survey_start_url\" string=\"Survey Link\" invisible=\"survey_access_mode != 'public'\"/>\n                            <field name=\"survey_start_url\" nolabel=\"1\" widget=\"CopyClipboardChar\" readonly=\"1\" invisible=\"survey_access_mode != 'public'\"/>\n                            <field string=\"Send by Email\" name=\"send_email\" widget=\"boolean_toggle\" options=\"{'autosave': False}\" invisible=\"survey_access_mode != 'public'\"/>\n                            <field name=\"partner_ids\" widget=\"many2many_tags_email\" placeholder=\"Add existing contacts...\" options=\"{'no_quick_create': True}\" context=\"{'show_email': True, 'form_view_ref': 'base.view_partner_simple_form'}\" required=\"True\" invisible=\"not send_email\"/>\n                            <field name=\"emails\" invisible=\"survey_users_login_required or not send_email\" placeholder=\"e.g.  'Rick Sanchez' &lt;rick_sanchez@example.com&gt;, hictor_vugo@example.com\"/>\n                        </group>\n                        <field name=\"existing_partner_ids\" invisible=\"1\"/>\n                        <field name=\"existing_emails\" invisible=\"1\"/>\n                        <div col=\"2\" class=\"alert alert-warning\" role=\"alert\" invisible=\"survey_access_mode == 'public' or not existing_text\">\n                            <field name=\"existing_text\"/>\n                            <group col=\"2\">\n                                <label for=\"existing_mode\" string=\"Handle existing\"/>\n                                <div>\n                                    <field name=\"existing_mode\" nolabel=\"1\"/>\n                                    <p invisible=\"existing_mode != 'resend'\">Customers will receive the same token.</p>\n                                    <p invisible=\"existing_mode != 'new'\">Customers will receive a new token and be able to completely retake the survey.</p>\n                                </div>\n                            </group>\n                        </div>\n                        <group col=\"2\">\n                            <field name=\"subject\" invisible=\"not send_email\" placeholder=\"Subject...\"/>\n                        </group>\n                        <field name=\"can_edit_body\" invisible=\"1\"/>\n                        <field name=\"body\" class=\"oe-bordered-editor border border-1 m-3 p-0 flex-fill\" widget=\"html_mail\" options=\"{'height': 380}\" invisible=\"not send_email\" readonly=\"not can_edit_body\" force_save=\"1\"/>\n                        <group invisible=\"not send_email\">\n                            <group>\n                                <field name=\"attachment_ids\" widget=\"many2many_binary\"/>\n                            </group>\n                            <group>\n                                <field name=\"deadline\"/>\n                                <field name=\"template_id\" label=\"Use template\"/>\n                            </group>\n                        </group>\n                    </group>\n                    <footer>\n                        <button string=\"Send\" invisible=\"not send_email\" name=\"action_invite\" type=\"object\" class=\"btn-primary\" data-hotkey=\"q\"/>\n                        <button string=\"Close\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                    </footer>\n                </form>\n            </field>\n        "
+  }
+ ]
+}

@@ -1,0 +1,1060 @@
+{
+ "catalog": {
+  "name": "entity:account.report",
+  "description": "Complete definition of entity Accounting Report (account.report).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.report",
+  "storage_name": "account_report",
+  "full_name": "Accounting Report",
+  "kind": "persistent",
+  "description": "Accounting Report",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "l10n_in"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "account",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "defined_in_package": "account",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "account",
+    "full_name": "Active"
+   },
+   {
+    "name": "line_ids",
+    "type": "One2many",
+    "string": "Lines",
+    "comodel": "account.report.line",
+    "inverse_name": "report_id",
+    "defined_in_package": "account",
+    "full_name": "Lines",
+    "target_entity": "account.report.line"
+   },
+   {
+    "name": "column_ids",
+    "type": "One2many",
+    "string": "Columns",
+    "comodel": "account.report.column",
+    "inverse_name": "report_id",
+    "defined_in_package": "account",
+    "full_name": "Columns",
+    "target_entity": "account.report.column"
+   },
+   {
+    "name": "root_report_id",
+    "type": "Many2one",
+    "string": "Root Report",
+    "comodel": "account.report",
+    "index": "btree_not_null",
+    "help": "The report this report is a variant of.",
+    "defined_in_package": "account",
+    "full_name": "Root Report",
+    "target_entity": "account.report"
+   },
+   {
+    "name": "variant_report_ids",
+    "type": "One2many",
+    "string": "Variants",
+    "comodel": "account.report",
+    "inverse_name": "root_report_id",
+    "defined_in_package": "account",
+    "full_name": "Variants",
+    "target_entity": "account.report"
+   },
+   {
+    "name": "section_report_ids",
+    "type": "Many2many",
+    "string": "Sections",
+    "comodel": "account.report",
+    "relation": "account_report_section_rel",
+    "column1": "main_report_id",
+    "column2": "sub_report_id",
+    "defined_in_package": "account",
+    "full_name": "Sections",
+    "target_entity": "account.report"
+   },
+   {
+    "name": "section_main_report_ids",
+    "type": "Many2many",
+    "string": "Section Of",
+    "comodel": "account.report",
+    "relation": "account_report_section_rel",
+    "column1": "sub_report_id",
+    "column2": "main_report_id",
+    "defined_in_package": "account",
+    "full_name": "Section Of",
+    "target_entity": "account.report"
+   },
+   {
+    "name": "use_sections",
+    "type": "Boolean",
+    "string": "Composite Report",
+    "compute": "_compute_use_sections",
+    "store": true,
+    "readonly": false,
+    "help": "Create a structured report with multiple sections for convenient navigation and simultaneous printing.",
+    "defined_in_package": "account",
+    "full_name": "Composite Report"
+   },
+   {
+    "name": "chart_template",
+    "type": "Selection",
+    "string": "Chart of Accounts",
+    "selection": {
+     "expression": "lambda self: self.env['account.chart.template']._select_chart_template()"
+    },
+    "defined_in_package": "account",
+    "full_name": "Chart of Accounts"
+   },
+   {
+    "name": "country_id",
+    "type": "Many2one",
+    "string": "Country",
+    "comodel": "res.country",
+    "defined_in_package": "account",
+    "full_name": "Country",
+    "target_entity": "res.country"
+   },
+   {
+    "name": "only_tax_exigible",
+    "type": "Boolean",
+    "string": "Only Tax Exigible Lines",
+    "compute": "fields.Boolean(string='Only Tax Exigible Lines', compute=lambda x: x._compute_report_option_filter('only_tax_exigible'), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Only Tax Exigible Lines"
+   },
+   {
+    "name": "availability_condition",
+    "type": "Selection",
+    "string": "Availability",
+    "selection": [
+     [
+      "country",
+      "Country Matches"
+     ],
+     [
+      "coa",
+      "Chart of Accounts Matches"
+     ],
+     [
+      "always",
+      "Always"
+     ]
+    ],
+    "compute": "_compute_default_availability_condition",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "account",
+    "full_name": "Availability"
+   },
+   {
+    "name": "load_more_limit",
+    "type": "Integer",
+    "string": "Load More Limit",
+    "defined_in_package": "account",
+    "full_name": "Load More Limit"
+   },
+   {
+    "name": "search_bar",
+    "type": "Boolean",
+    "string": "Search Bar",
+    "defined_in_package": "account",
+    "full_name": "Search Bar"
+   },
+   {
+    "name": "prefix_groups_threshold",
+    "type": "Integer",
+    "string": "Prefix Groups Threshold",
+    "default": 4000,
+    "defined_in_package": "account",
+    "full_name": "Prefix Groups Threshold"
+   },
+   {
+    "name": "integer_rounding",
+    "type": "Selection",
+    "string": "Integer Rounding",
+    "selection": [
+     [
+      "HALF-UP",
+      "Nearest"
+     ],
+     [
+      "UP",
+      "Up"
+     ],
+     [
+      "DOWN",
+      "Down"
+     ]
+    ],
+    "defined_in_package": "account",
+    "full_name": "Integer Rounding"
+   },
+   {
+    "name": "allow_foreign_vat",
+    "type": "Boolean",
+    "string": "Allow Foreign VAT",
+    "compute": "fields.Boolean(string='Allow Foreign VAT', compute=lambda x: x._compute_report_option_filter('allow_foreign_vat'), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Allow Foreign value-added tax"
+   },
+   {
+    "name": "default_opening_date_filter",
+    "type": "Selection",
+    "string": "Default Opening",
+    "selection": [
+     [
+      "this_year",
+      "This Year"
+     ],
+     [
+      "this_quarter",
+      "This Quarter"
+     ],
+     [
+      "this_month",
+      "This Month"
+     ],
+     [
+      "today",
+      "Today"
+     ],
+     [
+      "previous_month",
+      "Last Month"
+     ],
+     [
+      "previous_quarter",
+      "Last Quarter"
+     ],
+     [
+      "previous_year",
+      "Last Year"
+     ],
+     [
+      "this_return_period",
+      "This Return Period"
+     ],
+     [
+      "previous_return_period",
+      "Last Return Period"
+     ]
+    ],
+    "compute": "fields.Selection(string='Default Opening', selection=[('this_year', 'This Year'), ('this_quarter', 'This Quarter'), ('this_month', 'This Month'), ('today', 'Today'), ('previous_month', 'Last Month'), ('previous_quarter', 'Last Quarter'), ('previous_year', 'Last Year'), ('this_return_period', 'This Return Period'), ('previous_return_period', 'Last Return Period')], compute=lambda x: x._compute_report_option_filter('default_opening_date_filter', 'previous_month'), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Default Opening"
+   },
+   {
+    "name": "currency_translation",
+    "type": "Selection",
+    "string": "Currency Translation",
+    "selection": [
+     [
+      "current",
+      "Use the most recent rate at the date of the report"
+     ],
+     [
+      "cta",
+      "Use CTA"
+     ]
+    ],
+    "compute": "fields.Selection(string='Currency Translation', selection=[('current', 'Use the most recent rate at the date of the report'), ('cta', 'Use CTA')], compute=lambda x: x._compute_report_option_filter('currency_translation', 'cta'), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Currency Translation"
+   },
+   {
+    "name": "filter_multi_company",
+    "type": "Selection",
+    "string": "Multi-Company",
+    "selection": [
+     [
+      "selector",
+      "Use Company Selector"
+     ],
+     [
+      "tax_units",
+      "Use Tax Units"
+     ]
+    ],
+    "compute": "fields.Selection(string='Multi-Company', selection=[('selector', 'Use Company Selector'), ('tax_units', 'Use Tax Units')], compute=lambda x: x._compute_report_option_filter('filter_multi_company', 'selector'), readonly=False, precompute=True, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "readonly": false,
+    "precompute": true,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Multi-Company"
+   },
+   {
+    "name": "filter_date_range",
+    "type": "Boolean",
+    "string": "Date Range",
+    "compute": "fields.Boolean(string='Date Range', compute=lambda x: x._compute_report_option_filter('filter_date_range', True), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Date Range"
+   },
+   {
+    "name": "filter_show_draft",
+    "type": "Boolean",
+    "string": "Draft Entries",
+    "compute": "fields.Boolean(string='Draft Entries', compute=lambda x: x._compute_report_option_filter('filter_show_draft', True), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Draft Entries"
+   },
+   {
+    "name": "filter_unreconciled",
+    "type": "Boolean",
+    "string": "Unreconciled Entries",
+    "compute": "fields.Boolean(string='Unreconciled Entries', compute=lambda x: x._compute_report_option_filter('filter_unreconciled', False), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Unreconciled Entries"
+   },
+   {
+    "name": "filter_unfold_all",
+    "type": "Boolean",
+    "string": "Unfold All",
+    "compute": "fields.Boolean(string='Unfold All', compute=lambda x: x._compute_report_option_filter('filter_unfold_all'), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Unfold All"
+   },
+   {
+    "name": "filter_hide_0_lines",
+    "type": "Selection",
+    "string": "Hide lines at 0",
+    "selection": [
+     [
+      "by_default",
+      "Enabled by Default"
+     ],
+     [
+      "optional",
+      "Optional"
+     ],
+     [
+      "never",
+      "Never"
+     ]
+    ],
+    "compute": "fields.Selection(string='Hide lines at 0', selection=[('by_default', 'Enabled by Default'), ('optional', 'Optional'), ('never', 'Never')], compute=lambda x: x._compute_report_option_filter('filter_hide_0_lines', 'optional'), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Hide lines at 0"
+   },
+   {
+    "name": "filter_period_comparison",
+    "type": "Boolean",
+    "string": "Period Comparison",
+    "compute": "fields.Boolean(string='Period Comparison', compute=lambda x: x._compute_report_option_filter('filter_period_comparison', True), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Period Comparison"
+   },
+   {
+    "name": "filter_growth_comparison",
+    "type": "Boolean",
+    "string": "Growth Comparison",
+    "compute": "fields.Boolean(string='Growth Comparison', compute=lambda x: x._compute_report_option_filter('filter_growth_comparison', True), precompute=True, readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Growth Comparison"
+   },
+   {
+    "name": "filter_journals",
+    "type": "Boolean",
+    "string": "Journals",
+    "compute": "fields.Boolean(string='Journals', compute=lambda x: x._compute_report_option_filter('filter_journals'), readonly=False, precompute=True, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "readonly": false,
+    "precompute": true,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Journals"
+   },
+   {
+    "name": "filter_analytic",
+    "type": "Boolean",
+    "string": "Analytic Filter",
+    "compute": "fields.Boolean(string='Analytic Filter', compute=lambda x: x._compute_report_option_filter('filter_analytic'), readonly=False, precompute=True, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "readonly": false,
+    "precompute": true,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Analytic Filter"
+   },
+   {
+    "name": "filter_hierarchy",
+    "type": "Selection",
+    "string": "Account Groups",
+    "selection": [
+     [
+      "by_default",
+      "Enabled by Default"
+     ],
+     [
+      "optional",
+      "Optional"
+     ],
+     [
+      "never",
+      "Never"
+     ]
+    ],
+    "compute": "fields.Selection(string='Account Groups', selection=[('by_default', 'Enabled by Default'), ('optional', 'Optional'), ('never', 'Never')], compute=lambda x: x._compute_report_option_filter('filter_hierarchy', 'optional'), readonly=False, precompute=True, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "readonly": false,
+    "precompute": true,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Account Groups"
+   },
+   {
+    "name": "filter_account_type",
+    "type": "Selection",
+    "string": "Account Types",
+    "selection": [
+     [
+      "both",
+      "Payable and receivable"
+     ],
+     [
+      "payable",
+      "Payable"
+     ],
+     [
+      "receivable",
+      "Receivable"
+     ],
+     [
+      "disabled",
+      "Disabled"
+     ]
+    ],
+    "compute": "fields.Selection(string='Account Types', selection=[('both', 'Payable and receivable'), ('payable', 'Payable'), ('receivable', 'Receivable'), ('disabled', 'Disabled')], compute=lambda x: x._compute_report_option_filter('filter_account_type', 'disabled'), readonly=False, precompute=True, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "readonly": false,
+    "precompute": true,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Account Types"
+   },
+   {
+    "name": "filter_partner",
+    "type": "Boolean",
+    "string": "Partners",
+    "compute": "fields.Boolean(string='Partners', compute=lambda x: x._compute_report_option_filter('filter_partner'), readonly=False, precompute=True, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "readonly": false,
+    "precompute": true,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Partners"
+   },
+   {
+    "name": "filter_aml_ir_filters",
+    "type": "Boolean",
+    "string": "Favorite Filters",
+    "help": "If activated, user-defined filters on journal items can be selected on this report",
+    "compute": "fields.Boolean(string='Favorite Filters', help='If activated, user-defined filters on journal items can be selected on this report', compute=lambda x: x._compute_report_option_filter('filter_aml_ir_filters'), readonly=False, precompute=True, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "readonly": false,
+    "precompute": true,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Favorite Filters"
+   },
+   {
+    "name": "filter_budgets",
+    "type": "Boolean",
+    "string": "Budgets",
+    "compute": "fields.Boolean(string='Budgets', compute=lambda x: x._compute_report_option_filter('filter_budgets'), readonly=False, precompute=True, store=True, depends=['root_report_id', 'section_main_report_ids'])",
+    "readonly": false,
+    "precompute": true,
+    "store": true,
+    "depends": [
+     "root_report_id",
+     "section_main_report_ids"
+    ],
+    "defined_in_package": "account",
+    "full_name": "Budgets"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_report_option_filter",
+    "kind": "computation",
+    "arguments": [
+     "self",
+     "field_name",
+     "default_value"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 18,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_default_availability_condition",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "root_report_id",
+         "country_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_use_sections",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "section_report_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_root_report_id",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "root_report_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Only a report without a root report of its own can be selected as root report.",
+        "line": 237
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_validate_parent_sequence",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "line_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Line \"%(line)s\" defines line \"%(parent_line)s\" as its parent, but appears before it in the report. The parent must always come first.",
+        "line": 244
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_validate_section_report_ids",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "section_report_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The sections defined on a report cannot have sections themselves.",
+        "line": 253
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_validate_availability_condition",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "availability_condition",
+         "country_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The Availability is set to 'Country Matches' but the field Country is not set.",
+        "line": 259
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_onchange_availability_condition",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "availability_condition"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Copy the whole financial report hierarchy by duplicating each line recursively.\n\n:param default: Default values.\n:return: The copied account.report record.",
+      "size_in_lines": 28,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_if_no_variant",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can't delete a report that has variants.",
+        "line": 326
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_copied_name",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Return a copied name of the account.report record by adding the suffix (copy) at the end\nuntil the name is unique.\n\n:return: an unique name for the copied account.report",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "country_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_init_options_buttons",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "options",
+     "previous_options"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_validate_root_report_id",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Only a report without a root report of its own can be selected as root report."
+   },
+   {
+    "operation": "_validate_parent_sequence",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Line \"%(line)s\" defines line \"%(parent_line)s\" as its parent, but appears before it in the report. The parent must always come first."
+   },
+   {
+    "operation": "_validate_section_report_ids",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The sections defined on a report cannot have sections themselves."
+   },
+   {
+    "operation": "_validate_availability_condition",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "The Availability is set to 'Country Matches' but the field Country is not set."
+   },
+   {
+    "operation": "_unlink_if_no_variant",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can't delete a report that has variants."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_report_basic",
+    "package": "account",
+    "name": "account.report.basic",
+    "entity": "account.report",
+    "group": "account.group_account_basic",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_report_readonly",
+    "package": "account",
+    "name": "account.report.readonly",
+    "entity": "account.report",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_report_ac_user",
+    "package": "account",
+    "name": "account.report.ac.user",
+    "entity": "account.report",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

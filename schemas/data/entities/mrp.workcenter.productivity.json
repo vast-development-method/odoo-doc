@@ -1,0 +1,883 @@
+{
+ "catalog": {
+  "name": "entity:mrp.workcenter.productivity",
+  "description": "Complete definition of entity Workcenter Productivity Log (mrp.workcenter.productivity).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mrp.workcenter.productivity",
+  "storage_name": "mrp_workcenter_productivity",
+  "full_name": "Workcenter Productivity Log",
+  "kind": "persistent",
+  "description": "Workcenter Productivity Log",
+  "defined_by_package": "mrp",
+  "extended_by_packages": [
+   "mrp_account"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "id desc",
+  "display_name_field": "loss_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "production_id",
+    "type": "Many2one",
+    "comodel": "mrp.production",
+    "string": "Manufacturing Order",
+    "related": "workorder_id.production_id",
+    "readonly": true,
+    "defined_in_package": "mrp",
+    "full_name": "Manufacturing Order",
+    "target_entity": "mrp.production"
+   },
+   {
+    "name": "workcenter_id",
+    "type": "Many2one",
+    "comodel": "mrp.workcenter",
+    "string": "Work Center",
+    "required": true,
+    "check_company": true,
+    "index": true,
+    "defined_in_package": "mrp",
+    "full_name": "Work Center",
+    "target_entity": "mrp.workcenter"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "required": true,
+    "index": true,
+    "default": {
+     "dynamic": "lambda self: self._get_default_company_id()"
+    },
+    "defined_in_package": "mrp",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "workorder_id",
+    "type": "Many2one",
+    "comodel": "mrp.workorder",
+    "string": "Work Order",
+    "check_company": true,
+    "index": true,
+    "defined_in_package": "mrp",
+    "full_name": "Work Order",
+    "target_entity": "mrp.workorder"
+   },
+   {
+    "name": "user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "User",
+    "default": {
+     "dynamic": "lambda self: self.env.uid"
+    },
+    "defined_in_package": "mrp",
+    "full_name": "User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "loss_id",
+    "type": "Many2one",
+    "comodel": "mrp.workcenter.productivity.loss",
+    "string": "Loss Reason",
+    "ondelete": "restrict",
+    "required": true,
+    "defined_in_package": "mrp",
+    "full_name": "Loss Reason",
+    "target_entity": "mrp.workcenter.productivity.loss"
+   },
+   {
+    "name": "loss_type",
+    "type": "Selection",
+    "string": "Effectiveness",
+    "related": "loss_id.loss_type",
+    "readonly": false,
+    "defined_in_package": "mrp",
+    "full_name": "Effectiveness"
+   },
+   {
+    "name": "description",
+    "type": "Text",
+    "string": "Description",
+    "defined_in_package": "mrp",
+    "full_name": "Description"
+   },
+   {
+    "name": "date_start",
+    "type": "Datetime",
+    "string": "Start Date",
+    "default": {
+     "dynamic": "fields.Datetime.now"
+    },
+    "required": true,
+    "defined_in_package": "mrp",
+    "full_name": "Start Date"
+   },
+   {
+    "name": "date_end",
+    "type": "Datetime",
+    "string": "End Date",
+    "defined_in_package": "mrp",
+    "full_name": "End Date"
+   },
+   {
+    "name": "duration",
+    "type": "Float",
+    "string": "Duration",
+    "compute": "_compute_duration",
+    "store": true,
+    "defined_in_package": "mrp",
+    "full_name": "Duration"
+   },
+   {
+    "name": "account_move_line_id",
+    "type": "Many2one",
+    "comodel": "account.move.line",
+    "defined_in_package": "mrp_account",
+    "string": "Account Move Line",
+    "full_name": "Account Move Line",
+    "target_entity": "account.move.line"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_default_company_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_duration",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "date_end",
+         "date_start"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_duration_changed",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "duration"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_date_start_changed",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "date_start"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_date_end_changed",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "date_end"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_open_time_ids",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "workorder_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The Workorder (%s) cannot be started twice!",
+        "line": 581
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "button_block",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_loss_type_change",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_close",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You need to define at least one unactive productivity loss in the category 'Performance'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses.",
+        "line": 609
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_open_time_ids",
+    "package": "mrp",
+    "kind": "ValidationError",
+    "message": "The Workorder (%s) cannot be started twice!"
+   },
+   {
+    "operation": "_close",
+    "package": "mrp",
+    "kind": "UserError",
+    "message": "You need to define at least one unactive productivity loss in the category 'Performance'. Create one from the Manufacturing app, menu: Configuration / Productivity Losses."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp.access_mrp_workcenter_productivity",
+    "package": "mrp",
+    "name": "mrp.workcenter.productivity",
+    "entity": "mrp.workcenter.productivity",
+    "group": "mrp.group_mrp_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp.mrp_workcenter_block_wizard_form",
+    "package": "mrp",
+    "name": "mrp.workcenter.productivity.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Block Workcenter"
+     },
+     "fields": [
+      {
+       "name": "loss_id",
+       "domain": "[('manual','=',True)]"
+      },
+      {
+       "name": "description",
+       "placeholder": "Add a description..."
+      },
+      {
+       "name": "workcenter_id",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "button_block",
+       "string": "Block",
+       "type": "object",
+       "class": "btn-danger",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mrp.oee_pie_view",
+    "package": "mrp",
+    "name": "mrp.workcenter.productivity.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "20",
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Workcenter Productivity",
+      "type": "pie",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "loss_id"
+      },
+      {
+       "name": "duration",
+       "string": "Duration (minutes)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "loss_id"
+      },
+      {
+       "name": "duration",
+       "type": "measure",
+       "string": "Duration (minutes)"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.oee_search_view",
+    "package": "mrp",
+    "name": "mrp.workcenter.productivity.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Operations"
+     },
+     "fields": [
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "loss_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "availability",
+       "string": "Availability Losses",
+       "domain": "[('loss_type','=','availability')]"
+      },
+      {
+       "name": "performance",
+       "string": "Performance Losses",
+       "domain": "[('loss_type','=','performance')]"
+      },
+      {
+       "name": "quality",
+       "string": "Quality Losses",
+       "domain": "[('loss_type','=','quality')]"
+      },
+      {
+       "name": "productive",
+       "string": "Fully Productive",
+       "domain": "[('loss_type','=','productive')]"
+      },
+      {
+       "name": "filter_date_start",
+       "string": "Date",
+       "date": "date_start"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "user",
+       "string": "User",
+       "context": "{'group_by': 'create_uid'}"
+      },
+      {
+       "name": "workcenter_group",
+       "string": "Workcenter",
+       "context": "{'group_by': 'workcenter_id'}"
+      },
+      {
+       "name": "loss_group",
+       "string": "Loss Reason",
+       "context": "{'group_by': 'loss_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mrp.oee_form_view",
+    "package": "mrp",
+    "name": "mrp.workcenter.productivity.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "5",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Workcenter Productivity"
+     },
+     "fields": [
+      {
+       "name": "production_id"
+      },
+      {
+       "name": "workorder_id"
+      },
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "loss_id"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "date_end"
+      },
+      {
+       "name": "duration"
+      },
+      {
+       "name": "company_id"
+      },
+      {
+       "name": "description"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mrp.oee_tree_view",
+    "package": "mrp",
+    "name": "mrp.workcenter.productivity.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Workcenter Productivity"
+     },
+     "fields": [
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "date_end"
+      },
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "user_id"
+      },
+      {
+       "name": "loss_id"
+      },
+      {
+       "name": "duration",
+       "string": "Duration (minutes)",
+       "sum": "Duration"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mrp.oee_graph_view",
+    "package": "mrp",
+    "name": "mrp.workcenter.productivity.graph",
+    "view_type": "graph",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "graph",
+     "root_attributes": {
+      "string": "Workcenter Productivity",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "loss_id"
+      },
+      {
+       "name": "duration",
+       "string": "Duration (minutes)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "workcenter_id"
+      },
+      {
+       "name": "loss_id"
+      },
+      {
+       "name": "duration",
+       "type": "measure",
+       "string": "Duration (minutes)"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mrp.oee_pivot_view",
+    "package": "mrp",
+    "name": "mrp.workcenter.productivity.pivot",
+    "view_type": "pivot",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "pivot",
+     "root_attributes": {
+      "string": "Workcenter Productivity",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "date_start"
+      },
+      {
+       "name": "loss_type"
+      },
+      {
+       "name": "duration",
+       "string": "Duration (minutes)"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "measures": [
+      {
+       "name": "date_start",
+       "type": "row",
+       "interval": "day"
+      },
+      {
+       "name": "loss_type",
+       "type": "col"
+      },
+      {
+       "name": "duration",
+       "type": "measure",
+       "string": "Duration (minutes)"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mrp.act_mrp_block_workcenter",
+    "package": "mrp",
+    "name": "Block Workcenter",
+    "view_mode": "form",
+    "view_id": "mrp_workcenter_block_wizard_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_workcenter_id': active_id}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mrp.workcenter.productivity"
+   },
+   {
+    "external_identifier": "mrp.act_mrp_block_workcenter_wo",
+    "package": "mrp",
+    "name": "Block Workcenter",
+    "view_mode": "form",
+    "view_id": "mrp_workcenter_block_wizard_form",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mrp.workcenter.productivity"
+   },
+   {
+    "external_identifier": "mrp.mrp_workcenter_productivity_report_oee",
+    "package": "mrp",
+    "name": "Overall Equipment Effectiveness",
+    "view_mode": "graph,pivot,list,form",
+    "view_id": "oee_pie_view",
+    "search_view_id": null,
+    "domain": "[('workcenter_id','=',active_id)]",
+    "context": "{'search_default_thismonth':True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">\n                    Overall Equipment Effectiveness: no working or blocked time\n                </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mrp.workcenter.productivity"
+   },
+   {
+    "external_identifier": "mrp.mrp_workcenter_productivity_report_blocked",
+    "package": "mrp",
+    "name": "Productivity Losses",
+    "view_mode": "list,form,graph,pivot",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'search_default_availability': '1',\n                                   'search_default_performance': '1',\n                                   'search_default_quality': '1',\n                                   'default_workcenter_id': active_id,\n                                   'search_default_workcenter_id': [active_id]}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n              <p class=\"o_view_nocontent_empty_folder\">\n                No productivity loss for this equipment\n              </p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "mrp.workcenter.productivity"
+   },
+   {
+    "external_identifier": "mrp.mrp_workcenter_productivity_report",
+    "package": "mrp",
+    "name": "Overall Equipment Effectiveness",
+    "view_mode": "graph,pivot,list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[]",
+    "context": "{'search_default_workcenter_group': 1, 'search_default_loss_group': 2, 'create':False,'edit':False}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Overall Equipment Effectiveness: no working or blocked time\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mrp.workcenter.productivity"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

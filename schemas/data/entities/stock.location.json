@@ -1,0 +1,1907 @@
+{
+ "catalog": {
+  "name": "entity:stock.location",
+  "description": "Complete definition of entity Inventory Locations (stock.location).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.location",
+  "storage_name": "stock_location",
+  "full_name": "Inventory Locations",
+  "kind": "persistent",
+  "description": "Inventory Locations",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "stock_account",
+   "mrp_subcontracting",
+   "stock_maintenance"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "complete_name, id",
+  "display_name_field": null,
+  "display_name_search_fields": [
+   "complete_name",
+   "barcode"
+  ],
+  "parent_field": "location_id",
+  "hierarchy_path_stored": true,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Location Name",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Location Name"
+   },
+   {
+    "name": "complete_name",
+    "type": "Char",
+    "string": "Full Location Name",
+    "compute": "_compute_complete_name",
+    "recursive": true,
+    "store": true,
+    "defined_in_package": "stock",
+    "full_name": "Full Location Name"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "help": "By unchecking the active field, you may hide a location without deleting it.",
+    "defined_in_package": "stock",
+    "full_name": "Active"
+   },
+   {
+    "name": "usage",
+    "type": "Selection",
+    "selection": [
+     [
+      "supplier",
+      "Vendor"
+     ],
+     [
+      "view",
+      "Virtual"
+     ],
+     [
+      "internal",
+      "Internal"
+     ],
+     [
+      "customer",
+      "Customer"
+     ],
+     [
+      "inventory",
+      "Inventory Loss"
+     ],
+     [
+      "production",
+      "Production"
+     ],
+     [
+      "transit",
+      "Transit"
+     ]
+    ],
+    "string": "Location Type",
+    "default": "internal",
+    "index": true,
+    "required": true,
+    "help": "* Vendor: Virtual location representing the source location for products coming from your vendors\n* Virtual: Virtual location used to create a hierarchical structure for your warehouse by aggregating its child locations. Can't directly contain products\n* Internal: Physical locations inside your warehouses,\n* Customer: Virtual location representing the destination location for products sent to your customers\n* Inventory Loss: Virtual location serving as the counterpart for inventory operations done to correct stock levels (Physical inventories)\n* Production: Virtual counterpart location for production operations. I.e. This location consumes components and produces finished products\n* Transit: Counterpart location that should be used for inter-company or inter-warehouses operations",
+    "defined_in_package": "stock",
+    "full_name": "Location Type"
+   },
+   {
+    "name": "location_id",
+    "type": "Many2one",
+    "comodel": "stock.location",
+    "string": "Parent Location",
+    "index": true,
+    "check_company": true,
+    "help": "The parent location that includes this location. Example : The 'Dispatch Zone' is the 'Gate 1' parent location.",
+    "defined_in_package": "stock",
+    "full_name": "Parent Location",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "child_ids",
+    "type": "One2many",
+    "comodel": "stock.location",
+    "inverse_name": "location_id",
+    "string": "Contains",
+    "defined_in_package": "stock",
+    "full_name": "Contains",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "child_internal_location_ids",
+    "type": "Many2many",
+    "comodel": "stock.location",
+    "string": "Internal locations among descendants",
+    "compute": "_compute_child_internal_location_ids",
+    "recursive": true,
+    "help": "This location (if it's internal) and all its descendants filtered by type=Internal.",
+    "defined_in_package": "stock",
+    "full_name": "Internal locations among descendants",
+    "target_entity": "stock.location"
+   },
+   {
+    "name": "parent_path",
+    "type": "Char",
+    "index": true,
+    "defined_in_package": "stock",
+    "string": "Parent Path",
+    "full_name": "Parent Path"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "index": true,
+    "help": "Let this field empty if this location is shared between companies",
+    "defined_in_package": "stock",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "replenish_location",
+    "type": "Boolean",
+    "string": "Replenishments",
+    "copy": false,
+    "compute": "_compute_replenish_location",
+    "readonly": false,
+    "store": true,
+    "help": "Trigger replenishment suggestions for this location when required",
+    "defined_in_package": "stock",
+    "full_name": "Replenishments"
+   },
+   {
+    "name": "removal_strategy_id",
+    "type": "Many2one",
+    "comodel": "product.removal",
+    "string": "Removal Strategy",
+    "help": "Defines the default method used for suggesting the exact location (shelf) where to take the products from, which lot etc. for this location. This method can be enforced at the product category level, and a fallback is made on the parent locations if none is set here.\n\nFIFO: products/lots that were stocked first will be moved out first.\nLIFO: products/lots that were stocked last will be moved out first.\nClosest Location: products/lots closest to the target location will be moved out first.\nLeast Packages: products/lots that were stocked in package with least amount of qty will be moved out first.\nFEFO: products/lots with the closest removal date will be moved out first (the availability of this method depends on the \"Expiration Dates\" setting).",
+    "defined_in_package": "stock",
+    "full_name": "Removal Strategy",
+    "target_entity": "product.removal"
+   },
+   {
+    "name": "putaway_rule_ids",
+    "type": "One2many",
+    "comodel": "stock.putaway.rule",
+    "inverse_name": "location_in_id",
+    "string": "Putaway Rules",
+    "defined_in_package": "stock",
+    "full_name": "Putaway Rules",
+    "target_entity": "stock.putaway.rule"
+   },
+   {
+    "name": "barcode",
+    "type": "Char",
+    "string": "Barcode",
+    "copy": false,
+    "defined_in_package": "stock",
+    "full_name": "Barcode"
+   },
+   {
+    "name": "quant_ids",
+    "type": "One2many",
+    "comodel": "stock.quant",
+    "inverse_name": "location_id",
+    "defined_in_package": "stock",
+    "string": "Quant",
+    "full_name": "Quant",
+    "target_entity": "stock.quant"
+   },
+   {
+    "name": "cyclic_inventory_frequency",
+    "type": "Integer",
+    "string": "Inventory Frequency",
+    "default": 0,
+    "help": " When different than 0, inventory count date for products stored at this location will be automatically set at the defined frequency.",
+    "defined_in_package": "stock",
+    "full_name": "Inventory Frequency"
+   },
+   {
+    "name": "last_inventory_date",
+    "type": "Date",
+    "string": "Last Inventory",
+    "readonly": true,
+    "help": "Date of the last inventory at this location.",
+    "defined_in_package": "stock",
+    "full_name": "Last Inventory"
+   },
+   {
+    "name": "next_inventory_date",
+    "type": "Date",
+    "string": "Next Expected",
+    "compute": "_compute_next_inventory_date",
+    "store": true,
+    "help": "Date for next planned inventory based on cyclic schedule.",
+    "defined_in_package": "stock",
+    "full_name": "Next Expected"
+   },
+   {
+    "name": "warehouse_view_ids",
+    "type": "One2many",
+    "comodel": "stock.warehouse",
+    "inverse_name": "view_location_id",
+    "readonly": true,
+    "defined_in_package": "stock",
+    "string": "Warehouse View",
+    "full_name": "Warehouse View",
+    "target_entity": "stock.warehouse"
+   },
+   {
+    "name": "warehouse_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse",
+    "compute": "_compute_warehouse_id",
+    "store": true,
+    "defined_in_package": "stock",
+    "string": "Warehouse",
+    "full_name": "Warehouse",
+    "target_entity": "stock.warehouse"
+   },
+   {
+    "name": "storage_category_id",
+    "type": "Many2one",
+    "comodel": "stock.storage.category",
+    "string": "Storage Category",
+    "check_company": true,
+    "index": "btree_not_null",
+    "defined_in_package": "stock",
+    "full_name": "Storage Category",
+    "target_entity": "stock.storage.category"
+   },
+   {
+    "name": "outgoing_move_line_ids",
+    "type": "One2many",
+    "comodel": "stock.move.line",
+    "inverse_name": "location_id",
+    "defined_in_package": "stock",
+    "string": "Outgoing Move Line",
+    "full_name": "Outgoing Move Line",
+    "target_entity": "stock.move.line"
+   },
+   {
+    "name": "incoming_move_line_ids",
+    "type": "One2many",
+    "comodel": "stock.move.line",
+    "inverse_name": "location_dest_id",
+    "defined_in_package": "stock",
+    "string": "Incoming Move Line",
+    "full_name": "Incoming Move Line",
+    "target_entity": "stock.move.line"
+   },
+   {
+    "name": "net_weight",
+    "type": "Float",
+    "string": "Net Weight",
+    "compute": "_compute_weight",
+    "defined_in_package": "stock",
+    "full_name": "Net Weight"
+   },
+   {
+    "name": "forecast_weight",
+    "type": "Float",
+    "string": "Forecasted Weight",
+    "compute": "_compute_weight",
+    "defined_in_package": "stock",
+    "full_name": "Forecasted Weight"
+   },
+   {
+    "name": "is_empty",
+    "type": "Boolean",
+    "string": "Is Empty",
+    "compute": "_compute_is_empty",
+    "search": "_search_is_empty",
+    "defined_in_package": "stock",
+    "full_name": "Is Empty"
+   },
+   {
+    "name": "valuation_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Stock Valuation Account",
+    "domain": [
+     [
+      "account_type",
+      "not in",
+      [
+       "asset_receivable",
+       "liability_payable",
+       "asset_cash",
+       "liability_credit_card"
+      ]
+     ]
+    ],
+    "help": "Expense account used to re-qualify products removed from stock and sent to this location",
+    "defined_in_package": "stock_account",
+    "full_name": "Stock Valuation Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "is_valued_internal",
+    "type": "Boolean",
+    "string": "Is valued inside the company",
+    "compute": "_compute_is_valued",
+    "search": "_search_is_valued",
+    "defined_in_package": "stock_account",
+    "full_name": "Is valued inside the company"
+   },
+   {
+    "name": "is_valued_external",
+    "type": "Boolean",
+    "string": "Is valued outside the company",
+    "compute": "_compute_is_valued",
+    "defined_in_package": "stock_account",
+    "full_name": "Is valued outside the company"
+   },
+   {
+    "name": "subcontractor_ids",
+    "type": "One2many",
+    "comodel": "res.partner",
+    "inverse_name": "property_stock_subcontractor",
+    "defined_in_package": "mrp_subcontracting",
+    "string": "Subcontractor",
+    "full_name": "Subcontractor",
+    "target_entity": "res.partner"
+   },
+   {
+    "name": "equipment_count",
+    "type": "Integer",
+    "string": "Equipment Count",
+    "compute": "_compute_equipment_count",
+    "defined_in_package": "stock_maintenance",
+    "full_name": "Equipment Count"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_barcode_company_uniq",
+    "kind": "Constraint",
+    "definition": "unique (barcode,company_id)",
+    "message": "The barcode for a location must be unique per company!",
+    "defined_in_package": "stock"
+   },
+   {
+    "name": "_inventory_freq_nonneg",
+    "kind": "Constraint",
+    "definition": "check(cyclic_inventory_frequency >= 0)",
+    "message": "The inventory frequency (days) for a location must be non-negative",
+    "defined_in_package": "stock"
+   },
+   {
+    "name": "_parent_path_id_idx",
+    "kind": "Index",
+    "definition": "(parent_path, id)",
+    "message": null,
+    "defined_in_package": "stock"
+   }
+  ],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "location_id.complete_name",
+         "usage"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "formatted_display_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_weight",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "outgoing_move_line_ids.quantity_product_uom",
+         "incoming_move_line_ids.quantity_product_uom",
+         "outgoing_move_line_ids.state",
+         "incoming_move_line_ids.state",
+         "outgoing_move_line_ids.product_id.weight",
+         "outgoing_move_line_ids.product_id.weight",
+         "quant_ids.quantity",
+         "quant_ids.product_id.weight"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_complete_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "name",
+         "location_id.complete_name",
+         "usage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_empty",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_next_inventory_date",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "cyclic_inventory_frequency",
+         "last_inventory_date",
+         "usage",
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The selected Inventory Frequency (Days) creates a date too far into the future.",
+        "line": 155
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_warehouse_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "warehouse_view_ids",
+         "location_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_child_internal_location_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "child_ids.usage",
+         "child_ids.child_internal_location_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_replenish_location",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "usage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_replenish_location",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "replenish_location",
+         "location_id",
+         "usage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Another parent/sub replenish location %s exists, if you wish to change it, uncheck it first",
+        "line": 193
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_scrap_location",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "usage"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot set a location as a scrap location when it is assigned as a destination location for a manufacturing type operation.",
+        "line": 199
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_master_data",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "The %s location is required by the Inventory app and cannot be deleted, but you can archive it.",
+        "line": 205
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_search_is_empty",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 45,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This location's usage cannot be changed to view as it contains products.",
+        "line": 228
+       },
+       {
+        "kind": "UserError",
+        "message": "Internal locations having stock can't be converted",
+        "line": 237
+       },
+       {
+        "kind": "UserError",
+        "message": "Changing the company of this record is forbidden at this point, you should rather archive it and create a new one.",
+        "line": 225
+       },
+       {
+        "kind": "UserError",
+        "message": "You can't disable locations %s because they still contain products.",
+        "line": 254
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot archive location %(location)s because it is used by warehouse %(warehouse)s",
+        "line": 245
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "name_create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "name"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_putaway_strategy",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product",
+     "quantity",
+     "package",
+     "packaging",
+     "additional_qty"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Returns the location where the product has to be put, if any compliant\nputaway strategy is found. Otherwise returns self.\nThe quantity should be in the default UOM of the product, it is used when\nno package is specified.",
+      "size_in_lines": 80,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_next_inventory_date",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Used to get the next inventory date for a quant located in this location. It is\nbased on:\n1. Does the location have a cyclic inventory set?\n2. If not 1, then is there an annual inventory date set (for its company)?\n3. If not 1 and 2, then quants have no next inventory date.",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "should_bypass_reservation",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_access_putaway",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": "Use sudo mode for subcontractor ",
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_can_be_used",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "product",
+     "quantity",
+     "package",
+     "location_qty"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Check if product/package can be stored in the location. Quantity\nshould in the default uom of product, it's only used when no package is\nspecified.",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_child_of",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "other_location"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_outgoing",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_weight",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "excluded_sml_ids"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": "Returns a dictionary with the net and forecasted weight of the location.\nparam excluded_sml_ids: set of stock.move.line ids to exclude from the computation",
+      "size_in_lines": 39,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_is_valued",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_is_valued",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_should_be_valued",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_account",
+      "decorators": [],
+      "documentation": "This method returns a boolean reflecting whether the products stored in `self` should\nbe considered when valuating the stock of a company.",
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_subcontracting_location",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "usage",
+         "location_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot alter the company's subcontracting location",
+        "line": 16
+       },
+       {
+        "kind": "ValidationError",
+        "message": "In order to manage stock accurately, subcontracting locations must be type Internal, linked to the appropriate company.",
+        "line": 18
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "is_subcontract",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp_subcontracting",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_equipment_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_maintenance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_view_equipments_records",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock_maintenance",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_compute_next_inventory_date",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "The selected Inventory Frequency (Days) creates a date too far into the future."
+   },
+   {
+    "operation": "_check_replenish_location",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "Another parent/sub replenish location %s exists, if you wish to change it, uncheck it first"
+   },
+   {
+    "operation": "_check_scrap_location",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "You cannot set a location as a scrap location when it is assigned as a destination location for a manufacturing type operation."
+   },
+   {
+    "operation": "_unlink_except_master_data",
+    "package": "stock",
+    "kind": "ValidationError",
+    "message": "The %s location is required by the Inventory app and cannot be deleted, but you can archive it."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "This location's usage cannot be changed to view as it contains products."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Internal locations having stock can't be converted"
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You can't disable locations %s because they still contain products."
+   },
+   {
+    "operation": "write",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "You cannot archive location %(location)s because it is used by warehouse %(warehouse)s"
+   },
+   {
+    "operation": "_check_subcontracting_location",
+    "package": "mrp_subcontracting",
+    "kind": "ValidationError",
+    "message": "You cannot alter the company's subcontracting location"
+   },
+   {
+    "operation": "_check_subcontracting_location",
+    "package": "mrp_subcontracting",
+    "kind": "ValidationError",
+    "message": "In order to manage stock accurately, subcontracting locations must be type Internal, linked to the appropriate company."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mrp_subcontracting.access_subcontracting_portal_location",
+    "package": "mrp_subcontracting",
+    "name": "subcontracting.portal.location",
+    "entity": "stock.location",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "point_of_sale.access_stock_location_manager",
+    "package": "point_of_sale",
+    "name": "stock.location manager",
+    "entity": "stock.location",
+    "group": "group_pos_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase_stock.access_stock_location_purchase_user",
+    "package": "purchase_stock",
+    "name": "stock.location",
+    "entity": "stock.location",
+    "group": "purchase.group_purchase_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "purchase_stock.access_stock_location_purchase_user_manager",
+    "package": "purchase_stock",
+    "name": "stock.location",
+    "entity": "stock.location",
+    "group": "purchase.group_purchase_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_stock.access_stock_location_user",
+    "package": "sale_stock",
+    "name": "stock.location.user",
+    "entity": "stock.location",
+    "group": "sales_team.group_sale_salesman",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "sale_stock.access_stock_location_sale_manager",
+    "package": "sale_stock",
+    "name": "stock.location sale manager",
+    "entity": "stock.location",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_stock_location_partner_manager",
+    "package": "stock",
+    "name": "stock.location.partner.manager",
+    "entity": "stock.location",
+    "group": "base.group_partner_manager",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "stock.access_stock_location_manager",
+    "package": "stock",
+    "name": "stock.location.manager",
+    "entity": "stock.location",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "stock.access_stock_location_all_user",
+    "package": "stock",
+    "name": "stock.location.all.user",
+    "entity": "stock.location",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "mrp_subcontracting.stock_location_subcontractor_rule",
+    "package": "mrp_subcontracting",
+    "name": "Stock Locations Subcontractor",
+    "entity": "stock.location",
+    "domain": "[\n            '|',\n                '|',\n                    '|',\n                        '|', \n                            ('child_ids', 'in', user.partner_id.commercial_partner_id.picking_ids.location_id.ids), \n                            ('child_ids', 'in', user.partner_id.commercial_partner_id.picking_ids.location_dest_id.ids),\n                        '|', \n                            ('id', 'in', user.partner_id.commercial_partner_id.picking_ids.location_id.ids), \n                            ('id', 'in', user.partner_id.commercial_partner_id.picking_ids.location_dest_id.ids),\n                    '|',\n                        ('id', 'in', user.partner_id.commercial_partner_id.picking_ids.picking_type_id.warehouse_id.view_location_id.ids),\n                        ('id', 'in', user.partner_id.commercial_partner_id.production_ids.production_location_id.ids),\n                ('id', 'in', user.partner_id.commercial_partner_id.production_ids.move_finished_ids.move_dest_ids.location_id.ids),\n        ]",
+    "groups": "[(4, ref('base.group_portal'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "stock.stock_location_comp_rule",
+    "package": "stock",
+    "name": "Location multi-company",
+    "entity": "stock.location",
+    "domain": "[('company_id', 'in', company_ids + [False])]",
+    "groups": null,
+    "global": true,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "stock.view_location_form",
+    "package": "stock",
+    "name": "stock.location.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Stock Location"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Shelf 1"
+      },
+      {
+       "name": "location_id",
+       "options": "{'no_create': True}",
+       "placeholder": "e.g. Aisle 1"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "usage"
+      },
+      {
+       "name": "storage_category_id",
+       "invisible": "usage != 'internal'",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "company_id",
+       "options": "{'no_create': True}",
+       "groups": "base.group_multi_company",
+       "placeholder": "Visible to all"
+      },
+      {
+       "name": "replenish_location",
+       "invisible": "usage != 'internal'"
+      },
+      {
+       "name": "cyclic_inventory_frequency",
+       "nolabel": "1"
+      },
+      {
+       "name": "last_inventory_date"
+      },
+      {
+       "name": "next_inventory_date",
+       "invisible": "not active"
+      },
+      {
+       "name": "removal_strategy_id",
+       "widget": "radio",
+       "options": "{'no_create': True}"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(location_open_putaway)d",
+       "string": "Putaway Rules",
+       "type": "action",
+       "class": "oe_stat_button",
+       "context": "{'default_company_id': company_id}",
+       "groups": "stock.group_stock_multi_locations",
+       "icon": "fa-random"
+      },
+      {
+       "name": "stock.act_product_location_open",
+       "string": "Products",
+       "type": "action",
+       "class": "oe_stat_button",
+       "icon": "fa-th-list"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "string": "Putaway Rules",
+       "class": "oe_stat_button",
+       "icon": "fa-random",
+       "name": "%(location_open_putaway)d",
+       "type": "action",
+       "groups": "stock.group_stock_multi_locations",
+       "context": "{'default_company_id': company_id}"
+      },
+      {
+       "string": "Products",
+       "class": "oe_stat_button",
+       "icon": "fa-th-list",
+       "type": "action",
+       "name": "stock.act_product_location_open"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.stock_location_view_form_editable",
+    "package": "stock",
+    "name": "stock.location.form.editable",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_location_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_location_search",
+    "package": "stock",
+    "name": "stock.location.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Stock Locations"
+     },
+     "fields": [
+      {
+       "name": "complete_name",
+       "string": "Stock Locations"
+      },
+      {
+       "name": "location_id",
+       "string": "Parent Location"
+      },
+      {
+       "name": "usage",
+       "string": "Location Type"
+      },
+      {
+       "name": "warehouse_id",
+       "string": "Warehouse"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "in_location",
+       "string": "Internal",
+       "domain": "[('usage', '=', 'internal')]",
+       "help": "Internal Locations"
+      },
+      {
+       "name": "customer",
+       "string": "Customer",
+       "domain": "[('usage', '=', 'customer')]",
+       "help": "Customer Locations"
+      },
+      {
+       "name": "inventory",
+       "string": "Inventory Loss",
+       "domain": "[('usage', '=', 'inventory')]",
+       "help": "Inventory Loss Locations"
+      },
+      {
+       "name": "prod_inv_location",
+       "string": "Production",
+       "domain": "[('usage', '=', 'production')]",
+       "help": "Production Locations"
+      },
+      {
+       "name": "supplier",
+       "string": "Vendor",
+       "domain": "[('usage', '=', 'supplier')]",
+       "help": "Vendor Locations"
+      },
+      {
+       "name": "view",
+       "string": "Virtual",
+       "domain": "[('usage', '=', 'view')]",
+       "help": "Virtual Locations"
+      },
+      {
+       "name": "empty_location",
+       "string": "Empty Locations",
+       "domain": "[('is_empty', '=', True)]"
+      },
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active','=',False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "warehouse",
+       "string": "Warehouse",
+       "domain": "[]",
+       "context": "{'group_by': 'warehouse_id'}"
+      },
+      {
+       "name": "usage",
+       "string": "Location Type",
+       "domain": "[]",
+       "context": "{'group_by': 'usage'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock.view_location_tree2",
+    "package": "stock",
+    "name": "stock.location.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "2",
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Stock Location",
+      "decoration-info": "usage=='view'",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "active",
+       "column_invisible": "True"
+      },
+      {
+       "name": "complete_name",
+       "string": "Location"
+      },
+      {
+       "name": "usage"
+      },
+      {
+       "name": "is_empty",
+       "invisible": "usage not in ['internal', 'transit']",
+       "optional": "hide"
+      },
+      {
+       "name": "storage_category_id",
+       "readonly": "usage != 'internal'",
+       "groups": "stock.group_stock_multi_locations"
+      },
+      {
+       "name": "company_id",
+       "groups": "base.group_multi_company"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-info": "usage=='view'"
+     }
+    }
+   },
+   {
+    "external_identifier": "stock.stock_location_view_tree2_editable",
+    "package": "stock",
+    "name": "stock.location.list2.editable",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_location_tree2",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//list",
+      "position": "attributes"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//list",
+       "position": "attributes"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_account.view_location_form_inherit",
+    "package": "stock_account",
+    "name": "stock.location.form.inherit",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_location_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//group[@name='additional_info']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "valuation_account_id",
+       "options": "{'no_create': True}",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//group[@name='additional_info']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock_fleet.stock_location_form_stock_fleet",
+    "package": "stock_fleet",
+    "name": "stock.location.form.inherit.stock.transport",
+    "view_type": "field",
+    "inherits_view": "stock.view_location_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "field",
+     "root_attributes": {
+      "name": "usage",
+      "position": "attributes"
+     },
+     "fields": [
+      {
+       "name": "usage",
+       "position": "attributes"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "stock_maintenance.stock_location_form_maintenance_equipments",
+    "package": "stock_maintenance",
+    "name": "stock.location.form.inherit.maintenance.equipments",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_location_form",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_button_box')]",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "equipment_count"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_view_equipments_records",
+       "type": "object",
+       "invisible": "equipment_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-wrench"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_button_box')]",
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock.action_storage_category_locations",
+    "package": "stock",
+    "name": "Locations",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "[('storage_category_id', '=', active_id)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "stock.location"
+   },
+   {
+    "external_identifier": "stock.action_location_form",
+    "package": "stock",
+    "name": "Locations",
+    "view_mode": "list,form",
+    "view_id": "view_location_tree2",
+    "search_view_id": "view_location_search",
+    "domain": null,
+    "context": "{'search_default_in_location':1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Add a new location\n          </p><p>\n            Define your locations to reflect your warehouse structure and\n            organization. the system is able to manage physical locations\n            (warehouses, shelves, bin, etc), partner locations (customers,\n            vendors) and virtual locations which are the counterpart of\n            the stock operations like the manufacturing orders\n            consumptions, inventories, etc.\n          </p><p>\n            Every stock operation in the system moves the products from one\n            location to another one.  For instance, if you receive products\n            from a vendor, the system will move products from the Vendor\n            location to the Stock location. Each report can be performed on\n            physical, partner or virtual locations.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "stock.location"
+   },
+   {
+    "external_identifier": "stock.action_prod_inv_location_form",
+    "package": "stock",
+    "name": "Locations",
+    "view_mode": "list,form",
+    "view_id": "view_location_tree2",
+    "search_view_id": "view_location_search",
+    "domain": null,
+    "context": "{'search_default_prod_inv_location': 1}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "stock.location"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [
+   {
+    "external_identifier": "stock.action_report_location_barcode",
+    "package": "stock",
+    "name": "Location Barcode",
+    "report_type": "qweb-pdf",
+    "report_name": "stock.report_location_barcode",
+    "report_file": "stock.report_location_barcode",
+    "print_report_name": "'Location - %s' % object.name",
+    "attachment": null,
+    "attachment_use": null,
+    "binding_model_id": "model_stock_location",
+    "binding_type": "report",
+    "paperformat_id": "product.paperformat_label_sheet",
+    "groups_id": null,
+    "multi": null,
+    "entity": "stock.location"
+   }
+  ],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

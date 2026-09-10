@@ -1,0 +1,477 @@
+{
+ "catalog": {
+  "name": "entity:account.resequence.wizard",
+  "description": "Complete definition of entity Remake the sequence of Journal Entries. (account.resequence.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.resequence.wizard",
+  "storage_name": "account_resequence_wizard",
+  "full_name": "Remake the sequence of Journal Entries.",
+  "kind": "transient",
+  "description": "Remake the sequence of Journal Entries.",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "account_edi",
+   "l10n_es_edi_sii",
+   "l10n_lk_invoice"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "sequence_number_reset",
+    "type": "Char",
+    "compute": "_compute_sequence_number_reset",
+    "defined_in_package": "account",
+    "string": "Sequence Number Reset",
+    "full_name": "Sequence Number Reset"
+   },
+   {
+    "name": "first_date",
+    "type": "Date",
+    "help": "Date (inclusive) from which the numbers are resequenced.",
+    "defined_in_package": "account",
+    "string": "First Date",
+    "full_name": "First Date"
+   },
+   {
+    "name": "end_date",
+    "type": "Date",
+    "help": "Date (inclusive) to which the numbers are resequenced. If not set, all Journal Entries up to the end of the period are resequenced.",
+    "defined_in_package": "account",
+    "string": "End Date",
+    "full_name": "End Date"
+   },
+   {
+    "name": "first_name",
+    "type": "Char",
+    "compute": "_compute_first_name",
+    "readonly": false,
+    "store": true,
+    "required": true,
+    "string": "First New Sequence",
+    "defined_in_package": "account",
+    "full_name": "First New Sequence"
+   },
+   {
+    "name": "ordering",
+    "type": "Selection",
+    "selection": [
+     [
+      "keep",
+      "Keep current order"
+     ],
+     [
+      "date",
+      "Reorder by accounting date"
+     ]
+    ],
+    "required": true,
+    "default": "keep",
+    "defined_in_package": "account",
+    "string": "Ordering",
+    "full_name": "Ordering"
+   },
+   {
+    "name": "move_ids",
+    "type": "Many2many",
+    "comodel": "account.move",
+    "defined_in_package": "account",
+    "string": "Move",
+    "full_name": "Move",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "new_values",
+    "type": "Text",
+    "compute": "_compute_new_values",
+    "defined_in_package": "account",
+    "string": "New Values",
+    "full_name": "New Values"
+   },
+   {
+    "name": "preview_moves",
+    "type": "Text",
+    "compute": "_compute_preview_moves",
+    "defined_in_package": "account",
+    "string": "Preview Moves",
+    "full_name": "Preview Moves"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can only resequence items from the same journal",
+        "line": 33
+       },
+       {
+        "kind": "UserError",
+        "message": "The sequences of this journal are different for Invoices and Refunds but you selected some of both types.",
+        "line": 40
+       },
+       {
+        "kind": "UserError",
+        "message": "The sequences of this journal are different for Payments and non-Payments but you selected some of both types.",
+        "line": 46
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_sequence_number_reset",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "first_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_first_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "move_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_preview_moves",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "new_values",
+         "ordering"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Reduce the computed new_values to a smaller set to display in the preview.",
+      "size_in_lines": 30,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_new_values",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "first_name",
+         "move_ids",
+         "sequence_number_reset"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Compute the proposed new values.\n\nSets a json string on new_values representing a dictionary thats maps account.move\nids to a dictionary containing the name if we execute the action, and information\nrelative to the preview widget.",
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_lk_invoice",
+      "decorators": [],
+      "documentation": "Resequence LK invoices with per-record month/year from their\ninvoice date, since the standard implementation reuses the month\nabbreviation of the previous name.",
+      "size_in_lines": 59,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "resequence",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You can not reorder sequence by date when the journal is locked with a hash.",
+        "line": 159
+       }
+      ]
+     },
+     {
+      "package": "account_edi",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The following documents have already been sent and cannot be resequenced: %s",
+        "line": 20
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_frozen_edi_documents",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account_edi",
+      "decorators": [],
+      "documentation": "Get EDI documents that can't change.\n\nTheir moves are restricted and cannot be resequenced.",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "l10n_es_edi_sii",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can only resequence items from the same journal"
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "The sequences of this journal are different for Invoices and Refunds but you selected some of both types."
+   },
+   {
+    "operation": "default_get",
+    "package": "account",
+    "kind": "UserError",
+    "message": "The sequences of this journal are different for Payments and non-Payments but you selected some of both types."
+   },
+   {
+    "operation": "resequence",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You can not reorder sequence by date when the journal is locked with a hash."
+   },
+   {
+    "operation": "resequence",
+    "package": "account_edi",
+    "kind": "UserError",
+    "message": "The following documents have already been sent and cannot be resequenced: %s"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_resequence",
+    "package": "account",
+    "name": "access.account.resequence.wizard",
+    "entity": "account.resequence.wizard",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.account_resequence_view",
+    "package": "account",
+    "name": "Re-sequence Journal Entries",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Re-Sequence"
+     },
+     "fields": [
+      {
+       "name": "move_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "new_values",
+       "invisible": "1"
+      },
+      {
+       "name": "sequence_number_reset",
+       "invisible": "1"
+      },
+      {
+       "name": "ordering",
+       "widget": "radio"
+      },
+      {
+       "name": "first_name"
+      },
+      {
+       "name": "preview_moves",
+       "widget": "account_resequence_widget",
+       "nolabel": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "resequence",
+       "string": "Confirm",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "radio": 1,
+      "account_resequence_widget": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.action_account_resequence",
+    "package": "account",
+    "name": "Resequence",
+    "view_mode": "form",
+    "view_id": "account_resequence_view",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "account.model_account_move",
+    "binding_type": null,
+    "binding_view_types": "list,kanban",
+    "help": null,
+    "usage": null,
+    "entity": "account.resequence.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

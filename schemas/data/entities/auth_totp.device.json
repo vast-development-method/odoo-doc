@@ -1,0 +1,196 @@
+{
+ "catalog": {
+  "name": "entity:auth_totp.device",
+  "description": "Complete definition of entity Authentication Device (auth_totp.device).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "auth_totp.device",
+  "storage_name": "auth_totp_device",
+  "full_name": "Authentication Device",
+  "kind": "persistent",
+  "description": "Authentication Device",
+  "defined_by_package": "auth_totp",
+  "extended_by_packages": [
+   "auth_totp_mail",
+   "auth_timeout"
+  ],
+  "mixins": [
+   "res.users.apikeys"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_check_credentials_for_uid",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "scope",
+     "key",
+     "uid"
+    ],
+    "definitions": [
+     {
+      "package": "auth_totp",
+      "decorators": [],
+      "documentation": "Return True if device key matches given `scope` for user ID `uid`",
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_trusted_device_age",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "auth_totp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "auth_timeout",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "auth_totp_mail",
+      "decorators": [],
+      "documentation": "Notify users when trusted devices are removed from their account. ",
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_classify_by_user",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "auth_totp_mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "auth_totp.access_auth_totp_device_access_employee",
+    "package": "auth_totp",
+    "name": "TOTP Device access employees",
+    "entity": "auth_totp.device",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "auth_totp.access_auth_totp_device_access_portal",
+    "package": "auth_totp",
+    "name": "TOTP Device access portal",
+    "entity": "auth_totp.device",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "auth_totp.api_key_public",
+    "package": "auth_totp",
+    "name": "Public users can't interact with keys at all",
+    "entity": "auth_totp.device",
+    "domain": "[(0, '=', 1)]",
+    "groups": "[Command.link(ref('base.group_public'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "auth_totp.api_key_user",
+    "package": "auth_totp",
+    "name": "Users can read and delete their own keys",
+    "entity": "auth_totp.device",
+    "domain": "[('user_id', '=', user.id)]",
+    "groups": "[                 Command.link(ref('base.group_portal')),                 Command.link(ref('base.group_user')),             ]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "auth_totp.api_key_admin",
+    "package": "auth_totp",
+    "name": "Administrators can view user keys to revoke them",
+    "entity": "auth_totp.device",
+    "domain": "[(1, '=', 1)]",
+    "groups": "[Command.link(ref('base.group_system'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

@@ -1,0 +1,543 @@
+{
+ "catalog": {
+  "name": "entity:account.cash.rounding",
+  "description": "Complete definition of entity Account Cash Rounding (account.cash.rounding).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.cash.rounding",
+  "storage_name": "account_cash_rounding",
+  "full_name": "Account Cash Rounding",
+  "kind": "persistent",
+  "description": "Account Cash Rounding",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "point_of_sale",
+   "point_of_sale"
+  ],
+  "mixins": [
+   "pos.load.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "translate": true,
+    "required": true,
+    "defined_in_package": "account",
+    "full_name": "Name"
+   },
+   {
+    "name": "rounding",
+    "type": "Float",
+    "string": "Rounding Precision",
+    "required": true,
+    "default": 0.01,
+    "help": "Represent the non-zero value smallest coinage (for example, 0.05).",
+    "defined_in_package": "account",
+    "full_name": "Rounding Precision"
+   },
+   {
+    "name": "strategy",
+    "type": "Selection",
+    "selection": [
+     [
+      "biggest_tax",
+      "Modify tax amount"
+     ],
+     [
+      "add_invoice_line",
+      "Add a rounding line"
+     ]
+    ],
+    "string": "Rounding Strategy",
+    "default": "add_invoice_line",
+    "required": true,
+    "help": "Specify which way will be used to round the invoice amount to the rounding precision",
+    "defined_in_package": "account",
+    "full_name": "Rounding Strategy"
+   },
+   {
+    "name": "profit_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Profit Account",
+    "company_dependent": true,
+    "check_company": true,
+    "domain": "[('account_type', 'not in', ('asset_receivable', 'liability_payable'))]",
+    "ondelete": "restrict",
+    "defined_in_package": "account",
+    "full_name": "Profit Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "loss_account_id",
+    "type": "Many2one",
+    "comodel": "account.account",
+    "string": "Loss Account",
+    "company_dependent": true,
+    "check_company": true,
+    "domain": "[('account_type', 'not in', ('asset_receivable', 'liability_payable'))]",
+    "ondelete": "restrict",
+    "defined_in_package": "account",
+    "full_name": "Loss Account",
+    "target_entity": "account.account"
+   },
+   {
+    "name": "rounding_method",
+    "type": "Selection",
+    "string": "Rounding Method",
+    "required": true,
+    "selection": [
+     [
+      "UP",
+      "Up"
+     ],
+     [
+      "DOWN",
+      "Down"
+     ],
+     [
+      "HALF-UP",
+      "Nearest"
+     ]
+    ],
+    "default": "HALF-UP",
+    "help": "The tie-breaking rule used for float rounding operations",
+    "defined_in_package": "account",
+    "full_name": "Rounding Method"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "validate_rounding",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "rounding"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Please set a strictly positive rounding value.",
+        "line": 49
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "round",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Compute the rounding on the amount passed as parameter.\n\n:param amount: the amount to round\n:return: the rounded amount depending the rounding value and the rounding method",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "compute_difference",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "currency",
+     "amount"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Compute the difference between the base_amount and the amount after rounding.\nFor example, base_amount=23.91, after rounding=24.00, the result will be 0.09.\n\n:param currency: The currency.\n:param amount: The amount\n:return: round(difference)",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_pos_config",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete a rounding method that is used in a Point of Sale configuration.",
+        "line": 11
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_session_state",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "rounding",
+         "rounding_method",
+         "strategy"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You are not allowed to change the cash rounding configuration while a pos session using it is already opened.",
+        "line": 2081
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "validate_rounding",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Please set a strictly positive rounding value."
+   },
+   {
+    "operation": "_unlink_except_pos_config",
+    "package": "point_of_sale",
+    "kind": "UserError",
+    "message": "You cannot delete a rounding method that is used in a Point of Sale configuration."
+   },
+   {
+    "operation": "_check_session_state",
+    "package": "point_of_sale",
+    "kind": "ValidationError",
+    "message": "You are not allowed to change the cash rounding configuration while a pos session using it is already opened."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_cash_rounding_readonly",
+    "package": "account",
+    "name": "account.cash.rounding",
+    "entity": "account.cash.rounding",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_cash_rounding_uinvoice",
+    "package": "account",
+    "name": "account.cash.rounding",
+    "entity": "account.cash.rounding",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "point_of_sale.access_account_cash_rounding_pos_user",
+    "package": "point_of_sale",
+    "name": "account.cash.rounding pos_user",
+    "entity": "account.cash.rounding",
+    "group": "group_pos_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "account.rounding_form_view",
+    "package": "account",
+    "name": "account.cash.rounding.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Rounding Form"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "rounding"
+      },
+      {
+       "name": "strategy"
+      },
+      {
+       "name": "profit_account_id",
+       "invisible": "strategy != 'add_invoice_line'",
+       "required": "strategy == 'add_invoice_line'",
+       "options": "{'no_create': True}",
+       "groups": "account.group_account_invoice,account.group_account_readonly"
+      },
+      {
+       "name": "loss_account_id",
+       "invisible": "strategy != 'add_invoice_line'",
+       "required": "strategy == 'add_invoice_line'",
+       "options": "{'no_create': True}",
+       "groups": "account.group_account_invoice,account.group_account_readonly"
+      },
+      {
+       "name": "rounding_method"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "account.rounding_search_view",
+    "package": "account",
+    "name": "account.cash.rounding.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "account.rounding_tree_view",
+    "package": "account",
+    "name": "account.cash.rounding.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Rounding List"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "rounding"
+      },
+      {
+       "name": "rounding_method"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "point_of_sale.pos_rounding_form_view_inherited",
+    "package": "point_of_sale",
+    "name": "pos.cash.rounding.form.inherited",
+    "view_type": "xpath",
+    "inherits_view": "account.rounding_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[hasclass('oe_title')]",
+      "position": "before"
+     },
+     "fields": [],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//div[hasclass('oe_title')]",
+       "position": "before"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "account.rounding_list_action",
+    "package": "account",
+    "name": "Cash Roundings",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n                <p class=\"o_view_nocontent_smiling_face\">Create the first cash rounding</p>\n            </field>\n        ",
+    "usage": null,
+    "entity": "account.cash.rounding"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

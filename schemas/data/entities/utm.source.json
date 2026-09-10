@@ -1,0 +1,392 @@
+{
+ "catalog": {
+  "name": "entity:utm.source",
+  "description": "Complete definition of entity campaign tracking parameter Source (utm.source).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "utm.source",
+  "storage_name": "utm_source",
+  "full_name": "campaign tracking parameter Source",
+  "kind": "persistent",
+  "description": "UTM Source",
+  "defined_by_package": "utm",
+  "extended_by_packages": [
+   "hr_recruitment",
+   "mass_mailing",
+   "marketing_card"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Source Name",
+    "required": true,
+    "defined_in_package": "utm",
+    "full_name": "Source Name"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_unique_name",
+    "kind": "Constraint",
+    "definition": "UNIQUE(name)",
+    "message": "The name must be unique",
+    "defined_in_package": "utm"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_unlink_except_referral",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "utm",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot delete the 'Referral' UTM source record.",
+        "line": 23
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "utm",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_generate_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "record",
+     "content"
+    ],
+    "definitions": [
+     {
+      "package": "utm",
+      "decorators": [],
+      "documentation": "Generate the UTM source name based on the content of the source.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_linked_recruitment_sources",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_recruitment",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Already handled by ondelete='restrict', but let's show a nice error message ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete these UTM Sources as they are linked to the following recruitment sources in Recruitment:\n%(recruitment_sources)s",
+        "line": 20
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_linked_mailings",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mass_mailing",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Already handled by ondelete='restrict', but let's show a nice error message ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete these UTM Sources as they are linked to the following mailings in Mass Mailing:\n%(mailing_names)s",
+        "line": 20
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_utm_source_marketing_card",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "marketing_card",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The UTM source '%s' cannot be deleted as it is used to promote marketing cards campaigns.",
+        "line": 11
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_unlink_except_referral",
+    "package": "utm",
+    "kind": "ValidationError",
+    "message": "You cannot delete the 'Referral' UTM source record."
+   },
+   {
+    "operation": "_unlink_except_linked_recruitment_sources",
+    "package": "hr_recruitment",
+    "kind": "UserError",
+    "message": "You cannot delete these UTM Sources as they are linked to the following recruitment sources in Recruitment:\n%(recruitment_sources)s"
+   },
+   {
+    "operation": "_unlink_except_linked_mailings",
+    "package": "mass_mailing",
+    "kind": "UserError",
+    "message": "You cannot delete these UTM Sources as they are linked to the following mailings in Mass Mailing:\n%(mailing_names)s"
+   },
+   {
+    "operation": "_unlink_except_utm_source_marketing_card",
+    "package": "marketing_card",
+    "kind": "UserError",
+    "message": "The UTM source '%s' cannot be deleted as it is used to promote marketing cards campaigns."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "mass_mailing.access_utm_source",
+    "package": "mass_mailing",
+    "name": "access_utm_source",
+    "entity": "utm.source",
+    "group": "mass_mailing.group_mass_mailing_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "utm.access_utm_source_user",
+    "package": "utm",
+    "name": "access_utm_source_user",
+    "entity": "utm.source",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   },
+   {
+    "external_identifier": "utm.access_utm_source_system",
+    "package": "utm",
+    "name": "utm.source.system",
+    "entity": "utm.source",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "utm.utm_source_view_tree",
+    "package": "utm",
+    "name": "utm.source.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Source",
+      "editable": "bottom",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "placeholder": "e.g. \"Christmas Mailing\""
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": "bottom",
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "utm.utm_source_view_form",
+    "package": "utm",
+    "name": "utm.source.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Source"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "utm.utm_source_action",
+    "package": "utm",
+    "name": "Sources",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No Sources yet!\n            </p><p>\n                UTM Sources track where traffic comes from  (e.g. \"May Newsletter\", \"\", ...).\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "utm.source"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "hr_recruitment.menu_hr_recruitment_utm_sources",
+    "package": "hr_recruitment",
+    "name": "Sources",
+    "parent_id": "menu_hr_recruitment_utm",
+    "action": "utm.utm_source_action",
+    "sequence": "15",
+    "groups_id": "base.group_no_one",
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

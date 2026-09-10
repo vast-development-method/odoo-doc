@@ -1,0 +1,716 @@
+{
+ "catalog": {
+  "name": "entity:account.report.expression",
+  "description": "Complete definition of entity Accounting Report Expression (account.report.expression).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "account.report.expression",
+  "storage_name": "account_report_expression",
+  "full_name": "Accounting Report Expression",
+  "kind": "persistent",
+  "description": "Accounting Report Expression",
+  "defined_by_package": "account",
+  "extended_by_packages": [
+   "l10n_it"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "report_line_name",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "report_line_id",
+    "type": "Many2one",
+    "string": "Report Line",
+    "comodel": "account.report.line",
+    "required": true,
+    "index": true,
+    "ondelete": "cascade",
+    "defined_in_package": "account",
+    "full_name": "Report Line",
+    "target_entity": "account.report.line"
+   },
+   {
+    "name": "report_line_name",
+    "type": "Char",
+    "string": "Report Line Name",
+    "related": "report_line_id.name",
+    "defined_in_package": "account",
+    "full_name": "Report Line Name"
+   },
+   {
+    "name": "label",
+    "type": "Char",
+    "string": "Label",
+    "required": true,
+    "copy": true,
+    "defined_in_package": "account",
+    "full_name": "Label"
+   },
+   {
+    "name": "engine",
+    "type": "Selection",
+    "string": "Computation Engine",
+    "selection": [
+     [
+      "domain",
+      "the system Domain"
+     ],
+     [
+      "tax_tags",
+      "Tax Tags"
+     ],
+     [
+      "aggregation",
+      "Aggregate Other Formulas"
+     ],
+     [
+      "account_codes",
+      "Prefix of Account Codes"
+     ],
+     [
+      "external",
+      "External Value"
+     ],
+     [
+      "custom",
+      "Custom Python Function"
+     ]
+    ],
+    "required": true,
+    "defined_in_package": "account",
+    "full_name": "Computation Engine"
+   },
+   {
+    "name": "formula",
+    "type": "Char",
+    "string": "Formula",
+    "required": true,
+    "defined_in_package": "account",
+    "full_name": "Formula"
+   },
+   {
+    "name": "subformula",
+    "type": "Char",
+    "string": "Subformula",
+    "defined_in_package": "account",
+    "full_name": "Subformula"
+   },
+   {
+    "name": "date_scope",
+    "type": "Selection",
+    "string": "Date Scope",
+    "selection": [
+     [
+      "from_beginning",
+      "From the very start"
+     ],
+     [
+      "from_fiscalyear",
+      "From the start of the fiscal year"
+     ],
+     [
+      "to_beginning_of_fiscalyear",
+      "At the beginning of the fiscal year"
+     ],
+     [
+      "to_beginning_of_period",
+      "At the beginning of the period"
+     ],
+     [
+      "strict_range",
+      "Strictly on the given dates"
+     ],
+     [
+      "previous_return_period",
+      "From previous return period"
+     ]
+    ],
+    "required": true,
+    "default": "strict_range",
+    "defined_in_package": "account",
+    "full_name": "Date Scope"
+   },
+   {
+    "name": "figure_type",
+    "type": "Selection",
+    "string": "Figure Type",
+    "selection": {
+     "expression": "FIGURE_TYPE_SELECTION_VALUES"
+    },
+    "defined_in_package": "account",
+    "full_name": "Figure Type"
+   },
+   {
+    "name": "green_on_positive",
+    "type": "Boolean",
+    "string": "Is Growth Good when Positive",
+    "default": true,
+    "defined_in_package": "account",
+    "full_name": "Is Growth Good when Positive"
+   },
+   {
+    "name": "blank_if_zero",
+    "type": "Boolean",
+    "string": "Blank if Zero",
+    "help": "When checked, 0 values will not show when displaying this expression's value.",
+    "defined_in_package": "account",
+    "full_name": "Blank if Zero"
+   },
+   {
+    "name": "auditable",
+    "type": "Boolean",
+    "string": "Auditable",
+    "store": true,
+    "readonly": false,
+    "compute": "_compute_auditable",
+    "defined_in_package": "account",
+    "full_name": "Auditable"
+   },
+   {
+    "name": "carryover_target",
+    "type": "Char",
+    "string": "Carry Over To",
+    "help": "Formula in the form line_code.expression_label. This allows setting the target of the carryover for this expression (on a _carryover_*-labeled expression), in case it is different from the parent line.",
+    "defined_in_package": "account",
+    "full_name": "Carry Over To"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_domain_engine_subformula_required",
+    "kind": "Constraint",
+    "definition": "CHECK(engine != 'domain' OR subformula IS NOT NULL)",
+    "message": "Expressions using 'domain' engine should all have a subformula.",
+    "defined_in_package": "account"
+   },
+   {
+    "name": "_line_label_uniq",
+    "kind": "Constraint",
+    "definition": "UNIQUE(report_line_id,label)",
+    "message": "The expression label must be unique per report line.",
+    "defined_in_package": "account"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_check_carryover_target",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "carryover_target",
+         "label"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot use the field carryover_target in an expression that does not have the label starting with _carryover_",
+        "line": 639
+       },
+       {
+        "kind": "UserError",
+        "message": "When targeting an expression for carryover, the label of that expression must start with _applied_carryover_",
+        "line": 641
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_formula",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "formula"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid formula for expression '%(label)s' of line '%(line)s': %(formula)s",
+        "line": 646
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_auditable",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "engine"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_engine",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "engine",
+         "report_line_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Groupby feature isn't supported by '%(engine)s' engine. Please remove the groupby value on '%(report_line)s'",
+        "line": 682
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_auditable_engines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_strip_formula",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_create_tax_tags",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "tag_name",
+     "country"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 46,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_unlink_archive_used_tags",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": "Manages unlink or archive of tax_tags when account.report.expression are deleted.\nIf a tag is still in use on amls, we archive it.",
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "report_line_name",
+         "label"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_expand_aggregations",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Return self and its full aggregation expression dependency",
+      "size_in_lines": 59,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "In report '%(report_name)s', on line '%(line_name)s', with label '%(label)s',\nThe format of the cross report expression is invalid. \nExpected: cross_report(<report_id>|<xml_id>)Example:  cross_report(my_module.my_report) or cross_report(123)",
+        "line": 818
+       },
+       {
+        "kind": "UserError",
+        "message": "In report '%(report_name)s', on line '%(line_name)s', with label '%(label)s',\nFailed to parse the cross report id or xml_id.\n",
+        "line": 834
+       },
+       {
+        "kind": "UserError",
+        "message": "You cannot use cross report on itself",
+        "line": 842
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_aggregation_terms_details",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Computes the details of each aggregation expression in self, and returns them in the form of a single dict aggregating all the results.\n\nExample of aggregation details:\nformula 'A.balance + B.balance + A.other'\nwill return: {'A': {'balance', 'other'}, 'B': {'balance'}}",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Cannot get aggregation details from a line not using 'aggregation' engine",
+        "line": 870
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_get_matching_tags",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": "Returns all the signed account.account.tags records whose name matches any of the formulas of the tax_tags expressions contained in self.\n        ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_tags_create_vals",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "tag_name",
+     "country_id",
+     "existing_tag"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_carryover_target_expression",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "options"
+    ],
+    "definitions": [
+     {
+      "package": "account",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Could not determine carryover target automatically for expression %s.",
+        "line": 927
+       }
+      ]
+     },
+     {
+      "package": "l10n_it",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_carryover_target",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot use the field carryover_target in an expression that does not have the label starting with _carryover_"
+   },
+   {
+    "operation": "_check_carryover_target",
+    "package": "account",
+    "kind": "UserError",
+    "message": "When targeting an expression for carryover, the label of that expression must start with _applied_carryover_"
+   },
+   {
+    "operation": "_check_formula",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Invalid formula for expression '%(label)s' of line '%(line)s': %(formula)s"
+   },
+   {
+    "operation": "_validate_engine",
+    "package": "account",
+    "kind": "ValidationError",
+    "message": "Groupby feature isn't supported by '%(engine)s' engine. Please remove the groupby value on '%(report_line)s'"
+   },
+   {
+    "operation": "_expand_aggregations",
+    "package": "account",
+    "kind": "UserError",
+    "message": "In report '%(report_name)s', on line '%(line_name)s', with label '%(label)s',\nThe format of the cross report expression is invalid. \nExpected: cross_report(<report_id>|<xml_id>)Example:  cross_report(my_module.my_report) or cross_report(123)"
+   },
+   {
+    "operation": "_expand_aggregations",
+    "package": "account",
+    "kind": "UserError",
+    "message": "In report '%(report_name)s', on line '%(line_name)s', with label '%(label)s',\nFailed to parse the cross report id or xml_id.\n"
+   },
+   {
+    "operation": "_expand_aggregations",
+    "package": "account",
+    "kind": "UserError",
+    "message": "You cannot use cross report on itself"
+   },
+   {
+    "operation": "_get_aggregation_terms_details",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Cannot get aggregation details from a line not using 'aggregation' engine"
+   },
+   {
+    "operation": "_get_carryover_target_expression",
+    "package": "account",
+    "kind": "UserError",
+    "message": "Could not determine carryover target automatically for expression %s."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "account.access_account_report_expression_basic",
+    "package": "account",
+    "name": "account.report.expression.basic",
+    "entity": "account.report.expression",
+    "group": "account.group_account_basic",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_report_expression_readonly",
+    "package": "account",
+    "name": "account.report.expression.readonly",
+    "entity": "account.report.expression",
+    "group": "account.group_account_readonly",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "account.access_account_report_expression_ac_user",
+    "package": "account",
+    "name": "account.report.expression.ac.user",
+    "entity": "account.report.expression",
+    "group": "account.group_account_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

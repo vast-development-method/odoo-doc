@@ -1,0 +1,629 @@
+{
+ "catalog": {
+  "name": "entity:product.tag",
+  "description": "Complete definition of entity Product Tag (product.tag).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.tag",
+  "storage_name": "product_tag",
+  "full_name": "Product Tag",
+  "kind": "persistent",
+  "description": "Product Tag",
+  "defined_by_package": "product",
+  "extended_by_packages": [
+   "point_of_sale",
+   "website_sale",
+   "pos_self_order"
+  ],
+  "mixins": [
+   "pos.load.mixin",
+   "website.multi.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "product",
+    "full_name": "Name"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "default": 10,
+    "defined_in_package": "product",
+    "string": "Sequence",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "color",
+    "type": "Char",
+    "string": "Color",
+    "default": "#3C3C3C",
+    "defined_in_package": "product",
+    "full_name": "Color"
+   },
+   {
+    "name": "product_template_ids",
+    "type": "Many2many",
+    "string": "Product Templates",
+    "comodel": "product.template",
+    "relation": "product_tag_product_template_rel",
+    "default": {
+     "dynamic": "_get_default_template_id"
+    },
+    "defined_in_package": "product",
+    "full_name": "Product Templates",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "product_product_ids",
+    "type": "Many2many",
+    "string": "Product Variants",
+    "comodel": "product.product",
+    "relation": "product_tag_product_product_rel",
+    "domain": "[('attribute_line_ids', '!=', False), ('product_tmpl_id', 'not in', product_template_ids)]",
+    "default": {
+     "dynamic": "_get_default_variant_id"
+    },
+    "defined_in_package": "product",
+    "full_name": "Product Variants",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_ids",
+    "type": "Many2many",
+    "comodel": "product.product",
+    "string": "All Product Variants using this Tag",
+    "compute": "_compute_product_ids",
+    "search": "_search_product_ids",
+    "defined_in_package": "product",
+    "full_name": "All Product Variants using this Tag",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "visible_to_customers",
+    "type": "Boolean",
+    "string": "Visible to customers",
+    "help": "Whether the tag is displayed to customers.",
+    "default": true,
+    "defined_in_package": "product",
+    "full_name": "Visible to customers"
+   },
+   {
+    "name": "image",
+    "type": "Image",
+    "string": "Image",
+    "max_width": 200,
+    "max_height": 200,
+    "defined_in_package": "product",
+    "full_name": "Image"
+   },
+   {
+    "name": "pos_description",
+    "type": "Html",
+    "string": "Description",
+    "translate": true,
+    "defined_in_package": "point_of_sale",
+    "full_name": "Description"
+   },
+   {
+    "name": "has_image",
+    "type": "Boolean",
+    "compute": "_compute_has_image",
+    "defined_in_package": "point_of_sale",
+    "string": "Has Image",
+    "full_name": "Has Image"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_name_uniq",
+    "kind": "Constraint",
+    "definition": "unique (name)",
+    "message": "Tag name already exists!",
+    "defined_in_package": "product"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_get_default_template_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_default_variant_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_product_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_template_ids",
+         "product_product_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "copy_data",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "default"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_product_ids",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "product",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_data_fields",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_has_image",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "has_image"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "point_of_sale",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_can_return_content",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "field_name",
+     "access_token"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_load_pos_self_data_domain",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "data",
+     "config"
+    ],
+    "definitions": [
+     {
+      "package": "pos_self_order",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "product.access_product_tag_user",
+    "package": "product",
+    "name": "product.tag.user",
+    "entity": "product.tag",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "product.access_product_tag_manager",
+    "package": "product",
+    "name": "product.tag.manager",
+    "entity": "product.tag",
+    "group": "group_product_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "website_sale.access_product_tag_public_public",
+    "package": "website_sale",
+    "name": "product.tag.public",
+    "entity": "product.tag",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_tag_public_portal",
+    "package": "website_sale",
+    "name": "product.tag.public",
+    "entity": "product.tag",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "website_sale.access_product_tag_public_employee",
+    "package": "website_sale",
+    "name": "product.tag.public",
+    "entity": "product.tag",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "point_of_sale.product_tag_form_view_inherit_point_of_sale",
+    "package": "point_of_sale",
+    "name": "product.tag.form.inherit.point.of.sale",
+    "view_type": "xpath",
+    "inherits_view": "product.product_tag_form_view",
+    "mode": null,
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//form/sheet/group",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "pos_description"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//form/sheet/group",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "product.product_tag_form_view",
+    "package": "product",
+    "name": "product.tag.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Product Tag"
+     },
+     "fields": [
+      {
+       "name": "image",
+       "widget": "image",
+       "invisible": "not visible_to_customers"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "visible_to_customers",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "color",
+       "widget": "color",
+       "invisible": "not visible_to_customers"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "boolean_toggle": 1,
+      "color": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "product.product_tag_tree_view",
+    "package": "product",
+    "name": "product.tag.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Product Tags",
+      "multi_edit": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "visible_to_customers",
+       "optional": "show"
+      },
+      {
+       "name": "color",
+       "widget": "color",
+       "invisible": "not visible_to_customers",
+       "readonly": "1",
+       "optional": "hide"
+      },
+      {
+       "name": "image",
+       "widget": "image",
+       "invisible": "not visible_to_customers",
+       "options": "{'size': [0, 30]}",
+       "optional": "hide"
+      },
+      {
+       "name": "product_template_ids",
+       "widget": "many2many_tags",
+       "optional": "show"
+      },
+      {
+       "name": "product_product_ids",
+       "widget": "many2many_tags",
+       "string": "Product Variant",
+       "optional": "show"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "color": 1,
+      "image": 1,
+      "many2many_tags": 2
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "product.product_tag_action",
+    "package": "product",
+    "name": "Product Tags",
+    "view_mode": "list,form",
+    "view_id": "False",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'create': True}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n          <p class=\"o_view_nocontent_smiling_face\">\n            Define a new tag\n          </p><p>\n            Tags are used to search product for a given theme.\n          </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "product.tag"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "point_of_sale.pos_menu_products_tag_action",
+    "package": "point_of_sale",
+    "name": null,
+    "parent_id": "point_of_sale.pos_menu_products_configuration",
+    "action": "product.product_tag_action",
+    "sequence": "3",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "sale.menu_product_tags",
+    "package": "sale",
+    "name": null,
+    "parent_id": null,
+    "action": "product.product_tag_action",
+    "sequence": "30",
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "website_sale.product_catalog_product_tags",
+    "package": "website_sale",
+    "name": "Product Tags",
+    "parent_id": null,
+    "action": "product.product_tag_action",
+    "sequence": null,
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

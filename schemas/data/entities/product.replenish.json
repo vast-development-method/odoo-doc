@@ -1,0 +1,809 @@
+{
+ "catalog": {
+  "name": "entity:product.replenish",
+  "description": "Complete definition of entity Product Replenish (product.replenish).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "product.replenish",
+  "storage_name": "product_replenish",
+  "full_name": "Product Replenish",
+  "kind": "transient",
+  "description": "Product Replenish",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "purchase_stock",
+   "mrp"
+  ],
+  "mixins": [
+   "stock.replenish.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "string": "Product",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_tmpl_id",
+    "type": "Many2one",
+    "comodel": "product.template",
+    "string": "Product Template",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Product Template",
+    "target_entity": "product.template"
+   },
+   {
+    "name": "product_has_variants",
+    "type": "Boolean",
+    "string": "Has variants",
+    "default": false,
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Has variants"
+   },
+   {
+    "name": "allowed_uom_ids",
+    "type": "Many2many",
+    "comodel": "uom.uom",
+    "compute": "_compute_allowed_uom_ids",
+    "defined_in_package": "stock",
+    "string": "Allowed Unit of measure",
+    "full_name": "Allowed Unit of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "product_uom_id",
+    "type": "Many2one",
+    "comodel": "uom.uom",
+    "string": "Unity of measure",
+    "domain": "[('id', 'in', allowed_uom_ids)]",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Unity of measure",
+    "target_entity": "uom.uom"
+   },
+   {
+    "name": "forecast_uom_id",
+    "type": "Many2one",
+    "related": "product_id.uom_id",
+    "defined_in_package": "stock",
+    "string": "Forecast Unit of measure",
+    "full_name": "Forecast Unit of measure"
+   },
+   {
+    "name": "quantity",
+    "type": "Float",
+    "string": "Quantity",
+    "default": 1,
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Quantity"
+   },
+   {
+    "name": "date_planned",
+    "type": "Datetime",
+    "string": "Scheduled Date",
+    "required": true,
+    "compute": "_compute_date_planned",
+    "readonly": false,
+    "help": "Date at which the replenishment should take place.",
+    "store": true,
+    "precompute": true,
+    "defined_in_package": "stock",
+    "full_name": "Scheduled Date"
+   },
+   {
+    "name": "warehouse_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse",
+    "string": "Warehouse",
+    "required": true,
+    "check_company": true,
+    "defined_in_package": "stock",
+    "full_name": "Warehouse",
+    "target_entity": "stock.warehouse"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "defined_in_package": "stock",
+    "string": "Company",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "forecasted_quantity",
+    "type": "Float",
+    "string": "Forecasted Quantity",
+    "compute": "_compute_forecasted_quantity",
+    "defined_in_package": "stock",
+    "full_name": "Forecasted Quantity"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_onchange_product_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "product_id",
+         "warehouse_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_uom_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id",
+         "product_id.uom_id",
+         "product_id.uom_ids",
+         "product_id.seller_ids",
+         "product_id.seller_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "product_id.bom_ids",
+         "product_id.bom_ids.product_uom_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_forecasted_quantity",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "warehouse_id",
+         "product_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_date_planned",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_id",
+         "supplier_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "route_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 31,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_date_planned",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "route_id",
+     "**kwargs"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 13,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "launch_replenishment",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "error",
+        "line": 117
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_prepare_orderpoint_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_run_values",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_record_to_notify",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "date"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_replenishment_order_notification_link",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_allowed_route_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_replenishment_order_notification",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "move"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_route_domain",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "product_tmpl_id"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "mrp",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_supplier_id",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "route_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_stock_replenishment_info",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "launch_replenishment",
+    "package": "stock",
+    "kind": "UserError",
+    "message": "error"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "stock.access_product_replenish",
+    "package": "stock",
+    "name": "access.product.replenish",
+    "entity": "product.replenish",
+    "group": "stock.group_stock_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "purchase_stock.view_product_replenish_form_inherit_stock",
+    "package": "purchase_stock",
+    "name": "product.replenish.form.inherit.stock",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_product_replenish",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='route_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "show_vendor",
+       "invisible": "1"
+      },
+      {
+       "name": "supplier_id",
+       "invisible": "not show_vendor",
+       "required": "show_vendor",
+       "domain": "[('product_tmpl_id', '=', product_tmpl_id)]",
+       "options": "{'no_open': 1, 'no_create': 1}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='route_id']",
+       "position": "after"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_product_replenish",
+    "package": "stock",
+    "name": "Replenish",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Replenish wizard"
+     },
+     "fields": [
+      {
+       "name": "product_id",
+       "readonly": "not product_has_variants",
+       "domain": "[('product_tmpl_id', '=', product_tmpl_id)]",
+       "options": "{'no_open': 1, 'no_create': 1}"
+      },
+      {
+       "name": "forecasted_quantity"
+      },
+      {
+       "name": "forecast_uom_id",
+       "readonly": "1",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "product_tmpl_id",
+       "invisible": "1"
+      },
+      {
+       "name": "product_has_variants",
+       "invisible": "1"
+      },
+      {
+       "name": "allowed_route_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "company_id",
+       "invisible": "1"
+      },
+      {
+       "name": "quantity"
+      },
+      {
+       "name": "product_uom_id",
+       "widget": "many2one_uom",
+       "options": "{'no_open': 1, 'no_create': 1, 'quantity_field': 'quantity'}",
+       "groups": "uom.group_uom"
+      },
+      {
+       "name": "date_planned"
+      },
+      {
+       "name": "warehouse_id",
+       "groups": "stock.group_stock_multi_warehouses"
+      },
+      {
+       "name": "route_id",
+       "domain": "[('id', 'in', allowed_route_ids)]"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "launch_replenishment",
+       "string": "Confirm",
+       "type": "object",
+       "class": "btn-primary",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_uom": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock.action_product_replenish",
+    "package": "stock",
+    "name": "Low on stock? Let's replenish.",
+    "view_mode": "form",
+    "view_id": "view_product_replenish",
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": "False",
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "product.replenish"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

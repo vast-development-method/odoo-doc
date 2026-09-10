@@ -1,0 +1,1255 @@
+{
+ "catalog": {
+  "name": "entity:mail.activity.type",
+  "description": "Complete definition of entity Activity Type (mail.activity.type).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.activity.type",
+  "storage_name": "mail_activity_type",
+  "full_name": "Activity Type",
+  "kind": "persistent",
+  "description": "Activity Type",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "fleet",
+   "calendar",
+   "hr_holidays"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "sequence, id",
+  "display_name_field": "name",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Name",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "mail",
+    "full_name": "Name"
+   },
+   {
+    "name": "summary",
+    "type": "Char",
+    "string": "Default Summary",
+    "translate": true,
+    "defined_in_package": "mail",
+    "full_name": "Default Summary"
+   },
+   {
+    "name": "sequence",
+    "type": "Integer",
+    "string": "Sequence",
+    "default": 10,
+    "defined_in_package": "mail",
+    "full_name": "Sequence"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "mail",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "create_uid",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "index": true,
+    "defined_in_package": "mail",
+    "string": "Create Uid",
+    "full_name": "Create Uid",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "delay_count",
+    "type": "Integer",
+    "string": "Schedule",
+    "default": 0,
+    "help": "Number of days/week/month before executing the action. It allows to plan the action deadline.",
+    "defined_in_package": "mail",
+    "full_name": "Schedule"
+   },
+   {
+    "name": "delay_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "days",
+      "days"
+     ],
+     [
+      "weeks",
+      "weeks"
+     ],
+     [
+      "months",
+      "months"
+     ]
+    ],
+    "string": "Delay units",
+    "help": "Unit of delay",
+    "required": true,
+    "default": "days",
+    "defined_in_package": "mail",
+    "full_name": "Delay units"
+   },
+   {
+    "name": "delay_label",
+    "type": "Char",
+    "compute": "_compute_delay_label",
+    "defined_in_package": "mail",
+    "string": "Delay Label",
+    "full_name": "Delay Label"
+   },
+   {
+    "name": "delay_from",
+    "type": "Selection",
+    "selection": [
+     [
+      "current_date",
+      "after previous activity completion date"
+     ],
+     [
+      "previous_activity",
+      "after previous activity deadline"
+     ]
+    ],
+    "string": "Delay Type",
+    "help": "Type of delay",
+    "required": true,
+    "default": "previous_activity",
+    "defined_in_package": "mail",
+    "full_name": "Delay Type"
+   },
+   {
+    "name": "icon",
+    "type": "Char",
+    "string": "Icon",
+    "help": "Font awesome icon e.g. fa-tasks",
+    "defined_in_package": "mail",
+    "full_name": "Icon"
+   },
+   {
+    "name": "decoration_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "warning",
+      "Alert"
+     ],
+     [
+      "danger",
+      "Error"
+     ]
+    ],
+    "string": "Decoration Type",
+    "help": "Change the background color of the related activities of this type.",
+    "defined_in_package": "mail",
+    "full_name": "Decoration Type"
+   },
+   {
+    "name": "res_model",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_model_selection"
+    },
+    "string": "Model",
+    "help": "Specify a model if the activity should be specific to a model and not available when managing activities for other models.",
+    "defined_in_package": "mail",
+    "full_name": "Model"
+   },
+   {
+    "name": "triggered_next_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Trigger",
+    "compute": "_compute_triggered_next_type_id",
+    "inverse": "_inverse_triggered_next_type_id",
+    "store": true,
+    "readonly": false,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', res_model)]",
+    "ondelete": "restrict",
+    "help": "Automatically schedule this activity once the current one is marked as done.",
+    "defined_in_package": "mail",
+    "full_name": "Trigger",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "chaining_type",
+    "type": "Selection",
+    "selection": [
+     [
+      "suggest",
+      "Suggest Next Activity"
+     ],
+     [
+      "trigger",
+      "Trigger Next Activity"
+     ]
+    ],
+    "string": "Chaining Type",
+    "required": true,
+    "default": "suggest",
+    "defined_in_package": "mail",
+    "full_name": "Chaining Type"
+   },
+   {
+    "name": "suggested_next_type_ids",
+    "type": "Many2many",
+    "comodel": "mail.activity.type",
+    "relation": "mail_activity_rel",
+    "column1": "activity_id",
+    "column2": "recommended_id",
+    "string": "Suggest",
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', res_model)]",
+    "compute": "_compute_suggested_next_type_ids",
+    "inverse": "_inverse_suggested_next_type_ids",
+    "store": true,
+    "readonly": false,
+    "help": "Suggest these activities once the current one is marked as done.",
+    "defined_in_package": "mail",
+    "full_name": "Suggest",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "previous_type_ids",
+    "type": "Many2many",
+    "comodel": "mail.activity.type",
+    "relation": "mail_activity_rel",
+    "column1": "recommended_id",
+    "column2": "activity_id",
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', res_model)]",
+    "string": "Preceding Activities",
+    "defined_in_package": "mail",
+    "full_name": "Preceding Activities",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "category",
+    "type": "Selection",
+    "selection": [
+     [
+      "default",
+      "None"
+     ],
+     [
+      "upload_file",
+      "Upload Document"
+     ],
+     [
+      "phonecall",
+      "Phonecall"
+     ],
+     [
+      "meeting",
+      "Meeting"
+     ]
+    ],
+    "default": "default",
+    "string": "Action",
+    "help": "Actions may trigger specific behavior like opening calendar view or automatically mark as done when a document is uploaded",
+    "defined_in_package": "mail",
+    "selection_added_by": [
+     "calendar"
+    ],
+    "extended_in_packages": [
+     "calendar"
+    ],
+    "full_name": "Action"
+   },
+   {
+    "name": "mail_template_ids",
+    "type": "Many2many",
+    "comodel": "mail.template",
+    "string": "Email templates",
+    "defined_in_package": "mail",
+    "full_name": "Email templates",
+    "target_entity": "mail.template"
+   },
+   {
+    "name": "default_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Default User",
+    "defined_in_package": "mail",
+    "full_name": "Default User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "default_note",
+    "type": "Html",
+    "string": "Default Note",
+    "translate": true,
+    "defined_in_package": "mail",
+    "full_name": "Default Note"
+   },
+   {
+    "name": "initial_res_model",
+    "type": "Selection",
+    "selection": {
+     "expression": "_get_model_selection"
+    },
+    "string": "Initial model",
+    "compute": "_compute_initial_res_model",
+    "store": false,
+    "help": "Technical field to keep track of the model at the start of editing to support UX related behaviour",
+    "defined_in_package": "mail",
+    "full_name": "Initial model"
+   },
+   {
+    "name": "res_model_change",
+    "type": "Boolean",
+    "string": "Model has change",
+    "default": false,
+    "store": false,
+    "defined_in_package": "mail",
+    "full_name": "Model has change"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_model_selection",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_activity_type_res_model",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_onchange_res_model",
+    "kind": "on_change",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.onchange",
+        "arguments": [
+         "res_model"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_initial_res_model",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_delay_label",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "delay_unit",
+         "delay_count"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_suggested_next_type_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "chaining_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "suggested_next_type_ids and triggered_next_type_id should be mutually exclusive",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_suggested_next_type_ids",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_triggered_next_type_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "chaining_type"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "suggested_next_type_ids and triggered_next_type_id should be mutually exclusive",
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_inverse_triggered_next_type_id",
+    "kind": "inverse_computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot modify %(activities_names)s target model as they are are required in various apps.",
+        "line": 146
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_unlink_except_todo",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.ondelete",
+        "arguments": [],
+        "options": {
+         "at_uninstall": false
+        }
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You cannot delete %(activity_names)s as it is required in various apps.",
+        "line": 160
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "action_archive",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "The 'To-Do' activity type is used to create reminders from the top bar menu and the command palette. Consequently, it cannot be archived or deleted.",
+        "line": 167
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "unlink",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "When removing an activity type, put activities into a Todo. ",
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_date_deadline",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Return the activity deadline computed from today or from activity_previous_deadline context variable. ",
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_model_info_by_xmlid",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Get model info based on xml ids. ",
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "fleet",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     },
+     {
+      "package": "hr_holidays",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "write",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "You cannot modify %(activities_names)s target model as they are are required in various apps."
+   },
+   {
+    "operation": "_unlink_except_todo",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "You cannot delete %(activity_names)s as it is required in various apps."
+   },
+   {
+    "operation": "action_archive",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "The 'To-Do' activity type is used to create reminders from the top bar menu and the command palette. Consequently, it cannot be archived or deleted."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "crm.access_mail_activity_type_sale_manager",
+    "package": "crm",
+    "name": "mail.activity.type.sale.manager",
+    "entity": "mail.activity.type",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "fleet.access_mail_activity_type_fleet_manager",
+    "package": "fleet",
+    "name": "mail.activity.type.fleet.manager",
+    "entity": "mail.activity.type",
+    "group": "fleet.fleet_group_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_expense.access_mail_activity_type_expense_user",
+    "package": "hr_expense",
+    "name": "mail.activity.type.expense.user",
+    "entity": "mail.activity.type",
+    "group": "hr_expense.group_hr_expense_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "hr_holidays.access_mail_activity_type_holidays_manager",
+    "package": "hr_holidays",
+    "name": "mail.activity.type.holidays.manager",
+    "entity": "mail.activity.type",
+    "group": "hr_holidays.group_hr_holidays_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "mail.access_mail_activity_type_user",
+    "package": "mail",
+    "name": "mail.activity.type.user",
+    "entity": "mail.activity.type",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_mail_activity_type_system",
+    "package": "mail",
+    "name": "mail.activity.type.system",
+    "entity": "mail.activity.type",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "maintenance.access_mail_activity_type_equipment_manager",
+    "package": "maintenance",
+    "name": "mail.activity.type.equipment.manager",
+    "entity": "mail.activity.type",
+    "group": "maintenance.group_equipment_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "project.access_mail_activity_type_project_manager",
+    "package": "project",
+    "name": "mail.activity.type.project.manager",
+    "entity": "mail.activity.type",
+    "group": "project.group_project_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "sale.access_mail_activity_type_sale_manager",
+    "package": "sale",
+    "name": "mail.activity.type.sale.manager",
+    "entity": "mail.activity.type",
+    "group": "sales_team.group_sale_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mail.mail_activity_type_view_form",
+    "package": "mail",
+    "name": "mail.activity.type.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Activities"
+     },
+     "fields": [
+      {
+       "name": "name",
+       "widget": "text",
+       "options": "{'line_breaks': False}",
+       "placeholder": "e.g. Schedule a meeting"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "category"
+      },
+      {
+       "name": "default_user_id",
+       "widget": "many2one_avatar_user",
+       "domain": "[('share', '=', False)]",
+       "options": "{'no_create': True}"
+      },
+      {
+       "name": "res_model",
+       "invisible": "context.get('default_res_model')",
+       "placeholder": "Available everywhere"
+      },
+      {
+       "name": "summary",
+       "placeholder": "e.g. \"Discuss proposal\""
+      },
+      {
+       "name": "icon",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "decoration_type",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "delay_count"
+      },
+      {
+       "name": "delay_unit"
+      },
+      {
+       "name": "delay_from"
+      },
+      {
+       "name": "chaining_type",
+       "invisible": "category == 'upload_file'"
+      },
+      {
+       "name": "triggered_next_type_id",
+       "invisible": "chaining_type == 'suggest' and category != 'upload_file'",
+       "required": "chaining_type == 'trigger' and category != 'upload_file'",
+       "context": "{'default_res_model': res_model}",
+       "options": "{'no_open': True}"
+      },
+      {
+       "name": "suggested_next_type_ids",
+       "widget": "many2many_tags",
+       "invisible": "chaining_type == 'trigger' or category == 'upload_file'",
+       "context": "{'default_res_model': res_model}"
+      },
+      {
+       "name": "mail_template_ids",
+       "widget": "many2many_tags",
+       "invisible": "not res_model",
+       "domain": "[('model_id.model', '=', res_model)]",
+       "context": "{'default_model': res_model}"
+      },
+      {
+       "name": "default_note",
+       "nolabel": "1",
+       "placeholder": "e.g. \"Go over the offer and discuss details\""
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "text": 1,
+      "many2one_avatar_user": 1,
+      "many2many_tags": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_type_view_search",
+    "package": "mail",
+    "name": "mail.activity.type.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Activities"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "archived",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_type_view_tree",
+    "package": "mail",
+    "name": "mail.activity.type.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Activities",
+      "sample": "1"
+     },
+     "fields": [
+      {
+       "name": "sequence",
+       "widget": "handle"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "summary"
+      },
+      {
+       "name": "delay_label",
+       "string": "Planned in"
+      },
+      {
+       "name": "delay_from",
+       "string": "Type"
+      },
+      {
+       "name": "res_model",
+       "column_invisible": "context.get('default_res_model')"
+      },
+      {
+       "name": "icon",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "triggered_next_type_id",
+       "string": "Triggered Next",
+       "optional": "hide"
+      },
+      {
+       "name": "suggested_next_type_ids",
+       "widget": "many2many_tags",
+       "string": "Suggested Next",
+       "optional": "hide"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "handle": 1,
+      "many2many_tags": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_activity_type_view_kanban",
+    "package": "mail",
+    "name": "mail.activity.type.view.kanban",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {
+      "class": "o_kanban_mobile"
+     },
+     "fields": [
+      {
+       "name": "icon"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "res_model"
+      },
+      {
+       "name": "summary"
+      },
+      {
+       "name": "default_user_id",
+       "widget": "many2one_avatar_user",
+       "readonly": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "many2one_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "fleet.mail_activity_type_action_config_fleet",
+    "package": "fleet",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', 'fleet.vehicle.log.contract')]",
+    "context": "{'default_res_model': 'fleet.vehicle.log.contract'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.activity.type"
+   },
+   {
+    "external_identifier": "hr_expense.mail_activity_type_action_config_hr_expense",
+    "package": "hr_expense",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', 'hr.expense')]",
+    "context": "{'default_res_model': 'hr.expense'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.activity.type"
+   },
+   {
+    "external_identifier": "hr_holidays.mail_activity_type_action_config_hr_holidays",
+    "package": "hr_holidays",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('res_model', '=', False), ('res_model', 'in', ['hr.leave', 'hr.leave.allocation'])]",
+    "context": "{'default_res_model': 'hr.leave'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No data to display\n            </p>\n            <p>\n                Try to add some records, or make sure that there is no active filter in the search bar.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mail.activity.type"
+   },
+   {
+    "external_identifier": "hr_recruitment.mail_activity_type_action_config_hr_applicant",
+    "package": "hr_recruitment",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', 'hr.applicant')]",
+    "context": "{'default_res_model': 'hr.applicant'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_empty_folder\">\n                No data to display\n            </p>\n            <p>\n                Try to add some records, or make sure that there is no active filter in the search bar.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mail.activity.type"
+   },
+   {
+    "external_identifier": "mail.mail_activity_type_action",
+    "package": "mail",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.activity.type"
+   },
+   {
+    "external_identifier": "maintenance.mail_activity_type_action_config_maintenance",
+    "package": "maintenance",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', 'maintenance.request')]",
+    "context": "{'default_res_model': 'maintenance.request'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.activity.type"
+   },
+   {
+    "external_identifier": "project.mail_activity_type_action_config_project_types",
+    "package": "project",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', 'project.task')]",
+    "context": "{'default_res_model': 'project.task'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                No activity types found. Let's create one!\n            </p><p>\n                Those represent the different categories of things you have to do (e.g. \"Call\" or \"Send email\").\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mail.activity.type"
+   },
+   {
+    "external_identifier": "sale.mail_activity_type_action_config_sale",
+    "package": "sale",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', 'sale.order')]",
+    "context": "{'default_res_model': 'sale.order'}",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.activity.type"
+   },
+   {
+    "external_identifier": "sales_team.mail_activity_type_action_config_sales",
+    "package": "sales_team",
+    "name": "Activity Types",
+    "view_mode": "list,kanban,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('res_model', '=', False), ('res_model', '=', 'res.partner')]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create an Activity Type\n            </p><p>\n                Those represent the different categories of things you have to do (e.g. \"Call\" or \"Prepare meeting\").\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "mail.activity.type"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "crm.crm_team_menu_config_activity_types",
+    "package": "crm",
+    "name": "Activity Types",
+    "parent_id": "crm_team_menu_config_activities",
+    "action": "sales_team.mail_activity_type_action_config_sales",
+    "sequence": "10",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

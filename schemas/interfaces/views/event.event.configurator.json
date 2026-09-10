@@ -1,0 +1,93 @@
+{
+ "catalog": {
+  "name": "views:event.event.configurator",
+  "description": "View declarations for entity event.event.configurator.",
+  "record_count": 1,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "event_sale.event_configurator_view_form",
+   "package": "event_sale",
+   "name": "event.configurator.view.form",
+   "entity": "event.event.configurator",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "js_class": "event_configurator_form"
+    },
+    "fields": [
+     {
+      "name": "has_available_tickets",
+      "invisible": "1"
+     },
+     {
+      "name": "event_id",
+      "required": "1",
+      "domain": "[                             ('event_ticket_ids.product_id','=', product_id),                             ('date_end','>=',time.strftime('%Y-%m-%d 00:00:00'))                         ]",
+      "context": "{'name_with_seats_availability': True}",
+      "options": "{'no_open': True, 'no_create': True}",
+      "placeholder": "All Events"
+     },
+     {
+      "name": "event_slot_id",
+      "invisible": "not is_multi_slots",
+      "required": "is_multi_slots",
+      "domain": "[('event_id', '=', event_id)]",
+      "context": "{'name_with_seats_availability': True}",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "event_ticket_id",
+      "invisible": "not event_id",
+      "required": "event_id",
+      "domain": "[('event_id', '=', event_id), ('product_id', '=', product_id)]",
+      "context": "{'name_with_seats_availability': True}",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "product_id",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "string": "Add",
+      "invisible": "not has_available_tickets",
+      "class": "btn-primary o_event_sale_js_event_configurator_ok",
+      "special": "save",
+      "data-hotkey": "q"
+     },
+     {
+      "string": "Discard",
+      "invisible": "not has_available_tickets",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     },
+     {
+      "string": "Close",
+      "invisible": "has_available_tickets",
+      "class": "btn-secondary",
+      "special": "cancel",
+      "data-hotkey": "x"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form js_class=\"event_configurator_form\">\n                <field name=\"has_available_tickets\" invisible=\"1\"/>\n                <div invisible=\"has_available_tickets\">\n                    We could not find a matching event ticket for this product. <br/>\n                    <a role=\"button\" class=\"btn btn-link\" target=\"_blank\" href=\"/the system/action-event.action_event_view\">\n                        <i class=\"fa fa-arrow-right\"/> Configure Events &amp; Tickets\n                    </a>\n                </div>\n                <group invisible=\"not has_available_tickets\">\n                    <field name=\"event_id\" domain=\"[                             ('event_ticket_ids.product_id','=', product_id),                             ('date_end','&gt;=',time.strftime('%Y-%m-%d 00:00:00'))                         ]\" required=\"1\" context=\"{'name_with_seats_availability': True}\" options=\"{'no_open': True, 'no_create': True}\" placeholder=\"All Events\"/>\n                    <field name=\"event_slot_id\" domain=\"[('event_id', '=', event_id)]\" invisible=\"not is_multi_slots\" required=\"is_multi_slots\" context=\"{'name_with_seats_availability': True}\" options=\"{'no_open': True, 'no_create': True}\"/>\n                    <field name=\"event_ticket_id\" domain=\"[('event_id', '=', event_id), ('product_id', '=', product_id)]\" invisible=\"not event_id\" required=\"event_id\" context=\"{'name_with_seats_availability': True}\" options=\"{'no_open': True, 'no_create': True}\"/>\n                    <field name=\"product_id\" invisible=\"1\"/>\n                </group>\n                <footer>\n                    <button string=\"Add\" invisible=\"not has_available_tickets\" class=\"btn-primary o_event_sale_js_event_configurator_ok\" special=\"save\" data-hotkey=\"q\"/>\n                    <button string=\"Discard\" invisible=\"not has_available_tickets\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                    <button string=\"Close\" invisible=\"has_available_tickets\" class=\"btn-secondary\" special=\"cancel\" data-hotkey=\"x\"/>\n                </footer>\n            </form>\n        </field>\n    "
+  }
+ ]
+}

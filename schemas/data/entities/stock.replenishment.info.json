@@ -1,0 +1,716 @@
+{
+ "catalog": {
+  "name": "entity:stock.replenishment.info",
+  "description": "Complete definition of entity Stock supplier replenishment information (stock.replenishment.info).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "stock.replenishment.info",
+  "storage_name": "stock_replenishment_info",
+  "full_name": "Stock supplier replenishment information",
+  "kind": "transient",
+  "description": "Stock supplier replenishment information",
+  "defined_by_package": "stock",
+  "extended_by_packages": [
+   "purchase_stock",
+   "mrp"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": "orderpoint_id",
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "orderpoint_id",
+    "type": "Many2one",
+    "comodel": "stock.warehouse.orderpoint",
+    "defined_in_package": "stock",
+    "string": "Orderpoint",
+    "full_name": "Orderpoint",
+    "target_entity": "stock.warehouse.orderpoint"
+   },
+   {
+    "name": "product_id",
+    "type": "Many2one",
+    "comodel": "product.product",
+    "related": "orderpoint_id.product_id",
+    "defined_in_package": "stock",
+    "string": "Product",
+    "full_name": "Product",
+    "target_entity": "product.product"
+   },
+   {
+    "name": "product_uom_name",
+    "type": "Char",
+    "related": "orderpoint_id.product_uom_name",
+    "defined_in_package": "stock",
+    "string": "Product Unit of measure Name",
+    "full_name": "Product Unit of measure Name"
+   },
+   {
+    "name": "product_min_qty",
+    "type": "Float",
+    "string": "Min",
+    "related": "orderpoint_id.product_min_qty",
+    "readonly": false,
+    "related_sudo": false,
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Min"
+   },
+   {
+    "name": "product_max_qty",
+    "type": "Float",
+    "string": "Max",
+    "related": "orderpoint_id.product_max_qty",
+    "readonly": false,
+    "related_sudo": false,
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Max"
+   },
+   {
+    "name": "qty_to_order",
+    "type": "Float",
+    "related": "orderpoint_id.qty_to_order",
+    "defined_in_package": "stock",
+    "string": "Qty To Order",
+    "full_name": "Qty To Order"
+   },
+   {
+    "name": "json_lead_days",
+    "type": "Char",
+    "compute": "_compute_json_lead_days",
+    "defined_in_package": "stock",
+    "string": "JavaScript Object Notation Lead Days",
+    "full_name": "JavaScript Object Notation Lead Days"
+   },
+   {
+    "name": "json_replenishment_graph",
+    "type": "Char",
+    "compute": "_compute_json_replenishment_graph",
+    "defined_in_package": "stock",
+    "string": "JavaScript Object Notation Replenishment Graph",
+    "full_name": "JavaScript Object Notation Replenishment Graph"
+   },
+   {
+    "name": "based_on",
+    "type": "Selection",
+    "selection": [
+     [
+      "one_week",
+      "Last 7 days"
+     ],
+     [
+      "one_month",
+      "Last 30 days"
+     ],
+     [
+      "three_months",
+      "Last 3 months"
+     ],
+     [
+      "one_year",
+      "Last 12 months"
+     ],
+     [
+      "last_year",
+      "Same month last year"
+     ],
+     [
+      "last_year_2",
+      "Next month last year"
+     ],
+     [
+      "last_year_3",
+      "After next month last year"
+     ],
+     [
+      "last_year_quarter",
+      "Last year quarter"
+     ]
+    ],
+    "default": "one_month",
+    "string": "Based on",
+    "help": "Estimate the sales volume for the period based on past period or order the forecasted quantity for that period.",
+    "required": true,
+    "defined_in_package": "stock",
+    "full_name": "Based on"
+   },
+   {
+    "name": "percent_factor",
+    "type": "Integer",
+    "default": 100,
+    "required": true,
+    "defined_in_package": "stock",
+    "string": "Percent Factor",
+    "full_name": "Percent Factor"
+   },
+   {
+    "name": "warehouseinfo_ids",
+    "type": "One2many",
+    "related": "orderpoint_id.warehouse_id.resupply_route_ids",
+    "defined_in_package": "stock",
+    "string": "Warehouseinfo",
+    "full_name": "Warehouseinfo"
+   },
+   {
+    "name": "wh_replenishment_option_ids",
+    "type": "One2many",
+    "comodel": "stock.replenishment.option",
+    "inverse_name": "replenishment_info_id",
+    "compute": "_compute_wh_replenishment_options",
+    "defined_in_package": "stock",
+    "string": "Wh Replenishment Option",
+    "full_name": "Wh Replenishment Option",
+    "target_entity": "stock.replenishment.option"
+   },
+   {
+    "name": "supplierinfo_id",
+    "type": "Many2one",
+    "related": "orderpoint_id.supplier_id",
+    "defined_in_package": "purchase_stock",
+    "string": "Supplierinfo",
+    "full_name": "Supplierinfo"
+   },
+   {
+    "name": "supplierinfo_ids",
+    "type": "Many2many",
+    "comodel": "product.supplierinfo",
+    "compute": "_compute_supplierinfo_ids",
+    "store": true,
+    "defined_in_package": "purchase_stock",
+    "string": "Supplierinfo",
+    "full_name": "Supplierinfo",
+    "target_entity": "product.supplierinfo"
+   },
+   {
+    "name": "show_vendor_tab",
+    "type": "Boolean",
+    "compute": "_compute_show_vendor_tab",
+    "defined_in_package": "purchase_stock",
+    "string": "Show Vendor Tab",
+    "full_name": "Show Vendor Tab"
+   },
+   {
+    "name": "bom_id",
+    "type": "Many2one",
+    "related": "orderpoint_id.bom_id",
+    "defined_in_package": "mrp",
+    "string": "Bill of materials",
+    "full_name": "Bill of materials"
+   },
+   {
+    "name": "bom_ids",
+    "type": "Many2many",
+    "comodel": "mrp.bom",
+    "compute": "_compute_bom_ids",
+    "store": true,
+    "defined_in_package": "mrp",
+    "string": "Bill of materials",
+    "full_name": "Bill of materials",
+    "target_entity": "mrp.bom"
+   },
+   {
+    "name": "show_bom_tab",
+    "type": "Boolean",
+    "compute": "_compute_show_bom_tab",
+    "defined_in_package": "mrp",
+    "string": "Show Bill of materials Tab",
+    "full_name": "Show Bill of materials Tab"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_wh_replenishment_options",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "orderpoint_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_lead_days_and_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_json_lead_days",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "orderpoint_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_period_of_time",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_graph_data",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "daily_demand"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 27,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_json_replenishment_graph",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "orderpoint_id",
+         "based_on",
+         "percent_factor",
+         "product_min_qty",
+         "product_max_qty"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 43,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_supplierinfo_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "orderpoint_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_vendor_tab",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "purchase_stock",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "orderpoint_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_bom_ids",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "orderpoint_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_show_bom_tab",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mrp",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "orderpoint_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "stock.access_stock_replenishment_info",
+    "package": "stock",
+    "name": "stock.replenishment.info",
+    "entity": "stock.replenishment.info",
+    "group": "stock.group_stock_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mrp.view_stock_replenishment_info_stock_mrp_inherit",
+    "package": "mrp",
+    "name": "stock.replenishment.information.mrp.stock.inherit",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_replenishment_info",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//page",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "bom_id",
+       "invisible": "1"
+      },
+      {
+       "name": "bom_ids",
+       "readonly": "1",
+       "context": "{'list_view_ref': 'mrp.mrp_bom_replenishment_tree_view', 'stock_replenishment_info_id': id, 'orderpoint_id': orderpoint_id}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_boms",
+       "string": "Bills of Materials",
+       "invisible": "not show_bom_tab",
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//page",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "purchase_stock.view_stock_replenishment_info_stock_purchase_inherit",
+    "package": "purchase_stock",
+    "name": "stock.replenishment.information.purchase.stock.inherit",
+    "view_type": "xpath",
+    "inherits_view": "stock.view_stock_replenishment_info",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//page",
+      "position": "before"
+     },
+     "fields": [
+      {
+       "name": "supplierinfo_id",
+       "invisible": "1"
+      },
+      {
+       "name": "supplierinfo_ids",
+       "readonly": "1",
+       "context": "{'list_view_ref': 'purchase_stock.product_supplierinfo_replenishment_tree_view', 'stock_replenishment_info_id': id, 'orderpoint_id': orderpoint_id}"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_vendors",
+       "string": "Vendors",
+       "invisible": "not show_vendor_tab",
+       "groups": null
+      }
+     ],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//page",
+       "position": "before"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "stock.view_stock_replenishment_info",
+    "package": "stock",
+    "name": "Stock Replenishment Information",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "class": "o_stock_replenishment_info"
+     },
+     "fields": [
+      {
+       "name": "orderpoint_id",
+       "invisible": "1"
+      },
+      {
+       "name": "qty_to_order",
+       "invisible": "1"
+      },
+      {
+       "name": "product_min_qty",
+       "readonly": "True"
+      },
+      {
+       "name": "product_uom_name"
+      },
+      {
+       "name": "product_max_qty",
+       "readonly": "True"
+      },
+      {
+       "name": "product_uom_name"
+      },
+      {
+       "name": "json_lead_days",
+       "widget": "lead_days_widget",
+       "nolabel": "1"
+      },
+      {
+       "name": "based_on",
+       "widget": "time_period_selection"
+      },
+      {
+       "name": "percent_factor"
+      },
+      {
+       "name": "product_min_qty"
+      },
+      {
+       "name": "product_uom_name"
+      },
+      {
+       "name": "product_max_qty"
+      },
+      {
+       "name": "product_uom_name"
+      },
+      {
+       "name": "json_replenishment_graph",
+       "widget": "replenishment_graph_widget",
+       "nolabel": "1"
+      },
+      {
+       "name": "warehouseinfo_ids",
+       "invisible": "1"
+      },
+      {
+       "name": "wh_replenishment_option_ids"
+      }
+     ],
+     "buttons": [
+      {
+       "string": "Save",
+       "class": "btn btn-primary",
+       "special": "save",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Close",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [
+      {
+       "name": "page_warehouses",
+       "string": "Warehouses",
+       "invisible": "not warehouseinfo_ids",
+       "groups": null
+      }
+     ],
+     "widgets": {
+      "lead_days_widget": 1,
+      "time_period_selection": 1,
+      "replenishment_graph_widget": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "stock.action_stock_replenishment_info",
+    "package": "stock",
+    "name": "Replenishment Information",
+    "view_mode": "form",
+    "view_id": "view_stock_replenishment_info",
+    "search_view_id": null,
+    "domain": null,
+    "context": "{'default_orderpoint_id': active_id}",
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "stock.replenishment.info"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

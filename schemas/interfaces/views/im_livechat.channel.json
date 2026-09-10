@@ -1,0 +1,407 @@
+{
+ "catalog": {
+  "name": "views:im_livechat.channel",
+  "description": "View declarations for entity im_livechat.channel.",
+  "record_count": 4,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "im_livechat.im_livechat_channel_view_kanban",
+   "package": "im_livechat",
+   "name": "im_livechat.channel.kanban",
+   "entity": "im_livechat.channel",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "js_class": "im_livechat.livechat_channel_kanban",
+     "action": "im_livechat.discuss_channel_action_from_livechat_channel",
+     "type": "action"
+    },
+    "fields": [
+     {
+      "name": "are_you_inside"
+     },
+     {
+      "name": "rating_count"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "nbr_channel"
+     },
+     {
+      "name": "available_operator_ids",
+      "widget": "many2many_avatar_user",
+      "readonly": "True"
+     },
+     {
+      "name": "rating_percentage_satisfaction"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_quit",
+      "type": "object",
+      "class": "btn btn-primary"
+     },
+     {
+      "name": "action_join",
+      "type": "object",
+      "class": "btn btn-secondary",
+      "groups": "im_livechat.im_livechat_group_user"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2many_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": null,
+    "quick_create": null,
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban js_class=\"im_livechat.livechat_channel_kanban\" action=\"im_livechat.discuss_channel_action_from_livechat_channel\" type=\"action\">\n                    <field name=\"are_you_inside\"/>\n                    <field name=\"rating_count\"/>\n                    <templates>\n                        <t t-name=\"menu\">\n                            <a type=\"open\" class=\"dropdown-item\" role=\"menuitem\">\n                                <span groups=\"im_livechat.im_livechat_group_manager\">Configure Channel</span>\n                                <span groups=\"!im_livechat.im_livechat_group_manager\">View Channel</span>\n                            </a>\n                        </t>\n                        <t t-name=\"card\" class=\"p-0 row g-0\">\n                            <main class=\"pe-4 py-2 ps-4 col\" t-att-class=\"{'o-livechat-ChannelKanban-highlighted': record.available_operator_ids.raw_value.length &gt; 0}\">\n                                <div class=\"d-flex justify-content-between\">\n                                    <div>\n                                        <field name=\"name\" class=\"fs-4\" style=\"word-wrap: break-word;\"/>\n                                        <p class=\"fst-italic fs-5\"><field name=\"nbr_channel\"/> Sessions</p>\n                                    </div>\n                                    <div class=\"pe-1\">\n                                        <button t-if=\"record.are_you_inside.raw_value\" name=\"action_quit\" type=\"object\" class=\"btn btn-primary\">Leave</button>\n                                        <button t-else=\"\" name=\"action_join\" type=\"object\" class=\"btn btn-secondary\" groups=\"im_livechat.im_livechat_group_user\">Join</button>\n                                    </div>\n                                </div>\n                                <footer class=\"pt-0\">\n                                    <field name=\"available_operator_ids\" widget=\"many2many_avatar_user\" readonly=\"True\"/>\n                                    <a t-if=\"record.rating_count.raw_value &gt; 0\" name=\"action_view_rating\" class=\"ms-auto fs-6\" type=\"object\" tabindex=\"10\">\n                                        <i class=\"fa fa-smile-o text-success\" title=\"Percentage of happy ratings\" role=\"img\" aria-label=\"Happy face\"/> <field name=\"rating_percentage_satisfaction\"/>%\n                                    </a>\n                                </footer>\n                            </main>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "im_livechat.im_livechat_channel_view_form",
+   "package": "im_livechat",
+   "name": "im_livechat.channel.form",
+   "entity": "im_livechat.channel",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {},
+    "fields": [
+     {
+      "name": "are_you_inside",
+      "invisible": "1"
+     },
+     {
+      "name": "rating_count",
+      "invisible": "1"
+     },
+     {
+      "name": "chatbot_script_count",
+      "widget": "statinfo",
+      "string": "Chatbots"
+     },
+     {
+      "name": "nbr_channel"
+     },
+     {
+      "name": "rating_percentage_satisfaction"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. YourWebsite.com"
+     },
+     {
+      "name": "user_ids",
+      "domain": "[['all_group_ids', 'in', %(im_livechat.im_livechat_group_user)d]]",
+      "context": "{'add_livechat_channel_ctx': True}",
+      "nolabel": "1",
+      "mode": "list,kanban"
+     },
+     {
+      "name": "partner_id",
+      "widget": "many2one_avatar_user",
+      "string": "Agent",
+      "context": "{'im_livechat_hide_partner_company': True}"
+     },
+     {
+      "name": "livechat_is_in_call",
+      "widget": "boolean_phone",
+      "nolabel": "1"
+     },
+     {
+      "name": "livechat_lang_ids",
+      "widget": "many2many_tags",
+      "string": "Languages",
+      "optional": "show"
+     },
+     {
+      "name": "livechat_expertise_ids",
+      "widget": "many2many_tags",
+      "string": "Expertise",
+      "optional": "show"
+     },
+     {
+      "name": "livechat_ongoing_session_count",
+      "string": "Ongoing Sessions",
+      "optional": "show"
+     },
+     {
+      "name": "avatar_1024",
+      "widget": "image"
+     },
+     {
+      "name": "name"
+     },
+     {
+      "name": "livechat_lang_ids",
+      "widget": "many2many_tags"
+     },
+     {
+      "name": "livechat_expertise_ids",
+      "widget": "many2many_tags"
+     },
+     {
+      "name": "livechat_ongoing_session_count"
+     },
+     {
+      "name": "livechat_is_in_call",
+      "widget": "boolean_phone"
+     },
+     {
+      "name": "ongoing_session_count",
+      "nolabel": "1"
+     },
+     {
+      "name": "remaining_session_capacity",
+      "nolabel": "1"
+     },
+     {
+      "name": "button_text",
+      "string": "Notification Text",
+      "placeholder": "e.g. Need help? Chat with us."
+     },
+     {
+      "name": "button_background_color",
+      "widget": "color"
+     },
+     {
+      "name": "button_text_color",
+      "widget": "color"
+     },
+     {
+      "name": "default_message",
+      "placeholder": "e.g. Hello, how may I help you?"
+     },
+     {
+      "name": "header_background_color",
+      "widget": "color"
+     },
+     {
+      "name": "title_color",
+      "widget": "color"
+     },
+     {
+      "name": "review_link",
+      "placeholder": "Do not redirect visitors"
+     },
+     {
+      "name": "max_sessions_mode",
+      "widget": "radio",
+      "options": "{'horizontal': true}"
+     },
+     {
+      "name": "max_sessions",
+      "invisible": "max_sessions_mode != 'limited'"
+     },
+     {
+      "name": "block_assignment_during_call"
+     },
+     {
+      "name": "rule_ids"
+     },
+     {
+      "name": "script_external",
+      "widget": "CopyClipboardChar",
+      "readonly": "1"
+     },
+     {
+      "name": "web_page",
+      "widget": "CopyClipboardChar",
+      "readonly": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_join",
+      "string": "Join Channel",
+      "type": "object",
+      "invisible": "are_you_inside",
+      "class": "oe_highlight"
+     },
+     {
+      "name": "action_quit",
+      "string": "Leave Channel",
+      "type": "object",
+      "invisible": "not are_you_inside",
+      "class": "btn btn-primary"
+     },
+     {
+      "name": "action_view_chatbot_scripts",
+      "type": "object",
+      "invisible": "chatbot_script_count == 0",
+      "class": "oe_stat_button",
+      "groups": "im_livechat.im_livechat_group_manager",
+      "icon": "fa-android"
+     },
+     {
+      "name": "%(discuss_channel_action_from_livechat_channel)d",
+      "type": "action",
+      "invisible": "nbr_channel == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-comments"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "Agents",
+      "string": "Agents",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "options",
+      "string": "Options",
+      "invisible": null,
+      "groups": "im_livechat.im_livechat_group_manager"
+     },
+     {
+      "name": "channel_rules",
+      "string": "Rules",
+      "invisible": null,
+      "groups": "im_livechat.im_livechat_group_manager"
+     },
+     {
+      "name": "configuration_widget",
+      "string": "Widget",
+      "invisible": null,
+      "groups": "im_livechat.im_livechat_group_manager"
+     }
+    ],
+    "widgets": {
+     "statinfo": 1,
+     "many2one_avatar_user": 1,
+     "boolean_phone": 2,
+     "many2many_tags": 4,
+     "image": 1,
+     "color": 4,
+     "radio": 1,
+     "CopyClipboardChar": 2
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "type": "object",
+      "name": "action_join",
+      "class": "oe_highlight",
+      "string": "Join Channel",
+      "invisible": "are_you_inside"
+     },
+     {
+      "type": "object",
+      "name": "action_quit",
+      "class": "btn btn-primary",
+      "string": "Leave Channel",
+      "invisible": "not are_you_inside"
+     }
+    ],
+    "statusbar_field": "are_you_inside",
+    "statusbar_visible": null,
+    "chatter": false,
+    "button_box": [
+     {
+      "class": "oe_stat_button",
+      "type": "object",
+      "name": "action_view_chatbot_scripts",
+      "icon": "fa-android",
+      "invisible": "chatbot_script_count == 0",
+      "groups": "im_livechat.im_livechat_group_manager"
+     },
+     {
+      "class": "oe_stat_button",
+      "type": "action",
+      "invisible": "nbr_channel == 0",
+      "name": "%(discuss_channel_action_from_livechat_channel)d",
+      "icon": "fa-comments"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form>\n                    <header>\n                        <button type=\"object\" name=\"action_join\" class=\"oe_highlight\" string=\"Join Channel\" invisible=\"are_you_inside\"/>\n                        <button type=\"object\" name=\"action_quit\" class=\"btn btn-primary\" string=\"Leave Channel\" invisible=\"not are_you_inside\"/>\n                        <field name=\"are_you_inside\" invisible=\"1\"/>\n                    </header>\n                    <sheet>\n                        <field name=\"rating_count\" invisible=\"1\"/>\n                        <div class=\"oe_button_box\" name=\"button_box\">\n                            <button class=\"oe_stat_button\" type=\"object\" name=\"action_view_chatbot_scripts\" icon=\"fa-android\" invisible=\"chatbot_script_count == 0\" groups=\"im_livechat.im_livechat_group_manager\">\n                                <field string=\"Chatbots\" name=\"chatbot_script_count\" widget=\"statinfo\"/>\n                            </button>\n                            <button class=\"oe_stat_button\" type=\"action\" invisible=\"nbr_channel == 0\" name=\"%(discuss_channel_action_from_livechat_channel)d\" icon=\"fa-comments\">\n                                <div>\n                                    <div class=\"o_stat_info flex-row-reverse align-items-baseline gap-1 me-1\">\n                                        <span class=\"o_stat_value\"><field name=\"nbr_channel\"/></span>\n                                        <span class=\"o_stat_text\">Sessions</span>\n                                    </div>\n                                    <div class=\"o_stat_info flex-row-reverse align-items-baseline gap-1 me-1\" invisible=\"rating_count == 0\">\n                                        <span class=\"o_stat_value\"><field name=\"rating_percentage_satisfaction\"/>%</span>\n                                        <span class=\"o_stat_text\">Happy</span>\n                                    </div>\n                                </div>\n                            </button>\n                        </div>\n                        <div class=\"oe_title\">\n                            <label for=\"name\"/>\n                            <h1>\n                                <field name=\"name\" placeholder=\"e.g. YourWebsite.com\"/>\n                            </h1>\n                        </div>\n                        <notebook>\n                            <page string=\"Agents\" name=\"Agents\">\n                                    <field name=\"user_ids\" nolabel=\"1\" colspan=\"2\" domain=\"[['all_group_ids', 'in', %(im_livechat.im_livechat_group_user)d]]\" mode=\"list,kanban\" context=\"{'add_livechat_channel_ctx': True}\">\n                                        <list no_open=\"1\" create=\"0\">\n                                            <field name=\"partner_id\" string=\"Agent\" widget=\"many2one_avatar_user\" width=\"175px\" context=\"{'im_livechat_hide_partner_company': True}\"/>\n                                            <field name=\"livechat_is_in_call\" widget=\"boolean_phone\" nolabel=\"1\"/>\n                                            <field string=\"Languages\" name=\"livechat_lang_ids\" widget=\"many2many_tags\" optional=\"show\"/>\n                                            <field string=\"Expertise\" name=\"livechat_expertise_ids\" widget=\"many2many_tags\" optional=\"show\"/>\n                                            <field string=\"Ongoing Sessions\" name=\"livechat_ongoing_session_count\" width=\"150px\" optional=\"show\"/>\n                                        </list>\n                                        <kanban class=\"o_kanban_mobile\" can_open=\"False\" create=\"0\">\n                                            <templates>\n                                                <t t-name=\"card\" class=\"flex-row\">\n                                                    <aside>\n                                                        <field name=\"avatar_1024\" widget=\"image\" alt=\"User\"/>\n                                                    </aside>\n                                                    <main class=\"ps-1\">\n                                                        <div class=\"d-flex justify-content-between align-items-baseline\">\n                                                            <field name=\"name\" class=\"fw-bold fs-5\"/>\n                                                            <a class=\"btn p-0 opacity-75 opacity-100-hover\" role=\"button\" groups=\"im_livechat.im_livechat_group_manager\" type=\"delete\">\n                                                                <i title=\"Remove operator\" class=\"fa fa-fw fa-lg fa-close\"/>\n                                                            </a>\n                                                        </div>\n                                                        <field t-if=\"record.livechat_lang_ids.raw_value.length &gt; 0\" name=\"livechat_lang_ids\" widget=\"many2many_tags\"/>\n                                                        <field t-if=\"record.livechat_expertise_ids.raw_value.length &gt; 0\" name=\"livechat_expertise_ids\" widget=\"many2many_tags\"/>\n                                                        <div class=\"d-flex justify-content-between align-items-baseline\">\n                                                            <div class=\"column\">\n                                                                <span>Ongoing Sessions:</span><field name=\"livechat_ongoing_session_count\" class=\"ms-1\"/>\n                                                            </div>\n                                                            <field name=\"livechat_is_in_call\" class=\"me-1\" widget=\"boolean_phone\"/>\n                                                        </div>\n                                                    </main>\n                                                </t>\n                                            </templates>\n                                        </kanban>\n                                    </field>\n                                    <group>\n                                        <group class=\"order-1 order-lg-0\">\n                                            <p class=\"text-muted\" colspan=\"2\">\n                                                Agents who are inactive in the system for more than 30 minutes will be considered disconnected.\n                                            </p>\n                                        </group>\n                                        <group class=\"oe_subtotal_footer d-flex justify-content-end\">\n                                            <div class=\"container\">\n                                                <div class=\"row mb-2\">\n                                                    <div class=\"col\"><label class=\"fw-bold\" for=\"ongoing_session_count\"/></div>\n                                                    <div class=\"col me-1\"><field name=\"ongoing_session_count\" nolabel=\"1\"/></div>\n                                                </div>\n                                                <div class=\"row mb-2\" invisible=\"max_sessions_mode!='limited'\">\n                                                    <div class=\"col\"><label class=\"fw-bold\" for=\"remaining_session_capacity\"/></div>\n                                                    <div class=\"col me-1\"><field name=\"remaining_session_capacity\" nolabel=\"1\"/></div>\n                                                </div>\n                                            </div>\n                                        </group>\n                                    </group>\n                            </page>\n                            <page string=\"Options\" name=\"options\" groups=\"im_livechat.im_livechat_group_manager\">\n                                <group>\n                                    <group string=\"Live Chat Button\">\n                                        <field name=\"button_text\" string=\"Notification Text\" placeholder=\"e.g. Need help? Chat with us.\"/>\n                                        <label for=\"button_background_color\" string=\"Button Colors\"/>\n                                        <div class=\"o_livechat_layout_colors d-flex align-items-center align-middle\">\n                                            <field name=\"button_background_color\" widget=\"color\" class=\"mb-4 w-auto o_im_livechat_field_widget_color\"/>\n                                            <field name=\"button_text_color\" widget=\"color\" class=\"mb-4 w-auto o_im_livechat_field_widget_color\"/>\n                                            <widget name=\"colors_reset_button\" options=\"{'default_colors': {'button_background_color': '#878787', 'button_text_color': '#FFFFFF'}}\"/>\n                                        </div>\n                                    </group>\n                                    <group string=\"Live Chat Window\">\n                                        <field name=\"default_message\" placeholder=\"e.g. Hello, how may I help you?\"/>\n                                        <label for=\"header_background_color\" string=\"Window Colors\"/>\n                                        <div class=\"o_livechat_layout_colors d-flex align-items-center align-middle\">\n                                            <field name=\"header_background_color\" widget=\"color\" class=\"mb-4 w-auto o_im_livechat_field_widget_color\"/>\n                                            <field name=\"title_color\" widget=\"color\" class=\"mb-4 w-auto o_im_livechat_field_widget_color\"/>\n                                            <widget name=\"colors_reset_button\" options=\"{'default_colors': {'header_background_color': '#875A7B', 'title_color': '#FFFFFF'}}\"/>\n                                        </div>\n                                        <field name=\"review_link\" placeholder=\"Do not redirect visitors\"/>\n                                    </group>\n                                </group>\n                                <group string=\"Session Limits\">\n                                    <group>\n                                        <field name=\"max_sessions_mode\" widget=\"radio\" options=\"{'horizontal': true}\"/>\n                                        <field name=\"max_sessions\" invisible=\"max_sessions_mode != 'limited'\"/>\n                                        <field name=\"block_assignment_during_call\"/>\n                                    </group>\n                                </group>\n                            </page>\n                            <page string=\"Rules\" name=\"channel_rules\" groups=\"im_livechat.im_livechat_group_manager\">\n                                <field name=\"rule_ids\" colspan=\"2\"/>\n                                <div class=\"text-muted\" colspan=\"2\">\n                                    To apply the rule only to certain pages of your website, enter a URL regex like /shop. This will match any page that starts with /shop, such as /shop/product. Leave the field empty to apply the rule to all pages.<br/>\n                                    For on-premise databases, GeoIP must be installed on your server to geolocate visitors. Without it, rules that include country restrictions will be ignored.\n                                    <widget name=\"documentation_link\" path=\"/administration/on_premise/geo_ip.html\" icon=\"fa-fw fa-info-circle\"/>\n                                </div>\n                            </page>\n                            <page string=\"Widget\" name=\"configuration_widget\" groups=\"im_livechat.im_livechat_group_manager\">\n                                <div class=\"alert alert-warning mt4 mb16\" role=\"alert\" invisible=\"web_page\">\n                                    Save your Channel to get your configuration widget.\n                                </div>\n                                <div invisible=\"not web_page\">\n                                    <p>\n                                        Learn how to display a live chat bubble on your website and start chatting with visitors in a few easy steps.\n                                    </p>\n                                    <separator string=\"FOR WEBSITES BUILT WITH THE SYSTEM\"/>\n                                    <ol>\n                                        <li>Go to <strong>Website</strong> &gt; <strong>Configuration</strong> &gt; <strong>Settings</strong> &gt; <strong>Email</strong> &amp; <strong>Marketing.</strong></li>\n                                        <li>Turn on the <strong>Live Chat</strong> feature.</li>\n                                        <li>Choose the live chat channel you want to display on your website.</li>\n                                    </ol>\n                                    <separator string=\"FOR OTHER WEBSITES\"/>\n                                    <p>\n                                        Add the following code to the &lt;head&gt; section of your website:\n                                    </p>\n                                    <field class=\"text-muted\" name=\"script_external\" readonly=\"1\" widget=\"CopyClipboardChar\"/>\n                                    <br/><br/>\n                                    <p>\n                                        Alternatively, share this URL with your customers or suppliers via email:\n                                    </p>\n                                    <field class=\"text-muted\" name=\"web_page\" readonly=\"1\" widget=\"CopyClipboardChar\"/>\n                                </div>\n                            </page>\n                        </notebook>\n                    </sheet>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "im_livechat.im_livechat_channel_view_search",
+   "package": "im_livechat",
+   "name": "im.livechat.channel.view.search",
+   "entity": "im_livechat.channel",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "LiveChat Channel Search"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Channel"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"LiveChat Channel Search\">\n                    <field name=\"name\" string=\"Channel\"/>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "website_livechat.im_livechat_channel_view_form_add",
+   "package": "website_livechat",
+   "name": "im_livechat.channel.view.form.add",
+   "entity": "im_livechat.channel",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "js_class": "website_new_content_form"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Channel Name"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n        <form js_class=\"website_new_content_form\">\n            <group>\n                <field name=\"name\" string=\"Channel Name\"/>\n            </group>\n        </form>\n    </field>\n"
+  }
+ ]
+}

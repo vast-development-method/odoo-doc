@@ -1,0 +1,207 @@
+{
+ "catalog": {
+  "name": "entity:hr.expense.post.wizard",
+  "description": "Complete definition of entity Expense Posting Wizard (hr.expense.post.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.expense.post.wizard",
+  "storage_name": "hr_expense_post_wizard",
+  "full_name": "Expense Posting Wizard",
+  "kind": "transient",
+  "description": "Expense Posting Wizard",
+  "defined_by_package": "hr_expense",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "default": {
+     "dynamic": "lambda self: self.env.company"
+    },
+    "string": "Company",
+    "readonly": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "accounting_date",
+    "type": "Date",
+    "string": "Accounting Date",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "help": "Specify the bill date of the related vendor bill.",
+    "defined_in_package": "hr_expense",
+    "full_name": "Accounting Date"
+   },
+   {
+    "name": "employee_journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Journal",
+    "default": {
+     "dynamic": "_default_journal_id"
+    },
+    "check_company": true,
+    "domain": [
+     [
+      "type",
+      "=",
+      "purchase"
+     ]
+    ],
+    "help": "The journal used when the expense is paid by employee.",
+    "defined_in_package": "hr_expense",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_journal_id",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "The journal is determining the company of the accounting entries generated from expense.\nWe need to force journal company and expense company to be the same.",
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_post_entry",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "You don't have the rights to create accounting entries.",
+        "line": 47
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "action_post_entry",
+    "package": "hr_expense",
+    "kind": "UserError",
+    "message": "You don't have the rights to create accounting entries."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_expense.access_hr_expense_post",
+    "package": "hr_expense",
+    "name": "access.hr.expense.post.wizard",
+    "entity": "hr.expense.post.wizard",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "hr_expense.hr_expense_post_wizard_view",
+    "package": "hr_expense",
+    "name": "Post Expenses",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "employee_journal_id",
+       "string": "Journal"
+      },
+      {
+       "name": "accounting_date",
+       "string": "Accounting date"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_post_entry",
+       "string": "Post Expenses",
+       "type": "object",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

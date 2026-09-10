@@ -1,0 +1,1046 @@
+{
+ "catalog": {
+  "name": "entity:gamification.badge",
+  "description": "Complete definition of entity Gamification Badge (gamification.badge).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "gamification.badge",
+  "storage_name": "gamification_badge",
+  "full_name": "Gamification Badge",
+  "kind": "persistent",
+  "description": "Gamification Badge",
+  "defined_by_package": "gamification",
+  "extended_by_packages": [
+   "hr_gamification",
+   "survey",
+   "website_profile"
+  ],
+  "mixins": [
+   "mail.thread",
+   "image.mixin",
+   "website.published.mixin"
+  ],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "name",
+    "type": "Char",
+    "string": "Badge",
+    "required": true,
+    "translate": true,
+    "defined_in_package": "gamification",
+    "full_name": "Badge"
+   },
+   {
+    "name": "active",
+    "type": "Boolean",
+    "string": "Active",
+    "default": true,
+    "defined_in_package": "gamification",
+    "full_name": "Active"
+   },
+   {
+    "name": "description",
+    "type": "Html",
+    "string": "Description",
+    "translate": true,
+    "sanitize_attributes": false,
+    "defined_in_package": "gamification",
+    "full_name": "Description"
+   },
+   {
+    "name": "level",
+    "type": "Selection",
+    "selection": [
+     [
+      "bronze",
+      "Bronze"
+     ],
+     [
+      "silver",
+      "Silver"
+     ],
+     [
+      "gold",
+      "Gold"
+     ]
+    ],
+    "string": "Forum Badge Level",
+    "default": "bronze",
+    "defined_in_package": "gamification",
+    "full_name": "Forum Badge Level"
+   },
+   {
+    "name": "rule_auth",
+    "type": "Selection",
+    "selection": [
+     [
+      "everyone",
+      "Everyone"
+     ],
+     [
+      "users",
+      "A selected list of users"
+     ],
+     [
+      "having",
+      "People having some badges"
+     ],
+     [
+      "nobody",
+      "No one, assigned through challenges"
+     ]
+    ],
+    "default": "everyone",
+    "string": "Allowance to Grant",
+    "help": "Who can grant this badge",
+    "required": true,
+    "defined_in_package": "gamification",
+    "full_name": "Allowance to Grant"
+   },
+   {
+    "name": "rule_auth_user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "relation": "rel_badge_auth_users",
+    "string": "Authorized Users",
+    "help": "Only these people can give this badge",
+    "defined_in_package": "gamification",
+    "full_name": "Authorized Users",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "rule_auth_badge_ids",
+    "type": "Many2many",
+    "comodel": "gamification.badge",
+    "relation": "gamification_badge_rule_badge_rel",
+    "column1": "badge1_id",
+    "column2": "badge2_id",
+    "string": "Required Badges",
+    "help": "Only the people having these badges can give this badge",
+    "defined_in_package": "gamification",
+    "full_name": "Required Badges",
+    "target_entity": "gamification.badge"
+   },
+   {
+    "name": "rule_max",
+    "type": "Boolean",
+    "string": "Monthly Limited Sending",
+    "help": "Check to set a monthly limit per person of sending this badge",
+    "defined_in_package": "gamification",
+    "full_name": "Monthly Limited Sending"
+   },
+   {
+    "name": "rule_max_number",
+    "type": "Integer",
+    "string": "Limitation Number",
+    "help": "The maximum number of time this badge can be sent per month per person.",
+    "defined_in_package": "gamification",
+    "full_name": "Limitation Number"
+   },
+   {
+    "name": "challenge_ids",
+    "type": "One2many",
+    "comodel": "gamification.challenge",
+    "inverse_name": "reward_id",
+    "string": "Reward of Challenges",
+    "defined_in_package": "gamification",
+    "full_name": "Reward of Challenges",
+    "target_entity": "gamification.challenge"
+   },
+   {
+    "name": "goal_definition_ids",
+    "type": "Many2many",
+    "comodel": "gamification.goal.definition",
+    "relation": "badge_unlocked_definition_rel",
+    "string": "Rewarded by",
+    "help": "The users that have succeeded these goals will receive automatically the badge.",
+    "defined_in_package": "gamification",
+    "full_name": "Rewarded by",
+    "target_entity": "gamification.goal.definition"
+   },
+   {
+    "name": "owner_ids",
+    "type": "One2many",
+    "comodel": "gamification.badge.user",
+    "inverse_name": "badge_id",
+    "string": "Owners",
+    "help": "The list of instances of this badge granted to users",
+    "defined_in_package": "gamification",
+    "full_name": "Owners",
+    "target_entity": "gamification.badge.user"
+   },
+   {
+    "name": "granted_count",
+    "type": "Integer",
+    "string": "Total",
+    "compute": "_get_owners_info",
+    "help": "The number of time this badge has been received.",
+    "defined_in_package": "gamification",
+    "full_name": "Total"
+   },
+   {
+    "name": "granted_users_count",
+    "type": "Integer",
+    "string": "Number of users",
+    "compute": "_get_owners_info",
+    "help": "The number of time this badge has been received by unique users.",
+    "defined_in_package": "gamification",
+    "full_name": "Number of users"
+   },
+   {
+    "name": "unique_owner_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "string": "Unique Owners",
+    "compute": "_get_owners_info",
+    "help": "The list of unique users having received this badge.",
+    "defined_in_package": "gamification",
+    "full_name": "Unique Owners",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "stat_this_month",
+    "type": "Integer",
+    "string": "Monthly total",
+    "compute": "_get_badge_user_stats",
+    "help": "The number of time this badge has been received this month.",
+    "defined_in_package": "gamification",
+    "full_name": "Monthly total"
+   },
+   {
+    "name": "stat_my",
+    "type": "Integer",
+    "string": "My Total",
+    "compute": "_get_badge_user_stats",
+    "help": "The number of time the current user has received this badge.",
+    "defined_in_package": "gamification",
+    "full_name": "My Total"
+   },
+   {
+    "name": "stat_my_this_month",
+    "type": "Integer",
+    "string": "My Monthly Total",
+    "compute": "_get_badge_user_stats",
+    "help": "The number of time the current user has received this badge this month.",
+    "defined_in_package": "gamification",
+    "full_name": "My Monthly Total"
+   },
+   {
+    "name": "stat_my_monthly_sending",
+    "type": "Integer",
+    "string": "My Monthly Sending Total",
+    "compute": "_get_badge_user_stats",
+    "help": "The number of time the current user has sent this badge this month.",
+    "defined_in_package": "gamification",
+    "full_name": "My Monthly Sending Total"
+   },
+   {
+    "name": "remaining_sending",
+    "type": "Integer",
+    "string": "Remaining Sending Allowed",
+    "compute": "_remaining_sending_calc",
+    "help": "If a maximum is set",
+    "defined_in_package": "gamification",
+    "full_name": "Remaining Sending Allowed"
+   },
+   {
+    "name": "granted_employees_count",
+    "type": "Integer",
+    "compute": "_compute_granted_employees_count",
+    "defined_in_package": "hr_gamification",
+    "string": "Granted Employees Count",
+    "full_name": "Granted Employees Count"
+   },
+   {
+    "name": "survey_ids",
+    "type": "One2many",
+    "comodel": "survey.survey",
+    "inverse_name": "certification_badge_id",
+    "string": "Survey Ids",
+    "defined_in_package": "survey",
+    "full_name": "Survey Ids",
+    "target_entity": "survey.survey"
+   },
+   {
+    "name": "survey_id",
+    "type": "Many2one",
+    "comodel": "survey.survey",
+    "string": "Survey",
+    "compute": "_compute_survey_id",
+    "store": true,
+    "defined_in_package": "survey",
+    "full_name": "Survey",
+    "target_entity": "survey.survey"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_get_owners_info",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "owner_ids"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Return:\nthe list of unique res.users ids having received this badge\nthe total number of time this badge was granted\nthe total number of users this badge was granted to",
+      "size_in_lines": 45,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_badge_user_stats",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "owner_ids.badge_id",
+         "owner_ids.create_date",
+         "owner_ids.user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Return stats related to badge users",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_remaining_sending_calc",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "rule_auth",
+         "rule_auth_user_ids",
+         "rule_auth_badge_ids",
+         "rule_max",
+         "rule_max_number",
+         "stat_my_monthly_sending"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Computes the number of badges remaining the user can send\n\n0 if not allowed or no remaining\ninteger if limited sending\n-1 if infinite (should not be displayed)",
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "check_granting",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Check the user 'uid' can grant the badge 'badge_id' and raise the appropriate exception\nif not\n\nDo not check for SUPERUSER_ID",
+      "size_in_lines": 20,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This badge can not be sent by users.",
+        "line": 186
+       },
+       {
+        "kind": "UserError",
+        "message": "You are not in the user allowed list.",
+        "line": 188
+       },
+       {
+        "kind": "UserError",
+        "message": "You do not have the required badges.",
+        "line": 190
+       },
+       {
+        "kind": "UserError",
+        "message": "You have already sent this badge too many time this month.",
+        "line": 192
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_can_grant_badge",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "gamification",
+      "decorators": [],
+      "documentation": "Check if a user can grant a badge to another user\n\n:return: integer representing the permission.",
+      "size_in_lines": 22,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_granted_employees_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_gamification",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "owner_ids.employee_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "get_granted_employees",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_gamification",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_survey_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "survey",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "survey_ids.certification_badge_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "check_granting",
+    "package": "gamification",
+    "kind": "UserError",
+    "message": "This badge can not be sent by users."
+   },
+   {
+    "operation": "check_granting",
+    "package": "gamification",
+    "kind": "UserError",
+    "message": "You are not in the user allowed list."
+   },
+   {
+    "operation": "check_granting",
+    "package": "gamification",
+    "kind": "UserError",
+    "message": "You do not have the required badges."
+   },
+   {
+    "operation": "check_granting",
+    "package": "gamification",
+    "kind": "UserError",
+    "message": "You have already sent this badge too many time this month."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "gamification.badge_employee",
+    "package": "gamification",
+    "name": "Badge Employee",
+    "entity": "gamification.badge",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "gamification.badge_manager",
+    "package": "gamification",
+    "name": "Badge Manager",
+    "entity": "gamification.badge",
+    "group": "base.group_erp_manager",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "gamification.badge_portal",
+    "package": "gamification",
+    "name": "Badge Portal",
+    "entity": "gamification.badge",
+    "group": "base.group_portal",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "gamification.badge_public",
+    "package": "gamification",
+    "name": "Badge Public",
+    "entity": "gamification.badge",
+    "group": "base.group_public",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "hr_gamification.badge_officer",
+    "package": "hr_gamification",
+    "name": "Badge Officer",
+    "entity": "gamification.badge",
+    "group": "hr.group_hr_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   },
+   {
+    "external_identifier": "survey.access_gamification_badge_survey_user",
+    "package": "survey",
+    "name": "gamification.badge.survey.user",
+    "entity": "gamification.badge",
+    "group": "group_survey_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "gamification.gamification_badge_view_search",
+    "package": "gamification",
+    "name": "gamification.badge.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Badge"
+     },
+     "fields": [
+      {
+       "name": "name"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "inactive",
+       "string": "Archived",
+       "domain": "[('active', '=', False)]"
+      }
+     ],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   },
+   {
+    "external_identifier": "gamification.badge_list_view",
+    "package": "gamification",
+    "name": "Badge List",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Badge List"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "granted_count"
+      },
+      {
+       "name": "stat_this_month"
+      },
+      {
+       "name": "stat_my"
+      },
+      {
+       "name": "rule_auth"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "gamification.badge_form_view",
+    "package": "gamification",
+    "name": "Badge Form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Badge"
+     },
+     "fields": [
+      {
+       "name": "image_1920",
+       "widget": "image",
+       "options": "{'preview_image': 'image_128'}"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Problem Solver"
+      },
+      {
+       "name": "description",
+       "nolabel": "1",
+       "placeholder": "Badge Description"
+      },
+      {
+       "name": "active",
+       "invisible": "1"
+      },
+      {
+       "name": "rule_auth",
+       "widget": "radio"
+      },
+      {
+       "name": "rule_auth_user_ids",
+       "widget": "many2many_tags",
+       "invisible": "rule_auth != 'users'"
+      },
+      {
+       "name": "rule_auth_badge_ids",
+       "widget": "many2many_tags",
+       "invisible": "rule_auth != 'having'"
+      },
+      {
+       "name": "rule_max",
+       "invisible": "rule_auth == 'nobody'"
+      },
+      {
+       "name": "rule_max_number",
+       "invisible": "not rule_max or rule_auth == 'nobody'"
+      },
+      {
+       "name": "stat_my_monthly_sending",
+       "invisible": "rule_auth == 'nobody'"
+      },
+      {
+       "name": "remaining_sending"
+      },
+      {
+       "name": "challenge_ids",
+       "widget": "many2many",
+       "context": "{'default_reward_id': id}",
+       "nolabel": "1",
+       "mode": "kanban"
+      },
+      {
+       "name": "level"
+      },
+      {
+       "name": "granted_count"
+      },
+      {
+       "name": "stat_this_month"
+      },
+      {
+       "name": "granted_users_count"
+      },
+      {
+       "name": "stat_my"
+      },
+      {
+       "name": "stat_my_this_month"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(action_grant_wizard)d",
+       "string": "Grant this Badge",
+       "type": "action",
+       "invisible": "remaining_sending == 0",
+       "class": "oe_highlight"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "radio": 1,
+      "many2many_tags": 2,
+      "many2many": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "string": "Grant this Badge",
+       "type": "action",
+       "name": "%(action_grant_wizard)d",
+       "class": "oe_highlight",
+       "invisible": "remaining_sending == 0"
+      }
+     ],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "gamification.badge_kanban_view",
+    "package": "gamification",
+    "name": "Badge Kanban View",
+    "view_type": "kanban",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "kanban",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "remaining_sending"
+      },
+      {
+       "name": "image_1024",
+       "widget": "image"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "stat_my_monthly_sending"
+      },
+      {
+       "name": "rule_max_number"
+      },
+      {
+       "name": "stat_my_monthly_sending"
+      },
+      {
+       "name": "granted_count"
+      },
+      {
+       "name": "stat_this_month"
+      },
+      {
+       "name": "description"
+      },
+      {
+       "name": "unique_owner_ids",
+       "widget": "many2many_avatar_user"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "%(action_grant_wizard)d",
+       "type": "action",
+       "class": "btn btn-primary ms-auto"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1,
+      "many2many_avatar_user": 1
+     },
+     "inheritance_operations": [],
+     "default_group_by": null,
+     "quick_create": null,
+     "progressbar": []
+    }
+   },
+   {
+    "external_identifier": "hr_gamification.hr_badge_form_view",
+    "package": "hr_gamification",
+    "name": "gamification.badge.form.inherit",
+    "view_type": "div",
+    "inherits_view": "gamification.badge_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "div",
+     "root_attributes": {
+      "name": "button_box",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "granted_employees_count",
+       "widget": "statinfo",
+       "string": "Granted"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "get_granted_employees",
+       "type": "object",
+       "invisible": "granted_count == 0",
+       "class": "oe_stat_button",
+       "icon": "fa-user"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1
+     },
+     "inheritance_operations": [
+      {
+       "element": "div",
+       "attributes": {
+        "name": "button_box",
+        "position": "inside"
+       },
+       "position": "inside"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "survey.gamification_badge_form_view_simplified",
+    "package": "survey",
+    "name": "gamification.badge.form.view.simplified",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": "100",
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Badge"
+     },
+     "fields": [
+      {
+       "name": "image_1920",
+       "widget": "image",
+       "options": "{'preview_image': 'image_128'}"
+      },
+      {
+       "name": "name",
+       "placeholder": "e.g. Problem Solver"
+      },
+      {
+       "name": "description",
+       "placeholder": "e.g. No one can solve challenges like you do"
+      },
+      {
+       "name": "level"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "image": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "website_profile.gamification_badge_view_form",
+    "package": "website_profile",
+    "name": "gamification.badge.view.form.inherit.website",
+    "view_type": "xpath",
+    "inherits_view": "gamification.badge_form_view",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//div[@name='button_box']",
+      "position": "inside"
+     },
+     "fields": [
+      {
+       "name": "is_published",
+       "widget": "website_publish_button"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "website_publish_button",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-globe"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "website_publish_button": 1
+     },
+     "inheritance_operations": [
+      {
+       "expr": "//div[@name='button_box']",
+       "position": "inside"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "gamification.badge_list_action",
+    "package": "gamification",
+    "name": "Badges",
+    "view_mode": "kanban,list,form",
+    "view_id": null,
+    "search_view_id": "gamification_badge_view_search",
+    "domain": null,
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": "<field name=\"help\" type=\"html\">\n            <p class=\"o_view_nocontent_smiling_face\">\n                Create a new badge\n            </p><p>\n                A badge is a symbolic token granted to a user as a sign of reward.\n                It can be deserved automatically when some conditions are met or manually by users.\n                Some badges are harder than others to get with specific conditions.\n            </p>\n        </field>\n    ",
+    "usage": null,
+    "entity": "gamification.badge"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [
+   {
+    "external_identifier": "hr_gamification.gamification_badge_menu_hr",
+    "package": "hr_gamification",
+    "name": null,
+    "parent_id": "menu_hr_gamification",
+    "action": "gamification.badge_list_action",
+    "sequence": null,
+    "groups_id": null,
+    "web_icon": null
+   },
+   {
+    "external_identifier": "website_forum.menu_forum_badges",
+    "package": "website_forum",
+    "name": "Badges",
+    "parent_id": "menu_website_forum_global",
+    "action": "gamification.badge_list_action",
+    "sequence": "40",
+    "groups_id": null,
+    "web_icon": null
+   }
+  ],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

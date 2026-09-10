@@ -1,0 +1,250 @@
+{
+ "catalog": {
+  "name": "views:account.bank.statement",
+  "description": "View declarations for entity account.bank.statement.",
+  "record_count": 4,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "account.view_bank_statement_tree",
+   "package": "account",
+   "name": "account.bank.statement.list",
+   "entity": "account.bank.statement",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "decoration-danger": "journal_id and not is_complete or not is_valid",
+     "decoration-muted": "not journal_id",
+     "create": "false",
+     "string": "Statements"
+    },
+    "fields": [
+     {
+      "name": "name"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "journal_id"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     },
+     {
+      "name": "balance_start"
+     },
+     {
+      "name": "balance_end_real"
+     },
+     {
+      "name": "balance_end",
+      "column_invisible": "True"
+     },
+     {
+      "name": "currency_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_complete",
+      "column_invisible": "True"
+     },
+     {
+      "name": "is_valid",
+      "column_invisible": "True"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "editable": null,
+    "create": "false",
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-danger": "journal_id and not is_complete or not is_valid",
+     "decoration-muted": "not journal_id"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list decoration-danger=\"journal_id and not is_complete or not is_valid\" decoration-muted=\"not journal_id\" create=\"false\" string=\"Statements\">\n                    <field name=\"name\"/>\n                    <field name=\"date\"/>\n                    <field name=\"journal_id\"/>\n                    <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n                    <field name=\"balance_start\"/>\n                    <field name=\"balance_end_real\"/>\n                    <field name=\"balance_end\" column_invisible=\"True\"/>\n                    <field name=\"currency_id\" column_invisible=\"True\"/>\n                    <field name=\"is_complete\" column_invisible=\"True\"/>\n                    <field name=\"is_valid\" column_invisible=\"True\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.view_bank_statement_search",
+   "package": "account",
+   "name": "account.bank.statement.search",
+   "entity": "account.bank.statement",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Search Statements"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Statement"
+     },
+     {
+      "name": "date"
+     },
+     {
+      "name": "journal_id",
+      "domain": "[('type', 'in', ('bank', 'cash', 'credit'))]"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "empty",
+      "string": "Empty",
+      "domain": "[('line_ids','=',False)]"
+     },
+     {
+      "name": "invalid",
+      "string": "Invalid",
+      "domain": "['|', ('is_valid', '=', False),('is_complete', '=', False)]"
+     },
+     {
+      "name": "filter_date",
+      "date": "date"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "journal",
+      "string": "Journal",
+      "context": "{'group_by': 'journal_id'}"
+     },
+     {
+      "name": "date",
+      "string": "Date",
+      "context": "{'group_by': 'date'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <search string=\"Search Statements\">\n                    <field name=\"name\" string=\"Statement\"/>\n                    <field name=\"date\"/>\n                    <filter string=\"Empty\" name=\"empty\" domain=\"[('line_ids','=',False)]\"/>\n                    <filter name=\"invalid\" string=\"Invalid\" domain=\"['|', ('is_valid', '=', False),('is_complete', '=', False)]\"/>\n                    <separator/>\n                    <filter name=\"filter_date\" date=\"date\"/>\n                    <field name=\"journal_id\" domain=\"[('type', 'in', ('bank', 'cash', 'credit'))]\"/>\n                    <group>\n                        <filter string=\"Journal\" name=\"journal\" context=\"{'group_by': 'journal_id'}\"/>\n                        <filter string=\"Date\" name=\"date\" context=\"{'group_by': 'date'}\"/>\n                    </group>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "account.account_bank_statement_pivot",
+   "package": "account",
+   "name": "account.bank.statement.pivot",
+   "entity": "account.bank.statement",
+   "view_type": "pivot",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "pivot",
+    "root_attributes": {
+     "string": "Account Statistics",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "balance_start"
+     },
+     {
+      "name": "balance_end"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date",
+      "type": "row"
+     },
+     {
+      "name": "balance_start",
+      "type": "measure"
+     },
+     {
+      "name": "balance_end",
+      "type": "measure"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <pivot string=\"Account Statistics\" sample=\"1\">\n                    <field name=\"date\" type=\"row\"/>\n                    <field name=\"balance_start\" type=\"measure\"/>\n                    <field name=\"balance_end\" type=\"measure\"/>\n                </pivot>\n            </field>\n         "
+  },
+  {
+   "external_identifier": "account.account_bank_statement_graph",
+   "package": "account",
+   "name": "account.bank.statement.graph",
+   "entity": "account.bank.statement",
+   "view_type": "graph",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "graph",
+    "root_attributes": {
+     "string": "Account Statistics",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "balance_start",
+      "operator": "+"
+     },
+     {
+      "name": "balance_end",
+      "operator": "+"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "measures": [
+     {
+      "name": "date"
+     },
+     {
+      "name": "balance_start",
+      "operator": "+"
+     },
+     {
+      "name": "balance_end",
+      "operator": "+"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <graph string=\"Account Statistics\" sample=\"1\">\n                    <field name=\"date\"/>\n                    <field name=\"balance_start\" operator=\"+\"/>\n                    <field name=\"balance_end\" operator=\"+\"/>\n                </graph>\n            </field>\n         "
+  }
+ ]
+}

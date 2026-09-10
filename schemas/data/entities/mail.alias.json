@@ -1,0 +1,1084 @@
+{
+ "catalog": {
+  "name": "entity:mail.alias",
+  "description": "Complete definition of entity Email Aliases (mail.alias).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.alias",
+  "storage_name": "mail_alias",
+  "full_name": "Email Aliases",
+  "kind": "persistent",
+  "description": "Email Aliases",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "hr"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "alias_model_id, alias_name",
+  "display_name_field": "alias_name",
+  "display_name_search_fields": [
+   "alias_name",
+   "alias_domain"
+  ],
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "alias_name",
+    "type": "Char",
+    "string": "Alias Name",
+    "copy": false,
+    "help": "The name of the email alias, e.g. 'jobs' if you want to catch emails for <jobs@example.the system.com>",
+    "defined_in_package": "mail",
+    "full_name": "Alias Name"
+   },
+   {
+    "name": "alias_full_name",
+    "type": "Char",
+    "string": "Alias Email",
+    "compute": "_compute_alias_full_name",
+    "store": true,
+    "index": "btree_not_null",
+    "defined_in_package": "mail",
+    "full_name": "Alias Email"
+   },
+   {
+    "name": "alias_domain_id",
+    "type": "Many2one",
+    "comodel": "mail.alias.domain",
+    "string": "Alias Domain",
+    "ondelete": "restrict",
+    "default": {
+     "dynamic": "lambda self: self.env.company.alias_domain_id"
+    },
+    "defined_in_package": "mail",
+    "full_name": "Alias Domain",
+    "target_entity": "mail.alias.domain"
+   },
+   {
+    "name": "alias_domain",
+    "type": "Char",
+    "string": "Alias domain name",
+    "related": "alias_domain_id.name",
+    "defined_in_package": "mail",
+    "full_name": "Alias domain name"
+   },
+   {
+    "name": "alias_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Aliased Model",
+    "required": true,
+    "ondelete": "cascade",
+    "help": "The model (the system Document Kind) to which this alias corresponds. Any incoming email that does not reply to an existing record will cause the creation of a new record of this model (e.g. a Project Task)",
+    "domain": "[('field_id.name', '=', 'message_ids')]",
+    "defined_in_package": "mail",
+    "full_name": "Aliased Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "alias_defaults",
+    "type": "Text",
+    "string": "Default Values",
+    "required": true,
+    "default": "{}",
+    "help": "A Python dictionary that will be evaluated to provide default values when creating new records for this alias.",
+    "defined_in_package": "mail",
+    "full_name": "Default Values"
+   },
+   {
+    "name": "alias_force_thread_id",
+    "type": "Integer",
+    "string": "Record Thread ID",
+    "help": "Optional ID of a thread (record) to which all incoming messages will be attached, even if they did not reply to it. If set, this will disable the creation of new records completely.",
+    "defined_in_package": "mail",
+    "full_name": "Record Thread identifier"
+   },
+   {
+    "name": "alias_parent_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Parent Model",
+    "help": "Parent model holding the alias. The model holding the alias reference is not necessarily the model given by alias_model_id (example: project (parent_model) and task (model))",
+    "defined_in_package": "mail",
+    "full_name": "Parent Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "alias_parent_thread_id",
+    "type": "Integer",
+    "string": "Parent Record Thread ID",
+    "help": "ID of the parent record holding the alias (example: project holding the task creation alias)",
+    "defined_in_package": "mail",
+    "full_name": "Parent Record Thread identifier"
+   },
+   {
+    "name": "alias_contact",
+    "type": "Selection",
+    "selection": [
+     [
+      "everyone",
+      "Everyone"
+     ],
+     [
+      "partners",
+      "Authenticated Partners"
+     ],
+     [
+      "followers",
+      "Followers only"
+     ],
+     [
+      "employees",
+      "Authenticated Employees"
+     ]
+    ],
+    "default": "everyone",
+    "string": "Alias Contact Security",
+    "required": true,
+    "help": "Policy to post a message on the document using the mailgateway.\n- everyone: everyone can post\n- partners: only authenticated partners\n- followers: only followers of the related document or members of following channels\n",
+    "defined_in_package": "mail",
+    "selection_added_by": [
+     "hr"
+    ],
+    "ondelete": {
+     "employees": "cascade"
+    },
+    "extended_in_packages": [
+     "hr"
+    ],
+    "full_name": "Alias Contact Security"
+   },
+   {
+    "name": "alias_incoming_local",
+    "type": "Boolean",
+    "string": "Local-part based incoming detection",
+    "default": false,
+    "defined_in_package": "mail",
+    "full_name": "Local-part based incoming detection"
+   },
+   {
+    "name": "alias_bounced_content",
+    "type": "Html",
+    "string": "Custom Bounced Message",
+    "translate": true,
+    "help": "If set, this content will automatically be sent out to unauthorized users instead of the default message.",
+    "defined_in_package": "mail",
+    "full_name": "Custom Bounced Message"
+   },
+   {
+    "name": "alias_status",
+    "type": "Selection",
+    "selection": [
+     [
+      "not_tested",
+      "Not Tested"
+     ],
+     [
+      "valid",
+      "Valid"
+     ],
+     [
+      "invalid",
+      "Invalid"
+     ]
+    ],
+    "compute": "_compute_alias_status",
+    "store": true,
+    "help": "Alias status assessed on the last message received.",
+    "defined_in_package": "mail",
+    "string": "Alias Status",
+    "full_name": "Alias Status"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_name_domain_unique",
+    "kind": "UniqueIndex",
+    "definition": "(alias_name, COALESCE(alias_domain_id, 0))",
+    "message": null,
+    "defined_in_package": "mail"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_check_alias_domain_id_mc",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "alias_domain_id",
+         "alias_force_thread_id",
+         "alias_parent_model_id",
+         "alias_parent_thread_id",
+         "alias_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Check for invalid alias domains based on company configuration.\nWhen having a parent record and/or updating an existing record alias\ndomain should match the one used on the related record. ",
+      "size_in_lines": 77,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "We could not create alias %(alias_name)s because domain %(alias_domain_name)s belongs to company %(alias_company_names)s while the owner document belongs to company %(company_name)s.",
+        "line": 156
+       },
+       {
+        "kind": "ValidationError",
+        "message": "We could not create alias %(alias_name)s because domain %(alias_domain_name)s belongs to company %(alias_company_names)s while the target document belongs to company %(company_name)s.",
+        "line": 168
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_alias_is_ascii",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "alias_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "The local-part (\"display-name\" <local-part@domain>) of an\naddress only contains limited range of ascii characters.\nWe DO NOT allow anything else than ASCII dot-atom formed\nlocal-part. Quoted-string and internationnal characters are\nto be rejected. See rfc5322 sections 3.4.1 and 3.2.3",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "You cannot use anything else than unaccented latin characters in the alias address %(alias_name)s.",
+        "line": 188
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_alias_defaults",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "alias_defaults"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Invalid expression, it must be a literal python dictionary definition e.g. \"{'field': 'value'}\"",
+        "line": 199
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_alias_domain_clash",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "alias_name",
+         "alias_domain_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Within a given alias domain, aliases should not conflict with bounce\nor catchall email addresses, as emails should be unique for the gateway. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Aliases %(alias_names)s is already used as bounce or catchall address. Please choose another alias.",
+        "line": 211
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_alias_full_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "alias_domain_id.name",
+         "alias_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "A bit like display_name, but without the 'inactive alias' UI display.\nMoreover it is stored, allowing to search on it. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_display_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "alias_domain",
+         "alias_name"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Return the mail alias display alias_name, including the catchall\ndomain if found otherwise \"Inactive Alias\". e.g.`jobs@mail.the system.com`\nor `jobs` or 'Inactive Alias' ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_alias_status",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "alias_contact",
+         "alias_defaults",
+         "alias_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "Reset alias_status to \"not_tested\" when fields, that can be the source of an error, are modified.",
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "create",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals_list"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model_create_multi",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Creates mail.alias records according to the values provided in\n``vals`` but sanitize 'alias_name' by replacing certain unsafe\ncharacters; set default alias domain if not given.\n\n:raise UserError: if given (alias_name, alias_domain_id) already exists\n  or if there are duplicates in given vals_list;",
+      "size_in_lines": 17,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Raise UserError with a meaningful message instead of letting the\nuniqueness constraint raise an SQL error. To check uniqueness we have\nto rebuild pairs of names / domains to validate, taking into account\nthat a void alias_domain_id is acceptable (but also raises for\nuniqueness).",
+      "size_in_lines": 26,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_check_unique",
+    "kind": "validation",
+    "arguments": [
+     "self",
+     "alias_names",
+     "alias_domains"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Check unicity constraint won't be raised, otherwise raise a UserError\nwith a complete error message. Also check unicity against alias config\nparameters.\n\n:param list alias_names: a list of names (considered as sanitized\n  and ready to be sent to DB);\n:param list alias_domains: list of alias_domain records under which\n  the check is performed, as uniqueness is performed for given pair\n  (name, alias_domain);",
+      "size_in_lines": 58,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "f'{msg_begin} {msg_end}'",
+        "line": 349
+       },
+       {
+        "kind": "UserError",
+        "message": "Email aliases %(alias_name)s cannot be used on several records at the same time. Please update records one by one.",
+        "line": 312
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_sanitize_allowed_domains",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "allowed_domains"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "When having aliases checked on email left-part only we may define\nan allowed list for right-part filtering, allowing more fine-grain than\neither alias domain, either everything. This method sanitized its value. ",
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Value %(allowed_domains)s for `mail.catchall.domain.allowed` cannot be validated.\nIt should be a comma separated list of domains e.g. example.com,example.org.",
+        "line": 358
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_sanitize_alias_name",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "name",
+     "is_email"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Cleans and sanitizes the alias name. In some cases we want the alias\nto be a complete email instead of just a left-part (when sanitizing\ndefault.from for example). In that case we extract the right part and\nput it back after sanitizing the left part.\n\n:param str name: the alias name to sanitize;\n:param bool is_email: whether to keep a right part, otherwise only\n  left part is kept;\n\n:returns: sanitized alias name\n:rtype: str",
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_is_encodable",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "alias_name",
+     "charset"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": "Check if alias_name is encodable. Standard charset is ascii, as\nUTF-8 requires a specific extension. Not recommended for outgoing\naliases. 'remove_accents' is performed as sanitization process of\nthe name will do it anyway. ",
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_document",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_parent_document",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_alias_bounced_body",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "message_dict"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Get the body of the email return in case of bounced email when the\nalias does not accept incoming email e.g. contact is not allowed.\n\n:param dict message_dict: dictionary holding parsed message variables\n\n:return: HTML to use as email body",
+      "size_in_lines": 26,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_alias_bounced_body_fallback",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "message_dict"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Default body of bounced emails. See '_get_alias_bounced_body' ",
+      "size_in_lines": 19,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_alias_contact_description",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     },
+     {
+      "package": "hr",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_alias_invalid_body",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "message_dict"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Get the body of the bounced email returned when the alias is incorrectly\nconfigured e.g. error in alias_defaults.\n\n:param dict message_dict: dictionary holding parsed message variables\n\n:return: HTML to use as email body",
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_alias_bounce_incoming_email",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "message",
+     "message_dict",
+     "set_invalid"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Set alias status to invalid and create bounce message to the sender.\n\nThis method must be called when a message received on the alias has\ncaused an error due to the mis-configuration of the alias.\n\n:param EmailMessage message: email message that is invalid and is about\n  to bounce;\n:param dict message_dict: dictionary holding parsed message variables\n:param bool set_invalid: set alias as invalid, to be done notably if\n  bounce is considered as coming from a configuration error instead of\n  being rejected due to alias rules;",
+      "size_in_lines": 23,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_alias_domain_id_mc",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "We could not create alias %(alias_name)s because domain %(alias_domain_name)s belongs to company %(alias_company_names)s while the owner document belongs to company %(company_name)s."
+   },
+   {
+    "operation": "_check_alias_domain_id_mc",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "We could not create alias %(alias_name)s because domain %(alias_domain_name)s belongs to company %(alias_company_names)s while the target document belongs to company %(company_name)s."
+   },
+   {
+    "operation": "_check_alias_is_ascii",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "You cannot use anything else than unaccented latin characters in the alias address %(alias_name)s."
+   },
+   {
+    "operation": "_check_alias_defaults",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Invalid expression, it must be a literal python dictionary definition e.g. \"{'field': 'value'}\""
+   },
+   {
+    "operation": "_check_alias_domain_clash",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Aliases %(alias_names)s is already used as bounce or catchall address. Please choose another alias."
+   },
+   {
+    "operation": "_check_unique",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "f'{msg_begin} {msg_end}'"
+   },
+   {
+    "operation": "_check_unique",
+    "package": "mail",
+    "kind": "UserError",
+    "message": "Email aliases %(alias_name)s cannot be used on several records at the same time. Please update records one by one."
+   },
+   {
+    "operation": "_sanitize_allowed_domains",
+    "package": "mail",
+    "kind": "ValidationError",
+    "message": "Value %(allowed_domains)s for `mail.catchall.domain.allowed` cannot be validated.\nIt should be a comma separated list of domains e.g. example.com,example.org."
+   }
+  ],
+  "state_fields": [
+   "alias_status"
+  ],
+  "access_rights": [
+   {
+    "external_identifier": "mail.access_mail_alias_user",
+    "package": "mail",
+    "name": "mail.alias.user",
+    "entity": "mail.alias",
+    "group": "base.group_user",
+    "read": true,
+    "write": false,
+    "create": false,
+    "delete": false
+   },
+   {
+    "external_identifier": "mail.access_mail_alias_system",
+    "package": "mail",
+    "name": "mail.alias.system",
+    "entity": "mail.alias",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "mail.mail_alias_view_form",
+    "package": "mail",
+    "name": "mail.alias.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {
+      "string": "Alias"
+     },
+     "fields": [
+      {
+       "name": "alias_status",
+       "invisible": "1"
+      },
+      {
+       "name": "alias_name",
+       "placeholder": "alias"
+      },
+      {
+       "name": "alias_domain_id",
+       "options": "{'no_create': True, 'no_open': True}",
+       "placeholder": "e.g. mycompany.com"
+      },
+      {
+       "name": "alias_status",
+       "widget": "badge",
+       "decoration-danger": "alias_status == 'invalid'",
+       "decoration-warning": "alias_status == 'not_tested'",
+       "decoration-success": "alias_status == 'valid'"
+      },
+      {
+       "name": "alias_model_id"
+      },
+      {
+       "name": "alias_force_thread_id"
+      },
+      {
+       "name": "alias_defaults"
+      },
+      {
+       "name": "alias_contact"
+      },
+      {
+       "name": "alias_incoming_local"
+      },
+      {
+       "name": "alias_parent_model_id"
+      },
+      {
+       "name": "alias_parent_thread_id"
+      },
+      {
+       "name": "alias_bounced_content",
+       "invisible": "alias_contact == 'everyone'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "open_document",
+       "string": "Open Document",
+       "type": "object",
+       "invisible": "not alias_model_id or alias_force_thread_id == 0",
+       "class": "oe_link",
+       "icon": "fa-sitemap"
+      },
+      {
+       "name": "open_parent_document",
+       "type": "object",
+       "invisible": "not alias_parent_model_id or alias_parent_thread_id == 0",
+       "class": "oe_link",
+       "icon": "fa-sitemap"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": [
+      {
+       "name": "open_document",
+       "string": "Open Document",
+       "type": "object",
+       "class": "oe_link",
+       "icon": "fa-sitemap",
+       "invisible": "not alias_model_id or alias_force_thread_id == 0"
+      },
+      {
+       "name": "open_parent_document",
+       "type": "object",
+       "class": "oe_link",
+       "icon": "fa-sitemap",
+       "invisible": "not alias_parent_model_id or alias_parent_thread_id == 0"
+      }
+     ]
+    }
+   },
+   {
+    "external_identifier": "mail.mail_alias_view_tree",
+    "package": "mail",
+    "name": "mail.alias.view.list",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "string": "Alias"
+     },
+     "fields": [
+      {
+       "name": "alias_name"
+      },
+      {
+       "name": "alias_domain_id"
+      },
+      {
+       "name": "alias_model_id"
+      },
+      {
+       "name": "alias_force_thread_id",
+       "optional": "hide"
+      },
+      {
+       "name": "alias_parent_model_id"
+      },
+      {
+       "name": "alias_parent_thread_id",
+       "optional": "hide"
+      },
+      {
+       "name": "alias_defaults",
+       "optional": "hide"
+      },
+      {
+       "name": "alias_contact"
+      },
+      {
+       "name": "alias_incoming_local",
+       "optional": "hide"
+      },
+      {
+       "name": "alias_status",
+       "widget": "badge",
+       "decoration-danger": "alias_status == 'invalid'",
+       "decoration-warning": "alias_status == 'not_tested'",
+       "decoration-success": "alias_status == 'valid'"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "open_document",
+       "string": "Open Document",
+       "type": "object",
+       "invisible": "not alias_model_id or alias_force_thread_id == 0",
+       "icon": "fa-sitemap"
+      },
+      {
+       "name": "open_parent_document",
+       "string": "Open Owner",
+       "type": "object",
+       "invisible": "not alias_parent_model_id or alias_parent_thread_id == 0",
+       "icon": "fa-sitemap"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "badge": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {}
+    }
+   },
+   {
+    "external_identifier": "mail.mail_alias_view_search",
+    "package": "mail",
+    "name": "mail.alias.view.search",
+    "view_type": "search",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "search",
+     "root_attributes": {
+      "string": "Search Alias"
+     },
+     "fields": [
+      {
+       "name": "alias_name"
+      },
+      {
+       "name": "alias_domain_id"
+      },
+      {
+       "name": "alias_model_id"
+      },
+      {
+       "name": "create_uid"
+      },
+      {
+       "name": "alias_force_thread_id"
+      },
+      {
+       "name": "alias_parent_model_id"
+      },
+      {
+       "name": "alias_parent_thread_id"
+      }
+     ],
+     "buttons": [],
+     "filters": [
+      {
+       "name": "active",
+       "string": "Active",
+       "domain": "[('alias_name', '!=', False)]"
+      }
+     ],
+     "group_by_filters": [
+      {
+       "name": "groupby_create_uid",
+       "string": "Creator",
+       "context": "{'group_by': 'create_uid'}"
+      },
+      {
+       "name": "groupby_alias_domain_id",
+       "string": "Alias Domain",
+       "context": "{'group_by': 'alias_domain_id'}"
+      },
+      {
+       "name": "groupby_alias_model_id",
+       "string": "Document Model",
+       "context": "{'group_by': 'alias_model_id'}"
+      },
+      {
+       "name": "groupby_alias_model_id",
+       "string": "Container Model",
+       "context": "{'group_by': 'alias_parent_model_id'}"
+      }
+     ],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "mail.mail_alias_action",
+    "package": "mail",
+    "name": "Aliases",
+    "view_mode": null,
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": "{\n                    'search_default_active': True,\n                }",
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "mail.alias"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

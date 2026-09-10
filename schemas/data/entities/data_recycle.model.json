@@ -1,0 +1,726 @@
+{
+ "catalog": {
+  "name": "entity:data_recycle.model",
+  "description": "Complete definition of entity Recycling Model (data_recycle.model).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "data_recycle.model",
+  "storage_name": "data_recycle_model",
+  "full_name": "Recycling Model",
+  "kind": "persistent",
+  "description": "Recycling Model",
+  "defined_by_package": "data_recycle",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": "name",
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "active",
+    "type": "Boolean",
+    "default": true,
+    "defined_in_package": "data_recycle",
+    "string": "Active",
+    "full_name": "Active"
+   },
+   {
+    "name": "name",
+    "type": "Char",
+    "compute": "_compute_name",
+    "string": "Name",
+    "readonly": false,
+    "store": true,
+    "required": true,
+    "copy": true,
+    "defined_in_package": "data_recycle",
+    "full_name": "Name"
+   },
+   {
+    "name": "res_model_id",
+    "type": "Many2one",
+    "comodel": "ir.model",
+    "string": "Model",
+    "required": true,
+    "ondelete": "cascade",
+    "defined_in_package": "data_recycle",
+    "full_name": "Model",
+    "target_entity": "ir.model"
+   },
+   {
+    "name": "res_model_name",
+    "type": "Char",
+    "related": "res_model_id.model",
+    "string": "Model Name",
+    "readonly": true,
+    "store": true,
+    "defined_in_package": "data_recycle",
+    "full_name": "Model Name"
+   },
+   {
+    "name": "recycle_record_ids",
+    "type": "One2many",
+    "comodel": "data_recycle.record",
+    "inverse_name": "recycle_model_id",
+    "defined_in_package": "data_recycle",
+    "string": "Recycle Record",
+    "full_name": "Recycle Record",
+    "target_entity": "data_recycle.record"
+   },
+   {
+    "name": "recycle_mode",
+    "type": "Selection",
+    "selection": [
+     [
+      "manual",
+      "Manual"
+     ],
+     [
+      "automatic",
+      "Automatic"
+     ]
+    ],
+    "string": "Recycle Mode",
+    "default": "manual",
+    "required": true,
+    "defined_in_package": "data_recycle",
+    "full_name": "Recycle Mode"
+   },
+   {
+    "name": "recycle_action",
+    "type": "Selection",
+    "selection": [
+     [
+      "archive",
+      "Archive"
+     ],
+     [
+      "unlink",
+      "Delete"
+     ]
+    ],
+    "string": "Recycle Action",
+    "default": "unlink",
+    "required": true,
+    "defined_in_package": "data_recycle",
+    "full_name": "Recycle Action"
+   },
+   {
+    "name": "domain",
+    "type": "Char",
+    "string": "Filter",
+    "compute": "_compute_domain",
+    "readonly": false,
+    "store": true,
+    "defined_in_package": "data_recycle",
+    "full_name": "Filter"
+   },
+   {
+    "name": "time_field_id",
+    "type": "Many2one",
+    "comodel": "ir.model.fields",
+    "string": "Time Field",
+    "domain": "[('model_id', '=', res_model_id), ('ttype', 'in', ('date', 'datetime')), ('store', '=', True)]",
+    "ondelete": "cascade",
+    "defined_in_package": "data_recycle",
+    "full_name": "Time Field",
+    "target_entity": "ir.model.fields"
+   },
+   {
+    "name": "time_field_delta",
+    "type": "Integer",
+    "string": "Delta",
+    "default": 1,
+    "defined_in_package": "data_recycle",
+    "full_name": "Delta"
+   },
+   {
+    "name": "time_field_delta_unit",
+    "type": "Selection",
+    "selection": [
+     [
+      "days",
+      "Days"
+     ],
+     [
+      "weeks",
+      "Weeks"
+     ],
+     [
+      "months",
+      "Months"
+     ],
+     [
+      "years",
+      "Years"
+     ]
+    ],
+    "string": "Delta Unit",
+    "default": "months",
+    "defined_in_package": "data_recycle",
+    "full_name": "Delta Unit"
+   },
+   {
+    "name": "include_archived",
+    "type": "Boolean",
+    "defined_in_package": "data_recycle",
+    "string": "Include Archived",
+    "full_name": "Include Archived"
+   },
+   {
+    "name": "records_to_recycle_count",
+    "type": "Integer",
+    "string": "Records To Recycle",
+    "compute": "_compute_records_to_recycle_count",
+    "defined_in_package": "data_recycle",
+    "full_name": "Records To Recycle"
+   },
+   {
+    "name": "notify_user_ids",
+    "type": "Many2many",
+    "comodel": "res.users",
+    "string": "Notify Users",
+    "domain": {
+     "dynamic": "lambda self: [('all_group_ids', 'in', self.env.ref('base.group_system').id)]"
+    },
+    "default": {
+     "dynamic": "lambda self: self.env.user"
+    },
+    "help": "List of users to notify when there are new records to recycle",
+    "defined_in_package": "data_recycle",
+    "full_name": "Notify Users",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "notify_frequency",
+    "type": "Integer",
+    "string": "Notify",
+    "default": 1,
+    "defined_in_package": "data_recycle",
+    "full_name": "Notify"
+   },
+   {
+    "name": "notify_frequency_period",
+    "type": "Selection",
+    "selection": [
+     [
+      "days",
+      "Days"
+     ],
+     [
+      "weeks",
+      "Weeks"
+     ],
+     [
+      "months",
+      "Months"
+     ]
+    ],
+    "string": "Notify Frequency Period",
+    "default": "weeks",
+    "defined_in_package": "data_recycle",
+    "full_name": "Notify Frequency Period"
+   },
+   {
+    "name": "last_notification",
+    "type": "Datetime",
+    "readonly": true,
+    "defined_in_package": "data_recycle",
+    "string": "Last Notification",
+    "full_name": "Last Notification"
+   }
+  ],
+  "constraints": [
+   {
+    "name": "_check_notif_freq",
+    "kind": "Constraint",
+    "definition": "CHECK(notify_frequency > 0)",
+    "message": "The notification frequency should be greater than 0",
+    "defined_in_package": "data_recycle"
+   }
+  ],
+  "operations": [
+   {
+    "name": "_check_recycle_action",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "recycle_action"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "This model doesn't manage archived records. Only deletion is possible.",
+        "line": 81
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_domain",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "res_model_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_records_to_recycle_count",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 8,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_cron_recycle_records",
+    "kind": "background_operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_recycle_records",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "batch_commits"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_notify_records_to_recycle",
+    "kind": "internal_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 16,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_send_notification",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "delta"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "write",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "vals"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "open_records",
+    "kind": "operation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_recycle_records",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "data_recycle",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 5,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "_check_recycle_action",
+    "package": "data_recycle",
+    "kind": "UserError",
+    "message": "This model doesn't manage archived records. Only deletion is possible."
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "data_recycle.access_data_recycle_model_group_system",
+    "package": "data_recycle",
+    "name": "access_data_recycle_model_group_system",
+    "entity": "data_recycle.model",
+    "group": "base.group_system",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "data_recycle.view_data_recycle_model_list",
+    "package": "data_recycle",
+    "name": "Field Recyle Model List",
+    "view_type": "list",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "list",
+     "root_attributes": {
+      "decoration-muted": "not active"
+     },
+     "fields": [
+      {
+       "name": "name"
+      },
+      {
+       "name": "res_model_id"
+      },
+      {
+       "name": "recycle_mode",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "recycle_action",
+       "groups": "base.group_no_one"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "boolean_toggle": 1
+     },
+     "inheritance_operations": [],
+     "editable": null,
+     "create": null,
+     "delete": null,
+     "edit": null,
+     "decorations": {
+      "decoration-muted": "not active"
+     }
+    }
+   },
+   {
+    "external_identifier": "data_recycle.view_data_merge_model_form",
+    "package": "data_recycle",
+    "name": "Field Recyle Model Form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "records_to_recycle_count",
+       "widget": "statinfo",
+       "string": "Records"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "res_model_id",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "res_model_name",
+       "invisible": "1"
+      },
+      {
+       "name": "active",
+       "widget": "boolean_toggle"
+      },
+      {
+       "name": "recycle_mode",
+       "widget": "radio",
+       "options": "{'horizontal': true}"
+      },
+      {
+       "name": "recycle_action",
+       "widget": "radio",
+       "options": "{'horizontal': true}"
+      },
+      {
+       "name": "include_archived",
+       "invisible": "recycle_action != 'unlink'"
+      },
+      {
+       "name": "notify_user_ids",
+       "widget": "many2many_tags",
+       "domain": "[('share', '=', False)]",
+       "options": "{'no_create': True, 'no_edit': True}",
+       "nolabel": "1"
+      },
+      {
+       "name": "notify_frequency",
+       "required": "notify_user_ids"
+      },
+      {
+       "name": "notify_frequency_period",
+       "required": "notify_user_ids"
+      },
+      {
+       "name": "domain",
+       "widget": "domain",
+       "options": "{'model': 'res_model_name'}"
+      },
+      {
+       "name": "time_field_id"
+      },
+      {
+       "name": "time_field_delta"
+      },
+      {
+       "name": "time_field_delta_unit"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_recycle_records",
+       "string": "Run Now",
+       "type": "object",
+       "class": "oe_highlight"
+      },
+      {
+       "name": "open_records",
+       "type": "object",
+       "class": "oe_stat_button",
+       "icon": "fa-bars"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "statinfo": 1,
+      "boolean_toggle": 1,
+      "radio": 2,
+      "many2many_tags": 1,
+      "domain": 1
+     },
+     "inheritance_operations": [],
+     "header_buttons": [
+      {
+       "name": "action_recycle_records",
+       "type": "object",
+       "string": "Run Now",
+       "class": "oe_highlight"
+      }
+     ],
+     "chatter": false,
+     "button_box": [
+      {
+       "class": "oe_stat_button",
+       "name": "open_records",
+       "type": "object",
+       "icon": "fa-bars"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "data_recycle.action_data_recycle_config",
+    "package": "data_recycle",
+    "name": "Recyle Records Rules",
+    "view_mode": "list,form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": "['|', ('active', '=', False), ('active', '=', True)]",
+    "context": null,
+    "target": null,
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "data_recycle.model"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [
+   {
+    "external_identifier": "data_recycle.ir_cron_clean_records",
+    "package": "data_recycle",
+    "name": "Data Recycle: Clean Records",
+    "interval_number": "1",
+    "interval_type": "days",
+    "priority": null,
+    "active": "True",
+    "user_id": null,
+    "doall": null,
+    "numbercall": null,
+    "cron_name": null,
+    "entity": "data_recycle.model",
+    "operation": "_cron_recycle_records",
+    "operation_call": "model._cron_recycle_records()"
+   }
+  ],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

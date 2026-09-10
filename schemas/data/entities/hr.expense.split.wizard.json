@@ -1,0 +1,466 @@
+{
+ "catalog": {
+  "name": "entity:hr.expense.split.wizard",
+  "description": "Complete definition of entity Expense Split Wizard (hr.expense.split.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "hr.expense.split.wizard",
+  "storage_name": "hr_expense_split_wizard",
+  "full_name": "Expense Split Wizard",
+  "kind": "transient",
+  "description": "Expense Split Wizard",
+  "defined_by_package": "hr_expense",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "expense_id",
+    "type": "Many2one",
+    "comodel": "hr.expense",
+    "string": "Expense",
+    "required": true,
+    "defined_in_package": "hr_expense",
+    "full_name": "Expense",
+    "target_entity": "hr.expense"
+   },
+   {
+    "name": "expense_split_line_ids",
+    "type": "One2many",
+    "comodel": "hr.expense.split",
+    "inverse_name": "wizard_id",
+    "defined_in_package": "hr_expense",
+    "string": "Expense Split Line",
+    "full_name": "Expense Split Line",
+    "target_entity": "hr.expense.split"
+   },
+   {
+    "name": "total_amount_currency",
+    "type": "Monetary",
+    "string": "Total Amount",
+    "compute": "_compute_total_amount_currency",
+    "currency_field": "currency_id",
+    "defined_in_package": "hr_expense",
+    "full_name": "Total Amount"
+   },
+   {
+    "name": "total_amount_currency_original",
+    "type": "Monetary",
+    "string": "Total amount original",
+    "related": "expense_id.total_amount_currency",
+    "currency_field": "currency_id",
+    "help": "Total amount of the original Expense that we are splitting",
+    "defined_in_package": "hr_expense",
+    "full_name": "Total amount original"
+   },
+   {
+    "name": "tax_amount_currency",
+    "type": "Monetary",
+    "string": "Taxes",
+    "currency_field": "currency_id",
+    "compute": "_compute_tax_amount_currency",
+    "defined_in_package": "hr_expense",
+    "full_name": "Taxes"
+   },
+   {
+    "name": "split_possible",
+    "type": "Boolean",
+    "help": "The sum of after split shut remain the same",
+    "compute": "_compute_split_possible",
+    "defined_in_package": "hr_expense",
+    "string": "Split Possible",
+    "full_name": "Split Possible"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "comodel": "res.currency",
+    "related": "expense_id.currency_id",
+    "defined_in_package": "hr_expense",
+    "string": "Currency",
+    "full_name": "Currency",
+    "target_entity": "res.currency"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_compute_total_amount_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "expense_split_line_ids.total_amount_currency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_amount_currency",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "expense_split_line_ids.tax_amount_currency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_split_possible",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "total_amount_currency_original",
+         "total_amount_currency"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_split_expense",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "hr_expense",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 28,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "hr_expense.access_hr_expense_split_wizard_manager",
+    "package": "hr_expense",
+    "name": "access.hr.expense.split.wizard.manager",
+    "entity": "hr.expense.split.wizard",
+    "group": "base.group_user",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": false
+   }
+  ],
+  "record_rules": [
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_split_employee",
+    "package": "hr_expense",
+    "name": "Employee Expense Split",
+    "entity": "hr.expense.split.wizard",
+    "domain": "[\n                ('expense_id.state', '=', 'draft'),\n                '|', ('expense_id.employee_id.user_id', '=', user.id), ('expense_id.manager_id', '=', user.id),\n            ]",
+    "groups": "[(4, ref('base.group_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_split_approver",
+    "package": "hr_expense",
+    "name": "Approver Expense Split",
+    "entity": "hr.expense.split.wizard",
+    "domain": "[\n                ('expense_id.state', 'in', ['draft', 'submitted']),\n                ('expense_id.manager_id', 'in', [user.id, False])\n            ]",
+    "groups": "[(4, ref('hr_expense.group_hr_expense_team_approver'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_split_user",
+    "package": "hr_expense",
+    "name": "All approver Expense Split",
+    "entity": "hr.expense.split.wizard",
+    "domain": "[\n                ('expense_id.state', 'in', ['draft', 'submitted']),\n                '|', ('expense_id.employee_id.user_id', '!=', user.id), ('expense_id.manager_id', 'in', [user.id, False])\n            ]",
+    "groups": "[(4, ref('hr_expense.group_hr_expense_user'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_split_manager",
+    "package": "hr_expense",
+    "name": "Manager Expense Split",
+    "entity": "hr.expense.split.wizard",
+    "domain": "[('expense_id.state', 'in', ['draft', 'submitted'])]",
+    "groups": "[(4, ref('hr_expense.group_hr_expense_manager'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   },
+   {
+    "external_identifier": "hr_expense.ir_rule_hr_expense_split_accountant",
+    "package": "hr_expense",
+    "name": "Accountant Expense Split",
+    "entity": "hr.expense.split.wizard",
+    "domain": "[('expense_id.state', 'in', ('draft', 'submitted', 'approved'))]",
+    "groups": "[(4, ref('account.group_account_invoice'))]",
+    "global": false,
+    "applies_to_read": true,
+    "applies_to_write": true,
+    "applies_to_create": true,
+    "applies_to_delete": true
+   }
+  ],
+  "views": [
+   {
+    "external_identifier": "hr_expense.hr_expense_split",
+    "package": "hr_expense",
+    "name": "Expense split",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "total_amount_currency_original",
+       "invisible": "1"
+      },
+      {
+       "name": "expense_id",
+       "invisible": "1"
+      },
+      {
+       "name": "expense_split_line_ids",
+       "widget": "one2many",
+       "context": "{'default_expense_id': expense_id}"
+      },
+      {
+       "name": "currency_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "expense_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "company_id",
+       "column_invisible": "True"
+      },
+      {
+       "name": "product_has_cost",
+       "column_invisible": "True"
+      },
+      {
+       "name": "name"
+      },
+      {
+       "name": "product_id",
+       "context": "{                                     'default_type': 'service',                                     'default_can_be_expensed': 1,                                     'list_view_ref': 'hr_expense.product_product_expense_tree_view',                                     'form_view_ref': 'hr_expense.product_product_expense_form_view',                                 }"
+      },
+      {
+       "name": "employee_id",
+       "widget": "many2one_avatar_user"
+      },
+      {
+       "name": "tax_ids",
+       "widget": "many2many_tags"
+      },
+      {
+       "name": "tax_amount_currency"
+      },
+      {
+       "name": "analytic_distribution",
+       "widget": "analytic_distribution",
+       "optional": "show",
+       "groups": "analytic.group_analytic_accounting"
+      },
+      {
+       "name": "total_amount_currency",
+       "readonly": "product_has_cost",
+       "force_save": "1"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "total_amount_currency",
+       "invisible": "split_possible",
+       "nolabel": "1"
+      },
+      {
+       "name": "total_amount_currency",
+       "invisible": "not split_possible"
+      },
+      {
+       "name": "total_amount_currency_original",
+       "widget": "monetary",
+       "string": "Original Amount"
+      },
+      {
+       "name": "tax_amount_currency",
+       "widget": "monetary",
+       "string": "Taxes"
+      },
+      {
+       "name": "split_possible",
+       "invisible": "1"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_split_expense",
+       "string": "Split Expense",
+       "type": "object",
+       "invisible": "split_possible",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "name": "action_split_expense",
+       "string": "Split Expense",
+       "type": "object",
+       "invisible": "not split_possible",
+       "class": "oe_highlight",
+       "data-hotkey": "q"
+      },
+      {
+       "string": "Cancel",
+       "class": "btn-secondary",
+       "special": "cancel",
+       "data-hotkey": "x"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "one2many": 1,
+      "many2one_avatar_user": 1,
+      "many2many_tags": 1,
+      "analytic_distribution": 1,
+      "monetary": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   },
+   {
+    "external_identifier": "sale_expense.hr_expense_split_view_inherit_sale_expense",
+    "package": "sale_expense",
+    "name": "hr.expense.split.view.inherit.sale.expense",
+    "view_type": "xpath",
+    "inherits_view": "hr_expense.hr_expense_split",
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "xpath",
+     "root_attributes": {
+      "expr": "//field[@name='employee_id']",
+      "position": "after"
+     },
+     "fields": [
+      {
+       "name": "can_be_reinvoiced",
+       "column_invisible": "True"
+      },
+      {
+       "name": "sale_order_id",
+       "readonly": "not can_be_reinvoiced",
+       "force_save": "1"
+      }
+     ],
+     "buttons": [],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {},
+     "inheritance_operations": [
+      {
+       "expr": "//field[@name='employee_id']",
+       "position": "after"
+      }
+     ]
+    }
+   }
+  ],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

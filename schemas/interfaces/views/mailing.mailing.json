@@ -1,0 +1,1323 @@
+{
+ "catalog": {
+  "name": "views:mailing.mailing",
+  "description": "View declarations for entity mailing.mailing.",
+  "record_count": 13,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "marketing_card.mailing_mailing_view_form_inherit_marketing_card",
+   "package": "marketing_card",
+   "name": "mailing.mailing.view.form.inherit.marketing.card",
+   "entity": "mailing.mailing",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.view_mail_mass_mailing_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//header",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//header",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//header\" position=\"attributes\">\n                <attribute name=\"invisible\" separator=\" or \" add=\"card_requires_sync_count\"/>\n            </xpath>\n            <xpath expr=\"//header\" position=\"after\">\n                <header invisible=\"not card_requires_sync_count\">\n                    <button type=\"object\" name=\"action_update_cards\" class=\"btn-primary\" confirm=\"Are you sure you want to update all cards of the campaign?\" confirm-title=\"Confirm Cards Update\" confirm-label=\"Update Cards\">Update <field name=\"card_requires_sync_count\"/> Cards</button>\n                </header>\n            </xpath>\n            <xpath expr=\"//header//button[@name='action_set_favorite']\" position=\"attributes\">\n                <attribute name=\"invisible\" separator=\" or \" add=\"card_campaign_id\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='mailing_model_id']\" position=\"attributes\">\n                <attribute name=\"readonly\" separator=\" or \" add=\"card_campaign_id\"/>\n            </xpath>\n            <xpath expr=\"//label[@for='mailing_model_id']\" position=\"before\">\n                <field name=\"card_campaign_id\" invisible=\"not card_campaign_id\" readonly=\"1\"/>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing.view_mail_mass_mailing_search",
+   "package": "mass_mailing",
+   "name": "mailing.mailing.search",
+   "entity": "mailing.mailing",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Mailings"
+    },
+    "fields": [
+     {
+      "name": "name",
+      "string": "Mailing",
+      "filter_domain": "['|', ('name', 'ilike', self), ('subject', 'ilike', self)]"
+     },
+     {
+      "name": "campaign_id",
+      "string": "Campaign",
+      "groups": "mass_mailing.group_mass_mailing_campaign"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "assigned_to_me",
+      "string": "My Mailings",
+      "domain": "[('user_id', '=', uid)]",
+      "help": "Mailings that are assigned to me"
+     },
+     {
+      "name": "filter_sent_date",
+      "date": "sent_date"
+     },
+     {
+      "name": "filter_ab_test",
+      "string": "A/B Tests",
+      "domain": "[('ab_testing_enabled', '=', True)]"
+     },
+     {
+      "name": "filter_ab_test_to_review",
+      "string": "A/B Tests to review",
+      "domain": "[('ab_testing_enabled', '=', True), ('ab_testing_winner_selection', '=', 'manual'), ('ab_testing_completed', '=', False)]"
+     },
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active', '=', False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "group_state",
+      "string": "Status",
+      "context": "{'group_by': 'state'}"
+     },
+     {
+      "name": "sent_by",
+      "string": "Sent By",
+      "domain": "[]",
+      "context": "{'group_by': 'email_from'}"
+     },
+     {
+      "name": "group_by_contact_list_ids",
+      "string": "Mailing List",
+      "domain": "[]",
+      "context": "{'group_by': 'contact_list_ids'}"
+     },
+     {
+      "name": "sent_date",
+      "string": "Sent Period",
+      "domain": "[]",
+      "context": "{'group_by': 'sent_date'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n               <search string=\"Mailings\">\n                    <field name=\"name\" string=\"Mailing\" filter_domain=\"['|', ('name', 'ilike', self), ('subject', 'ilike', self)]\"/>\n                    <field name=\"campaign_id\" string=\"Campaign\" groups=\"mass_mailing.group_mass_mailing_campaign\"/>\n                    <filter string=\"My Mailings\" name=\"assigned_to_me\" domain=\"[('user_id', '=', uid)]\" help=\"Mailings that are assigned to me\"/>\n                    <separator/>\n                    <filter name=\"filter_sent_date\" date=\"sent_date\"/>\n                    <separator/>\n                    <filter string=\"A/B Tests\" name=\"filter_ab_test\" domain=\"[('ab_testing_enabled', '=', True)]\"/>\n                    <filter string=\"A/B Tests to review\" name=\"filter_ab_test_to_review\" domain=\"[('ab_testing_enabled', '=', True), ('ab_testing_winner_selection', '=', 'manual'), ('ab_testing_completed', '=', False)]\"/>\n                    <separator/>\n                    <filter name=\"inactive\" string=\"Archived\" domain=\"[('active', '=', False)]\"/>\n                    <group>\n                        <filter string=\"Status\" name=\"group_state\" context=\"{'group_by': 'state'}\"/>\n                        <filter string=\"Sent By\" name=\"sent_by\" domain=\"[]\" context=\"{'group_by': 'email_from'}\"/>\n                        <filter string=\"Mailing List\" name=\"group_by_contact_list_ids\" domain=\"[]\" context=\"{'group_by': 'contact_list_ids'}\"/>\n                        <separator/>\n                        <filter string=\"Sent Period\" name=\"sent_date\" domain=\"[]\" context=\"{'group_by': 'sent_date'}\"/>\n                    </group>\n                </search>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mass_mailing.view_mail_mass_mailing_tree",
+   "package": "mass_mailing",
+   "name": "mailing.mailing.list",
+   "entity": "mailing.mailing",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "10",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Mailings",
+     "sample": "1",
+     "class": "o_mass_mailing_mailing_tree"
+    },
+    "fields": [
+     {
+      "name": "calendar_date",
+      "widget": "datetime",
+      "string": "Date"
+     },
+     {
+      "name": "subject",
+      "readonly": "state in ('sending', 'done')"
+     },
+     {
+      "name": "mailing_model_id",
+      "string": "Recipients",
+      "optional": "hide"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "ab_testing_enabled",
+      "string": "A/B Test",
+      "groups": "mass_mailing.group_mass_mailing_campaign"
+     },
+     {
+      "name": "campaign_id",
+      "string": "Campaign",
+      "optional": "hide",
+      "groups": "mass_mailing.group_mass_mailing_campaign"
+     },
+     {
+      "name": "sent",
+      "sum": "Total"
+     },
+     {
+      "name": "received_ratio",
+      "widget": "progressbar",
+      "string": "Delivered (%)",
+      "avg": "Average"
+     },
+     {
+      "name": "opened_ratio",
+      "widget": "progressbar",
+      "string": "Opened (%)",
+      "avg": "Average"
+     },
+     {
+      "name": "bounced_ratio",
+      "string": "Bounced (%)",
+      "optional": "hide",
+      "avg": "Average"
+     },
+     {
+      "name": "clicks_ratio",
+      "string": "Clicked (%)",
+      "avg": "Average"
+     },
+     {
+      "name": "replied_ratio",
+      "string": "Replied (%)",
+      "avg": "Average"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-success": "state == 'sending' or state == 'done'",
+      "decoration-info": "state in ['draft', 'in_queue']"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "datetime": 1,
+     "many2one_avatar_user": 1,
+     "progressbar": 2,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {}
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <list string=\"Mailings\" sample=\"1\" class=\"o_mass_mailing_mailing_tree\">\n                    <field name=\"calendar_date\" string=\"Date\" widget=\"datetime\"/>\n                    <field name=\"subject\" readonly=\"state in ('sending', 'done')\"/>\n                    <field name=\"mailing_model_id\" string=\"Recipients\" optional=\"hide\"/>\n                    <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                    <field name=\"ab_testing_enabled\" string=\"A/B Test\" groups=\"mass_mailing.group_mass_mailing_campaign\"/>\n                    <field name=\"campaign_id\" string=\"Campaign\" groups=\"mass_mailing.group_mass_mailing_campaign\" optional=\"hide\"/>\n                    <field name=\"sent\" sum=\"Total\"/>\n                    <field name=\"received_ratio\" class=\"d-flex align-items-center ps-0 ps-lg-5\" widget=\"progressbar\" string=\"Delivered (%)\" avg=\"Average\"/>\n                    <field name=\"opened_ratio\" class=\"d-flex align-items-center ps-0 ps-lg-5\" widget=\"progressbar\" string=\"Opened (%)\" avg=\"Average\"/>\n                    <field name=\"bounced_ratio\" string=\"Bounced (%)\" optional=\"hide\" avg=\"Average\"/>\n                    <field name=\"clicks_ratio\" string=\"Clicked (%)\" avg=\"Average\"/>\n                    <field name=\"replied_ratio\" string=\"Replied (%)\" avg=\"Average\"/>\n                    <field name=\"state\" decoration-info=\"state in ['draft', 'in_queue']\" decoration-success=\"state == 'sending' or state == 'done'\" widget=\"badge\"/>\n                </list>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mass_mailing.view_mail_mass_mailing_form",
+   "package": "mass_mailing",
+   "name": "mailing.mailing.form",
+   "entity": "mailing.mailing",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Mailing",
+     "class": "o_mass_mailing_mailing_form"
+    },
+    "fields": [
+     {
+      "name": "state",
+      "widget": "statusbar",
+      "readonly": "1"
+     },
+     {
+      "name": "canceled"
+     },
+     {
+      "name": "scheduled"
+     },
+     {
+      "name": "process"
+     },
+     {
+      "name": "sent"
+     },
+     {
+      "name": "failed"
+     },
+     {
+      "name": "next_departure"
+     },
+     {
+      "name": "next_departure_is_past",
+      "invisible": "1"
+     },
+     {
+      "name": "next_departure_is_past",
+      "invisible": "1"
+     },
+     {
+      "name": "schedule_type",
+      "invisible": "1"
+     },
+     {
+      "name": "warning_message"
+     },
+     {
+      "name": "opened_ratio",
+      "widget": "percentpie",
+      "string": "Opened"
+     },
+     {
+      "name": "replied_ratio",
+      "widget": "percentpie",
+      "string": "Replied"
+     },
+     {
+      "name": "clicks_ratio",
+      "widget": "percentpie",
+      "string": "Clicked"
+     },
+     {
+      "name": "received_ratio",
+      "widget": "percentpie",
+      "string": "Received"
+     },
+     {
+      "name": "bounced_ratio",
+      "widget": "percentpie",
+      "string": "Bounced"
+     },
+     {
+      "name": "link_trackers_count",
+      "widget": "statinfo",
+      "string": "Link Trackers"
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "create_uid",
+      "invisible": "1"
+     },
+     {
+      "name": "mailing_type",
+      "widget": "radio",
+      "invisible": "1",
+      "readonly": "state != 'draft'",
+      "options": "{'horizontal': true}",
+      "force_save": "1"
+     },
+     {
+      "name": "subject",
+      "widget": "char_emojis",
+      "readonly": "state in ('sending', 'done')",
+      "options": "{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'mailing_model_real'}",
+      "placeholder": "e.g. New Sale on all T-shirts"
+     },
+     {
+      "name": "mailing_model_id",
+      "readonly": "state in ('sending', 'done')",
+      "options": "{'no_open': True, 'no_create': True}"
+     },
+     {
+      "name": "contact_list_ids",
+      "widget": "many2many_tags",
+      "readonly": "state in ('sending', 'done')",
+      "context": "{'form_view_ref': 'mass_mailing.mailing_list_view_form_simplified'}",
+      "placeholder": "Select recipients..."
+     },
+     {
+      "name": "mailing_filter_id",
+      "widget": "mailing_filter",
+      "readonly": "state in ('sending', 'done')",
+      "options": "{'no_create': 1, 'no_open': 1, 'domain_field': 'mailing_domain', 'model_field': 'mailing_model_id'}",
+      "placeholder": "Reload a favorite filter"
+     },
+     {
+      "name": "mailing_filter_count",
+      "invisible": "1"
+     },
+     {
+      "name": "mailing_model_name",
+      "invisible": "1"
+     },
+     {
+      "name": "mailing_on_mailing_list",
+      "invisible": "1"
+     },
+     {
+      "name": "mailing_model_real",
+      "invisible": "1"
+     },
+     {
+      "name": "mailing_domain",
+      "widget": "domain",
+      "invisible": "mailing_on_mailing_list",
+      "readonly": "state in ('sending', 'done')",
+      "options": "{'model': 'mailing_model_real', 'foldable': true}"
+     },
+     {
+      "name": "body_arch",
+      "widget": "mass_mailing_html",
+      "readonly": "state in ('sending', 'done')",
+      "options": "{                                             'inline_field': 'body_html',                                             'dynamic_placeholder': true,                                             'dynamic_placeholder_model_reference_field': 'mailing_model_real',                                         }"
+     },
+     {
+      "name": "body_html",
+      "invisible": "1",
+      "required": "body_arch"
+     },
+     {
+      "name": "is_body_empty",
+      "invisible": "1"
+     },
+     {
+      "name": "ab_testing_enabled",
+      "readonly": "state != 'draft'",
+      "force_save": "1"
+     },
+     {
+      "name": "ab_testing_pc",
+      "readonly": "state != 'draft'"
+     },
+     {
+      "name": "ab_testing_winner_selection",
+      "invisible": "not ab_testing_enabled or mailing_type != 'mail'",
+      "readonly": "state != 'draft'",
+      "required": "ab_testing_enabled and mailing_type == 'mail'"
+     },
+     {
+      "name": "ab_testing_schedule_datetime",
+      "invisible": "not ab_testing_enabled or ab_testing_winner_selection == 'manual'",
+      "readonly": "not ab_testing_enabled or state != 'draft'",
+      "required": "ab_testing_enabled and ab_testing_winner_selection != 'manual'"
+     },
+     {
+      "name": "is_ab_test_sent",
+      "invisible": "1"
+     },
+     {
+      "name": "ab_testing_mailings_count",
+      "invisible": "1"
+     },
+     {
+      "name": "ab_testing_completed",
+      "invisible": "1"
+     },
+     {
+      "name": "ab_testing_description",
+      "nolabel": "1"
+     },
+     {
+      "name": "preview",
+      "widget": "char_emojis",
+      "readonly": "state in ('sending', 'done')",
+      "string": "Preview Text",
+      "options": "{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'mailing_model_real'}",
+      "placeholder": "e.g. Check it out before it's too late!"
+     },
+     {
+      "name": "email_from",
+      "readonly": "state in ('sending', 'done')"
+     },
+     {
+      "name": "reply_to_mode",
+      "widget": "radio",
+      "invisible": "mailing_model_name in ['mailing.contact', 'res.partner', 'mailing.list']",
+      "readonly": "state in ('sending', 'done')"
+     },
+     {
+      "name": "reply_to",
+      "invisible": "reply_to_mode == 'update'",
+      "readonly": "state in ('sending', 'done')",
+      "required": "reply_to_mode == 'new'"
+     },
+     {
+      "name": "attachment_ids",
+      "widget": "many2many_binary",
+      "readonly": "state in ('sending', 'done')",
+      "string": "Attach a file"
+     },
+     {
+      "name": "campaign_id",
+      "readonly": "state in ('sending', 'done')",
+      "string": "Campaign",
+      "options": "{'create_name_field': 'title'}",
+      "groups": "mass_mailing.group_mass_mailing_campaign"
+     },
+     {
+      "name": "medium_id",
+      "readonly": "state in ('sending', 'done')",
+      "required": "True",
+      "string": "Medium",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "source_id",
+      "readonly": "1",
+      "required": "False",
+      "string": "Source",
+      "groups": "base.group_no_one"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user",
+      "domain": "[('share', '=', False)]"
+     },
+     {
+      "name": "mail_server_available",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "readonly": "state in ('sending', 'done')",
+      "required": "False",
+      "string": "Name"
+     },
+     {
+      "name": "mail_server_id",
+      "invisible": "not mail_server_available",
+      "readonly": "state in ('sending', 'done')",
+      "domain": "[('owner_user_id', '=', False)]"
+     },
+     {
+      "name": "keep_archives",
+      "readonly": "state in ('sending', 'done')"
+     },
+     {
+      "name": "use_exclusion_list",
+      "invisible": "not mail_server_id and use_exclusion_list",
+      "readonly": "state != 'draft'"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_launch",
+      "string": "Send",
+      "type": "object",
+      "invisible": "state in ('in_queue', 'sending', 'done')",
+      "class": "oe_highlight",
+      "confirm": "Once you send these emails, they'll be making a grand entrance in all the inboxes, creating quite the buzz!",
+      "data-hotkey": "q"
+     },
+     {
+      "name": "action_schedule",
+      "string": "Schedule",
+      "type": "object",
+      "invisible": "state in ('in_queue', 'sending', 'done')",
+      "class": "btn-secondary",
+      "data-hotkey": "v"
+     },
+     {
+      "name": "action_duplicate",
+      "string": "Duplicate",
+      "type": "object",
+      "invisible": "state != 'done'",
+      "class": "btn-secondary",
+      "data-hotkey": "d"
+     },
+     {
+      "name": "action_test",
+      "string": "Test",
+      "type": "object",
+      "class": "btn-secondary",
+      "data-hotkey": "k"
+     },
+     {
+      "name": "action_cancel",
+      "string": "Cancel",
+      "type": "object",
+      "invisible": "state != 'in_queue'",
+      "class": "btn-secondary",
+      "data-hotkey": "x"
+     },
+     {
+      "name": "action_retry_failed",
+      "string": "Retry",
+      "type": "object",
+      "invisible": "state != 'done' or failed == 0",
+      "class": "oe_highlight",
+      "data-hotkey": "y"
+     },
+     {
+      "name": "action_set_favorite",
+      "string": "Add to Templates",
+      "type": "object",
+      "invisible": "favorite",
+      "class": "btn-secondary"
+     },
+     {
+      "name": "action_remove_favorite",
+      "string": "Remove from Templates",
+      "type": "object",
+      "invisible": "not favorite",
+      "class": "btn-secondary"
+     },
+     {
+      "name": "action_view_traces_canceled",
+      "type": "object",
+      "class": "btn btn-link py-0"
+     },
+     {
+      "name": "action_view_traces_scheduled",
+      "type": "object",
+      "class": "btn btn-link py-0"
+     },
+     {
+      "name": "action_view_traces_process",
+      "type": "object",
+      "class": "btn btn-link py-0"
+     },
+     {
+      "name": "action_view_traces_sent",
+      "type": "object",
+      "class": "btn btn-link py-0"
+     },
+     {
+      "name": "action_view_traces_failed",
+      "type": "object",
+      "class": "btn btn-link py-0"
+     },
+     {
+      "name": "action_reload",
+      "type": "object",
+      "class": "btn btn-link pe-0"
+     },
+     {
+      "name": "action_reload",
+      "type": "object",
+      "class": "btn btn-link pe-0"
+     },
+     {
+      "name": "action_view_opened",
+      "type": "object",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button",
+      "context": "{'search_default_filter_opened': True}"
+     },
+     {
+      "name": "action_view_replied",
+      "type": "object",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button",
+      "context": "{'search_default_filter_replied': True}"
+     },
+     {
+      "name": "action_view_clicked",
+      "type": "object",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button",
+      "context": "{'search_default_filter_clicked': True}"
+     },
+     {
+      "name": "action_view_delivered",
+      "type": "object",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button",
+      "context": "{'search_default_filter_delivered': True}"
+     },
+     {
+      "name": "action_view_bounced",
+      "type": "object",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button",
+      "context": "{'search_default_filter_bounced': True}"
+     },
+     {
+      "name": "action_view_link_trackers",
+      "type": "object",
+      "invisible": "state != 'done'",
+      "class": "oe_stat_button",
+      "icon": "fa-link"
+     },
+     {
+      "name": "action_view_mailing_contacts",
+      "type": "object",
+      "invisible": "not contact_list_ids or not contact_list_ids or state in ('sending', 'done')",
+      "class": "btn btn-secondary py-0 px-1 ms-1",
+      "icon": "fa-user-plus"
+     },
+     {
+      "name": "action_compare_versions",
+      "type": "object",
+      "class": "btn btn-link d-block"
+     },
+     {
+      "name": "action_duplicate",
+      "type": "object",
+      "invisible": "ab_testing_completed",
+      "class": "btn btn-link d-block"
+     },
+     {
+      "name": "action_send_winner_mailing",
+      "type": "object",
+      "invisible": "not is_ab_test_sent or ab_testing_completed or ab_testing_winner_selection == 'manual'",
+      "class": "btn btn-link d-block"
+     },
+     {
+      "name": "action_select_as_winner",
+      "type": "object",
+      "invisible": "ab_testing_completed or ab_testing_winner_selection != 'manual'",
+      "class": "btn btn-link d-block"
+     },
+     {
+      "name": "action_duplicate",
+      "type": "object",
+      "invisible": "ab_testing_mailings_count >= 2 or not ab_testing_enabled",
+      "class": "btn btn-primary"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [
+     {
+      "name": "mail_body",
+      "string": "Mail Body",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "ab_testing",
+      "string": "A/B Tests",
+      "invisible": null,
+      "groups": null
+     },
+     {
+      "name": "settings",
+      "string": "Settings",
+      "invisible": null,
+      "groups": null
+     }
+    ],
+    "widgets": {
+     "statusbar": 1,
+     "percentpie": 5,
+     "statinfo": 1,
+     "radio": 2,
+     "char_emojis": 2,
+     "many2many_tags": 1,
+     "mailing_filter": 1,
+     "domain": 1,
+     "mass_mailing_html": 1,
+     "many2many_binary": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "header_buttons": [
+     {
+      "name": "action_launch",
+      "type": "object",
+      "class": "oe_highlight",
+      "string": "Send",
+      "invisible": "state in ('in_queue', 'sending', 'done')",
+      "data-hotkey": "q",
+      "confirm": "Once you send these emails, they'll be making a grand entrance in all the inboxes, creating quite the buzz!",
+      "confirm-title": "Ready to unleash emails?",
+      "confirm-label": "Send to all"
+     },
+     {
+      "name": "action_schedule",
+      "type": "object",
+      "class": "btn-secondary",
+      "string": "Schedule",
+      "invisible": "state in ('in_queue', 'sending', 'done')",
+      "data-hotkey": "v"
+     },
+     {
+      "name": "action_duplicate",
+      "type": "object",
+      "class": "btn-secondary",
+      "string": "Duplicate",
+      "data-hotkey": "d",
+      "invisible": "state != 'done'"
+     },
+     {
+      "name": "action_test",
+      "type": "object",
+      "class": "btn-secondary",
+      "string": "Test",
+      "data-hotkey": "k"
+     },
+     {
+      "name": "action_cancel",
+      "type": "object",
+      "invisible": "state != 'in_queue'",
+      "class": "btn-secondary",
+      "string": "Cancel",
+      "data-hotkey": "x"
+     },
+     {
+      "name": "action_retry_failed",
+      "type": "object",
+      "invisible": "state != 'done' or failed == 0",
+      "class": "oe_highlight",
+      "string": "Retry",
+      "data-hotkey": "y"
+     },
+     {
+      "type": "object",
+      "name": "action_set_favorite",
+      "class": "btn-secondary",
+      "invisible": "favorite",
+      "string": "Add to Templates"
+     },
+     {
+      "type": "object",
+      "name": "action_remove_favorite",
+      "class": "btn-secondary",
+      "invisible": "not favorite",
+      "string": "Remove from Templates"
+     }
+    ],
+    "statusbar_field": "state",
+    "statusbar_visible": "draft,in_queue,sending,done",
+    "chatter": true,
+    "button_box": [
+     {
+      "name": "action_view_opened",
+      "type": "object",
+      "context": "{'search_default_filter_opened': True}",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button"
+     },
+     {
+      "name": "action_view_replied",
+      "type": "object",
+      "context": "{'search_default_filter_replied': True}",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button"
+     },
+     {
+      "name": "action_view_clicked",
+      "type": "object",
+      "context": "{'search_default_filter_clicked': True}",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button"
+     },
+     {
+      "name": "action_view_delivered",
+      "id": "button_view_delivered",
+      "type": "object",
+      "context": "{'search_default_filter_delivered': True}",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button"
+     },
+     {
+      "name": "action_view_bounced",
+      "type": "object",
+      "context": "{'search_default_filter_bounced': True}",
+      "invisible": "state in ('draft', 'test')",
+      "class": "oe_stat_button"
+     },
+     {
+      "name": "action_view_link_trackers",
+      "invisible": "state != 'done'",
+      "type": "object",
+      "class": "oe_stat_button",
+      "icon": "fa-link"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <form string=\"Mailing\" class=\"o_mass_mailing_mailing_form\">\n                    <header>\n                        <button name=\"action_launch\" type=\"object\" class=\"oe_highlight\" string=\"Send\" invisible=\"state in ('in_queue', 'sending', 'done')\" data-hotkey=\"q\" confirm=\"Once you send these emails, they'll be making a grand entrance in all the inboxes, creating quite the buzz!\" confirm-title=\"Ready to unleash emails?\" confirm-label=\"Send to all\"/>\n                        <button name=\"action_schedule\" type=\"object\" class=\"btn-secondary\" string=\"Schedule\" invisible=\"state in ('in_queue', 'sending', 'done')\" data-hotkey=\"v\"/>\n                        <button name=\"action_duplicate\" type=\"object\" class=\"btn-secondary\" string=\"Duplicate\" data-hotkey=\"d\" invisible=\"state != 'done'\"/>\n                        <button name=\"action_test\" type=\"object\" class=\"btn-secondary\" string=\"Test\" data-hotkey=\"k\"/>\n                        <button name=\"action_cancel\" type=\"object\" invisible=\"state != 'in_queue'\" class=\"btn-secondary\" string=\"Cancel\" data-hotkey=\"x\"/>\n                        <button name=\"action_retry_failed\" type=\"object\" invisible=\"state != 'done' or failed == 0\" class=\"oe_highlight\" string=\"Retry\" data-hotkey=\"y\"/>\n                        <button type=\"object\" name=\"action_set_favorite\" class=\"btn-secondary\" invisible=\"favorite\" string=\"Add to Templates\"/>\n                        <button type=\"object\" name=\"action_remove_favorite\" class=\"btn-secondary\" invisible=\"not favorite\" string=\"Remove from Templates\"/>\n                        <field name=\"state\" readonly=\"1\" widget=\"statusbar\" statusbar_visible=\"draft,in_queue,sending,done\"/>\n                    </header>\n                    <div class=\"alert alert-info o_mass_mailing_alert_message\" role=\"alert\" invisible=\"state not in ['in_queue', 'done'] and sent == 0 and canceled == 0 and scheduled == 0 and failed == 0 and not warning_message\">\n                        <div class=\"o_mails_canceled\" invisible=\"canceled == 0\">\n                            <button class=\"btn btn-link py-0\" name=\"action_view_traces_canceled\" type=\"object\">\n                                <strong>\n                                    <field name=\"canceled\" class=\"oe_inline me-2\"/>\n                                    <span name=\"canceled_text\">emails have been cancelled and will not be sent.</span>\n                                </strong>\n                            </button>\n                        </div>\n                        <div class=\"o_mails_scheduled\" invisible=\"scheduled == 0\">\n                            <button class=\"btn btn-link py-0\" name=\"action_view_traces_scheduled\" type=\"object\">\n                                <strong>\n                                    <field name=\"scheduled\" class=\"oe_inline me-2\"/>\n                                    <span name=\"scheduled_text\">emails are in queue and will be sent soon.</span>\n                                </strong>\n                            </button>\n                        </div>\n                        <div class=\"o_mails_process\" invisible=\"process == 0\">\n                            <button class=\"btn btn-link py-0\" name=\"action_view_traces_process\" type=\"object\">\n                                <strong>\n                                    <field name=\"process\" class=\"oe_inline me-2\"/>\n                                    <span name=\"process_text\">emails are being processed.</span>\n                                </strong>\n                            </button>\n                        </div>\n                        <div class=\"o_mails_sent\" invisible=\"sent == 0 and state in ('draft', 'test', 'in_queue')\">\n                            <button class=\"btn btn-link py-0\" name=\"action_view_traces_sent\" type=\"object\">\n                                <strong>\n                                    <field name=\"sent\" class=\"oe_inline me-2\"/>\n                                    <span name=\"sent\">emails have been sent.</span>\n                                </strong>\n                            </button>\n                            <strong class=\"d-block\" invisible=\"mailing_type == 'mail' or not ab_testing_enabled or state != 'done' or sent != 0 or failed != 0 or canceled != 0\">\n                                <span name=\"ab_test_text\">There wasn't enough recipients given to this mailing. </span>\n                            </strong>\n                        </div>\n                        <div class=\"o_mails_failed\" invisible=\"state != 'done' or failed == 0\">\n                            <button class=\"btn btn-link py-0\" name=\"action_view_traces_failed\" type=\"object\">\n                                <strong>\n                                    <field name=\"failed\" class=\"oe_inline me-2\"/>\n                                    <span name=\"failed_text\">emails could not be sent.</span>\n                            </strong>\n                            </button>\n                        </div>\n\n                        <div class=\"o_mails_in_queue\" invisible=\"state != 'in_queue'\">\n                            <strong invisible=\"next_departure_is_past or schedule_type == 'now'\">\n                                <span name=\"next_departure_text\">This mailing is scheduled for </span>\n                                <field name=\"next_departure\" class=\"oe_inline\"/>.\n                            </strong>\n                            <strong invisible=\"not next_departure_is_past or schedule_type == 'now'\" class=\"d-flex align-items-center\">\n                                <field name=\"next_departure_is_past\" invisible=\"1\"/>\n                                <span name=\"refresh_text\">This mailing will be sent as soon as possible.</span>\n                                <button name=\"action_reload\" type=\"object\" class=\"btn btn-link pe-0\">\n                                    <u>Refresh <i class=\"fa fa-refresh ms-1\"/></u>\n                                </button>\n                            </strong>\n                            <strong invisible=\"schedule_type != 'now'\" class=\"d-flex align-items-center\">\n                                <field name=\"next_departure_is_past\" invisible=\"1\"/>\n                                <field name=\"schedule_type\" invisible=\"1\"/>\n                                <span name=\"mailing_schedule_type_now_text\">This mailing will be sent as soon as possible.</span>\n                                <button name=\"action_reload\" type=\"object\" class=\"btn btn-link pe-0\">\n                                    <u>Refresh <i class=\"fa fa-refresh ms-1\"/></u>\n                                </button>\n                            </strong>\n                        </div>\n                        <div invisible=\"not warning_message\">\n                            <strong><field name=\"warning_message\"/></strong>\n                        </div>\n                    </div>\n                    <sheet>\n                        <div class=\"oe_button_box\" name=\"button_box\">\n                            <button name=\"action_view_opened\" type=\"object\" context=\"{'search_default_filter_opened': True}\" invisible=\"state in ('draft', 'test')\" class=\"oe_stat_button\">\n                                <field name=\"opened_ratio\" string=\"Opened\" widget=\"percentpie\"/>\n                            </button>\n                            <button name=\"action_view_replied\" type=\"object\" context=\"{'search_default_filter_replied': True}\" invisible=\"state in ('draft', 'test')\" class=\"oe_stat_button\">\n                                <field name=\"replied_ratio\" string=\"Replied\" widget=\"percentpie\"/>\n                            </button>\n                            <button name=\"action_view_clicked\" type=\"object\" context=\"{'search_default_filter_clicked': True}\" invisible=\"state in ('draft', 'test')\" class=\"oe_stat_button\">\n                                <field name=\"clicks_ratio\" string=\"Clicked\" widget=\"percentpie\"/>\n                            </button>\n                            <button name=\"action_view_delivered\" id=\"button_view_delivered\" type=\"object\" context=\"{'search_default_filter_delivered': True}\" invisible=\"state in ('draft', 'test')\" class=\"oe_stat_button\">\n                                <field name=\"received_ratio\" string=\"Received\" widget=\"percentpie\"/>\n                            </button>\n                            <button name=\"action_view_bounced\" type=\"object\" context=\"{'search_default_filter_bounced': True}\" invisible=\"state in ('draft', 'test')\" class=\"oe_stat_button\">\n                                <field name=\"bounced_ratio\" string=\"Bounced\" widget=\"percentpie\"/>\n                            </button>\n                            <button name=\"action_view_link_trackers\" invisible=\"state != 'done'\" type=\"object\" class=\"oe_stat_button\" icon=\"fa-link\">\n                                <field name=\"link_trackers_count\" widget=\"statinfo\" string=\"Link Trackers\"/>\n                            </button>\n                        </div>\n                        <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                        <group class=\"o_mass_mailing_mailing_group\">\n                            <field name=\"active\" invisible=\"1\"/>\n                            <field name=\"create_uid\" invisible=\"1\"/>\n                            <field name=\"mailing_type\" widget=\"radio\" options=\"{'horizontal': true}\" invisible=\"1\" readonly=\"state != 'draft'\" force_save=\"1\"/>\n                            <field class=\"text-break\" name=\"subject\" options=\"{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'mailing_model_real'}\" readonly=\"state in ('sending', 'done')\" widget=\"char_emojis\" placeholder=\"e.g. New Sale on all T-shirts\"/>\n                            <label for=\"mailing_model_id\" string=\"Recipients\"/>\n                            <div name=\"mailing_model_id_container\">\n                                <div class=\"row\">\n                                    <div class=\"col-md-auto\">\n                                        <field name=\"mailing_model_id\" options=\"{'no_open': True, 'no_create': True}\" readonly=\"state in ('sending', 'done')\"/>\n                                    </div>\n                                    <div invisible=\"not mailing_on_mailing_list\" class=\"o_mass_mailing_contact_list_ids col-md-auto pt-1\">\n                                        <label for=\"contact_list_ids\" string=\"Mailing Lists:\" class=\"oe_edit_only pe-3\"/>\n                                        <div class=\"d-inline-flex flex-row align-items-center\">\n                                            <field name=\"contact_list_ids\" widget=\"many2many_tags\" placeholder=\"Select recipients...\" class=\"oe_inline mb-0\" context=\"{'form_view_ref': 'mass_mailing.mailing_list_view_form_simplified'}\" readonly=\"state in ('sending', 'done')\"/>\n                                            <button icon=\"fa-user-plus\" type=\"object\" class=\"btn btn-secondary py-0 px-1 ms-1\" invisible=\"not contact_list_ids or not contact_list_ids or state in ('sending', 'done')\" name=\"action_view_mailing_contacts\" title=\"Add Mailing Contacts\"/>\n                                        </div>\n                                    </div>\n                                    <div invisible=\"mailing_on_mailing_list\" class=\"col-md-auto o_mailing_filter_width\">\n                                        <field name=\"mailing_filter_id\" placeholder=\"Reload a favorite filter\" class=\"o_mailing_filter_readonly_width\" widget=\"mailing_filter\" options=\"{'no_create': 1, 'no_open': 1, 'domain_field': 'mailing_domain', 'model_field': 'mailing_model_id'}\" readonly=\"state in ('sending', 'done')\"/>\n                                    </div>\n                                    <field name=\"mailing_filter_count\" invisible=\"1\"/>\n                                </div>\n\n                                <field name=\"mailing_model_name\" invisible=\"1\"/>\n                                <field name=\"mailing_on_mailing_list\" invisible=\"1\"/>\n                                <field name=\"mailing_model_real\" invisible=\"1\"/>\n                                <field name=\"mailing_domain\" widget=\"domain\" options=\"{'model': 'mailing_model_real', 'foldable': true}\" invisible=\"mailing_on_mailing_list\" readonly=\"state in ('sending', 'done')\"/>\n                            </div>\n                        </group>\n                        <notebook>\n                            <page string=\"Mail Body\" name=\"mail_body\">\n                                <div class=\"position-relative\">\n                                    <field name=\"body_arch\" class=\"o_mail_body_mailing\" widget=\"mass_mailing_html\" options=\"{                                             'inline_field': 'body_html',                                             'dynamic_placeholder': true,                                             'dynamic_placeholder_model_reference_field': 'mailing_model_real',                                         }\" readonly=\"state in ('sending', 'done')\"/>\n                                    <field name=\"body_html\" invisible=\"1\" required=\"body_arch\"/>\n                                    <field name=\"is_body_empty\" invisible=\"1\"/>\n                                </div>\n                            </page>\n                            <page string=\"A/B Tests\" name=\"ab_testing\">\n                                <group>\n                                    <group>\n                                        <label for=\"ab_testing_enabled\"/>\n                                        <span class=\"d-flex\">\n                                            <field name=\"ab_testing_enabled\" readonly=\"state != 'draft'\" force_save=\"1\"/>\n                                            <span class=\"d-flex\" invisible=\"not ab_testing_enabled\">\n                                                on <field name=\"ab_testing_pc\" class=\"mx-1 text-center\" readonly=\"state != 'draft'\"/> %\n                                            </span>\n                                        </span>\n                                        <field name=\"ab_testing_winner_selection\" invisible=\"not ab_testing_enabled or mailing_type != 'mail'\" readonly=\"state != 'draft'\" required=\"ab_testing_enabled and mailing_type == 'mail'\"/>\n                                        <field name=\"ab_testing_schedule_datetime\" invisible=\"not ab_testing_enabled or ab_testing_winner_selection == 'manual'\" readonly=\"not ab_testing_enabled or state != 'draft'\" required=\"ab_testing_enabled and ab_testing_winner_selection != 'manual'\"/>\n                                        <field name=\"is_ab_test_sent\" invisible=\"1\"/>\n                                    </group>\n                                    <div>\n                                        <field name=\"ab_testing_mailings_count\" invisible=\"1\"/>\n                                        <field name=\"ab_testing_completed\" invisible=\"1\"/>\n                                        <field name=\"ab_testing_description\" nolabel=\"1\"/>\n                                        <div id=\"mailing_form_ab_buttons\" invisible=\"ab_testing_mailings_count &lt; 2 or not ab_testing_enabled\">\n                                            <button name=\"action_compare_versions\" type=\"object\" class=\"btn btn-link d-block\">\n                                                <i class=\"fa fa-bar-chart\"/> Compare Version\n                                            </button>\n                                            <button name=\"action_duplicate\" type=\"object\" class=\"btn btn-link d-block\" invisible=\"ab_testing_completed\">\n                                                <i class=\"fa fa-copy\"/> Create an Alternative\n                                            </button>\n                                            <button name=\"action_send_winner_mailing\" type=\"object\" class=\"btn btn-link d-block\" invisible=\"not is_ab_test_sent or ab_testing_completed or ab_testing_winner_selection == 'manual'\">\n                                                <i class=\"fa fa-envelope\"/><span name=\"ab_test_auto\">\n                                                    Send Winner Now\n                                                </span>\n                                            </button>\n                                            <button name=\"action_select_as_winner\" type=\"object\" class=\"btn btn-link d-block\" invisible=\"ab_testing_completed or ab_testing_winner_selection != 'manual'\">\n                                                <i class=\"fa fa-envelope\"/> Send this as winner\n                                            </button>\n                                        </div>\n                                        <button name=\"action_duplicate\" type=\"object\" class=\"btn btn-primary\" invisible=\"ab_testing_mailings_count &gt;= 2 or not ab_testing_enabled\">\n                                            Create an Alternative Version\n                                        </button>\n                                    </div>\n                                </group>\n                            </page>\n                            <page string=\"Settings\" name=\"settings\">\n                                <group>\n                                    <group string=\"Email Content\" name=\"email_content\" invisible=\"mailing_type != 'mail'\">\n                                        <field class=\"o_text_overflow\" name=\"preview\" string=\"Preview Text\" options=\"{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'mailing_model_real'}\" readonly=\"state in ('sending', 'done')\" widget=\"char_emojis\" placeholder=\"e.g. Check it out before it's too late!\"/>\n                                        <field name=\"email_from\" readonly=\"state in ('sending', 'done')\"/>\n                                        <label for=\"reply_to\"/>\n                                        <div name=\"reply_to_details\">\n                                            <field name=\"reply_to_mode\" widget=\"radio\" invisible=\"mailing_model_name in ['mailing.contact', 'res.partner', 'mailing.list']\" readonly=\"state in ('sending', 'done')\"/>\n                                            <field name=\"reply_to\" invisible=\"reply_to_mode == 'update'\" readonly=\"state in ('sending', 'done')\" required=\"reply_to_mode == 'new'\"/>\n                                            <div style=\"margin-top:-5px\">\n                                                <small class=\"oe_edit_only text-muted mb-2\" style=\"font-size:74%\" invisible=\"reply_to_mode == 'update' or mailing_model_name in ['mailing.contact', 'res.partner', 'mailing.list']\">\n                                                    To track replies, this address must belong to this database.\n                                                </small>\n                                            </div>\n                                        </div>\n                                        <label for=\"attachment_ids\"/>\n                                        <div name=\"attachment_ids_details\">\n                                            <field name=\"attachment_ids\" widget=\"many2many_binary\" string=\"Attach a file\" readonly=\"state in ('sending', 'done')\"/>\n                                        </div>\n                                    </group>\n                                    <group string=\"Tracking\">\n                                        <field name=\"campaign_id\" string=\"Campaign\" groups=\"mass_mailing.group_mass_mailing_campaign\" options=\"{'create_name_field': 'title'}\" readonly=\"state in ('sending', 'done')\"/>\n                                        <field name=\"medium_id\" string=\"Medium\" groups=\"base.group_no_one\" required=\"True\" readonly=\"state in ('sending', 'done')\"/>\n                                        <field name=\"source_id\" string=\"Source\" class=\"o_text_overflow\" groups=\"base.group_no_one\" readonly=\"1\" required=\"False\"/>\n                                        <field name=\"user_id\" widget=\"many2one_avatar_user\" domain=\"[('share', '=', False)]\"/>\n                                    </group>\n                                    <group string=\"Advanced\" groups=\"base.group_no_one\">\n                                        <field name=\"mail_server_available\" invisible=\"1\"/>\n                                        <field name=\"name\" string=\"Name\" required=\"False\" readonly=\"state in ('sending', 'done')\"/>\n                                        <field name=\"mail_server_id\" invisible=\"not mail_server_available\" readonly=\"state in ('sending', 'done')\" domain=\"[('owner_user_id', '=', False)]\"/>\n                                        <field name=\"keep_archives\" readonly=\"state in ('sending', 'done')\"/>\n                                        \n                                        <field name=\"use_exclusion_list\" invisible=\"not mail_server_id and use_exclusion_list\" readonly=\"state != 'draft'\"/>\n                                    </group>\n                                </group>\n                            </page>\n                        </notebook>\n                    </sheet>\n                    <chatter/>\n                </form>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mass_mailing.view_mail_mass_mailing_kanban",
+   "package": "mass_mailing",
+   "name": "mailing.mailing.kanban",
+   "entity": "mailing.mailing",
+   "view_type": "kanban",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "kanban",
+    "root_attributes": {
+     "highlight_color": "color",
+     "default_group_by": "state",
+     "quick_create": "false",
+     "sample": "1"
+    },
+    "fields": [
+     {
+      "name": "mailing_on_mailing_list"
+     },
+     {
+      "name": "next_departure"
+     },
+     {
+      "name": "active"
+     },
+     {
+      "name": "color",
+      "widget": "kanban_color_picker"
+     },
+     {
+      "name": "subject"
+     },
+     {
+      "name": "campaign_id",
+      "invisible": "not sent_date",
+      "groups": "mass_mailing.group_mass_mailing_campaign"
+     },
+     {
+      "name": "mailing_model_id",
+      "invisible": "mailing_on_mailing_list"
+     },
+     {
+      "name": "sent_date"
+     },
+     {
+      "name": "schedule_date",
+      "readonly": "state not in ['draft', 'in_queue']"
+     },
+     {
+      "name": "total"
+     },
+     {
+      "name": "mailing_model_id",
+      "invisible": "mailing_on_mailing_list"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "kanban_color_picker": 1,
+     "many2one_avatar_user": 1
+    },
+    "inheritance_operations": [],
+    "default_group_by": "state",
+    "quick_create": "false",
+    "progressbar": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <kanban highlight_color=\"color\" default_group_by=\"state\" quick_create=\"false\" sample=\"1\">\n                    <field name=\"mailing_on_mailing_list\"/>\n                    <field name=\"next_departure\"/>\n                    <field name=\"active\"/>\n                    <templates>\n                        <t t-name=\"menu\" t-if=\"!selection_mode\">\n                            <field name=\"color\" widget=\"kanban_color_picker\"/>\n                            <t t-if=\"widget.deletable\">\n                                <a role=\"menuitem\" type=\"delete\" class=\"dropdown-item\">Delete</a>\n                            </t>\n                            <a role=\"menuitem\" type=\"object\" name=\"action_archive\" class=\"dropdown-item o_kanban_mailing_active\" t-if=\"record.active.raw_value\">Archive</a>\n                            <a role=\"menuitem\" type=\"object\" name=\"action_unarchive\" class=\"dropdown-item o_kanban_mailing_active\" t-if=\"!record.active.raw_value\">Restore</a>\n                        </t>\n                        <t t-name=\"card\">\n                            <field name=\"subject\" class=\"my-1 text-truncate fs-3 fw-bold\"/>\n                            <field name=\"campaign_id\" invisible=\"not sent_date\" class=\"fw-bold fs-5\" groups=\"mass_mailing.group_mass_mailing_campaign\"/>\n                            <div>\n                                <i class=\"fa fa-bullseye me-2\" role=\"img\" aria-label=\"Lead/Opportunity\"/>\n                                <field name=\"mailing_model_id\" invisible=\"mailing_on_mailing_list\"/>\n                                <span invisible=\"not mailing_on_mailing_list\">Mailing Contact</span>\n                            </div>\n                            <footer class=\"pt-0\">\n                                <div>\n                                    <span invisible=\"not sent_date\" t-attf-title=\"Sent on #{record.sent_date.value}\">\n                                        <span class=\"fa fa-paper-plane me-2 small my-auto\" aria-label=\"Sent date\"/>\n                                        <field name=\"sent_date\"/>\n                                    </span>\n                                    <span invisible=\"not schedule_date\" t-attf-title=\"Scheduled on #{record.schedule_date.value}\">\n                                        <span class=\"fa fa-hourglass-half me-2 small my-auto\" aria-label=\"Scheduled date\"/>\n                                        <field name=\"schedule_date\" readonly=\"state not in ['draft', 'in_queue']\"/>\n                                    </span>\n                                    <span invisible=\"sent_date or schedule_date or state == 'in_queue'\">\n                                        <field name=\"total\" class=\"me-1 fw-bold\"/>\n                                        <field name=\"mailing_model_id\" invisible=\"mailing_on_mailing_list\"/>\n                                        <span invisible=\"not mailing_on_mailing_list\">Mailing Contact</span>\n                                    </span>\n                                    <span invisible=\"schedule_date or state != 'in_queue' or not next_departure\" t-attf-title=\"Scheduled on #{record.next_departure.value}\">\n                                        <span class=\"fa fa-hourglass-o me-2 small my-auto\" aria-label=\"Scheduled date\"/>\n                                        <span>Next Batch</span>\n                                    </span>\n                                </div>\n                                <field name=\"user_id\" widget=\"many2one_avatar_user\" class=\"ms-auto\"/>\n                            </footer>\n                        </t>\n                    </templates>\n                </kanban>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mass_mailing.mailing_mailing_view_calendar",
+   "package": "mass_mailing",
+   "name": "mailing.mailing.view.calendar",
+   "entity": "mailing.mailing",
+   "view_type": "calendar",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "calendar",
+    "root_attributes": {
+     "date_start": "calendar_date",
+     "string": "Mailings",
+     "hide_time": "true",
+     "mode": "month",
+     "color": "state",
+     "quick_create": "0"
+    },
+    "fields": [
+     {
+      "name": "mailing_model_id",
+      "string": "Recipient",
+      "options": "{'no_open': True}"
+     },
+     {
+      "name": "user_id",
+      "invisible": "1"
+     },
+     {
+      "name": "state",
+      "invisible": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "calendar": {
+     "date_start": "calendar_date",
+     "date_stop": null,
+     "date_delay": null,
+     "color": "state",
+     "mode": "month",
+     "quick_create": "0",
+     "event_open_popup": null,
+     "all_day": null
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <calendar date_start=\"calendar_date\" string=\"Mailings\" hide_time=\"true\" mode=\"month\" color=\"state\" quick_create=\"0\">\n                    <field name=\"mailing_model_id\" string=\"Recipient\" options=\"{'no_open': True}\"/>\n                    <field name=\"user_id\" filters=\"1\" invisible=\"1\"/>\n                    <field name=\"state\" filters=\"1\" invisible=\"1\"/>\n                </calendar>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "mass_mailing_crm.mailing_mailing_view_form",
+   "package": "mass_mailing_crm",
+   "name": "mailing.mailing.view.form.inherit.crm",
+   "entity": "mailing.mailing",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.view_mail_mass_mailing_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//button[@id='button_view_delivered']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "use_leads",
+      "invisible": "1"
+     },
+     {
+      "name": "crm_lead_count",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_redirect_to_leads_and_opportunities",
+      "type": "object",
+      "invisible": "state == 'draft'",
+      "class": "oe_stat_button",
+      "icon": "fa-star"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//button[@id='button_view_delivered']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n    \t\t<xpath expr=\"//button[@id='button_view_delivered']\" position=\"before\">\n                <button name=\"action_redirect_to_leads_and_opportunities\" type=\"object\" icon=\"fa-star\" class=\"oe_stat_button\" invisible=\"state == 'draft'\">\n                    <div class=\"o_field_widget o_stat_info\">\n                        <field name=\"use_leads\" invisible=\"1\"/>\n                        <span class=\"o_stat_value\"><field nolabel=\"1\" name=\"crm_lead_count\"/></span>\n                        <span class=\"o_stat_text\" invisible=\"not use_leads\">Leads</span>\n                        <span class=\"o_stat_text\" invisible=\"use_leads\">Opportunities</span>\n                    </div>\n                </button>\n    \t\t</xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sale.mailing_mailing_view_form",
+   "package": "mass_mailing_sale",
+   "name": "mailing.mailing.view.form.inherit.sale",
+   "entity": "mailing.mailing",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.view_mail_mass_mailing_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//button[@id='button_view_delivered']",
+     "position": "before"
+    },
+    "fields": [
+     {
+      "name": "sale_quotation_count",
+      "widget": "statinfo",
+      "string": "Quotations"
+     },
+     {
+      "name": "sale_invoiced_amount",
+      "widget": "statinfo",
+      "string": "Invoiced"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_redirect_to_quotations",
+      "type": "object",
+      "invisible": "state == 'draft'",
+      "class": "oe_stat_button",
+      "icon": "fa-pencil-square-o"
+     },
+     {
+      "name": "action_redirect_to_invoiced",
+      "type": "object",
+      "invisible": "state == 'draft'",
+      "class": "oe_stat_button",
+      "icon": "fa-dollar"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "statinfo": 2
+    },
+    "inheritance_operations": [
+     {
+      "expr": "//button[@id='button_view_delivered']",
+      "position": "before"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n    \t\t<xpath expr=\"//button[@id='button_view_delivered']\" position=\"before\">\n                <button name=\"action_redirect_to_quotations\" type=\"object\" icon=\"fa-pencil-square-o\" class=\"oe_stat_button\" invisible=\"state == 'draft'\">\n                    <field name=\"sale_quotation_count\" string=\"Quotations\" widget=\"statinfo\"/>\n                </button>\n                <button name=\"action_redirect_to_invoiced\" type=\"object\" icon=\"fa-dollar\" class=\"oe_stat_button\" invisible=\"state == 'draft'\">\n                    <field name=\"sale_invoiced_amount\" string=\"Invoiced\" widget=\"statinfo\"/>\n                </button>\n    \t\t</xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_mailing_view_search_sms",
+   "package": "mass_mailing_sms",
+   "name": "mailing.mailing.search",
+   "entity": "mailing.mailing",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.view_mail_mass_mailing_search",
+   "mode": "primary",
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//filter[@name='assigned_to_me']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//filter[@name='assigned_to_me']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//filter[@name='assigned_to_me']\" position=\"attributes\">\n                <attribute name=\"string\">My SMS Marketing</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_mailing_view_form_sms",
+   "package": "mass_mailing_sms",
+   "name": "mailing.mailing.view.form.inherit.sms",
+   "entity": "mailing.mailing",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.view_mail_mass_mailing_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//button[@name='action_launch']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//button[@name='action_launch']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            \n            <xpath expr=\"//button[@name='action_launch']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail' or state in ('in_queue', 'sending', 'processing', 'done')</attribute>\n            </xpath>\n            <xpath expr=\"//button[@name='action_schedule']\" position=\"before\">\n                <field name=\"sms_force_send\" invisible=\"1\"/>\n                <field name=\"schedule_type\" invisible=\"1\" readonly=\"state not in ['draft', 'in_queue']\"/>\n                <button name=\"action_put_in_queue\" type=\"object\" string=\"Send\" class=\"oe_highlight\" data-hotkey=\"v\" invisible=\"mailing_type == 'mail' or state in ('in_queue', 'sending', 'processing', 'done') or sms_force_send\" confirm=\"Once you send these text messages, they'll be making a grand entrance in all pockets, creating quite the bzzzzz!\" confirm-title=\"Ready to unleash your text messages?\" confirm-label=\"Send to all\"/>\n                <button name=\"action_send_mail\" type=\"object\" string=\"Send Now\" class=\"oe_highlight\" data-hotkey=\"g\" invisible=\"mailing_type == 'mail' or state in ('in_queue', 'processing', 'done') or schedule_type == 'scheduled' or not sms_force_send\" confirm=\"Once you send these text messages, they'll be making a grand entrance in all pockets, creating quite the bzzzzz!\" confirm-title=\"Ready to unleash your text messages?\" confirm-label=\"Send to all\"/>\n            </xpath>\n            \n            <xpath expr=\"//header\" position=\"after\">\n                <field name=\"sms_has_insufficient_credit\" invisible=\"1\"/>\n                <div class=\"alert alert-warning text-center o-hidden-ios\" invisible=\"not sms_has_insufficient_credit\" role=\"alert\">\n                    <button class=\"btn-link py-0\" name=\"action_buy_sms_credits\" type=\"object\">\n                        <strong>\n                            It appears you don't have enough IAP credits. Click here to buy credits.\n                        </strong>\n                    </button>\n                </div>\n                <field name=\"sms_has_unregistered_account\" invisible=\"1\"/>\n                <div class=\"alert alert-warning text-center o-hidden-ios\" invisible=\"not sms_has_unregistered_account\" role=\"alert\">\n                    <button class=\"btn-link py-0\" name=\"action_buy_sms_credits\" type=\"object\">\n                        <strong>\n                            It appears your SMS account is not registered. Click here to set up your account.\n                        </strong>\n                    </button>\n                </div>\n            </xpath>\n            <xpath expr=\"//span[@name='canceled_text']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//span[@name='canceled_text']\" position=\"after\">\n                <span name=\"canceled_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text Message have been cancelled and will not be sent.</span>\n            </xpath>\n            <xpath expr=\"//span[@name='scheduled_text']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//span[@name='scheduled_text']\" position=\"after\">\n                <span name=\"scheduled_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text Messages are in queue and will be sent soon.</span>\n            </xpath>\n            <xpath expr=\"//span[@name='process_text']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//span[@name='process_text']\" position=\"after\">\n                <span name=\"process_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text Messages are being processed.</span>\n            </xpath>\n            <xpath expr=\"//span[@name='sent']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//span[@name='sent']\" position=\"after\">\n                <span name=\"sent_sms\" invisible=\"mailing_type != 'sms'\">SMS Text Messages have been sent.</span>\n            </xpath>\n            <xpath expr=\"//span[@name='failed_text']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//span[@name='failed_text']\" position=\"after\">\n                <span name=\"failed_text_sms\" invisible=\"mailing_type != 'sms'\">SMS Text Messages could not be delivered.</span>\n            </xpath>\n            <xpath expr=\"//span[@name='next_departure_text']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//span[@name='next_departure_text']\" position=\"after\">\n                <span name=\"next_departure_text\" invisible=\"mailing_type != 'sms'\">This SMS marketing is scheduled for </span>\n            </xpath>\n            \n            <xpath expr=\"//button[@name='action_view_opened']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail' or state in ('draft', 'test')</attribute>\n            </xpath>\n            <xpath expr=\"//button[@name='action_view_replied']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail' or state in ('draft', 'test')</attribute>\n            </xpath>\n            \n            <xpath expr=\"//field[@name='subject']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='subject']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n                <attribute name=\"readonly\">state in ('sending', 'done')</attribute>\n                <attribute name=\"required\">mailing_type == 'mail'</attribute>\n                \n                <attribute name=\"help\">For an Email, Subject your Recipients will see in their inbox.\n                    For an SMS Text Message, internal Title of the Message.</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='subject']\" position=\"after\">\n                <field class=\"text-break\" name=\"sms_subject\" string=\"Title\" placeholder=\"e.g. Black Friday SMS coupon\" invisible=\"mailing_type != 'sms'\" readonly=\"state in ('sending', 'done')\" required=\"mailing_type == 'sms'\"/>\n            </xpath>\n            <xpath expr=\"//button[@name='action_set_favorite']\" position=\"attributes\">\n                <attribute name=\"invisible\" separator=\" or \" add=\"mailing_type != 'mail'\"/>\n            </xpath>\n            <xpath expr=\"//button[@name='action_remove_favorite']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail' or not favorite</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='preview']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n                <attribute name=\"readonly\">state in ('sending', 'done')</attribute>\n            </xpath>\n            <xpath expr=\"//page[@name='mail_body']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//page[@name='mail_body']\" position=\"after\">\n                <page string=\"SMS Content\" name=\"sms_body\" invisible=\"mailing_type != 'sms'\">\n                    <field name=\"body_plaintext\" widget=\"sms_widget\" readonly=\"state in ('sending', 'done')\" required=\"mailing_type == 'sms'\" options=\"{'dynamic_placeholder': true, 'dynamic_placeholder_model_reference_field': 'mailing_model_real'}\" enable_emojis=\"true\"/>\n                </page>\n            </xpath>\n            <xpath expr=\"//page[@name='settings']/group/group[@name='email_content']\" position=\"after\">\n                <group string=\"Options\" invisible=\"mailing_type != 'sms'\">\n                    <field name=\"sms_allow_unsubscribe\" invisible=\"mailing_type != 'sms'\" readonly=\"state in ('sending', 'done')\"/>\n                </group>\n            </xpath>\n\n            <xpath expr=\"//field[@name='contact_list_ids']\" position=\"attributes\">\n                <attribute name=\"context\">\n                    {'mailing_sms' : context.get('mailing_sms'),\n                    'form_view_ref': 'mass_mailing.mailing_list_view_form_simplified'}\n                </attribute>\n            </xpath>\n            \n            <xpath expr=\"//field[@name='email_from']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//label[@for='reply_to']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='reply_to']\" position=\"attributes\">\n                <attribute name=\"required\">mailing_type == 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//div[@name='reply_to_details']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//label[@for='attachment_ids']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//div[@name='attachment_ids_details']\" position=\"attributes\">\n                <attribute name=\"invisible\">mailing_type != 'mail'</attribute>\n            </xpath>\n            <xpath expr=\"//field[@name='mail_server_id']\" position=\"attributes\">\n                <attribute name=\"invisible\" add=\"mailing_type != 'mail'\" separator=\" or \"/>\n            </xpath>\n            \n            <xpath expr=\"//field[@name='ab_testing_mailings_count']\" position=\"after\">\n                <field name=\"ab_testing_mailings_sms_count\" invisible=\"1\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='ab_testing_winner_selection']\" position=\"after\">\n                <label for=\"ab_testing_sms_winner_selection\" string=\"Winner Selection\" invisible=\"not ab_testing_enabled or mailing_type != 'sms'\"/>\n                <field name=\"ab_testing_sms_winner_selection\" nolabel=\"1\" invisible=\"not ab_testing_enabled or mailing_type != 'sms'\" readonly=\"state != 'draft'\" required=\"ab_testing_enabled and mailing_type == 'sms'\"/>\n            </xpath>\n            <xpath expr=\"//field[@name='ab_testing_schedule_datetime']\" position=\"replace\">\n                 <field name=\"ab_testing_schedule_datetime\" invisible=\"not ab_testing_enabled or ab_testing_winner_selection == 'manual' or ab_testing_sms_winner_selection == 'manual'\" readonly=\"not ab_testing_enabled or state != 'draft'\" required=\"ab_testing_enabled and ab_testing_winner_selection != 'manual' and ab_testing_sms_winner_selection != 'manual'\"/>\n            </xpath>\n            <xpath expr=\"//div[@id='mailing_form_ab_buttons']\" position=\"attributes\">\n                <attribute name=\"invisible\">not ab_testing_enabled or ab_testing_mailings_count &lt; 2 and ab_testing_mailings_sms_count &lt; 2</attribute>\n            </xpath>\n            <xpath expr=\"//button[@name='action_send_winner_mailing']\" position=\"attributes\">\n                <attribute name=\"invisible\">not is_ab_test_sent or ab_testing_completed or ab_testing_winner_selection == 'manual' or ab_testing_sms_winner_selection == 'manual'</attribute>\n            </xpath>\n            <xpath expr=\"//button[@name='action_duplicate'][hasclass('btn-primary')]\" position=\"attributes\">\n                <attribute name=\"invisible\">not ab_testing_enabled or ab_testing_mailings_count &gt;= 2 or ab_testing_mailings_sms_count &gt;= 2</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_mailing_view_form_mixed",
+   "package": "mass_mailing_sms",
+   "name": "mailing.mailing.view.form.mixed",
+   "entity": "mailing.mailing",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing_sms.mailing_mailing_view_form_sms",
+   "mode": "primary",
+   "priority": "30",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='mailing_type']",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='mailing_type']",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='mailing_type']\" position=\"attributes\">\n                <attribute name=\"invisible\">0</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_mailing_view_kanban_sms",
+   "package": "mass_mailing_sms",
+   "name": "mailing.mailing.view.kanban.inherit.sms",
+   "entity": "mailing.mailing",
+   "view_type": "xpath",
+   "inherits_view": "mass_mailing.view_mail_mass_mailing_kanban",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//field[@name='active']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "sms_has_insufficient_credit"
+     },
+     {
+      "name": "sms_has_unregistered_account"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//field[@name='active']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//field[@name='active']\" position=\"after\">\n                <field name=\"sms_has_insufficient_credit\"/>\n                <field name=\"sms_has_unregistered_account\"/>\n            </xpath>\n            <xpath expr=\"//footer\" position=\"after\">\n                <div class=\"alert alert-warning mb-0 mt-3 o-hidden-ios\" role=\"alert\" invisible=\"not sms_has_insufficient_credit\">\n                    <a name=\"action_buy_sms_credits\" type=\"object\">Insufficient credits</a>\n                </div>\n                <div class=\"alert alert-warning mb-0 mt-3\" role=\"alert\" invisible=\"not sms_has_unregistered_account\">\n                    <a name=\"action_buy_sms_credits\" type=\"object\">Unregistered account</a>\n                </div>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "mass_mailing_sms.mailing_mailing_view_tree_sms",
+   "package": "mass_mailing_sms",
+   "name": "mailing.mailing.view.list.sms",
+   "entity": "mailing.mailing",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "20",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "SMS Marketing",
+     "sample": "1",
+     "decoration-info": "state == 'draft'"
+    },
+    "fields": [
+     {
+      "name": "calendar_date",
+      "string": "Date"
+     },
+     {
+      "name": "subject",
+      "string": "Title"
+     },
+     {
+      "name": "mailing_type",
+      "column_invisible": "True"
+     },
+     {
+      "name": "mailing_model_id",
+      "string": "Recipients",
+      "optional": "hide"
+     },
+     {
+      "name": "user_id",
+      "widget": "many2one_avatar_user"
+     },
+     {
+      "name": "campaign_id",
+      "string": "Campaign",
+      "optional": "hide",
+      "groups": "mass_mailing.group_mass_mailing_campaign"
+     },
+     {
+      "name": "ab_testing_enabled",
+      "string": "A/B Test",
+      "groups": "mass_mailing.group_mass_mailing_campaign"
+     },
+     {
+      "name": "sent",
+      "sum": "Total Sent"
+     },
+     {
+      "name": "clicked",
+      "widget": "progressbar",
+      "string": "Clicked (%)",
+      "avg": "Average of Clicked"
+     },
+     {
+      "name": "bounced",
+      "widget": "progressbar",
+      "string": "Bounced (%)",
+      "optional": "hide",
+      "avg": "Average of Bounced"
+     },
+     {
+      "name": "state",
+      "widget": "badge",
+      "decoration-success": "state in ('sending', 'done')",
+      "decoration-info": "state in ('draft', 'in_queue')"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "many2one_avatar_user": 1,
+     "progressbar": 2,
+     "badge": 1
+    },
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-info": "state == 'draft'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"SMS Marketing\" sample=\"1\" decoration-info=\"state == 'draft'\">\n                <field name=\"calendar_date\" string=\"Date\"/>\n                <field name=\"subject\" string=\"Title\"/>\n                <field name=\"mailing_type\" column_invisible=\"True\"/>\n                <field name=\"mailing_model_id\" string=\"Recipients\" optional=\"hide\"/>\n                <field name=\"user_id\" widget=\"many2one_avatar_user\"/>\n                <field name=\"campaign_id\" string=\"Campaign\" groups=\"mass_mailing.group_mass_mailing_campaign\" optional=\"hide\"/>\n                <field name=\"ab_testing_enabled\" string=\"A/B Test\" groups=\"mass_mailing.group_mass_mailing_campaign\"/>\n                <field name=\"sent\" sum=\"Total Sent\"/>\n                <field name=\"clicked\" string=\"Clicked (%)\" widget=\"progressbar\" avg=\"Average of Clicked\"/>\n                <field name=\"bounced\" string=\"Bounced (%)\" widget=\"progressbar\" optional=\"hide\" avg=\"Average of Bounced\"/>\n                <field name=\"state\" decoration-info=\"state in ('draft', 'in_queue')\" decoration-success=\"state in ('sending', 'done')\" widget=\"badge\"/>\n            </list>\n        </field>\n    "
+  }
+ ]
+}

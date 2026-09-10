@@ -1,0 +1,472 @@
+{
+ "catalog": {
+  "name": "views:stock.location",
+  "description": "View declarations for entity stock.location.",
+  "record_count": 8,
+  "generated_from": "specification revision 1"
+ },
+ "records": [
+  {
+   "external_identifier": "stock.view_location_form",
+   "package": "stock",
+   "name": "stock.location.form",
+   "entity": "stock.location",
+   "view_type": "form",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "form",
+    "root_attributes": {
+     "string": "Stock Location"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "invisible": "1"
+     },
+     {
+      "name": "name",
+      "placeholder": "e.g. Shelf 1"
+     },
+     {
+      "name": "location_id",
+      "options": "{'no_create': True}",
+      "placeholder": "e.g. Aisle 1"
+     },
+     {
+      "name": "active",
+      "invisible": "1"
+     },
+     {
+      "name": "usage"
+     },
+     {
+      "name": "storage_category_id",
+      "invisible": "usage != 'internal'",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "company_id",
+      "options": "{'no_create': True}",
+      "groups": "base.group_multi_company",
+      "placeholder": "Visible to all"
+     },
+     {
+      "name": "replenish_location",
+      "invisible": "usage != 'internal'"
+     },
+     {
+      "name": "cyclic_inventory_frequency",
+      "nolabel": "1"
+     },
+     {
+      "name": "last_inventory_date"
+     },
+     {
+      "name": "next_inventory_date",
+      "invisible": "not active"
+     },
+     {
+      "name": "removal_strategy_id",
+      "widget": "radio",
+      "options": "{'no_create': True}"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "%(location_open_putaway)d",
+      "string": "Putaway Rules",
+      "type": "action",
+      "class": "oe_stat_button",
+      "context": "{'default_company_id': company_id}",
+      "groups": "stock.group_stock_multi_locations",
+      "icon": "fa-random"
+     },
+     {
+      "name": "stock.act_product_location_open",
+      "string": "Products",
+      "type": "action",
+      "class": "oe_stat_button",
+      "icon": "fa-th-list"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {
+     "radio": 1
+    },
+    "inheritance_operations": [],
+    "chatter": false,
+    "button_box": [
+     {
+      "string": "Putaway Rules",
+      "class": "oe_stat_button",
+      "icon": "fa-random",
+      "name": "%(location_open_putaway)d",
+      "type": "action",
+      "groups": "stock.group_stock_multi_locations",
+      "context": "{'default_company_id': company_id}"
+     },
+     {
+      "string": "Products",
+      "class": "oe_stat_button",
+      "icon": "fa-th-list",
+      "type": "action",
+      "name": "stock.act_product_location_open"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <form string=\"Stock Location\">\n                <field name=\"company_id\" invisible=\"1\"/>\n                <sheet>\n                    <div class=\"oe_button_box\" name=\"button_box\">\n                        <button string=\"Putaway Rules\" class=\"oe_stat_button\" icon=\"fa-random\" name=\"%(location_open_putaway)d\" type=\"action\" groups=\"stock.group_stock_multi_locations\" context=\"{'default_company_id': company_id}\"/>\n                        <button string=\"Products\" class=\"oe_stat_button\" icon=\"fa-th-list\" type=\"action\" name=\"stock.act_product_location_open\"/>\n                    </div>\n                    <widget name=\"web_ribbon\" title=\"Archived\" bg_color=\"text-bg-danger\" invisible=\"active\"/>\n                    <div class=\"oe_location_header\">\n                        <div>\n                            <label for=\"name\"/>\n                            <h1><field name=\"name\" placeholder=\"e.g. Shelf 1\"/></h1>\n                            <label for=\"location_id\"/>\n                            <h2><field name=\"location_id\" placeholder=\"e.g. Aisle 1\" options=\"{'no_create': True}\"/></h2>\n                        </div>\n                    </div>\n\n                    <group>\n                        <group string=\"Additional Information\" name=\"additional_info\">\n                            <field name=\"active\" invisible=\"1\"/>\n                            <field name=\"usage\"/>\n                            <field name=\"storage_category_id\" invisible=\"usage != 'internal'\" groups=\"stock.group_stock_multi_locations\"/>\n                            <field name=\"company_id\" groups=\"base.group_multi_company\" options=\"{'no_create': True}\" placeholder=\"Visible to all\"/>\n                            <field name=\"replenish_location\" invisible=\"usage != 'internal'\"/>\n                        </group>\n                        <group string=\"Cyclic Counting\" invisible=\"usage not in ('internal', 'transit') or not company_id\">\n                            <label for=\"cyclic_inventory_frequency\" string=\"Inventory Frequency\"/>\n                            <div class=\"o_row\">\n                                <field name=\"cyclic_inventory_frequency\" nolabel=\"1\" class=\"oe_inline\"/>\n                                <span>days</span>\n                            </div>\n                            <field name=\"last_inventory_date\"/>\n                            <field name=\"next_inventory_date\" invisible=\"not active\"/>\n                        </group>\n                        <group string=\"Logistics\" invisible=\"usage not in ('view', 'internal', 'transit') or (usage == 'transit' and not company_id)\">\n                            <field name=\"removal_strategy_id\" widget=\"radio\" options=\"{'no_create': True}\"/>\n                        </group>\n                    </group>\n                </sheet>\n            </form>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.stock_location_view_form_editable",
+   "package": "stock",
+   "name": "stock.location.form.editable",
+   "entity": "stock.location",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_location_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//form",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//form",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//form\" position=\"attributes\">\n                <attribute name=\"create\">false</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_location_search",
+   "package": "stock",
+   "name": "stock.location.search",
+   "entity": "stock.location",
+   "view_type": "search",
+   "inherits_view": null,
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "search",
+    "root_attributes": {
+     "string": "Stock Locations"
+    },
+    "fields": [
+     {
+      "name": "complete_name",
+      "string": "Stock Locations"
+     },
+     {
+      "name": "location_id",
+      "string": "Parent Location"
+     },
+     {
+      "name": "usage",
+      "string": "Location Type"
+     },
+     {
+      "name": "warehouse_id",
+      "string": "Warehouse"
+     }
+    ],
+    "buttons": [],
+    "filters": [
+     {
+      "name": "in_location",
+      "string": "Internal",
+      "domain": "[('usage', '=', 'internal')]",
+      "help": "Internal Locations"
+     },
+     {
+      "name": "customer",
+      "string": "Customer",
+      "domain": "[('usage', '=', 'customer')]",
+      "help": "Customer Locations"
+     },
+     {
+      "name": "inventory",
+      "string": "Inventory Loss",
+      "domain": "[('usage', '=', 'inventory')]",
+      "help": "Inventory Loss Locations"
+     },
+     {
+      "name": "prod_inv_location",
+      "string": "Production",
+      "domain": "[('usage', '=', 'production')]",
+      "help": "Production Locations"
+     },
+     {
+      "name": "supplier",
+      "string": "Vendor",
+      "domain": "[('usage', '=', 'supplier')]",
+      "help": "Vendor Locations"
+     },
+     {
+      "name": "view",
+      "string": "Virtual",
+      "domain": "[('usage', '=', 'view')]",
+      "help": "Virtual Locations"
+     },
+     {
+      "name": "empty_location",
+      "string": "Empty Locations",
+      "domain": "[('is_empty', '=', True)]"
+     },
+     {
+      "name": "inactive",
+      "string": "Archived",
+      "domain": "[('active','=',False)]"
+     }
+    ],
+    "group_by_filters": [
+     {
+      "name": "warehouse",
+      "string": "Warehouse",
+      "domain": "[]",
+      "context": "{'group_by': 'warehouse_id'}"
+     },
+     {
+      "name": "usage",
+      "string": "Location Type",
+      "domain": "[]",
+      "context": "{'group_by': 'usage'}"
+     }
+    ],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <search string=\"Stock Locations\">\n                <field name=\"complete_name\" string=\"Stock Locations\"/>\n                <filter name=\"in_location\" string=\"Internal\" domain=\"[('usage', '=', 'internal')]\" help=\"Internal Locations\"/>\n                <filter name=\"customer\" string=\"Customer\" domain=\"[('usage', '=', 'customer')]\" help=\"Customer Locations\"/>\n                <filter name=\"inventory\" string=\"Inventory Loss\" domain=\"[('usage', '=', 'inventory')]\" help=\"Inventory Loss Locations\"/>\n                <filter name=\"prod_inv_location\" string=\"Production\" domain=\"[('usage', '=', 'production')]\" help=\"Production Locations\"/>\n                <filter name=\"supplier\" string=\"Vendor\" domain=\"[('usage', '=', 'supplier')]\" help=\"Vendor Locations\"/>\n                <filter name=\"view\" string=\"Virtual\" domain=\"[('usage', '=', 'view')]\" help=\"Virtual Locations\"/>\n                <separator/>\n                <filter name=\"empty_location\" string=\"Empty Locations\" domain=\"[('is_empty', '=', True)]\"/>\n                <field name=\"location_id\" string=\"Parent Location\"/>\n                <field name=\"usage\" string=\"Location Type\"/>\n                <field name=\"warehouse_id\" string=\"Warehouse\"/>\n                <separator/>\n                <filter string=\"Archived\" name=\"inactive\" domain=\"[('active','=',False)]\"/>\n                <group>\n                    <filter string=\"Warehouse\" name=\"warehouse\" domain=\"[]\" context=\"{'group_by': 'warehouse_id'}\"/>\n                    <filter string=\"Location Type\" name=\"usage\" domain=\"[]\" context=\"{'group_by': 'usage'}\"/>\n                </group>\n            </search>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.view_location_tree2",
+   "package": "stock",
+   "name": "stock.location.list",
+   "entity": "stock.location",
+   "view_type": "list",
+   "inherits_view": null,
+   "mode": null,
+   "priority": "2",
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "list",
+    "root_attributes": {
+     "string": "Stock Location",
+     "decoration-info": "usage=='view'",
+     "multi_edit": "1"
+    },
+    "fields": [
+     {
+      "name": "company_id",
+      "column_invisible": "True"
+     },
+     {
+      "name": "active",
+      "column_invisible": "True"
+     },
+     {
+      "name": "complete_name",
+      "string": "Location"
+     },
+     {
+      "name": "usage"
+     },
+     {
+      "name": "is_empty",
+      "invisible": "usage not in ['internal', 'transit']",
+      "optional": "hide"
+     },
+     {
+      "name": "storage_category_id",
+      "readonly": "usage != 'internal'",
+      "groups": "stock.group_stock_multi_locations"
+     },
+     {
+      "name": "company_id",
+      "groups": "base.group_multi_company"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [],
+    "editable": null,
+    "create": null,
+    "delete": null,
+    "edit": null,
+    "decorations": {
+     "decoration-info": "usage=='view'"
+    }
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <list string=\"Stock Location\" decoration-info=\"usage=='view'\" multi_edit=\"1\">\n                <field name=\"company_id\" column_invisible=\"True\"/>\n                <field name=\"active\" column_invisible=\"True\"/>\n                <field name=\"complete_name\" string=\"Location\"/>\n                <field name=\"usage\"/>\n                <field name=\"is_empty\" optional=\"hide\" invisible=\"usage not in ['internal', 'transit']\"/>\n                <field name=\"storage_category_id\" readonly=\"usage != 'internal'\" groups=\"stock.group_stock_multi_locations\"/>\n                <field name=\"company_id\" groups=\"base.group_multi_company\"/>\n            </list>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock.stock_location_view_tree2_editable",
+   "package": "stock",
+   "name": "stock.location.list2.editable",
+   "entity": "stock.location",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_location_tree2",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//list",
+     "position": "attributes"
+    },
+    "fields": [],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//list",
+      "position": "attributes"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//list\" position=\"attributes\">\n                <attribute name=\"create\">false</attribute>\n            </xpath>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_account.view_location_form_inherit",
+   "package": "stock_account",
+   "name": "stock.location.form.inherit",
+   "entity": "stock.location",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_location_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//group[@name='additional_info']",
+     "position": "after"
+    },
+    "fields": [
+     {
+      "name": "valuation_account_id",
+      "options": "{'no_create': True}",
+      "nolabel": "1"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//group[@name='additional_info']",
+      "position": "after"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n                <xpath expr=\"//group[@name='additional_info']\" position=\"after\">\n                    <div>\n                        <group string=\"Accounting Information\" invisible=\"usage not in ('inventory', 'production')\">\n                            <label for=\"valuation_account_id\" string=\"Cost of Production\" invisible=\"usage != 'production'\"/>\n                            <label for=\"valuation_account_id\" string=\"Loss Account\" invisible=\"usage != 'inventory'\"/>\n                            <field name=\"valuation_account_id\" nolabel=\"1\" options=\"{'no_create': True}\"/>\n                        </group>\n                    </div>\n                </xpath>\n            </field>\n        "
+  },
+  {
+   "external_identifier": "stock_fleet.stock_location_form_stock_fleet",
+   "package": "stock_fleet",
+   "name": "stock.location.form.inherit.stock.transport",
+   "entity": "stock.location",
+   "view_type": "field",
+   "inherits_view": "stock.view_location_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "field",
+    "root_attributes": {
+     "name": "usage",
+     "position": "attributes"
+    },
+    "fields": [
+     {
+      "name": "usage",
+      "position": "attributes"
+     }
+    ],
+    "buttons": [],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": []
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <field name=\"usage\" position=\"attributes\">\n                <attribute name=\"readonly\">context.get('for_dock_location', False)</attribute>\n            </field>\n        </field>\n    "
+  },
+  {
+   "external_identifier": "stock_maintenance.stock_location_form_maintenance_equipments",
+   "package": "stock_maintenance",
+   "name": "stock.location.form.inherit.maintenance.equipments",
+   "entity": "stock.location",
+   "view_type": "xpath",
+   "inherits_view": "stock.view_location_form",
+   "mode": null,
+   "priority": null,
+   "groups": null,
+   "active": null,
+   "structure": {
+    "root": "xpath",
+    "root_attributes": {
+     "expr": "//div[hasclass('oe_button_box')]",
+     "position": "inside"
+    },
+    "fields": [
+     {
+      "name": "equipment_count"
+     }
+    ],
+    "buttons": [
+     {
+      "name": "action_view_equipments_records",
+      "type": "object",
+      "invisible": "equipment_count == 0",
+      "class": "oe_stat_button",
+      "icon": "fa-wrench"
+     }
+    ],
+    "filters": [],
+    "group_by_filters": [],
+    "pages": [],
+    "widgets": {},
+    "inheritance_operations": [
+     {
+      "expr": "//div[hasclass('oe_button_box')]",
+      "position": "inside"
+     }
+    ]
+   },
+   "declaration": "<field name=\"arch\" type=\"xml\">\n            <xpath expr=\"//div[hasclass('oe_button_box')]\" position=\"inside\">\n                <button class=\"oe_stat_button\" name=\"action_view_equipments_records\" type=\"object\" icon=\"fa-wrench\" invisible=\"equipment_count == 0\">\n                    <div class=\"o_stat_info\">\n                        <span class=\"o_stat_value\">\n                            <field name=\"equipment_count\"/>\n                        </span>\n                        <span class=\"o_stat_text\">\n                            Equipments\n                        </span>\n                    </div>\n                </button>\n            </xpath>\n        </field>\n    "
+  }
+ ]
+}

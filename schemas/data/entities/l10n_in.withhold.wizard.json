@@ -1,0 +1,774 @@
+{
+ "catalog": {
+  "name": "entity:l10n_in.withhold.wizard",
+  "description": "Complete definition of entity Withhold Wizard (l10n_in.withhold.wizard).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "l10n_in.withhold.wizard",
+  "storage_name": "l10n_in_withhold_wizard",
+  "full_name": "Withhold Wizard",
+  "kind": "transient",
+  "description": "Withhold Wizard",
+  "defined_by_package": "l10n_in",
+  "extended_by_packages": [],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": true,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "reference",
+    "type": "Char",
+    "string": "Reference",
+    "defined_in_package": "l10n_in",
+    "full_name": "Reference"
+   },
+   {
+    "name": "type_name",
+    "type": "Char",
+    "string": "Type",
+    "compute": "_compute_type_name",
+    "defined_in_package": "l10n_in",
+    "full_name": "Type"
+   },
+   {
+    "name": "related_move_id",
+    "type": "Many2one",
+    "comodel": "account.move",
+    "string": "Invoice/Bill",
+    "readonly": true,
+    "defined_in_package": "l10n_in",
+    "full_name": "Invoice/Bill",
+    "target_entity": "account.move"
+   },
+   {
+    "name": "related_payment_id",
+    "type": "Many2one",
+    "comodel": "account.payment",
+    "string": "Payment",
+    "readonly": true,
+    "defined_in_package": "l10n_in",
+    "full_name": "Payment",
+    "target_entity": "account.payment"
+   },
+   {
+    "name": "tds_deduction",
+    "type": "Selection",
+    "selection": [
+     [
+      "normal",
+      "Normal Deduction"
+     ],
+     [
+      "lower",
+      "Lower Deduction"
+     ],
+     [
+      "higher",
+      "Higher Deduction"
+     ],
+     [
+      "no",
+      "No Deduction"
+     ]
+    ],
+    "string": "TDS Deduction",
+    "compute": "_compute_tds_deduction",
+    "defined_in_package": "l10n_in",
+    "full_name": "tax deducted at source Deduction"
+   },
+   {
+    "name": "company_id",
+    "type": "Many2one",
+    "comodel": "res.company",
+    "string": "Company",
+    "compute": "_compute_company_id",
+    "defined_in_package": "l10n_in",
+    "full_name": "Company",
+    "target_entity": "res.company"
+   },
+   {
+    "name": "currency_id",
+    "type": "Many2one",
+    "related": "company_id.currency_id",
+    "string": "Currency",
+    "defined_in_package": "l10n_in",
+    "full_name": "Currency"
+   },
+   {
+    "name": "journal_id",
+    "type": "Many2one",
+    "comodel": "account.journal",
+    "string": "Journal",
+    "compute": "_compute_journal",
+    "precompute": true,
+    "readonly": false,
+    "store": true,
+    "required": true,
+    "check_company": true,
+    "defined_in_package": "l10n_in",
+    "full_name": "Journal",
+    "target_entity": "account.journal"
+   },
+   {
+    "name": "date",
+    "type": "Date",
+    "string": "Date",
+    "default": {
+     "dynamic": "fields.Date.context_today"
+    },
+    "defined_in_package": "l10n_in",
+    "full_name": "Date"
+   },
+   {
+    "name": "l10n_in_tds_tax_type",
+    "type": "Char",
+    "string": "Indian Tax Type",
+    "compute": "_compute_l10n_in_tds_tax_type",
+    "defined_in_package": "l10n_in",
+    "full_name": "Indian Tax Type"
+   },
+   {
+    "name": "l10n_in_withholding_warning",
+    "type": "Json",
+    "string": "Withholding warning",
+    "compute": "_compute_l10n_in_withholding_warning",
+    "defined_in_package": "l10n_in",
+    "full_name": "Withholding warning"
+   },
+   {
+    "name": "base",
+    "type": "Monetary",
+    "string": "Base Amount",
+    "compute": "_compute_base",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_in",
+    "full_name": "Base Amount"
+   },
+   {
+    "name": "tax_id",
+    "type": "Many2one",
+    "comodel": "account.tax",
+    "string": "TDS Section",
+    "required": true,
+    "compute": "_compute_tax_id",
+    "store": true,
+    "readonly": false,
+    "defined_in_package": "l10n_in",
+    "full_name": "tax deducted at source Section",
+    "target_entity": "account.tax"
+   },
+   {
+    "name": "amount",
+    "type": "Monetary",
+    "string": "TDS Amount",
+    "compute": "_compute_amount",
+    "defined_in_package": "l10n_in",
+    "full_name": "tax deducted at source Amount"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "default_get",
+    "kind": "lifecycle_override",
+    "arguments": [
+     "self",
+     "fields"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 20,
+      "calls_previous_definition": true,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "TDS must be created from an Invoice or a Payment.",
+        "line": 19
+       },
+       {
+        "kind": "UserError",
+        "message": "You can only create a withhold for only one record at a time.",
+        "line": 21
+       },
+       {
+        "kind": "UserError",
+        "message": "TDS must be created from Posted Customer Invoices, Customer Credit Notes, Vendor Bills or Vendor Refunds.",
+        "line": 26
+       },
+       {
+        "kind": "UserError",
+        "message": "Please set a partner on the %s before creating a withhold.",
+        "line": 31
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_check_amounts",
+    "kind": "validation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.constrains",
+        "arguments": [
+         "base"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "ValidationError",
+        "message": "Negative or zero values are not allowed in Base Amount for withhold",
+        "line": 102
+       },
+       {
+        "kind": "ValidationError",
+        "message": "Negative or zero values are not allowed in TDS Amount for withhold",
+        "line": 104
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_in_tds_tax_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "related_move_id",
+         "related_payment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tds_deduction",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "l10n_in_tds_tax_type",
+         "related_move_id",
+         "related_payment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_type_name",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "related_move_id",
+         "related_payment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_company_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "related_move_id",
+         "related_payment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_journal",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "company_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_l10n_in_withholding_warning",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "related_move_id",
+         "base"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 10,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_tax_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "related_move_id",
+         "related_payment_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 24,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_base",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "tax_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_amount",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "tax_id",
+         "base"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 14,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_get_withhold_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 12,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_create_and_post_withhold",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 29,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_withhold_header",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [],
+      "documentation": "Prepare the header for the withhold entry ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_prepare_withhold_move_lines",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self",
+     "withholding_account_id"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [],
+      "documentation": "Prepare the move lines for the withhold entry",
+      "size_in_lines": 42,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_validate_withhold_data_on_post",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "withholding_account_id"
+    ],
+    "definitions": [
+     {
+      "package": "l10n_in",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": [
+       {
+        "kind": "UserError",
+        "message": "Please configure the withholding account from the settings",
+        "line": 314
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "validation_messages": [
+   {
+    "operation": "default_get",
+    "package": "l10n_in",
+    "kind": "UserError",
+    "message": "TDS must be created from an Invoice or a Payment."
+   },
+   {
+    "operation": "default_get",
+    "package": "l10n_in",
+    "kind": "UserError",
+    "message": "You can only create a withhold for only one record at a time."
+   },
+   {
+    "operation": "default_get",
+    "package": "l10n_in",
+    "kind": "UserError",
+    "message": "TDS must be created from Posted Customer Invoices, Customer Credit Notes, Vendor Bills or Vendor Refunds."
+   },
+   {
+    "operation": "default_get",
+    "package": "l10n_in",
+    "kind": "UserError",
+    "message": "Please set a partner on the %s before creating a withhold."
+   },
+   {
+    "operation": "_check_amounts",
+    "package": "l10n_in",
+    "kind": "ValidationError",
+    "message": "Negative or zero values are not allowed in Base Amount for withhold"
+   },
+   {
+    "operation": "_check_amounts",
+    "package": "l10n_in",
+    "kind": "ValidationError",
+    "message": "Negative or zero values are not allowed in TDS Amount for withhold"
+   },
+   {
+    "operation": "_validate_withhold_data_on_post",
+    "package": "l10n_in",
+    "kind": "UserError",
+    "message": "Please configure the withholding account from the settings"
+   }
+  ],
+  "state_fields": [],
+  "access_rights": [
+   {
+    "external_identifier": "l10n_in.l10n_in.access_l10n_in_withhold_wizard",
+    "package": "l10n_in",
+    "name": "access_l10n_in_withhold_wizard",
+    "entity": "l10n_in.withhold.wizard",
+    "group": "account.group_account_invoice",
+    "read": true,
+    "write": true,
+    "create": true,
+    "delete": true
+   }
+  ],
+  "record_rules": [],
+  "views": [
+   {
+    "external_identifier": "l10n_in.tds_entry_view_form",
+    "package": "l10n_in",
+    "name": "l10n_in.withhold.wizard.view.form",
+    "view_type": "form",
+    "inherits_view": null,
+    "mode": null,
+    "priority": null,
+    "groups": null,
+    "structure": {
+     "root": "form",
+     "root_attributes": {},
+     "fields": [
+      {
+       "name": "l10n_in_withholding_warning",
+       "widget": "actionable_errors"
+      },
+      {
+       "name": "date",
+       "string": "Entry Date"
+      },
+      {
+       "name": "tax_id",
+       "required": "True",
+       "domain": "[('l10n_in_tax_type', '=', l10n_in_tds_tax_type)]",
+       "options": "{'no_create': True, 'no_open': True}"
+      },
+      {
+       "name": "tds_deduction",
+       "invisible": "tds_deduction == 'normal' or l10n_in_tds_tax_type != 'tds_purchase'",
+       "decoration-danger": "tds_deduction == 'higher'",
+       "decoration-warning": "tds_deduction == 'no'",
+       "decoration-success": "tds_deduction == 'lower'"
+      },
+      {
+       "name": "base",
+       "widget": "monetary",
+       "required": "True",
+       "options": "{'currency_field': 'currency_id'}"
+      },
+      {
+       "name": "amount",
+       "widget": "monetary",
+       "options": "{'currency_field': 'currency_id'}"
+      },
+      {
+       "name": "currency_id",
+       "invisible": "1"
+      },
+      {
+       "name": "related_move_id",
+       "invisible": "1"
+      },
+      {
+       "name": "related_payment_id",
+       "invisible": "1"
+      },
+      {
+       "name": "journal_id",
+       "domain": "[('type', '=', 'general')]"
+      },
+      {
+       "name": "reference"
+      }
+     ],
+     "buttons": [
+      {
+       "name": "action_create_and_post_withhold",
+       "string": "Apply TDS",
+       "type": "object",
+       "class": "btn-primary"
+      },
+      {
+       "string": "Discard",
+       "class": "btn-secondary",
+       "special": "cancel"
+      }
+     ],
+     "filters": [],
+     "group_by_filters": [],
+     "pages": [],
+     "widgets": {
+      "actionable_errors": 1,
+      "monetary": 2
+     },
+     "inheritance_operations": [],
+     "chatter": false,
+     "button_box": []
+    }
+   }
+  ],
+  "window_actions": [
+   {
+    "external_identifier": "l10n_in.l10n_in_withholding_entry_form_action",
+    "package": "l10n_in",
+    "name": "Create TDS Entry",
+    "view_mode": "form",
+    "view_id": null,
+    "search_view_id": null,
+    "domain": null,
+    "context": null,
+    "target": "new",
+    "limit": null,
+    "groups_id": null,
+    "binding_model_id": null,
+    "binding_type": null,
+    "binding_view_types": null,
+    "help": null,
+    "usage": null,
+    "entity": "l10n_in.withhold.wizard"
+   }
+  ],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}

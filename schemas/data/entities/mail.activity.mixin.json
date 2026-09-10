@@ -1,0 +1,747 @@
+{
+ "catalog": {
+  "name": "entity:mail.activity.mixin",
+  "description": "Complete definition of entity Activity Mixin (mail.activity.mixin).",
+  "generated_from": "specification revision 1"
+ },
+ "entity": {
+  "transport_name": "mail.activity.mixin",
+  "storage_name": "mail_activity_mixin",
+  "full_name": "Activity Mixin",
+  "kind": "abstract",
+  "description": "Activity Mixin",
+  "defined_by_package": "mail",
+  "extended_by_packages": [
+   "calendar"
+  ],
+  "mixins": [],
+  "delegation_inheritance": {},
+  "ordering": null,
+  "display_name_field": null,
+  "display_name_search_fields": null,
+  "parent_field": null,
+  "hierarchy_path_stored": null,
+  "company_consistency_checked": null,
+  "active_field": null,
+  "date_field": null,
+  "fold_field": null,
+  "audit_fields": true,
+  "transient_maximum_count": null,
+  "transient_maximum_hours": null,
+  "message_post_access": null,
+  "primary_email_field": null,
+  "other_attributes": {},
+  "fields": [
+   {
+    "name": "activity_ids",
+    "type": "One2many",
+    "comodel": "mail.activity",
+    "inverse_name": "res_id",
+    "string": "Activities",
+    "bypass_search_access": true,
+    "groups": "base.group_user",
+    "defined_in_package": "mail",
+    "full_name": "Activities",
+    "target_entity": "mail.activity"
+   },
+   {
+    "name": "activity_state",
+    "type": "Selection",
+    "selection": [
+     [
+      "overdue",
+      "Overdue"
+     ],
+     [
+      "today",
+      "Today"
+     ],
+     [
+      "planned",
+      "Planned"
+     ]
+    ],
+    "string": "Activity State",
+    "compute": "_compute_activity_state",
+    "search": "_search_activity_state",
+    "groups": "base.group_user",
+    "help": "Status based on activities\nOverdue: Due date is already passed\nToday: Activity date is today\nPlanned: Future activities.",
+    "defined_in_package": "mail",
+    "full_name": "Activity State"
+   },
+   {
+    "name": "activity_user_id",
+    "type": "Many2one",
+    "comodel": "res.users",
+    "string": "Responsible User",
+    "compute": "_compute_activity_user_id",
+    "readonly": true,
+    "search": "_search_activity_user_id",
+    "groups": "base.group_user",
+    "defined_in_package": "mail",
+    "full_name": "Responsible User",
+    "target_entity": "res.users"
+   },
+   {
+    "name": "activity_type_id",
+    "type": "Many2one",
+    "comodel": "mail.activity.type",
+    "string": "Next Activity Type",
+    "related": "activity_ids.activity_type_id",
+    "readonly": false,
+    "search": "_search_activity_type_id",
+    "groups": "base.group_user",
+    "defined_in_package": "mail",
+    "full_name": "Next Activity Type",
+    "target_entity": "mail.activity.type"
+   },
+   {
+    "name": "activity_type_icon",
+    "type": "Char",
+    "string": "Activity Type Icon",
+    "related": "activity_ids.icon",
+    "defined_in_package": "mail",
+    "full_name": "Activity Type Icon"
+   },
+   {
+    "name": "activity_date_deadline",
+    "type": "Date",
+    "string": "Next Activity Deadline",
+    "compute": "_compute_activity_date_deadline",
+    "search": "_search_activity_date_deadline",
+    "compute_sudo": false,
+    "readonly": true,
+    "store": false,
+    "groups": "base.group_user",
+    "defined_in_package": "mail",
+    "full_name": "Next Activity Deadline"
+   },
+   {
+    "name": "my_activity_date_deadline",
+    "type": "Date",
+    "string": "My Activity Deadline",
+    "compute": "_compute_my_activity_date_deadline",
+    "search": "_search_my_activity_date_deadline",
+    "compute_sudo": false,
+    "readonly": true,
+    "groups": "base.group_user",
+    "defined_in_package": "mail",
+    "full_name": "My Activity Deadline"
+   },
+   {
+    "name": "activity_summary",
+    "type": "Char",
+    "string": "Next Activity Summary",
+    "related": "activity_ids.summary",
+    "readonly": false,
+    "search": "_search_activity_summary",
+    "groups": "base.group_user",
+    "defined_in_package": "mail",
+    "full_name": "Next Activity Summary"
+   },
+   {
+    "name": "activity_exception_decoration",
+    "type": "Selection",
+    "selection": [
+     [
+      "warning",
+      "Alert"
+     ],
+     [
+      "danger",
+      "Error"
+     ]
+    ],
+    "compute": "_compute_activity_exception_type",
+    "search": "_search_activity_exception_decoration",
+    "help": "Type of the exception activity on record.",
+    "defined_in_package": "mail",
+    "string": "Activity Exception Decoration",
+    "full_name": "Activity Exception Decoration"
+   },
+   {
+    "name": "activity_exception_icon",
+    "type": "Char",
+    "string": "Icon",
+    "help": "Icon to indicate an exception activity.",
+    "compute": "_compute_activity_exception_type",
+    "defined_in_package": "mail",
+    "full_name": "Icon"
+   },
+   {
+    "name": "activity_calendar_event_id",
+    "type": "Many2one",
+    "comodel": "calendar.event",
+    "string": "Next Activity Calendar Event",
+    "compute": "_compute_activity_calendar_event_id",
+    "groups": "base.group_user",
+    "defined_in_package": "calendar",
+    "full_name": "Next Activity Calendar Event",
+    "target_entity": "calendar.event"
+   }
+  ],
+  "constraints": [],
+  "operations": [
+   {
+    "name": "_default_activity_type",
+    "kind": "preparation_rule",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Define a default fallback activity type when requested xml id wasn't found.\n\nCan be overriden to specify the default activity type of a model.\nIt is only called in in activity_schedule() for now.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_exception_type",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_ids.activity_type_id.decoration_type",
+         "activity_ids.activity_type_id.icon"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_user_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_ids.user_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 3,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_activity_exception_decoration",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 2,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_state",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_ids.state"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_activity_state",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "value"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 56,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_date_deadline",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_ids.date_deadline"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_activity_date_deadline",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 6,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_activity_user_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 17,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_activity_type_id",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_activity_summary",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.model",
+        "arguments": [],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_my_activity_date_deadline",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_ids.date_deadline",
+         "activity_ids.user_id"
+        ],
+        "options": {}
+       },
+       {
+        "name": "api.depends_context",
+        "arguments": [
+         "uid"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": null,
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_search_my_activity_date_deadline",
+    "kind": "search_rule",
+    "arguments": [
+     "self",
+     "operator",
+     "operand"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 9,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_read_group_groupby",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "alias",
+     "groupby_spec",
+     "query"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 38,
+      "calls_previous_definition": true,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reschedule_my_next_today",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reschedule_my_next_tomorrow",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "action_reschedule_my_next_nextweek",
+    "kind": "user_action",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": null,
+      "size_in_lines": 4,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_send_mail",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "template_id"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Automatically send an email based on the given mail.template, given\nits ID. ",
+      "size_in_lines": 11,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_search",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "act_type_xmlids",
+     "user_id",
+     "additional_domain",
+     "only_automated"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Search automated activities on current record set, given a list of activity\ntypes xml IDs. It is useful when dealing with specific types involved in automatic\nactivities management.\n\n:param act_type_xmlids: list of activity types xml IDs\n:param user_id: if set, restrict to activities of that user_id;\n:param additional_domain: if set, filter on that domain;\n:param only_automated: if unset, search for all activities, not only automated ones;",
+      "size_in_lines": 32,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_schedule",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "act_type_xmlid",
+     "date_deadline",
+     "summary",
+     "note",
+     "**act_values"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Schedule an activity on each record of the current record set.\nThis method allow to provide as parameter act_type_xmlid. This is an\nxml_id of activity type instead of directly giving an activity_type_id.\nIt is useful to avoid having various \"env.ref\" in the code and allow\nto let the mixin handle access rights.\n\nNote that unless specified otherwise in act_values, the activities created\nwill have their \"automated\" field set to True.\n\n:param date_deadline: the day the activity must be scheduled on\nthe timezone of the user must be considered to set the correct deadline",
+      "size_in_lines": 53,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_activity_schedule_with_view",
+    "kind": "internal_rule",
+    "arguments": [
+     "self",
+     "act_type_xmlid",
+     "date_deadline",
+     "summary",
+     "views_or_xmlid",
+     "render_context",
+     "**act_values"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Helper method: Schedule an activity on each record of the current record set.\nThis method allow to the same mecanism as `activity_schedule`, but provide\n2 additionnal parameters:\n:param views_or_xmlid: record of ir.ui.view or string representing the xmlid\n    of the qweb template to render\n:type views_or_xmlid: string or recordset\n:param render_context: the values required to render the given qweb template\n:type render_context: dict",
+      "size_in_lines": 21,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_reschedule",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "act_type_xmlids",
+     "user_id",
+     "date_deadline",
+     "new_user_id",
+     "only_automated"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Reschedule some automated activities. Activities to reschedule are\nselected based on type xml ids and optionally by user. Purpose is to be\nable to\n\n * update the deadline to date_deadline;\n * update the responsible to new_user_id;",
+      "size_in_lines": 25,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_feedback",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "act_type_xmlids",
+     "user_id",
+     "feedback",
+     "attachment_ids",
+     "only_automated"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Set activities as done, limiting to some activity types and\noptionally to a given user. ",
+      "size_in_lines": 15,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "activity_unlink",
+    "kind": "operation",
+    "arguments": [
+     "self",
+     "act_type_xmlids",
+     "user_id",
+     "only_automated"
+    ],
+    "definitions": [
+     {
+      "package": "mail",
+      "decorators": [],
+      "documentation": "Unlink activities, limiting to some activity types and optionally\nto a given user. ",
+      "size_in_lines": 13,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   },
+   {
+    "name": "_compute_activity_calendar_event_id",
+    "kind": "computation",
+    "arguments": [
+     "self"
+    ],
+    "definitions": [
+     {
+      "package": "calendar",
+      "decorators": [
+       {
+        "name": "api.depends",
+        "arguments": [
+         "activity_ids.calendar_event_id"
+        ],
+        "options": {}
+       }
+      ],
+      "documentation": "This computes the calendar event of the next activity.\nIt evaluates to false if there is no such event.",
+      "size_in_lines": 7,
+      "calls_previous_definition": false,
+      "validation_messages": []
+     }
+    ]
+   }
+  ],
+  "validation_messages": [],
+  "state_fields": [
+   "activity_state"
+  ],
+  "access_rights": [],
+  "record_rules": [],
+  "views": [],
+  "window_actions": [],
+  "server_actions": [],
+  "report_actions": [],
+  "menus": [],
+  "scheduled_jobs": [],
+  "sequences": [],
+  "mail_templates": []
+ }
+}
