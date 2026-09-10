@@ -1,0 +1,2082 @@
+{
+ "catalog": {
+  "name": "table_constraints",
+  "description": "Every unique and check constraint of the persistent schema.",
+  "record_count": 296,
+  "generated_from": "the live relational schema and entity registry of a complete installation of every capability package"
+ },
+ "records": [
+  {
+   "storage_name": "account_account_tag",
+   "entity": "account.account.tag",
+   "name": "account_account_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, applicability, country_id)"
+  },
+  {
+   "storage_name": "account_edi_document",
+   "entity": "account.edi.document",
+   "name": "account_edi_document_unique_edi_document_by_move_by_format",
+   "kind": "unique",
+   "definition": "UNIQUE (edi_format_id, move_id)"
+  },
+  {
+   "storage_name": "account_edi_format",
+   "entity": "account.edi.format",
+   "name": "account_edi_format_unique_code",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "account_edi_proxy_client_user",
+   "entity": "account_edi_proxy_client.user",
+   "name": "account_edi_proxy_client_user_unique_id_client",
+   "kind": "unique",
+   "definition": "UNIQUE (id_client)"
+  },
+  {
+   "storage_name": "account_fiscal_position_account",
+   "entity": "account.fiscal.position.account",
+   "name": "account_fiscal_position_account_account_src_dest_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (position_id, account_src_id, account_dest_id)"
+  },
+  {
+   "storage_name": "account_group",
+   "entity": "account.group",
+   "name": "account_group_check_length_prefix",
+   "kind": "check",
+   "definition": "CHECK ((char_length((COALESCE(code_prefix_start, ''::character varying))::text) = char_length((COALESCE(code_prefix_end, ''::character varying))::text)))"
+  },
+  {
+   "storage_name": "account_journal",
+   "entity": "account.journal",
+   "name": "account_journal_code_company_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (company_id, code)"
+  },
+  {
+   "storage_name": "account_journal_group",
+   "entity": "account.journal.group",
+   "name": "account_journal_group_uniq_name",
+   "kind": "unique",
+   "definition": "UNIQUE (company_id, name)"
+  },
+  {
+   "storage_name": "account_move",
+   "entity": "account.move",
+   "name": "account_move_l10n_pl_edi_number_company_id_move_type_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (l10n_pl_edi_number, company_id, move_type)"
+  },
+  {
+   "storage_name": "account_move_line",
+   "entity": "account.move.line",
+   "name": "account_move_line_check_accountable_required_fields",
+   "kind": "check",
+   "definition": "CHECK ((((display_type)::text = ANY ((ARRAY['line_section'::character varying, 'line_subsection'::character varying, 'line_note'::character varying])::text[])) OR (account_id IS NOT NULL)))"
+  },
+  {
+   "storage_name": "account_move_line",
+   "entity": "account.move.line",
+   "name": "account_move_line_check_amount_currency_balance_sign",
+   "kind": "check",
+   "definition": "CHECK ((((display_type)::text = ANY ((ARRAY['line_section'::character varying, 'line_subsection'::character varying, 'line_note'::character varying])::text[])) OR (((balance <= (0)::numeric) AND (amount_currency <= (0)::numeric)) OR ((balance >= (0)::numeric) AND (amount_currency >= (0)::numeric)))))"
+  },
+  {
+   "storage_name": "account_move_line",
+   "entity": "account.move.line",
+   "name": "account_move_line_check_credit_debit",
+   "kind": "check",
+   "definition": "CHECK ((((display_type)::text = ANY ((ARRAY['line_section'::character varying, 'line_subsection'::character varying, 'line_note'::character varying])::text[])) OR ((credit * debit) = (0)::numeric)))"
+  },
+  {
+   "storage_name": "account_move_line",
+   "entity": "account.move.line",
+   "name": "account_move_line_check_non_accountable_fields_null",
+   "kind": "check",
+   "definition": "CHECK ((((display_type)::text <> ALL ((ARRAY['line_section'::character varying, 'line_subsection'::character varying, 'line_note'::character varying])::text[])) OR ((amount_currency = (0)::numeric) AND (debit = (0)::numeric) AND (credit = (0)::numeric) AND (account_id IS NULL))))"
+  },
+  {
+   "storage_name": "account_payment",
+   "entity": "account.payment",
+   "name": "account_payment_check_amount_not_negative",
+   "kind": "check",
+   "definition": "CHECK ((amount >= 0.0))"
+  },
+  {
+   "storage_name": "account_payment_method",
+   "entity": "account.payment.method",
+   "name": "account_payment_method_name_code_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (code, payment_type)"
+  },
+  {
+   "storage_name": "account_report_expression",
+   "entity": "account.report.expression",
+   "name": "account_report_expression_domain_engine_subformula_required",
+   "kind": "check",
+   "definition": "CHECK ((((engine)::text <> 'domain'::text) OR (subformula IS NOT NULL)))"
+  },
+  {
+   "storage_name": "account_report_expression",
+   "entity": "account.report.expression",
+   "name": "account_report_expression_line_label_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (report_line_id, label)"
+  },
+  {
+   "storage_name": "account_report_line",
+   "entity": "account.report.line",
+   "name": "account_report_line_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (report_id, code)"
+  },
+  {
+   "storage_name": "auth_passkey_key",
+   "entity": "auth.passkey.key",
+   "name": "auth_passkey_key_unique_identifier",
+   "kind": "unique",
+   "definition": "UNIQUE (credential_identifier)"
+  },
+  {
+   "storage_name": "auth_totp_device",
+   "entity": "auth_totp.device",
+   "name": "auth_totp_device_index_check",
+   "kind": "check",
+   "definition": "CHECK ((char_length((index)::text) = 8))"
+  },
+  {
+   "storage_name": "blog_tag",
+   "entity": "blog.tag",
+   "name": "blog_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "blog_tag_category",
+   "entity": "blog.tag.category",
+   "name": "blog_tag_category_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "calendar_event_type",
+   "entity": "calendar.event.type",
+   "name": "calendar_event_type_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "calendar_filters",
+   "entity": "calendar.filters",
+   "name": "calendar_filters_user_id_partner_id_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (user_id, partner_id)"
+  },
+  {
+   "storage_name": "calendar_recurrence",
+   "entity": "calendar.recurrence",
+   "name": "calendar_recurrence_month_day",
+   "kind": "check",
+   "definition": "CHECK ((((rrule_type)::text <> 'monthly'::text) OR ((month_by)::text <> 'day'::text) OR ((day >= 1) AND (day <= 31)) OR (((weekday)::text = ANY ((ARRAY['MON'::character varying, 'TUE'::character varying, 'WED'::character varying, 'THU'::character varying, 'FRI'::character varying, 'SAT'::character varying, 'SUN'::character varying])::text[])) AND ((byday)::text = ANY ((ARRAY['1'::character varying, '2'::character varying, '3'::character varying, '4'::character varying, '-1'::character varying])::text[])))))"
+  },
+  {
+   "storage_name": "card_campaign_tag",
+   "entity": "card.campaign.tag",
+   "name": "card_campaign_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "card_card",
+   "entity": "card.card",
+   "name": "card_card_campaign_record_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (campaign_id, res_id)"
+  },
+  {
+   "storage_name": "chatbot_message",
+   "entity": "chatbot.message",
+   "name": "chatbot_message_unique_mail_message_id",
+   "kind": "unique",
+   "definition": "UNIQUE (mail_message_id)"
+  },
+  {
+   "storage_name": "crm_iap_lead_industry",
+   "entity": "crm.iap.lead.industry",
+   "name": "crm_iap_lead_industry_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "crm_iap_lead_role",
+   "entity": "crm.iap.lead.role",
+   "name": "crm_iap_lead_role_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "crm_iap_lead_seniority",
+   "entity": "crm.iap.lead.seniority",
+   "name": "crm_iap_lead_seniority_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "crm_lead",
+   "entity": "crm.lead",
+   "name": "crm_lead_check_probability",
+   "kind": "check",
+   "definition": "CHECK (((probability >= (0)::double precision) AND (probability <= (100)::double precision)))"
+  },
+  {
+   "storage_name": "crm_recurring_plan",
+   "entity": "crm.recurring.plan",
+   "name": "crm_recurring_plan_check_number_of_months",
+   "kind": "check",
+   "definition": "CHECK ((number_of_months >= 0))"
+  },
+  {
+   "storage_name": "crm_reveal_rule",
+   "entity": "crm.reveal.rule",
+   "name": "crm_reveal_rule_limit_extra_contacts",
+   "kind": "check",
+   "definition": "CHECK (((extra_contacts >= 1) AND (extra_contacts <= 5)))"
+  },
+  {
+   "storage_name": "crm_tag",
+   "entity": "crm.tag",
+   "name": "crm_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "data_recycle_model",
+   "entity": "data_recycle.model",
+   "name": "data_recycle_model_check_notif_freq",
+   "kind": "check",
+   "definition": "CHECK ((notify_frequency > 0))"
+  },
+  {
+   "storage_name": "decimal_precision",
+   "entity": "decimal.precision",
+   "name": "decimal_precision_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "delivery_carrier",
+   "entity": "delivery.carrier",
+   "name": "delivery_carrier_margin_not_under_100_percent",
+   "kind": "check",
+   "definition": "CHECK ((margin >= ('-1'::integer)::double precision))"
+  },
+  {
+   "storage_name": "delivery_carrier",
+   "entity": "delivery.carrier",
+   "name": "delivery_carrier_shipping_insurance_is_percentage",
+   "kind": "check",
+   "definition": "CHECK (((shipping_insurance >= 0) AND (shipping_insurance <= 100)))"
+  },
+  {
+   "storage_name": "delivery_zip_prefix",
+   "entity": "delivery.zip.prefix",
+   "name": "delivery_zip_prefix_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "discuss_call_history",
+   "entity": "discuss.call.history",
+   "name": "discuss_call_history_channel_id_not_null_constraint",
+   "kind": "check",
+   "definition": "CHECK ((channel_id IS NOT NULL))"
+  },
+  {
+   "storage_name": "discuss_call_history",
+   "entity": "discuss.call.history",
+   "name": "discuss_call_history_message_id_unique_constraint",
+   "kind": "unique",
+   "definition": "UNIQUE (start_call_message_id)"
+  },
+  {
+   "storage_name": "discuss_call_history",
+   "entity": "discuss.call.history",
+   "name": "discuss_call_history_start_dt_is_not_null_constraint",
+   "kind": "check",
+   "definition": "CHECK ((start_dt IS NOT NULL))"
+  },
+  {
+   "storage_name": "discuss_channel",
+   "entity": "discuss.channel",
+   "name": "discuss_channel_from_message_id_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (from_message_id)"
+  },
+  {
+   "storage_name": "discuss_channel",
+   "entity": "discuss.channel",
+   "name": "discuss_channel_group_public_id_check",
+   "kind": "check",
+   "definition": "CHECK ((((channel_type)::text = 'channel'::text) OR (group_public_id IS NULL)))"
+  },
+  {
+   "storage_name": "discuss_channel",
+   "entity": "discuss.channel",
+   "name": "discuss_channel_livechat_end_dt_status_constraint",
+   "kind": "check",
+   "definition": "CHECK (((livechat_end_dt IS NULL) OR (livechat_status IS NULL)))"
+  },
+  {
+   "storage_name": "discuss_channel",
+   "entity": "discuss.channel",
+   "name": "discuss_channel_livechat_operator_id",
+   "kind": "check",
+   "definition": "CHECK (((((channel_type)::text = 'livechat'::text) AND (livechat_operator_id IS NOT NULL)) OR ((channel_type)::text <> 'livechat'::text)))"
+  },
+  {
+   "storage_name": "discuss_channel",
+   "entity": "discuss.channel",
+   "name": "discuss_channel_uuid_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (uuid)"
+  },
+  {
+   "storage_name": "discuss_channel_member",
+   "entity": "discuss.channel.member",
+   "name": "discuss_channel_member_partner_or_guest_exists",
+   "kind": "check",
+   "definition": "CHECK ((((partner_id IS NOT NULL) AND (guest_id IS NULL)) OR ((partner_id IS NULL) AND (guest_id IS NOT NULL))))"
+  },
+  {
+   "storage_name": "discuss_channel_rtc_session",
+   "entity": "discuss.channel.rtc.session",
+   "name": "discuss_channel_rtc_session_channel_member_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (channel_member_id)"
+  },
+  {
+   "storage_name": "discuss_gif_favorite",
+   "entity": "discuss.gif.favorite",
+   "name": "discuss_gif_favorite_user_gif_favorite",
+   "kind": "unique",
+   "definition": "UNIQUE (create_uid, tenor_gif_id)"
+  },
+  {
+   "storage_name": "event_booth_registration",
+   "entity": "event.booth.registration",
+   "name": "event_booth_registration_unique_registration",
+   "kind": "unique",
+   "definition": "UNIQUE (sale_order_line_id, event_booth_id)"
+  },
+  {
+   "storage_name": "event_lead_request",
+   "entity": "event.lead.request",
+   "name": "event_lead_request_uniq_event",
+   "kind": "unique",
+   "definition": "UNIQUE (event_id)"
+  },
+  {
+   "storage_name": "event_question",
+   "entity": "event.question",
+   "name": "event_question_check_default_question_is_reusable",
+   "kind": "check",
+   "definition": "CHECK (((is_default IS DISTINCT FROM true) OR (is_reusable IS TRUE)))"
+  },
+  {
+   "storage_name": "event_registration",
+   "entity": "event.registration",
+   "name": "event_registration_barcode_event_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (barcode)"
+  },
+  {
+   "storage_name": "event_registration_answer",
+   "entity": "event.registration.answer",
+   "name": "event_registration_answer_value_check",
+   "kind": "check",
+   "definition": "CHECK (((value_answer_id IS NOT NULL) OR (COALESCE(value_text_box, ''::text) <> ''::text)))"
+  },
+  {
+   "storage_name": "event_track_tag",
+   "entity": "event.track.tag",
+   "name": "event_track_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "fleet_vehicle_model_category",
+   "entity": "fleet.vehicle.model.category",
+   "name": "fleet_vehicle_model_category_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "fleet_vehicle_state",
+   "entity": "fleet.vehicle.state",
+   "name": "fleet_vehicle_state_fleet_state_name_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "fleet_vehicle_tag",
+   "entity": "fleet.vehicle.tag",
+   "name": "fleet_vehicle_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "forum_post_vote",
+   "entity": "forum.post.vote",
+   "name": "forum_post_vote_vote_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (post_id, user_id)"
+  },
+  {
+   "storage_name": "forum_tag",
+   "entity": "forum.tag",
+   "name": "forum_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, forum_id)"
+  },
+  {
+   "storage_name": "gamification_karma_rank",
+   "entity": "gamification.karma.rank",
+   "name": "gamification_karma_rank_karma_min_check",
+   "kind": "check",
+   "definition": "CHECK ((karma_min > 0))"
+  },
+  {
+   "storage_name": "hr_applicant_category",
+   "entity": "hr.applicant.category",
+   "name": "hr_applicant_category_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "hr_attendance_overtime_line",
+   "entity": "hr.attendance.overtime.line",
+   "name": "hr_attendance_overtime_line_overtime_start_before_end",
+   "kind": "check",
+   "definition": "CHECK ((time_stop > time_start))"
+  },
+  {
+   "storage_name": "hr_attendance_overtime_rule",
+   "entity": "hr.attendance.overtime.rule",
+   "name": "hr_attendance_overtime_rule_timing_start_is_hour",
+   "kind": "check",
+   "definition": "CHECK ((((0)::double precision <= timing_start) AND (timing_start < (24)::double precision)))"
+  },
+  {
+   "storage_name": "hr_attendance_overtime_rule",
+   "entity": "hr.attendance.overtime.rule",
+   "name": "hr_attendance_overtime_rule_timing_stop_is_hour",
+   "kind": "check",
+   "definition": "CHECK ((((0)::double precision <= timing_stop) AND (timing_stop <= (24)::double precision)))"
+  },
+  {
+   "storage_name": "hr_employee",
+   "entity": "hr.employee",
+   "name": "hr_employee_barcode_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (barcode)"
+  },
+  {
+   "storage_name": "hr_employee",
+   "entity": "hr.employee",
+   "name": "hr_employee_user_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (user_id, company_id)"
+  },
+  {
+   "storage_name": "hr_employee_category",
+   "entity": "hr.employee.category",
+   "name": "hr_employee_category_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "hr_employee_location",
+   "entity": "hr.employee.location",
+   "name": "hr_employee_location_uniq_exceptional_per_day",
+   "kind": "unique",
+   "definition": "UNIQUE (employee_id, date)"
+  },
+  {
+   "storage_name": "hr_job",
+   "entity": "hr.job",
+   "name": "hr_job_name_company_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, company_id, department_id)"
+  },
+  {
+   "storage_name": "hr_job",
+   "entity": "hr.job",
+   "name": "hr_job_no_of_recruitment_positive",
+   "kind": "check",
+   "definition": "CHECK ((no_of_recruitment >= 0))"
+  },
+  {
+   "storage_name": "hr_job_platform",
+   "entity": "hr.job.platform",
+   "name": "hr_job_platform_email_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (email)"
+  },
+  {
+   "storage_name": "hr_leave",
+   "entity": "hr.leave",
+   "name": "hr_leave_date_check2",
+   "kind": "check",
+   "definition": "CHECK ((date_from <= date_to))"
+  },
+  {
+   "storage_name": "hr_leave",
+   "entity": "hr.leave",
+   "name": "hr_leave_date_check3",
+   "kind": "check",
+   "definition": "CHECK ((request_date_from <= request_date_to))"
+  },
+  {
+   "storage_name": "hr_leave",
+   "entity": "hr.leave",
+   "name": "hr_leave_duration_check",
+   "kind": "check",
+   "definition": "CHECK ((number_of_days >= (0)::double precision))"
+  },
+  {
+   "storage_name": "hr_leave_accrual_level",
+   "entity": "hr.leave.accrual.level",
+   "name": "hr_leave_accrual_level_added_value_greater_than_zero",
+   "kind": "check",
+   "definition": "CHECK ((added_value > (0)::numeric))"
+  },
+  {
+   "storage_name": "hr_leave_accrual_level",
+   "entity": "hr.leave.accrual.level",
+   "name": "hr_leave_accrual_level_start_count_check",
+   "kind": "check",
+   "definition": "CHECK ((((start_count > 0) AND ((milestone_date)::text = 'after'::text)) OR ((start_count = 0) AND ((milestone_date)::text = 'creation'::text))))"
+  },
+  {
+   "storage_name": "hr_leave_accrual_level",
+   "entity": "hr.leave.accrual.level",
+   "name": "hr_leave_accrual_level_valid_accrual_validity_value",
+   "kind": "check",
+   "definition": "CHECK (((accrual_validity IS NOT TRUE) OR (COALESCE(accrual_validity_count, 0) > 0)))"
+  },
+  {
+   "storage_name": "hr_leave_accrual_level",
+   "entity": "hr.leave.accrual.level",
+   "name": "hr_leave_accrual_level_valid_postpone_max_days_value",
+   "kind": "check",
+   "definition": "CHECK ((((action_with_unused_accruals)::text <> 'all'::text) OR ((carryover_options)::text <> 'limited'::text) OR (COALESCE(postpone_max_days, 0) > 0)))"
+  },
+  {
+   "storage_name": "hr_leave_accrual_level",
+   "entity": "hr.leave.accrual.level",
+   "name": "hr_leave_accrual_level_valid_yearly_cap_value",
+   "kind": "check",
+   "definition": "CHECK (((cap_accrued_time_yearly IS NOT TRUE) OR (COALESCE(maximum_leave_yearly, (0)::numeric) > (0)::numeric)))"
+  },
+  {
+   "storage_name": "hr_leave_allocation",
+   "entity": "hr.leave.allocation",
+   "name": "hr_leave_allocation_duration_check",
+   "kind": "check",
+   "definition": "CHECK ((((number_of_days > (0)::double precision) AND ((allocation_type)::text = 'regular'::text)) OR ((allocation_type)::text <> 'regular'::text)))"
+  },
+  {
+   "storage_name": "hr_leave_mandatory_day",
+   "entity": "hr.leave.mandatory.day",
+   "name": "hr_leave_mandatory_day_date_from_after_day_to",
+   "kind": "check",
+   "definition": "CHECK ((start_date <= end_date))"
+  },
+  {
+   "storage_name": "hr_leave_type",
+   "entity": "hr.leave.type",
+   "name": "hr_leave_type_check_negative",
+   "kind": "check",
+   "definition": "CHECK (((NOT allows_negative) OR (max_allowed_negative > 0)))"
+  },
+  {
+   "storage_name": "hr_recruitment_degree",
+   "entity": "hr.recruitment.degree",
+   "name": "hr_recruitment_degree_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "hr_recruitment_degree",
+   "entity": "hr.recruitment.degree",
+   "name": "hr_recruitment_degree_score_range",
+   "kind": "check",
+   "definition": "CHECK (((score >= (0)::double precision) AND (score <= (1)::double precision)))"
+  },
+  {
+   "storage_name": "hr_resume_line",
+   "entity": "hr.resume.line",
+   "name": "hr_resume_line_date_check",
+   "kind": "check",
+   "definition": "CHECK (((date_start <= date_end) OR (date_end IS NULL)))"
+  },
+  {
+   "storage_name": "hr_skill_level",
+   "entity": "hr.skill.level",
+   "name": "hr_skill_level_check_level_progress",
+   "kind": "check",
+   "definition": "CHECK (((level_progress >= 0) AND (level_progress <= 100)))"
+  },
+  {
+   "storage_name": "hr_user_work_entry_employee",
+   "entity": "hr.user.work.entry.employee",
+   "name": "hr_user_work_entry_employee_user_id_employee_id_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (user_id, employee_id)"
+  },
+  {
+   "storage_name": "hr_version",
+   "entity": "hr.version",
+   "name": "hr_version_check_contract_start_date_defined",
+   "kind": "check",
+   "definition": "CHECK (((contract_date_end IS NULL) OR (contract_date_start IS NOT NULL)))"
+  },
+  {
+   "storage_name": "iap_service",
+   "entity": "iap.service",
+   "name": "iap_service_unique_technical_name",
+   "kind": "unique",
+   "definition": "UNIQUE (technical_name)"
+  },
+  {
+   "storage_name": "im_livechat_channel",
+   "entity": "im_livechat.channel",
+   "name": "im_livechat_channel_max_sessions_mode_greater_than_zero",
+   "kind": "check",
+   "definition": "CHECK ((max_sessions > 0))"
+  },
+  {
+   "storage_name": "im_livechat_channel_member_history",
+   "entity": "im_livechat.channel.member.history",
+   "name": "im_livechat_channel_member_history_member_id_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (member_id)"
+  },
+  {
+   "storage_name": "im_livechat_channel_member_history",
+   "entity": "im_livechat.channel.member.history",
+   "name": "im_livechat_channel_member_history_partner_id_or_guest_3b134909",
+   "kind": "check",
+   "definition": "CHECK (((partner_id IS NULL) OR (guest_id IS NULL)))"
+  },
+  {
+   "storage_name": "ir_act_client",
+   "entity": null,
+   "name": "ir_act_client_path_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (path)"
+  },
+  {
+   "storage_name": "ir_act_report_xml",
+   "entity": null,
+   "name": "ir_act_report_xml_path_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (path)"
+  },
+  {
+   "storage_name": "ir_act_server",
+   "entity": null,
+   "name": "ir_act_server_path_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (path)"
+  },
+  {
+   "storage_name": "ir_act_url",
+   "entity": null,
+   "name": "ir_act_url_path_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (path)"
+  },
+  {
+   "storage_name": "ir_act_window",
+   "entity": null,
+   "name": "ir_act_window_path_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (path)"
+  },
+  {
+   "storage_name": "ir_actions",
+   "entity": null,
+   "name": "ir_actions_path_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (path)"
+  },
+  {
+   "storage_name": "ir_config_parameter",
+   "entity": "ir.config_parameter",
+   "name": "ir_config_parameter_key_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (key)"
+  },
+  {
+   "storage_name": "ir_cron",
+   "entity": "ir.cron",
+   "name": "ir_cron_check_strictly_positive_interval",
+   "kind": "check",
+   "definition": "CHECK ((interval_number > 0))"
+  },
+  {
+   "storage_name": "ir_embedded_actions",
+   "entity": "ir.embedded.actions",
+   "name": "ir_embedded_actions_check_only_one_action_defined",
+   "kind": "check",
+   "definition": "CHECK ((((action_id IS NOT NULL) AND (python_method IS NULL)) OR ((action_id IS NULL) AND (python_method IS NOT NULL))))"
+  },
+  {
+   "storage_name": "ir_embedded_actions",
+   "entity": "ir.embedded.actions",
+   "name": "ir_embedded_actions_check_python_method_requires_name",
+   "kind": "check",
+   "definition": "CHECK ((NOT ((python_method IS NOT NULL) AND (name IS NULL))))"
+  },
+  {
+   "storage_name": "ir_filters",
+   "entity": "ir.filters",
+   "name": "ir_filters_check_res_id_only_when_embedded_action",
+   "kind": "check",
+   "definition": "CHECK ((NOT ((embedded_parent_res_id IS NOT NULL) AND (embedded_action_id IS NULL))))"
+  },
+  {
+   "storage_name": "ir_filters",
+   "entity": "ir.filters",
+   "name": "ir_filters_check_sort_json",
+   "kind": "check",
+   "definition": "CHECK (((sort IS NULL) OR (jsonb_typeof((sort)::jsonb) = 'array'::text)))"
+  },
+  {
+   "storage_name": "ir_mail_server",
+   "entity": "ir.mail_server",
+   "name": "ir_mail_server_certificate_requires_tls",
+   "kind": "check",
+   "definition": "CHECK ((((smtp_encryption)::text <> 'none'::text) OR ((smtp_authentication)::text <> 'certificate'::text)))"
+  },
+  {
+   "storage_name": "ir_mail_server",
+   "entity": "ir.mail_server",
+   "name": "ir_mail_server_unique_owner_user_id",
+   "kind": "unique",
+   "definition": "UNIQUE (owner_user_id)"
+  },
+  {
+   "storage_name": "ir_model",
+   "entity": "ir.model",
+   "name": "ir_model_obj_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (model)"
+  },
+  {
+   "storage_name": "ir_model_constraint",
+   "entity": "ir.model.constraint",
+   "name": "ir_model_constraint_module_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, module)"
+  },
+  {
+   "storage_name": "ir_model_data",
+   "entity": "ir.model.data",
+   "name": "ir_model_data_name_nospaces",
+   "kind": "check",
+   "definition": "CHECK (((name)::text !~~ '% %'::text))"
+  },
+  {
+   "storage_name": "ir_model_fields",
+   "entity": "ir.model.fields",
+   "name": "ir_model_fields_name_manual_field",
+   "kind": "check",
+   "definition": "CHECK ((((state)::text <> 'manual'::text) OR ((name)::text ~~ 'x\\_%'::text)))"
+  },
+  {
+   "storage_name": "ir_model_fields",
+   "entity": "ir.model.fields",
+   "name": "ir_model_fields_name_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (model, name)"
+  },
+  {
+   "storage_name": "ir_model_fields",
+   "entity": "ir.model.fields",
+   "name": "ir_model_fields_size_gt_zero",
+   "kind": "check",
+   "definition": "CHECK ((size >= 0))"
+  },
+  {
+   "storage_name": "ir_model_fields_selection",
+   "entity": "ir.model.fields.selection",
+   "name": "ir_model_fields_selection_selection_field_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (field_id, value)"
+  },
+  {
+   "storage_name": "ir_model_inherit",
+   "entity": "ir.model.inherit",
+   "name": "ir_model_inherit_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (model_id, parent_id)"
+  },
+  {
+   "storage_name": "ir_module_module",
+   "entity": "ir.module.module",
+   "name": "ir_module_module_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "ir_rule",
+   "entity": "ir.rule",
+   "name": "ir_rule_no_access_rights",
+   "kind": "check",
+   "definition": "CHECK (((perm_read <> false) OR (perm_write <> false) OR (perm_create <> false) OR (perm_unlink <> false)))"
+  },
+  {
+   "storage_name": "ir_sequence_date_range",
+   "entity": "ir.sequence.date_range",
+   "name": "ir_sequence_date_range_unique_range_per_sequence",
+   "kind": "unique",
+   "definition": "UNIQUE (sequence_id, date_from, date_to)"
+  },
+  {
+   "storage_name": "ir_ui_view",
+   "entity": "ir.ui.view",
+   "name": "ir_ui_view_inheritance_mode",
+   "kind": "check",
+   "definition": "CHECK ((((mode)::text <> 'extension'::text) OR (inherit_id IS NOT NULL)))"
+  },
+  {
+   "storage_name": "ir_ui_view",
+   "entity": "ir.ui.view",
+   "name": "ir_ui_view_qweb_required_key",
+   "kind": "check",
+   "definition": "CHECK ((((type)::text <> 'qweb'::text) OR (key IS NOT NULL)))"
+  },
+  {
+   "storage_name": "l10n_ar_afip_responsibility_type",
+   "entity": "l10n_ar.afip.responsibility.type",
+   "name": "l10n_ar_afip_responsibility_type_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "l10n_ar_afip_responsibility_type",
+   "entity": "l10n_ar.afip.responsibility.type",
+   "name": "l10n_ar_afip_responsibility_type_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "l10n_br_zip_range",
+   "entity": "l10n_br.zip.range",
+   "name": "l10n_br_zip_range_uniq_end",
+   "kind": "unique",
+   "definition": "UNIQUE (\"end\")"
+  },
+  {
+   "storage_name": "l10n_br_zip_range",
+   "entity": "l10n_br.zip.range",
+   "name": "l10n_br_zip_range_uniq_start",
+   "kind": "unique",
+   "definition": "UNIQUE (start)"
+  },
+  {
+   "storage_name": "l10n_cz_tax_office",
+   "entity": "l10n_cz.tax_office",
+   "name": "l10n_cz_tax_office_workplace_code_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (workplace_code)"
+  },
+  {
+   "storage_name": "l10n_eg_edi_thumb_drive",
+   "entity": "l10n_eg_edi.thumb.drive",
+   "name": "l10n_eg_edi_thumb_drive_user_drive_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (user_id, company_id)"
+  },
+  {
+   "storage_name": "l10n_in_pan_entity",
+   "entity": "l10n_in.pan.entity",
+   "name": "l10n_in_pan_entity_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "l10n_in_port_code",
+   "entity": "l10n_in.port.code",
+   "name": "l10n_in_port_code_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "l10n_in_section_alert",
+   "entity": "l10n_in.section.alert",
+   "name": "l10n_in_section_alert_aggregate_limit",
+   "kind": "check",
+   "definition": "CHECK ((aggregate_limit >= (0)::double precision))"
+  },
+  {
+   "storage_name": "l10n_in_section_alert",
+   "entity": "l10n_in.section.alert",
+   "name": "l10n_in_section_alert_per_transaction_limit",
+   "kind": "check",
+   "definition": "CHECK ((per_transaction_limit >= (0)::double precision))"
+  },
+  {
+   "storage_name": "l10n_it_edi_doi_declaration_of_intent",
+   "entity": "l10n_it_edi_doi.declaration_of_intent",
+   "name": "l10n_it_edi_doi_declaration_of_intent_protocol_number_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (protocol_number_part1, protocol_number_part2)"
+  },
+  {
+   "storage_name": "l10n_it_edi_doi_declaration_of_intent",
+   "entity": "l10n_it_edi_doi.declaration_of_intent",
+   "name": "l10n_it_edi_doi_declaration_of_intent_threshold_positive",
+   "kind": "check",
+   "definition": "CHECK ((threshold > (0)::numeric))"
+  },
+  {
+   "storage_name": "l10n_pl_l10n_pl_tax_office",
+   "entity": "l10n_pl.l10n_pl_tax_office",
+   "name": "l10n_pl_l10n_pl_tax_office_code_company_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "l10n_ro_cpv_code",
+   "entity": "l10n_ro.cpv.code",
+   "name": "l10n_ro_cpv_code_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "l10n_tr_nilvera_trailer_plate",
+   "entity": "l10n_tr.nilvera.trailer.plate",
+   "name": "l10n_tr_nilvera_trailer_plate_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, plate_number_type)"
+  },
+  {
+   "storage_name": "l10n_vn_edi_viettel_sinvoice_symbol",
+   "entity": "l10n_vn_edi_viettel.sinvoice.symbol",
+   "name": "l10n_vn_edi_viettel_sinvoice_symbol_name_template_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, invoice_template_id)"
+  },
+  {
+   "storage_name": "l10n_vn_edi_viettel_sinvoice_template",
+   "entity": "l10n_vn_edi_viettel.sinvoice.template",
+   "name": "l10n_vn_edi_viettel_sinvoice_template_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "link_tracker_code",
+   "entity": "link.tracker.code",
+   "name": "link_tracker_code_code",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "loyalty_card",
+   "entity": "loyalty.card",
+   "name": "loyalty_card_card_code_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "loyalty_program",
+   "entity": "loyalty.program",
+   "name": "loyalty_program_check_max_usage",
+   "kind": "check",
+   "definition": "CHECK (((limit_usage = false) OR (max_usage > 0)))"
+  },
+  {
+   "storage_name": "loyalty_reward",
+   "entity": "loyalty.reward",
+   "name": "loyalty_reward_discount_positive",
+   "kind": "check",
+   "definition": "CHECK ((((reward_type)::text <> 'discount'::text) OR (discount > (0)::double precision)))"
+  },
+  {
+   "storage_name": "loyalty_reward",
+   "entity": "loyalty.reward",
+   "name": "loyalty_reward_product_qty_positive",
+   "kind": "check",
+   "definition": "CHECK ((((reward_type)::text <> 'product'::text) OR (reward_product_qty > 0)))"
+  },
+  {
+   "storage_name": "loyalty_reward",
+   "entity": "loyalty.reward",
+   "name": "loyalty_reward_required_points_positive",
+   "kind": "check",
+   "definition": "CHECK ((required_points > (0)::double precision))"
+  },
+  {
+   "storage_name": "loyalty_rule",
+   "entity": "loyalty.rule",
+   "name": "loyalty_rule_reward_point_amount_positive",
+   "kind": "check",
+   "definition": "CHECK ((reward_point_amount > (0)::double precision))"
+  },
+  {
+   "storage_name": "lunch_alert",
+   "entity": "lunch.alert",
+   "name": "lunch_alert_notification_time_range",
+   "kind": "check",
+   "definition": "CHECK (((notification_time >= (0)::double precision) AND (notification_time <= (12)::double precision)))"
+  },
+  {
+   "storage_name": "lunch_supplier",
+   "entity": "lunch.supplier",
+   "name": "lunch_supplier_automatic_email_time_range",
+   "kind": "check",
+   "definition": "CHECK (((automatic_email_time >= (0)::double precision) AND (automatic_email_time <= (12)::double precision)))"
+  },
+  {
+   "storage_name": "mail_activity",
+   "entity": "mail.activity",
+   "name": "mail_activity_check_res_id_is_set_if_model",
+   "kind": "check",
+   "definition": "CHECK (((((COALESCE(res_model, ''::character varying))::text <> ''::text) AND ((res_id IS NOT NULL) AND (res_id <> 0))) OR (((COALESCE(res_model, ''::character varying))::text = ''::text) AND ((res_id IS NULL) OR (res_id = 0)))))"
+  },
+  {
+   "storage_name": "mail_activity",
+   "entity": "mail.activity",
+   "name": "mail_activity_check_user_id_is_set_if_model",
+   "kind": "check",
+   "definition": "CHECK ((((COALESCE(res_model, ''::character varying))::text <> ''::text) OR (user_id IS NOT NULL)))"
+  },
+  {
+   "storage_name": "mail_alias_domain",
+   "entity": "mail.alias.domain",
+   "name": "mail_alias_domain_bounce_email_uniques",
+   "kind": "unique",
+   "definition": "UNIQUE (bounce_alias, name)"
+  },
+  {
+   "storage_name": "mail_alias_domain",
+   "entity": "mail.alias.domain",
+   "name": "mail_alias_domain_catchall_email_uniques",
+   "kind": "unique",
+   "definition": "UNIQUE (catchall_alias, name)"
+  },
+  {
+   "storage_name": "mail_blacklist",
+   "entity": "mail.blacklist",
+   "name": "mail_blacklist_unique_email",
+   "kind": "unique",
+   "definition": "UNIQUE (email)"
+  },
+  {
+   "storage_name": "mail_followers",
+   "entity": "mail.followers",
+   "name": "mail_followers_mail_followers_res_partner_res_model_id_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (res_model, res_id, partner_id)"
+  },
+  {
+   "storage_name": "mail_group_member",
+   "entity": "mail.group.member",
+   "name": "mail_group_member_unique_partner",
+   "kind": "unique",
+   "definition": "UNIQUE (partner_id, mail_group_id)"
+  },
+  {
+   "storage_name": "mail_group_moderation",
+   "entity": "mail.group.moderation",
+   "name": "mail_group_moderation_mail_group_email_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (mail_group_id, email)"
+  },
+  {
+   "storage_name": "mail_message_reaction",
+   "entity": "mail.message.reaction",
+   "name": "mail_message_reaction_partner_or_guest_exists",
+   "kind": "check",
+   "definition": "CHECK ((((partner_id IS NOT NULL) AND (guest_id IS NULL)) OR ((partner_id IS NULL) AND (guest_id IS NOT NULL))))"
+  },
+  {
+   "storage_name": "mail_notification",
+   "entity": "mail.notification",
+   "name": "mail_notification_notification_partner_or_email_required",
+   "kind": "check",
+   "definition": "CHECK ((((notification_type)::text <> 'email'::text) OR (failure_type IS NOT NULL) OR (res_partner_id IS NOT NULL) OR ((COALESCE(mail_email_address, ''::character varying))::text <> ''::text)))"
+  },
+  {
+   "storage_name": "mail_notification",
+   "entity": "mail.notification",
+   "name": "mail_notification_notification_partner_required",
+   "kind": "check",
+   "definition": "CHECK ((((notification_type)::text <> 'inbox'::text) OR (res_partner_id IS NOT NULL)))"
+  },
+  {
+   "storage_name": "mail_presence",
+   "entity": "mail.presence",
+   "name": "mail_presence_partner_or_guest_exists",
+   "kind": "check",
+   "definition": "CHECK ((((user_id IS NOT NULL) AND (guest_id IS NULL)) OR ((user_id IS NULL) AND (guest_id IS NOT NULL))))"
+  },
+  {
+   "storage_name": "mail_push_device",
+   "entity": "mail.push.device",
+   "name": "mail_push_device_endpoint_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (endpoint)"
+  },
+  {
+   "storage_name": "mailing_mailing",
+   "entity": "mailing.mailing",
+   "name": "mailing_mailing_email_from",
+   "kind": "check",
+   "definition": "CHECK (((email_from IS NOT NULL) OR ((mailing_type)::text <> 'mail'::text)))"
+  },
+  {
+   "storage_name": "mailing_mailing",
+   "entity": "mailing.mailing",
+   "name": "mailing_mailing_percentage_valid",
+   "kind": "check",
+   "definition": "CHECK (((ab_testing_pc >= 0) AND (ab_testing_pc <= 100)))"
+  },
+  {
+   "storage_name": "mailing_subscription",
+   "entity": "mailing.subscription",
+   "name": "mailing_subscription_unique_contact_list",
+   "kind": "unique",
+   "definition": "UNIQUE (contact_id, list_id)"
+  },
+  {
+   "storage_name": "mailing_trace",
+   "entity": "mailing.trace",
+   "name": "mailing_trace_check_res_id_is_set",
+   "kind": "check",
+   "definition": "CHECK (((res_id IS NOT NULL) AND (res_id <> 0)))"
+  },
+  {
+   "storage_name": "maintenance_equipment",
+   "entity": "maintenance.equipment",
+   "name": "maintenance_equipment_serial_no",
+   "kind": "unique",
+   "definition": "UNIQUE (serial_no)"
+  },
+  {
+   "storage_name": "mrp_account_wip_accounting_line",
+   "entity": "mrp.account.wip.accounting.line",
+   "name": "mrp_account_wip_accounting_line_check_debit_credit",
+   "kind": "check",
+   "definition": "CHECK (((debit = (0)::numeric) OR (credit = (0)::numeric)))"
+  },
+  {
+   "storage_name": "mrp_bom",
+   "entity": "mrp.bom",
+   "name": "mrp_bom_qty_positive",
+   "kind": "check",
+   "definition": "CHECK ((product_qty > (0)::numeric))"
+  },
+  {
+   "storage_name": "mrp_bom_line",
+   "entity": "mrp.bom.line",
+   "name": "mrp_bom_line_bom_qty_zero",
+   "kind": "check",
+   "definition": "CHECK ((product_qty >= (0)::numeric))"
+  },
+  {
+   "storage_name": "mrp_production",
+   "entity": "mrp.production",
+   "name": "mrp_production_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, company_id)"
+  },
+  {
+   "storage_name": "mrp_production",
+   "entity": "mrp.production",
+   "name": "mrp_production_qty_positive",
+   "kind": "check",
+   "definition": "CHECK ((product_qty > (0)::numeric))"
+  },
+  {
+   "storage_name": "mrp_unbuild",
+   "entity": "mrp.unbuild",
+   "name": "mrp_unbuild_qty_positive",
+   "kind": "check",
+   "definition": "CHECK ((product_qty > (0)::numeric))"
+  },
+  {
+   "storage_name": "mrp_workcenter_capacity",
+   "entity": "mrp.workcenter.capacity",
+   "name": "mrp_workcenter_capacity_positive_capacity",
+   "kind": "check",
+   "definition": "CHECK ((capacity >= (0)::double precision))"
+  },
+  {
+   "storage_name": "mrp_workcenter_tag",
+   "entity": "mrp.workcenter.tag",
+   "name": "mrp_workcenter_tag_tag_name_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "onboarding_onboarding",
+   "entity": "onboarding.onboarding",
+   "name": "onboarding_onboarding_route_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (route_name)"
+  },
+  {
+   "storage_name": "payment_provider",
+   "entity": "payment.provider",
+   "name": "payment_provider_custom_providers_setup",
+   "kind": "check",
+   "definition": "CHECK (((custom_mode IS NULL) OR (((code)::text = 'custom'::text) AND (custom_mode IS NOT NULL))))"
+  },
+  {
+   "storage_name": "payment_transaction",
+   "entity": "payment.transaction",
+   "name": "payment_transaction_reference_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (reference)"
+  },
+  {
+   "storage_name": "phone_blacklist",
+   "entity": "phone.blacklist",
+   "name": "phone_blacklist_unique_number",
+   "kind": "unique",
+   "definition": "UNIQUE (number)"
+  },
+  {
+   "storage_name": "pos_note",
+   "entity": "pos.note",
+   "name": "pos_note_name_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "pos_order",
+   "entity": "pos.order",
+   "name": "pos_order_unique_uuid",
+   "kind": "unique",
+   "definition": "UNIQUE (uuid)"
+  },
+  {
+   "storage_name": "pos_order_line",
+   "entity": "pos.order.line",
+   "name": "pos_order_line_unique_uuid",
+   "kind": "unique",
+   "definition": "UNIQUE (uuid)"
+  },
+  {
+   "storage_name": "pos_payment",
+   "entity": "pos.payment",
+   "name": "pos_payment_unique_uuid",
+   "kind": "unique",
+   "definition": "UNIQUE (uuid)"
+  },
+  {
+   "storage_name": "product_attribute",
+   "entity": "product.attribute",
+   "name": "product_attribute_check_multi_checkbox_no_variant",
+   "kind": "check",
+   "definition": "CHECK ((((display_type)::text <> 'multi'::text) OR ((create_variant)::text = 'no_variant'::text)))"
+  },
+  {
+   "storage_name": "product_attribute_custom_value",
+   "entity": "product.attribute.custom.value",
+   "name": "product_attribute_custom_value_sol_custom_value_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (custom_product_template_attribute_value_id, sale_order_line_id)"
+  },
+  {
+   "storage_name": "product_tag",
+   "entity": "product.tag",
+   "name": "product_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "product_template_attribute_value",
+   "entity": "product.template.attribute.value",
+   "name": "product_template_attribute_value_attribute_value_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (attribute_line_id, product_attribute_value_id)"
+  },
+  {
+   "storage_name": "product_uom",
+   "entity": "product.uom",
+   "name": "product_uom_barcode_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (barcode)"
+  },
+  {
+   "storage_name": "product_wishlist",
+   "entity": "product.wishlist",
+   "name": "product_wishlist_product_unique_partner_id",
+   "kind": "unique",
+   "definition": "UNIQUE (product_id, partner_id)"
+  },
+  {
+   "storage_name": "project_collaborator",
+   "entity": "project.collaborator",
+   "name": "project_collaborator_unique_collaborator",
+   "kind": "unique",
+   "definition": "UNIQUE (project_id, partner_id)"
+  },
+  {
+   "storage_name": "project_project",
+   "entity": "project.project",
+   "name": "project_project_project_date_greater",
+   "kind": "check",
+   "definition": "CHECK ((date >= date_start))"
+  },
+  {
+   "storage_name": "project_sale_line_employee_map",
+   "entity": "project.sale.line.employee.map",
+   "name": "project_sale_line_employee_map_uniqueness_employee",
+   "kind": "unique",
+   "definition": "UNIQUE (project_id, employee_id)"
+  },
+  {
+   "storage_name": "project_tags",
+   "entity": "project.tags",
+   "name": "project_tags_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "project_task",
+   "entity": "project.task",
+   "name": "project_task_private_task_has_no_parent",
+   "kind": "check",
+   "definition": "CHECK ((NOT ((project_id IS NULL) AND (parent_id IS NOT NULL))))"
+  },
+  {
+   "storage_name": "project_task",
+   "entity": "project.task",
+   "name": "project_task_recurring_task_has_no_parent",
+   "kind": "check",
+   "definition": "CHECK ((NOT ((recurring_task IS TRUE) AND (parent_id IS NOT NULL))))"
+  },
+  {
+   "storage_name": "project_task_user_rel",
+   "entity": null,
+   "name": "project_task_user_rel_project_personal_stage_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (task_id, user_id)"
+  },
+  {
+   "storage_name": "properties_base_definition",
+   "entity": "properties.base.definition",
+   "name": "properties_base_definition_unique_properties_field_id",
+   "kind": "unique",
+   "definition": "UNIQUE (properties_field_id)"
+  },
+  {
+   "storage_name": "purchase_order_line",
+   "entity": "purchase.order.line",
+   "name": "purchase_order_line_accountable_required_fields",
+   "kind": "check",
+   "definition": "CHECK (((display_type IS NOT NULL) OR is_downpayment OR ((product_id IS NOT NULL) AND (product_uom_id IS NOT NULL) AND (date_planned IS NOT NULL))))"
+  },
+  {
+   "storage_name": "purchase_order_line",
+   "entity": "purchase.order.line",
+   "name": "purchase_order_line_non_accountable_null_fields",
+   "kind": "check",
+   "definition": "CHECK (((display_type IS NULL) OR ((product_id IS NULL) AND (price_unit = (0)::numeric) AND (product_uom_qty = (0)::double precision) AND (product_uom_id IS NULL) AND (date_planned IS NULL))))"
+  },
+  {
+   "storage_name": "rating_rating",
+   "entity": "rating.rating",
+   "name": "rating_rating_rating_range",
+   "kind": "check",
+   "definition": "CHECK (((rating >= (0)::double precision) AND (rating <= (5)::double precision)))"
+  },
+  {
+   "storage_name": "repair_tags",
+   "entity": "repair.tags",
+   "name": "repair_tags_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "res_company",
+   "entity": "res.company",
+   "name": "res_company_check_quotation_validity_days",
+   "kind": "check",
+   "definition": "CHECK ((quotation_validity_days >= 0))"
+  },
+  {
+   "storage_name": "res_company",
+   "entity": "res.company",
+   "name": "res_company_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "res_country",
+   "entity": "res.country",
+   "name": "res_country_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "res_country",
+   "entity": "res.country",
+   "name": "res_country_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "res_country_group",
+   "entity": "res.country.group",
+   "name": "res_country_group_check_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "res_country_state",
+   "entity": "res.country.state",
+   "name": "res_country_state_name_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (country_id, code)"
+  },
+  {
+   "storage_name": "res_currency",
+   "entity": "res.currency",
+   "name": "res_currency_rounding_gt_zero",
+   "kind": "check",
+   "definition": "CHECK ((rounding > (0)::numeric))"
+  },
+  {
+   "storage_name": "res_currency",
+   "entity": "res.currency",
+   "name": "res_currency_unique_name",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "res_currency_rate",
+   "entity": "res.currency.rate",
+   "name": "res_currency_rate_currency_rate_check",
+   "kind": "check",
+   "definition": "CHECK ((rate > (0)::numeric))"
+  },
+  {
+   "storage_name": "res_currency_rate",
+   "entity": "res.currency.rate",
+   "name": "res_currency_rate_unique_name_per_day",
+   "kind": "unique",
+   "definition": "UNIQUE (name, currency_id, company_id)"
+  },
+  {
+   "storage_name": "res_groups",
+   "entity": "res.groups",
+   "name": "res_groups_check_api_key_duration",
+   "kind": "check",
+   "definition": "CHECK ((api_key_duration >= (0)::double precision))"
+  },
+  {
+   "storage_name": "res_groups",
+   "entity": "res.groups",
+   "name": "res_groups_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (privilege_id, name)"
+  },
+  {
+   "storage_name": "res_lang",
+   "entity": "res.lang",
+   "name": "res_lang_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (code)"
+  },
+  {
+   "storage_name": "res_lang",
+   "entity": "res.lang",
+   "name": "res_lang_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "res_lang",
+   "entity": "res.lang",
+   "name": "res_lang_url_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (url_code)"
+  },
+  {
+   "storage_name": "res_partner",
+   "entity": "res.partner",
+   "name": "res_partner_check_name",
+   "kind": "check",
+   "definition": "CHECK (((((type)::text = 'contact'::text) AND (name IS NOT NULL)) OR ((type)::text <> 'contact'::text)))"
+  },
+  {
+   "storage_name": "res_partner",
+   "entity": "res.partner",
+   "name": "res_partner_l10n_it_codice_fiscale",
+   "kind": "check",
+   "definition": "CHECK (((l10n_it_codice_fiscale IS NULL) OR ((l10n_it_codice_fiscale)::text = ''::text) OR (length((l10n_it_codice_fiscale)::text) >= 11)))"
+  },
+  {
+   "storage_name": "res_partner",
+   "entity": "res.partner",
+   "name": "res_partner_l10n_it_pa_index",
+   "kind": "check",
+   "definition": "CHECK (((l10n_it_pa_index IS NULL) OR ((l10n_it_pa_index)::text = ''::text) OR (length((l10n_it_pa_index)::text) >= 6)))"
+  },
+  {
+   "storage_name": "res_partner_bank",
+   "entity": "res.partner.bank",
+   "name": "res_partner_bank_unique_number",
+   "kind": "unique",
+   "definition": "UNIQUE (sanitized_acc_number, partner_id)"
+  },
+  {
+   "storage_name": "res_partner_iap",
+   "entity": "res.partner.iap",
+   "name": "res_partner_iap_unique_partner_id",
+   "kind": "unique",
+   "definition": "UNIQUE (partner_id)"
+  },
+  {
+   "storage_name": "res_users",
+   "entity": "res.users",
+   "name": "res_users_login_key",
+   "kind": "unique",
+   "definition": "UNIQUE (login, website_id)"
+  },
+  {
+   "storage_name": "res_users",
+   "entity": "res.users",
+   "name": "res_users_notification_type",
+   "kind": "check",
+   "definition": "CHECK ((((notification_type)::text = 'email'::text) OR (NOT share)))"
+  },
+  {
+   "storage_name": "res_users",
+   "entity": "res.users",
+   "name": "res_users_uniq_users_oauth_provider_oauth_uid",
+   "kind": "unique",
+   "definition": "UNIQUE (oauth_provider_id, oauth_uid)"
+  },
+  {
+   "storage_name": "res_users_apikeys",
+   "entity": "res.users.apikeys",
+   "name": "res_users_apikeys_index_check",
+   "kind": "check",
+   "definition": "CHECK ((char_length((index)::text) = 8))"
+  },
+  {
+   "storage_name": "res_users_settings",
+   "entity": "res.users.settings",
+   "name": "res_users_settings_unique_user_id",
+   "kind": "unique",
+   "definition": "UNIQUE (user_id)"
+  },
+  {
+   "storage_name": "res_users_settings_embedded_action",
+   "entity": "res.users.settings.embedded.action",
+   "name": "res_users_settings_embedded_action_res_user_settings_e_91890fa3",
+   "kind": "unique",
+   "definition": "UNIQUE (user_setting_id, action_id, res_id)"
+  },
+  {
+   "storage_name": "res_users_settings_volumes",
+   "entity": "res.users.settings.volumes",
+   "name": "res_users_settings_volumes_partner_or_guest_exists",
+   "kind": "check",
+   "definition": "CHECK ((((partner_id IS NOT NULL) AND (guest_id IS NULL)) OR ((partner_id IS NULL) AND (guest_id IS NOT NULL))))"
+  },
+  {
+   "storage_name": "resource_resource",
+   "entity": "resource.resource",
+   "name": "resource_resource_check_time_efficiency",
+   "kind": "check",
+   "definition": "CHECK ((time_efficiency > (0)::double precision))"
+  },
+  {
+   "storage_name": "sale_order",
+   "entity": "sale.order",
+   "name": "sale_order_date_order_conditional_required",
+   "kind": "check",
+   "definition": "CHECK (((((state)::text = 'sale'::text) AND (date_order IS NOT NULL)) OR ((state)::text <> 'sale'::text)))"
+  },
+  {
+   "storage_name": "sale_order_coupon_points",
+   "entity": "sale.order.coupon.points",
+   "name": "sale_order_coupon_points_order_coupon_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (order_id, coupon_id)"
+  },
+  {
+   "storage_name": "sale_order_line",
+   "entity": "sale.order.line",
+   "name": "sale_order_line_accountable_required_fields",
+   "kind": "check",
+   "definition": "CHECK (((display_type IS NOT NULL) OR is_downpayment OR ((product_id IS NOT NULL) AND (product_uom_id IS NOT NULL))))"
+  },
+  {
+   "storage_name": "sale_order_line",
+   "entity": "sale.order.line",
+   "name": "sale_order_line_non_accountable_null_fields",
+   "kind": "check",
+   "definition": "CHECK (((display_type IS NULL) OR ((product_id IS NULL) AND (price_unit = (0)::numeric) AND (product_uom_qty = (0)::numeric) AND (product_uom_id IS NULL) AND (customer_lead = (0)::double precision))))"
+  },
+  {
+   "storage_name": "sale_order_template_line",
+   "entity": "sale.order.template.line",
+   "name": "sale_order_template_line_accountable_product_id_required",
+   "kind": "check",
+   "definition": "CHECK (((display_type IS NOT NULL) OR ((product_id IS NOT NULL) AND (product_uom_id IS NOT NULL))))"
+  },
+  {
+   "storage_name": "sale_order_template_line",
+   "entity": "sale.order.template.line",
+   "name": "sale_order_template_line_non_accountable_fields_null",
+   "kind": "check",
+   "definition": "CHECK (((display_type IS NULL) OR ((product_id IS NULL) AND (product_uom_qty = (0)::numeric) AND (product_uom_id IS NULL))))"
+  },
+  {
+   "storage_name": "sale_pdf_form_field",
+   "entity": "sale.pdf.form.field",
+   "name": "sale_pdf_form_field_unique_name_per_doc_type",
+   "kind": "unique",
+   "definition": "UNIQUE (name, document_type)"
+  },
+  {
+   "storage_name": "slide_channel",
+   "entity": "slide.channel",
+   "name": "slide_channel_check_enroll",
+   "kind": "check",
+   "definition": "CHECK ((((visibility)::text <> 'members'::text) OR ((enroll)::text = 'invite'::text)))"
+  },
+  {
+   "storage_name": "slide_channel",
+   "entity": "slide.channel",
+   "name": "slide_channel_forum_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (forum_id)"
+  },
+  {
+   "storage_name": "slide_channel",
+   "entity": "slide.channel",
+   "name": "slide_channel_product_id_check",
+   "kind": "check",
+   "definition": "CHECK ((((enroll)::text <> 'payment'::text) OR (product_id IS NOT NULL)))"
+  },
+  {
+   "storage_name": "slide_channel_partner",
+   "entity": "slide.channel.partner",
+   "name": "slide_channel_partner_channel_partner_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (channel_id, partner_id)"
+  },
+  {
+   "storage_name": "slide_channel_partner",
+   "entity": "slide.channel.partner",
+   "name": "slide_channel_partner_check_completion",
+   "kind": "check",
+   "definition": "CHECK (((completion >= 0) AND (completion <= 100)))"
+  },
+  {
+   "storage_name": "slide_slide",
+   "entity": "slide.slide",
+   "name": "slide_slide_check_certification_preview",
+   "kind": "check",
+   "definition": "CHECK ((((slide_category)::text <> 'certification'::text) OR (is_preview = false)))"
+  },
+  {
+   "storage_name": "slide_slide",
+   "entity": "slide.slide",
+   "name": "slide_slide_check_survey_id",
+   "kind": "check",
+   "definition": "CHECK ((((slide_category)::text <> 'certification'::text) OR (survey_id IS NOT NULL)))"
+  },
+  {
+   "storage_name": "slide_slide",
+   "entity": "slide.slide",
+   "name": "slide_slide_exclusion_html_content_and_url",
+   "kind": "check",
+   "definition": "CHECK (((html_content IS NULL) OR (url IS NULL)))"
+  },
+  {
+   "storage_name": "slide_slide_partner",
+   "entity": "slide.slide.partner",
+   "name": "slide_slide_partner_check_vote",
+   "kind": "check",
+   "definition": "CHECK ((vote = ANY (ARRAY['-1'::integer, 0, 1])))"
+  },
+  {
+   "storage_name": "slide_slide_partner",
+   "entity": "slide.slide.partner",
+   "name": "slide_slide_partner_slide_partner_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (slide_id, partner_id)"
+  },
+  {
+   "storage_name": "slide_slide_resource",
+   "entity": "slide.slide.resource",
+   "name": "slide_slide_resource_check_file_type",
+   "kind": "check",
+   "definition": "CHECK ((((resource_type)::text <> 'file'::text) OR (link IS NULL)))"
+  },
+  {
+   "storage_name": "slide_slide_resource",
+   "entity": "slide.slide.resource",
+   "name": "slide_slide_resource_check_url",
+   "kind": "check",
+   "definition": "CHECK ((((resource_type)::text <> 'url'::text) OR (link IS NOT NULL)))"
+  },
+  {
+   "storage_name": "slide_tag",
+   "entity": "slide.tag",
+   "name": "slide_tag_slide_tag_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "sms_sms",
+   "entity": "sms.sms",
+   "name": "sms_sms_uuid_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (uuid)"
+  },
+  {
+   "storage_name": "sms_tracker",
+   "entity": "sms.tracker",
+   "name": "sms_tracker_sms_uuid_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (sms_uuid)"
+  },
+  {
+   "storage_name": "stock_location",
+   "entity": "stock.location",
+   "name": "stock_location_barcode_company_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (barcode, company_id)"
+  },
+  {
+   "storage_name": "stock_location",
+   "entity": "stock.location",
+   "name": "stock_location_inventory_freq_nonneg",
+   "kind": "check",
+   "definition": "CHECK ((cyclic_inventory_frequency >= 0))"
+  },
+  {
+   "storage_name": "stock_package_type",
+   "entity": "stock.package.type",
+   "name": "stock_package_type_barcode_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (barcode)"
+  },
+  {
+   "storage_name": "stock_package_type",
+   "entity": "stock.package.type",
+   "name": "stock_package_type_positive_height",
+   "kind": "check",
+   "definition": "CHECK ((height >= (0.0)::double precision))"
+  },
+  {
+   "storage_name": "stock_package_type",
+   "entity": "stock.package.type",
+   "name": "stock_package_type_positive_length",
+   "kind": "check",
+   "definition": "CHECK ((packaging_length >= (0.0)::double precision))"
+  },
+  {
+   "storage_name": "stock_package_type",
+   "entity": "stock.package.type",
+   "name": "stock_package_type_positive_max_weight",
+   "kind": "check",
+   "definition": "CHECK ((max_weight >= (0.0)::double precision))"
+  },
+  {
+   "storage_name": "stock_package_type",
+   "entity": "stock.package.type",
+   "name": "stock_package_type_positive_width",
+   "kind": "check",
+   "definition": "CHECK ((width >= (0.0)::double precision))"
+  },
+  {
+   "storage_name": "stock_picking",
+   "entity": "stock.picking",
+   "name": "stock_picking_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, company_id)"
+  },
+  {
+   "storage_name": "stock_scrap_reason_tag",
+   "entity": "stock.scrap.reason.tag",
+   "name": "stock_scrap_reason_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "stock_storage_category",
+   "entity": "stock.storage.category",
+   "name": "stock_storage_category_positive_max_weight",
+   "kind": "check",
+   "definition": "CHECK ((max_weight >= (0)::numeric))"
+  },
+  {
+   "storage_name": "stock_storage_category_capacity",
+   "entity": "stock.storage.category.capacity",
+   "name": "stock_storage_category_capacity_positive_quantity",
+   "kind": "check",
+   "definition": "CHECK ((quantity > (0)::double precision))"
+  },
+  {
+   "storage_name": "stock_storage_category_capacity",
+   "entity": "stock.storage.category.capacity",
+   "name": "stock_storage_category_capacity_unique_package_type",
+   "kind": "unique",
+   "definition": "UNIQUE (package_type_id, storage_category_id)"
+  },
+  {
+   "storage_name": "stock_storage_category_capacity",
+   "entity": "stock.storage.category.capacity",
+   "name": "stock_storage_category_capacity_unique_product",
+   "kind": "unique",
+   "definition": "UNIQUE (product_id, storage_category_id)"
+  },
+  {
+   "storage_name": "stock_warehouse",
+   "entity": "stock.warehouse",
+   "name": "stock_warehouse_warehouse_code_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (code, company_id)"
+  },
+  {
+   "storage_name": "stock_warehouse",
+   "entity": "stock.warehouse",
+   "name": "stock_warehouse_warehouse_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name, company_id)"
+  },
+  {
+   "storage_name": "stock_warehouse_orderpoint",
+   "entity": "stock.warehouse.orderpoint",
+   "name": "stock_warehouse_orderpoint_product_location_check",
+   "kind": "unique",
+   "definition": "UNIQUE (product_id, location_id, company_id)"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_is_time_limited_have_time_limit",
+   "kind": "check",
+   "definition": "CHECK (((is_time_limited <> true) OR ((time_limit IS NOT NULL) AND (time_limit > 0))))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_positive_answer_score",
+   "kind": "check",
+   "definition": "CHECK ((answer_score >= (0)::double precision))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_positive_len_max",
+   "kind": "check",
+   "definition": "CHECK ((validation_length_max >= 0))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_positive_len_min",
+   "kind": "check",
+   "definition": "CHECK ((validation_length_min >= 0))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_scale",
+   "kind": "check",
+   "definition": "CHECK ((((question_type)::text <> 'scale'::text) OR ((scale_min >= 0) AND (scale_max <= 10) AND (scale_min < scale_max))))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_scored_date_have_answers",
+   "kind": "check",
+   "definition": "CHECK (((is_scored_question <> true) OR ((question_type)::text <> 'date'::text) OR (answer_date IS NOT NULL)))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_scored_datetime_have_answers",
+   "kind": "check",
+   "definition": "CHECK (((is_scored_question <> true) OR ((question_type)::text <> 'datetime'::text) OR (answer_datetime IS NOT NULL)))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_validation_date",
+   "kind": "check",
+   "definition": "CHECK ((validation_min_date <= validation_max_date))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_validation_datetime",
+   "kind": "check",
+   "definition": "CHECK ((validation_min_datetime <= validation_max_datetime))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_validation_float",
+   "kind": "check",
+   "definition": "CHECK ((validation_min_float_value <= validation_max_float_value))"
+  },
+  {
+   "storage_name": "survey_question",
+   "entity": "survey.question",
+   "name": "survey_question_validation_length",
+   "kind": "check",
+   "definition": "CHECK ((validation_length_min <= validation_length_max))"
+  },
+  {
+   "storage_name": "survey_question_answer",
+   "entity": "survey.question.answer",
+   "name": "survey_question_answer_value_not_empty",
+   "kind": "check",
+   "definition": "CHECK (((value IS NOT NULL) OR (value_image_filename IS NOT NULL)))"
+  },
+  {
+   "storage_name": "survey_survey",
+   "entity": "survey.survey",
+   "name": "survey_survey_access_token_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (access_token)"
+  },
+  {
+   "storage_name": "survey_survey",
+   "entity": "survey.survey",
+   "name": "survey_survey_attempts_limit_check",
+   "kind": "check",
+   "definition": "CHECK (((is_attempts_limited = false) OR ((attempts_limit IS NOT NULL) AND (attempts_limit > 0))))"
+  },
+  {
+   "storage_name": "survey_survey",
+   "entity": "survey.survey",
+   "name": "survey_survey_badge_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (certification_badge_id)"
+  },
+  {
+   "storage_name": "survey_survey",
+   "entity": "survey.survey",
+   "name": "survey_survey_certification_check",
+   "kind": "check",
+   "definition": "CHECK ((((scoring_type)::text <> 'no_scoring'::text) OR (certification = false)))"
+  },
+  {
+   "storage_name": "survey_survey",
+   "entity": "survey.survey",
+   "name": "survey_survey_scoring_success_min_check",
+   "kind": "check",
+   "definition": "CHECK (((scoring_success_min IS NULL) OR ((scoring_success_min >= (0)::double precision) AND (scoring_success_min <= (100)::double precision))))"
+  },
+  {
+   "storage_name": "survey_survey",
+   "entity": "survey.survey",
+   "name": "survey_survey_session_code_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (session_code)"
+  },
+  {
+   "storage_name": "survey_survey",
+   "entity": "survey.survey",
+   "name": "survey_survey_session_speed_rating_has_time_limit",
+   "kind": "check",
+   "definition": "CHECK (((session_speed_rating <> true) OR ((session_speed_rating_time_limit IS NOT NULL) AND (session_speed_rating_time_limit > 0))))"
+  },
+  {
+   "storage_name": "survey_survey",
+   "entity": "survey.survey",
+   "name": "survey_survey_time_limit_check",
+   "kind": "check",
+   "definition": "CHECK (((is_time_limited = false) OR ((time_limit IS NOT NULL) AND (time_limit > (0)::double precision))))"
+  },
+  {
+   "storage_name": "survey_user_input",
+   "entity": "survey.user_input",
+   "name": "survey_user_input_unique_token",
+   "kind": "unique",
+   "definition": "UNIQUE (access_token)"
+  },
+  {
+   "storage_name": "uom_uom",
+   "entity": "uom.uom",
+   "name": "uom_uom_factor_gt_zero",
+   "kind": "check",
+   "definition": "CHECK ((relative_factor <> (0)::numeric))"
+  },
+  {
+   "storage_name": "utm_campaign",
+   "entity": "utm.campaign",
+   "name": "utm_campaign_unique_name",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "utm_medium",
+   "entity": "utm.medium",
+   "name": "utm_medium_unique_name",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "utm_source",
+   "entity": "utm.source",
+   "name": "utm_source_unique_name",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "utm_tag",
+   "entity": "utm.tag",
+   "name": "utm_tag_name_uniq",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "web_tour_tour",
+   "entity": "web_tour.tour",
+   "name": "web_tour_tour_uniq_name",
+   "kind": "unique",
+   "definition": "UNIQUE (name)"
+  },
+  {
+   "storage_name": "website",
+   "entity": "website",
+   "name": "website_domain_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (domain)"
+  },
+  {
+   "storage_name": "website_controller_page",
+   "entity": "website.controller.page",
+   "name": "website_controller_page_unique_name_slugified",
+   "kind": "unique",
+   "definition": "UNIQUE (name_slugified)"
+  },
+  {
+   "storage_name": "website_visitor",
+   "entity": "website.visitor",
+   "name": "website_visitor_access_token_unique",
+   "kind": "unique",
+   "definition": "UNIQUE (access_token)"
+  }
+ ]
+}
