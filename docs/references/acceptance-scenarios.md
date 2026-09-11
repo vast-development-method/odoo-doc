@@ -1,6 +1,6 @@
 # Acceptance scenario index
 
-Every numbered scenario across the specification: 1,926 scenarios in 11 domains, of which 460 assert concrete monetary amounts.
+Every numbered scenario across the specification: 2,097 scenarios in 12 domains, of which 477 assert concrete monetary amounts.
 
 A scenario is referenced as the domain name, a full stop, and its number, for example `sales.A1`. That reference never changes and never gets reused, so a failing test in a rebuild can always be traced back to what it asserts. The rules are in [traceability rules](../reimplementation/traceability-rules.md).
 
@@ -16,6 +16,7 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 | [inventory-valuation-and-costing](../domains/inventory-valuation-and-costing/acceptance-criteria.md) | 206 | 111 |
 | [point-of-sale](../domains/point-of-sale/acceptance-criteria.md) | 178 | 51 |
 | [products-and-catalog](../domains/products-and-catalog/acceptance-criteria.md) | 216 | 29 |
+| [projects-and-tasks](../domains/projects-and-tasks/acceptance-criteria.md) | 171 | 17 |
 | [purchasing](../domains/purchasing/acceptance-criteria.md) | 170 | 47 |
 | [sales](../domains/sales/acceptance-criteria.md) | 183 | 61 |
 | [taxes](../domains/taxes/acceptance-criteria.md) | 266 | 3 |
@@ -599,7 +600,7 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 | `human-resources-core.A3` | Part A — Creating an employee and linkin | The image is copied when the employee has none |  |
 | `human-resources-core.A4` | Part A — Creating an employee and linkin | Writing the employee's time zone updates the user's |  |
 | `human-resources-core.A5` | Part A — Creating an employee and linkin | A user cannot be linked to two employees of the same company | business rules |
-| `human-resources-core.A6` | Part A — Creating an employee and linkin | Linking a user detaches a stale sharing employee |  |
+| `human-resources-core.A6` | Part A — Creating an employee and linkin | Linking a user detaches a stale sharing employee | business rules |
 | `human-resources-core.A7` | Part A — Creating an employee and linkin | Creating a user from the employee |  |
 | `human-resources-core.A8` | Part A — Creating an employee and linkin | Bulk user creation classifies every employee | workflows |
 | `human-resources-core.A9` | Part A — Creating an employee and linkin | A person editing their own data notifies the responsible | workflows, state machines |
@@ -706,7 +707,7 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 | `human-resources-core.M4` | Part M — Derived dates and schedules | Newly hired |  |
 | `human-resources-core.M5` | Part M — Derived dates and schedules | First version date with gap removal |  |
 | `human-resources-core.M6` | Part M — Derived dates and schedules | A version with no end date never triggers the gap cut |  |
-| `human-resources-core.M7` | Part M — Derived dates and schedules | Unusual days across two versions with a gap | calculations |
+| `human-resources-core.M7` | Part M — Derived dates and schedules | Unusual days across two versions with a gap | calculations, accounting effects |
 | `human-resources-core.M8` | Part M — Derived dates and schedules | Calendar periods split at a schedule change | workflows, calculations |
 | `human-resources-core.M9` | Part M — Derived dates and schedules | A fully flexible version |  |
 | `human-resources-core.N1` | Part N — Meeting availability | An attendee outside their working hours is flagged | calculations |
@@ -1366,6 +1367,182 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 | `products-and-catalog.V-5` | V. Cross-cutting invariants | A parse is total or nothing under the Global Standards One nomenclature | calculations |
 | `products-and-catalog.V-6` | V. Cross-cutting invariants | Derived expiry dates keep their offsets under a postponement | workflows |
 | `products-and-catalog.V-7` | V. Cross-cutting invariants | The catalog posts nothing | workflows |
+
+## projects-and-tasks
+
+| Reference | Group | Scenario | Exercises |
+|---|---|---|---|
+| `projects-and-tasks.A1` | A. Projects | Creating a project applies every default |  |
+| `projects-and-tasks.A2` | A. Projects | Creating a project on the fly creates one stage | workflows |
+| `projects-and-tasks.A3` | A. Projects | The task label may not be empty |  |
+| `projects-and-tasks.A4` | A. Projects | The expiration date may not precede the start date | business rules |
+| `projects-and-tasks.A5` | A. Projects | The two project dates behave as a pair |  |
+| `projects-and-tasks.A6` | A. Projects | The project stage default follows the lowest sequence |  |
+| `projects-and-tasks.A7` | A. Projects | A project stage of another company is refused | business rules |
+| `projects-and-tasks.A8` | A. Projects | Changing a project stage's company is refused while projects of another company sit in it | business rules |
+| `projects-and-tasks.A9` | A. Projects | Archiving a project archives its tasks |  |
+| `projects-and-tasks.A10` | A. Projects | Deleting a project | accounting effects |
+| `projects-and-tasks.A11` | A. Projects | The analytic account is renamed with the project, but only when it is exclusive | accounting effects |
+| `projects-and-tasks.A12` | A. Projects | Changing the company of a project with analytic lines is refused | accounting effects, business rules |
+| `projects-and-tasks.A13` | A. Projects | Deleting an analytic account with tasks behind it is refused | accounting effects, business rules |
+| `projects-and-tasks.A14` | A. Projects | Duplicating a project |  |
+| `projects-and-tasks.A15` | A. Projects | Feature flags grant a privilege group to everyone |  |
+| `projects-and-tasks.A16` | A. Projects | Switching off the dependency feature releases waiting tasks | state machines |
+| `projects-and-tasks.A17` | A. Projects | Switching off the recurrence feature clears the recurrent switches |  |
+| `projects-and-tasks.B1` | B. Tasks — creation and defaults | A task created inside a project | workflows, state machines |
+| `projects-and-tasks.B2` | B. Tasks — creation and defaults | A task created from the board of a project does not self-assign |  |
+| `projects-and-tasks.B3` | B. Tasks — creation and defaults | A private to-do always has its creator as an assignee |  |
+| `projects-and-tasks.B4` | B. Tasks — creation and defaults | A task created with a project does not force the creator in |  |
+| `projects-and-tasks.B5` | B. Tasks — creation and defaults | A stage may not be set on a private to-do | business rules |
+| `projects-and-tasks.B6` | B. Tasks — creation and defaults | Quick-creation shortcuts |  |
+| `projects-and-tasks.B7` | B. Tasks — creation and defaults | A private task may not have a parent | business rules |
+| `projects-and-tasks.B8` | B. Tasks — creation and defaults | A task with sub-tasks may not become private | business rules |
+| `projects-and-tasks.B9` | B. Tasks — creation and defaults | A recurring task may not become a sub-task | calculations, business rules |
+| `projects-and-tasks.B10` | B. Tasks — creation and defaults | A task may not be its own parent, nor create a cycle | business rules |
+| `projects-and-tasks.B11` | B. Tasks — creation and defaults | Customer and company must agree | business rules |
+| `projects-and-tasks.B12` | B. Tasks — creation and defaults | Sub-task display and roll-up |  |
+| `projects-and-tasks.C1` | C. Tasks — the state machine | Blocking a task | workflows, state machines |
+| `projects-and-tasks.C2` | C. Tasks — the state machine | Unblocking | workflows, state machines |
+| `projects-and-tasks.C3` | C. Tasks — the state machine | Forcing a blocked task closed and reopening it | workflows, state machines |
+| `projects-and-tasks.C4` | C. Tasks — the state machine | A cycle is refused | business rules |
+| `projects-and-tasks.C5` | C. Tasks — the state machine | A task is never created waiting | state machines |
+| `projects-and-tasks.C6` | C. Tasks — the state machine | Changing the project resets the state, unless it is waiting or closed | workflows, state machines |
+| `projects-and-tasks.C7` | C. Tasks — the state machine | Reparenting does not reset the state | workflows, state machines |
+| `projects-and-tasks.C8` | C. Tasks — the state machine | The stage and the state are independent | workflows, state machines |
+| `projects-and-tasks.C9` | C. Tasks — the state machine | Notification subtypes per state | workflows, state machines |
+| `projects-and-tasks.D1` | D. Tasks — the date metrics | The five-task scenario |  |
+| `projects-and-tasks.D2` | D. Tasks — the date metrics | A public leave is subtracted | workflows, calculations |
+| `projects-and-tasks.D3` | D. Tasks — the date metrics | No working schedule means no metric |  |
+| `projects-and-tasks.D4` | D. Tasks — the date metrics | Staleness | workflows, calculations, state machines |
+| `projects-and-tasks.D5` | D. Tasks — the date metrics | Days to deadline | calculations |
+| `projects-and-tasks.D6` | D. Tasks — the date metrics | Per-stage duration map | workflows |
+| `projects-and-tasks.E1` | E. Recurrence | Four further occurrences of a weekly recurrence | workflows, state machines |
+| `projects-and-tasks.E2` | E. Recurrence | Closing an older occurrence produces nothing | workflows |
+| `projects-and-tasks.E3` | E. Recurrence | A recurring task with no deadline | workflows |
+| `projects-and-tasks.E4` | E. Recurrence | Monthly clamping | workflows |
+| `projects-and-tasks.E5` | E. Recurrence | Recurrence constraints | business rules |
+| `projects-and-tasks.E6` | E. Recurrence | Deleting occurrences |  |
+| `projects-and-tasks.E7` | E. Recurrence | The next occurrence's stage when the project has no stage | workflows |
+| `projects-and-tasks.F1` | F. Milestones | A milestone reached | workflows, state machines |
+| `projects-and-tasks.F2` | F. Milestones | Milestone progress truncates |  |
+| `projects-and-tasks.F3` | F. Milestones | A saved milestone with no task |  |
+| `projects-and-tasks.F4` | F. Milestones | Unticking re-stamps the reached date |  |
+| `projects-and-tasks.F5` | F. Milestones | Milestone propagation to sub-tasks | workflows |
+| `projects-and-tasks.F6` | F. Milestones | A milestone of another project is rejected | business rules |
+| `projects-and-tasks.F7` | F. Milestones | Milestone delivered quantity | workflows, calculations |
+| `projects-and-tasks.G1` | G. Ratings | An external customer rates a task | workflows, calculations |
+| `projects-and-tasks.G2` | G. Ratings | A second, low rating | calculations, state machines |
+| `projects-and-tasks.G3` | G. Ratings | The 30-day window applies to the project only | calculations |
+| `projects-and-tasks.G4` | G. Ratings | No rating at all | calculations |
+| `projects-and-tasks.G5` | G. Ratings | An invalid rating value | workflows, calculations, business rules, state machines |
+| `projects-and-tasks.G6` | G. Ratings | A signed-in visitor of another company | calculations |
+| `projects-and-tasks.G7` | G. Ratings | The rating request is skipped |  |
+| `projects-and-tasks.G8` | G. Ratings | Re-using an unconsumed rating |  |
+| `projects-and-tasks.G9` | G. Ratings | The periodic job | state machines |
+| `projects-and-tasks.H1` | H. The incoming message gateway | A message creates a task with its sender as customer | workflows, business rules |
+| `projects-and-tasks.H2` | H. The incoming message gateway | No author | business rules |
+| `projects-and-tasks.H3` | H. The incoming message gateway | A recipient without a user account | accounting effects, business rules |
+| `projects-and-tasks.H4` | H. The incoming message gateway | A carbon-copy contact with an internal user | workflows |
+| `projects-and-tasks.H5` | H. The incoming message gateway | No subject | business rules |
+| `projects-and-tasks.H6` | H. The incoming message gateway | The reply address |  |
+| `projects-and-tasks.I1` | I. Private tasks and sharing with a seco | A private task shared with a second assignee | state machines |
+| `projects-and-tasks.I2` | I. Private tasks and sharing with a seco | A project administrator cannot read someone else's private to-do | business rules |
+| `projects-and-tasks.I3` | I. Private tasks and sharing with a seco | Personal stages are private | business rules |
+| `projects-and-tasks.I4` | I. Private tasks and sharing with a seco | Deleting the last personal stage is refused | business rules |
+| `projects-and-tasks.I5` | I. Private tasks and sharing with a seco | Personal stage reassignment on deletion |  |
+| `projects-and-tasks.I6` | I. Private tasks and sharing with a seco | A personal stage may not be attached to a project | business rules |
+| `projects-and-tasks.J1` | J. Project updates | A project update with its generated summary | workflows, calculations, accounting effects, state machines |
+| `projects-and-tasks.J2` | J. Project updates | Writing the project's status creates an update | state machines |
+| `projects-and-tasks.J3` | J. Project updates | Deleting updates | state machines |
+| `projects-and-tasks.J4` | J. Project updates | Update defaults with no previous update | state machines |
+| `projects-and-tasks.J5` | J. Project updates | The profitability block requires the administrator privilege |  |
+| `projects-and-tasks.K1` | K. Profitability | Analytic lines with no journal item behind them | accounting effects |
+| `projects-and-tasks.K2` | K. Profitability | Sales order items | accounting effects |
+| `projects-and-tasks.K3` | K. Profitability | Invoice lines and cost of goods sold | workflows, calculations, accounting effects, state machines |
+| `projects-and-tasks.K4` | K. Profitability | Purchase orders | workflows, accounting effects, state machines |
+| `projects-and-tasks.K5` | K. Profitability | Vendor bills outside a purchase order | workflows, calculations, accounting effects, state machines |
+| `projects-and-tasks.K6` | K. Profitability | Timesheet merging | workflows, calculations, accounting effects |
+| `projects-and-tasks.K7` | K. Profitability | Derived totals and percentages | workflows, calculations |
+| `projects-and-tasks.K8` | K. Profitability | The panel is hidden for a non-billable project |  |
+| `projects-and-tasks.K9` | K. Profitability | The side-panel document is empty without the privilege | workflows |
+| `projects-and-tasks.L1` | L. Visibility and access | Visibility "Invited internal users" |  |
+| `projects-and-tasks.L2` | L. Visibility and access | Visibility "All internal users" |  |
+| `projects-and-tasks.L3` | L. Visibility and access | Visibility "All internal users and invited portal users" |  |
+| `projects-and-tasks.L4` | L. Visibility and access | Visibility "Invited internal and portal users" |  |
+| `projects-and-tasks.L5` | L. Visibility and access | Changing the visibility away from the portal range |  |
+| `projects-and-tasks.L6` | L. Visibility and access | Changing the visibility into the portal range |  |
+| `projects-and-tasks.L7` | L. Visibility and access | A project user cannot create a task in a project they do not follow | business rules |
+| `projects-and-tasks.L8` | L. Visibility and access | Nobody below administrator may write a project | business rules |
+| `projects-and-tasks.L9` | L. Visibility and access | A project user cannot rename a project stage | business rules |
+| `projects-and-tasks.L10` | L. Visibility and access | Subscribing to a project does not subscribe to existing tasks |  |
+| `projects-and-tasks.L11` | L. Visibility and access | Unsubscribing from a project unsubscribes from its tasks |  |
+| `projects-and-tasks.L12` | L. Visibility and access | A portal person cannot reach a project update | business rules |
+| `projects-and-tasks.M1` | M. Project sharing | Granting "edit" to a new person |  |
+| `projects-and-tasks.M2` | M. Project sharing | Granting "edit with limited access" |  |
+| `projects-and-tasks.M3` | M. Project sharing | Granting "read" |  |
+| `projects-and-tasks.M4` | M. Project sharing | Lowering and removing |  |
+| `projects-and-tasks.M5` | M. Project sharing | Duplicate collaborators | business rules |
+| `projects-and-tasks.M6` | M. Project sharing | A person who is not shareable |  |
+| `projects-and-tasks.M7` | M. Project sharing | Sign-up links | workflows |
+| `projects-and-tasks.M8` | M. Project sharing | The embedded application refuses a non-collaborator | business rules |
+| `projects-and-tasks.M9` | M. Project sharing | The embedded session is single-company |  |
+| `projects-and-tasks.M10` | M. Project sharing | Field-level restriction | business rules |
+| `projects-and-tasks.M11` | M. Project sharing | Referenced records must be readable | business rules |
+| `projects-and-tasks.N1` | N. The customer portal | The portal home counters |  |
+| `projects-and-tasks.N2` | N. The customer portal | A template project redirects |  |
+| `projects-and-tasks.N3` | N. The customer portal | A project with collaborators redirects a qualifying visitor |  |
+| `projects-and-tasks.N4` | N. The customer portal | A public visitor with a token |  |
+| `projects-and-tasks.N5` | N. The customer portal | Sorting a portal task list by status | workflows, state machines |
+| `projects-and-tasks.N6` | N. The customer portal | The milestone sort and grouping disappear when milestones do not apply |  |
+| `projects-and-tasks.N7` | N. The customer portal | Attachment upload restrictions | business rules |
+| `projects-and-tasks.N8` | N. The customer portal | The task page content | business rules |
+| `projects-and-tasks.O1` | O. Reporting | The analysis excludes private tasks |  |
+| `projects-and-tasks.O2` | O. Reporting | Zero is mapped to empty in the analysis | calculations |
+| `projects-and-tasks.O3` | O. Reporting | The burndown grouping requirement | workflows, business rules, state machines |
+| `projects-and-tasks.O4` | O. Reporting | A burndown series | workflows, calculations, state machines |
+| `projects-and-tasks.O5` | O. Reporting | The burndown filter split |  |
+| `projects-and-tasks.O6` | O. Reporting | The digest indicator |  |
+| `projects-and-tasks.P1` | P. Templates | Converting a project into a template | calculations |
+| `projects-and-tasks.P2` | P. Templates | Instantiating a template | calculations |
+| `projects-and-tasks.P3` | P. Templates | Converting a template back | workflows, calculations, business rules |
+| `projects-and-tasks.P4` | P. Templates | A private to-do cannot become a template | workflows, calculations, business rules |
+| `projects-and-tasks.P5` | P. Templates | Template tasks are excluded from the counters and the listings |  |
+| `projects-and-tasks.Q1` | Q. Stage administration | Deleting a task stage that still holds tasks | workflows |
+| `projects-and-tasks.Q2` | Q. Stage administration | Unarchiving a stage with archived tasks | workflows |
+| `projects-and-tasks.Q3` | Q. Stage administration | Archiving a stage archives its tasks |  |
+| `projects-and-tasks.Q4` | Q. Stage administration | A stage used by a task is attached to the project |  |
+| `projects-and-tasks.Q5` | Q. Stage administration | Stage entry side effects | workflows, accounting effects |
+| `projects-and-tasks.R1` | R. Tags and roles | Tag uniqueness | workflows, business rules |
+| `projects-and-tasks.R2` | R. Tags and roles | Project-aware tag listing |  |
+| `projects-and-tasks.R3` | R. Tags and roles | Transparent tags |  |
+| `projects-and-tasks.R4` | R. Tags and roles | Role dispatching clears the roles |  |
+| `projects-and-tasks.S1` | S. Notifications and messaging | The assignment notification | workflows |
+| `projects-and-tasks.S2` | S. Notifications and messaging | The notification is suppressed during duplication and recurrence | workflows |
+| `projects-and-tasks.S3` | S. Notifications and messaging | The project-transfer notification | workflows, calculations |
+| `projects-and-tasks.S4` | S. Notifications and messaging | Posting requires only read access | workflows, business rules |
+| `projects-and-tasks.S5` | S. Notifications and messaging | The cover image | workflows, business rules, state machines |
+| `projects-and-tasks.S6` | S. Notifications and messaging | The subtitle of a task notification |  |
+| `projects-and-tasks.S7` | S. Notifications and messaging | Mention suggestions inside the shared application |  |
+| `projects-and-tasks.T1` | T. Multi-company | A task inherits its company from the project | business rules |
+| `projects-and-tasks.T2` | T. Multi-company | Changing a task's company clears an incompatible project |  |
+| `projects-and-tasks.T3` | T. Multi-company | The company filter | business rules |
+| `projects-and-tasks.T4` | T. Multi-company | Switching a project's company reassigns its stage | calculations |
+| `projects-and-tasks.U1` | U. Users | A new internal user receives seven personal stages | workflows, accounting effects |
+| `projects-and-tasks.U2` | U. Users | The welcome to-do |  |
+| `projects-and-tasks.U3` | U. Users | The notification tray splits tasks and to-dos | accounting effects |
+| `projects-and-tasks.U4` | U. Users | The project manager's embedded arrangement is the default |  |
+| `projects-and-tasks.V1` | V. Edge cases and rounding | Counters and the closed figure | workflows, calculations |
+| `projects-and-tasks.V2` | V. Edge cases and rounding | The open counter excludes children of templates |  |
+| `projects-and-tasks.V3` | V. Edge cases and rounding | The closed-task percentage rounds half away from zero | workflows, calculations |
+| `projects-and-tasks.V4` | V. Edge cases and rounding | The rating average display |  |
+| `projects-and-tasks.V5` | V. Edge cases and rounding | The cropped update title |  |
+| `projects-and-tasks.V6` | V. Edge cases and rounding | The derived to-do title | state machines |
+| `projects-and-tasks.V7` | V. Edge cases and rounding | The rating request deadline | calculations |
+| `projects-and-tasks.V8` | V. Edge cases and rounding | A security token on a project outside the portal range | business rules |
+| `projects-and-tasks.V9` | V. Edge cases and rounding | Analytic conversion rounding | workflows, calculations |
+| `projects-and-tasks.V10` | V. Edge cases and rounding | A section with cancelling figures is omitted | workflows, accounting effects, state machines |
+| `projects-and-tasks.V11` | V. Edge cases and rounding | Multiple analytic keys containing the same account | workflows, accounting effects |
+| `projects-and-tasks.V12` | V. Edge cases and rounding | Ordering of the profitability lists |  |
 
 ## purchasing
 

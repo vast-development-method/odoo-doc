@@ -82,8 +82,8 @@ batch is written.
 
 | Rule | Condition | Message |
 |---|---|---|
-| No restriction on a variant-specific recipe | The recipe names a specific variant **and** any component line, operation or by-product carries a restriction. | You cannot use the 'Apply on Variant' functionality and simultaneously create a BoM for a specific variant. |
-| The restriction belongs to the recipe's template | A restriction value's product template differs from the recipe's product template. | The attribute value *the attribute value display name* set on product *the attribute value's product template display name* does not match the BoM product *the recipe's product template display name*. |
+| No restriction on a variant-specific recipe | The recipe names a specific variant **and** any component line, operation or by-product carries a restriction. | You cannot use the 'Apply on Variant' functionality and simultaneously create a bill of materials for a specific variant. |
+| The restriction belongs to the recipe's template | A restriction value's product template differs from the recipe's product template. | The attribute value *the attribute value display name* set on product *the attribute value's product template display name* does not match the bill of materials product *the recipe's product template display name*. |
 
 ### 1.4 By-product constraints
 
@@ -91,9 +91,9 @@ Same watched fields.
 
 | Rule | Condition | Message |
 |---|---|---|
-| A by-product is not the finished product | When the recipe names a variant: the by-product equals it. When it does not: the by-product's template equals the recipe's template. | By-product *the recipe display name* should not be the same as BoM product. |
+| A by-product is not the finished product | When the recipe names a variant: the by-product equals it. When it does not: the by-product's template equals the recipe's template. | By-product *the recipe display name* should not be the same as bill of materials product. |
 | Non-negative cost share | A by-product's `cost_share` is strictly negative. | By-products cost shares must be positive. |
-| Total cost share at most 100 | For **each** variant of the recipe's template, the sum of the cost shares of the by-product lines that are not skipped for that variant and whose quantity is not zero at their unit exceeds 100 when compared at two decimal places. | The total cost share for a BoM's by-products cannot exceed 100. |
+| Total cost share at most 100 | For **each** variant of the recipe's template, the sum of the cost shares of the by-product lines that are not skipped for that variant and whose quantity is not zero at their unit exceeds 100 when compared at two decimal places. | The total cost share for a bill of materials's by-products cannot exceed 100. |
 
 Note that the total is checked **per variant**: two by-product lines of 60 percent each,
 restricted to different mutually exclusive variants, are legal because no single variant
@@ -259,7 +259,7 @@ the order itself.
 | Split or merge | Any order is not `draft` or `confirmed`. | Only manufacturing orders in either a draft or confirmed state can be *split* / *merged*. |
 | Split or merge | Any order has no recipe. | Only manufacturing orders with a Bill of Materials can be *split* / *merged*. |
 | Merge | Fewer than two orders. | You need at least two production orders to merge them. |
-| Merge | The orders do not all share one product **and** one recipe. | You can only merge manufacturing orders of identical products with same BoM. |
+| Merge | The orders do not all share one product **and** one recipe. | You can only merge manufacturing orders of identical products with same bill of materials. |
 | Merge | Any order has an extra component move (no recipe line) or an extra by-product move (no by-product line). | You can only merge manufacturing orders with no additional components or by-products. |
 | Merge | The orders do not all share one state. | You can only merge manufacturing with the same state. |
 | Merge | The orders do not all share one operation type. | You can only merge manufacturing with the same operation type |
@@ -554,7 +554,7 @@ company and their record rules do not accept an empty one.
 | Subcontracted orders cannot be merged | Operation refusal | Any order in the merge has a subcontract receipt behind it. | Subcontracted manufacturing orders cannot be merged. |
 | A portal user writes only the allowed fields | Operation refusal on writing an order | The acting user is a portal user, not acting with elevated rights, and writes any field outside the allowed set (`move_line_raw_ids`, `lot_producing_ids`, `qty_producing`, `product_qty`). | You cannot write on fields *the comma-separated field list* in mrp.production. |
 | A portal user does not post stock | Operation refusal on creating or writing a Stock Move | The acting user is a portal user, not acting with elevated rights, and the state written or defaulted is `done`. | Portal users cannot create a stock move with a state 'Done' or change the current state to 'Done'. |
-| Splitting a subcontracting order needs a lot | Operation refusal | No producing lot is set. | Please set a lot/serial for the currently opened subcontracting MO first. |
+| Splitting a subcontracting order needs a lot | Operation refusal | No producing lot is set. | Please set a lot/serial for the currently opened subcontracting manufacturing order first. |
 | Splitting after receipt | Operation refusal | The receipt move is already `done`. | The subcontracted goods have already been received. |
 | The company's subcontracting location is protected | Record constraint on the location | An attempt is made to change the company of the company's own subcontracting location. | You cannot alter the company's subcontracting location |
 | A subcontracting location is internal and company-bound | Record constraint on the location | A subcontractor location is not of internal usage or is not linked to the right company. | In order to manage stock accurately, subcontracting locations must be type Internal, linked to the appropriate company. |

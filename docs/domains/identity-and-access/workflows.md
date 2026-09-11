@@ -170,7 +170,7 @@ what lets a program that holds it act as the account (section 22.5 of
    `default`.
 5. If no binding verifies, the original refusal stands.
 6. When no local account exists and the binding forbids creation, the refusal is *No local user
-   found for LDAP login and not configured to create one*.
+   found for directory access protocol login and not configured to create one*.
 
 ---
 

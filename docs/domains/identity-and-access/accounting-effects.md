@@ -93,7 +93,7 @@ interaction must be understood:
 
 | For | See |
 |---|---|
-| The journal entries themselves | `../general-ledger/accounting-effects.md` |
-| The multi-company behaviour of financial documents | `../general-ledger/entities.md` and `../multi-currency/calculations.md` |
-| The accounting security groups and their rights | `../general-ledger/configuration.md` |
-| The customer-facing invoice pages that use the token mechanism specified here | `../accounts-receivable/interfaces.md` |
+| The journal entries themselves | [../general-ledger/accounting-effects.md](../general-ledger/accounting-effects.md) |
+| The multi-company behaviour of financial documents | [../general-ledger/entities.md](../general-ledger/entities.md) and [../multi-currency/calculations.md](../multi-currency/calculations.md) |
+| The accounting security groups and their rights | [../general-ledger/configuration.md](../general-ledger/configuration.md) |
+| The customer-facing invoice pages that use the token mechanism specified here | [../accounts-receivable/interfaces.md](../accounts-receivable/interfaces.md) |

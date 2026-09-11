@@ -1025,7 +1025,7 @@ Given a scope and a candidate key:
 Two named operations allow a program holding a valid key to mint and revoke keys without a browser.
 Both are gated:
 
-> Programmatic API keys are not enabled
+> Programmatic application programming interface keys are not enabled
 
 unless the acting environment is that of a system user **or** the parameter
 `base.enable_programmatic_api_keys` is set to a true value. (Administrators are exempt on purpose:
@@ -1083,7 +1083,7 @@ message. Creating the wizard record validates the expiry outright.
 
 Producing the key is protected by the identity re-check and additionally refuses non-internal users:
 
-> Only internal users can create API keys
+> Only internal users can create application programming interface keys
 
 On success the clear key is handed to a display record.
 
@@ -1701,10 +1701,10 @@ reports:
 
 | Outcome | Title | Message |
 |---|---|---|
-| Success | Connection Test Successful! | Successfully connected to LDAP server at *server*:*port* |
-| Server unreachable | Connection Test Failed! | Cannot contact LDAP server at *server*:*port* |
+| Success | Connection Test Successful! | Successfully connected to directory access protocol server at *server*:*port* |
+| Server unreachable | Connection Test Failed! | Cannot contact directory access protocol server at *server*:*port* |
 | Invalid credentials | Connection Test Failed! | Invalid credentials for bind DN *the query account distinguished name* |
-| Timeout | Connection Test Failed! | Connection to LDAP server at *server*:*port* timed out |
+| Timeout | Connection Test Failed! | Connection to directory access protocol server at *server*:*port* timed out |
 | Any other error | Connection Test Failed! | An error occurred: *the error* |
 
 ---

@@ -43,7 +43,7 @@ is that the cash difference is posted and the session is marked closed.
 2. No order of the session may be unfinished — *"There are still orders in draft state in
    the session. Pay or cancel the following orders to validate the session: <order
    names>"*.
-3. Every invoice of every closed order must be posted — *"You cannot close the POS when
+3. Every invoice of every closed order must be posted — *"You cannot close the point of sale when
    invoices are not posted.\nInvoices: <invoice number> - <state>"*, one per line.
 4. Every tax line of the closing entry must resolve to an account — otherwise *"Unable to
    close and validate the session.\nPlease set corresponding tax account in each

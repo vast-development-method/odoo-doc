@@ -1799,10 +1799,10 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 121 — Put-away with the "last used" sublocation mode
 
-**Given** a Put-away Rule sends BOLT arriving in `WH/Stock` to `WH/Stock/Zone A` with the sublocation mode "Last Used"
-**And** the most recent completed detail line of BOLT whose destination Location is inside `WH/Stock/Zone A` landed in `WH/Stock/Zone A/Bin 7`
+**Given** a Put-away Rule sends Bolt arriving in `WH/Stock` to `WH/Stock/Zone A` with the sublocation mode "Last Used"
+**And** the most recent completed detail line of Bolt whose destination Location is inside `WH/Stock/Zone A` landed in `WH/Stock/Zone A/Bin 7`
 
-**When** BOLT arrives in `WH/Stock`
+**When** Bolt arrives in `WH/Stock`
 
 **Then** the rule's target is replaced by `WH/Stock/Zone A/Bin 7` before the capacity check runs
 **And**, the rule naming no storage category, that Location is returned as soon as it passes the check.
@@ -1817,12 +1817,12 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 122 — Put-away prefers a location that already holds the product
 
-**Given** a Put-away Rule sends BOLT arriving in `WH/Stock` to `WH/Stock/Zone A` with the closest-location mode and the storage category "Shelf"
-**And** `WH/Stock/Zone A` has three children carrying that category: `Bin 1` (empty), `Bin 2` (holds 4.00 BOLT), `Bin 3` (empty)
+**Given** a Put-away Rule sends Bolt arriving in `WH/Stock` to `WH/Stock/Zone A` with the closest-location mode and the storage category "Shelf"
+**And** `WH/Stock/Zone A` has three children carrying that category: `Bin 1` (empty), `Bin 2` (holds 4.00 Bolt), `Bin 3` (empty)
 
-**When** 2 BOLT arrive
+**When** 2 Bolt arrive
 
-**Then** the first pass walks the children looking for one whose occupancy figure for BOLT is strictly positive; `Bin 2` qualifies and passes the capacity check, so `Bin 2` is chosen
+**Then** the first pass walks the children looking for one whose occupancy figure for Bolt is strictly positive; `Bin 2` qualifies and passes the capacity check, so `Bin 2` is chosen
 **And** the second pass is never reached.
 
 **Given** instead `Bin 2` fails the capacity check
@@ -1843,10 +1843,10 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 124 — Put-away occupancy counts future arrivals
 
-**Given** `WH/Stock/Shelf A` holds 10.00 BOLT and an open detail line of another Transfer will bring 15.00 more into it
-**And** the Storage Category on that Shelf caps BOLT at 30
+**Given** `WH/Stock/Shelf A` holds 10.00 Bolt and an open detail line of another Transfer will bring 15.00 more into it
+**And** the Storage Category on that Shelf caps Bolt at 30
 
-**When** 8 BOLT are put away
+**When** 8 Bolt are put away
 
 **Then** the occupancy figure is 10 + 15 = **25**
 **And** the second quantity test `8 + 25 = 33 > 30` rejects the Shelf.
@@ -1871,7 +1871,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 126 — Reserving a chained move
 
-**Given** a two-step receipt has been validated: the receipt move put 10.00 BOLT into `WH/Input/Bay 2`, inside container `PACK0010`, under no lot
+**Given** a two-step receipt has been validated: the receipt move put 10.00 Bolt into `WH/Input/Bay 2`, inside container `PACK0010`, under no lot
 **And** the storage move demands 10 and has the receipt move as originating move
 
 **When** the storage move is reserved
@@ -1889,7 +1889,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 127 — A chained move whose goods were counted away
 
-**Given** the same starting point, but an inventory adjustment removed 3.00 BOLT from `WH/Input/Bay 2` after the receipt
+**Given** the same starting point, but an inventory adjustment removed 3.00 Bolt from `WH/Input/Bay 2` after the receipt
 
 **When** the storage move is reserved
 
@@ -1899,7 +1899,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 128 — A bypassing chained move
 
-**Given** a move whose source Location is the shared customer Location (a return) has an originating move that delivered 5.00 BOLT
+**Given** a move whose source Location is the shared customer Location (a return) has an originating move that delivered 5.00 Bolt
 
 **When** it is reserved
 
@@ -1908,7 +1908,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 129 — Reserving a serial-tracked move that bypasses reservation
 
-**Given** a receipt of 3 DRILL, whose source Location bypasses reservation
+**Given** a receipt of 3 Drill, whose source Location bypasses reservation
 **And** the Operation Type allows creating lots
 
 **When** the move is reserved
@@ -1918,7 +1918,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 130 — Reserving twice does not double up
 
-**Given** a move of 10 BOLT is already `partially_available` with 6.00 reserved
+**Given** a move of 10 Bolt is already `partially_available` with 6.00 reserved
 
 **When** the reservation is run again and 4.00 is now available
 
@@ -1928,7 +1928,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 131 — Reservation extends an existing line rather than adding one
 
-**Given** a move of 10 BOLT has one detail line of 6.00 from `WH/Stock`, no lot, no container, no owner, no destination container
+**Given** a move of 10 Bolt has one detail line of 6.00 from `WH/Stock`, no lot, no container, no owner, no destination container
 **And** 4.00 more becomes available at exactly that key
 
 **When** the move is reserved again
@@ -1941,8 +1941,8 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 132 — Reservation with a lot requested
 
-**Given** PAINT in `WH/Stock` has 4.00 under lot `L1` and 6.00 with no lot
-**And** a move of 10 PAINT is reserved loosely with no lot requested
+**Given** Paint in `WH/Stock` has 4.00 under lot `L1` and 6.00 with no lot
+**And** a move of 10 Paint is reserved loosely with no lot requested
 
 **Then** the gathering returns the lot-bearing record first
 **And** 4.00 is taken from `L1` and 6.00 from the lot-less record
@@ -1950,7 +1950,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 133 — Assigning lots directly on a move
 
-**Given** a move of 5 PAINT is `confirmed` with no detail line
+**Given** a move of 5 Paint is `confirmed` with no detail line
 **And** `WH/Stock` holds 3.00 of `L1` and 4.00 of `L2`
 
 **When** the person writes the lot list `[L1, L2]` on the move
@@ -2181,7 +2181,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 155 — Two concurrent reservations of the same goods
 
-**Given** two transactions both reserve BOLT at `WH/Stock` at the same instant
+**Given** two transactions both reserve Bolt at `WH/Stock` at the same instant
 
 **Then** the first takes the write lock on the first candidate record
 **And** the second, unable to take it, creates a **new** record instead of waiting
@@ -2203,14 +2203,14 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 157 — A container with a manual shipping weight
 
-**Given** container `PACK0012` of type "Box" (base weight 1.2) holds 10.00 BOLT (weight 0.5) and has a manual shipping weight of **9.00**
+**Given** container `PACK0012` of type "Box" (base weight 1.2) holds 10.00 Bolt (weight 0.5) and has a manual shipping weight of **9.00**
 
 **Then** the Transfer's shipping weight counts **9.00** for that container, not 1.2 + 5 = 6.2.
 
 ## Scenario 158 — A nested container's weight during a transfer
 
 **Given** `PALLET2` is the destination container of `BOX1` and `BOX2`
-**And** `BOX1` holds 4.00 BOLT and `BOX2` holds 6.00 BOLT on the Transfer's lines
+**And** `BOX1` holds 4.00 Bolt and `BOX2` holds 6.00 Bolt on the Transfer's lines
 **And** the base weights are: pallet 20, box 1.2
 
 **Then** the weight of `PALLET2` for that Transfer is 20 + (1.2 + 4 × 0.5) + (1.2 + 6 × 0.5) = 20 + 3.2 + 4.2 = **27.4**.
@@ -2284,28 +2284,28 @@ Every assertion about a quantity is an assertion about the value **after** round
 ## Scenario 166 — A full three-step delivery of a tracked product in containers
 
 **Given** the Warehouse delivers in three steps
-**And** `WH/Stock/Shelf A` holds 20.00 PAINT under lot `L1`, with the first in first out strategy
+**And** `WH/Stock/Shelf A` holds 20.00 Paint under lot `L1`, with the first in first out strategy
 **And** the container group and the lot group are active
 
-**When** a need for 12 PAINT at `Customers` reaches the rule engine
+**When** a need for 12 Paint at `Customers` reaches the rule engine
 
 **Then** a pick move is created from `WH/Stock` towards `WH/Packing Zone` with `Customers` as final Location, grouped into `WH/PICK/00010`, and reserved: one detail line of 12.00 from `WH/Stock/Shelf A` carrying lot `L1`.
 
 **When** the pick is validated
 
-**Then** 12.00 PAINT of `L1` sit in `WH/Packing Zone`
+**Then** 12.00 Paint of `L1` sit in `WH/Packing Zone`
 **And** a pack move is created into `WH/PACK/00007`, reserved against exactly (`WH/Packing Zone`, `L1`, no container).
 
 **When** the person packs the 12 units into a new container `PACK0020` of type "Box" and validates the pack Transfer
 
 **Then** the container history snapshot is written first, recording `PACK0020`, its Location before (`WH/Packing Zone`) and after (`WH/Output`)
-**And** 12.00 PAINT of `L1` sit in `WH/Output` inside `PACK0020`
+**And** 12.00 Paint of `L1` sit in `WH/Output` inside `PACK0020`
 **And** a delivery move is created into `WH/OUT/00015` and reserved against (`WH/Output`, `L1`, `PACK0020`)
 **And** the whole-container detection sees that the delivery's lines reproduce the container exactly, so each line gets `PACK0020` as destination container and the entire-package flag.
 
 **When** the delivery is validated
 
-**Then** 12.00 PAINT of `L1` sit at `Customers` inside `PACK0020`
+**Then** 12.00 Paint of `L1` sit at `Customers` inside `PACK0020`
 **And** the delivery document prints one container with its contents rather than a loose line
 **And** the traceability tree of `L1` shows four completed lines: the original receipt, the pick, the pack and the delivery
 **And** the delivery discovery of `L1` returns `WH/OUT/00015`.
@@ -2314,7 +2314,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **Given** the Warehouse receives in two steps
 
-**When** 20 BOLT are received into `WH/Input` and the receipt is validated
+**When** 20 Bolt are received into `WH/Input` and the receipt is validated
 
 **Then** a storage Transfer of 20 is created and reserved.
 

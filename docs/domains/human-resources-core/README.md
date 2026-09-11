@@ -38,7 +38,7 @@ here because the rest of the platform depends on them:
    considerable lengths — overriding search, fetch, view retrieval and form redirection —
    to make an ordinary user who touches the private model transparently receive public
    data or a clean access error rather than a leak. This is documented field by field in
-   [Business Rules](business-rules.md#2-the-private-public-field-split) and is the single
+   [Business Rules](business-rules.md#2-the-privatepublic-field-split) and is the single
    most important invariant of this domain.
 
 ## 2. Capabilities covered

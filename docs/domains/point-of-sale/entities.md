@@ -803,7 +803,7 @@ amounts always equals the amount the customer actually parted with.
   posted or already invoiced raises *"You cannot edit a payment for a posted order."*
 - **Method must be offered on the till.** Writing a method that is not among the session
   configuration's payment methods raises *"The payment method selected is not allowed in
-  the config of the POS session."*
+  the config of the point of sale session."*
 - **Ordering**: by identifier descending.
 - **Display name**: the label followed by the amount formatted in the payment currency,
   or just the formatted amount when there is no label.
@@ -887,7 +887,7 @@ to the fields actually present in the write, and the records are split into thre
 
 - **Quick response code configuration.** When the integration is quick response code the
   journal must be a bank journal with a bank account — otherwise *"At least one bank
-  account must be defined on the journal to allow registering QR code payments with Bank
+  account must be defined on the journal to allow registering quick response code payments with Bank
   apps."* A format must be chosen — otherwise *"You must select a QR-code method to
   generate QR-codes for this payment method."* The bank account must be able to produce
   that format for the company currency; the format's own error message is reported.
@@ -896,7 +896,7 @@ to the fields actually present in the write, and the records are split into thre
   company."*
 - **One shop per cash method.** A cash method (or a method on a cash journal) may be
   attached to at most one till — otherwise *"Validation Error: You cannot assign the same
-  Cash payment method to multiple POS Shops. Please create a separate Cash payment method
+  Cash payment method to multiple point of sale Shops. Please create a separate Cash payment method
   for each shop."*
 
 ### 7.6 Duplication
@@ -1031,7 +1031,7 @@ to a time slot.
   twenty-four, must be strictly smaller than the end hour reduced modulo twenty-four —
   otherwise *"The start time must be before the end time."*
 - **Deletion** is refused when the preset is attached to any configuration: *"You cannot
-  delete a preset that is linked to a POS configuration."*
+  delete a preset that is linked to a point of sale configuration."*
 
 ### 11.4 Slot usage
 

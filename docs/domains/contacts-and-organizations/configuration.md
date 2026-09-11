@@ -242,7 +242,7 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Bangladesh | BD | 880 | BDT | no | yes |  | before | no | no |  |
 | Barbados | BB | 1246 | BBD | no | yes |  | before | no | no |  |
 | Belarus | BY | 375 | BYN | no | yes |  | before | no | no |  |
-| Belgium | BE | 32 | EUR | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
+| Belgium | BE | 32 | EUR | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
 | Belize | BZ | 501 | BZD | no | no |  | before | no | no |  |
 | Benin | BJ | 229 | XOF | no | no |  | before | no | no |  |
 | Bermuda | BM | 1441 | BMD | no | yes |  | before | no | no |  |
@@ -255,7 +255,7 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Brazil | BR | 55 | BRL | no | yes |  | before | no | yes | %(street)s\n%(street2)s\n%(city)s %(state_code)s\n%(zip)s\n%(country_name)s |
 | British Indian Ocean Territory | IO | 246 | USD | no | yes |  | before | no | no |  |
 | Brunei Darussalam | BN | 673 | BND | no | yes |  | before | no | no | %(street)s\n%(street2)s\n%(city)s %(zip)s\n%(country_name)s |
-| Bulgaria | BG | 359 | EUR | no | yes | VAT | before | no | no |  |
+| Bulgaria | BG | 359 | EUR | no | yes | value-added tax | before | no | no |  |
 | Burkina Faso | BF | 226 | XOF | no | yes |  | before | no | no |  |
 | Burundi | BI | 257 | BIF | no | yes |  | before | no | no |  |
 | Cambodia | KH | 855 | KHR | no | yes |  | before | no | no |  |
@@ -275,13 +275,13 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Congo (Republic) | CG | 242 | XAF | no | yes |  | before | no | no |  |
 | Cook Islands | CK | 682 | NZD | no | yes |  | before | no | no |  |
 | Costa Rica | CR | 506 | CRC | no | yes |  | before | no | no |  |
-| Croatia | HR | 385 | EUR | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s \n%(country_name)s |
+| Croatia | human resources | 385 | EUR | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s \n%(country_name)s |
 | Cuba | CU | 53 | CUP | no | yes |  | before | no | no |  |
 | Curaçao | CW | 599 | XCG | no | yes |  | before | no | no |  |
-| Cyprus | CY | 357 | EUR | no | yes | VAT | before | no | no |  |
-| Czech Republic | CZ | 420 | CZK | no | yes | VAT | before | no | no |  |
+| Cyprus | CY | 357 | EUR | no | yes | value-added tax | before | no | no |  |
+| Czech Republic | CZ | 420 | CZK | no | yes | value-added tax | before | no | no |  |
 | Côte d'Ivoire | CI | 225 | XOF | no | yes |  | before | no | no |  |
-| Denmark | DK | 45 | DKK | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
+| Denmark | DK | 45 | DKK | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
 | Djibouti | DJ | 253 | DJF | no | yes |  | before | no | no |  |
 | Dominica | DM | 1767 | XCD | no | yes |  | before | no | no |  |
 | Dominican Republic | DO | 1849 | DOP | no | yes | RNC | before | no | no | %(street)s\n%(street2)s\n%(city)s %(state_name)s %(zip)s\n%(country_name)s |
@@ -290,24 +290,24 @@ In the table the line feeds inside a layout are written as the two characters `\
 | El Salvador | SV | 503 | SVC | no | yes |  | before | no | no |  |
 | Equatorial Guinea | GQ | 240 | XAF | no | yes |  | before | no | no |  |
 | Eritrea | ER | 291 | ERN | no | yes |  | before | no | no |  |
-| Estonia | EE | 372 | EUR | no | yes | VAT | before | no | no |  |
+| Estonia | EE | 372 | EUR | no | yes | value-added tax | before | no | no |  |
 | Eswatini | SZ | 268 | SZL | no | yes |  | before | no | no |  |
 | Ethiopia | ET | 251 | ETB | no | yes |  | before | no | no |  |
 | Falkland Islands | FK | 500 | FKP | no | yes |  | before | no | no |  |
 | Faroe Islands | FO | 298 | DKK | no | yes |  | before | no | no |  |
 | Fiji | FJ | 679 | FJD | no | yes |  | before | no | no |  |
-| Finland | FI | 358 | EUR | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
-| France | FR | 33 | EUR | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
+| Finland | FI | 358 | EUR | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
+| France | FR | 33 | EUR | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
 | French Guiana | GF | 594 | EUR | no | yes |  | before | no | no |  |
-| French Polynesia | PF | 689 | XPF | no | yes | VAT | before | no | no |  |
+| French Polynesia | PF | 689 | XPF | no | yes | value-added tax | before | no | no |  |
 | French Southern Territories | TF | 262 | EUR | no | yes |  | before | no | no |  |
 | Gabon | GA | 241 | XAF | no | yes |  | before | no | no |  |
 | Gambia | GM | 220 | GMD | no | yes |  | before | no | no |  |
 | Georgia | GE | 995 | GEL | no | yes |  | before | no | no | %(street)s\n%(street2)s\n%(city)s %(state_name)s %(zip)s\n%(country_name)s |
-| Germany | DE | 49 | EUR | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
+| Germany | DE | 49 | EUR | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
 | Ghana | GH | 233 | GHS | no | yes |  | before | no | no |  |
 | Gibraltar | GI | 350 | GIP | no | yes |  | before | no | no |  |
-| Greece | GR | 30 | EUR | no | yes | VAT | before | no | no |  |
+| Greece | GR | 30 | EUR | no | yes | value-added tax | before | no | no |  |
 | Greenland | GL | 299 | DKK | no | yes |  | before | no | no |  |
 | Grenada | GD | 1473 | XCD | no | yes |  | before | no | no |  |
 | Guadeloupe | GP | 590 | EUR | no | yes |  | before | no | no |  |
@@ -322,16 +322,16 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Holy See (Vatican City State) | VA | 379 | EUR | no | yes |  | before | no | no |  |
 | Honduras | HN | 504 | HNL | no | yes | RTN | before | no | no |  |
 | Hong Kong | HK | 852 | HKD | no | no |  | before | no | no |  |
-| Hungary | HU | 36 | HUF | no | yes | VAT | before | no | no |  |
+| Hungary | HU | 36 | HUF | no | yes | value-added tax | before | no | no |  |
 | Iceland | IS | 354 | ISK | no | yes |  | before | no | no |  |
 | India | IN | 91 | INR | yes | yes | GSTIN | before | no | no | %(street)s\n%(street2)s\n%(city)s %(zip)s\n%(state_name)s %(state_code)s\n%(country_name)s |
 | Indonesia | ID | 62 | IDR | yes | yes | NPWP | before | no | no |  |
 | Iran | IR | 98 | IRR | no | yes |  | before | no | no |  |
 | Iraq | IQ | 964 | IQD | no | yes |  | before | no | no |  |
-| Ireland | IE | 353 | EUR | no | no | VAT | before | no | no |  |
+| Ireland | IE | 353 | EUR | no | no | value-added tax | before | no | no |  |
 | Isle of Man | IM | 44 | GBP | no | yes |  | before | no | no |  |
 | Israel | IL | 972 | ILS | no | yes |  | before | no | no |  |
-| Italy | IT | 39 | EUR | yes | yes | VAT | before | no | no |  |
+| Italy | IT | 39 | EUR | yes | yes | value-added tax | before | no | no |  |
 | Jamaica | JM | 1876 | JMD | no | yes |  | before | no | no |  |
 | Japan | JP | 81 | JPY | yes | yes |  | after | no | no | %(zip)s\n%(state_name)s %(city)s\n%(street)s\n%(street2)s\n%(country_name)s |
 | Jersey | JE | 44 | GBP | no | yes |  | before | no | no |  |
@@ -343,21 +343,21 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Kuwait | KW | 965 | KWD | no | yes |  | before | no | no |  |
 | Kyrgyzstan | KG | 996 | KGS | yes | yes |  | before | no | no | %(street)s\n%(street2)s\n%(city)s\n%(state_name)s\n%(country_name)s |
 | Laos | LA | 856 | LAK | no | yes |  | before | no | no |  |
-| Latvia | LV | 371 | EUR | no | yes | VAT | before | no | no |  |
+| Latvia | LV | 371 | EUR | no | yes | value-added tax | before | no | no |  |
 | Lebanon | LB | 961 | LBP | no | yes |  | before | no | no |  |
 | Lesotho | LS | 266 | LSL | no | yes |  | before | no | no |  |
 | Liberia | LR | 231 | LRD | no | yes |  | before | no | no |  |
 | Libya | LY | 218 | LYD | no | yes |  | before | no | no |  |
 | Liechtenstein | LI | 423 | CHF | no | yes |  | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
-| Lithuania | LT | 370 | EUR | no | yes | VAT | before | no | no |  |
-| Luxembourg | LU | 352 | EUR | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s \n%(country_name)s |
-| Macau | MO | 853 | MOP | no | no |  | before | no | no |  |
+| Lithuania | LT | 370 | EUR | no | yes | value-added tax | before | no | no |  |
+| Luxembourg | LU | 352 | EUR | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s \n%(country_name)s |
+| Macau | manufacturing order | 853 | MOP | no | no |  | before | no | no |  |
 | Madagascar | MG | 261 | MGA | no | yes |  | before | no | no |  |
 | Malawi | MW | 265 | MWK | no | yes |  | before | no | no |  |
 | Malaysia | MY | 60 | MYR | no | yes |  | before | no | no | %(street)s\n%(street2)s\n%(city)s %(state_name)s %(zip)s\n%(country_name)s |
 | Maldives | MV | 960 | MVR | no | yes |  | before | no | no |  |
 | Mali | ML | 223 | XOF | no | yes |  | before | no | no |  |
-| Malta | MT | 356 | EUR | no | yes | VAT | before | no | no |  |
+| Malta | MT | 356 | EUR | no | yes | value-added tax | before | no | no |  |
 | Marshall Islands | MH | 692 | USD | no | yes |  | before | no | no |  |
 | Martinique | MQ | 596 | EUR | no | yes |  | before | no | no |  |
 | Mauritania | MR | 222 | MRU | no | yes |  | before | no | no |  |
@@ -376,7 +376,7 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Namibia | NA | 264 | NAD | no | yes |  | before | no | no |  |
 | Nauru | NR | 674 | AUD | no | yes |  | before | no | no |  |
 | Nepal | NP | 977 | NPR | no | yes |  | before | no | no |  |
-| Netherlands | NL | 31 | EUR | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
+| Netherlands | NL | 31 | EUR | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
 | New Caledonia | NC | 687 | XPF | no | yes |  | before | no | no |  |
 | New Zealand | NZ | 64 | NZD | no | yes | GST | before | no | no |  |
 | Nicaragua | NI | 505 | NIO | no | yes |  | before | no | no |  |
@@ -398,11 +398,11 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Peru | PE | 51 | PEN | no | no | RUC | before | yes | yes | %(street)s\n%(l10n_pe_district_name)s\n%(zip)s%(city)s\n%(state_name)s\n%(country_name)s |
 | Philippines | PH | 63 | PHP | no | yes |  | before | no | no |  |
 | Pitcairn Islands | PN | 64 | NZD | no | yes |  | before | no | no |  |
-| Poland | PL | 48 | PLN | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
-| Portugal | PT | 351 | EUR | no | yes | VAT | before | no | no |  |
+| Poland | PL | 48 | PLN | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
+| Portugal | PT | 351 | EUR | no | yes | value-added tax | before | no | no |  |
 | Puerto Rico | PR | 1939 | USD | no | yes |  | before | no | no |  |
 | Qatar | QA | 974 | QAR | no | yes |  | before | no | no |  |
-| Romania | RO | 40 | RON | no | yes | VAT | before | no | no |  |
+| Romania | RO | 40 | RON | no | yes | value-added tax | before | no | no |  |
 | Russian Federation | RU | 7 | RUB | no | yes |  | before | no | no |  |
 | Rwanda | RW | 250 | RWF | no | yes |  | before | no | no |  |
 | Réunion | RE | 262 | EUR | no | yes |  | before | no | no |  |
@@ -415,28 +415,28 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Saint Vincent and the Grenadines | VC | 1784 | XCD | no | yes |  | before | no | no |  |
 | Samoa | WS | 685 | WST | no | yes |  | before | no | no |  |
 | San Marino | SM | 378 | EUR | no | yes |  | before | no | no |  |
-| Saudi Arabia | SA | 966 | SAR | no | yes | VAT Number | before | no | yes | %(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(l10n_sa_edi_building_number)s %(l10n_sa_edi_plot_identification)s\n%(country_name)s |
+| Saudi Arabia | SA | 966 | SAR | no | yes | value-added tax Number | before | no | yes | %(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(l10n_sa_edi_building_number)s %(l10n_sa_edi_plot_identification)s\n%(country_name)s |
 | Senegal | SN | 221 | XOF | no | yes |  | before | no | no |  |
 | Serbia | RS | 381 | RSD | no | yes |  | before | no | no |  |
 | Seychelles | SC | 248 | SCR | no | yes |  | before | no | no |  |
 | Sierra Leone | SL | 232 | SLE | no | yes |  | before | no | no |  |
 | Singapore | SG | 65 | SGD | no | yes | GST No. | before | no | no |  |
 | Sint Maarten (Dutch part) | SX | 1721 | XCG | no | yes |  | before | no | no |  |
-| Slovakia | SK | 421 | EUR | no | yes | VAT | before | no | no |  |
-| Slovenia | SI | 386 | EUR | no | yes | VAT | before | no | yes | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
+| Slovakia | SK | 421 | EUR | no | yes | value-added tax | before | no | no |  |
+| Slovenia | SI | 386 | EUR | no | yes | value-added tax | before | no | yes | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
 | Solomon Islands | SB | 677 | SBD | no | yes |  | before | no | no |  |
-| Somalia | SO | 252 | SOS | no | yes |  | before | no | no |  |
+| Somalia | sales order | 252 | SOS | no | yes |  | before | no | no |  |
 | South Africa | ZA | 27 | ZAR | no | yes |  | before | no | no |  |
 | South Georgia and the South Sandwich Islands | GS | 500 | GBP | no | yes |  | before | no | no |  |
 | South Korea | KR | 82 | KRW | no | yes |  | before | no | yes | %(country_name)s %(state_name)s\n%(city)s %(street2)s %(street)s %(zip)s |
 | South Sudan | SS | 211 | SSP | no | yes |  | before | no | no |  |
-| Spain | ES | 34 | EUR | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(state_name)s\n%(country_name)s |
+| Spain | ES | 34 | EUR | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(state_name)s\n%(country_name)s |
 | Sri Lanka | LK | 94 | LKR | no | yes |  | before | no | no |  |
 | State of Palestine | PS | 970 | ILS | no | yes |  | before | no | no |  |
 | Sudan | SD | 249 | SDG | no | yes |  | before | no | no |  |
 | Suriname | SR | 597 | SRD | no | yes |  | before | no | no |  |
 | Svalbard and Jan Mayen | SJ | 47 | NOK | no | yes |  | before | no | no |  |
-| Sweden | SE | 46 | SEK | no | yes | VAT | before | no | yes | %(street)s\n%(street2)s\n%(zip)s %(city)s %(state_code)s\n%(country_name)s |
+| Sweden | SE | 46 | SEK | no | yes | value-added tax | before | no | yes | %(street)s\n%(street2)s\n%(zip)s %(city)s %(state_code)s\n%(country_name)s |
 | Switzerland | CH | 41 | CHF | no | yes |  | before | no | no | %(street)s\n%(street2)s\n%(zip)s %(city)s\n%(country_name)s |
 | Syria | SY | 963 | SYP | no | yes |  | before | no | no |  |
 | São Tomé and Príncipe | ST | 239 | STD | no | yes |  | before | no | no |  |
@@ -458,7 +458,7 @@ In the table the line feeds inside a layout are written as the two characters `\
 | Uganda | UG | 256 | UGX | no | yes | TIN | before | no | no |  |
 | Ukraine | UA | 380 | UAH | no | yes |  | before | no | no |  |
 | United Arab Emirates | AE | 971 | AED | yes | yes | TRN | before | no | no |  |
-| United Kingdom | GB | 44 | GBP | no | yes | VAT | before | no | no | %(street)s\n%(street2)s\n%(city)s\n%(state_name)s\n%(zip)s\n%(country_name)s |
+| United Kingdom | GB | 44 | GBP | no | yes | value-added tax | before | no | no | %(street)s\n%(street2)s\n%(city)s\n%(state_name)s\n%(zip)s\n%(country_name)s |
 | United States | US | 1 | USD | yes | yes |  | before | no | no | %(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s |
 | Uruguay | UY | 598 | UYU | no | yes | RUT | before | no | no |  |
 | Uzbekistan | UZ | 998 | UZS | no | yes | TIN | before | no | no |  |
@@ -740,7 +740,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | CH | SH | Schaffhausen |
 | CH | SH-FR | Schaffhouse |
 | CH | SH-IT | Sciaffusa |
-| CH | SO | Solothurn |
+| CH | sales order | Solothurn |
 | CH | SO-FR | Soleure |
 | CH | SO-IT | Soletta |
 | CH | SZ | Schwyz |
@@ -886,7 +886,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | DO | MC | Monte Cristi |
 | DO | MON | Monseñor Nouel |
 | DO | MP | Monte Plata |
-| DO | MTS | María Trinidad Sánchez |
+| DO | make to stock | María Trinidad Sánchez |
 | DO | PED | Pedernales |
 | DO | PER | Peravia |
 | DO | PP | Puerto Plata |
@@ -1004,12 +1004,12 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | ES | OR | Ourense (Orense) |
 | ES | P | Palencia |
 | ES | PM | Illes Balears (Islas Baleares) |
-| ES | PO | Pontevedra |
+| ES | purchase order | Pontevedra |
 | ES | S | Cantabria |
 | ES | SA | Salamanca |
 | ES | SE | Sevilla |
 | ES | SG | Segovia |
-| ES | SO | Soria |
+| ES | sales order | Soria |
 | ES | SS | Gipuzkoa (Guipúzcoa) |
 | ES | T | Tarragona |
 | ES | TE | Teruel |
@@ -1026,7 +1026,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | ET | BN | Benishangul-Gumuz |
 | ET | DR | Dire Dawa |
 | ET | GM | Gambella Peoples |
-| ET | HR | Harrari Peoples |
+| ET | human resources | Harrari Peoples |
 | ET | OR | Oromia |
 | ET | SM | Somali |
 | ET | SP | Southern Peoples, Nations, and Nationalities |
@@ -1266,10 +1266,10 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | IE | LY | Londonderry |
 | IE | MH | Meath |
 | IE | MN | Monaghan |
-| IE | MO | Mayo |
+| IE | manufacturing order | Mayo |
 | IE | OY | Offaly |
 | IE | RN | Roscommon |
-| IE | SO | Sligo |
+| IE | sales order | Sligo |
 | IE | TE | Tyrone |
 | IE | TR | Tipperary |
 | IE | WD | Waterford |
@@ -1289,7 +1289,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | IN | GA | Goa |
 | IN | GJ | Gujarat |
 | IN | HP | Himachal Pradesh |
-| IN | HR | Haryana |
+| IN | human resources | Haryana |
 | IN | IN_OC | Foreign Country |
 | IN | IN_OT | Other Territory |
 | IN | JH | Jharkhand |
@@ -1406,7 +1406,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | IT | ME | Messina |
 | IT | MI | Milano |
 | IT | MN | Mantova |
-| IT | MO | Modena |
+| IT | manufacturing order | Modena |
 | IT | MS | Massa-Carrara |
 | IT | MT | Matera |
 | IT | NA | Napoli |
@@ -1422,7 +1422,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | IT | PG | Perugia |
 | IT | PI | Pisa |
 | IT | PN | Pordenone |
-| IT | PO | Prato |
+| IT | purchase order | Prato |
 | IT | PR | Parma |
 | IT | PT | Pistoia |
 | IT | PU | Pesaro e Urbino |
@@ -1438,7 +1438,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | IT | RO | Rovigo |
 | IT | SA | Salerno |
 | IT | SI | Siena |
-| IT | SO | Sondrio |
+| IT | sales order | Sondrio |
 | IT | SP | La Spezia |
 | IT | SR | Siracusa |
 | IT | SS | Sassari |
@@ -2075,7 +2075,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | RO | GL | Galați |
 | RO | GR | Giurgiu |
 | RO | HD | Hunedoara |
-| RO | HR | Harghita |
+| RO | human resources | Harghita |
 | RO | IF | Ilfov |
 | RO | IL | Ialomița |
 | RO | IS | Iași |
@@ -2135,7 +2135,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | RU | LIP | Lipetsk Oblast |
 | RU | MAG | Magadan Oblast |
 | RU | ME | Mari El Republic |
-| RU | MO | Republic of Mordovia |
+| RU | manufacturing order | Republic of Mordovia |
 | RU | MOS | Moscow Oblast |
 | RU | MOW | Moscow |
 | RU | MUR | Murmansk Oblast |
@@ -2290,14 +2290,14 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | SE | SE-X | Gävleborgs län |
 | SE | SE-Y | Västernorrlands län |
 | SE | SE-Z | Jämtlands län |
-| SO | BN | Banaadir |
-| SO | GM | Galmudug |
-| SO | HS | Hirshabelle |
-| SO | JL | Jubaland |
-| SO | KG | Koonfur Galbeed |
-| SO | PL | Puntland |
-| SO | SL | Somaliland |
-| SO | SSC | Khatumo |
+| sales order | BN | Banaadir |
+| sales order | GM | Galmudug |
+| sales order | HS | Hirshabelle |
+| sales order | JL | Jubaland |
+| sales order | KG | Koonfur Galbeed |
+| sales order | PL | Puntland |
+| sales order | SL | Somaliland |
+| sales order | SSC | Khatumo |
 | TH | TH-10 | กรุงเทพมหานคร |
 | TH | TH-11 | สมุทรปราการ |
 | TH | TH-12 | นนทบุรี |
@@ -2520,7 +2520,7 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | US | MH | Marshall Islands |
 | US | MI | Michigan |
 | US | MN | Minnesota |
-| US | MO | Missouri |
+| US | manufacturing order | Missouri |
 | US | MP | Northern Mariana Islands |
 | US | MS | Mississippi |
 | US | MT | Montana |
@@ -2560,14 +2560,14 @@ code. The pair (country, code) is unique; the same code may recur under differen
 | UY | FS | Flores |
 | UY | LA | Lavalleja |
 | UY | MA | Maldonado |
-| UY | MO | Montevideo |
+| UY | manufacturing order | Montevideo |
 | UY | PA | Paysandú |
 | UY | RN | Río Negro |
 | UY | RO | Rocha |
 | UY | RV | Rivera |
 | UY | SA | Salto |
 | UY | SJ | San José |
-| UY | SO | Soriano |
+| UY | sales order | Soriano |
 | UY | TA | Tacuarembó |
 | UY | TT | Treinta y Tres |
 | UZ | UZ-AN | Andijon |
@@ -2638,35 +2638,38 @@ that is politically inside a country but outside its customs regime.
 |---|---|---|---|---|
 | DOM-TOM | DOM-TOM | 10 | BL, GF, GP, MF, MQ, NC, PF, PM, RE, YT |  |
 | Eurasian Economic Union | EEU | 5 | AM, BY, KG, KZ, RU |  |
-| European Union | EU | 27 | AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GR, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK |  |
-| European Union Prefixed Countries | EU_PREFIX | 31 | AT, BE, BG, CH, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GR, HR, HU, IE, IT, LT, LU, LV, MT, NL, NO, PL, PT, RO, SE, SI, SK, SM |  |
-| European Union VAT | EU-VAT | 28 | AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GR, HR, HU, IE, IT, LT, LU, LV, MC, MT, NL, PL, PT, RO, SE, SI, SK | ES_CE, ES_ML, ES_TF, ES_GC, NL_BQ1, NL_BQ2, NL_BQ3 |
-| European Union VAT (Without Monaco) | EU-VAT-no-mc | 27 | AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GR, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK | ES_CE, ES_ML, ES_TF, ES_GC, NL_BQ1, NL_BQ2, NL_BQ3 |
+| European Union | EU | 27 | AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GR, human resources, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK |  |
+| European Union Prefixed Countries | EU_PREFIX | 31 | AT, BE, BG, CH, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GR, human resources, HU, IE, IT, LT, LU, LV, MT, NL, NO, PL, PT, RO, SE, SI, SK, SM |  |
+| European Union value-added tax | EU-VAT | 28 | AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GR, human resources, HU, IE, IT, LT, LU, LV, MC, MT, NL, PL, PT, RO, SE, SI, SK | ES_CE, ES_ML, ES_TF, ES_GC, NL_BQ1, NL_BQ2, NL_BQ3 |
+| European Union value-added tax (Without Monaco) | EU-VAT-no-mc | 27 | AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GR, human resources, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK | ES_CE, ES_ML, ES_TF, ES_GC, NL_BQ1, NL_BQ2, NL_BQ3 |
 | France and Monaco | FR-MC | 2 | FR, MC |  |
 | France and Monaco and Drom | FR-MC-DROM | 7 | FR, GF, GP, MC, MQ, RE, YT |  |
-| GCC VAT implementing States | GCC-VAT | 3 | AE, BH, SA |  |
+| GCC value-added tax implementing States | GCC-VAT | 3 | AE, BH, SA |  |
 | Gulf Cooperation Council (GCC) | GCC | 6 | AE, BH, KW, OM, QA, SA |  |
 | India Inter-State Group | IN-INTER | 1 | IN | IN_OC |
-| Intrastat | INTRASTAT | 29 | AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GR, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK, XI |  |
+| Intrastat | INTRASTAT | 29 | AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GR, human resources, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK, XI |  |
 | Latin America Identification | LATAMID | 8 | AR, BR, CL, CO, EC, GT, PE, UY |  |
-| Mainland Spain VAT | ES-VAT | 1 | ES | ES_CE, ES_ML, ES_TF, ES_GC |
-| Netherlands VAT | NL-VAT | 1 | NL | NL_BQ1, NL_BQ2, NL_BQ3 |
-| SEPA Countries | SEPA | 49 | AD, AT, AX, BE, BG, BL, CH, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GF, GG, GI, GP, GR, HR, HU, IE, IM, IS, IT, JE, LI, LT, LU, LV, MC, MF, MQ, MT, NL, NO, PL, PM, PT, RE, RO, SE, SI, SK, SM, VA, YT |  |
+| Mainland Spain value-added tax | ES-VAT | 1 | ES | ES_CE, ES_ML, ES_TF, ES_GC |
+| Netherlands value-added tax | NL-VAT | 1 | NL | NL_BQ1, NL_BQ2, NL_BQ3 |
+| Single Euro Payments Area Countries | Single Euro Payments Area | 49 | AD, AT, AX, BE, BG, BL, CH, CY, CZ, DE, DK, EE, ES, FI, FR, GB, GF, GG, GI, GP, GR, human resources, HU, IE, IM, IS, IT, JE, LI, LT, LU, LV, MC, MF, MQ, MT, NL, NO, PL, PM, PT, RE, RO, SE, SI, SK, SM, VA, YT |  |
 | South America | SA | 15 | AR, BO, BR, CL, CO, EC, FK, GF, GS, GY, PE, PY, SR, UY, VE |  |
 | Switzerland and Liechtenstein | CH-LI | 2 | CH, LI |  |
 | United Kingdom and Northern Ireland | UKXI | 2 | GB, XI |  |
 
 **The two group codes this domain itself reads.**
 
-- `EU_PREFIX` — the thirty countries whose tax registration numbers carry a two-letter prefix.
+- `EU_PREFIX` — the thirty-one countries whose tax registration numbers carry a two-letter
+  prefix.
   Membership switches on the prefix handling in the tax-number normalise-and-validate routine and
   in the duplicate detection. Note that it contains four countries that are **not** in the customs
   union proper: Switzerland, Norway, the United Kingdom and San Marino.
 - `EU` — the customs union proper, used by the tax-number routine to decide whether a number
   prefixed `EU` should be left alone.
 
-A blank entry in the member list means that the group's definition referenced an identifier that
-resolves to no shipped country in this catalogue; it is reproduced so the count is honest.
+Two pairs of groups differ by exactly one member and exist so that a rule can be written either
+way: the customs-union tax group with and without the principality that shares one member state's
+tax regime, and the customs-union group itself, which has one member fewer than the tax group for
+the same reason. A rebuild must keep both, because different rules point at different ones.
 
 ## 8.4 Currencies
 
@@ -2796,7 +2799,7 @@ rounded — and the decimal-places field is derived from it.
 | PKR | Pakistani rupee | Rs. | 586 | 0.01 | before | Rupee | Paisa | no |
 | PLN | Polish złoty | zł | 985 | 0.01 | after | Zloty | Groszy | no |
 | PYG | Paraguayan guaraní | ₲ | 600 | 1 | after | Guarani | Centimos | no |
-| QAR | Qatari riyal | QR | 634 | 0.01 | after | Riyal | Dirham | no |
+| QAR | Qatari riyal | quick response | 634 | 0.01 | after | Riyal | Dirham | no |
 | RON | Romanian leu | lei | 946 | 0.01 | after | Leu | Bani | no |
 | RSD | Serbian dinar | din. | 941 | 0.01 | after | Dinar | Para | no |
 | RUB | Russian ruble | руб | 643 | 0.01 | after | Ruble | Kopek | no |
@@ -2970,9 +2973,12 @@ installation activates. The grouping column is the digit-grouping specification 
 
 ## 8.6 Industries
 
-Twenty-one industries ship, following the standard economic-activity classification with
-single-letter section codes. The two records with codes beyond the standard sections are
-reproduced as they ship.
+Twenty-three industry records ship. Twenty-one of them follow the standard economic-activity
+classification with single-letter section codes, from `A` to `U`, and come from the foundation
+package. The remaining two come from a country-specific electronic-invoicing package and name two
+categories of electronic-commerce operator under that country's tax law; they carry no section
+letter. All twenty-three are listed below, ordered by their full name, which puts the two
+country-specific records among the lettered ones.
 
 | Short name | Full name |
 |---|---|

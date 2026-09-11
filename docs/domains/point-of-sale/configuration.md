@@ -124,7 +124,7 @@ acting context.
 
 | Attribute | Value |
 | --- | --- |
-| Name | POS Session |
+| Name | point of sale Session |
 | Code | `pos.session` |
 | Prefix | The single character `/` |
 | Padding | 5 |
@@ -395,11 +395,11 @@ All rules below are non-updatable shipped records.
 | Point Of Sale Order Analysis multi-company | Point of Sale Order Analysis | everyone | The row's company is in the acting company set. |
 | PoS Payment Method | Point of Sale Payment Method | everyone | The method's company is in the acting company set. |
 | PoS Payment | Point of Sale Payment | everyone | The payment's company is in the acting company set. |
-| Point Of Sale Bank Statement Line POS User | Bank Statement Line | Point of Sale / User | The statement line belongs to a session. A cashier therefore sees only counter cash movements, never ordinary bank statement lines. |
+| Point Of Sale Bank Statement Line point of sale User | Bank Statement Line | Point of Sale / User | The statement line belongs to a session. A cashier therefore sees only counter cash movements, never ordinary bank statement lines. |
 | Point Of Sale Bank Statement Line Accountant | Bank Statement Line | Accounting / Invoicing | Everything. |
 | Point Of Sale Bank Statement Accountant | Bank Statement | Accounting / Invoicing | Everything. |
-| Invoice POS User | Journal Entry | Point of Sale / User | The entry has at least one counter order attached. A cashier therefore sees only the invoices raised from the counter. |
-| Invoice Line POS User | Journal Item | Point of Sale / User | The item's entry has at least one counter order attached. |
+| Invoice point of sale User | Journal Entry | Point of Sale / User | The entry has at least one counter order attached. A cashier therefore sees only the invoices raised from the counter. |
+| Invoice Line point of sale User | Journal Item | Point of Sale / User | The item's entry has at least one counter order attached. |
 
 ---
 

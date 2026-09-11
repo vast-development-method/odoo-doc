@@ -96,7 +96,7 @@ Then, whether or not a session already exists:
 8. The company must have a fiscal country, otherwise *"The company must have a fiscal
    country set."*
 9. The acting user must not be the system superuser, otherwise *"You do not have
-   permission to open a POS session. Please try opening a session with a different
+   permission to open a point of sale session. Please try opening a session with a different
    user"*. (This check is skipped in a test environment.)
 
 ### 2.7 Fields frozen while a session is open
@@ -136,7 +136,7 @@ Please change the configuration first."*
 
 An operation type used by a configuration cannot be archived:
 
-> You cannot archive '*<operation type name>*' as it is used by POS configuration
+> You cannot archive '*<operation type name>*' as it is used by point of sale configuration
 > '*<configuration name>*'.
 
 ### 2.11 Consequential writes
@@ -196,7 +196,7 @@ rights, so that a cashier without accounting rights can still open a till.
 
 | Condition | Message | Redirects the cashier to the administrative interface |
 | --- | --- | --- |
-| An order of the session due now or earlier is unfinished | You cannot close the POS while there are still draft orders for the day. | No |
+| An order of the session due now or earlier is unfinished | You cannot close the point of sale while there are still draft orders for the day. | No |
 | The session is already closed | The session has been already closed by another User. All sales completed in the meantime have been saved in a Rescue Session, which can be reviewed anytime and posted to Accounting from Point of Sale's dashboard. (Shown as an alert titled *Session already closed*.) | Yes |
 | The session is already closed, as seen from the administrative interface | This session is already closed. | — |
 | A bank payment method was given a negative difference and its journal has no loss account | Need loss account for the following journals to post the lost amount: <journal names>\\n | No |
@@ -208,7 +208,7 @@ rights, so that a cashier without accounting rights can still open a till.
 | Condition | Message |
 | --- | --- |
 | An order of the session is unfinished | There are still orders in draft state in the session. Pay or cancel the following orders to validate the session:\\n<order names, joined by a comma and a space> |
-| An invoice of a closed order is not posted | You cannot close the POS when invoices are not posted.\\nInvoices: <one line per invoice, each the invoice number, a space, a hyphen, a space, and the invoice state> |
+| An invoice of a closed order is not posted | You cannot close the point of sale when invoices are not posted.\\nInvoices: <one line per invoice, each the invoice number, a space, a hyphen, a space, and the invoice state> |
 | A prepared tax line has no account | Unable to close and validate the session.\\nPlease set corresponding tax account in each repartition line of the following taxes: \\n<tax names, joined by a comma and a space> |
 | A negative cash difference must be posted and the cash journal has no loss account | Please go on the <cash journal name> journal and define a Loss Account. This account will be used to record cash difference. |
 | A positive cash difference must be posted and the cash journal has no profit account | Please go on the <cash journal name> journal and define a Profit Account. This account will be used to record cash difference. |
@@ -256,7 +256,7 @@ supported path for an unused session is the cancel operation of section 3.2.
 | A transmission contains lines refunding more than one distinct order | You can only refund products from the same order. |
 | The named session is closing or closed and no open session exists for the configuration | No open session available. Please open a new session to capture the order. |
 | Change must be recorded and the session has no cash payment method | No cash statement found for this session. Unable to record returned cash. |
-| The order asks to be invoiced and the configuration has no invoice journal | No invoice journal configured for this POS session. |
+| The order asks to be invoiced and the configuration has no invoice journal | No invoice journal configured for this point of sale session. |
 | The order has no currency when its amounts are recomputed | You can't: create a pos order from the backend interface, or unset the pricelist, or create a pos.order in a python test with Form tool, or edit the form view in studio if no PoS order exist |
 
 A customer identifier that no longer exists is silently dropped, together with the
@@ -292,7 +292,7 @@ order clears it.
 | Condition | Message |
 | --- | --- |
 | A refund line's quantity would exceed the outstanding quantity of the refunded line | You cannot refund more than the outstanding quantity for this product. |
-| Refunding from the administrative interface when the order's configuration has no open session | To return product(s), you need to open a session in the POS <configuration display name> |
+| Refunding from the administrative interface when the order's configuration has no open session | To return product(s), you need to open a session in the point of sale <configuration display name> |
 
 ### 4.6 Invoicing
 
@@ -362,7 +362,7 @@ current server time before storing.
 | Condition | Message |
 | --- | --- |
 | The amount is written on a tender of an order that is posted or already invoiced | You cannot edit a payment for a posted order. |
-| A tender's method is not among the payment methods of the session's configuration | The payment method selected is not allowed in the config of the POS session. |
+| A tender's method is not among the payment methods of the session's configuration | The payment method selected is not allowed in the config of the point of sale session. |
 | A tender of an identify-customer method is aggregated at closing and its order has no customer | You have enabled the "Identify Customer" option for <payment method name> payment method,but the order <order name> does not contain a customer. |
 | The administrative payment wizard is confirmed with an identify-customer method and the order has no customer | Customer is required for <payment method name> payment method. |
 
@@ -397,17 +397,17 @@ configurations using those journals are deleted with them.
 
 | Condition | Message |
 | --- | --- |
-| The integration is quick response code and the journal is not a bank journal with a bank account | At least one bank account must be defined on the journal to allow registering QR code payments with Bank apps. |
+| The integration is quick response code and the journal is not a bank journal with a bank account | At least one bank account must be defined on the journal to allow registering quick response code payments with Bank apps. |
 | The integration is quick response code and no format is chosen | You must select a QR-code method to generate QR-codes for this payment method. |
 | The bank account cannot produce the chosen format for the company currency | The format's own error message. |
-| A code is requested on a method that is not configured for it | This payment method is not configured to generate QR codes. |
+| A code is requested on a method that is not configured for it | This payment method is not configured to generate quick response codes. |
 
 ### 7.4 Company and shop rules
 
 | Condition | Message |
 | --- | --- |
 | A configuration offering the method belongs to another company | The points of sale for the payment method <method name> must belong to its company. |
-| A cash method is attached to more than one configuration | Validation Error: You cannot assign the same Cash payment method to multiple POS Shops. Please create a separate Cash payment method for each shop. |
+| A cash method is attached to more than one configuration | Validation Error: You cannot assign the same Cash payment method to multiple point of sale Shops. Please create a separate Cash payment method for each shop. |
 
 ### 7.5 Duplication
 
@@ -432,7 +432,7 @@ Choosing an integration clears the fields of the other integrations, as describe
 | Category | A category is deleted while any session anywhere is open | You cannot delete a point of sale category while a session is still opened. |
 | Denomination | A denomination is created by typing a non-numeric name | The name of the Coins/Bills must be a number. |
 | Preset | An attendance line's start hour, modulo twenty-four, is not strictly smaller than its end hour modulo twenty-four | The start time must be before the end time. |
-| Preset | A preset attached to a configuration is deleted | You cannot delete a preset that is linked to a POS configuration. |
+| Preset | A preset attached to a configuration is deleted | You cannot delete a preset that is linked to a point of sale configuration. |
 | Preset | A shipped master preset is deleted | You cannot delete the master preset(s). |
 | Printer | The printer type is the direct one and no address is given | Epson Printer IP Address cannot be empty. |
 
@@ -442,8 +442,8 @@ Choosing an integration clears the fields of the other integrations, as describe
 
 | Condition | Message |
 | --- | --- |
-| A tax's kind, amount, scope, group, price-included behavior, base-inclusion behavior or base-affected behavior is changed while a counter line carrying it belongs to an open session | It is forbidden to modify a tax used in a POS order not posted. You must close the POS sessions before modifying the tax. |
-| A numbering sequence used by a configuration is deleted | You cannot delete a sequence used in an active POS config: <the names of the order sequences of the affected configurations> |
+| A tax's kind, amount, scope, group, price-included behavior, base-inclusion behavior or base-affected behavior is changed while a counter line carrying it belongs to an open session | It is forbidden to modify a tax used in a point of sale order not posted. You must close the point of sale sessions before modifying the tax. |
+| A numbering sequence used by a configuration is deleted | You cannot delete a sequence used in an active point of sale config: <the names of the order sequences of the affected configurations> |
 | A cash rounding definition used by a configuration is deleted | You cannot delete a rounding method that is used in a Point of Sale configuration. |
 | A cash rounding definition's step, method or strategy is changed while a session using it is open | You are not allowed to change the cash rounding configuration while a pos session using it is already opened. |
 
@@ -485,7 +485,7 @@ order line carries it, even a line of an unfinished order.
 | Deleting a cash movement | The movement belongs to this session | You cannot delete a cash move that is not linked to this session. |
 | Editing the receipt header or footer | The acting user is a platform administrator | Only administrators can edit receipt headers and footers |
 | Opening the selling application | The acting user is an internal user | The page is reported as not found. |
-| Opening the selling application | The acting user is not the system superuser | You do not have permission to open a POS session. Please try opening a session with a different user |
+| Opening the selling application | The acting user is not the system superuser | You do not have permission to open a point of sale session. Please try opening a session with a different user |
 | Changing a unit price when price control is restricted | The acting user is a counter administrator | Enforced by the selling application; the server does not repeat the check. |
 | Seeing cost and margin in the product information panel | The margins-and-costs flag is set, or the acting user is a counter administrator | Enforced by the selling application. |
 | Posting a cash difference above the authorised limit | The acting user is a counter administrator | Enforced by the selling application. |
@@ -518,7 +518,7 @@ reported as no longer relevant, so the selling application drops it from its cac
 
 | Condition | Message |
 | --- | --- |
-| Self-ordering is enabled and the default user is missing or is neither a counter user nor a counter administrator | The Self-Order default user must be a POS user |
+| Self-ordering is enabled and the default user is missing or is neither a counter user nor a counter administrator | The Self-Order default user must be a point of sale user |
 | The self-ordering mode is kiosk and a cash payment method is offered | You cannot add cash payment methods in kiosk mode. |
 | A submitted order names a preset while the configuration uses presets and the preset does not exist | Invalid preset |
 | The preset is not available in self-ordering and is not the configuration default | Preset is not available in self-ordering |
@@ -526,8 +526,8 @@ reported as no longer relevant, so the selling application drops it from its cac
 | A submitted line carries a quantity that is not a finite number strictly greater than zero | Invalid quantity |
 | A submitted line carries an attribute value that does not exist or does not belong to the ordered product's template | Invalid product attribute |
 | A submitted line carries a combo structure that does not match the product | Invalid combo line |
-| Codes are requested in a mode other than mobile or browse-only | QR codes can only be generated in mobile or consultation mode. |
-| Codes are requested in table-service mode with no table | In Self-Order mode, you must have at least one table to generate QR codes |
+| Codes are requested in a mode other than mobile or browse-only | quick response codes can only be generated in mobile or consultation mode. |
+| Codes are requested in table-service mode with no table | In Self-Order mode, you must have at least one table to generate quick response codes |
 | A pay-after value other than each order is chosen in kiosk mode | Only pay after each is available with kiosk mode. |
 
 Server-side sanitisation of a submitted order, beyond the messages above:
@@ -556,17 +556,17 @@ Forced settings, applied on every write:
 
 | Condition | Message |
 | --- | --- |
-| More than one online payment method is offered on one configuration | A POS config cannot have more than one online payment method. |
-| An online payment method's providers do not all use the configuration currency | All payment providers configured for an online payment method must use the same currency as the Sales Journal, or the company currency if that is not set, of the POS config. |
-| An online payment method has no published provider supporting the configuration currency | To use an online payment method in a POS config, it must have at least one published payment provider supporting the currency of that POS config. |
-| An online tender is created with no accounting payment | Cannot create a POS online payment without an accounting payment. |
-| An accounting payment marked online is attached to a tender whose method is not an online method | Cannot create a POS payment with a not online payment method and an online accounting payment. |
-| The essential data of an online tender is edited | Cannot edit a POS online payment essential data. |
+| More than one online payment method is offered on one configuration | A point of sale config cannot have more than one online payment method. |
+| An online payment method's providers do not all use the configuration currency | All payment providers configured for an online payment method must use the same currency as the Sales Journal, or the company currency if that is not set, of the point of sale config. |
+| An online payment method has no published provider supporting the configuration currency | To use an online payment method in a point of sale config, it must have at least one published payment provider supporting the currency of that point of sale config. |
+| An online tender is created with no accounting payment | Cannot create a point of sale online payment without an accounting payment. |
+| An accounting payment marked online is attached to a tender whose method is not an online method | Cannot create a point of sale payment with a not online payment method and an online accounting payment. |
+| The essential data of an online tender is edited | Cannot edit a point of sale online payment essential data. |
 | An order already carries an online payment and another is attempted | The <order name> already has one online payment. |
 | A payment transaction carries a negative amount | The payment transaction (<transaction identifier>) has a negative amount. |
-| The partner of an online tender cannot be resolved | The partner of the POS online payment (id=<identifier>) could not be found |
-| An online tender cannot be saved | The POS online payment (tx.id=<transaction identifier>) could not be saved correctly |
-| An online tender cannot be saved because the method is missing | The POS online payment (tx.id=<transaction identifier>) could not be saved correctly because the online payment method could not be found |
+| The partner of an online tender cannot be resolved | The partner of the point of sale online payment (id=<identifier>) could not be found |
+| An online tender cannot be saved | The point of sale online payment (tx.id=<transaction identifier>) could not be saved correctly |
+| An online tender cannot be saved because the method is missing | The point of sale online payment (tx.id=<transaction identifier>) could not be saved correctly because the online payment method could not be found |
 
 ---
 
@@ -593,7 +593,7 @@ floor list and forces the tip-after-payment flag off.
 | Condition | Message |
 | --- | --- |
 | An employee that may be used in an open session is deleted | You cannot delete an employee that may be used in an active PoS session, close the session(s) first: \\n followed by one line per pair, each *Employee: <employee name> - PoS Config(s): <configuration names> \\n* |
-| A user chosen for a self-ordering or employee role is not a counter user | The user must be a POS user |
+| A user chosen for a self-ordering or employee role is not a counter user | The user must be a point of sale user |
 
 ---
 

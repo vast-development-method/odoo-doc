@@ -1240,7 +1240,7 @@ with a bearer authentication challenge.
 
 **And** leaving the date empty refuses with
 
-> The API key must have an expiration date
+> The application programming interface key must have an expiration date
 
 ### Scenario 11.3 — An administrator may mint a persistent key
 
@@ -1259,7 +1259,7 @@ expiry; no duration validation is performed at all.
 
 **Then** it is refused with
 
-> You can not remove API keys unless they're yours or you are a system user
+> You can not remove application programming interface keys unless they're yours or you are a system user
 
 ### Scenario 11.5 — Only internal users may create keys
 
@@ -1269,7 +1269,7 @@ expiry; no duration validation is performed at all.
 
 **Then** it is refused with
 
-> Only internal users can create API keys
+> Only internal users can create application programming interface keys
 
 ### Scenario 11.6 — Programmatic minting
 
@@ -1279,7 +1279,7 @@ expiry; no duration validation is performed at all.
 
 **Then** it is refused with
 
-> Programmatic API keys are not enabled
+> Programmatic application programming interface keys are not enabled
 
 **Given** the switch is set and account 40 already has 10 unexpired keys
 
@@ -1287,7 +1287,7 @@ expiry; no duration validation is performed at all.
 
 **Then** it is refused with
 
-> Limit of 10 API keys is reached for programmatic creation
+> Limit of 10 application programming interface keys is reached for programmatic creation
 
 **Given** the caller presents a key scoped to `reporting`
 
@@ -1295,7 +1295,7 @@ expiry; no duration validation is performed at all.
 
 **Then** the verification of the presented key against the global purpose fails and the answer is
 
-> The provided API key is invalid or does not belong to the current user.
+> The provided application programming interface key is invalid or does not belong to the current user.
 
 ---
 
@@ -1685,7 +1685,7 @@ asserted to be a guarded one, and it is invoked with the stored arguments; its r
 
 **Then** it is refused with
 
-> This method can only be accessed over HTTP
+> This method can only be accessed over Hypertext Transfer Protocol
 
 ---
 

@@ -661,3 +661,139 @@ These run while a person is typing, before anything is saved. They never create 
 | Request a Count | scheduled date | the current instant |
 | Inventory Adjustment Reference | label | the literal text "Physical Inventory" |
 | Inventory Adjustment Reference | counting date | the current instant |
+
+---
+
+# 23. Index of user-facing messages
+
+Every message this domain can produce, in alphabetical order of its first word, with the operation that raises it and the section that specifies it. Placeholders are shown as italic descriptions. A message that contains a reproduced abbreviation is quoted verbatim; see the note at the top of this file.
+
+| Message | Raised by | Section |
+|---|---|---|
+| "A package can't have one of its contained packages as destination container." | Writing a destination container | 9.3 |
+| "Another parent/sub replenish location *the other location's name* exists, if you wish to change it, uncheck it first" | Marking a replenishment Location | 2.4 |
+| "A barcode can only be assigned to one package type!" | Saving a Package Type | 9.6 |
+| "Batch transfers cannot be merged with wave transfers and vice versa." | Merging batches | 12.6 |
+| "Batch/Wave transfers with different operation types cannot be merged." | Merging batches | 12.5 |
+| "Batch/Wave transfers with different states cannot be merged." | Merging batches | 12.7 |
+| "Can't find any customer or supplier location." | Resolving the shared partner Locations | 1.8 |
+| "Can't find any generic route *the route name*." | Warehouse generation | 1.9 |
+| "Can't move a container having packages in another location (*the old location*) to a different location (*the new location*)." | Applying destination containers at completion | 9.5 |
+| "Cannot create wave transfers" | The wave composition wizard | 12.14 |
+| "Cannot move an empty package" | Writing a Location on a container | 9.2 |
+| "Cannot remove the location of a non empty package" | Clearing a container's Location | 9.1 |
+| "Changing the company of this record is forbidden at this point, you should rather archive it and create a new one." | Writing the company of a Warehouse, Location, Operation Type or Put-away Rule | 1.4, 2.7, 10.5 |
+| "Changing the Lot/Serial number for move lines with different products is not allowed." | Writing a lot across products | 6.5 |
+| "Changing the operation type of this record is forbidden at this point." | Writing the Operation Type of a final Transfer | 4.1.2 |
+| "Changing the product is only allowed in 'Draft' state." | Writing the product of a detail line | 6.4 |
+| "Creating a new warehouse will automatically activate the Storage Locations setting" | Creating a Warehouse (warning) | 1 |
+| "Deleting product moves after the transfer is done? …" | Deleting a final detail line | 6.7 |
+| "Editing quantities in an Inventory Adjustment location is forbidden,those locations are used as counterpart when correcting the quantities." | Typing a count in an inventory-loss Location (warning) | 7 |
+| "Height must be positive" | Saving a Package Type | 9.7 |
+| "If the Automatic Batches feature is enabled, at least one 'Group by' option must be selected." | Saving an Operation Type | 12.9 |
+| "Internal locations having stock can't be converted" | Changing a Location usage | 2.9 |
+| "Invalid rule's configuration, the following rule causes an endless loop: *the rule display name*" | Walking the rules of a product | 3.4 |
+| "It is not possible to unreserve more products of *the product* than you have in stock." | A negative reservation | 7.10 |
+| "Length must be positive" | Saving a Package Type | 9.7 |
+| "Max Weight must be positive" | Saving a Package Type | 9.7 |
+| "Max weight should be a positive number." | Saving a Storage Category | 10.1 |
+| "Multiple capacity rules for one package type." | Saving a capacity | 10.4 |
+| "Multiple capacity rules for one product." | Saving a capacity | 10.3 |
+| "No negative quantities allowed" | Completing a detail line | 6.9 |
+| "No product found to generate Serials/Lots for." | Generating lot lines | 5.11 |
+| "No products to return (only lines in Done state and not fully returned yet can be returned)." | Opening the return screen | 15 (workflows) |
+| "No source location defined on stock rule: *the rule name*!" | Running a pull rule | 3.3 |
+| "Nothing to check the availability for." | The availability action | 4.1.4 |
+| "Operation not supported" | The availability search | 5.17 |
+| "Packages *the names* are moved to different locations while being in the same container *the container name*." | Applying destination containers at completion | 9.4 |
+| "Please contact your administrator to configure your warehouse." | No Warehouse, for a non-manager | 1.7 |
+| "Please create a warehouse for company *the company*." | No Warehouse, for a manager (redirect) | 1.7 |
+| "Please select at least two batch/wave transfers to merge." | Merging batches | 12.4 |
+| "Please specify at least one non-zero quantity." | Confirming the return screen | 15 (workflows) |
+| "Quantity or Reserved Quantity should be set." | Writing a quantity record | 7.11 |
+| "Quantity should be a positive number." | Saving a capacity | 10.2 |
+| "Quant's creation is restricted, you can't do this operation." | Creating a quantity record in counting mode | 7.6 |
+| "Quant's editing is restricted, you can't do this operation." | Writing a protected field in counting mode | 7.7 |
+| "Quants are auto-deleted when appropriate. If you must manually delete them, please ask a stock manager to do it." | Deleting a quantity record as a non-manager | 7.8 |
+| "Quants cannot be created for consumables or services." | Creating a quantity record | 7.1 |
+| "Removal strategy *the method key* not implemented." | Gathering | 7.12 |
+| "Reserving a negative quantity is not allowed." | Writing a detail-line quantity | 6.6 |
+| "Save the product form before updating the Quantity On Hand." | Writing the on-hand figure on an unsaved product | 13.7 |
+| "Search not supported without a value." | The availability search | 5.15 |
+| "Selected storage category does not exist in the 'store to' location or any of its sublocations" | Configuring a put-away rule (warning) | 10 |
+| "Selection not supported." | The availability search | 5.16 |
+| "Serial number (*the number*) is not located in *the source*, but is located in location(s): *the list*. …" | Choosing a serial number (warning, two variants) | 6.2 |
+| "Serial number (*the number*) already exists in location(s): *the list*. Please correct the serial number encoded." | Typing a serial number (warning) | 6.2 |
+| "Tag name already exists!" | Saving a Scrap Reason Tag | 17 (entities) |
+| "The %s location is required by the Inventory app and cannot be deleted, but you can archive it." — rendered with the Location name | Deleting the shared inter-company Location | 2.6 |
+| "The barcode for a location must be unique per company!" | Saving a Location | 2.1 |
+| "The combination of lot/serial number and product must be unique within a company including when no company is defined. …" | Saving a Lot | 8.1 |
+| "The following transfers cannot be added to batch transfer *the batch*. …" | Composing a batch | 12.3 |
+| "The inventory frequency (days) for a location must be non-negative" | Saving a Location | 2.2 |
+| "The Lot/Serial number (*the name*) is linked to another product." | Saving a quantity record | 7.3 |
+| "The name of the warehouse must be unique per company!" | Saving a Warehouse | 1.1 |
+| "The number of Serial Numbers to generate must be greater than zero." | Generating serial numbers | 5.10 |
+| "The quantity done for the product *the product* doesn't respect the rounding precision defined on the system. …" | Writing a processed quantity | 5.4 |
+| "The quantity done for the product \"*the product*\" doesn't respect the rounding precision defined on the unit of measure \"*the unit*\". …" | Completing a detail line | 6.8 |
+| "The quantity per lot should always be a positive value." | Generating lot lines | 5.12 |
+| "The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`." | Writing the real quantity | 5.1 |
+| "The selected Inventory Frequency (Days) creates a date too far into the future." | Computing a next count date | 2.3 |
+| "The selected operations should belong to a unique company." | The wave composition wizard | 12.12 |
+| "The selected pickings should belong to an unique company." | The batch composition wizard | 12.10 |
+| "The selected transfers should belong to a unique company." | The wave composition wizard | 12.13 |
+| "The selected transfers should belong to the same operation type" | The wave composition wizard | 12.11 |
+| "The sequence '*the code*' is misconfigured. Its prefix should end with a '/' separator." | Naming a batch (note, not an error) | 12 |
+| "The Serial Number (*the number*) is already used in location(s): *the list*. …" | Assigning an existing serial number (warning) | 6.2 |
+| "The serial number has already been assigned: \n Product: *the product*, Serial Number: *the number*" | Saving a quantity record | 7.4 |
+| "The short name of the warehouse must be unique per company!" | Saving a Warehouse | 1.2 |
+| "This location's usage cannot be changed to view as it contains products." | Changing a Location usage | 2.8 |
+| "This lot *the lot* is incompatible with this product *the product*" | Saving a detail line | 6.1 |
+| "This sequence prefix is already being used by another operation type. …" | Typing a sequence prefix (warning) | — |
+| "Transfer trouble alert! Validating a zero quantity transfer? …" | Validating | 4.2.2 |
+| "Transfers *the references*: Please add some items to move." | Validating several Transfers | 4.2 |
+| "Unavailable Serial numbers. Please correct the serial numbers encoded: *the list*" | Assigning lots on a move (warning) | 6.2 |
+| "Updating the location of this transfer will result in unreservation … " | Changing a Transfer's source Location (warning) | 4.5 |
+| "Width must be positive" | Saving a Package Type | 9.7 |
+| "You are not allowed to change the product linked to a serial or lot number …" | Writing a Lot's product | 8.5 |
+| "You are not allowed to create a lot or serial number with this operation type. …" | Creating a Lot from a Transfer screen | 8.2 |
+| "You can not delete moves linked to another operation" | Deleting a chained move | 5.9 |
+| "You can not enter negative quantities." | Writing a detail-line quantity | 6.2 |
+| "You can only enter positive quantities." | Validating a Scrap | 11.1 |
+| "You can only move a lot/serial to a new location if it exists in a single location." | Writing a Lot's Location | 8.3 |
+| "You can only move positive quantities stored in locations used by a single company per relocation." | Opening the relocation screen | 7.9 |
+| "You can only process 1.0 *the unit* of products with unique serial number." | Writing a serial-tracked quantity | 6.3 |
+| "You can't deactivate the multi-location if you have more than once warehouse by company" | Saving the settings | 13.1 |
+| "You can't disable locations *the list* because they still contain products." | Archiving a Location | 2.11 |
+| "You can’t validate an empty transfer. Please add some products to move before proceeding." | Validating | 4.2.1 |
+| "You cannot cancel a stock move that has been set to 'Done'. …" | Cancelling | 5.6 |
+| "You cannot change a cancelled stock move, create a new line instead." | Writing a quantity on a cancelled move | 5.2 |
+| "You cannot change the company of a lot/serial number currently in a location belonging to another company." | Writing a Lot's company | 8.4 |
+| "You cannot change the Scheduled Date on a cancelled transfer." | Writing a scheduled date | 4.1.3 |
+| "You cannot change the UoM for a stock move that has been set to 'Done'." | Writing a unit | 5.3 |
+| "You cannot delete a scrap which is done." | Deleting a Scrap | 11.2 |
+| "You cannot delete Done batch transfers." | Deleting a batch | 12.2 |
+| "You cannot duplicate stock quants." | Duplicating a quantity record | 7.5 |
+| "You cannot merge done or cancelled batch/wave transfers." | Merging batches | 12.8 |
+| "You cannot modify inventory loss quantity" | Typing a count in an inventory-loss Location (warning title) | 7 |
+| "You cannot move the same package content more than once in the same transfer or split the same package into two location." | Completing | 5.14 |
+| "You cannot pack products into the same package when they are from different transfers with different operation types" | Put in pack | 6.11 |
+| "You cannot set a location as a scrap location when it is assigned as a destination location for a manufacturing type operation." | Changing a Location usage | 2.5 |
+| "You cannot split a draft move. It needs to be confirmed first." | Splitting | 5.8 |
+| "You cannot split a stock move that has been set to 'Done' or 'Cancel'." | Splitting | 5.7 |
+| "You cannot take products from or deliver products to a location of type \"view\" (*the location*)." | Saving a quantity record | 7.2 |
+| "You cannot unreserve a stock move that has been set to 'Done'." | Unreserving | 5.5 |
+| "You cannot use the same serial number twice. Please correct the serial numbers encoded." | Typing a serial number (warning) | 6.2 |
+| "You have product(s) in stock that have lot/serial number tracking enabled. …" | Saving the settings | 13.2 |
+| "You have to set some pickings to batch." | Confirming a batch | 12.1 |
+| "You may only return Done pickings." | Opening the return screen | 15 (workflows) |
+| "You may only return one picking at a time." | Opening the return screen | 15 (workflows) |
+| "You need a transfer to add these packages to." | The add-packages action | 5.13 |
+| "You need to activate storage locations to be able to do internal operation types." | Choosing the internal kind (warning) | 5 (entities) |
+| "You need to supply a Lot/Serial number for products *the list*." | Validating one Transfer | 4.2.3 |
+| "You need to supply a Lot/Serial Number for product:\n*the list*" | Completing the detail lines | 6.10 |
+| "You still have ongoing operations for operation types *the list* in warehouse *the warehouse*" | Archiving a Warehouse | 1.5 |
+| "*the operation types* have default source or destination locations within warehouse *the warehouse*, therefore you cannot archive it." | Archiving a Warehouse | 1.6 |
+| "*the transfer*: Can't split: quantities done can't be above demand" | Splitting a Transfer | 4.3.3 |
+| "*the transfer*: Nothing to split, all demand is done. …" | Splitting a Transfer | 4.3.2 |
+| "*the transfer*: Nothing to split. Fill the quantities you want in a new transfer in the done quantities" | Splitting a Transfer | 4.3.1 |
+| "*the product*: Insufficient Quantity To Scrap" | Validating a Scrap (screen title, not an error) | 11.3 |

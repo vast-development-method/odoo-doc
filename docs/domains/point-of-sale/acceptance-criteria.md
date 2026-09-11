@@ -190,7 +190,7 @@ only.
    identifier, counterpart account 101300, amount 25.00 — producing a debit of 25.00 on
    570000 and a credit of 25.00 on 101300.
 2. **An accounting payment** in the bank journal, inbound, amount 140.50, forced
-   outstanding account 101401, destination 101300, memo `Combine Card POS payments from
+   outstanding account 101401, destination 101300, memo `Combine Card point of sale payments from
    <session identifier>` — producing a debit of 140.50 on 101401 and a credit of 140.50 on
    101300.
 3. **The invoice of order C**, in the invoice journal, customer Acme, total 100.00: a
@@ -334,7 +334,7 @@ Unable to record returned cash."*
 **Given** a payment method that is not among the configuration's methods,
 **When** a tender using it is written,
 **Then** the write is refused with *"The payment method selected is not allowed in the
-config of the POS session."*
+config of the point of sale session."*
 
 ### C8 — Editing a tender of a posted order is refused
 
@@ -514,7 +514,7 @@ order."*
 
 **Given** a paid order whose configuration has no open session,
 **When** the refund action is invoked from the administrative interface,
-**Then** it is refused with *"To return product(s), you need to open a session in the POS
+**Then** it is refused with *"To return product(s), you need to open a session in the point of sale
 Shop"*.
 
 ### D7 — A full refund before delivery cancels the delivery
@@ -962,7 +962,7 @@ request turned on, paid by card, in an open session,
    account (falling back to 101300) for a non-identifying method, or the partner's
    receivable for an identifying one;
 3. a **reversal entry** is created in the point of sale journal, dated today, referenced
-   *"Reversal of POS closing entry <closing entry number> for order <order name> from
+   *"Reversal of point of sale closing entry <closing entry number> for order <order name> from
    session <session identifier>"*, containing the negation of the order's own accounting
    values: a debit of 82.64 on 400000, a debit of 17.36 on 251000, a credit of 100.00 on
    the receivable account of the tender, plus the negated stock pair;
@@ -998,9 +998,9 @@ separately.\n\n<order name> (<receipt number>)"*.
 
 **Given** a selection on one configuration where exactly one customer appears and some
 orders carry none,
-**Then** the confirmation wizard is offered, reading *"It seems that the POS order(s)
+**Then** the confirmation wizard is offered, reading *"It seems that the point of sale order(s)
 <names> do not have a customer.\n\nWould you like to set <customer name> as the customer
-for the selected POS order(s)?"*; confirming writes that customer onto every order and
+for the selected point of sale order(s)?"*; confirming writes that customer onto every order and
 reopens the invoice wizard.
 
 ### K7 — No invoiceable order
@@ -1021,7 +1021,7 @@ R's invoice's refunded invoices.
 **Given** an invoice of an order whose session is still open,
 **When** the invoice is reset to draft,
 **Then** nothing happens and the acting user receives a sticky danger notification reading
-*"You can't reset this invoice to draft because the POS session is still open. Please
+*"You can't reset this invoice to draft because the point of sale session is still open. Please
 close the ongoing session first, then try again."*
 
 ### K10 — The customer claims the invoice from the receipt
@@ -1409,7 +1409,7 @@ headers and footers"*.
 
 **Given** the system superuser outside a test environment,
 **When** the application is opened,
-**Then** it is refused with *"You do not have permission to open a POS session. Please try
+**Then** it is refused with *"You do not have permission to open a point of sale session. Please try
 opening a session with a different user"*.
 
 ### Q9 — An unreadable entity does not block the session
@@ -1426,8 +1426,8 @@ opening a session with a different user"*.
 
 **Given** an open session containing an order line carrying the 21 percent tax,
 **When** the tax's amount is changed,
-**Then** it is refused with *"It is forbidden to modify a tax used in a POS order not
-posted. You must close the POS sessions before modifying the tax."*
+**Then** it is refused with *"It is forbidden to modify a tax used in a point of sale order not
+posted. You must close the point of sale sessions before modifying the tax."*
 
 ### R2 — The lock date is frozen during a session
 
@@ -1447,7 +1447,7 @@ set on the following payment method : Card."*
 ### R4 — A sequence used by a configuration is protected
 
 **When** one of the four configuration sequences is deleted,
-**Then** it is refused with *"You cannot delete a sequence used in an active POS config:
+**Then** it is refused with *"You cannot delete a sequence used in an active point of sale config:
 <sequence names>"*.
 
 ### R5 — A category is protected while any session is open
@@ -1474,7 +1474,7 @@ before modifying this payment method.\nOpen sessions: <session names>"*.
 
 **When** a cash method is attached to a second configuration,
 **Then** it is refused with *"Validation Error: You cannot assign the same Cash payment
-method to multiple POS Shops. Please create a separate Cash payment method for each
+method to multiple point of sale Shops. Please create a separate Cash payment method for each
 shop."*
 
 ### R9 — A cash journal carries one method
@@ -1485,7 +1485,7 @@ multiples cash payment methods."*
 
 ### R10 — A preset attached to a configuration cannot be deleted
 
-**Then** it is refused with *"You cannot delete a preset that is linked to a POS
+**Then** it is refused with *"You cannot delete a preset that is linked to a point of sale
 configuration."*
 
 ---

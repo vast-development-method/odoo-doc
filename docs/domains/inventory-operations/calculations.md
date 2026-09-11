@@ -1781,7 +1781,7 @@ These traces follow one operation from the first read to the last write, naming 
 
 ## 34.1 A reservation that partially succeeds
 
-**Starting state.** Product BOLT, product unit "Units" with a rounding step of 0.01. `WH/Stock` has two internal children. The `Product Unit` precision is 2. No removal strategy is set anywhere, so first in first out applies.
+**Starting state.** Product Bolt, product unit "Units" with a rounding step of 0.01. `WH/Stock` has two internal children. The `Product Unit` precision is 2. No removal strategy is set anywhere, so first in first out applies.
 
 | Quantity record | Location | Lot | Container | Owner | On hand | Reserved | Incoming date |
 |---|---|---|---|---|---|---|---|
@@ -1829,66 +1829,66 @@ Creating them raises the reserved counters: Q1 goes to 6.00 on hand / 6.00 reser
 
 **Step 9 — whole containers.** The Transfer re-runs the whole-container detection. Grouping by source container gives one group for `PACK0001` holding L2 alone. The container's contents are 9.00 and the line claims 8.00, so the whole-container test fails and nothing is flagged.
 
-**End state.** The move is `assigned` with a processed quantity of 12.00; Q3 is untouched at −1.00; the available quantity of BOLT at `WH/Stock` is now `(6 + 9 − 1) − (6 + 8) = 0.00`.
+**End state.** The move is `assigned` with a processed quantity of 12.00; Q3 is untouched at −1.00; the available quantity of Bolt at `WH/Stock` is now `(6 + 9 − 1) − (6 + 8) = 0.00`.
 
 ## 34.2 A validation that creates a backorder
 
-**Starting state.** The Transfer of the previous trace, plus a second move of 5 PAINT that could not be reserved at all. The Operation Type's backorder policy is "ask" and it reserves at confirmation. The Transfer's shipping policy is as soon as possible, so its status is `assigned`.
+**Starting state.** The Transfer of the previous trace, plus a second move of 5 Paint that could not be reserved at all. The Operation Type's backorder policy is "ask" and it reserves at confirmation. The Transfer's shipping policy is as soon as possible, so its status is `assigned`.
 
-**The person's input.** They set the BOLT move's processed quantity to 12 (it already is) and tick it as picked; they leave the PAINT move untouched.
+**The person's input.** They set the Bolt move's processed quantity to 12 (it already is) and tick it as picked; they leave the Paint move untouched.
 
 **Step 1 — immediate transfer.** The Transfer is not in draft, so nothing is copied.
 
 **Step 2 — sanity check.**
-- *No quantity at all?* At least one move that is neither done nor cancelled is picked, so *has pick* is true; the test therefore looks only at the picked moves; the BOLT move has 12.00, which is not zero; the Transfer passes.
+- *No quantity at all?* At least one move that is neither done nor cancelled is picked, so *has pick* is true; the test therefore looks only at the picked moves; the Bolt move has 12.00, which is not zero; the Transfer passes.
 - *No moves?* It has two.
-- *Missing lots?* PAINT is lot-tracked and the Operation Type uses existing lots, but the PAINT line — there is none — contributes nothing, and the BOLT move is untracked. The Transfer passes.
+- *Missing lots?* Paint is lot-tracked and the Operation Type uses existing lots, but the Paint line — there is none — contributes nothing, and the Bolt move is untracked. The Transfer passes.
 
-**Step 3 — picked marking.** At least one move is picked, so the marking does **not** run; the PAINT move stays unpicked.
+**Step 3 — picked marking.** At least one move is picked, so the marking does **not** run; the Paint move stays unpicked.
 
-**Step 4 — the backorder decision.** The policy is "ask". For the BOLT move: it is picked and its picked quantity is 12, which is not below its demand of 12 — no trigger. For the PAINT move: its demand is 5 and it is **not** picked — trigger. The Transfer needs a decision, so the backorder screen opens.
+**Step 4 — the backorder decision.** The policy is "ask". For the Bolt move: it is picked and its picked quantity is 12, which is not below its demand of 12 — no trigger. For the Paint move: its demand is 5 and it is **not** picked — trigger. The Transfer needs a decision, so the backorder screen opens.
 
 **Step 5 — the person chooses "Create backorder".** The validation resumes with the backorder step suppressed and nothing declared as not-to-be-backordered.
 
 **Step 6 — completion.**
-- *Prune.* The BOLT move is picked and both its lines are picked, so nothing is deleted. The PAINT move has a processed quantity of 0 and is not picked, so the first half of the condition is true; but backorders are allowed and its demand is 5, not zero, so it is **not** cancelled.
-- *Select.* The set to complete is the BOLT move alone: the PAINT move is excluded because it is not picked.
-- *Backorder moves.* The BOLT move's processed quantity (12.00) is not below its demand (12) at the `Product Unit` precision, so **no** backorder move is split off it.
+- *Prune.* The Bolt move is picked and both its lines are picked, so nothing is deleted. The Paint move has a processed quantity of 0 and is not picked, so the first half of the condition is true; but backorders are allowed and its demand is 5, not zero, so it is **not** cancelled.
+- *Select.* The set to complete is the Bolt move alone: the Paint move is excluded because it is not picked.
+- *Backorder moves.* The Bolt move's processed quantity (12.00) is not below its demand (12) at the `Product Unit` precision, so **no** backorder move is split off it.
 - *Move the goods.* L1 and L2 are completed in order (destination container descending, then identifier: neither has a destination container, so by identifier). For L1: release 4.00 of reservation on Q1; decrease Q1 by 4.00, leaving 2.00 on hand and 2.00 reserved, returning an available quantity of 0.00 and an incoming date of 2 March; increase `Customers` by 4.00 stamping 2 March. For L2: release 8.00 on Q2; decrease Q2 by 8.00, leaving 1.00 on hand and 0.00 reserved; increase `Customers` by 8.00 stamping 5 March. Neither returned a negative available quantity, so no reservation is freed.
-- *Status.* The BOLT move becomes `done` with the current instant as its date.
+- *Status.* The Bolt move becomes `done` with the current instant as its date.
 - *Push.* `Customers` has no push rule.
-- *Propagate.* The BOLT move has no destination move.
-- *Transfer backorder.* The moves that are neither done nor cancelled are the PAINT move alone. A backorder Transfer is created by copying the original with an empty reference, no moves, no lines, the original as back-order link. The PAINT move is moved into it with its picked flag cleared. The backorder's responsible is cleared. A note is posted on the original.
-- *Reserve the backorder.* The Operation Type reserves at confirmation, so the backorder's availability is checked; PAINT is still unavailable, so its move stays `confirmed` and the backorder's status is `confirmed`.
+- *Propagate.* The Bolt move has no destination move.
+- *Transfer backorder.* The moves that are neither done nor cancelled are the Paint move alone. A backorder Transfer is created by copying the original with an empty reference, no moves, no lines, the original as back-order link. The Paint move is moved into it with its picked flag cleared. The backorder's responsible is cleared. A note is posted on the original.
+- *Reserve the backorder.* The Operation Type reserves at confirmation, so the backorder's availability is checked; Paint is still unavailable, so its move stays `confirmed` and the backorder's status is `confirmed`.
 
 **Step 7 — after completion.** The completion instant is stamped on the original Transfer and its priority is reset. The Operation Type kind is delivery, so the re-reservation search does **not** run. The delivery confirmation message and text message are sent if the company asks for them.
 
-**End state.** The original Transfer is `done` with one move of 12; the backorder is `confirmed` with one move of 5; `WH/Stock` holds 3.00 BOLT (2.00 on Q1 plus 1.00 on Q2) minus the −1.00 on Q3, that is a net 2.00.
+**End state.** The original Transfer is `done` with one move of 12; the backorder is `confirmed` with one move of 5; `WH/Stock` holds 3.00 Bolt (2.00 on Q1 plus 1.00 on Q2) minus the −1.00 on Q3, that is a net 2.00.
 
 ## 34.3 A put-away that walks two rules
 
-**Starting state.** Arrival Location `WH/Stock`, whose internal descendants are `Bin 1`, `Bin 2` and `Bin 3`, all three carrying the Storage Category "Shelf" (maximum weight 40, product capacity 20 BOLT, mixing policy "If all products are same"). BOLT weighs 0.5.
+**Starting state.** Arrival Location `WH/Stock`, whose internal descendants are `Bin 1`, `Bin 2` and `Bin 3`, all three carrying the Storage Category "Shelf" (maximum weight 40, product capacity 20 Bolt, mixing policy "If all products are same"). Bolt weighs 0.5.
 
 | Location | On hand | Open lines arriving |
 |---|---|---|
-| `Bin 1` | 18.00 BOLT | — |
-| `Bin 2` | 4.00 PAINT | — |
-| `Bin 3` | 0 | 5.00 BOLT |
+| `Bin 1` | 18.00 Bolt | — |
+| `Bin 2` | 4.00 Paint | — |
+| `Bin 3` | 0 | 5.00 Bolt |
 
 **The rules on `WH/Stock`:**
 
 | Rule | Product | Category | Container type | Target | Mode | Storage category | Priority |
 |---|---|---|---|---|---|---|---|
 | R1 | — | All | — | `WH/Stock` | No | — | 10 |
-| R2 | BOLT | — | — | `WH/Stock` | Closest Location | Shelf | 10 |
+| R2 | Bolt | — | — | `WH/Stock` | Closest Location | Shelf | 10 |
 
-**The request.** Put away 6.00 BOLT, no container, no packaging unit, no additional-quantity map.
+**The request.** Put away 6.00 Bolt, no container, no packaging unit, no additional-quantity map.
 
 **Step 1 — container type.** None.
 
-**Step 2 — product set.** {BOLT}.
+**Step 2 — product set.** {Bolt}.
 
-**Step 3 — category chain.** BOLT's own category and its ancestors, say {Hardware, All}.
+**Step 3 — category chain.** Bolt's own category and its ancestors, say {Hardware, All}.
 
 **Step 4 — rule selection.** R1 passes (no product; its category "All" is in the chain; no container type). R2 passes (its product is in the set). Both selected.
 
@@ -1896,7 +1896,7 @@ Creating them raises the reserved counters: Q1 goes to 6.00 on hand / 6.00 reser
 
 **Step 6 — candidate Locations.** No Locations in the calling context, so the internal descendants of `WH/Stock`: `Bin 1`, `Bin 2`, `Bin 3` (and `WH/Stock` itself when it is internal, which it is).
 
-**Step 7 — the occupancy map.** At least one candidate carries a storage category, and no typed container is involved, so the map is a quantity map for BOLT:
+**Step 7 — the occupancy map.** At least one candidate carries a storage category, and no typed container is involved, so the map is a quantity map for Bolt:
 
 ```
 Bin 1 : 18.00 (records) + 0 (lines) = 18.00
@@ -1908,13 +1908,13 @@ WH/Stock : 0
 **Step 8 — the walk, rule R2.** The mode is closest location, so the target `WH/Stock` is kept and its children are narrowed to those carrying the category "Shelf": `Bin 1`, `Bin 2`, `Bin 3`.
 
 *First pass — prefer a Location that already holds BOLT.* Walk in order:
-- `Bin 1`: occupancy 18.00 > 0, so it qualifies. Capacity check: forecasted weight = 18 × 0.5 = 9; mixing policy "same" — the only positive record is BOLT, and no open line targets `Bin 1` with another product, so it passes; weight test `40 < 9 + 0.5 × 6 = 12`? No; first quantity test `18 ≥ 20`? No; second `6 + 18 = 24 > 20`? **Yes** → the check fails. `Bin 1` is added to the rejected set.
+- `Bin 1`: occupancy 18.00 > 0, so it qualifies. Capacity check: forecasted weight = 18 × 0.5 = 9; mixing policy "same" — the only positive record is Bolt, and no open line targets `Bin 1` with another product, so it passes; weight test `40 < 9 + 0.5 × 6 = 12`? No; first quantity test `18 ≥ 20`? No; second `6 + 18 = 24 > 20`? **Yes** → the check fails. `Bin 1` is added to the rejected set.
 - `Bin 2`: occupancy 0, not strictly positive, skipped by this pass.
-- `Bin 3`: occupancy 5.00 > 0, so it qualifies. Capacity check: forecasted weight = 0 (records) − 0 (leaving) + 5 × 0.5 (arriving) = 2.5; mixing policy "same" — there is no positive record, but an open line targets `Bin 3` with BOLT, which is the same product, so it passes; weight test `40 < 2.5 + 3 = 5.5`? No; `5 ≥ 20`? No; `6 + 5 = 11 > 20`? No → the check **passes**. Return `Bin 3`.
+- `Bin 3`: occupancy 5.00 > 0, so it qualifies. Capacity check: forecasted weight = 0 (records) − 0 (leaving) + 5 × 0.5 (arriving) = 2.5; mixing policy "same" — there is no positive record, but an open line targets `Bin 3` with Bolt, which is the same product, so it passes; weight test `40 < 2.5 + 3 = 5.5`? No; `5 ≥ 20`? No; `6 + 5 = 11 > 20`? No → the check **passes**. Return `Bin 3`.
 
 **Step 9 — the answer.** `Bin 3`. Rule R1 is never reached.
 
-**Variation.** Had `Bin 3` failed too, the first pass would have rejected it, the second pass would have walked `Bin 1` (already rejected, skipped), `Bin 2` (capacity check: the mixing policy "same" finds a positive PAINT record, so it **fails**) and `Bin 3` (already rejected). R2 would have returned nothing, the walk would have moved to R1, whose target `WH/Stock` carries no storage category — and `WH/Stock` itself has no storage category either, so its capacity check passes trivially and `WH/Stock` is returned.
+**Variation.** Had `Bin 3` failed too, the first pass would have rejected it, the second pass would have walked `Bin 1` (already rejected, skipped), `Bin 2` (capacity check: the mixing policy "same" finds a positive Paint record, so it **fails**) and `Bin 3` (already rejected). R2 would have returned nothing, the walk would have moved to R1, whose target `WH/Stock` carries no storage category — and `WH/Stock` itself has no storage category either, so its capacity check passes trivially and `WH/Stock` is returned.
 
 ---
 

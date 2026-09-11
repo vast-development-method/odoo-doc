@@ -376,6 +376,40 @@ linked to them by removing their existing tasks!"
 The customer field is additionally recomputed: when the project is not billable, or when the
 project's company and the customer's company differ, the customer is cleared.
 
+### 1.16 The incoming electronic mail address
+
+A Project owns an **Alias**: a named local part plus a domain, forming one electronic mail address
+whose inbound messages are routed into this project.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Alias (`alias_id`) | link to Alias | The alias record itself. Its help text reads: "Internal email associated with this project. Incoming emails are automatically synchronized with Tasks (or optionally Issues if the Issue Tracker module is installed)." |
+| Alias name (`alias_name`) | text | The local part of the address, offered directly on the project's form. |
+| Alias domain (`alias_domain_id`) | link to Alias Domain | The domain part. |
+| Alias address (`alias_email`) | text | The assembled address, empty when either part is missing. |
+| Alias default values (`alias_defaults`) | structured text | The values every record created from the address receives. |
+
+When the alias is created or recreated for a project, two values are forced:
+
+1. its **target entity** is the Task;
+2. its **default values** are the alias's own stored defaults with the key `project_id` set to
+   this project's identifier — so a message arriving at the address always produces a task in
+   this project.
+
+The alias is the only inbound integration point of the domain. What happens to an arriving
+message is specified in [workflows.md](workflows.md) §9 and [business-rules.md](business-rules.md)
+§9. The alias's own contact policy — who may post to it and whether unknown senders are accepted
+— belongs to the messaging domain.
+
+Three further consequences of owning an alias:
+
+- the **reply address** of every task of the project is this alias, not a task-specific address,
+  so a conversation stays on one address;
+- when a task is created from a message, the project's own alias address is stripped from the
+  set of unresolved recipient addresses, so that the address never becomes a contact;
+- the second shipped digest tip renders the address of the first project, in sequence order, that
+  has both an alias name and an alias domain.
+
 ---
 
 ## 2. Project Stage (`project.project.stage`, table `project_project_stage`)

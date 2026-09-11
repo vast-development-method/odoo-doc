@@ -504,10 +504,10 @@ without blocking.
 | Invoice and credit note distribution should have a total factor (+) equals to 100. | validation | section 2 rule 5 |
 | Invoice and credit note distribution should have a total factor (-) equals to 100. | validation | section 2 rule 6 |
 | Invalid "Zip Range", You have to configure both "From" and "To" values for the zip range and "To" should be greater than "From". | validation | section 4.1 |
-| The country of the foreign VAT number could not be detected. Please assign a country to the fiscal position. | validation | section 4.2 rule 1 |
-| You cannot create a fiscal position with a foreign VAT within your fiscal country without assigning it a state. | validation | section 4.2 rule 2 |
+| The country of the foreign value-added tax number could not be detected. Please assign a country to the fiscal position. | validation | section 4.2 rule 1 |
+| You cannot create a fiscal position with a foreign value-added tax within your fiscal country without assigning it a state. | validation | section 4.2 rule 2 |
 | You cannot create a fiscal position with a country outside of the selected country group. | validation | section 4.2 rule 3 |
-| A fiscal position with a foreign VAT already exists in this country. | validation | section 4.2 rule 4 |
+| A fiscal position with a foreign value-added tax already exists in this country. | validation | section 4.2 rule 4 |
 | An account fiscal position could be defined only one time on same accounts. | database constraint | section 4.4 |
 | A tag with the same name and applicability already exists in this country. | database constraint | `entities.md` section 6.2 |
 | You cannot delete this account tag (&lt;name&gt;), it is used on the chart of account definition. | operation refused | `configuration.md` section 4.1 |
@@ -538,15 +538,15 @@ without blocking.
 | Kwargs are not allowed | validation | section 1.9 |
 | Only product['string'] or uom['string'] read-access is allowed | validation | section 1.9 |
 | Only primitive types are allowed in python tax formula context. | validation | section 1.9 |
-| To explicitly indicate no (valid) VAT, use '/' instead. | validation | section 9.1 |
+| To explicitly indicate no (valid) value-added tax, use '/' instead. | validation | section 9.1 |
 | The &lt;label&gt; number [&lt;number&gt;] for &lt;record&gt; does not seem to be valid. \nNote: the expected format is &lt;example&gt; | validation | section 9.2 |
 | The &lt;label&gt; number [&lt;number&gt;] does not seem to be valid. \nNote: the expected format is &lt;example&gt; | validation | section 9.2 |
 | If you are trying to input a European number, this is the expected format: &lt;example&gt; | appended | section 9.2 |
-| Invalid IAP VIES endpoint | operation refused | section 9.6 |
+| Invalid IAP the cross-border registration checking service endpoint | operation refused | section 9.6 |
 | You cannot set a partner as an invoicing address of another if they have a different &lt;label&gt;. | operation refused | section 9.5 |
 | Update with children taxes that are child of multiple parents is not supported. | operation refused | `workflows.md` section 9 |
-| The VIES check is pending. The status will be updated soon. | logged message | `state-machines.md` section 5.2 |
-| The VIES check failed. Please check the Tax ID manually. | logged message | `state-machines.md` section 5.2 |
+| The the cross-border registration checking service check is pending. The status will be updated soon. | logged message | `state-machines.md` section 5.2 |
+| The the cross-border registration checking service check failed. Please check the Tax ID manually. | logged message | `state-machines.md` section 5.2 |
 | The Intra-Community validity has been updated to: &lt;status&gt;. | logged message | `state-machines.md` section 5.2 |
 | Untaxed Amount | label | the default subtotal name in the totals block |
 | &lt;name&gt; (copy) | label | the name of a duplicated tax |
