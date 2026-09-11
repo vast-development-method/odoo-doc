@@ -165,7 +165,7 @@ delayed order shows the delay popover; a Work Order row shows its own popover.
 | Late Availability | the component availability state is late |
 | Late | the start date is before now and the state is confirmed |
 | Delayed Productions | a delay alert date exists, or the order is delayed |
-| My MOs | the responsible is the current user |
+| My manufacturing orders | the responsible is the current user |
 | Before / Yesterday / Today / Tomorrow / The day after tomorrow / After | the date category of the start date |
 | Date | a date range on the start date |
 | Date: Last 365 Days | a hidden filter used by the "manufactured" statistic |

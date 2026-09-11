@@ -175,11 +175,11 @@ These are stated in full, with their exact messages, in
 |---|---|---|
 | Positive quantity | Database check on `product_qty` | The quantity to produce must be positive! |
 | No cycle | On write of `active`, `product_id`, `product_tmpl_id`, `bom_line_ids` | The current configuration is incorrect because it would create a cycle between these products: *the list of product names*. |
-| Variant restriction versus variant-specific recipe | On write of `product_id`, `product_tmpl_id`, `bom_line_ids`, `byproduct_ids`, `operation_ids` | You cannot use the 'Apply on Variant' functionality and simultaneously create a BoM for a specific variant. |
-| Variant restriction belongs to the same template | Same trigger | The attribute value *the attribute value name* set on product *the product name* does not match the BoM product *the recipe product name*. |
-| By-product is not the finished product | Same trigger | By-product *the recipe display name* should not be the same as BoM product. |
+| Variant restriction versus variant-specific recipe | On write of `product_id`, `product_tmpl_id`, `bom_line_ids`, `byproduct_ids`, `operation_ids` | You cannot use the 'Apply on Variant' functionality and simultaneously create a bill of materials for a specific variant. |
+| Variant restriction belongs to the same template | Same trigger | The attribute value *the attribute value name* set on product *the product name* does not match the bill of materials product *the recipe product name*. |
+| By-product is not the finished product | Same trigger | By-product *the recipe display name* should not be the same as bill of materials product. |
 | By-product cost share is non-negative | Same trigger | By-products cost shares must be positive. |
-| Total cost share at most 100 | Same trigger, per variant | The total cost share for a BoM's by-products cannot exceed 100. |
+| Total cost share at most 100 | Same trigger, per variant | The total cost share for a bill of materials's by-products cannot exceed 100. |
 | A kit has no reordering rule | On write of `product_tmpl_id`, `product_id`, `type` | You can not create a kit-type bill of materials for products that have at least one reordering rule. |
 | Positive batch size | On write of `enable_batch_size`, `batch_size` | The batch size must be positive! |
 | No deletion while orders run | On delete | You can not delete a Bill of Material with running manufacturing orders. Please close or cancel it first. |

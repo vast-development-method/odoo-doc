@@ -629,7 +629,7 @@ split."** or **"Only manufacturing orders with a Bill of Materials can be split.
 - at least two orders: **"You need at least two production orders to merge them."**;
 - every order `draft` or `confirmed` with a recipe (same messages as §8.1 with "merged");
 - all orders share the same product **and** the same recipe: **"You can only merge
-  manufacturing orders of identical products with same BoM."**;
+  manufacturing orders of identical products with same bill of materials."**;
 - no order has an extra component move (one with no recipe line) or an extra by-product move
   (one with no by-product line): **"You can only merge manufacturing orders with no
   additional components or by-products."**;
@@ -863,7 +863,7 @@ product; a line for a product with no component move creates an **additional** c
 move for the summed quantity.
 
 *Split* on the subcontracting order requires a lot to be set first — **"Please set a
-lot/serial for the currently opened subcontracting MO first."** — and refuses when the goods
+lot/serial for the currently opened subcontracting manufacturing order first."** — and refuses when the goods
 are already received: **"The subcontracted goods have already been received."** It adds an
 empty-lot line of one unit to the receipt move when every line already has a lot, and then
 reopens the order list filtered on the empty lot.

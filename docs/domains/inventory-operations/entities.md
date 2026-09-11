@@ -1323,8 +1323,8 @@ This index is the contract for anything that reads or writes the domain from out
 | `is_signed` | Transfer | boolean |  | Is Signed |
 | `is_storable` | Stock Move | boolean |  |  |
 | `is_wave` | Batch Transfer | boolean |  | This batch is a wave |
-| `json_popover` | Package | text |  | JSON data for popover widget |
-| `json_popover` | Transfer | text |  | JSON data for the popover widget |
+| `json_popover` | Package | text |  | JavaScript Object Notation data for popover widget |
+| `json_popover` | Transfer | text |  | JavaScript Object Notation data for the popover widget |
 | `kanban_dashboard_graph` | Operation Type | long text |  |  |
 | `last_count_date` | Stock Quantity | date |  |  |
 | `last_inventory_date` | Location | date |  | Last Inventory |
@@ -1384,7 +1384,7 @@ This index is the contract for anything that reads or writes the domain from out
 | `move_partner_id` | Stock Move Line | link |  |  |
 | `move_type` | Transfer | selection |  | Shipping Policy |
 | `move_type` | Operation Type | selection |  | Shipping Policy |
-| `mto_pull_id` | Warehouse | link | Stock Rule | MTO rule |
+| `mto_pull_id` | Warehouse | link | Stock Rule | make to order rule |
 | `name` | Removal Strategy | text |  | Name |
 | `name` | Location | text |  | Location Name |
 | `name` | Lot | text |  | Lot/Serial Number |
@@ -1544,7 +1544,7 @@ This index is the contract for anything that reads or writes the domain from out
 | `quantity` | Stock Move Line | decimal |  | Quantity |
 | `quantity` | Stock Quantity | decimal |  | Quantity |
 | `quantity` | Storage Category Capacity | decimal |  | Quantity |
-| `quantity_product_uom` | Stock Move Line | decimal |  | Quantity in Product UoM |
+| `quantity_product_uom` | Stock Move Line | decimal |  | Quantity in Product unit of measure |
 | `reception_route_id` | Warehouse | link | Route | Receipt Route |
 | `reception_steps` | Warehouse | selection |  | Incoming Shipments |
 | `ref` | Lot | text |  | Internal Reference |

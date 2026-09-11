@@ -73,7 +73,7 @@ Groups and their direct implications:
 | 1 | Role / User | 5 |
 | 2 | Role / Administrator | 3, 4 |
 | 3 | Access Rights | 1 |
-| 4 | Bypass HTML Field Sanitize | — |
+| 4 | Bypass hypertext markup language Field Sanitize | — |
 | 5 | Technical Features | — |
 | 10 | Sales / User: own documents only | 1 |
 | 11 | Sales / User: all documents | 10 |

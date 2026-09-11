@@ -121,13 +121,13 @@ Three worked examples of exactly what the valuation domain receives.
 
 ## 5.1 A receipt
 
-**Given** a receipt of 10 units of BOLT at a unit price of 3.00 in the company currency, validated on 11 September 2026 at 14:05.
+**Given** a receipt of 10 units of Bolt at a unit price of 3.00 in the company currency, validated on 11 September 2026 at 14:05.
 
 **The record handed over:** one Stock Move with
 
 | Field | Value |
 |---|---|
-| product | BOLT |
+| product | Bolt |
 | real quantity | 10 |
 | processed quantity and line unit | 10, Units |
 | unit price | 3.00 |

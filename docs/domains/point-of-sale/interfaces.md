@@ -70,7 +70,7 @@ integration contracts.
 | Refunded Order | Point of Sale Order | Form | Opens the order this one refunds. |
 | Refund Orders | Point of Sale Order | List, form | Opens the orders that refunded this one. |
 | Linked Orders | Point of Sale Order | List | Opened from a preset. |
-| Linked POS Configurations | Point of Sale Configuration | List | Opened from a preset. |
+| Linked point of sale Configurations | Point of Sale Configuration | List | Opened from a preset. |
 | Rescue Sessions | Point of Sale Session | Form when there is exactly one, otherwise list and form | Opened from the dashboard. |
 | Session | Point of Sale Session | Form, list | Opened from the dashboard's "close session" button. |
 | Send Email | Message Composer | Form (dialog) | Opened from a selection of orders in mass-mail mode with the receipt template pre-selected. |
@@ -409,7 +409,7 @@ capability, giving the floor name, the table number and the table's short addres
 otherwise six copies of the generic short address. Codes can only be produced in mobile or
 browse-only mode (*"QR codes can only be generated in mobile or consultation mode."*) and
 table codes require at least one table (*"In Self-Order mode, you must have at least one
-table to generate QR codes"*).
+table to generate quick response codes"*).
 
 ---
 
@@ -465,7 +465,7 @@ since <opening instant>, we advise you to close it and to create a new one."*
 
 | Trigger | Kind | Message |
 | --- | --- | --- |
-| An invoice of a counter order is reset to draft while its session is open | Danger, sticky | You can't reset this invoice to draft because the POS session is still open. Please close the ongoing session first, then try again. |
+| An invoice of a counter order is reset to draft while its session is open | Danger, sticky | You can't reset this invoice to draft because the point of sale session is still open. Please close the ongoing session first, then try again. |
 
 ---
 

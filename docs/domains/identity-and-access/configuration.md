@@ -253,7 +253,7 @@ section 14.8 of [calculations.md](calculations.md).
 | Group | External reference | Directly implies | Privilege | Comment |
 |---|---|---|---|---|
 | Access Rights | `base.group_erp_manager` | *Role / User* | — | The permission administrator: may read and write users, groups, access rights, record rules, entity definitions and external identifiers. |
-| Bypass HTML Field Sanitize | `base.group_sanitize_override` | — | — | Allows storing markup that would otherwise be stripped. |
+| Bypass hypertext markup language Field Sanitize | `base.group_sanitize_override` | — | — | Allows storing markup that would otherwise be stripped. |
 | Role / Administrator | `base.group_system` | *Access Rights*, *Bypass HTML Field Sanitize* | — | *Access to the settings to configure the apps*. Held by the system account and the administrator account out of the box. |
 | Role / User | `base.group_user` | — | — | *Access to the home menu*. Maximum application-key duration: **90 days**. |
 | Multi Companies | `base.group_multi_company` | — | — | Presentation group: shows the company switcher. Membership is maintained mechanically (section 14.10 of [calculations.md](calculations.md)). |

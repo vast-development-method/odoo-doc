@@ -2162,11 +2162,11 @@ engine, the aggregation engine, the external value engine and the carry-over mec
 | Line | Code | Engine | Formula |
 |---|---|---|---|
 | 00 - Operations subject to a special regulation | `c00` | `tax_tags` | `-00` |
-| 01 - Operations subject to 6% VAT | `c01` | `tax_tags` | `-01` |
-| 02 - Operations subject to 12% VAT | `c02` | `tax_tags` | `-02` |
-| 03 - Operations subject to 21% VAT | `c03` | `tax_tags` | `-03` |
+| 01 - Operations subject to 6% value-added tax | `c01` | `tax_tags` | `-01` |
+| 02 - Operations subject to 12% value-added tax | `c02` | `tax_tags` | `-02` |
+| 03 - Operations subject to 21% value-added tax | `c03` | `tax_tags` | `-03` |
 | 44 - Intra-Community services | `c44` | `tax_tags` | `-44` |
-| 45 - Operations subject to VAT due by the co-contractor | `c45` | `tax_tags` | `-45` |
+| 45 - Operations subject to value-added tax due by the co-contractor | `c45` | `tax_tags` | `-45` |
 | 46 - Exempted intra-Community deliveries and ABC sales | `c46` | `aggregation` | `c46L.balance + c46T.balance` — foldable |
 | &nbsp;&nbsp;46L - Exempted intra-Community deliveries | `c46L` | `tax_tags` | `-46L` |
 | &nbsp;&nbsp;46T - ABC sales | `c46T` | `tax_tags` | `-46T` |
@@ -2197,7 +2197,7 @@ five-expression carry-over pattern.
 | 84 - Credit notes for operations in grids [86] and [88] | `c84` | `balance` | `tax_tags` | `-84` | — | `strict_range` |
 | 85 - Credit notes received relating to other operations in part III | `c85` | `balance` | `tax_tags` | `-85` | — | `strict_range` |
 | 86 - Intra-Community acquisitions and ABC sales | `c86` | the same five, with `86` | | | | |
-| 87 - Other operations subject to VAT | `c87` | the same five, with `87` | | | | |
+| 87 - Other operations subject to value-added tax | `c87` | the same five, with `87` | | | | |
 | 88 - Intra-Community services with reverse charge | `c88` | the same five, with `88` | | | | |
 
 Six boxes — 81, 82, 83, 86, 87 and 88 — therefore each hold five expressions, of which only
@@ -2211,12 +2211,12 @@ all with a leading minus.
 
 | Line | Code | Formula |
 |---|---|---|
-| 54 - VAT on operations in grids [01], [02] and [03] | `c54` | `-54` |
-| 55 - VAT on operations in grids [86] and [88] | `c55` | `-55` |
-| 56 - VAT on operations in grid [87], with the exception of imports with reverse charge | `c56` | `-56` |
-| 57 - VAT on import with reverse charge | `c57` | `-57` |
-| 61 - Various VAT regularizations in favor of the State | `c61` | `-61` |
-| 63 - VAT to be paid back on credit notes received | `c63` | `-63` |
+| 54 - value-added tax on operations in grids [01], [02] and [03] | `c54` | `-54` |
+| 55 - value-added tax on operations in grids [86] and [88] | `c55` | `-55` |
+| 56 - value-added tax on operations in grid [87], with the exception of imports with reverse charge | `c56` | `-56` |
+| 57 - value-added tax on import with reverse charge | `c57` | `-57` |
+| 61 - Various value-added tax regularizations in favor of the State | `c61` | `-61` |
+| 63 - value-added tax to be paid back on credit notes received | `c63` | `-63` |
 
 **Section "Taxes" → "V Deductible"** — leaves, all with one `balance` expression, engine
 `tax_tags`, none with a minus, because deductible tax sits on the debit side and is already
@@ -2224,9 +2224,9 @@ positive.
 
 | Line | Code | Formula |
 |---|---|---|
-| 59 - Deductible VAT | `c59` | `59` |
-| 62 - Various VAT regularizations in favor of the declarant | `c62` | `62` |
-| 64 - VAT to be recovered on credit notes issued | `c64` | `64` |
+| 59 - Deductible value-added tax | `c59` | `59` |
+| 62 - Various value-added tax regularizations in favor of the declarant | `c62` | `62` |
+| 64 - value-added tax to be recovered on credit notes issued | `c64` | `64` |
 
 **Section "Taxes" → "VI Balance"** — the two complementary result lines.
 
@@ -2263,7 +2263,7 @@ generic tax report. Twenty-four lines, forty-five expressions, **three** columns
 | Column | Expression label | Display type |
 |---|---|---|
 | Amount | `base` | monetary |
-| VAT Amount | `tax` | monetary |
+| value-added tax Amount | `tax` | monetary |
 | Adjustment | `adj` | monetary |
 
 This definition is reproduced in full because it exercises the three-column contract, the
@@ -2379,14 +2379,14 @@ amount at all. They demonstrate that the external value engine is not restricted
 |---|---|---|---|---|
 | VP2 - Total active transactions | `VP2` | `debit` | `tax_tags` | `-02` |
 | VP3 - Total passive transactions | `VP3` | `credit` | `tax_tags` | `03` |
-| VP4 - VAT due | `VP4` | `debit` | `tax_tags` | `-4v` |
-| VP5 - VAT Deductible | `VP5` | `credit` | `tax_tags` | `5v` |
+| VP4 - value-added tax due | `VP4` | `debit` | `tax_tags` | `-4v` |
+| VP5 - value-added tax Deductible | `VP5` | `credit` | `tax_tags` | `5v` |
 
 **Section "Balances, carryovers and interest" (`h3`).**
 
 | Line | Code | Label | Engine | Formula | Subformula | Date scope |
 |---|---|---|---|---|---|---|
-| VP6 - VAT due/deductible | `VP6` | `debit` | `aggregation` | `VP4.debit - VP5.credit` | `if_above(EUR(0))` | `strict_range` |
+| VP6 - value-added tax due/deductible | `VP6` | `debit` | `aggregation` | `VP4.debit - VP5.credit` | `if_above(EUR(0))` | `strict_range` |
 | | | `credit` | `aggregation` | `VP5.credit - VP4.debit` | `if_above(EUR(0))` | `strict_range` |
 | VP7 - Previous period debt not to exceed 100,00 | `VP7` | `tag` | `tax_tags` | `-vp7` | — | `strict_range` |
 | | | `_applied_carryover_debit` | `external` | `most_recent` | — | `previous_return_period` |
@@ -2406,7 +2406,7 @@ amount at all. They demonstrate that the external value engine is not restricted
 
 | Line | Code | Label | Engine | Formula | Subformula | Carry over to |
 |---|---|---|---|---|---|---|
-| VP14 - VAT payable | `VP14` | `debit` | `aggregation` | `(VP6.debit + VP7.debit + VP12.debit) - (VP6.credit + VP8.credit + VP9.credit + VP10.credit + VP11.credit + VP13.credit)` | `if_above(EUR(0))` | — |
+| VP14 - value-added tax payable | `VP14` | `debit` | `aggregation` | `(VP6.debit + VP7.debit + VP12.debit) - (VP6.credit + VP8.credit + VP9.credit + VP10.credit + VP11.credit + VP13.credit)` | `if_above(EUR(0))` | — |
 | | | `_carryover_debit` | `aggregation` | `VP14.debit` | `if_between(EUR(0), EUR(100))` | `VP7._applied_carryover_debit` |
 | | | `credit` | `aggregation` | `(VP6.credit + VP8.credit + VP9.credit + VP10.credit + VP11.credit + VP13.credit) - (VP6.debit + VP7.debit + VP12.debit)` | `if_above(EUR(0))` | — |
 | | | `_carryover_credit` | `aggregation` | `VP14.credit` | `if_above(EUR(0))` | `VP8._applied_carryover_credit` |

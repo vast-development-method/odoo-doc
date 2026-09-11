@@ -144,7 +144,7 @@ value is always skipped).
 **When** an administrator adds a by-product line for *Dining table*,
 
 **Then** the save is refused with **"By-product *the recipe display name* should not be the
-same as BoM product."**
+same as bill of materials product."**
 
 ### Scenario 1.6 — The total by-product cost share is capped
 
@@ -152,7 +152,7 @@ same as BoM product."**
 
 **When** a second by-product of cost share 40 is added, applicable to the same variant,
 
-**Then** the save is refused with **"The total cost share for a BoM's by-products cannot
+**Then** the save is refused with **"The total cost share for a bill of materials's by-products cannot
 exceed 100."**
 
 **But when** the two by-products are restricted to mutually exclusive variants,
@@ -333,7 +333,7 @@ order*".
 **When** instead the two orders use different recipes,
 
 **Then** the merge is refused with **"You can only merge manufacturing orders of identical
-products with same BoM."**
+products with same bill of materials."**
 
 ### Scenario 2.8 — Changing the quantity to produce
 

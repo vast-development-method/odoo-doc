@@ -517,7 +517,7 @@ that mechanism.
 1. The user opens a paid order and asks to return products.
 2. For each order, the system finds the current session of the order's configuration. When
    there is none, it refuses with *"To return product(s), you need to open a session in
-   the POS <configuration display name>"*.
+   the point of sale <configuration display name>"*.
 3. A copy of the order is created in that session with: the name being the original name
    followed by ` REFUND`, a fresh receipt number and tracking number, the current instant
    as its date, no lines, a paid amount of zero, the cost flagged as not computed, the
@@ -671,7 +671,7 @@ authorised limit.
 
 1. The cashier asks to close. The application first checks that no order due now or earlier
    is unfinished; the server repeats the check and answers, when it fails, *"You cannot
-   close the POS while there are still draft orders for the day."* with a flag telling the
+   close the point of sale while there are still draft orders for the day."* with a flag telling the
    application not to redirect.
 2. The server reports whether the session was already closed by somebody else. If it was,
    the answer is an alert titled "Session already closed" reading *"The session has been
@@ -1064,7 +1064,7 @@ A tax may not have its kind, amount, scope, tax group, price-included behavior,
 base-inclusion behavior or base-affected behavior changed while any counter order line
 carrying it belongs to a session that is not closed:
 
-> It is forbidden to modify a tax used in a POS order not posted. You must close the POS
+> It is forbidden to modify a tax used in a point of sale order not posted. You must close the point of sale
 > sessions before modifying the tax.
 
 ### 25.4 Journal protection
@@ -1079,7 +1079,7 @@ carrying it belongs to a session that is not closed:
 ### 25.5 Sequence protection
 
 A numbering sequence used by an active configuration may not be deleted: *"You cannot
-delete a sequence used in an active POS config: <sequence names>"*.
+delete a sequence used in an active point of sale config: <sequence names>"*.
 
 ### 25.6 Rounding definition protection
 
