@@ -84,7 +84,7 @@ Either a state of a Payment (`canceled`), meaning the movement was abandoned; or
 A Journal Entry produced when a reconciliation touches a receivable or payable account of a company that uses cash-basis taxes. It moves tax from a transitional account to the real tax account in proportion to what has been paid. Its content belongs to `../taxes/`; this domain supplies the trigger, the percentage, the payment rate, the settlement date and the both-posted flag.
 
 **Cash-discount account**
-One of two company accounts used when an early payment discount is granted: the **loss** account for an inbound document (a customer invoice), the **gain** account for an outbound document (a vendor bill).
+One of two company accounts used when an early payment discount is granted: the **loss** account for an inbound document — a customer invoice, a customer receipt or a vendor credit note — and the **gain** account for an outbound document — a vendor bill, a vendor receipt or a customer credit note.
 
 **Checked**
 A boolean on a Journal Entry meaning that an accountant has reviewed it. For a Bank Transaction it decides which figure of the dashboard counts it, and it changes how the residual is computed: an unchecked transaction's residual is its whole amount, whatever its journal items say.

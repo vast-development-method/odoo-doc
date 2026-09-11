@@ -1186,3 +1186,266 @@ capability if needed, instantiates the taxes and attaches each of them to the fi
 When a tax is created.
 Then no automatic "created" entry appears in its message history and the creator is not subscribed
 to its thread.
+
+---
+
+## R. Ordering, flattening and batching
+
+**R1 — Flattening order.**
+Given taxes named *G*, *B*, *E* and *C* whose sequences order them alphabetically, where *B* is a
+Group of Taxes containing *A*, *D* and *F* whose sequences also order them alphabetically.
+Then the evaluation order is *A*, *D*, *F*, *C*, *E*, *G*.
+
+**R2 — The group's own sequence positions its children.**
+Given a Group of Taxes at sequence one containing a child at sequence nine, and an ordinary tax at
+sequence five.
+Then the child is evaluated **before** the ordinary tax, because the group's sequence decides the
+group's position.
+
+**R3 — Ties are broken by identifier.**
+Given two taxes with the same sequence.
+Then the one with the smaller identifier is evaluated first.
+
+**R4 — An unsaved tax sorts first.**
+Given a saved tax and an unsaved one with the same sequence.
+Then the unsaved one is evaluated first, because it has no identifier.
+
+**R5 — Two price-included percentage taxes batch together.**
+Given two price-included ten percent taxes, neither affecting the base.
+Then they form one batch and are extracted by dividing by one point two, not twice by one point
+one.
+
+**R6 — An affecting tax breaks the batch.**
+Given the same two taxes but with the earlier one flagged "affect base of subsequent taxes" and
+the later one accepting it.
+Then two batches of one are formed and the taxes cascade.
+
+**R7 — An affecting tax does not break the batch when the next tax refuses to be affected.**
+Given the same two taxes with the earlier one flagged "affect base" and the later one **not**
+accepting to be affected.
+Then the fourth batching condition holds and the two taxes form one batch.
+
+**R8 — Different computation kinds never batch.**
+Given a percentage tax and a division tax adjacent in the order.
+Then they form two batches.
+
+**R9 — The special mode collapses the inclusion test.**
+Given a price-included and a price-excluded percentage tax, adjacent, neither affecting the base,
+under the special mode "total included".
+Then they form one batch.
+
+**R10 — Filtering keeps the group link.**
+Given a Group of Taxes with two children and a filter that removes one of them.
+Then the surviving child still records the group as its originator group.
+
+---
+
+## S. Engine internals
+
+**S1 — The untaxed total is the first result's base.**
+Given a line with one price-included tax and one price-excluded tax.
+Then the untaxed total is the base of the **first** result in evaluation order, not the raw base.
+
+**S2 — The extra base for the amount is frozen once the amount is known.**
+Given a tax *X* evaluated before a tax *Y*, where *Y*'s amount is already known when *X*'s
+propagation runs.
+Then *Y*'s base for **reporting** is updated but the base *Y*'s amount was computed on is not.
+
+**S3 — Downstream taxes are recorded.**
+Given a tax *A* flagged "affect base of subsequent taxes" and a tax *B* accepting it.
+Then *A*'s result records *B* as a downstream tax, and the journal item produced for *A* carries
+*B* in its base-tax set.
+
+**S4 — The subsequent-tax stack only collects taxes that accept being affected.**
+Given a tax *A* flagged "affect base" and a tax *B* **not** accepting to be affected.
+Then *A*'s downstream tax list does **not** contain *B*.
+
+**S5 — The batch total includes the reverse-charge halves.**
+Given a price-included reverse-charge tax in a batch.
+Then the amount subtracted from the base is the sum of the batch's amounts **plus** the sum of the
+reverse-charge halves of those members that have one — which is zero for a symmetric reverse
+charge.
+
+**S6 — The company-currency amount is a division.**
+Given a rate of one point two five foreign units per company unit and a foreign amount of one
+hundred.
+Then the company amount is eighty.
+
+**S7 — Round per line rounds the raw base first.**
+Given the rounding method "round per line", a quantity of twelve point one two and a unit price of
+twelve point one two.
+Then the raw base is one hundred forty-six point eight nine **before** any tax is computed.
+
+**S8 — Round per tax does not round the raw base.**
+Given the same with "round per tax".
+Then the raw base is one hundred forty-six point eight nine four four.
+
+**S9 — Merging tax details shifts the base of a tax missing from the second block.**
+Given two tax details blocks, the first carrying a fixed tax the second does not carry.
+Then, after the merge, the second block's untaxed totals are added to that fixed tax's base
+amounts, so that the merged base stays meaningful.
+
+**S10 — Splitting a base line preserves the total.**
+Given a base line with a tax amount of one and weights of one third each.
+Then the three pieces' tax amounts add back to exactly one.
+
+**S11 — Reducing lines to a target amount hits the target exactly.**
+Given a document whose grand total is one thousand two hundred ten and a request for a fixed
+amount of three hundred.
+Then the resulting lines' grand total is exactly three hundred point zero zero.
+
+**S12 — Aggregating with an empty tax set calls the grouping function once.**
+Given a base line with no tax.
+Then the grouping function is called once with an empty tax result, so the line still contributes
+to the untaxed amount of its group.
+
+**S13 — The analytic average of an aggregation.**
+Given a line of one thousand distributed one hundred percent to an analytic account and a line of
+minus one hundred distributed fifty percent to the same account, aggregated together.
+Then the aggregate's distribution for that account is one hundred five point five six percent.
+
+**S14 — The analytic average of an aggregation totalling zero.**
+Given lines whose raw untaxed totals cancel exactly.
+Then every analytic percentage becomes one hundred.
+
+---
+
+## T. Multi-company
+
+**T1 — A branch sees its parent's taxes.**
+Given a parent company owning a tax and a branch.
+Then a user acting for the branch sees that tax.
+
+**T2 — A parent does not see its branch's taxes.**
+Given a tax owned by the branch.
+Then a user acting only for the parent does not see it.
+
+**T3 — Filtering taxes by company walks upwards.**
+Given a tax set containing one tax owned by the parent and one owned by the branch, and a request
+to filter for the branch.
+Then only the branch's tax is returned; when the branch owns none, the parent's is returned.
+
+**T4 — A tax may not be used outside its company tree.**
+Given a tax of company *A* and an attempt to change its company to *B* while journal items of *A*
+reference it.
+Then it is refused.
+
+**T5 — A distribution line with no company is visible everywhere.**
+Given a distribution line whose company is empty.
+Then it passes the record rule for every company.
+
+**T6 — Account tags are not scoped by company.**
+Given a tag created for a country.
+Then every company sees it, subject only to the tag chooser's country restriction on a
+distribution line.
+
+**T7 — The display name shows the company when asked.**
+Given more than one active company and a request to append the company.
+Then the tax's display name ends with the company's display name in parentheses.
+
+**T8 — The display name shows a foreign country.**
+Given a tax whose country differs from the fiscal country of the first accessible branch of its
+company.
+Then the display name ends with that country's two-letter code in parentheses.
+
+---
+
+## U. Defaulting taxes on a line
+
+**U1 — From the product on a sales document.**
+Given a product with a sales tax and an account with a different default tax, on a customer
+invoice.
+Then the line takes the **product's** sales tax.
+
+**U2 — From the account when the product has none.**
+Given a product with no sales tax and an account with a default sales tax.
+Then the line takes the account's tax, restricted to the sales kind.
+
+**U3 — Nothing is wiped when the account proposes nothing.**
+Given a line with a manually chosen tax, no product, and an account proposing no tax.
+Then the manual tax survives, because the computation only runs when the line has a product, or
+the account proposes taxes, or the line currently has none.
+
+**U4 — A discount line is left alone.**
+Given a line whose display kind is a discount and no product.
+Then no tax is computed for it.
+
+**U5 — Section, note and payment-term lines are skipped.**
+Given a section, a subsection, a note, a payment term line or a cost-of-goods line.
+Then no tax is computed at all.
+
+**U6 — An imported line is skipped.**
+Given a line marked as coming from an imported document.
+Then no tax is computed.
+
+**U7 — A miscellaneous entry takes nothing by default.**
+Given a miscellaneous entry line with no product.
+Then no tax is proposed unless the caller explicitly asks for the account's default taxes.
+
+**U8 — The fiscal position maps the defaults.**
+Given a document with a fiscal position that replaces the product's tax.
+Then the line's taxes are the replacements, not the product's.
+
+**U9 — Changing the account recomputes only under a condition.**
+Given a line whose product proposes a tax for the company, and a change of account to one that
+also proposes taxes.
+Then the taxes are **not** recomputed, because the condition requires the product to propose none.
+
+---
+
+## V. Printing and presentation
+
+**V1 — The tax column.**
+Given a line carrying two taxes whose labels are `21%` and `Eco`.
+Then the tax column prints `21%, Eco`.
+
+**V2 — A tax with no label.**
+Given a tax whose invoice label is empty and whose name is "Withholding", flagged "withhold on
+payment".
+Then nothing is printed for it, because a withholding tax's label never falls back to the name.
+
+**V3 — A tax with no label that is not a withholding tax.**
+Given a tax whose invoice label is empty and whose name is "Reduced".
+Then "Reduced" is printed, because the label falls back to the name.
+
+**V4 — The subtotal column under a tax-included default.**
+Given the company default "tax included".
+Then the line's subtotal column prints the total **with** taxes.
+
+**V5 — The company-currency totals block.**
+Given a sales document in a foreign currency, the company setting on, and at least one tax group.
+Then a second totals block in the company currency is printed.
+
+**V6 — The same on a purchase document.**
+Then the second block is **not** printed, because the flag is restricted to sales documents.
+
+**V7 — The fiscal position note.**
+Given a document whose fiscal position has a note.
+Then the note is printed after the totals.
+
+**V8 — The tax legal notes.**
+Given two lines carrying the same tax, which has legal notes.
+Then the notes are printed once, not twice, because the taxes are collected without duplicates.
+
+**V9 — The payment receipt.**
+Given a payment carrying two withholding lines.
+Then a table with the four columns Tax, Withholding number, Base and Amount is printed before the
+ordinary content, with the base and the amount as absolute values.
+
+**V10 — The product price hint.**
+Given a product priced one hundred with a price-excluded tax of twenty-one percent.
+Then the hint reads *"(= 121.00 Incl. Taxes)"* — only the first fragment, because the untaxed total
+equals the price.
+
+**V11 — The product price hint with a price-included tax.**
+Given a product priced one hundred twenty-one with a price-included tax of twenty-one percent.
+Then the hint reads *"(= 100.00 Excl. Taxes)"*.
+
+**V12 — The product price hint with a withholding tax.**
+Given a product priced one hundred with a price-excluded tax of twenty-one percent and a
+withholding tax of minus one percent.
+Then the hint reads *"(= 121.00 Incl. Taxes, 1.00 Tax Withheld)"*.
+
+**V13 — No fragment at all.**
+Given a product with no tax.
+Then the hint is a single space.

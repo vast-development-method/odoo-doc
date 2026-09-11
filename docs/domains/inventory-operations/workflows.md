@@ -603,3 +603,115 @@ The interactive scanning screens belong to a companion capability; this domain s
    3. For each record in order: skip products with no barcode; when the product changes and its barcode is not a valid structured barcode, start the encoding with the raw product barcode; then append the record's own structured barcode, or, failing that, the serial number alone for a serial-tracked record.
    4. A record's structured barcode is: the identifier `01` followed by the product barcode left-padded with zeroes to fourteen digits, when the product's barcode is a valid one; then, unless the record is serial-tracked with a quantity of one, either the unit's quantity identifier followed by the quantity divided by the unit's rounding step, left-padded to six digits, or the identifier `30` followed by the rounded quantity left-padded to eight digits; then, when a lot exists and its name is at most twenty characters, the identifier `21` for a serial number or `10` for a lot, followed by the name. A lot name longer than twenty characters makes the whole record produce nothing.
    5. Concatenate with the separator, start a new aggregate barcode whenever the maximum length would be exceeded, and terminate every aggregate barcode with a tabulation character.
+
+---
+
+# 29. Internal transfers
+
+**Performed by:** an inventory user.
+**Precondition:** the multi-location group is active, so the internal-transfer Operation Type is available.
+
+1. The user creates a Transfer with the internal Operation Type. Both default Locations are the Warehouse's stock Location, so the user changes at least one of them to a sublocation.
+2. Moves are added and the Transfer is confirmed.
+3. Because the source Location is internal, the moves are reserved under the removal strategy; the detail lines carry the exact sublocations the goods were found in.
+4. Put-away applies to the destination side: each line's destination Location may be redirected to a sublocation of the Transfer's destination Location.
+5. Validation moves the quantities between the two internal Locations. No Location goes negative unless the goods were not really there.
+6. The completion triggers the re-reservation search, exactly as a receipt does, because the Operation Type kind is internal.
+
+---
+
+# 30. Cross docking
+
+**Performed by:** automation and an inventory user.
+**Precondition:** the Warehouse both receives in more than one step and delivers in more than one step, so the cross-dock Operation Type is active.
+
+The cross-dock Operation Type moves goods straight from the input Location to the output Location, skipping the stock Location. It is created and kept active by the Warehouse generation, but no rule of the two generated Routes uses it: it is offered so that a person, or a companion capability, can build a rule that bypasses storage.
+
+---
+
+# 31. Consignment
+
+**Performed by:** an inventory user.
+**Precondition:** the owner group is active.
+
+1. The owner field appears on Stock Quantity records, on Stock Move Lines and, as an owner restriction, on Stock Moves.
+2. A Transfer may carry an owner; at validation that owner is written onto every move as its owner restriction and onto every detail line as its owner.
+3. Gathering distinguishes owners: a strict gathering for owner *X* never returns a record owned by *Y* or by nobody, and a loose gathering that names an owner requires an exact match on it.
+4. Quantity records of different owners in the same Location for the same product are therefore separate records and are reserved separately.
+
+---
+
+# 32. Working with several companies
+
+**Performed by:** an inventory manager.
+
+1. Each company has its own Warehouses, Operation Types and Locations. The shared vendor, customer and inter-company Locations have no company and are visible to all.
+2. A resupply between two Warehouses of **different** companies uses the shared inter-company Location rather than the company's own transit Location; the shared Location is activated the first time such a Route is created.
+3. When goods travel between companies, the sending company's delivery lands in the transit Location and the receiving company's receipt takes them out of it. The two halves are separate documents in separate ledgers.
+4. The Transfer's contact is used to detect the counterpart company: the company whose contact is that contact or one of its ancestors. When that company differs from the Transfer's own, and the parameter is set, the destination containers of the transit-bound moves are unpacked so that the receiving company does not inherit the sender's containers.
+5. Every entity of the domain carries a record rule restricting it to the reader's enabled companies; the ones that also accept an empty company are listed in `configuration.md`, section 6.
+
+---
+
+# 33. Changing a product's tracking mode
+
+**Performed by:** an inventory manager, through `../products-and-catalog/`.
+
+This domain reacts to the change:
+
+1. Turning tracking **on** does not retroactively create lots: existing quantity records keep an empty lot and are still gathered, because gathering accepts an empty lot in both matching modes.
+2. Turning tracking **off** is refused at the settings level while any product is tracked; at product level the change is allowed and the existing lot-bearing records simply stop being distinguished.
+3. Switching a product from non-storable to storable creates a reserved quantity record for every already-reserved move of it, because the detail lines now have to be backed by counters.
+
+---
+
+# 34. Handling negative stock
+
+**Performed by:** an inventory user, usually without meaning to.
+
+A negative on-hand quantity arises whenever goods leave a Location that did not hold them: a delivery validated before its receipt, an over-processed delivery, a scrap confirmed through the shortage screen.
+
+1. The completion writes the negative figure onto the quantity record rather than refusing.
+2. When the available quantity at that key goes below zero, the reservation-freeing routine of `calculations.md`, section 7.4, takes the promised goods back from other open documents, current Transfer first.
+3. The negative record coexists with any positive records of the same product in the same Location that differ by lot, container or owner.
+4. From then on, the negative pocket mechanism of the reservation-quantity computation makes the positive records absorb the negative one before anything can be reserved out of them.
+5. When the missing receipt is finally validated, the arrival is written onto the same key and the negative figure returns to zero; the housekeeping pass then deletes the now-empty record.
+6. A lot-bearing negative is additionally compensated at completion time against untracked stock at the same Location, so that the lot-level figures stay coherent.
+
+The whole mechanism is deliberate: the system never blocks a physical movement because its paperwork arrived in the wrong order, and it repairs itself once the paperwork catches up.
+
+---
+
+# 35. Emptying a location
+
+**Performed by:** an inventory user.
+
+1. Read the Location's emptiness indicator: it is true when the sum of on-hand quantities of the records directly in it is at most zero.
+2. When it is not empty, either relocate the records (section 18) or count them to zero (section 20).
+3. Only then can the Location be archived; archiving a parent archives the whole subtree and is refused when any internal descendant still holds stock.
+
+---
+
+# 36. Transferring responsibility for a transfer
+
+1. Writing the responsible on a Transfer is tracked in its discussion thread.
+2. Writing the responsible on a Batch Transfer re-assigns every Transfer of the batch and posts a note on each, naming the batch.
+3. A backorder is always created with an empty responsible, so that it is picked up afresh.
+4. A return is likewise created with an empty responsible.
+
+---
+
+# 37. Reading a transfer's history after the fact
+
+**Performed by:** any internal user with read access.
+
+| Question | Where the answer is |
+|---|---|
+| What was actually moved? | The Transfer's detail lines, each with its quantity, lot, containers and exact Locations, and each with the instant it was completed. |
+| What was demanded? | The Transfer's moves, whose demand was reduced by whatever went into the backorder. |
+| What was **originally** demanded? | The aggregation of `calculations.md`, section 24.9, which walks the backorder chain and adds the demands back. |
+| Which containers travelled, and inside what? | The Package History snapshots, which freeze the container tree as it was. |
+| Where did the goods come from? | The traceability tree, walking upstream. |
+| Where did they go? | The traceability tree, walking downstream; for a lot, the delivery discovery. |
+| Who changed what after the fact? | The notes posted in the discussion thread by each edit of a done line. |
+| What did it weigh? | The stored shipping weight, frozen at validation unless a person rewrites it. |

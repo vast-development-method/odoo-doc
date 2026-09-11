@@ -415,92 +415,69 @@ cannot cancel it."*
 
 **Given** the standard setting and a paid order O with three lines:
 
-| Line | Product | Quantity | Unit price including tax | Tax-excluded | Tax |
-| --- | --- | --- | --- | --- | --- |
-| 1 | P | 3 | 12.10 | 30.00 | 6.30 |
-| 2 | Q | 1 | 40.50 | 33.47 | 7.03 |
-| 3 | R | 2 | 5.00 | 8.27 | 1.73 |
+| Line | Product | Quantity | Unit price including tax | Line including tax | Tax-excluded | Tax | Unit cost |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | P | 3 | 12.10 | 36.30 | 30.00 | 6.30 | 6.00 |
+| 2 | Q | 1 | 40.50 | 40.50 | 33.47 | 7.03 | 18.00 |
+| 3 | R | 2 | 5.00 | 10.00 | 8.26 | 1.74 | 2.00 |
+| | | | **Totals** | **86.80** | **71.73** | **15.07** | |
 
-paid 100.10 in cash, delivered in real time, product P costing 6.00 a unit,
+The tax-excluded figures are `round_to_currency( 36.30 ÷ 1.21 ) = 30.00`,
+`round_to_currency( 40.50 ÷ 1.21 ) = 33.47` and
+`round_to_currency( 10.00 ÷ 1.21 ) = 8.26`; each tax is the line total minus its base.
+Order O was tendered 86.80 in cash and delivered in real time.
 
 **When** the cashier refunds **one unit of line 1** and hands back 12.10 in cash,
 
 **Then**
-1. a new order is created in the current session with the refund flag set and the name
-   `<order O name> REFUND`; it has its own receipt number and tracking number;
-2. it has one line: product P, quantity −1, unit price 12.10, refunded line = line 1 of
-   order O, cost not yet computed;
-3. the guard passes because
+1. a new order R is created in the current session with the refund flag set and the name
+   `<order O name> REFUND`; it has its own receipt number and tracking number, its
+   own session-unique sequence number, and its cost is flagged as not computed;
+2. it has exactly one line: product P, quantity −1, unit price 12.10, refunded line =
+   line 1 of order O, with a copy of every lot of the original line;
+3. the refund guard passes, because
    `| 3 | − ( | 0 | + | −1 | ) = 2 ≥ 0`;
 4. the refund line's tax-excluded amount is −10.00 and its tax-included amount is −12.10;
-5. the refund order's tax amount is −2.10 and its total is −12.10;
+5. order R's tax amount is −2.10 and its total is −12.10;
 6. one cash tender of −12.10 is recorded;
-7. order O's line 1 now reports an already-refunded quantity of 1, and order O still has
-   refundable lines because `3 > 1`;
-8. order O's refund-orders count becomes 1 and the refund order's refunded-order link
-   points at O;
-9. a return transfer is created — because the goods were delivered — moving one unit of P
-   back, and completed; its cost bucket contributes −6.00.
+7. order O's line 1 now reports an already-refunded quantity of 1
+   (`− ( −1 ) = 1`), and order O still has refundable lines because `3 > 1`;
+8. order O's refund-orders count becomes 1 and order R's refunded-order link points at O;
+9. a transfer of the return operation type is created — the goods were delivered — moving
+   one unit of P back, linked to the original outgoing move as its returned origin, and
+   completed.
 
-**And** if the refund is in the **same** session as the sale, the closing entry contains:
-
-| # | Name | Account | Debit | Credit |
-| --- | --- | --- | --- | --- |
-| 1 | `21%` | 251000 | | 13.17 |
-| 2 | `Sales with 21%` | 400000 | | 71.74 |
-| 3 | `21%` | 251000 | 2.10 | |
-| 4 | `Refund with 21%` | 400000 | 10.00 | |
-| 5 | `<session> - Cash` | 101300 | 88.00 | |
-| 6 | *(unnamed)* | 600000 | *(the net cost)* | |
-| 7 | *(unnamed)* | 140000 | | *(the net cost)* |
-
-Lines 1 and 2 carry the sale bucket (`30.00 + 33.47 + 8.27 = 71.74` and
-`6.30 + 7.03 + 1.73 = 13.06`… note that the tax bucket of the sale is 13.06 and the refund
-tax bucket is 2.10, so the two tax buckets are **separate rows** because the sign is part
-of the sale key but **not** part of the tax key — the tax key is (account, repartition
-line, tags), which is identical for both, so in fact the two tax contributions are
-**netted** into one row of `−13.06 + 2.10 = −10.96`, a credit of 10.96).
-
-Restated precisely:
+**And** when the sale and the refund fall in the **same** session, the closing entry
+contains:
 
 | # | Name | Account | Debit | Credit |
 | --- | --- | --- | --- | --- |
-| 1 | `21%` | 251000 | | 10.96 |
-| 2 | `Sales with 21%` | 400000 | | 71.74 |
-| 3 | `Refund with 21%` | 400000 | 10.00 | |
-| 4 | `<session> - Cash` | 101300 | 88.00 | |
-| 5 | *(unnamed)* | 600000 | *(net cost)* | |
-| 6 | *(unnamed)* | 140000 | | *(net cost)* |
-| | **Totals without the cost pair** | | **98.00** | **82.70 + 10.96 = 93.66**… |
-
-which does not balance — so the figures must be reread. The correct arithmetic is:
-
-```formula
-sale_taxes  = 6.30 + 7.03 + 1.73 = 15.06
-sale_bases  = 30.00 + 33.47 + 8.27 = 71.74
-sale_total  = 71.74 + 15.06 = 86.80
-```
-
-The order total of 100.10 in the premise is therefore wrong for the line figures given;
-the consistent premise is a sale of 86.80 tendered in cash. With that correction:
-
-| # | Name | Account | Debit | Credit |
-| --- | --- | --- | --- | --- |
-| 1 | `21%` | 251000 | | 12.96 |
-| 2 | `Sales with 21%` | 400000 | | 61.74 |
+| 1 | `21%` | 251000 | | 12.97 |
+| 2 | `Sales with 21%` | 400000 | | 71.73 |
 | 3 | `Refund with 21%` | 400000 | 10.00 | |
 | 4 | `<session> - Cash` | 101300 | 74.70 | |
-| 5 | *(unnamed)* | 600000 | net cost | |
-| 6 | *(unnamed)* | 140000 | | net cost |
+| 5 | *(unnamed)* | 600000 | 34.00 | |
+| 6 | *(unnamed)* | 140000 | | 34.00 |
+| | **Totals** | | **118.70** | **118.70** |
 
-where the tax row nets `15.06 − 2.10 = 12.96`, the sale row keeps `71.74` and the refund
-row `10.00` (they do **not** net, because the sign is part of the sale key, so the sale
-row is a credit of 71.74 and the refund row a debit of 10.00, leaving 61.74 net across
-two rows — shown here as the two separate rows 2 and 3 that the system actually writes),
-and the cash bucket nets `86.80 − 12.10 = 74.70`.
+with
 
-**Verification**: debits `10.00 + 74.70 = 84.70`; credits `12.96 + 71.74 = 84.70`. The
-entry balances.
+```formula
+tax_bucket   = − 15.07 + 2.10 = − 12.97
+sales_bucket = − ( 30.00 + 33.47 + 8.26 ) = − 71.73
+refund_bucket = + 10.00
+cash_bucket  = 86.80 − 12.10 = 74.70
+cost_bucket  = ( 3 × 6.00 + 1 × 18.00 + 2 × 2.00 ) − ( 1 × 6.00 ) = 40.00 − 6.00 = 34.00
+```
+
+Note carefully that the **sales** contributions are **not** netted — rows 2 and 3 are
+separate, because the sign is part of the sales aggregation key — while the **tax**
+contributions **are** netted into row 1, because the tax aggregation key is (account,
+repartition line, tags) and carries no sign. The cash contributions are also netted,
+because the cash bucket is keyed only by payment method.
+
+**And** one cash statement line of 74.70 is produced, debiting 570000 and crediting
+101300; it is reconciled against row 4.
 
 ### D2 — The two tax contributions really are netted
 
