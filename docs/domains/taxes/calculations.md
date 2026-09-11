@@ -458,7 +458,7 @@ Grammar, enforced when the tax is saved and again at every evaluation:
    Otherwise: *"Only product['string'] or uom['string'] read-access is allowed"*.
 9. At evaluation, the whole context is round-tripped through a neutral text encoding; if any value
    cannot be encoded, the evaluation raises
-   *"Only primitive types are allowed in python tax formula context."*
+   `Only primitive types are allowed in python tax formula context.`
 10. A division by zero during evaluation yields zero rather than an error.
 
 The default formula of a new custom-formula tax is the unit price multiplied by one tenth.
@@ -3138,7 +3138,7 @@ central register through a relay service.
 **Configuration.** A company-level switch turns it on. The relay endpoint is either a production
 address or a test address; which one is the default depends on whether the validation capability
 was installed with demonstration data; an administrator may override it through a system parameter
-but only with one of those two values, otherwise: *"Invalid IAP VIES endpoint"*.
+but only with one of those two values, otherwise: `Invalid IAP VIES endpoint`.
 
 **Credentials.** The database identifies itself with a pair (identifier, token). If none is stored,
 a random universally unique identifier and a random token are generated and stored in their own
@@ -3164,8 +3164,8 @@ transport failure, or a response without a status, yields the status *fault*.
 |---|---|---|
 | `valid` | true | *"The Intra-Community validity has been updated to: valid."* |
 | `unassigned` | false | *"The Intra-Community validity has been updated to: unassigned."* |
-| `pending` | false | *"The VIES check is pending. The status will be updated soon."* |
-| `fault` | false | *"The VIES check failed. Please check the Tax ID manually."* |
+| `pending` | false | `The VIES check is pending. The status will be updated soon.` |
+| `fault` | false | `The VIES check failed. Please check the Tax ID manually.` |
 
 **The callback.** The relay may later call the callback address with the number and a status; the
 receiving route re-verifies the signed token before applying the status.

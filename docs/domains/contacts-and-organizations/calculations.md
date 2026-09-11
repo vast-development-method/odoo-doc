@@ -1932,10 +1932,10 @@ whose telephone field holds the national spelling `02 290 34 90`.
 
 **Formatting to the international presentation form.**
 
-1. Parse `02 290 34 90` assuming region `BE`. Every separator is discarded, leaving the digits
-   `0229034 90`, that is `022903490`. The leading zero is the Belgian national trunk prefix; the
-   parser strips it, so the national significant number is the eight digits `22903490` and the
-   country calling code is thirty-two.
+1. Parse `02 290 34 90` assuming region `BE`. Every separator is discarded, leaving the nine
+   digits `022903490`. The leading zero is the Belgian national trunk prefix; the parser strips
+   it, so the national significant number is the eight digits `22903490` and the country calling
+   code is thirty-two.
 2. Format internationally: `+32 2 290 34 90`.
 3. Re-parse that value: same result.
 4. It is possible and valid.

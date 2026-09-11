@@ -101,7 +101,7 @@ One row per configured access right. "R", "W", "C", "D" stand for read, write, c
 | Milestone | Project User | ✓ | ✓ | ✓ | ✓ |
 | Milestone | Project Administrator | ✓ | ✓ | ✓ | ✓ |
 | Project Update | internal-user group | ✓ | | | |
-| Project Update | portal group | | | | | (an explicit row granting **nothing**) |
+| Project Update | portal group — an explicit row granting **nothing** | | | | |
 | Project Update | Project User | ✓ | ✓ | ✓ | ✓ |
 | Project Update | Project Administrator | ✓ | ✓ | ✓ | ✓ |
 | Project Collaborator | portal group | ✓ | | | |

@@ -160,9 +160,9 @@ what it returns; the algorithms are in `calculations.md`.
 | Prepare down payment lines | the same with a positive amount | base lines carrying the computation key `down_payment` |
 | Flatten a set of taxes | a set of taxes | the ordered list of non-group taxes |
 | Get the tags of a tax | a tax, a refund flag and a line kind | the tag set |
-| The legacy all-in-one computation | a price, a currency, a quantity, a product, a partner, a refund flag, a price-inclusion flag, a cash-basis-tags flag and a rounding method | the untaxed total, the total with taxes, the total posted to no account, the base tags and one entry per produced tax result with its identifier, name, amount, base, sequence, account, analytic flag, settlement flag, reverse-charge flag, price-inclusion flag, exigibility, distribution line, group, tags and downstream taxes |
+| The combined all-in-one computation | a price, a currency, a quantity, a product, a partner, a refund flag, a price-inclusion flag, a cash-basis-tags flag and a rounding method | the untaxed total, the total with taxes, the total posted to no account, the base tags and one entry per produced tax result with its identifier, name, amount, base, sequence, account, analytic flag, settlement flag, reverse-charge flag, price-inclusion flag, exigibility, distribution line, group, tags and downstream taxes |
 
-**The legacy all-in-one computation** deserves a note: it rounds the untaxed and included totals to
+**The combined all-in-one computation** deserves a note: it rounds the untaxed and included totals to
 the currency unless the caller says otherwise, it reports the **raw** per-result base, and it adds
 a "total posted to no account" figure which is the untaxed total plus the amounts of every
 distribution line that has no account. It accepts a context marker forcing every tax to be treated
