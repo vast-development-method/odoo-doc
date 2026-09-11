@@ -131,7 +131,7 @@ Customer invoice of 1 000.00, payment of 980.00, discount of 20.00 booked on the
 | write-off | Cash Discount Loss | 20.00 | | +20.00 | Early Payment Discount |
 | counterpart | Accounts Receivable | | 1 000.00 | −1 000.00 | Manual Payment |
 
-The discount account is chosen by direction: the company's **cash-discount loss** account for an inbound document (a customer invoice), the company's **cash-discount gain** account for an outbound document (a vendor bill). A discount taken on a vendor bill is therefore income, and the entry mirrors:
+The discount account is chosen by the document's direction: the company's **cash-discount loss** account for an inbound document — a customer invoice, a customer receipt or a vendor credit note — and the company's **cash-discount gain** account for an outbound document — a vendor bill, a vendor receipt or a customer credit note. A discount taken on a vendor bill is therefore income, and the entry mirrors:
 
 | Line | Account | Debit | Credit |
 |---|---|---|---|

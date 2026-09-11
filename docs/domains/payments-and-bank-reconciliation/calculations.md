@@ -1325,10 +1325,13 @@ For one document:
 1. Let `discount_percentage` be the payment term's discount percentage. If it is zero, produce nothing.
 2. Choose the discount account:
    ```formula
-   discount_account = the company's cash-discount LOSS  account   when the document is an inbound document
-                                                                   (a customer invoice or an outgoing receipt)
-                    = the company's cash-discount GAIN  account   otherwise
+   discount_account = the company's cash-discount LOSS account   when the document is an INBOUND document
+                    = the company's cash-discount GAIN account   otherwise
    ```
+   An **inbound** document is one the company expects money for: a customer invoice, a customer receipt or a
+   vendor credit note. An **outbound** document is one the company expects to pay: a vendor bill, a vendor
+   receipt or a customer credit note. Granting a discount on money owed to the company is a loss; obtaining a
+   discount on money the company owes is a gain.
 3. Determine an analytic distribution for the discount from the analytic distribution models, keyed on the discount account's code, the company, the commercial counterparty and the counterparty's tags.
 4. Rebuild the document's product lines with their unit price multiplied by `(100 − discount_percentage) ÷ 100`, treating them as refund lines, and recompute their taxes (fixed-amount taxes are excluded from the recomputation).
 5. For each rebuilt line, compute the **base delta**:

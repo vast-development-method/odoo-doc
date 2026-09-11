@@ -1,6 +1,6 @@
 # Acceptance scenario index
 
-Every numbered scenario across the specification: 1,324 scenarios in 7 domains, of which 393 assert concrete monetary amounts.
+Every numbered scenario across the specification: 1,926 scenarios in 11 domains, of which 460 assert concrete monetary amounts.
 
 A scenario is referenced as the domain name, a full stop, and its number, for example `sales.A1`. That reference never changes and never gets reused, so a failing test in a rebuild can always be traced back to what it asserts. The rules are in [traceability rules](../reimplementation/traceability-rules.md).
 
@@ -10,11 +10,15 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 |---|---|---|
 | [accounts-payable](../domains/accounts-payable/acceptance-criteria.md) | 134 | 39 |
 | [accounts-receivable](../domains/accounts-receivable/acceptance-criteria.md) | 164 | 61 |
+| [financial-reporting](../domains/financial-reporting/acceptance-criteria.md) | 1 | 1 |
 | [general-ledger](../domains/general-ledger/acceptance-criteria.md) | 251 | 45 |
+| [human-resources-core](../domains/human-resources-core/acceptance-criteria.md) | 157 | 12 |
 | [inventory-valuation-and-costing](../domains/inventory-valuation-and-costing/acceptance-criteria.md) | 206 | 111 |
+| [point-of-sale](../domains/point-of-sale/acceptance-criteria.md) | 178 | 51 |
 | [products-and-catalog](../domains/products-and-catalog/acceptance-criteria.md) | 216 | 29 |
 | [purchasing](../domains/purchasing/acceptance-criteria.md) | 170 | 47 |
 | [sales](../domains/sales/acceptance-criteria.md) | 183 | 61 |
+| [taxes](../domains/taxes/acceptance-criteria.md) | 266 | 3 |
 
 ## accounts-payable
 
@@ -324,6 +328,12 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 | `accounts-receivable.V3` | V — End-to-end scenarios | Foreign currency with instalments and cash rounding | calculations |
 | `accounts-receivable.V4` | V — End-to-end scenarios | A fully worked cash rounding and instalment interaction | calculations |
 
+## financial-reporting
+
+| Reference | Group | Scenario | Exercises |
+|---|---|---|---|
+| `financial-reporting.25.0` |  | 0 | workflows, calculations, accounting effects, business rules, state machines |
+
 ## general-ledger
 
 | Reference | Group | Scenario | Exercises |
@@ -580,6 +590,168 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 | `general-ledger.26.7` |  | A residual below the rounding step counts as zero. | calculations, accounting effects |
 | `general-ledger.26.8` |  | The tolerance range uses half the step of the source currency. | calculations |
 
+## human-resources-core
+
+| Reference | Group | Scenario | Exercises |
+|---|---|---|---|
+| `human-resources-core.A1` | Part A — Creating an employee and linkin | Creating a minimal employee creates a resource, a version and a work contact |  |
+| `human-resources-core.A2` | Part A — Creating an employee and linkin | Creating an employee linked to a user synchronises five values | calculations |
+| `human-resources-core.A3` | Part A — Creating an employee and linkin | The image is copied when the employee has none |  |
+| `human-resources-core.A4` | Part A — Creating an employee and linkin | Writing the employee's time zone updates the user's |  |
+| `human-resources-core.A5` | Part A — Creating an employee and linkin | A user cannot be linked to two employees of the same company | business rules |
+| `human-resources-core.A6` | Part A — Creating an employee and linkin | Linking a user detaches a stale sharing employee |  |
+| `human-resources-core.A7` | Part A — Creating an employee and linkin | Creating a user from the employee |  |
+| `human-resources-core.A8` | Part A — Creating an employee and linkin | Bulk user creation classifies every employee | workflows |
+| `human-resources-core.A9` | Part A — Creating an employee and linkin | A person editing their own data notifies the responsible | workflows, state machines |
+| `human-resources-core.A10` | Part A — Creating an employee and linkin | The self-service boundary |  |
+| `human-resources-core.B1` | Part B — Employee Versions and the versi | An employee with two dated versions: the one chosen on a date | workflows |
+| `human-resources-core.B2` | Part B — Employee Versions and the versi | Creating the second version copies the first |  |
+| `human-resources-core.B3` | Part B — Employee Versions and the versi | Creating a version on a date that already has one is a no-operation | workflows |
+| `human-resources-core.B4` | Part B — Employee Versions and the versi | Two active versions cannot share an effective date | business rules |
+| `human-resources-core.B5` | Part B — Employee Versions and the versi | An employee must keep at least one version | business rules |
+| `human-resources-core.B6` | Part B — Employee Versions and the versi | Every version cannot be archived or unassigned | business rules |
+| `human-resources-core.B7` | Part B — Employee Versions and the versi | An employee with only future versions |  |
+| `human-resources-core.B8` | Part B — Employee Versions and the versi | Falling back to archived versions |  |
+| `human-resources-core.B9` | Part B — Employee Versions and the versi | Writing a delegated field lands on the pointed-at version |  |
+| `human-resources-core.B10` | Part B — Employee Versions and the versi | Changing the schedule on the current version moves the resource | calculations |
+| `human-resources-core.B11` | Part B — Employee Versions and the versi | The nightly refresh moves the current version |  |
+| `human-resources-core.B12` | Part B — Employee Versions and the versi | A version with no contract start date |  |
+| `human-resources-core.B13` | Part B — Employee Versions and the versi | The gap between a contract end and the next version |  |
+| `human-resources-core.C1` | Part C — Contract periods | Two overlapping contracts are refused | business rules |
+| `human-resources-core.C2` | Part C — Contract periods | Several versions may share one contract period |  |
+| `human-resources-core.C3` | Part C — Contract periods | Start must precede end | business rules |
+| `human-resources-core.C4` | Part C — Contract periods | An end date without a start date is impossible | business rules |
+| `human-resources-core.C5` | Part C — Contract periods | Closing a contract propagates across the whole period |  |
+| `human-resources-core.C6` | Part C — Contract periods | Writing contract dates across two different contracts is refused | business rules |
+| `human-resources-core.C7` | Part C — Contract periods | Setting a contract start date on a single-version employee moves the effective date |  |
+| `human-resources-core.C8` | Part C — Contract periods | Starting a contract before an existing future one |  |
+| `human-resources-core.C9` | Part C — Contract periods | Starting a contract on a date that already has a version | workflows |
+| `human-resources-core.C10` | Part C — Contract periods | Starting a contract on a covered date is refused | business rules |
+| `human-resources-core.C11` | Part C — Contract periods | Closing before opening | workflows |
+| `human-resources-core.D1` | Part D — Departure | A departure and everything it archives or cancels | workflows |
+| `human-resources-core.D2` | Part D — Departure | The departure date may not precede the contract start | workflows |
+| `human-resources-core.D3` | Part D — Departure | A user with another active employee is not archived | workflows |
+| `human-resources-core.D4` | Part D — Departure | Bulk archiving opens no wizard |  |
+| `human-resources-core.D5` | Part D — Departure | Unarchiving clears the departure but not the contract end |  |
+| `human-resources-core.D6` | Part D — Departure | Registering a departure without archiving | workflows |
+| `human-resources-core.D7` | Part D — Departure | A departure reason cannot be deleted | business rules |
+| `human-resources-core.E1` | Part E — The privacy boundary | An ordinary user reading the employee list gets public data |  |
+| `human-resources-core.E2` | Part E — The privacy boundary | Asking for a private field by name fails cleanly |  |
+| `human-resources-core.E3` | Part E — The privacy boundary | Opening the private form redirects |  |
+| `human-resources-core.E4` | Part E — The privacy boundary | Display names never leak through an error | business rules |
+| `human-resources-core.E5` | Part E — The privacy boundary | The consented date of birth is the only personal data that crosses |  |
+| `human-resources-core.E6` | Part E — The privacy boundary | An officer sees people but not pay |  |
+| `human-resources-core.E7` | Part E — The privacy boundary | Bank account visibility and masking | accounting effects |
+| `human-resources-core.E8` | Part E — The privacy boundary | Editing a many-to-many of employees without read access |  |
+| `human-resources-core.E9` | Part E — The privacy boundary | Seeing across companies for reporting lines |  |
+| `human-resources-core.F1` | Part F — Skills | A skill progressing a level |  |
+| `human-resources-core.F2` | Part F — Skills | Progressing a level on the day the skill was recorded |  |
+| `human-resources-core.F3` | Part F — Skills | Adding a second level of the same skill expires the first |  |
+| `human-resources-core.F4` | Part F — Skills | Two valid levels of the same skill are refused | business rules |
+| `human-resources-core.F5` | Part F — Skills | Certifications may coexist with different windows |  |
+| `human-resources-core.F6` | Part F — Skills | A lapsed certification stays visible |  |
+| `human-resources-core.F7` | Part F — Skills | The validity window must be ordered | business rules |
+| `human-resources-core.F8` | Part F — Skills | Skill and level must match the skill type | business rules |
+| `human-resources-core.F9` | Part F — Skills | Only one default level per skill type |  |
+| `human-resources-core.F10` | Part F — Skills | A skill type must not be emptied | business rules |
+| `human-resources-core.F11` | Part F — Skills | Level progress is bounded | business rules |
+| `human-resources-core.F12` | Part F — Skills | A non-officer may edit only their own skills | business rules |
+| `human-resources-core.F13` | Part F — Skills | Certification reminders |  |
+| `human-resources-core.G1` | Part G — Presence | Presence derived from a sign-in, with the base rule only | calculations, state machines |
+| `human-resources-core.G2` | Part G — Presence | The sign-in also records the network address |  |
+| `human-resources-core.G3` | Part G — Presence | Last activity |  |
+| `human-resources-core.G4` | Part G — Presence | Advanced presence with the message-count rule | business rules |
+| `human-resources-core.G5` | Part G — Presence | Advanced presence with the network-address rule | business rules |
+| `human-resources-core.G6` | Part G — Presence | A manual declaration overrides everything | workflows |
+| `human-resources-core.G7` | Part G — Presence | Writing the stored presence state to present sets the manual flag | state machines |
+| `human-resources-core.G8` | Part G — Presence | The presence job resets before it evaluates |  |
+| `human-resources-core.H1` | Part H — Home working | A home-working exception on one weekday |  |
+| `human-resources-core.H2` | Part H — Home working | Making the exception recurring removes it | state machines |
+| `human-resources-core.H3` | Part H — Home working | Choosing the weekday default deletes a redundant exception | state machines |
+| `human-resources-core.H4` | Part H — Home working | Updating an existing exception |  |
+| `human-resources-core.H5` | Part H — Home working | One exception per employee per day | business rules |
+| `human-resources-core.H6` | Part H — Home working | Deleting a work location | business rules |
+| `human-resources-core.H7` | Part H — Home working | The home-working payload | accounting effects |
+| `human-resources-core.I1` | Part I — Departments, jobs and the organ | Department manager change re-points the right employees |  |
+| `human-resources-core.I2` | Part I — Departments, jobs and the organ | Department cycles are refused | business rules |
+| `human-resources-core.I3` | Part I — Departments, jobs and the organ | Complete name and master department |  |
+| `human-resources-core.I4` | Part I — Departments, jobs and the organ | Department counters | calculations |
+| `human-resources-core.I5` | Part I — Departments, jobs and the organ | Job headcount forecast | calculations, business rules |
+| `human-resources-core.I6` | Part I — Departments, jobs and the organ | Job name uniqueness |  |
+| `human-resources-core.I7` | Part I — Departments, jobs and the organ | The organisation chart around an employee | calculations, business rules |
+| `human-resources-core.I8` | Part I — Departments, jobs and the organ | A reporting cycle terminates |  |
+| `human-resources-core.I9` | Part I — Departments, jobs and the organ | Subordinate listing kinds |  |
+| `human-resources-core.J1` | Part J — Activity plans and reminders | Responsible resolution, the happy path |  |
+| `human-resources-core.J2` | Part J — Activity plans and reminders | Walking up the chain when the designated person has no user | workflows, business rules |
+| `human-resources-core.J3` | Part J — Activity plans and reminders | No manager at all | workflows, business rules |
+| `human-resources-core.J4` | Part J — Activity plans and reminders | The suggested plan date | calculations |
+| `human-resources-core.J5` | Part J — Activity plans and reminders | Plan department filtering |  |
+| `human-resources-core.J6` | Part J — Activity plans and reminders | Contract expiry reminder | calculations |
+| `human-resources-core.J7` | Part J — Activity plans and reminders | Work permit expiry reminder | calculations |
+| `human-resources-core.K1` | Part K — Bank accounts and the salary di | Adding a third account to a full distribution | calculations, accounting effects |
+| `human-resources-core.K2` | Part K — Bank accounts and the salary di | Removing an account redistributes its share to the first | calculations, accounting effects |
+| `human-resources-core.K3` | Part K — Bank accounts and the salary di | Ordering of the rebalanced map | calculations, accounting effects |
+| `human-resources-core.K4` | Part K — Bank accounts and the salary di | Percentage validation | calculations, accounting effects, business rules |
+| `human-resources-core.K5` | Part K — Bank accounts and the salary di | Saving the allocation wizard | calculations, accounting effects |
+| `human-resources-core.K6` | Part K — Bank accounts and the salary di | The wizard refuses to open on an inconsistent state | accounting effects, business rules, state machines |
+| `human-resources-core.K7` | Part K — Bank accounts and the salary di | The primary account | accounting effects |
+| `human-resources-core.K8` | Part K — Bank accounts and the salary di | Changing the work contact moves and distrusts the accounts | accounting effects |
+| `human-resources-core.L1` | Part L — Validation of identifiers | Badge identifier format |  |
+| `human-resources-core.L2` | Part L — Validation of identifiers | Generated badge identifiers | workflows, calculations |
+| `human-resources-core.L3` | Part L — Validation of identifiers | Personal identification number format |  |
+| `human-resources-core.L4` | Part L — Validation of identifiers | Employee tag uniqueness | business rules |
+| `human-resources-core.M1` | Part M — Derived dates and schedules | Home-to-work distance conversion |  |
+| `human-resources-core.M2` | Part M — Derived dates and schedules | Normalised wage | calculations |
+| `human-resources-core.M3` | Part M — Derived dates and schedules | Age |  |
+| `human-resources-core.M4` | Part M — Derived dates and schedules | Newly hired |  |
+| `human-resources-core.M5` | Part M — Derived dates and schedules | First version date with gap removal |  |
+| `human-resources-core.M6` | Part M — Derived dates and schedules | A version with no end date never triggers the gap cut |  |
+| `human-resources-core.M7` | Part M — Derived dates and schedules | Unusual days across two versions with a gap | calculations |
+| `human-resources-core.M8` | Part M — Derived dates and schedules | Calendar periods split at a schedule change | workflows, calculations |
+| `human-resources-core.M9` | Part M — Derived dates and schedules | A fully flexible version |  |
+| `human-resources-core.N1` | Part N — Meeting availability | An attendee outside their working hours is flagged | calculations |
+| `human-resources-core.N2` | Part N — Meeting availability | An attendee fully inside their working hours is not flagged | calculations |
+| `human-resources-core.N3` | Part N — Meeting availability | A meeting straddling lunch | calculations |
+| `human-resources-core.N4` | Part N — Meeting availability | An all-day meeting spanning a closed day | workflows |
+| `human-resources-core.N5` | Part N — Meeting availability | Working hours common to all attendees | workflows, calculations |
+| `human-resources-core.O1` | Part O — Contract templates | Applying a template through the wizard |  |
+| `human-resources-core.O2` | Part O — Contract templates | Explicit values beat the template at version creation |  |
+| `human-resources-core.O3` | Part O — Contract templates | A template is not a version of anybody |  |
+| `human-resources-core.P1` | Part P — Discussion channels, aliases an | Department auto-subscription | business rules |
+| `human-resources-core.P2` | Part P — Discussion channels, aliases an | The authenticated-employees alias |  |
+| `human-resources-core.P3` | Part P — Discussion channels, aliases an | Equipment assignment |  |
+| `human-resources-core.P4` | Part P — Discussion channels, aliases an | Freeing equipment at departure | workflows |
+| `human-resources-core.Q1` | Part Q — Recognition badges | Granting a badge | workflows |
+| `human-resources-core.Q2` | Part Q — Recognition badges | Self-granting is refused | workflows, business rules |
+| `human-resources-core.Q3` | Part Q — Recognition badges | The employee must match the user | business rules |
+| `human-resources-core.Q4` | Part Q — Recognition badges | Who may edit a grant |  |
+| `human-resources-core.Q5` | Part Q — Recognition badges | Badge counters |  |
+| `human-resources-core.R1` | Part R — Reports and printing | Printing a badge |  |
+| `human-resources-core.R2` | Part R — Reports and printing | Printing a curriculum vitae |  |
+| `human-resources-core.R3` | Part R — Reports and printing | The curriculum vitae route guards |  |
+| `human-resources-core.R4` | Part R — Reports and printing | The skill inventory report and the manager filter |  |
+| `human-resources-core.R5` | Part R — Reports and printing | Report values | calculations |
+| `human-resources-core.R6` | Part R — Reports and printing | Certification report validity |  |
+| `human-resources-core.S1` | Part S — Multi-company | One person, two companies, two employees |  |
+| `human-resources-core.S2` | Part S — Multi-company | Creating employees for two companies in one call |  |
+| `human-resources-core.S3` | Part S — Multi-company | Moving an employee between companies warns |  |
+| `human-resources-core.S4` | Part S — Multi-company | Version visibility across companies |  |
+| `human-resources-core.S5` | Part S — Multi-company | Salary structure type visibility is global |  |
+| `human-resources-core.T1` | Part T — Contacts and deletion protectio | Deleting a contact linked to one employee | business rules |
+| `human-resources-core.T2` | Part T — Contacts and deletion protectio | Deleting several contacts, some linked | business rules |
+| `human-resources-core.T3` | Part T — Contacts and deletion protectio | A contact's address list gains an employee entry | accounting effects |
+| `human-resources-core.T4` | Part T — Contacts and deletion protectio | Work detail synchronisation only for a single-employee contact |  |
+| `human-resources-core.U1` | Part U — Miscellaneous invariants | Coach follows the manager only when it was the manager |  |
+| `human-resources-core.U2` | Part U — Miscellaneous invariants | Job title follows the job position unless customised |  |
+| `human-resources-core.U3` | Part U — Miscellaneous invariants | Legal name only fills when empty |  |
+| `human-resources-core.U4` | Part U — Miscellaneous invariants | Work permit file name |  |
+| `human-resources-core.U5` | Part U — Miscellaneous invariants | Contract type code fills once |  |
+| `human-resources-core.U6` | Part U — Miscellaneous invariants | Employee tag colour | workflows |
+| `human-resources-core.U7` | Part U — Miscellaneous invariants | Version display name depends on the reading language |  |
+| `human-resources-core.U8` | Part U — Miscellaneous invariants | Version revision signal | calculations |
+| `human-resources-core.U9` | Part U — Miscellaneous invariants | Deleting an employee deletes its resource |  |
+| `human-resources-core.U10` | Part U — Miscellaneous invariants | Import creates full employees |  |
+
 ## inventory-valuation-and-costing
 
 | Reference | Group | Scenario | Exercises |
@@ -790,6 +962,189 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 | `inventory-valuation-and-costing.T3` | T — End-to-end conformance runs | Perpetual, standard price, with a price difference and a landed cost | calculations, accounting effects |
 | `inventory-valuation-and-costing.T4` | T — End-to-end conformance runs | The complete negative-stock round trip under periodic valuation | workflows, calculations, accounting effects, state machines |
 | `inventory-valuation-and-costing.T5` | T — End-to-end conformance runs | A full landed cost round trip | workflows, calculations, accounting effects, state machines |
+
+## point-of-sale
+
+| Reference | Group | Scenario | Exercises |
+|---|---|---|---|
+| `point-of-sale.A1` | A — Session lifecycle | Opening a session, happy path | workflows |
+| `point-of-sale.A2` | A — Session lifecycle | Opening with a counted amount differing from the previous closing | workflows, calculations |
+| `point-of-sale.A3` | A — Session lifecycle | A second session on the same configuration is refused | business rules, state machines |
+| `point-of-sale.A4` | A — Session lifecycle | A recovery session may coexist |  |
+| `point-of-sale.A5` | A — Session lifecycle | A session may not start before a lock date | business rules |
+| `point-of-sale.A6` | A — Session lifecycle | Cancelling an unused session | workflows, state machines |
+| `point-of-sale.A7` | A — Session lifecycle | Cancelling a used session is refused | workflows, business rules |
+| `point-of-sale.A8` | A — Session lifecycle | Closing is blocked by an unfinished order | workflows, business rules, state machines |
+| `point-of-sale.A9` | A — Session lifecycle | An order scheduled in the future does not block the closing | workflows, state machines |
+| `point-of-sale.A10` | A — Session lifecycle | Closing a session with no activity | workflows |
+| `point-of-sale.A11` | A — Session lifecycle | A closing entry with no line is discarded | workflows, accounting effects, state machines |
+| `point-of-sale.A12` | A — Session lifecycle | Concurrent closing | workflows |
+| `point-of-sale.B1` | B — The mandatory closing scenario | A session with a cash order, a card order and an invoiced order, closed short | workflows, calculations, accounting effects, state machines |
+| `point-of-sale.B2` | B — The mandatory closing scenario | The same scenario closed exactly | workflows, calculations, accounting effects, state machines |
+| `point-of-sale.B3` | B — The mandatory closing scenario | The same scenario closed long | workflows, calculations, state machines |
+| `point-of-sale.B4` | B — The mandatory closing scenario | The same scenario with the cash journal missing its loss account | workflows, accounting effects, business rules |
+| `point-of-sale.B5` | B — The mandatory closing scenario | The same scenario with the tax lacking an account | workflows, calculations, accounting effects, business rules |
+| `point-of-sale.B6` | B — The mandatory closing scenario | The same scenario with the maximum difference set | calculations, business rules |
+| `point-of-sale.B7` | B — The mandatory closing scenario | The same scenario in a foreign selling currency | accounting effects |
+| `point-of-sale.C1` | C — Orders and payments | A simple cash sale | calculations |
+| `point-of-sale.C2` | C — Orders and payments | Change is a negative cash tender |  |
+| `point-of-sale.C3` | C — Orders and payments | Change without a cash method is refused | business rules, state machines |
+| `point-of-sale.C4` | C — Orders and payments | An underpaid order is refused | calculations, business rules, state machines |
+| `point-of-sale.C5` | C — Orders and payments | An overpaid order produces a warning, not a refusal | workflows, calculations, business rules |
+| `point-of-sale.C6` | C — Orders and payments | Changing the tender of a printed order is refused | workflows, business rules, state machines |
+| `point-of-sale.C7` | C — Orders and payments | A tender of a method not offered on the till is refused | business rules |
+| `point-of-sale.C8` | C — Orders and payments | Editing a tender of a posted order is refused | workflows, calculations, business rules, state machines |
+| `point-of-sale.C9` | C — Orders and payments | A transmission replay is idempotent |  |
+| `point-of-sale.C10` | C — Orders and payments | A transmission of an already paid order is a no-operation | workflows |
+| `point-of-sale.C11` | C — Orders and payments | A transmission against a closed session is re-homed | workflows |
+| `point-of-sale.C12` | C — Orders and payments | A transmission against a closed session with no open session is refused | workflows, business rules |
+| `point-of-sale.C13` | C — Orders and payments | Deleting an order | workflows, state machines |
+| `point-of-sale.C14` | C — Orders and payments | Cancelling a future-dated order from the administrative interface | workflows, business rules |
+| `point-of-sale.C15` | C — Orders and payments | Edit tracking | calculations |
+| `point-of-sale.D1` | D — The mandatory refund scenario | Refunding one line of a three-line order | workflows, accounting effects, state machines |
+| `point-of-sale.D2` | D — The mandatory refund scenario | The two tax contributions really are netted | calculations, accounting effects |
+| `point-of-sale.D3` | D — The mandatory refund scenario | The cash bucket nets to zero | accounting effects, state machines |
+| `point-of-sale.D4` | D — The mandatory refund scenario | Refunding more than the outstanding quantity is refused | calculations, business rules |
+| `point-of-sale.D5` | D — The mandatory refund scenario | Refunding lines of two different orders in one transmission | business rules |
+| `point-of-sale.D6` | D — The mandatory refund scenario | Refunding when no session is open | workflows, business rules |
+| `point-of-sale.D7` | D — The mandatory refund scenario | A full refund before delivery cancels the delivery | workflows, state machines |
+| `point-of-sale.D8` | D — The mandatory refund scenario | A partial refund before delivery reduces the delivery | workflows, calculations |
+| `point-of-sale.D9` | D — The mandatory refund scenario | A refund of a line whose move is already completed creates a return | workflows |
+| `point-of-sale.E1` | E — The mandatory tax scenario | A price-included tax of twenty-one percent on twelve point one zero | calculations |
+| `point-of-sale.E2` | E — The mandatory tax scenario | The tax is obtained by subtraction, not by multiplication | calculations |
+| `point-of-sale.E3` | E — The mandatory tax scenario | Quantity and discount | calculations |
+| `point-of-sale.E4` | E — The mandatory tax scenario | A fiscal position mapping the tax | calculations |
+| `point-of-sale.E5` | E — The mandatory tax scenario | A fiscal position with no mapping at all | calculations |
+| `point-of-sale.E6` | E — The mandatory tax scenario | Global tax rounding | calculations |
+| `point-of-sale.F1` | F — The mandatory cash rounding scenario | Rounding to five hundredths, gain | calculations |
+| `point-of-sale.F2` | F — The mandatory cash rounding scenario | Rounding to five hundredths, loss | calculations |
+| `point-of-sale.F3` | F — The mandatory cash rounding scenario | Rounding with change | calculations |
+| `point-of-sale.F4` | F — The mandatory cash rounding scenario | Rounding restricted to cash, mixed tenders | calculations |
+| `point-of-sale.F5` | F — The mandatory cash rounding scenario | Rounding restricted to cash, no cash tender | calculations |
+| `point-of-sale.F6` | F — The mandatory cash rounding scenario | The tolerance when an order is marked paid | calculations |
+| `point-of-sale.F7` | F — The mandatory cash rounding scenario | The rounding strategy must be add-a-rounding-line | calculations, business rules |
+| `point-of-sale.F8` | F — The mandatory cash rounding scenario | The rounding definition is frozen during a session | calculations, business rules |
+| `point-of-sale.F9` | F — The mandatory cash rounding scenario | Rounding on an invoice | workflows, calculations |
+| `point-of-sale.G1` | G — The mandatory loyalty scenario | A ten percent reward claimed after one hundred points | calculations |
+| `point-of-sale.G2` | G — The mandatory loyalty scenario | The reward on its own income account | calculations, accounting effects |
+| `point-of-sale.G3` | G — The mandatory loyalty scenario | The reward is withdrawn when the order changes |  |
+| `point-of-sale.G4` | G — The mandatory loyalty scenario | Not enough points | business rules |
+| `point-of-sale.G5` | G — The mandatory loyalty scenario | A coupon outside its validity window | business rules |
+| `point-of-sale.G6` | G — The mandatory loyalty scenario | A reward product not available at the counter |  |
+| `point-of-sale.H1` | H — The mandatory split-bill scenario | Splitting the payment of one order |  |
+| `point-of-sale.H2` | H — The mandatory split-bill scenario | Splitting into two orders | calculations |
+| `point-of-sale.H3` | H — The mandatory split-bill scenario | Splitting when one guest pays on a customer account | accounting effects |
+| `point-of-sale.H4` | H — The mandatory split-bill scenario | Splitting with no customer on an identifying method | business rules |
+| `point-of-sale.I1` | I — The mandatory self-ordering scenario | A self-ordered sale paid online | calculations, accounting effects |
+| `point-of-sale.I2` | I — The mandatory self-ordering scenario | A self order whose payment fails | state machines |
+| `point-of-sale.I3` | I — The mandatory self-ordering scenario | A kiosk configuration may not offer cash | business rules |
+| `point-of-sale.I4` | I — The mandatory self-ordering scenario | Pay-after is forced |  |
+| `point-of-sale.I5` | I — The mandatory self-ordering scenario | An invalid preset is refused | business rules |
+| `point-of-sale.I6` | I — The mandatory self-ordering scenario | A quantity that is not a positive finite number is refused | workflows, calculations, business rules |
+| `point-of-sale.I7` | I — The mandatory self-ordering scenario | An attribute value from another product is refused | business rules |
+| `point-of-sale.I8` | I — The mandatory self-ordering scenario | Rotating the access token invalidates printed codes | workflows, calculations |
+| `point-of-sale.I9` | I — The mandatory self-ordering scenario | A self order paid at the counter |  |
+| `point-of-sale.J1` | J — The mandatory pay-later scenario | A pay-later order settled afterwards | workflows, accounting effects |
+| `point-of-sale.J2` | J — The mandatory pay-later scenario | A pay-later order that is invoiced | workflows |
+| `point-of-sale.J3` | J — The mandatory pay-later scenario | A pay-later method that does not identify the customer | accounting effects |
+| `point-of-sale.J4` | J — The mandatory pay-later scenario | Mixed pay-later and cash | accounting effects, state machines |
+| `point-of-sale.K1` | K — Invoicing | Invoicing at the counter | workflows, calculations |
+| `point-of-sale.K2` | K — Invoicing | Invoicing after the session closed | workflows |
+| `point-of-sale.K3` | K — Invoicing | Consolidated invoicing | workflows |
+| `point-of-sale.K4` | K — Invoicing | Consolidated invoicing refused for a refund of an invoiced order | workflows, business rules |
+| `point-of-sale.K5` | K — Invoicing | Consolidated invoicing with a missing customer | business rules |
+| `point-of-sale.K6` | K — Invoicing | Consolidated invoicing with one customer and some orders missing it | workflows |
+| `point-of-sale.K7` | K — Invoicing | No invoiceable order | workflows, business rules, state machines |
+| `point-of-sale.K8` | K — Invoicing | A credit note for a refund of an invoiced order | workflows, accounting effects |
+| `point-of-sale.K9` | K — Invoicing | Resetting a counter invoice to draft while the session is open | workflows, state machines |
+| `point-of-sale.K10` | K — Invoicing | The customer claims the invoice from the receipt | workflows |
+| `point-of-sale.L1` | L — Inventory | Real-time delivery | workflows |
+| `point-of-sale.L2` | L — Inventory | Deferred delivery | workflows |
+| `point-of-sale.L3` | L — Inventory | The deferred flag is frozen |  |
+| `point-of-sale.L4` | L — Inventory | Real-time creation is forced for an invoiced order under cost-at-invoicing | workflows, calculations, accounting effects |
+| `point-of-sale.L5` | L — Inventory | A failed delivery does not block the sale | workflows, business rules |
+| `point-of-sale.L6` | L — Inventory | Ship later |  |
+| `point-of-sale.L7` | L — Inventory | Lot capture |  |
+| `point-of-sale.L8` | L — Inventory | A unit conversion that rounds to zero | calculations, business rules |
+| `point-of-sale.L9` | L — Inventory | No delivery notification | workflows, business rules |
+| `point-of-sale.L10` | L — Inventory | Cost computation at closing | workflows, calculations |
+| `point-of-sale.M1` | M — Multi-currency and multi-company | A foreign selling currency | accounting effects |
+| `point-of-sale.M2` | M — Multi-currency and multi-company | A cash journal in the company currency with a foreign selling currency | calculations, accounting effects, state machines |
+| `point-of-sale.M3` | M — Multi-currency and multi-company | The balancing line in a foreign currency | workflows, calculations, accounting effects |
+| `point-of-sale.M4` | M — Multi-currency and multi-company | Multi-company visibility |  |
+| `point-of-sale.M5` | M — Multi-currency and multi-company | A payment method of the wrong company | business rules |
+| `point-of-sale.M6` | M — Multi-currency and multi-company | The selling application is locked to one company |  |
+| `point-of-sale.N1` | N — Rounding edge cases | Half exactly, away from zero | calculations |
+| `point-of-sale.N2` | N — Rounding edge cases | Half exactly, toward zero | calculations |
+| `point-of-sale.N3` | N — Rounding edge cases | Asymmetric rounding on a negative amount | calculations |
+| `point-of-sale.N4` | N — Rounding edge cases | The double zero test | calculations |
+| `point-of-sale.N5` | N — Rounding edge cases | Combo distribution residual | calculations |
+| `point-of-sale.N6` | N — Rounding edge cases | Combo distribution when the last component has a quantity above one | calculations, accounting effects |
+| `point-of-sale.N7` | N — Rounding edge cases | Tax on an inclusive price that does not divide evenly | calculations |
+| `point-of-sale.O1` | O — Data loading and offline operation | The session opens with the master data | workflows, state machines |
+| `point-of-sale.O2` | O — Data loading and offline operation | Incremental loading |  |
+| `point-of-sale.O3` | O — Data loading and offline operation | Stale local records |  |
+| `point-of-sale.O4` | O — Data loading and offline operation | The product load limit | workflows |
+| `point-of-sale.O5` | O — Data loading and offline operation | On-demand partner fetch |  |
+| `point-of-sale.O6` | O — Data loading and offline operation | Offline selling and reconnection | workflows |
+| `point-of-sale.O7` | O — Data loading and offline operation | The data-change signal | calculations |
+| `point-of-sale.O8` | O — Data loading and offline operation | The change feed ignores a device's own echo |  |
+| `point-of-sale.P1` | P — Restaurant service | Matching an order by table |  |
+| `point-of-sale.P2` | P — Restaurant service | A default floor is created |  |
+| `point-of-sale.P3` | P — Restaurant service | Turning the restaurant capability off |  |
+| `point-of-sale.P4` | P — Restaurant service | A floor may not be removed while in use | business rules |
+| `point-of-sale.P5` | P — Restaurant service | A table may not be removed while orders sit on it | business rules, state machines |
+| `point-of-sale.P6` | P — Restaurant service | Table grouping cannot create a cycle | business rules |
+| `point-of-sale.P7` | P — Restaurant service | Courses |  |
+| `point-of-sale.P8` | P — Restaurant service | Preparation delta and the out-of-order guard |  |
+| `point-of-sale.Q1` | Q — Permissions | A cashier may not record a cash movement without accounting rights | accounting effects, business rules |
+| `point-of-sale.Q2` | Q — Permissions | A counter administrator may record one | state machines |
+| `point-of-sale.Q3` | Q — Permissions | Deleting a cash movement of another session | business rules, state machines |
+| `point-of-sale.Q4` | Q — Permissions | A cashier sees only counter statement lines | state machines |
+| `point-of-sale.Q5` | Q — Permissions | A cashier sees only counter invoices | workflows |
+| `point-of-sale.Q6` | Q — Permissions | The receipt header is administrator-only | business rules |
+| `point-of-sale.Q7` | Q — Permissions | The selling application refuses a non-internal user | business rules |
+| `point-of-sale.Q8` | Q — Permissions | The selling application refuses the superuser | business rules |
+| `point-of-sale.Q9` | Q — Permissions | An unreadable entity does not block the session |  |
+| `point-of-sale.R1` | R — Protections on shared data | The tax is frozen during a session | calculations, business rules |
+| `point-of-sale.R2` | R — Protections on shared data | The lock date is frozen during a session | workflows, calculations, business rules |
+| `point-of-sale.R3` | R — Protections on shared data | A journal attached to a method is protected | accounting effects, business rules |
+| `point-of-sale.R4` | R — Protections on shared data | A sequence used by a configuration is protected | business rules |
+| `point-of-sale.R5` | R — Protections on shared data | A category is protected while any session is open | business rules |
+| `point-of-sale.R6` | R — Protections on shared data | A customer with counter orders cannot be deleted | business rules |
+| `point-of-sale.R7` | R — Protections on shared data | A payment method is frozen during a session | workflows, business rules |
+| `point-of-sale.R8` | R — Protections on shared data | A cash method belongs to one shop | business rules |
+| `point-of-sale.R9` | R — Protections on shared data | A cash journal carries one method | accounting effects, business rules |
+| `point-of-sale.R10` | R — Protections on shared data | A preset attached to a configuration cannot be deleted | business rules |
+| `point-of-sale.S1` | S — Reporting | The sales details document for one session |  |
+| `point-of-sale.S2` | S — Reporting | The sales details document for a date range | workflows, state machines |
+| `point-of-sale.S3` | S — Reporting | Default period |  |
+| `point-of-sale.S4` | S — Reporting | Reporting currency |  |
+| `point-of-sale.S5` | S — Reporting | Cash rounding total | calculations |
+| `point-of-sale.S6` | S — Reporting | A session with no cash method |  |
+| `point-of-sale.S7` | S — Reporting | The order analysis rows |  |
+| `point-of-sale.S8` | S — Reporting | The digest indicator |  |
+| `point-of-sale.T1` | T — Forced close and recovery | A forced close | workflows, calculations, accounting effects |
+| `point-of-sale.T2` | T — Forced close and recovery | The account is read-only for a user without accounting rights | accounting effects |
+| `point-of-sale.T3` | T — Forced close and recovery | A rescue session closes without a cash difference | workflows, calculations |
+| `point-of-sale.T4` | T — Forced close and recovery | A rescue session cannot be closed from the selling application | workflows, business rules |
+| `point-of-sale.U1` | U — Presets and scheduling | A preset switches the pricelist and the fiscal position | calculations |
+| `point-of-sale.U2` | U — Presets and scheduling | A return preset negates the cart | workflows, calculations |
+| `point-of-sale.U3` | U — Presets and scheduling | Slot capacity | calculations, business rules |
+| `point-of-sale.U4` | U — Presets and scheduling | Attendance sanity | business rules |
+| `point-of-sale.V1` | V — Barcodes | A weighted product barcode | calculations |
+| `point-of-sale.V2` | V — Barcodes | A priced product barcode | calculations |
+| `point-of-sale.V3` | V — Barcodes | A discount barcode | calculations |
+| `point-of-sale.V4` | V — Barcodes | A customer barcode |  |
+| `point-of-sale.V5` | V — Barcodes | A cashier barcode |  |
+| `point-of-sale.V6` | V — Barcodes | Fallback order |  |
+| `point-of-sale.W1` | W — The customer display | A correct token renders the display |  |
+| `point-of-sale.W2` | W — The customer display | A wrong token is refused | business rules |
+| `point-of-sale.W3` | W — The customer display | The order is pushed to the display | business rules |
+| `point-of-sale.X1` | X — Housekeeping | The stale-session reminder | workflows, calculations |
+| `point-of-sale.X2` | X — Housekeeping | The replenishment trigger | workflows |
+| `point-of-sale.X3` | X — Housekeeping | The settings screen does not fire the frozen-field guard spuriously |  |
+| `point-of-sale.X4` | X — Housekeeping | The settings screen unlinks what it omits | calculations |
 
 ## products-and-catalog
 
@@ -1374,4 +1729,275 @@ A scenario is referenced as the domain name, a full stop, and its number, for ex
 | `sales.Z3` | Z — End-to-end regression | The tax invariant | workflows, calculations |
 | `sales.Z4` | Z — End-to-end regression | The quantity invariant | workflows, calculations |
 | `sales.Z5` | Z — End-to-end regression | The cost invariant | workflows, calculations |
+
+## taxes
+
+| Reference | Group | Scenario | Exercises |
+|---|---|---|---|
+| `taxes.A1` | A. Single-line computation | Percentage excluded. | calculations |
+| `taxes.A2` | A. Single-line computation | Percentage included. | calculations |
+| `taxes.A3` | A. Single-line computation | Percentage included with a residue. | calculations |
+| `taxes.A4` | A. Single-line computation | Fixed tax with a quantity. | calculations |
+| `taxes.A5` | A. Single-line computation | Fixed tax affecting the base. | calculations |
+| `taxes.A6` | A. Single-line computation | Division tax, price-excluded. | calculations |
+| `taxes.A7` | A. Single-line computation | Division tax, price-included. | calculations |
+| `taxes.A8` | A. Single-line computation | Group of taxes. | workflows, calculations |
+| `taxes.A9` | A. Single-line computation | Chain with base-amount inclusion. | calculations |
+| `taxes.A10` | A. Single-line computation | The same chain with the first tax price-included. | calculations |
+| `taxes.A11` | A. Single-line computation | Two price-included taxes in one batch. | calculations |
+| `taxes.A12` | A. Single-line computation | A fixed price-included tax. | calculations |
+| `taxes.A13` | A. Single-line computation | A fixed price-included tax followed by a percentage price-included tax. | calculations |
+| `taxes.A14` | A. Single-line computation | A discount. | calculations |
+| `taxes.A15` | A. Single-line computation | A discount on a price-included tax. | calculations |
+| `taxes.A16` | A. Single-line computation | A negative quantity. | calculations |
+| `taxes.A17` | A. Single-line computation | A negative unit price with a fixed tax. | calculations |
+| `taxes.A18` | A. Single-line computation | A quantity of zero. | calculations |
+| `taxes.A19` | A. Single-line computation | No tax at all. | calculations |
+| `taxes.A20` | A. Single-line computation | A division tax affecting the base of a percentage tax. | calculations |
+| `taxes.A21` | A. Single-line computation | A group mixing a price-excluded and a price-included child. | calculations |
+| `taxes.B1` | B. Special modes | Forcing tax-excluded. | calculations |
+| `taxes.B2` | B. Special modes | Forcing tax-included. | calculations |
+| `taxes.B3` | B. Special modes | Batching ignores the price-inclusion flag under a special mode. | calculations |
+| `taxes.B4` | B. Special modes | Symmetry is not guaranteed with round-per-line. | calculations |
+| `taxes.C1` | C. Document-wide rounding | Round per line on three identical lines. | calculations |
+| `taxes.C2` | C. Document-wide rounding | Round per tax on the same three lines. | calculations |
+| `taxes.C3` | C. Document-wide rounding | The difference. | calculations |
+| `taxes.C4` | C. Document-wide rounding | Round per line on three price-included lines. | calculations |
+| `taxes.C5` | C. Document-wide rounding | Round per tax on the same lines. | calculations |
+| `taxes.C6` | C. Document-wide rounding | The delta lands on the first line. |  |
+| `taxes.C7` | C. Document-wide rounding | A currency with no decimal places. | calculations |
+| `taxes.C8` | C. Document-wide rounding | Multi-currency, deltas may land on different lines. | calculations |
+| `taxes.C9` | C. Document-wide rounding | Smooth distribution proportional to weights. |  |
+| `taxes.C10` | C. Document-wide rounding | Smooth distribution leftover. | workflows |
+| `taxes.C11` | C. Document-wide rounding | Zero delta. | state machines |
+| `taxes.C12` | C. Document-wide rounding | Weights that sum to zero. |  |
+| `taxes.D1` | D. Rounding primitive | The tie is broken away from zero. |  |
+| `taxes.D2` | D. Rounding primitive | Negative ties. |  |
+| `taxes.D3` | D. Rounding primitive | Rounding to a step that is not a power of ten. | calculations |
+| `taxes.D4` | D. Rounding primitive | The zero test rounds after subtracting. | calculations |
+| `taxes.D5` | D. Rounding primitive | A value of exactly zero. |  |
+| `taxes.E1` | E. Distribution and accounting | One tax, one distribution line. | workflows, calculations, accounting effects, state machines |
+| `taxes.E2` | E. Distribution and accounting | A tax split over two accounts. | workflows, calculations, accounting effects |
+| `taxes.E3` | E. Distribution and accounting | The residue of a split. | calculations |
+| `taxes.E4` | E. Distribution and accounting | Reverse charge. | workflows, calculations, accounting effects |
+| `taxes.E5` | E. Distribution and accounting | A reverse-charge tax is never price-included. | workflows, calculations |
+| `taxes.E6` | E. Distribution and accounting | A distribution line with no account. | workflows, calculations, accounting effects, state machines |
+| `taxes.E7` | E. Distribution and accounting | A tax exigible on payment. | workflows, calculations, accounting effects, state machines |
+| `taxes.E8` | E. Distribution and accounting | Analytic distribution on a tax item. | calculations |
+| `taxes.E9` | E. Distribution and accounting | Analytic distribution kept. | calculations |
+| `taxes.E10` | E. Distribution and accounting | Analytic distribution kept for a non-settlement line. | calculations |
+| `taxes.E11` | E. Distribution and accounting | Two lines merging into one tax item. | workflows, calculations, accounting effects |
+| `taxes.E12` | E. Distribution and accounting | Two lines not merging. | calculations, accounting effects |
+| `taxes.E13` | E. Distribution and accounting | A zero tax item is dropped. | workflows, calculations, accounting effects |
+| `taxes.E14` | E. Distribution and accounting | A group names its children's items. | workflows, calculations |
+| `taxes.F1` | F. Refunds and tag signs | The refund distribution is used. | workflows, calculations, accounting effects |
+| `taxes.F2` | F. Refunds and tag signs | An invoice and its credit note net to zero on the return. | workflows, accounting effects |
+| `taxes.F3` | F. Refunds and tag signs | Both distributions must match structurally. | workflows, calculations, accounting effects, business rules |
+| `taxes.F4` | F. Refunds and tag signs | Only the accounts and the tags may differ. | workflows, calculations, accounting effects |
+| `taxes.F5` | F. Refunds and tag signs | The refund flag on a miscellaneous entry, sales tax, credit side. | workflows, calculations, accounting effects |
+| `taxes.F6` | F. Refunds and tag signs | The refund flag on a miscellaneous entry, sales tax, debit side. | calculations, accounting effects |
+| `taxes.F7` | F. Refunds and tag signs | The refund flag on a miscellaneous entry, purchase tax, debit side. | calculations, accounting effects |
+| `taxes.F8` | F. Refunds and tag signs | A line carrying both a sales and a purchase tax. | calculations, accounting effects |
+| `taxes.F9` | F. Refunds and tag signs | A reversal inverts the derived flag. | calculations, accounting effects |
+| `taxes.F10` | F. Refunds and tag signs | A reversal negates the stored manual amounts. | workflows, calculations |
+| `taxes.G1` | G. Fiscal positions | Automatic detection by country group. |  |
+| `taxes.G2` | G. Fiscal positions | The registration requirement blocks it. |  |
+| `taxes.G3` | G. Fiscal positions | A manual choice always wins. | workflows |
+| `taxes.G4` | G. Fiscal positions | The delivery address decides. | workflows |
+| `taxes.G5` | G. Fiscal positions | Unless both parties share a registration prefix inside the union. | workflows |
+| `taxes.G6` | G. Fiscal positions | Branch precedence. |  |
+| `taxes.G7` | G. Fiscal positions | Sequence precedence. |  |
+| `taxes.G8` | G. Fiscal positions | Postal code range. | workflows |
+| `taxes.G8` | G. Fiscal positions | b — Postal code range, the padding matters. | workflows |
+| `taxes.G9` | G. Fiscal positions | Tax substitution. | calculations |
+| `taxes.G10` | G. Fiscal positions | One tax mapping to two. | calculations |
+| `taxes.G11` | G. Fiscal positions | A fiscal position with no tax at all. | calculations |
+| `taxes.G12` | G. Fiscal positions | Price adaptation when the original tax is price-included. | calculations |
+| `taxes.G13` | G. Fiscal positions | No price adaptation when the original tax is price-excluded. | calculations |
+| `taxes.G14` | G. Fiscal positions | Account mapping. | accounting effects |
+| `taxes.G15` | G. Fiscal positions | The complete substitution. | workflows, calculations, accounting effects |
+| `taxes.G16` | G. Fiscal positions | The tax country constraint. | calculations, accounting effects, business rules |
+| `taxes.G17` | G. Fiscal positions | The same with a fiscal position. | calculations, accounting effects, business rules |
+| `taxes.G18` | G. Fiscal positions | A foreign registration changes the document's tax country. | calculations |
+| `taxes.H1` | H. Cash basis | A payment of forty percent. | workflows, calculations, accounting effects |
+| `taxes.H2` | H. Cash basis | The transition account is reconciled. | workflows, accounting effects, state machines |
+| `taxes.H3` | H. Cash basis | The settling payment. | calculations, accounting effects |
+| `taxes.H4` | H. Cash basis | Three uneven instalments. | workflows, calculations |
+| `taxes.H5` | H. Cash basis | No cash basis journal. | workflows, calculations, accounting effects, business rules |
+| `taxes.H6` | H. Cash basis | Mixed currencies. | workflows, accounting effects |
+| `taxes.H7` | H. Cash basis | No term line. | workflows, calculations, accounting effects |
+| `taxes.H8` | H. Cash basis | A draft counterpart. | workflows, accounting effects, state machines |
+| `taxes.H9` | H. Cash basis | Undoing the reconciliation. | workflows, accounting effects, state machines |
+| `taxes.H10` | H. Cash basis | A locked period on reversal. | accounting effects |
+| `taxes.H11` | H. Cash basis | Resetting a cash basis entry to draft. | workflows, calculations, accounting effects, business rules, state machines |
+| `taxes.H12` | H. Cash basis | Mixing exigibilities on one line. | workflows, calculations, accounting effects, business rules |
+| `taxes.H13` | H. Cash basis | Turning the company switch off. | calculations, business rules |
+| `taxes.I1` | I. Withholding | A withholding tax is invisible on the document. | workflows, calculations |
+| `taxes.I2` | I. Withholding | Registering the payment. | workflows, calculations |
+| `taxes.I3` | I. Withholding | The payment entry. | workflows, accounting effects |
+| `taxes.I4` | I. Withholding | An instalment. | workflows, calculations |
+| `taxes.I5` | I. Withholding | A negative net amount. | workflows, calculations, business rules |
+| `taxes.I6` | I. Withholding | A line with no number and no sequence. | calculations, accounting effects, business rules |
+| `taxes.I7` | I. Withholding | Numbering. | calculations, accounting effects |
+| `taxes.I8` | I. Withholding | A base of zero. | calculations, business rules |
+| `taxes.I9` | I. Withholding | A liquidity account on a withholding line. | accounting effects, business rules |
+| `taxes.I10` | I. Withholding | A group or a division withholding tax. | calculations, business rules |
+| `taxes.I11` | I. Withholding | Switching the flag on. | workflows, calculations |
+| `taxes.I12` | I. Withholding | A positive amount clears the flag. | calculations |
+| `taxes.I13` | I. Withholding | The feature is hidden. | calculations |
+| `taxes.I14` | I. Withholding | The wizard would split. | workflows |
+| `taxes.I15` | I. Withholding | A refund inverts the direction. | workflows, calculations |
+| `taxes.I16` | I. Withholding | The refund distribution on a withholding line. | calculations |
+| `taxes.J1` | J. Tax identification numbers | A valid Belgian number. |  |
+| `taxes.J2` | J. Tax identification numbers | An invalid check digit. | business rules |
+| `taxes.J3` | J. Tax identification numbers | The explicit "no number" marker. | workflows |
+| `taxes.J4` | J. Tax identification numbers | Any other single character. | business rules |
+| `taxes.J5` | J. Tax identification numbers | A doubled prefix. | workflows, business rules |
+| `taxes.J6` | J. Tax identification numbers | The Greek prefix. | workflows |
+| `taxes.J7` | J. Tax identification numbers | The Northern Ireland prefix. |  |
+| `taxes.J8` | J. Tax identification numbers | A number outside the union carrying the union prefix. | workflows |
+| `taxes.J9` | J. Tax identification numbers | Switzerland. |  |
+| `taxes.J10` | J. Tax identification numbers | Switzerland with the wrong suffix. | calculations, business rules |
+| `taxes.J11` | J. Tax identification numbers | Norway. |  |
+| `taxes.J12` | J. Tax identification numbers | Peru. |  |
+| `taxes.J13` | J. Tax identification numbers | Venezuela. |  |
+| `taxes.J14` | J. Tax identification numbers | Taiwan with a seven in the seventh position. |  |
+| `taxes.J15` | J. Tax identification numbers | Taiwan otherwise. |  |
+| `taxes.J16` | J. Tax identification numbers | Uzbekistan depends on the partner kind. |  |
+| `taxes.J17` | J. Tax identification numbers | Germany accepts two kinds. | calculations |
+| `taxes.J18` | J. Tax identification numbers | Cross-border verification is pending. | business rules, state machines |
+| `taxes.J19` | J. Tax identification numbers | The callback resolves it. | business rules, state machines |
+| `taxes.J20` | J. Tax identification numbers | A bad callback token. |  |
+| `taxes.J21` | J. Tax identification numbers | Import suppresses the verification. |  |
+| `taxes.J22` | J. Tax identification numbers | A fiscal position requiring a registration. | calculations |
+| `taxes.J23` | J. Tax identification numbers | A child partner inherits. |  |
+| `taxes.K1` | K. Report tags | Creating an expression creates a tag. | calculations, accounting effects |
+| `taxes.K2` | K. Report tags | A negated formula reuses the same tag. | calculations |
+| `taxes.K3` | K. Report tags | Renaming. |  |
+| `taxes.K4` | K. Report tags | Splitting. |  |
+| `taxes.K5` | K. Report tags | Deleting with items. | accounting effects |
+| `taxes.K6` | K. Report tags | Deleting without items. | accounting effects |
+| `taxes.K7` | K. Report tags | A shipped cash-flow tag. | accounting effects, business rules |
+| `taxes.K8` | K. Report tags | Base tags flow from an affecting tax into the affected tax's item. | calculations, accounting effects |
+| `taxes.K9` | K. Report tags | Product tags. | calculations, accounting effects |
+| `taxes.K10` | K. Report tags | A deferred tax stamps nothing. | workflows, calculations, state machines |
+| `taxes.L1` | L. Structural validations | Duplicate name. | calculations, business rules |
+| `taxes.L2` | L. Structural validations | Duplicate name is allowed for the type "none". | calculations |
+| `taxes.L3` | L. Structural validations | Tax group country mismatch. | calculations, business rules |
+| `taxes.L4` | L. Structural validations | A non-reconcilable transition account. | workflows, calculations, accounting effects, business rules, state machines |
+| `taxes.L5` | L. Structural validations | A cycle in a group. | calculations, business rules |
+| `taxes.L6` | L. Structural validations | A nested group. | calculations, business rules |
+| `taxes.L7` | L. Structural validations | A child with an incompatible scope. | business rules |
+| `taxes.L8` | L. Structural validations | Two base lines in a distribution. | business rules |
+| `taxes.L9` | L. Structural validations | No tax line in a distribution. | calculations, business rules |
+| `taxes.L10` | L. Structural validations | A mismatched percentage between the two distributions. | calculations, business rules |
+| `taxes.L11` | L. Structural validations | Positive factors not adding to one hundred. | calculations, business rules |
+| `taxes.L12` | L. Structural validations | Negative factors not adding to minus one hundred. | calculations, business rules |
+| `taxes.L13` | L. Structural validations | A group with no distribution at all. | workflows, calculations |
+| `taxes.L14` | L. Structural validations | Changing the company of a used tax. | calculations, business rules |
+| `taxes.L15` | L. Structural validations | Deleting a used tax. | calculations, business rules |
+| `taxes.L16` | L. Structural validations | Duplicating a tax. | calculations |
+| `taxes.L17` | L. Structural validations | A postal code range with only one bound. | workflows, business rules |
+| `taxes.L18` | L. Structural validations | A foreign registration with no country. | business rules |
+| `taxes.L19` | L. Structural validations | A foreign registration inside the fiscal country with no state. | business rules, state machines |
+| `taxes.L20` | L. Structural validations | A country outside the chosen country group. | business rules |
+| `taxes.L21` | L. Structural validations | A second foreign registration for the same country. | business rules |
+| `taxes.L22` | L. Structural validations | The same number twice. | business rules |
+| `taxes.L23` | L. Structural validations | A duplicate account mapping. | accounting effects, business rules |
+| `taxes.L24` | L. Structural validations | An off-balance account with taxes. | calculations, accounting effects, business rules |
+| `taxes.L25` | L. Structural validations | Deductibility on a customer document. | workflows, calculations, business rules |
+| `taxes.L26` | L. Structural validations | Deductibility out of range. | business rules |
+| `taxes.M1` | M. Locking | The tax lock date blocks a change. | workflows, calculations, accounting effects, business rules, state machines |
+| `taxes.M2` | M. Locking | An entry that does not affect the tax report. | workflows, calculations, accounting effects, state machines |
+| `taxes.M3` | M. Locking | A lock exception does not help. | calculations, business rules |
+| `taxes.N1` | N. Totals block | One tax group. | calculations |
+| `taxes.N2` | N. Totals block | Two tax groups with different bases. | calculations |
+| `taxes.N3` | N. Totals block | A preceding subtotal. | calculations |
+| `taxes.N4` | N. Totals block | Fixed taxes show no base. | calculations |
+| `taxes.N5` | N. Totals block | Price-included division taxes show the inclusive base. | calculations |
+| `taxes.N6` | N. Totals block | Cash rounding, add a rounding line. | calculations |
+| `taxes.N7` | N. Totals block | Cash rounding, adjust the biggest tax. | calculations |
+| `taxes.N8` | N. Totals block | Cash rounding with no tax at all. | calculations, state machines |
+| `taxes.N9` | N. Totals block | Excluding a tax group from the block. | calculations |
+| `taxes.N10` | N. Totals block | No tax at all. | calculations |
+| `taxes.O1` | O. Custom formula taxes | A simple formula. | calculations |
+| `taxes.O2` | O. Custom formula taxes | A formula reading the base. | calculations |
+| `taxes.O3` | O. Custom formula taxes | A formula with a bound. | calculations |
+| `taxes.O4` | O. Custom formula taxes | A forbidden construct. | business rules |
+| `taxes.O5` | O. Custom formula taxes | An unknown identifier. | business rules |
+| `taxes.O6` | O. Custom formula taxes | A relational field. | business rules |
+| `taxes.O7` | O. Custom formula taxes | A division by zero. | calculations, business rules |
+| `taxes.O8` | O. Custom formula taxes | A custom-formula tax behaves like a fixed tax. | calculations |
+| `taxes.O9` | O. Custom formula taxes | A custom-formula tax cannot be discounted. | calculations, business rules |
+| `taxes.O10` | O. Custom formula taxes | Uninstalling the capability. | calculations |
+| `taxes.P1` | P. Manual amounts and computation keys | A manual tax amount is kept. | workflows, calculations |
+| `taxes.P2` | P. Manual amounts and computation keys | Changing the price discards it. | calculations |
+| `taxes.P3` | P. Manual amounts and computation keys | Changing the currency rate rescales it. | calculations |
+| `taxes.P4` | P. Manual amounts and computation keys | Changing the set of taxes discards it. | calculations |
+| `taxes.P5` | P. Manual amounts and computation keys | A down payment deduction. | workflows, calculations |
+| `taxes.P6` | P. Manual amounts and computation keys | A global discount. | workflows, calculations |
+| `taxes.Q1` | Q. Maintenance and lifecycle | Archiving a tax. | workflows, calculations, state machines |
+| `taxes.Q2` | Q. Maintenance and lifecycle | The tax list shows archived taxes. | calculations |
+| `taxes.Q3` | Q. Maintenance and lifecycle | Changing a used tax logs a readable difference. | workflows, calculations, accounting effects, business rules |
+| `taxes.Q4` | Q. Maintenance and lifecycle | Changing an unused tax logs nothing about the distribution. | calculations |
+| `taxes.Q5` | Q. Maintenance and lifecycle | Re-deriving the tags of existing items. | workflows, calculations, state machines |
+| `taxes.Q6` | Q. Maintenance and lifecycle | A child tax in two groups. | calculations, business rules |
+| `taxes.Q7` | Q. Maintenance and lifecycle | The default starting date. | calculations |
+| `taxes.Q8` | Q. Maintenance and lifecycle | A warning for an earlier date. |  |
+| `taxes.Q9` | Q. Maintenance and lifecycle | Creating a foreign registration. | calculations |
+| `taxes.Q10` | Q. Maintenance and lifecycle | Creating a tax writes no "created" message. | calculations, accounting effects, business rules |
+| `taxes.R1` | R. Ordering, flattening and batching | Flattening order. | calculations |
+| `taxes.R2` | R. Ordering, flattening and batching | The group's own sequence positions its children. | calculations |
+| `taxes.R3` | R. Ordering, flattening and batching | Ties are broken by identifier. | calculations |
+| `taxes.R4` | R. Ordering, flattening and batching | An unsaved tax sorts first. | calculations |
+| `taxes.R5` | R. Ordering, flattening and batching | Two price-included percentage taxes batch together. | calculations |
+| `taxes.R6` | R. Ordering, flattening and batching | An affecting tax breaks the batch. | calculations |
+| `taxes.R7` | R. Ordering, flattening and batching | An affecting tax does not break the batch when the next tax refuses to be affected. | calculations, business rules |
+| `taxes.R8` | R. Ordering, flattening and batching | Different computation kinds never batch. | calculations |
+| `taxes.R9` | R. Ordering, flattening and batching | The special mode collapses the inclusion test. | calculations |
+| `taxes.R10` | R. Ordering, flattening and batching | Filtering keeps the group link. | calculations |
+| `taxes.S1` | S. Engine internals | The untaxed total is the first result's base. | calculations |
+| `taxes.S2` | S. Engine internals | The extra base for the amount is frozen once the amount is known. | calculations |
+| `taxes.S3` | S. Engine internals | Downstream taxes are recorded. | workflows, calculations, accounting effects |
+| `taxes.S4` | S. Engine internals | The subsequent-tax stack only collects taxes that accept being affected. | calculations |
+| `taxes.S5` | S. Engine internals | The batch total includes the reverse-charge halves. | workflows, calculations |
+| `taxes.S6` | S. Engine internals | The company-currency amount is a division. | calculations |
+| `taxes.S7` | S. Engine internals | Round per line rounds the raw base first. | calculations |
+| `taxes.S8` | S. Engine internals | Round per tax does not round the raw base. | calculations |
+| `taxes.S9` | S. Engine internals | Merging tax details shifts the base of a tax missing from the second block. | calculations |
+| `taxes.S10` | S. Engine internals | Splitting a base line preserves the total. | calculations |
+| `taxes.S11` | S. Engine internals | Reducing lines to a target amount hits the target exactly. | calculations |
+| `taxes.S12` | S. Engine internals | Aggregating with an empty tax set calls the grouping function once. | calculations |
+| `taxes.S13` | S. Engine internals | The analytic average of an aggregation. | calculations, accounting effects |
+| `taxes.S14` | S. Engine internals | The analytic average of an aggregation totalling zero. | workflows, calculations |
+| `taxes.T1` | T. Multi-company | A branch sees its parent's taxes. | calculations |
+| `taxes.T2` | T. Multi-company | A parent does not see its branch's taxes. | calculations |
+| `taxes.T3` | T. Multi-company | Filtering taxes by company walks upwards. | workflows, calculations |
+| `taxes.T4` | T. Multi-company | A tax may not be used outside its company tree. | calculations, accounting effects, business rules |
+| `taxes.T5` | T. Multi-company | A distribution line with no company is visible everywhere. |  |
+| `taxes.T6` | T. Multi-company | Account tags are not scoped by company. | accounting effects |
+| `taxes.T7` | T. Multi-company | The display name shows the company when asked. | calculations |
+| `taxes.T8` | T. Multi-company | The display name shows a foreign country. | calculations |
+| `taxes.U1` | U. Defaulting taxes on a line | From the product on a sales document. | calculations, accounting effects |
+| `taxes.U2` | U. Defaulting taxes on a line | From the account when the product has none. | calculations, accounting effects |
+| `taxes.U3` | U. Defaulting taxes on a line | Nothing is wiped when the account proposes nothing. | calculations, accounting effects |
+| `taxes.U4` | U. Defaulting taxes on a line | A discount line is left alone. | calculations |
+| `taxes.U5` | U. Defaulting taxes on a line | Section, note and payment-term lines are skipped. | calculations |
+| `taxes.U6` | U. Defaulting taxes on a line | An imported line is skipped. | calculations |
+| `taxes.U7` | U. Defaulting taxes on a line | A miscellaneous entry takes nothing by default. | calculations, accounting effects |
+| `taxes.U8` | U. Defaulting taxes on a line | The fiscal position maps the defaults. | calculations |
+| `taxes.U9` | U. Defaulting taxes on a line | Changing the account recomputes only under a condition. | calculations, accounting effects |
+| `taxes.V1` | V. Printing and presentation | The tax column. | calculations |
+| `taxes.V2` | V. Printing and presentation | A tax with no label. | workflows, calculations |
+| `taxes.V3` | V. Printing and presentation | A tax with no label that is not a withholding tax. | workflows, calculations |
+| `taxes.V4` | V. Printing and presentation | The subtotal column under a tax-included default. | calculations |
+| `taxes.V5` | V. Printing and presentation | The company-currency totals block. | calculations |
+| `taxes.V6` | V. Printing and presentation | The same on a purchase document. |  |
+| `taxes.V7` | V. Printing and presentation | The fiscal position note. | calculations |
+| `taxes.V8` | V. Printing and presentation | The tax legal notes. | calculations |
+| `taxes.V9` | V. Printing and presentation | The payment receipt. | calculations |
+| `taxes.V10` | V. Printing and presentation | The product price hint. | calculations |
+| `taxes.V11` | V. Printing and presentation | The product price hint with a price-included tax. | calculations |
+| `taxes.V12` | V. Printing and presentation | The product price hint with a withholding tax. | calculations |
+| `taxes.V13` | V. Printing and presentation | No fragment at all. | calculations |
 
