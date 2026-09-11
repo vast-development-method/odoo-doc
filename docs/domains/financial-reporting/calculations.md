@@ -1233,17 +1233,28 @@ carried_out = displayed                 when the bound clause admits it
 carried_out = 0                         otherwise
 ```
 
-and the displayed figure is then floored, by a second bound clause on the main expression, so that
-the declaration shows zero rather than a negative amount:
+Two variants of the flooring exist in the shipped data, and a rebuild must support both.
+
+**Variant A — the declaration is floored in the definition.** A second bound clause on the main
+expression, or a pair of complementary lines, floors the declared figure at zero:
 
 ```formula
 declared = displayed        when displayed > 0
 declared = 0                when displayed ≤ 0
 ```
 
-A rebuild must keep the two clauses separate: the *carried out* amount uses `if_below` and the
-*declared* amount uses `if_above`, over the same underlying figure, so that exactly one of them is
-non-zero.
+The *carried out* amount uses `if_below` and the *declared* amount uses `if_above`, over the same
+underlying figure, so that exactly one of the two is non-zero. This is the variant used where the
+law forbids a negative box outright.
+
+**Variant B — the unbounded figure is displayed and the filing format floors it.** The main
+expression carries no bound clause at all and shows the unbounded figure, negative included;
+only the carry-out expression carries a bound clause. The national filing format writes zero to
+the legal file and the carried amount is picked up by the next period. This is the variant the
+Belgian definition uses for its incoming-operation boxes (§15.4).
+
+In both variants the conservation property is the same: over any run of consecutive periods, the
+sum of what was declared plus what is still carried equals the sum of the periods' own movements.
 
 ### 12.4 Writing the carry-over
 
@@ -1861,9 +1872,9 @@ The ten largest are:
 | `l10n_es.mod_390_section_1` | IVA Devengado | 126 | 106 | 1 |
 | `l10n_br.tax_report` | Tax Report | 126 | 80 | 1 |
 | `l10n_lu.l10n_lu_tax_report_section_2` | Section II | 122 | 105 | 1 |
-| `l10n_kr.l10n_kr_general_tp_vat` | VAT Report - General Taxpayer | 119 | 159 | 2 |
-| `l10n_ma.tax_report_vat` | VAT Report | 115 | 198 | 4 |
-| `l10n_kr.l10n_kr_simplified_tp_vat` | VAT Report - Simplified Taxpayer | 103 | 116 | 2 |
+| `l10n_kr.l10n_kr_general_tp_vat` | value-added tax Report - General Taxpayer | 119 | 159 | 2 |
+| `l10n_ma.tax_report_vat` | value-added tax Report | 115 | 198 | 4 |
+| `l10n_kr.l10n_kr_simplified_tp_vat` | value-added tax Report - Simplified Taxpayer | 103 | 116 | 2 |
 
 ### 15.2 Composite reports shipped
 
@@ -1901,12 +1912,12 @@ field is empty.
 | `l10n_au.l10n_au_master_bas` | Master BAS | au | generic_tax_report | 67 | 65 | 1 |
 | `l10n_au.tax_report` | BAS Report | au | generic_tax_report | 38 | 18 | 1 |
 | `l10n_bd.tr_form` | Tax Report | bd | generic_tax_report | 21 | 30 | 2 |
-| `l10n_be.tax_report_vat` | VAT Return | be | generic_tax_report | 41 | 56 | 1 |
-| `l10n_bf.account_tax_report_bf` | VAT Report | bf | generic_tax_report | 40 | 33 | 1 |
+| `l10n_be.tax_report_vat` | value-added tax Return | be | generic_tax_report | 41 | 56 | 1 |
+| `l10n_bf.account_tax_report_bf` | value-added tax Report | bf | generic_tax_report | 40 | 33 | 1 |
 | `l10n_bg.l10n_bg_tax_report` | Tax report | bg | generic_tax_report | 40 | 32 | 1 |
-| `l10n_bh.l10n_bh_tax_report_full` | Full VAT Return | bh | generic_tax_report | 20 | 40 | 3 |
-| `l10n_bh.l10n_bh_tax_report_simplified` | Simplified VAT Return | bh | generic_tax_report | 20 | 28 | 2 |
-| `l10n_bj.account_tax_report_bj` | VAT Report | bj | generic_tax_report | 19 | 18 | 1 |
+| `l10n_bh.l10n_bh_tax_report_full` | Full value-added tax Return | bh | generic_tax_report | 20 | 40 | 3 |
+| `l10n_bh.l10n_bh_tax_report_simplified` | Simplified value-added tax Return | bh | generic_tax_report | 20 | 28 | 2 |
+| `l10n_bj.account_tax_report_bj` | value-added tax Report | bj | generic_tax_report | 19 | 18 | 1 |
 | `l10n_bo.tax_report` | Tax Report | bo | generic_tax_report | 83 | 144 | 2 |
 | `l10n_br.tax_report` | Tax Report | br | generic_tax_report | 126 | 80 | 1 |
 | `l10n_ca.l10n_ca_tr_gsthst` | GST/HST Report | ca | generic_tax_report | 20 | 12 | 1 |
@@ -1914,17 +1925,17 @@ field is empty.
 | `l10n_ca.l10n_ca_tr_pst_mb` | Manitoba PST Report | ca | generic_tax_report | 5 | 7 | 1 |
 | `l10n_ca.l10n_ca_tr_pst_sk` | Saskatchewan PST Report | ca | generic_tax_report | 19 | 15 | 1 |
 | `l10n_ca.l10n_ca_tr_qst` | Quebec Tax Report | ca | generic_tax_report | 13 | 24 | 2 |
-| `l10n_cd.account_tax_report_cd` | VAT Report | cd | generic_tax_report | 48 | 48 | 1 |
-| `l10n_cf.account_tax_report_cf` | VAT Report | cf | generic_tax_report | 13 | 20 | 2 |
-| `l10n_cg.account_tax_report_cg` | VAT Report | cg | generic_tax_report | 12 | 18 | 2 |
+| `l10n_cd.account_tax_report_cd` | value-added tax Report | cd | generic_tax_report | 48 | 48 | 1 |
+| `l10n_cf.account_tax_report_cf` | value-added tax Report | cf | generic_tax_report | 13 | 20 | 2 |
+| `l10n_cg.account_tax_report_cg` | value-added tax Report | cg | generic_tax_report | 12 | 18 | 2 |
 | `l10n_ch.tax_report` | Tax Report | ch | generic_tax_report | 44 | 32 | 1 |
-| `l10n_ci.account_tax_report_ci` | VAT Report | ci | generic_tax_report | 23 | 40 | 2 |
+| `l10n_ci.account_tax_report_ci` | value-added tax Report | ci | generic_tax_report | 23 | 40 | 2 |
 | `l10n_cl.tax_report` | Tax Report | cl | generic_tax_report | 32 | 32 | 1 |
-| `l10n_cm.account_tax_report_cm` | VAT Report | cm | generic_tax_report | 28 | 30 | 2 |
+| `l10n_cm.account_tax_report_cm` | value-added tax Report | cm | generic_tax_report | 28 | 30 | 2 |
 | `l10n_cy.tax_report` | Tax Report | cy | generic_tax_report | 13 | 15 | 1 |
-| `l10n_cz.l10n_cz_vat_declaration` | VAT Return | cz | generic_tax_report | 66 | 74 | 6 |
+| `l10n_cz.l10n_cz_vat_declaration` | value-added tax Return | cz | generic_tax_report | 66 | 74 | 6 |
 | `l10n_de.tax_report` | Tax Report | de | generic_tax_report | 49 | 62 | 2 |
-| `l10n_dk.account_tax_report_skat_dk` | VAT Report | dk | generic_tax_report | 21 | 17 | 1 |
+| `l10n_dk.account_tax_report_skat_dk` | value-added tax Report | dk | generic_tax_report | 21 | 17 | 1 |
 | `l10n_do.tax_report` | Tax Report | do | generic_tax_report | 29 | 22 | 1 |
 | `l10n_dz.tax_report` | Tax Report | dz | generic_tax_report | 39 | 98 | 4 |
 | `l10n_ec.tax_report_103` | 103 | ec | generic_tax_report | 226 | 143 | 1 |
@@ -1933,7 +1944,7 @@ field is empty.
 | `l10n_ee.tax_report` | KMD Report | ee | generic_tax_report | 31 | 54 | 1 |
 | `l10n_eg.tax_report_other_taxes` | Other Taxes | eg | generic_tax_report | 8 | 4 | 1 |
 | `l10n_eg.tax_report_schedule_tax` | Schedule Tax | eg | generic_tax_report | 32 | 28 | 1 |
-| `l10n_eg.tax_report_vat_return` | VAT Return | eg | generic_tax_report | 20 | 12 | 1 |
+| `l10n_eg.tax_report_vat_return` | value-added tax Return | eg | generic_tax_report | 20 | 12 | 1 |
 | `l10n_eg.tax_report_withholding_tax` | WH Tax | eg | generic_tax_report | 20 | 16 | 1 |
 | `l10n_es.mod_111` | Tax Report (Mod 111) | es | generic_tax_report | 44 | 29 | 1 |
 | `l10n_es.mod_115` | Tax Report (Mod 115) | es | generic_tax_report | 7 | 4 | 1 |
@@ -1949,31 +1960,31 @@ field is empty.
 | `l10n_es.mod_390_section_7` | Actividades con Regímenes de Deducción Diferenciados | es | — | 74 | 52 | 1 |
 | `l10n_es.mod_420` | Tax Report (Mod 420) Canary Islands | es | generic_tax_report | 27 | 38 | 2 |
 | `l10n_et.tax_report` | Tax Report | et | generic_tax_report | 29 | 20 | 1 |
-| `l10n_fi.vat_report` | VAT Report | fi | generic_tax_report | 23 | 21 | 1 |
+| `l10n_fi.vat_report` | value-added tax Report | fi | generic_tax_report | 23 | 21 | 1 |
 | `l10n_fr_account.tax_report` | Tax Report | fr | generic_tax_report | 132 | 345 | 2 |
-| `l10n_ga.account_tax_report_ga` | VAT Report | ga | generic_tax_report | 78 | 75 | 2 |
-| `l10n_ge.tax_report_ge` | VAT Report | ge | generic_tax_report | 42 | 67 | 2 |
-| `l10n_gn.account_tax_report_gn` | VAT Report | gn | generic_tax_report | 13 | 20 | 2 |
-| `l10n_gq.account_tax_report_gq` | VAT Report | gq | generic_tax_report | 13 | 20 | 2 |
+| `l10n_ga.account_tax_report_ga` | value-added tax Report | ga | generic_tax_report | 78 | 75 | 2 |
+| `l10n_ge.tax_report_ge` | value-added tax Report | ge | generic_tax_report | 42 | 67 | 2 |
+| `l10n_gn.account_tax_report_gn` | value-added tax Report | gn | generic_tax_report | 13 | 20 | 2 |
+| `l10n_gq.account_tax_report_gq` | value-added tax Report | gq | generic_tax_report | 13 | 20 | 2 |
 | `l10n_gr.tax_report` | Tax Report | gr | generic_tax_report | 60 | 65 | 1 |
-| `l10n_gw.account_tax_report_gw` | VAT Report | gw | generic_tax_report | 14 | 21 | 2 |
+| `l10n_gw.account_tax_report_gw` | value-added tax Report | gw | generic_tax_report | 14 | 21 | 2 |
 | `l10n_hr.tax_report` | Tax Report | hr | generic_tax_report | 54 | 85 | 2 |
 | `l10n_hr_kuna.tax_report` | Tax Report | hr | generic_tax_report | 81 | 58 | 1 |
 | `l10n_hu.tax_report` | Tax Report | hu | generic_tax_report | 31 | 25 | 1 |
 | `l10n_ie.l10n_ie_tr` | Tax Report | ie | generic_tax_report | 9 | 9 | 1 |
-| `l10n_il.vat_report` | VAT Report (PCN874) | il | generic_tax_report | 16 | 12 | 1 |
+| `l10n_il.vat_report` | value-added tax Report (PCN874) | il | generic_tax_report | 16 | 12 | 1 |
 | `l10n_in.tcs_report` | ACT 1961 TCS Report | in | generic_tax_report | 14 | 14 | 1 |
 | `l10n_in.tcs_report_it_act_25` | TCS I.T. Act 25 Report | in | generic_tax_report | 11 | 11 | 1 |
 | `l10n_in.tds_report` | ACT 1961 TDS Report | in | generic_tax_report | 31 | 31 | 1 |
 | `l10n_in.tds_report_it_act_25` | TDS I.T. Act 25 Report | in | generic_tax_report | 56 | 56 | 1 |
 | `l10n_it.tax_annual_report_vat` | Annual Tax Report | it | generic_tax_report | 0 | 0 | 0 |
-| `l10n_it.tax_annual_report_vat_va` | VA VAT Report | it | — | 11 | 8 | 2 |
-| `l10n_it.tax_annual_report_vat_ve` | VE VAT Report | it | — | 51 | 31 | 2 |
-| `l10n_it.tax_annual_report_vat_vf` | VF VAT Report | it | — | 74 | 73 | 2 |
-| `l10n_it.tax_annual_report_vat_vh` | VH VAT Report | it | — | 18 | 0 | 1 |
-| `l10n_it.tax_annual_report_vat_vj` | VJ VAT Report | it | — | 20 | 0 | 1 |
-| `l10n_it.tax_annual_report_vat_vl` | VL VAT Report | it | — | 40 | 8 | 1 |
-| `l10n_it.tax_monthly_report_vat` | Monthly VAT Report | it | generic_tax_report | 21 | 26 | 2 |
+| `l10n_it.tax_annual_report_vat_va` | VA value-added tax Report | it | — | 11 | 8 | 2 |
+| `l10n_it.tax_annual_report_vat_ve` | VE value-added tax Report | it | — | 51 | 31 | 2 |
+| `l10n_it.tax_annual_report_vat_vf` | VF value-added tax Report | it | — | 74 | 73 | 2 |
+| `l10n_it.tax_annual_report_vat_vh` | VH value-added tax Report | it | — | 18 | 0 | 1 |
+| `l10n_it.tax_annual_report_vat_vj` | VJ value-added tax Report | it | — | 20 | 0 | 1 |
+| `l10n_it.tax_annual_report_vat_vl` | VL value-added tax Report | it | — | 40 | 8 | 1 |
+| `l10n_it.tax_monthly_report_vat` | Monthly value-added tax Report | it | generic_tax_report | 21 | 26 | 2 |
 | `l10n_it.withh_tax_report_it` | Withholding Report | it | generic_tax_report | 4 | 4 | 1 |
 | `l10n_jo.tax_report_vat_return` | GST Return | jo | generic_tax_report | 41 | 58 | 2 |
 | `l10n_jp.tax_report` | Tax Report | jp | generic_tax_report | 22 | 16 | 1 |
@@ -1981,21 +1992,21 @@ field is empty.
 | `l10n_ke.wh_tax_report_ke` | WH Report | ke | generic_tax_report | 6 | 4 | 1 |
 | `l10n_kh.l10n_kh_t7001` | Form T7001 | kh | generic_tax_report | 55 | 45 | 2 |
 | `l10n_kh.l10n_kh_wt003` | Form WT003 | kh | generic_tax_report | 14 | 26 | 2 |
-| `l10n_km.account_tax_report_km` | VAT Report | km | generic_tax_report | 12 | 20 | 2 |
-| `l10n_kr.l10n_kr_general_tp_vat` | VAT Report - General Taxpayer | kr | generic_tax_report | 119 | 159 | 2 |
-| `l10n_kr.l10n_kr_simplified_tp_vat` | VAT Report - Simplified Taxpayer | kr | generic_tax_report | 103 | 116 | 2 |
-| `l10n_kz.l10n_kz_tr_form_300_00` | VAT Report - Form 300.00 | kz | generic_tax_report | 55 | 59 | 2 |
-| `l10n_lk.l10n_lk_vat001` | VAT Return Form VAT-001 | lk | generic_tax_report | 57 | 79 | 3 |
+| `l10n_km.account_tax_report_km` | value-added tax Report | km | generic_tax_report | 12 | 20 | 2 |
+| `l10n_kr.l10n_kr_general_tp_vat` | value-added tax Report - General Taxpayer | kr | generic_tax_report | 119 | 159 | 2 |
+| `l10n_kr.l10n_kr_simplified_tp_vat` | value-added tax Report - Simplified Taxpayer | kr | generic_tax_report | 103 | 116 | 2 |
+| `l10n_kz.l10n_kz_tr_form_300_00` | value-added tax Report - Form 300.00 | kz | generic_tax_report | 55 | 59 | 2 |
+| `l10n_lk.l10n_lk_vat001` | value-added tax Return Form VAT-001 | lk | generic_tax_report | 57 | 79 | 3 |
 | `l10n_lk.l10n_lk_wht001` | WHT/AIT Return Form WHT-001 | lk | generic_tax_report | 21 | 76 | 4 |
 | `l10n_lt.lt_tax_report` | Value Added Tax Declaration | lt | generic_tax_report | 31 | 30 | 1 |
 | `l10n_lu.l10n_lu_tax_report_section_1` | Section I | lu | — | 22 | 18 | 1 |
 | `l10n_lu.l10n_lu_tax_report_section_2` | Section II | lu | — | 122 | 105 | 1 |
 | `l10n_lu.l10n_lu_tax_report_sections_3_4` | Sections III, IV | lu | — | 18 | 11 | 1 |
 | `l10n_lu.tax_report` | Tax Report | lu | generic_tax_report | 0 | 0 | 0 |
-| `l10n_lv.l10n_lv_vat_main_tax_report` | VAT Report | lv | generic_tax_report | 39 | 78 | 2 |
-| `l10n_ma.tax_report_vat` | VAT Report | ma | generic_tax_report | 115 | 198 | 4 |
-| `l10n_ml.account_tax_report_ml` | VAT Report | ml | generic_tax_report | 20 | 34 | 2 |
-| `l10n_mn.account_report_vat_report` | VAT Repayment Report | mn | generic_tax_report | 73 | 46 | 1 |
+| `l10n_lv.l10n_lv_vat_main_tax_report` | value-added tax Report | lv | generic_tax_report | 39 | 78 | 2 |
+| `l10n_ma.tax_report_vat` | value-added tax Report | ma | generic_tax_report | 115 | 198 | 4 |
+| `l10n_ml.account_tax_report_ml` | value-added tax Report | ml | generic_tax_report | 20 | 34 | 2 |
+| `l10n_mn.account_report_vat_report` | value-added tax Repayment Report | mn | generic_tax_report | 73 | 46 | 1 |
 | `l10n_mr.tax_report` | Tax Report | mr | generic_tax_report | 23 | 28 | 4 |
 | `l10n_mt.tax_report` | Tax Report | mt | generic_tax_report | 33 | 51 | 2 |
 | `l10n_mu_account.mu_tax_report` | VAT3 Report | mu | generic_tax_report | 37 | 44 | 3 |
@@ -2003,33 +2014,33 @@ field is empty.
 | `l10n_my.tax_report_sst_02_a_b` | SST-02A (B) | my | generic_tax_report | 4 | 4 | 2 |
 | `l10n_my.tax_report_sst_02_b2` | SST-02 (B2, C, D, E) | my | — | 39 | 43 | 4 |
 | `l10n_mz.l10n_mz_tax_report` | Tax Report | mz | generic_tax_report | 33 | 19 | 1 |
-| `l10n_ne.account_tax_report_ne` | VAT Report | ne | generic_tax_report | 25 | 22 | 1 |
-| `l10n_ng.l10n_ng_tax_report` | VAT Report | ng | generic_tax_report | 27 | 20 | 1 |
-| `l10n_ng.l10n_ng_wh_vat_report` | WH VAT Returns (form 006) | ng | generic_tax_report | 2 | 2 | 1 |
+| `l10n_ne.account_tax_report_ne` | value-added tax Report | ne | generic_tax_report | 25 | 22 | 1 |
+| `l10n_ng.l10n_ng_tax_report` | value-added tax Report | ng | generic_tax_report | 27 | 20 | 1 |
+| `l10n_ng.l10n_ng_wh_vat_report` | WH value-added tax Returns (form 006) | ng | generic_tax_report | 2 | 2 | 1 |
 | `l10n_nl.tax_report` | Tax Report | nl | generic_tax_report | 26 | 36 | 2 |
 | `l10n_no.tax_report` | Tax Report | no | generic_tax_report | 48 | 40 | 1 |
 | `l10n_nz.tax_report` | GST Report | nz | generic_tax_report | 15 | 7 | 1 |
-| `l10n_om.l10n_om_tax_report` | VAT Return | om | generic_tax_report | 27 | 28 | 2 |
+| `l10n_om.l10n_om_tax_report` | value-added tax Return | om | generic_tax_report | 27 | 28 | 2 |
 | `l10n_ph.vat` | 2550Q | ph | generic_tax_report | 49 | 68 | 2 |
 | `l10n_pk.l10n_pk_vat_form` | Tax Report | pk | generic_tax_report | 53 | 88 | 2 |
 | `l10n_pk.l10n_pk_wh_vat_form` | WH Tax Report | pk | generic_tax_report | 25 | 46 | 2 |
 | `l10n_pl.tax_report` | Tax Report | pl | generic_tax_report | 47 | 50 | 1 |
 | `l10n_pt.tax_report_pt` | Tax Report | pt | generic_tax_report | 57 | 41 | 1 |
-| `l10n_ro.tax_report` | VAT Report D300 | ro | generic_tax_report | 84 | 66 | 1 |
-| `l10n_rs.tax_report_vat` | VAT Report | rs | generic_tax_report | 24 | 17 | 1 |
+| `l10n_ro.tax_report` | value-added tax Report D300 | ro | generic_tax_report | 84 | 66 | 1 |
+| `l10n_rs.tax_report_vat` | value-added tax Report | rs | generic_tax_report | 24 | 17 | 1 |
 | `l10n_rw.tax_report` | Tax Report | rw | generic_tax_report | 19 | 21 | 2 |
-| `l10n_sa.tax_report_vat_filing` | VAT Return | sa | generic_tax_report | 18 | 22 | 2 |
+| `l10n_sa.tax_report_vat_filing` | value-added tax Return | sa | generic_tax_report | 18 | 22 | 2 |
 | `l10n_sa.tax_report_withholding_tax` | Withholding Return | sa | generic_tax_report | 25 | 50 | 2 |
 | `l10n_se.tax_report` | Skatterapport | se | generic_tax_report | 38 | 28 | 1 |
 | `l10n_sg.tax_report` | Tax Report | sg | generic_tax_report | 28 | 19 | 1 |
-| `l10n_si.tax_report` | VAT Return (DDV-O) | si | generic_tax_report | 36 | 36 | 1 |
-| `l10n_si.tax_report_ir` | Payable VAT (IR) | si | generic_tax_report | 37 | 37 | 1 |
-| `l10n_si.tax_report_pd` | VAT RC (PD-O) | si | generic_tax_report | 1 | 1 | 1 |
-| `l10n_si.tax_report_pr` | Receivable VAT (PR) | si | generic_tax_report | 21 | 21 | 1 |
-| `l10n_sk.l10n_sk_vat_report` | Slovakia VAT Return (DPHv25) | sk | generic_tax_report | 69 | 69 | 2 |
-| `l10n_sn.account_tax_report_sn` | VAT Report | sn | generic_tax_report | 20 | 31 | 2 |
-| `l10n_td.account_tax_report_td` | VAT Report | td | generic_tax_report | 12 | 18 | 2 |
-| `l10n_tg.account_tax_report_tg` | VAT Report | tg | generic_tax_report | 19 | 29 | 2 |
+| `l10n_si.tax_report` | value-added tax Return (DDV-O) | si | generic_tax_report | 36 | 36 | 1 |
+| `l10n_si.tax_report_ir` | Payable value-added tax (IR) | si | generic_tax_report | 37 | 37 | 1 |
+| `l10n_si.tax_report_pd` | value-added tax RC (PD-O) | si | generic_tax_report | 1 | 1 | 1 |
+| `l10n_si.tax_report_pr` | Receivable value-added tax (PR) | si | generic_tax_report | 21 | 21 | 1 |
+| `l10n_sk.l10n_sk_vat_report` | Slovakia value-added tax Return (DPHv25) | sk | generic_tax_report | 69 | 69 | 2 |
+| `l10n_sn.account_tax_report_sn` | value-added tax Report | sn | generic_tax_report | 20 | 31 | 2 |
+| `l10n_td.account_tax_report_td` | value-added tax Report | td | generic_tax_report | 12 | 18 | 2 |
+| `l10n_tg.account_tax_report_tg` | value-added tax Report | tg | generic_tax_report | 19 | 29 | 2 |
 | `l10n_th.tax_report` | Tax Report | th | generic_tax_report | 16 | 16 | 1 |
 | `l10n_th.tax_report_pnd3` | PND3 | th | generic_tax_report | 4 | 4 | 1 |
 | `l10n_th.tax_report_pnd53` | PND53 | th | generic_tax_report | 4 | 4 | 1 |
@@ -2047,7 +2058,7 @@ field is empty.
 | `l10n_uy.tax_report` | Tax Report | uy | generic_tax_report | 26 | 20 | 1 |
 | `l10n_vn.tax_report` | Tax Report | vn | generic_tax_report | 20 | 33 | 2 |
 | `l10n_za.tax_report` | Tax Report | za | generic_tax_report | 28 | 21 | 1 |
-| `l10n_zm_account.zm_tax_report` | VAT Return | zm | generic_tax_report | 42 | 49 | 2 |
+| `l10n_zm_account.zm_tax_report` | value-added tax Return | zm | generic_tax_report | 42 | 49 | 2 |
 
 ### 15.4 Reading a national definition
 

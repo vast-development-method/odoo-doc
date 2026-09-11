@@ -366,7 +366,7 @@ Used to answer "when did this person actually join?" when the same person may ha
 employed, left, and come back.
 
 Precondition: the caller is a Human Resources Officer or the call is made with elevated
-rights; otherwise the operation fails with "Only HR users can access first version date on
+rights; otherwise the operation fails with "Only human resources users can access first version date on
 an employee."
 
 ### 6.1 Collecting the candidate versions

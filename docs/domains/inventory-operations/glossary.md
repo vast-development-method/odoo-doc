@@ -338,3 +338,178 @@ One physical site (`stock.warehouse`) owning a tree of Locations, a set of Opera
 
 **Wave**
 A Batch Transfer created from a selection of Stock Moves rather than whole Transfers; it carries the wave flag.
+
+---
+
+# Additional terms
+
+**Additional-quantity map**
+A map from Location to a signed quantity, passed into put-away so that goods the current operation is already sending to a Location are counted against its capacity. The entries may be negative, which is how a screen recomputing put-away for lines it is about to rewrite avoids counting those lines twice.
+
+**Advanced supply method**
+The value of a Stock Move's supply method (`make_to_order`, label "Advanced: Apply Procurement Rules") meaning that the goods must be brought to the source Location by another rule rather than taken from whatever is there. Also called make to order, and abbreviated `MTO` in the names the system generates for the rules that implement it.
+
+**Aggregate barcode**
+A single scannable string that encodes several quantity records at once, built from the structured application identifiers of the products, quantities and lots concerned and separated by a configured character.
+
+**Already reserved figure**
+The snapshot of a Stock Move's processed quantity taken before a reservation pass begins, used to compute how much is still missing. It is taken once, up front, because the reservation itself invalidates the field.
+
+**Applicability filter**
+The optional condition on a push rule (`push_domain`). A push rule whose filter does not match the arriving move is skipped and the search continues, excluding it.
+
+**Arrival location**
+The Location a Put-away Rule watches (`location_in_id`). Goods arriving there are redirected to the rule's target sublocation.
+
+**Automatic batching**
+The mechanism that puts a newly confirmed Transfer, or a newly created backorder, into a Batch Transfer without anyone asking, according to the grouping criteria set on the Operation Type.
+
+**Automatic move mode**
+The setting on a Stock Rule (`auto`) deciding whether a push creates a second move ("Manual Operation") or rewrites the destination of the current one ("Automatic No Step Added").
+
+**Candidate line**
+During a reservation, an existing detail line of the move that has no destination container and whose product is not serial-tracked; a newly reserved quantity is added to it instead of creating a new line when the characteristics match and the quantity is expressible in its unit.
+
+**Capacity check**
+The test that decides whether a Location may accept a given quantity or container: the mixing policy, the maximum weight and the per-product or per-container-type capacity of its Storage Category.
+
+**Company-less record**
+A record whose company field is empty. Locations, Routes, Stock Rules, Lots, containers, Stock Move Lines, Stock Quantity records and Storage Categories may be company-less, which makes them visible and usable from every company.
+
+**Consuming move**
+See the main entry; note that the test is on the Operation Type kind and the two Warehouses, not on the Location usages.
+
+**Cross dock**
+See the main entry. The Operation Type exists whenever the Warehouse both receives and delivers in more than one step, but no generated rule uses it.
+
+**Destination chain**
+The sequence of containers reached by following the destination-container link from a container: itself, then its destination container, then that container's destination container, and so on. Its last element is the outermost container.
+
+**Distribution map**
+The result of comparing what the originating moves brought with what the sibling moves took, keyed by (Location, lot, container, owner). A chained move reserves against this map rather than against the Location as a whole.
+
+**Document reference**
+See the main entry. Two documents linked through the Reception Report share each other's references.
+
+**Elevated rights**
+The mode in which the system performs an operation regardless of the acting person's access, used for numbering sequences, removal-strategy lookups, quantity-record writes during reservation and completion, rule-created moves, the housekeeping pass and the automatic batching search.
+
+**Empty waiting transfer**
+A Transfer of a batch whose status is waiting or waiting-another-operation and every one of whose open moves is unpicked or has a zero quantity. At batch validation it is detached rather than validated.
+
+**Excluded lines**
+A set of detail-line identifiers passed into put-away and into the Location weight computation so that those lines do not count against themselves.
+
+**Extra move**
+See the main entry. The term survives only in the name of the merge variant that keeps the first move's demand instead of the sum.
+
+**Force quantity**
+A quantity passed into the reservation algorithm that overrides the computed missing quantity and makes every move of the input set be processed, whatever its status.
+
+**Free quantity**
+See the main entry. Distinct from the *available quantity* of one record only in that the free quantity is a product-level figure subject to the Location scope of the reading context.
+
+**Generated route**
+One of the two Routes a Warehouse owns and rewrites from its step configuration: the receipt Route and the delivery Route.
+
+**Housekeeping pass**
+The three maintenance passes that run together: merge duplicate quantity records, clean reservations, delete empty records.
+
+**Immediate transfer**
+See the main entry. The mechanism is one step of the validation algorithm, not a separate mode.
+
+**Importance order**
+The ranking used when reducing a set of move statuses to one: assigned above waiting above partially available above confirmed, with anything else last, ties broken by demand ascending.
+
+**Inventory adjustment move**
+A Stock Move carrying the adjustment flag. It is created already picked and already confirmed, it is completed immediately, it is exempt from the zero-quantity pruning and from the lot requirement, and it never creates a backorder.
+
+**Lead time on a rule**
+A number of days subtracted from the planned date when a pull rule creates a move, and added to the date when a push rule creates one.
+
+**Leaf line**
+In the delivery discovery walk, a completed outgoing detail line of a lot that did not produce another lot; its Transfer is the one the lot finally left on.
+
+**Loose matching**
+See *Gather*. Loose matching accepts descendants of the Location and imposes no condition at all on a characteristic that was not requested.
+
+**Materialised path**
+The stored slash-separated list of ancestor identifiers on a Location, and the equivalent on a container. Ancestor tests are string-prefix tests on it.
+
+**Merge key**
+See the main entry. The full list of twelve fields, plus the two parameter-driven additions, is in `calculations.md`, section 13.1.
+
+**Mixing policy**
+The Storage Category setting deciding whether a Location may hold only one product, only nothing, or anything.
+
+**Negative pocket**
+The accumulated negative available quantity of one (Location, lot, container, owner) key, which the positive records of the same key must absorb before they can be reserved.
+
+**Occupancy figure**
+The number the capacity check compares against: a count of containers when a typed container is being put away, and a quantity in the product unit otherwise.
+
+**Open move**
+A Stock Move whose status is waiting-another-move, waiting, partially available or assigned. The term excludes draft, done and cancelled.
+
+**Picked quantity**
+For a move that is picked but has unpicked lines, the sum over the picked lines only, expressed in the move's line unit; otherwise the whole processed quantity. Used by the backorder decision.
+
+**Preserve state**
+The switch that suppresses the move status recomputation for one operation.
+
+**Product unit**
+The unit of measure that belongs to the product. Every Stock Quantity record and every reserved counter is expressed in it.
+
+**Promotion**
+The step that gives a parent container as destination container to a group of child containers, once every child of that parent is being moved and the parent is not reusable.
+
+**Pull rule**
+A Stock Rule that reacts to a need at its destination Location by creating a document that sources from its source Location.
+
+**Push rule**
+A Stock Rule that reacts to an arrival at its source Location by creating a document that sends to its destination Location.
+
+**Quantity in the product unit**
+The stored conversion of a detail line's quantity into the product unit, rounding half away from zero. It is the figure every reserved counter and every quantity record is written with.
+
+**Relevant status among moves**
+The subroutine that reduces a set of move statuses to the single status that best represents the group, used both by the Transfer status derivation and by the merge.
+
+**Reproduced identifier**
+A storage name, transport name, selection value or route path quoted exactly because an external contract depends on it.
+
+**Reservation-quantity computation**
+The routine that decides how much may be taken and from which records, given a product, a Location, a wanted quantity and a matching mode.
+
+**Resupply route**
+See the main entry. It is archived rather than deleted when the link is removed, and un-archived when it is restored.
+
+**Sanity check**
+The three-part refusal at the start of a validation: no moves, no quantities, missing lots.
+
+**Sibling move**
+Relative to a move, another originating move of one of its destination moves. Cancellation propagation and the distribution map both depend on siblings.
+
+**Single-unit entry**
+In the least-packages pre-selection, one of the synthetic entries standing for one unit of container-less stock.
+
+**Specificity sort**
+The four-part ordering of put-away rules: names a container type, names a product, names the product's own category, names any category — each compared as a boolean, descending.
+
+**Strict matching**
+See *Gather*. Strict matching compares the Location exactly, without descendants, and compares every characteristic exactly, empty included — except the lot, which also accepts an empty value.
+
+**Supply request**
+The call this domain makes into `../replenishment-and-procurement/` when a move must be supplied by another rule. It carries a product, a quantity, a unit, a Location, a name, an origin, a company and a bag of values.
+
+**Take-from-stock-else-trigger**
+The third supply method a Stock Rule may carry (`mts_else_mto`): take what the forecast says is free and raise a supply request only for the rest.
+
+**Untracked pocket**
+A quantity record of a tracked product that carries no lot. It participates in gathering, and it is used to compensate a lot-bearing record that would otherwise go negative.
+
+**Whole-container detection**
+The pass that recognises that the lines of one Transfer reproduce exactly the contents of a source container and turns them into an entire-package move.
+
+**Working unit**
+When lots are assigned on a move, the product unit for a serial-tracked product and the move's line unit otherwise.
