@@ -119,7 +119,7 @@ must satisfy the grammar of `calculations.md` section 4.6. The possible messages
 
 At evaluation time, one further message:
 
-> Only primitive types are allowed in python tax formula context.
+> `Only primitive types are allowed in python tax formula context.`
 
 Uninstalling the capability rewrites every custom-formula tax to a percentage tax and archives it.
 
@@ -397,7 +397,7 @@ installation has no control over the numbers); or the country has no check routi
   request is sent.
 - When **no** company at all has the verification switch on, the flag is set to false with no call.
 - The relay endpoint must be one of the two known addresses:
-  > Invalid IAP the cross-border registration checking service endpoint
+  > `Invalid IAP VIES endpoint`
 - During a file import, the recomputation of the flag is cancelled entirely.
 - The callback route verifies the signed token before applying a status; a token that does not
   verify is logged and ignored with no change.
@@ -537,7 +537,7 @@ without blocking.
 | Unknown function call | validation | section 1.9 |
 | Kwargs are not allowed | validation | section 1.9 |
 | Only product['string'] or uom['string'] read-access is allowed | validation | section 1.9 |
-| Only primitive types are allowed in python tax formula context. | validation | section 1.9 |
+| `Only primitive types are allowed in python tax formula context.` | validation | section 1.9 |
 | To explicitly indicate no (valid) value-added tax, use '/' instead. | validation | section 9.1 |
 | The &lt;label&gt; number [&lt;number&gt;] for &lt;record&gt; does not seem to be valid. \nNote: the expected format is &lt;example&gt; | validation | section 9.2 |
 | The &lt;label&gt; number [&lt;number&gt;] does not seem to be valid. \nNote: the expected format is &lt;example&gt; | validation | section 9.2 |

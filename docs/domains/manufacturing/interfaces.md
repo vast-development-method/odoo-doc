@@ -29,11 +29,9 @@ administrator groups. It contains five sections.
 | Manufacturing → Operations → Work Orders | Work Orders to do | *Manage Work Order Operations* |
 | Manufacturing → Operations → Unbuild Orders | Unbuild Orders | — |
 | Manufacturing → Operations → Scrap | Scrap records | — |
-| Manufacturing → Planning → Planning by Production | Work Order planning grouped by order | *Manage Work Order Operations* |
-| Manufacturing → Planning → Planning by Work Center | Work Order planning grouped by work centre | *Manage Work Order Operations* |
 | Manufacturing → Planning → *Run scheduler* | The replenishment scheduler | Technical users only |
 | Manufacturing → Products → Products | Product templates, filtered to goods, defaulting to storable | — |
-| Manufacturing → Products → Product Variants | Product variants that are storable and are not kits | — |
+| Manufacturing → Products → Product Variants | Product variants that are storable and are not kits | Product variants group |
 | Manufacturing → Products → Bills of Materials | Bills of Materials | — |
 | Manufacturing → Products → Lots/Serial Numbers | Lots and serial numbers | Lot group |
 | Manufacturing → Reporting → Work Orders | Work Orders analysis | *Manage Work Order Operations* |
@@ -42,8 +40,14 @@ administrator groups. It contains five sections.
 | Manufacturing → Configuration → Operations | Operations | *Manage Work Order Operations* |
 | Manufacturing → Configuration → Work Centers | Work centres | *Manage Work Order Operations* |
 
-An additional entry **Manufacturings** is grafted into the Inventory transfers menu,
-showing the Manufacturing Orders alongside the other operation types.
+The Planning section contains only the technical scheduler entry. The two planning
+screens — Work Order planning grouped by order and Work Order planning grouped by work
+centre — exist as window actions (§2) and are reached from a work centre, from an order or
+from a saved view rather than from a menu entry.
+
+An additional entry **Manufacturings** is grafted into the Inventory transfers menu at
+sequence 25, visible to the inventory user and inventory administrator groups, showing the
+Manufacturing Orders alongside the other operation types.
 
 ---
 

@@ -443,7 +443,7 @@ are moved to the new country; otherwise new tags are created in the new country.
 |---|---|---|
 | Report Line (`report_line_id`) | link to one Report Line | Required, indexed. Deleting the line deletes the expression. |
 | Label (`label`) | text | Required, copied. Unique per report line: *"The expression label must be unique per report line."* |
-| Computation Engine (`engine`) | selection | Required. Values: `domain` ("Odoo Domain" — a record filter), `tax_tags` ("Tax Tags"), `aggregation` ("Aggregate Other Formulas"), `account_codes` ("Prefix of Account Codes"), `external` ("External Value"), `custom` ("Custom Python Function"). Only the `tax_tags` kind concerns this domain. |
+| Computation Engine (`engine`) | selection | Required. Values: `domain` (a record filter), `tax_tags` ("Tax Tags"), `aggregation` ("Aggregate Other Formulas"), `account_codes` ("Prefix of Account Codes"), `external` ("External Value"), `custom` (a named routine supplied by a capability). Only the `tax_tags` kind concerns this domain. |
 | Formula (`formula`) | text | Required. For the `tax_tags` kind it is the **name of the tag**, optionally prefixed with a minus sign meaning "show the opposite of the tagged balance". Runs of white space are collapsed to a single space and the value is trimmed before storage. |
 | Subformula (`subformula`) | text | Not used by the tax-tags kind. A record-filter expression must always have one: *"Expressions using 'domain' engine should all have a subformula."* |
 | Date Scope (`date_scope`) | selection | Required. Default `strict_range`. Values: `from_beginning`, `from_fiscalyear`, `to_beginning_of_fiscalyear`, `to_beginning_of_period`, `strict_range`, `previous_return_period`. |

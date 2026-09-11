@@ -773,7 +773,7 @@ Given a regional tax number matching one of the sixteen regional patterns: also 
 **J18 — Cross-border verification is pending.**
 Given a company with the verification switch on and a partner whose number the relay reports as
 pending.
-Then the flag is false and the message *"The VIES check is pending. The status will be updated soon."*
+Then the flag is false and the message `The VIES check is pending. The status will be updated soon.`
 is logged.
 
 **J19 — The callback resolves it.**

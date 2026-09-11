@@ -74,7 +74,7 @@ shown in the screen is a mirror of the company field; changing it changes the co
 
 | Parameter | Purpose | Allowed values |
 |---|---|---|
-| `iap_vies.endpoint` | The address of the cross-border verification relay. | Exactly one of the production address or the test address; any other value raises *"Invalid IAP VIES endpoint"*. The default is the test address when the validation capability was installed with demonstration data, and the production address otherwise. |
+| `iap_vies.endpoint` | The address of the cross-border verification relay. | Exactly one of the production address or the test address; any other value raises `Invalid IAP VIES endpoint`. The default is the test address when the validation capability was installed with demonstration data, and the production address otherwise. |
 | `iap_vies.client_identifier` | The identifier this installation presents to the relay. | A universally unique identifier, generated on first use in its own transaction. |
 | `iap_vies.client_token` | The secret this installation presents to the relay. | A random token, generated with the identifier. |
 | `database.uuid` | The installation's own identifier, sent with every relay request. | Owned by the platform, not by this domain. |
