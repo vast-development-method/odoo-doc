@@ -30,9 +30,13 @@ The purchasing domain owns:
   orders into one bill, down payments, refunds, the bill-to-order matching view, the
   automatic matching of an incoming electronic or scanned bill against open orders, and the
   three-way comparison between ordered, received and billed quantities.
-- **Purchase agreements.** Blanket orders and calls for tenders, their agreement lines with
-  agreed prices and quantities, the generation of requests for quotation from an agreement,
-  the alternative-order comparison flow, and the selection of a winner.
+- **Purchase agreements.** Blanket orders and purchase templates, their agreement lines with
+  agreed prices and quantities, the vendor pricelist entries a confirmed blanket order
+  creates, and the generation of requests for quotation from an agreement.
+- **Calls for tenders.** Competing requests for quotation created as alternatives of one
+  another, their grouping, the side-by-side line comparison with best price, best unit price
+  and best arrival date highlighting, the clearing of losing quantities, and the
+  confirm-time question about what to do with the losing alternatives.
 - **Vendor reminders and acknowledgement.** The scheduled reminder that asks a vendor to
   confirm the promised arrival date a configurable number of days in advance, the
   acknowledgement flag, and the portal pages through which a vendor updates arrival dates.
@@ -68,9 +72,10 @@ The purchasing domain owns:
 |---|---|---|---|
 | Purchase Order | `purchase.order` | `purchase_order` | A request for quotation that becomes a purchase order when confirmed; the header holding vendor, currency, dates, totals, status and links to receipts and bills. |
 | Purchase Order Line | `purchase.order.line` | `purchase_order_line` | One ordered product with quantity, unit, price, discount, taxes, expected arrival, and the derived received and billed quantities; also carries sections, subsections, notes and down payments. |
-| Purchase Agreement | `purchase.requisition` | `purchase_requisition` | A blanket order or a call for tenders grouping several requests for quotation for the same set of products over a validity period. |
-| Purchase Agreement Line | `purchase.requisition.line` | `purchase_requisition_line` | One product of an agreement with an agreed quantity, an agreed price and a delivery lead time. |
-| Purchase Agreement Type | `purchase.requisition.type` | `purchase_requisition_type` | Configuration record describing how an agreement behaves: selection mode, line copy mode, quantity copy mode. |
+| Purchase Agreement | `purchase.requisition` | `purchase_requisition` | A blanket order (a negotiated fixed price with one vendor over a validity period) or a purchase template (a reusable list of products and quantities). |
+| Purchase Agreement Line | `purchase.requisition.line` | `purchase_requisition_line` | One product of an agreement with an agreed quantity and an agreed unit price; for a blanket order it also produces a vendor pricelist entry. |
+| Alternative Order Creation Assistant | `purchase.requisition.create.alternative` | transient | Short-lived record that creates one competing request for quotation per selected vendor, optionally copying the products of the originating request. |
+| Alternative Order Warning Assistant | `purchase.requisition.alternative.warning` | transient | Short-lived record shown when a request for quotation that has open alternatives is confirmed, offering to keep or to cancel those alternatives. |
 | Purchase Analysis Entry | `purchase.report` | database view `purchase_report` | Read-only analytical row, one per purchase order line group, exposing quantities, amounts, delays and dimensions for reporting. |
 | Vendor Delay Entry | `vendor.delay.report` | database view `vendor_delay_report` | Read-only analytical row measuring, per vendor and product, the quantity received on time against the quantity received in total. |
 | Purchases and Bills Union Entry | `purchase.bill.union` | database view `purchase_bill_union` | Read-only union of posted vendor bills and open purchase orders used as the source list of the auto-complete control on a vendor bill. |
