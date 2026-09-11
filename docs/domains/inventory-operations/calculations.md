@@ -1507,3 +1507,135 @@ Additional explicit checks:
 - A Route's every rule must satisfy the same equality, checked from the Route side with the same message.
 - A Lot may not change company while it sits in a Location of another company.
 - A Location, an Operation Type, a Warehouse and a Put-away Rule may never change company at all.
+
+---
+
+# 29. The daily quantity series
+
+The read-only daily series (`report.stock.quantity`) answers "how much of this product will this warehouse hold on each day of a window around today?" without storing anything. It is regenerated from the Stock Moves and the Stock Quantity records on every read.
+
+Let *P* be the horizon in months, taken from the system parameter `stock.report_stock_quantity_period` with a default of **3**. The window runs from *today − P months* to *today + P months*, one row per calendar day.
+
+## 29.1 Resolving a warehouse from a location
+
+Every Location is matched to a Warehouse by testing its materialised path against each Warehouse's view Location: the Location belongs to that Warehouse when its path contains the view Location's identifier as a complete segment, or starts with it. A Location that matches no Warehouse resolves to *no warehouse*.
+
+## 29.2 Selecting the relevant moves
+
+Take the Stock Moves that satisfy all of:
+
+1. the product is storable;
+2. the source Warehouse and the destination Warehouse **differ** (either may be absent);
+3. the demand in the product unit is non-zero, or the processed quantity is non-zero;
+4. the status is neither draft nor cancelled;
+5. either the status is not done, or the date is on or after *today − P months*.
+
+The destination Warehouse is resolved from the **final** Location when the move is not done and one is set, and from the intermediate destination Location otherwise; once the move is done it is always resolved from the intermediate destination Location. This is what makes a chain that has not run yet already point at the warehouse the goods are really going to.
+
+For each selected move, also compute the processed quantity expressed in the product unit:
+
+```formula
+processed_in_product_unit = processed_quantity × line_unit_factor ÷ product_unit_factor
+```
+
+## 29.3 Duplicating for inter-warehouse moves
+
+A move between two Warehouses must appear twice: as an outgoing movement of the source Warehouse and as an incoming movement of the destination Warehouse. Each selected move is therefore expanded into two rows, an original and a duplicate:
+
+| Value | Original row | Duplicate row |
+|---|---|---|
+| demand in product unit | the move's | the move's when the two Warehouses differ, else 0 |
+| processed quantity | the move's | the move's when both Warehouses exist and differ, else 0 |
+| processed quantity in the product unit | the move's | the move's when both Warehouses exist and differ, else 0 |
+| source Warehouse | the move's | none |
+| destination Warehouse | the move's, but only when there is no source Warehouse, or no destination Warehouse, or the two are equal | the move's, but only when both exist and they differ |
+
+The effect is that a purely incoming move keeps one meaningful row, a purely outgoing move keeps one, and an inter-warehouse move yields one row with only a source Warehouse and one row with only a destination Warehouse.
+
+## 29.4 The three kinds of row
+
+**Forecasted receipts and deliveries.** From the expanded rows whose demand is non-zero and whose status is not done, emit one row per move:
+
+```formula
+state    = "out"  when a source Warehouse is set and no destination Warehouse is
+         = "in"   when a destination Warehouse is set and no source Warehouse is
+date     = the move's date, truncated to the day
+quantity = − demand_in_product_unit   for "out"
+         = + demand_in_product_unit   for "in"
+warehouse= the source Warehouse for "out", the destination Warehouse for "in"
+```
+
+**Forecasted stock, from the quantity records.** For every day of the whole window and every Stock Quantity record whose Location is internal and belongs to a Warehouse, or is transit, emit a row with state `forecast`, that day, the record's on-hand quantity, its company and its Warehouse. In other words the current stock is repeated on every day of the window and then corrected by the movement rows below.
+
+**Forecasted stock, from the movements.** For every expanded row whose demand is non-zero, or which is done with a non-zero processed quantity, emit one `forecast` row per day of a range and with a signed quantity:
+
+| Move status | Day range | Signed quantity |
+|---|---|---|
+| done | from *today − P months* to *the move's day − 1 day* | `+ processed_in_product_unit` for an outgoing row, `− processed_in_product_unit` for an incoming row |
+| not done | from the later of the move's day and *today − P months*, to *today + P months* | `− demand_in_product_unit` for an outgoing row, `+ demand_in_product_unit` for an incoming row |
+
+The sign is deliberately inverted for done moves: the current stock already contains their effect, so the days **before** the move must be corrected backwards.
+
+## 29.5 Aggregation
+
+Group everything by (product, product template, state, date, company, warehouse) and sum the quantities. The row identifier is the smallest underlying identifier of the group; rows built from quantity records use the negated record identifier so that they cannot collide with rows built from moves.
+
+**Worked example.** Today is 11 September 2026, the horizon is 1 month, and warehouse `WH` holds 30 units of BOLT. One delivery move of 8 is planned for 20 September and one done receipt of 5 was completed on 5 September.
+
+- From the quantity record: every day from 11 August to 11 October carries `forecast` +30.
+- From the planned delivery: `out` −8 on 20 September; and `forecast` −8 on every day from 20 September to 11 October.
+- From the done receipt: `forecast` −5 on every day from 11 August to 4 September (the day before the move), because the +5 is already inside the 30.
+- The resulting forecast reads 25 up to 4 September, 30 from 5 to 19 September, and 22 from 20 September onwards.
+
+---
+
+# 30. Rules diagram
+
+The routes report draws, for one product and a set of Warehouses, the rules that can move it.
+
+1. For each chosen Warehouse, collect the Routes that apply: the Routes selected on the product, the Routes selected on the product's category chain, the Routes selected on that Warehouse, and the Warehouse's own generated Routes.
+2. From those Routes, collect the rules whose Warehouse is the chosen one or none.
+3. Lay them out as a graph whose nodes are Locations and whose edges are rules, each edge labelled with the rule's Operation Type, its action, its supply method and its lead time.
+4. Mark the rules the product would actually take, by running the rule-matching selection for that product at each destination Location in turn.
+
+---
+
+# 31. Detail-line date stamping
+
+The date carried by a detail line is not the move's date; it is the instant the line last *became more real*.
+
+| Event | Effect on the line's date |
+|---|---|
+| The line is created | The current instant (the field's default). |
+| The line becomes picked while it was not | The current instant. |
+| The line is already picked and its quantity in the product unit increases | The current instant. |
+| The line is already picked and its quantity decreases | Unchanged. |
+| The line is completed | The current instant, written for every surviving line at the end of the completion. |
+| The move's date is written while the move is done | The move's new date is copied onto the lines. |
+| The line's status is draft, cancelled or done | No automatic re-stamping. |
+| A date is written explicitly in the same operation | The explicit value wins; no automatic re-stamping. |
+
+---
+
+# 32. Ordering rules that matter
+
+Several algorithms depend on an ordering. They are collected here because getting one of them wrong produces different records, not merely a different display.
+
+| Where | Ordering | Why it matters |
+|---|---|---|
+| Gathering, first in first out | incoming date ascending, then identifier ascending | Decides which goods leave. |
+| Gathering, last in first out | incoming date descending, then identifier descending | Same. |
+| Gathering, closest location | full location name ascending, then identifier descending | Same. The name comparison is textual, so `Shelf 10` sorts before `Shelf 2`. |
+| Gathering, final pass | records with a lot before records without | Guarantees that tracked stock is consumed before untracked pockets. |
+| Reducing a processed quantity | detail lines in **reverse** identifier order | Gives back the goods that were reserved last, preserving the strategy's choice for the rest. |
+| Freeing other reservations | the current Transfer first, then scheduled date descending, then identifier descending | Robs the document at hand first, then the latest-promised ones. |
+| Availability check on a Transfer | priority descending, having a deadline before not having one, deadline ascending, date ascending, identifier ascending | Decides who gets scarce goods. |
+| The daily reservation job | reservation date, priority descending, date ascending, identifier ascending | Same, across documents. |
+| Re-reservation after a completion | priority descending, date ascending, identifier ascending, then the moves sharing a document reference with the completing moves first | Lets the document that caused the arrival claim it. |
+| Reception report demands | reservation date, priority descending, date, identifier | Decides which demand is offered the arrival first. |
+| Reception report, linking incoming moves | the offered moves walked from **last** to first | Consumes the most recently offered arrivals first. |
+| Put-away rule walk | container type, then product, then own category, then any category — all descending as booleans; ties keep priority ascending then product | Decides which shelf. |
+| Move merging | the candidate sets are the whole move list of each Transfer; inside a set, groups keep their natural sequence-then-identifier order and the **first** move of a group survives | Decides which record keeps the identifier. |
+| Detail lines at completion | destination container descending, then identifier ascending | Ensures that packed lines are completed before loose ones, so that the container snapshots are consistent. |
+| Transfers | priority descending, scheduled date ascending, identifier descending | Display only. |
+| Operation Types | favourite first, then sequence, then identifier | Display only. |
