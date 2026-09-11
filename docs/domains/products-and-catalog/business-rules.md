@@ -594,10 +594,10 @@ supplies as a constant. In the reproduced text below, the abbreviation the syste
 first and last lines stands for "uniform resource locator", and *the example address* stands for
 the constant the system substitutes there:
 
-> Please enter a valid URL.
+> Please enter a valid uniform resource locator.
 > Example: *the example address*
 > (blank line)
-> Invalid URL: *the entered address*
+> Invalid uniform resource locator: *the entered address*
 
 ### 12.2 Upload route protections
 
@@ -733,7 +733,7 @@ numeric.
 **Condition** a six-digit date whose day digits are not `00` does not form a valid calendar date.
 **Message**
 
-> A GS1 barcode nomenclature pattern was matched. However, the barcode failed to be converted to a
+> A Global Standards One barcode nomenclature pattern was matched. However, the barcode failed to be converted to a
 > valid date: '*the underlying parser's message*'
 
 ### 13.8 A partially decomposable Global Standards One barcode is rejected entirely

@@ -2,6 +2,8 @@
 
 Numbered scenarios in Given / When / Then form, with concrete numbers. An implementation that satisfies every scenario of this file behaves identically to the specification for the cases the scenarios cover.
 
+> **Reproduced literals.** A few strings in this file are reproduced exactly as the system emits them — error messages, selection labels, generated record names — and therefore keep abbreviations that this specification would otherwise spell out. They are: `UoM` for unit of measure, `SN` for serial number, `ZPL` for the Zebra printer command language, `PDF` for Portable Document Format, `GS1` for Global Standards One, and the suffix `(MTO)` for make to order, that is the supply method this specification calls *advanced* or *trigger another rule*. Wherever such a string is quoted, the quotation is verbatim and must be reproduced character for character.
+
 ## Shared fixture
 
 Unless a scenario says otherwise, assume:
@@ -11,9 +13,9 @@ Unless a scenario says otherwise, assume:
 - One Warehouse, short name `WH`, receiving in one step and delivering in one step. Its Locations are `WH` (virtual), `WH/Stock` (internal), `WH/Input` (internal, inactive), `WH/Quality Control` (internal, inactive), `WH/Output` (internal, inactive), `WH/Packing Zone` (internal, inactive).
 - Shared Locations `Vendors` (vendor usage), `Customers` (customer usage), `Inter-company transit` (transit usage, inactive), and the company's `Inventory adjustment` (inventory-loss usage), `Production` (production usage) and `Scrap` (inventory-loss usage).
 - Operation Types `WH: Receipts` (receipt, sequence prefix `IN`), `WH: Delivery Orders` (delivery, prefix `OUT`), `WH: Internal Transfers` (internal, prefix `INT`), `WH: Pick` (`PICK`), `WH: Pack` (`PACK`), `WH: Quality Control` (`QC`), `WH: Storage` (`STOR`), `WH: Cross Dock` (`XD`).
-- Product **BOLT**: storable, untracked, unit of measure "Units" with a rounding step of 0.01, weight 0.5, volume 0.001.
-- Product **DRILL**: storable, tracked by serial number, unit "Units".
-- Product **PAINT**: storable, tracked by lot, unit "Units".
+- Product **Bolt**: storable, untracked, unit of measure "Units" with a rounding step of 0.01, weight 0.5, volume 0.001.
+- Product **Drill**: storable, tracked by serial number, unit "Units".
+- Product **Paint**: storable, tracked by lot, unit "Units".
 - The multi-location group, the lot group and the container group are all active.
 - All the other settings are at their shipped defaults.
 
@@ -26,9 +28,9 @@ Every assertion about a quantity is an assertion about the value **after** round
 ## Scenario 1 — One-step receipt, happy path
 
 **Given** the Warehouse receives in one step
-**And** there is no stock of BOLT anywhere
+**And** there is no stock of Bolt anywhere
 
-**When** an inventory user creates a Transfer with Operation Type `WH: Receipts`, contact "Vendor V", and one move of **10** BOLT
+**When** an inventory user creates a Transfer with Operation Type `WH: Receipts`, contact "Vendor V", and one move of **10** Bolt
 **And** confirms it
 **And** sets the processed quantity to 10 and validates it
 
@@ -36,8 +38,8 @@ Every assertion about a quantity is an assertion about the value **after** round
 **And** its source Location is `Vendors` and its destination Location is `WH/Stock`
 **And** immediately after confirmation the move's status is `assigned` and the Transfer's status is `assigned`, because the source Location bypasses reservation
 **And** after validation the Transfer's status is `done`, its completion date is the instant of validation, and its priority is `0`
-**And** exactly one Stock Quantity record exists for (BOLT, `WH/Stock`, no lot, no container, no owner) with an on-hand quantity of **10.00**, a reserved quantity of **0.00** and an incoming date equal to the validation instant
-**And** one Stock Quantity record exists for (BOLT, `Vendors`) with an on-hand quantity of **−10.00**
+**And** exactly one Stock Quantity record exists for (Bolt, `WH/Stock`, no lot, no container, no owner) with an on-hand quantity of **10.00**, a reserved quantity of **0.00** and an incoming date equal to the validation instant
+**And** one Stock Quantity record exists for (Bolt, `Vendors`) with an on-hand quantity of **−10.00**
 **And** no backorder Transfer exists
 **And** no journal entry is produced by this domain.
 
@@ -48,9 +50,9 @@ Every assertion about a quantity is an assertion about the value **after** round
 **And** the default destination of `WH: Receipts` becomes `WH/Input`
 **And** the default source of `WH: Storage` becomes `WH/Input`.
 
-**When** an inventory user receives **10** BOLT through `WH/IN/00002` and validates it
+**When** an inventory user receives **10** Bolt through `WH/IN/00002` and validates it
 
-**Then** 10.00 BOLT sit in `WH/Input`
+**Then** 10.00 Bolt sit in `WH/Input`
 **And** a second Stock Move exists with source `WH/Input`, destination `WH/Stock`, demand 10, Operation Type `WH: Storage`, supply method advanced, and the receipt move recorded as its originating move
 **And** that move belongs to a new Transfer numbered `WH/STOR/00001`
 **And** that move's status is `assigned`, because the completion of the receipt re-reserved its destination moves against exactly the goods that arrived
@@ -58,14 +60,14 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **When** the user validates `WH/STOR/00001`
 
-**Then** 10.00 BOLT sit in `WH/Stock`, `WH/Input` holds 0.00, and both Transfers are `done`.
+**Then** 10.00 Bolt sit in `WH/Stock`, `WH/Input` holds 0.00, and both Transfers are `done`.
 
 ## Scenario 3 — Three-step receipt
 
 **Given** the Warehouse is reconfigured to receive in **three steps**
 **Then** `WH/Input` and `WH/Quality Control` are active, `WH: Quality Control` and `WH: Storage` are active, and the receipt Route contains exactly three rules: pull `Vendors` → `WH/Stock` through `WH: Receipts` (take-from-stock, propagate cancel set); push `WH/Input` → `WH/Quality Control` through `WH: Quality Control` (advanced, propagate cancel set); push `WH/Quality Control` → `WH/Stock` through `WH: Storage` (advanced, propagate cancel **cleared**).
 
-**When** 10 BOLT are received and each of the three Transfers is validated in turn
+**When** 10 Bolt are received and each of the three Transfers is validated in turn
 
 **Then** three Transfers exist, numbered `WH/IN/...`, `WH/QC/...` and `WH/STOR/...`
 **And** the three moves form a chain, each the originating move of the next
@@ -89,17 +91,17 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 5 — Receipt of three serial-numbered units
 
-**Given** DRILL is tracked by serial number
+**Given** Drill is tracked by serial number
 **And** `WH: Receipts` allows creating new lots and does not allow using existing ones
 
-**When** an inventory user creates `WH/IN/00003` with one move of **3** DRILL
+**When** an inventory user creates `WH/IN/00003` with one move of **3** Drill
 **And** confirms it
 **And** uses the serial-number generation with the first name `SN00007` and a count of 3
 **And** validates the Transfer
 
 **Then** the generation produces exactly the names `SN00007`, `SN00008`, `SN00009`
 **And** the move has exactly three detail lines, each with a quantity of **1** in the product unit and one of those typed names
-**And** at completion three Lot records are created, one per name, each linked to DRILL and to the company
+**And** at completion three Lot records are created, one per name, each linked to Drill and to the company
 **And** three Stock Quantity records exist in `WH/Stock`, one per serial number, each with an on-hand quantity of **1.00**
 **And** the serial-number uniqueness constraint holds: no serial number appears twice.
 
@@ -109,16 +111,16 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 6 — Serial number already in stock
 
-**Given** serial number `SN00007` of DRILL is on hand in `WH/Stock`
+**Given** serial number `SN00007` of Drill is on hand in `WH/Stock`
 
 **When** a person types `SN00007` again on a receipt line
 
 **Then** a warning is shown: "The Serial Number (SN00007) is already used in location(s): WH/Stock.\n\nIs this expected? For example, this can occur if a delivery operation is validated before its corresponding receipt operation is validated. In this case the issue will be solved automatically once all steps are completed. Otherwise, the serial number should be corrected to prevent inconsistent data."
-**And** the entry is **not** blocked; only validation of a resulting quantity above one in the same Location tree fails, with "The serial number has already been assigned: \n Product: DRILL, Serial Number: SN00007".
+**And** the entry is **not** blocked; only validation of a resulting quantity above one in the same Location tree fails, with "The serial number has already been assigned: \n Product: Drill, Serial Number: SN00007".
 
 ## Scenario 7 — Missing lot at validation
 
-**Given** `WH/IN/00004` has one move of 5 PAINT with a processed quantity of 5 and no lot on its detail line
+**Given** `WH/IN/00004` has one move of 5 Paint with a processed quantity of 5 and no lot on its detail line
 **And** `WH: Receipts` allows creating lots
 
 **When** the user validates
@@ -129,17 +131,17 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **When** the user validates
 
-**Then** the validation succeeds and 5.00 PAINT arrive in `WH/Stock` with **no** lot.
+**Then** the validation succeeds and 5.00 Paint arrive in `WH/Stock` with **no** lot.
 
 ## Scenario 8 — Over-processing a receipt
 
-**Given** `WH/IN/00005` demands **10** BOLT
+**Given** `WH/IN/00005` demands **10** Bolt
 
 **When** the user records a processed quantity of **12** and validates
 
 **Then** the move's demand stays **10** and its processed quantity is **12**
 **And** no backorder question is asked and no backorder Transfer is created
-**And** **12.00** BOLT arrive in `WH/Stock`
+**And** **12.00** Bolt arrive in `WH/Stock`
 **And** the move's status before completion was `assigned`, because the processed quantity was greater than or equal to the demand.
 
 ---
@@ -148,10 +150,10 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 9 — One-step delivery, fully available
 
-**Given** `WH/Stock` holds **20.00** BOLT with 0.00 reserved
+**Given** `WH/Stock` holds **20.00** Bolt with 0.00 reserved
 **And** `WH: Delivery Orders` reserves at confirmation and its backorder policy is "ask"
 
-**When** an inventory user creates `WH/OUT/00001` with one move of **8** BOLT and confirms it
+**When** an inventory user creates `WH/OUT/00001` with one move of **8** Bolt and confirms it
 
 **Then** the move is reserved: one detail line is created for 8 from `WH/Stock` to `Customers`
 **And** the Stock Quantity record now shows on hand **20.00** and reserved **8.00**, so its available quantity is **12.00**
@@ -160,8 +162,8 @@ Every assertion about a quantity is an assertion about the value **after** round
 **When** the user validates with a processed quantity of 8
 
 **Then** the Transfer is `done`
-**And** `WH/Stock` holds **12.00** BOLT with **0.00** reserved
-**And** `Customers` holds **−8.00** BOLT
+**And** `WH/Stock` holds **12.00** Bolt with **0.00** reserved
+**And** `Customers` holds **−8.00** Bolt
 **And** no backorder is created.
 
 ## Scenario 10 — Three-step delivery
@@ -170,21 +172,21 @@ Every assertion about a quantity is an assertion about the value **after** round
 **Then** `WH/Packing Zone` and `WH/Output` become active; `WH: Pick` and `WH: Pack` become active; the default destination of `WH: Pick` becomes `WH/Packing Zone`, the default destination of `WH: Pack` becomes `WH/Output`, and the default source of `WH: Delivery Orders` becomes `WH/Output`
 **And** the delivery Route contains exactly three rules: pull `WH/Stock` → `Customers` through `WH: Pick` (take-from-stock, propagate carrier); push `WH/Packing Zone` → `WH/Output` through `WH: Pack` (advanced, propagate carrier); push `WH/Output` → `Customers` through `WH: Delivery Orders` (advanced, propagate carrier).
 
-**Given** `WH/Stock` holds 20.00 BOLT
+**Given** `WH/Stock` holds 20.00 Bolt
 
-**When** a need for **8** BOLT at `Customers` reaches the rule engine
+**When** a need for **8** Bolt at `Customers` reaches the rule engine
 
 **Then** one pick move is created: source `WH/Stock`, intermediate destination `WH/Packing Zone`, final destination `Customers`, Operation Type `WH: Pick`, grouped into `WH/PICK/00001`
 **And** it reserves 8.00 from `WH/Stock`.
 
 **When** `WH/PICK/00001` is validated
 
-**Then** 8.00 BOLT sit in `WH/Packing Zone`
+**Then** 8.00 Bolt sit in `WH/Packing Zone`
 **And** a pack move is created: source `WH/Packing Zone`, destination `WH/Output`, Operation Type `WH: Pack`, supply method advanced, the pick move as originating move, grouped into `WH/PACK/00001`, status `assigned`.
 
 **When** `WH/PACK/00001` is validated
 
-**Then** 8.00 BOLT sit in `WH/Output`
+**Then** 8.00 Bolt sit in `WH/Output`
 **And** a delivery move is created: source `WH/Output`, destination `Customers`, Operation Type `WH: Delivery Orders`, supply method advanced, the pack move as originating move, grouped into `WH/OUT/00002`, status `assigned`.
 
 **When** `WH/OUT/00002` is validated
@@ -194,13 +196,13 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 11 — Shipping policy "when all products are ready"
 
-**Given** `WH/Stock` holds 5.00 BOLT and 0.00 PAINT
-**And** a delivery Transfer demands 5 BOLT and 3 PAINT
+**Given** `WH/Stock` holds 5.00 Bolt and 0.00 Paint
+**And** a delivery Transfer demands 5 Bolt and 3 Paint
 **And** its shipping policy is **all at once**
 
 **When** it is confirmed and reserved
 
-**Then** the BOLT move is `assigned` and the PAINT move is `confirmed`
+**Then** the Bolt move is `assigned` and the Paint move is `confirmed`
 **And** the Transfer's status is **`confirmed`** ("Waiting"), because with the all-at-once policy the most important open move being `partially_available` or `confirmed` yields `confirmed`.
 
 **Given** instead the shipping policy is **as soon as possible**
@@ -209,8 +211,8 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 12 — Partial delivery **with** a backorder
 
-**Given** `WH/Stock` holds **6.00** BOLT
-**And** `WH/OUT/00003` demands **10** BOLT
+**Given** `WH/Stock` holds **6.00** Bolt
+**And** `WH/OUT/00003` demands **10** Bolt
 **And** the Operation Type's backorder policy is "ask"
 
 **When** the Transfer is confirmed and reserved
@@ -227,8 +229,8 @@ Every assertion about a quantity is an assertion about the value **after** round
 **And** a new Stock Move of demand **4** is created with the same product, unit, supply method, chain links, unit price and deadline
 **And** a new Transfer is created whose back-order link points at `WH/OUT/00003`, whose reference is `WH/OUT/00004`, whose responsible is empty, and which holds the 4-unit move with its picked flag cleared
 **And** a note is posted on `WH/OUT/00003`: "The backorder WH/OUT/00004 has been created."
-**And** because the Operation Type reserves at confirmation, the backorder's availability is checked immediately; with 0.00 BOLT left in `WH/Stock` the 4-unit move stays `confirmed`
-**And** `WH/Stock` holds **0.00** BOLT and `Customers` holds **−6.00**.
+**And** because the Operation Type reserves at confirmation, the backorder's availability is checked immediately; with 0.00 Bolt left in `WH/Stock` the 4-unit move stays `confirmed`
+**And** `WH/Stock` holds **0.00** Bolt and `Customers` holds **−6.00**.
 
 ## Scenario 13 — Partial delivery **without** a backorder
 
@@ -239,7 +241,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 **Then** the original move keeps its demand of **10** and its processed quantity of **6**
 **And** it becomes `done`
 **And** **no** backorder move and **no** backorder Transfer are created
-**And** `WH/Stock` holds 0.00 BOLT and `Customers` holds −6.00
+**And** `WH/Stock` holds 0.00 Bolt and `Customers` holds −6.00
 **And** `WH/OUT/00003` is `done`.
 
 **Given** instead that the Operation Type's backorder policy is **never**
@@ -250,24 +252,24 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 14 — Partial delivery with one line untouched
 
-**Given** a delivery Transfer demands 10 BOLT and 4 PAINT
-**And** 10 BOLT are processed and 0 PAINT are processed, and no move is explicitly picked
+**Given** a delivery Transfer demands 10 Bolt and 4 Paint
+**And** 10 Bolt are processed and 0 Paint are processed, and no move is explicitly picked
 
 **When** the user validates and chooses "No backorder"
 
-**Then** the pruning step of the completion algorithm cancels the PAINT move, because its processed quantity is zero and backorders are forbidden
-**And** the BOLT move completes
+**Then** the pruning step of the completion algorithm cancels the Paint move, because its processed quantity is zero and backorders are forbidden
+**And** the Bolt move completes
 **And** the Transfer's status is `done`, because not every done move is a scrap.
 
 ## Scenario 15 — Splitting a transfer without validating
 
-**Given** a delivery Transfer demands 10 BOLT and 6 PAINT
-**And** the processed quantities are set to 4 BOLT and 0 PAINT
+**Given** a delivery Transfer demands 10 Bolt and 6 Paint
+**And** the processed quantities are set to 4 Bolt and 0 Paint
 
 **When** the user presses the split action
 
-**Then** the BOLT move is split: the original keeps a demand of 4 with a processed quantity of 4, and a new move of demand 6 is produced
-**And** the new BOLT move **and** the whole PAINT move are moved into a new backorder Transfer
+**Then** the Bolt move is split: the original keeps a demand of 4 with a processed quantity of 4, and a new move of demand 6 is produced
+**And** the new Bolt move **and** the whole Paint move are moved into a new backorder Transfer
 **And** neither Transfer is validated; both remain open.
 
 **Given** instead that every processed quantity is zero
@@ -289,14 +291,14 @@ Every assertion about a quantity is an assertion about the value **after** round
 ## Scenario 16 — First in first out across two arrival batches
 
 **Given** `WH/Stock` uses the first in first out removal strategy (no strategy is set anywhere, so the fallback applies)
-**And** two Stock Quantity records exist for BOLT in `WH/Stock`, both with no lot, no container and no owner, created as two separate arrivals:
+**And** two Stock Quantity records exist for Bolt in `WH/Stock`, both with no lot, no container and no owner, created as two separate arrivals:
 
 | Record | On hand | Reserved | Incoming date |
 |---|---|---|---|
 | Q1 | 40.00 | 0.00 | 3 March 2026, 08:00 |
 | Q2 | 25.00 | 0.00 | 10 March 2026, 08:00 |
 
-**When** a delivery move of **50** BOLT is reserved
+**When** a delivery move of **50** Bolt is reserved
 
 **Then** the gathering returns Q1 before Q2
 **And** the reservation takes **40.00** from Q1 and **10.00** from Q2
@@ -315,17 +317,17 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 17 — Merging two arrivals keeps the earliest incoming date
 
-**Given** PAINT lot `L1` is received into `WH/Stock` with an incoming date of **11 September 2026**, quantity 1
+**Given** Paint lot `L1` is received into `WH/Stock` with an incoming date of **11 September 2026**, quantity 1
 
 **When** the same lot is received again into the same Location with an explicit incoming date of **6 September 2026**, quantity 1
 
-**Then** exactly **one** Stock Quantity record exists for (PAINT, `WH/Stock`, `L1`)
+**Then** exactly **one** Stock Quantity record exists for (Paint, `WH/Stock`, `L1`)
 **And** its on-hand quantity is **2.00**
 **And** its incoming date is **6 September 2026** — the oldest of the candidate dates wins.
 
 ## Scenario 18 — Available quantity over several records
 
-**Given** BOLT in `WH/Stock` has four Stock Quantity records:
+**Given** Bolt in `WH/Stock` has four Stock Quantity records:
 
 | Record | On hand | Reserved |
 |---|---|---|
@@ -344,7 +346,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 19 — Reservation blocked, then released
 
-**Given** BOLT in `WH/Stock` has two Stock Quantity records:
+**Given** Bolt in `WH/Stock` has two Stock Quantity records:
 
 | Record | On hand | Reserved |
 |---|---|---|
@@ -353,7 +355,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **Then** the available quantity is **0.00** (5 − 7 = −2 and 12 − 10 = 2, and the sum is 0)
 
-**When** a move of **10** BOLT asks to be reserved
+**When** a move of **10** Bolt asks to be reserved
 
 **Then** **nothing** is reserved: the wanted quantity is clamped to the available quantity, which is 0
 **And** the available quantity is still **0.00**
@@ -375,7 +377,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 20 — Unreserving
 
-**Given** a move of 8 BOLT is `assigned` with one detail line of 8, not picked
+**Given** a move of 8 Bolt is `assigned` with one detail line of 8, not picked
 **And** the Stock Quantity record shows on hand 20.00 and reserved 8.00
 
 **When** the user presses unreserve
@@ -396,7 +398,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 21 — Raising the demand of a reserved move
 
-**Given** a move of 8 BOLT is `assigned` with 8 reserved
+**Given** a move of 8 Bolt is `assigned` with 8 reserved
 **And** the Transfer is unlocked
 
 **When** the user raises the demand to **12**
@@ -413,29 +415,29 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 22 — Reservation of a serial-tracked product refuses fractions
 
-**Given** DRILL is tracked by serial number and `WH/Stock` holds 3 units under three serial numbers
+**Given** Drill is tracked by serial number and `WH/Stock` holds 3 units under three serial numbers
 
-**When** a move asks to reserve **2.5** DRILL
+**When** a move asks to reserve **2.5** Drill
 
 **Then** the reservation-quantity computation sets the wanted quantity to **0** and nothing is reserved, because the quantity is not a whole number.
 
 ## Scenario 23 — Reserve only full packagings
 
-**Given** BOLT's product category asks for full-packaging reservation
+**Given** Bolt's product category asks for full-packaging reservation
 **And** a move carries a packaging unit "Box of 6" whose conversion to the product unit is 6
-**And** `WH/Stock` holds **20.00** BOLT free
+**And** `WH/Stock` holds **20.00** Bolt free
 
-**When** a move of **18** BOLT is reserved
+**When** a move of **18** Bolt is reserved
 
 **Then** the availability is first rounded **down** to whole boxes: the smaller of 18 and 20 is 18, which is exactly 3 boxes, so 18.00 is reserved.
 
-**When** instead the move demands **20** BOLT
+**When** instead the move demands **20** Bolt
 
 **Then** the availability is rounded down to 3 boxes, that is **18.00**, and only 18.00 is reserved; the move becomes `partially_available`.
 
 ## Scenario 24 — Least packages
 
-**Given** BOLT in `WH/Stock` sits in three containers and loose:
+**Given** Bolt in `WH/Stock` sits in three containers and loose:
 
 | Container | Free quantity |
 |---|---|
@@ -446,7 +448,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **And** `WH/Stock` names the least-packages removal strategy
 
-**When** a move of **13** BOLT is reserved
+**When** a move of **13** Bolt is reserved
 
 **Then** the container pre-selection finds the exact cover {P1, one loose unit} — two entries — rather than {P1, P3} (two entries but over-selecting by 4) or {P2, P3} (two entries, under by 0? no: 13 exactly, but examined later because the search opens the largest-first branch with the better estimate first)
 **And** the gathering is restricted to the records of P1 and to one container-less record
@@ -454,10 +456,10 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 25 — Closest location
 
-**Given** BOLT sits in `WH/Stock/Shelf 1` (record identifier 91, 5.00 free) and `WH/Stock/Shelf 10` (record identifier 42, 5.00 free)
+**Given** Bolt sits in `WH/Stock/Shelf 1` (record identifier 91, 5.00 free) and `WH/Stock/Shelf 10` (record identifier 42, 5.00 free)
 **And** `WH/Stock` names the closest-location strategy
 
-**When** a move of 5 BOLT from `WH/Stock` is reserved
+**When** a move of 5 Bolt from `WH/Stock` is reserved
 
 **Then** the records are ordered by full location name ascending — which is textual, so `WH/Stock/Shelf 1` comes before `WH/Stock/Shelf 10` — and the reservation takes from `WH/Stock/Shelf 1`.
 
@@ -468,9 +470,9 @@ Every assertion about a quantity is an assertion about the value **after** round
 ## Scenario 26 — Category strategy beats location strategy
 
 **Given** `WH/Stock` names the last in first out strategy
-**And** BOLT's product category names the first in first out strategy
+**And** Bolt's product category names the first in first out strategy
 
-**When** BOLT is reserved from `WH/Stock`
+**When** Bolt is reserved from `WH/Stock`
 
 **Then** the **first in first out** ordering is used, because the product category is consulted before any Location.
 
@@ -488,39 +490,39 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 28 — Strict versus loose matching
 
-**Given** BOLT sits in `WH/Stock/Shelf 1` with 4.00 and in `WH/Stock/Shelf 2` with 6.00, both without lot, container or owner
+**Given** Bolt sits in `WH/Stock/Shelf 1` with 4.00 and in `WH/Stock/Shelf 2` with 6.00, both without lot, container or owner
 
-**When** the gathering is run **loosely** for (BOLT, `WH/Stock`)
+**When** the gathering is run **loosely** for (Bolt, `WH/Stock`)
 
 **Then** both records are returned, because loose matching accepts descendants of the Location.
 
-**When** the gathering is run **strictly** for (BOLT, `WH/Stock`)
+**When** the gathering is run **strictly** for (Bolt, `WH/Stock`)
 
 **Then** **no** record is returned, because strict matching requires the Location to be exactly `WH/Stock`.
 
-**When** the gathering is run strictly for (BOLT, `WH/Stock/Shelf 1`, no lot, no container, no owner)
+**When** the gathering is run strictly for (Bolt, `WH/Stock/Shelf 1`, no lot, no container, no owner)
 
 **Then** exactly the 4.00 record is returned.
 
 ## Scenario 29 — Loose matching ignores unrequested characteristics
 
-**Given** PAINT sits in `WH/Stock` with 5.00 under lot `L1` and 2.00 with no lot
+**Given** Paint sits in `WH/Stock` with 5.00 under lot `L1` and 2.00 with no lot
 
-**When** the gathering is run loosely for (PAINT, `WH/Stock`) with no lot requested
+**When** the gathering is run loosely for (Paint, `WH/Stock`) with no lot requested
 
 **Then** both records are returned, and the lot-bearing one comes **first**, because of the final "lots before no lot" sort.
 
-**When** the gathering is run loosely for (PAINT, `WH/Stock`, lot `L1`)
+**When** the gathering is run loosely for (Paint, `WH/Stock`, lot `L1`)
 
 **Then** both records are still returned, because loose matching accepts a record with the requested lot **or with no lot**.
 
-**When** the gathering is run strictly for (PAINT, `WH/Stock`, lot `L1`)
+**When** the gathering is run strictly for (Paint, `WH/Stock`, lot `L1`)
 
 **Then** both are again returned, because strict matching also accepts an empty lot; but when the available quantity is computed for a tracked product with strict matching and a requested lot, the lot-less record is **skipped**, so the available quantity is 5.00, not 7.00.
 
 ## Scenario 30 — Available quantity with a negative bucket
 
-**Given** PAINT in `WH/Stock` has: lot `A` on hand 10.00 reserved 4.00; lot `B` on hand 3.00 reserved 0.00; no lot, on hand −2.00 reserved 0.00
+**Given** Paint in `WH/Stock` has: lot `A` on hand 10.00 reserved 4.00; lot `B` on hand 3.00 reserved 0.00; no lot, on hand −2.00 reserved 0.00
 
 **When** the available quantity is asked for with negative results **allowed**
 
@@ -532,9 +534,9 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 31 — The negative pocket during reservation
 
-**Given** BOLT in `WH/Stock` has record A with on hand **−5.00** reserved 0.00 and record B with on hand **12.00** reserved 0.00, all other characteristics identical and empty
+**Given** Bolt in `WH/Stock` has record A with on hand **−5.00** reserved 0.00 and record B with on hand **12.00** reserved 0.00, all other characteristics identical and empty
 
-**When** a move of **10** BOLT is reserved
+**When** a move of **10** Bolt is reserved
 
 **Then** the available quantity is 7.00, so the wanted quantity is clamped to **7.00**
 **And** record A is skipped, because its available quantity is not positive
@@ -549,26 +551,26 @@ Every assertion about a quantity is an assertion about the value **after** round
 ## Scenario 32 — Put-away to a shelf
 
 **Given** `WH/Stock` has two internal children, `WH/Stock/Shelf A` and `WH/Stock/Shelf B`
-**And** a Put-away Rule exists: when a product arrives in `WH/Stock`, store BOLT to `WH/Stock/Shelf A`, priority 10, sublocation mode "No", no storage category, no container type
+**And** a Put-away Rule exists: when a product arrives in `WH/Stock`, store Bolt to `WH/Stock/Shelf A`, priority 10, sublocation mode "No", no storage category, no container type
 
-**When** a receipt of **10** BOLT into `WH/Stock` is confirmed
+**When** a receipt of **10** Bolt into `WH/Stock` is confirmed
 
 **Then** the move's destination Location stays `WH/Stock`
 **But** its detail line's destination Location is rewritten to **`WH/Stock/Shelf A`**
 
 **When** the receipt is validated
 
-**Then** the 10.00 BOLT are recorded in `WH/Stock/Shelf A`, not in `WH/Stock`.
+**Then** the 10.00 Bolt are recorded in `WH/Stock/Shelf A`, not in `WH/Stock`.
 
 ## Scenario 33 — Put-away rule specificity
 
 **Given** three Put-away Rules on `WH/Stock`, all with priority 10:
  - R1: no product, category "All", store to `WH/Stock/Shelf A`
- - R2: product BOLT, store to `WH/Stock/Shelf B`
- - R3: no product, category "All / Hardware" (BOLT's own category), store to `WH/Stock/Shelf C`
+ - R2: product Bolt, store to `WH/Stock/Shelf B`
+ - R3: no product, category "All / Hardware" (Bolt's own category), store to `WH/Stock/Shelf C`
 **And** none names a container type
 
-**When** BOLT arrives in `WH/Stock`
+**When** Bolt arrives in `WH/Stock`
 
 **Then** the rules are sorted by the four-part specificity key, most specific first: R2 (names a product) comes first, then R3 (names the product's own category), then R1 (names an ancestor category)
 **And** the chosen Location is **`WH/Stock/Shelf B`**.
@@ -581,32 +583,32 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 34 — Storage capacity blocks a shelf
 
-**Given** the Storage Category "Small shelf" has a maximum weight of **50** and a product capacity of **30** BOLT
-**And** `WH/Stock/Shelf A` carries that category and already holds **22.00** BOLT
-**And** BOLT weighs 0.5 per unit
-**And** a Put-away Rule sends BOLT arriving in `WH/Stock` to `WH/Stock/Shelf A` with the closest-location mode and that storage category
+**Given** the Storage Category "Small shelf" has a maximum weight of **50** and a product capacity of **30** Bolt
+**And** `WH/Stock/Shelf A` carries that category and already holds **22.00** Bolt
+**And** Bolt weighs 0.5 per unit
+**And** a Put-away Rule sends Bolt arriving in `WH/Stock` to `WH/Stock/Shelf A` with the closest-location mode and that storage category
 **And** `WH/Stock/Shelf B` also carries the category and is empty
 
-**When** **5** BOLT arrive
+**When** **5** Bolt arrive
 
 **Then** the capacity check for Shelf A runs: the forecasted weight is 22 × 0.5 = 11; the weight test `50 < 11 + 0.5 × 5 = 13.5` fails to trigger; the first quantity test `22 ≥ 30` is false; the second `5 + 22 = 27 > 30` is false; so Shelf A is **accepted**.
 
-**When** instead **12** BOLT arrive
+**When** instead **12** Bolt arrive
 
 **Then** the second quantity test `12 + 22 = 34 > 30` is true, Shelf A is **rejected** and added to the rejected set, the walk continues, and `WH/Stock/Shelf B` is chosen.
 
-**When** instead Shelf A already holds **30.00** BOLT and 1 unit arrives
+**When** instead Shelf A already holds **30.00** Bolt and 1 unit arrives
 
 **Then** the **first** quantity test `30 ≥ 30` already rejects it, even before the incoming quantity is considered.
 
 ## Scenario 35 — Mixing policy
 
 **Given** the Storage Category "Single product" has the mixing policy "If all products are same"
-**And** `WH/Stock/Shelf A` carries it and holds 4.00 PAINT
+**And** `WH/Stock/Shelf A` carries it and holds 4.00 Paint
 
-**When** BOLT is put away there
+**When** Bolt is put away there
 
-**Then** the check fails, because a positive record exists whose product is not BOLT.
+**Then** the check fails, because a positive record exists whose product is not Bolt.
 
 **Given** instead the policy is "If the location is empty" and the Shelf holds 4.00 of **any** product
 
@@ -618,8 +620,8 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 36 — A container may not be split across shelves
 
-**Given** a container `PACK0001` with no container type holds 10 BOLT and 10 PAINT
-**And** put-away rules would send BOLT to `WH/Stock/Shelf A` and PAINT to `WH/Stock/Shelf B`
+**Given** a container `PACK0001` with no container type holds 10 Bolt and 10 Paint
+**And** put-away rules would send Bolt to `WH/Stock/Shelf A` and Paint to `WH/Stock/Shelf B`
 
 **When** the container's detail lines are pushed through the put-away application
 
@@ -641,8 +643,8 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 38 — A whole package is moved
 
-**Given** container `PACK0001` of type "Box" (not reusable) sits in `WH/Stock` and holds exactly 10.00 BOLT and nothing else
-**And** a delivery Transfer demands 10 BOLT
+**Given** container `PACK0001` of type "Box" (not reusable) sits in `WH/Stock` and holds exactly 10.00 Bolt and nothing else
+**And** a delivery Transfer demands 10 Bolt
 
 **When** the Transfer is confirmed and reserved
 
@@ -654,13 +656,13 @@ Every assertion about a quantity is an assertion about the value **after** round
 **When** the Transfer is validated
 
 **Then** a Package History snapshot is created first, recording `PACK0001`, its full name, its Location before (`WH/Stock`), its destination Location (`Customers`), its parent before and after, and the lines
-**And** the 10.00 BOLT move from `WH/Stock` to `Customers` **with** `PACK0001` as their container in the destination
+**And** the 10.00 Bolt move from `WH/Stock` to `Customers` **with** `PACK0001` as their container in the destination
 **And** the container's own Location becomes `Customers`
 **And** the Transfer's container counter reads 1 and reads from the history records, because the Transfer is done.
 
 ## Scenario 39 — Adding an existing container to a transfer
 
-**Given** container `PACK0002` in `WH/Stock` holds 4.00 BOLT and 2.00 PAINT under lot `L1`
+**Given** container `PACK0002` in `WH/Stock` holds 4.00 Bolt and 2.00 Paint under lot `L1`
 **And** an internal Transfer from `WH/Stock` to `WH/Stock/Shelf A` is open
 
 **When** the user adds `PACK0002` through the add-entire-packages action
@@ -712,12 +714,12 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 43 — Unpacking
 
-**Given** `PACK0003` in `WH/Stock` holds 6.00 BOLT and one child container `BOX9`
+**Given** `PACK0003` in `WH/Stock` holds 6.00 Bolt and one child container `BOX9`
 
 **When** the user unpacks `PACK0003`
 
 **Then** `BOX9` loses its parent container
-**And** an adjustment-style move with the reference "Quantities unpacked" relocates the 6.00 BOLT from (WH/Stock, PACK0003) to (WH/Stock, no container)
+**And** an adjustment-style move with the reference "Quantities unpacked" relocates the 6.00 Bolt from (WH/Stock, PACK0003) to (WH/Stock, no container)
 **And** the housekeeping pass runs on the affected records, so that the resulting duplicates are merged.
 
 ---
@@ -726,7 +728,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 44 — Adjustment of plus five
 
-**Given** `WH/Stock` holds **12.00** BOLT with 0.00 reserved
+**Given** `WH/Stock` holds **12.00** Bolt with 0.00 reserved
 **And** the record's counted flag is off
 
 **When** an inventory user types a counted quantity of **17** on the record
@@ -736,10 +738,10 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **When** the user presses Apply
 
-**Then** one Stock Move is created with: product BOLT, the product unit, a demand of **5**, source `Inventory adjustment`, destination `WH/Stock`, status confirmed, the adjustment flag set, the picked flag set, and one detail line of 5 with the same Locations and the record's container
+**Then** one Stock Move is created with: product Bolt, the product unit, a demand of **5**, source `Inventory adjustment`, destination `WH/Stock`, status confirmed, the adjustment flag set, the picked flag set, and one detail line of 5 with the same Locations and the record's container
 **And** the move is completed immediately, with destination containers ignored
-**And** `WH/Stock` holds **17.00** BOLT
-**And** `Inventory adjustment` holds **−5.00** BOLT
+**And** `WH/Stock` holds **17.00** Bolt
+**And** `Inventory adjustment` holds **−5.00** Bolt
 **And** the move's reference reads "Product Quantity Updated (*the acting user's display name*)"
 **And** `WH/Stock`'s last-count date becomes today
 **And** the record's counted quantity, difference, counted flag and assignee are cleared
@@ -753,7 +755,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 ## Scenario 45 — Conflict on a count
 
 **Given** the counted quantity 17 was typed while the on-hand quantity was 12
-**And** a delivery then removed 2.00 BOLT, so the on-hand quantity is now 10.00 while the recorded difference is still +5.00
+**And** a delivery then removed 2.00 Bolt, so the on-hand quantity is now 10.00 while the recorded difference is still +5.00
 
 **Then** the outdated indicator is true, because 17 − 5 = 12 no longer equals 10.
 
@@ -771,12 +773,12 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 46 — Requesting a count
 
-**Given** an inventory manager selects three records, one of which carries the lot-tracked product PAINT under lot `L1` in `WH/Stock`
-**And** `WH/Stock` also holds PAINT under lot `L2` and PAINT with no lot
+**Given** an inventory manager selects three records, one of which carries the lot-tracked product Paint under lot `L1` in `WH/Stock`
+**And** `WH/Stock` also holds Paint under lot `L2` and Paint with no lot
 
 **When** they request a count for **1 October 2026** assigned to user "Alice"
 
-**Then** the set is extended with every other record of (PAINT, `WH/Stock`), so the two sibling records are included
+**Then** the set is extended with every other record of (Paint, `WH/Stock`), so the two sibling records are included
 **And** each record of the extended set has its scheduled date set to 1 October 2026 and its assignee set to Alice
 **And** **no** counted quantity is written and no counted flag is turned on.
 
@@ -823,7 +825,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **Then** one mirror move is created and completed: demand 5, source `WH/Stock`, destination `Inventory adjustment`, adjustment flag set, picked flag set, containers swapped
 **And** its reference is "Product Quantity Updated (*the user's display name*) [reverted]"
-**And** `WH/Stock` returns to 12.00 BOLT.
+**And** `WH/Stock` returns to 12.00 Bolt.
 
 **When** the user selects a line that is not an adjustment line
 
@@ -831,7 +833,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 49 — A manager deletes a quantity record
 
-**Given** a record holds 3.00 BOLT
+**Given** a record holds 3.00 Bolt
 
 **When** an inventory manager deletes it
 
@@ -848,7 +850,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 50 — Returning a delivery
 
-**Given** `WH/OUT/00005` is `done`, having delivered **8** BOLT from `WH/Stock` to `Customers`
+**Given** `WH/OUT/00005` is `done`, having delivered **8** Bolt from `WH/Stock` to `Customers`
 **And** the delivery Operation Type's return Operation Type is `WH: Receipts`
 
 **When** the user opens the return screen and asks to return **3**
@@ -860,7 +862,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **When** the return is validated
 
-**Then** `WH/Stock` holds 3.00 BOLT more and `Customers` holds 3.00 less (that is, −5.00)
+**Then** `WH/Stock` holds 3.00 Bolt more and `Customers` holds 3.00 less (that is, −5.00)
 **And** `WH/OUT/00005`'s return counter reads 1.
 
 **When** the user instead presses "return all"
@@ -889,7 +891,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 52 — Exchange on a receipt
 
-**Given** `WH/IN/00006` is done, having received 10 BOLT
+**Given** `WH/IN/00006` is done, having received 10 Bolt
 
 **When** the user asks for a return **and exchange** of 4
 
@@ -901,12 +903,12 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 53 — Exchange on a delivery
 
-**Given** `WH/OUT/00007` is done, having delivered 4 BOLT
+**Given** `WH/OUT/00007` is done, having delivered 4 Bolt
 
 **When** the user asks for a return and exchange of 4
 
 **Then** the return Transfer is created as usual
-**And** instead of copying a second Transfer, one supply request of 4 BOLT is raised at the original move's intermediate destination Location, carrying the Transfer's document references, the move's date, the Warehouse, the contact, the final Location and the company
+**And** instead of copying a second Transfer, one supply request of 4 Bolt is raised at the original move's intermediate destination Location, carrying the Transfer's document references, the move's date, the Warehouse, the contact, the final Location and the company
 **And** the rule engine produces the replacement delivery through the normal routes.
 
 ## Scenario 54 — A return ignores the backorder policy
@@ -924,31 +926,31 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 55 — Scrapping available goods
 
-**Given** `WH/Stock` holds 12.00 BOLT
+**Given** `WH/Stock` holds 12.00 Bolt
 
-**When** an inventory user creates a Scrap for **2** BOLT from `WH/Stock` to `Scrap` and validates it
+**When** an inventory user creates a Scrap for **2** Bolt from `WH/Stock` to `Scrap` and validates it
 
 **Then** the Scrap's reference is drawn from the company's scrap sequence, for example `SP/00001`
 **And** one Stock Move is created already picked, from `WH/Stock` to `Scrap`, with one detail line of 2 carrying the lot, container and owner chosen on the Scrap
 **And** the move is completed with backorder creation suppressed
-**And** `WH/Stock` holds **10.00** BOLT and `Scrap` holds **2.00**
+**And** `WH/Stock` holds **10.00** Bolt and `Scrap` holds **2.00**
 **And** the Scrap's status is `done` and its date is the validation instant.
 
 **When** the replenish switch was on
 
-**Then** a supply request for 2 BOLT at `WH/Stock` is additionally run.
+**Then** a supply request for 2 Bolt at `WH/Stock` is additionally run.
 
 ## Scenario 56 — Scrapping more than is available
 
-**Given** `WH/Stock` holds 1.00 BOLT
+**Given** `WH/Stock` holds 1.00 Bolt
 
-**When** the user validates a Scrap of 2 BOLT
+**When** the user validates a Scrap of 2 Bolt
 
-**Then** the shortage screen opens, titled "BOLT: Insufficient Quantity To Scrap"
+**Then** the shortage screen opens, titled "Bolt: Insufficient Quantity To Scrap"
 
 **When** the user confirms anyway
 
-**Then** the scrap is performed, `WH/Stock` holds **−1.00** BOLT, and the reservation-freeing routine takes back any reservation that the negative figure invalidated.
+**Then** the scrap is performed, `WH/Stock` holds **−1.00** Bolt, and the reservation-freeing routine takes back any reservation that the negative figure invalidated.
 
 **When** the user instead validates a Scrap of quantity 0
 
@@ -956,8 +958,8 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 57 — Scrap inside a transfer
 
-**Given** an open delivery Transfer holds one move of 10 BOLT
-**And** the user scraps 1 BOLT from that Transfer
+**Given** an open delivery Transfer holds one move of 10 Bolt
+**And** the user scraps 1 Bolt from that Transfer
 
 **Then** the scrap move carries the Transfer, so the Transfer's scrap indicator becomes true
 **And** the Transfer's status computation excludes that move from the "all done are scrapped" test only when other moves are done normally.
@@ -1043,7 +1045,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 62 — Two identical moves merge
 
-**Given** a Transfer receives two Stock Moves, both for BOLT, both from `Vendors` to `WH/Stock`, both in the product unit, both with the take-from-stock supply method, the same unit price, the same description, the same deadline and the same final Location
+**Given** a Transfer receives two Stock Moves, both for Bolt, both from `Vendors` to `WH/Stock`, both in the product unit, both with the take-from-stock supply method, the same unit price, the same description, the same deadline and the same final Location
 **And** the demands are 4 and 6
 
 **When** the Transfer is confirmed
@@ -1117,7 +1119,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **When** a person writes a processed quantity of **1.005** on a move
 
-**Then** the write fails with "The quantity done for the product BOLT doesn't respect the rounding precision defined on the system. Please change the quantity done or the rounding precision in your settings."
+**Then** the write fails with "The quantity done for the product Bolt doesn't respect the rounding precision defined on the system. Please change the quantity done or the rounding precision in your settings."
 
 ## Scenario 67 — A quantity that breaks the unit's rounding at completion
 
@@ -1127,7 +1129,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **When** the Transfer is validated
 
-**Then** the completion fails with "The quantity done for the product \"BOLT\" doesn't respect the rounding precision defined on the unit of measure \"Units\". Please change the quantity done or the rounding precision of your unit of measure."
+**Then** the completion fails with "The quantity done for the product \"Bolt\" doesn't respect the rounding precision defined on the unit of measure \"Units\". Please change the quantity done or the rounding precision of your unit of measure."
 
 ## Scenario 68 — The backorder test uses digits, not the unit's rounding step
 
@@ -1164,12 +1166,12 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 71 — The reception report offers an arrival to a waiting delivery
 
-**Given** a delivery move of **10** BOLT from `WH/Stock` is `confirmed` with nothing reserved, and it has no originating move
-**And** a receipt Transfer of **10** BOLT into `WH/Stock` is open, and its move has no destination move
+**Given** a delivery move of **10** Bolt from `WH/Stock` is `confirmed` with nothing reserved, and it has no originating move
+**And** a receipt Transfer of **10** Bolt into `WH/Stock` is open, and its move has no destination move
 
 **When** the user opens the Reception Report from the receipt
 
-**Then** one line appears under the delivery's source document, with a quantity of 10, the product BOLT, the unit, and an Assign button
+**Then** one line appears under the delivery's source document, with a quantity of 10, the product Bolt, the unit, and an Assign button
 **And** the line is marked assignable.
 
 **When** the user presses Assign
@@ -1275,7 +1277,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 80 — Merging duplicate quantity records
 
-**Given** two Stock Quantity records exist for exactly (BOLT, `WH/Stock`, no lot, no container, no owner), created by two concurrent transactions:
+**Given** two Stock Quantity records exist for exactly (Bolt, `WH/Stock`, no lot, no container, no owner), created by two concurrent transactions:
 
 | Record | On hand | Reserved | Counted | Incoming date |
 |---|---|---|---|---|
@@ -1293,7 +1295,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 81 — Cleaning reservations
 
-**Given** a Stock Quantity record for (BOLT, `WH/Stock`) shows reserved **5.00**
+**Given** a Stock Quantity record for (Bolt, `WH/Stock`) shows reserved **5.00**
 **And** the open detail lines that draw from exactly that key total **3.00**
 
 **When** the clean-reservations pass runs
@@ -1362,11 +1364,11 @@ Every assertion about a quantity is an assertion about the value **after** round
 ## Scenario 86 — Automatic waving by product
 
 **Given** the delivery Operation Type has automatic batches on, grouping waves by product
-**And** a validation produces two backorders, each with one line of BOLT and one line of PAINT
+**And** a validation produces two backorders, each with one line of Bolt and one line of Paint
 
 **When** the automatic waving runs
 
-**Then** the BOLT lines of both backorders are collected into one wave and the PAINT lines into another
+**Then** the Bolt lines of both backorders are collected into one wave and the Paint lines into another
 **And** each wave's description is the product's display name
 **And** each contributing Transfer is split: a copy carrying only the taken lines is created with the wave as batch, and the moves are split by the taken quantities.
 
@@ -1415,7 +1417,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 90 — Changing a done quantity
 
-**Given** `WH/OUT/00008` is done, having delivered 8.00 BOLT from `WH/Stock`, which now holds 12.00
+**Given** `WH/OUT/00008` is done, having delivered 8.00 Bolt from `WH/Stock`, which now holds 12.00
 **And** the Transfer is unlocked
 
 **When** the user changes the detail line's quantity from 8 to **6**
@@ -1432,7 +1434,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 91 — Editing a done quantity that makes the source negative
 
-**Given** `WH/Stock` holds 2.00 BOLT and another open document has reserved 2.00 of it
+**Given** `WH/Stock` holds 2.00 Bolt and another open document has reserved 2.00 of it
 **And** a done detail line of 6.00 is raised to **8.00**
 
 **Then** after the replay the source available quantity is negative by 2.00
@@ -1571,7 +1573,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 102 — Archiving a location tree
 
-**Given** `WH/Stock/Shelf A` holds 3.00 BOLT
+**Given** `WH/Stock/Shelf A` holds 3.00 Bolt
 
 **When** the user archives `WH/Stock`
 
@@ -1583,15 +1585,15 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 103 — Location weight
 
-**Given** `WH/Stock/Shelf A` holds 10.00 BOLT (weight 0.5 each)
-**And** an open detail line will take 4.00 BOLT out of it and another will bring 6.00 BOLT into it
+**Given** `WH/Stock/Shelf A` holds 10.00 Bolt (weight 0.5 each)
+**And** an open detail line will take 4.00 Bolt out of it and another will bring 6.00 Bolt into it
 
 **Then** the net weight is 10 × 0.5 = **5.00**
 **And** the forecasted weight is 5.00 − 4 × 0.5 + 6 × 0.5 = **6.00**.
 
 ## Scenario 104 — Transfer weights
 
-**Given** a Transfer has one line of 4.00 BOLT with no container and one line of 6.00 BOLT whose destination container is `PACK0004` of type "Box" (base weight 1.2, no manual shipping weight)
+**Given** a Transfer has one line of 4.00 Bolt with no container and one line of 6.00 Bolt whose destination container is `PACK0004` of type "Box" (base weight 1.2, no manual shipping weight)
 
 **Then** the bulk weight is 4 × 0.5 = **2.00**
 **And** the shipping weight is 2.00 + (1.2 + 6 × 0.5) = **6.20**
@@ -1607,7 +1609,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 105 — Aggregating lines for a delivery document
 
-**Given** a delivery move of 10 BOLT has two detail lines of 6 and 4, both in the same unit, both with the same description and no container
+**Given** a delivery move of 10 Bolt has two detail lines of 6 and 4, both in the same unit, both with the same description and no container
 
 **Then** the two lines fall into one group whose key is built from the product identifier, the product display name, the description, the line unit identifier and the packaging unit identifier
 **And** the group's processed quantity is **10**
@@ -1623,7 +1625,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 106 — Cancelled and untouched moves on the document
 
-**Given** a Transfer has a move of 3 PAINT that was cancelled and a move of 2 PAINT that is confirmed with no detail line
+**Given** a Transfer has a move of 3 Paint that was cancelled and a move of 2 Paint that is confirmed with no detail line
 
 **Then** each of them adds a line to the printed document with no processed quantity and an ordered quantity equal to its demand, provided no existing group's key is a prefix of theirs; otherwise their demand is added to that group's ordered quantity.
 
@@ -1633,7 +1635,7 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 107 — Upstream and downstream
 
-**Given** lot `L1` of PAINT was received in `WH/IN/00010`, moved internally in `WH/INT/00003` and delivered in `WH/OUT/00011`
+**Given** lot `L1` of Paint was received in `WH/IN/00010`, moved internally in `WH/INT/00003` and delivered in `WH/OUT/00011`
 
 **When** the traceability tree is opened for `L1`
 
@@ -1663,13 +1665,13 @@ Every assertion about a quantity is an assertion about the value **after** round
 ## Scenario 109 — Aggregate barcode of a quantity record
 
 **Given** the separator parameter is `,` and the maximum length is 400
-**And** DRILL has a valid structured product barcode `12345678901231`
-**And** a quantity record holds 1 unit of DRILL under serial number `SN00007`
+**And** Drill has a valid structured product barcode `12345678901231`
+**And** a quantity record holds 1 unit of Drill under serial number `SN00007`
 
 **Then** the record's structured barcode is `01` + `12345678901231` + `21` + `SN00007`, with no quantity part because the product is serial-tracked with a quantity of one
 **And** the aggregate barcode is that string followed by a tabulation character.
 
-**Given** instead the product is PAINT with the same barcode, a quantity of 5 and lot `L1`, and no unit-specific application identifier applies
+**Given** instead the product is Paint with the same barcode, a quantity of 5 and lot `L1`, and no unit-specific application identifier applies
 
 **Then** the quantity part is `30` followed by `00000005` (the rounded quantity left-padded to eight digits)
 **And** the tracking part is `10` + `L1`.
@@ -1704,9 +1706,9 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 112 — Several transfers validated together
 
-**Given** two Transfers are validated together: T1 has no moves and T2 is missing a lot on a PAINT line
+**Given** two Transfers are validated together: T1 has no moves and T2 is missing a lot on a Paint line
 
-**Then** the failure carries one merged message: "Transfers T1: Please add some items to move.\n\nTransfers ['T2']: You need to supply a Lot/Serial number for products ['PAINT']."
+**Then** the failure carries one merged message: "Transfers T1: Please add some items to move.\n\nTransfers ['T2']: You need to supply a Lot/Serial number for products ['Paint']."
 **And** the zero-quantity case is **not** reported in this form.
 
 ## Scenario 113 — Negative quantity on a detail line
@@ -1721,17 +1723,17 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 ## Scenario 114 — Serial-tracked line with a quantity other than one
 
-**When** a person writes 2 on a detail line of DRILL
+**When** a person writes 2 on a detail line of Drill
 
 **Then** it fails with "You can only process 1.0 Units of products with unique serial number."
 
 ## Scenario 115 — Duplicate lot name
 
-**Given** lot `L1` of PAINT already exists for Acme
+**Given** lot `L1` of Paint already exists for Acme
 
-**When** another lot `L1` of PAINT is created for Acme
+**When** another lot `L1` of Paint is created for Acme
 
-**Then** it fails with "The combination of lot/serial number and product must be unique within a company including when no company is defined.\nThe following combinations contain duplicates:\n - Product: PAINT, Lot/Serial Number: L1"
+**Then** it fails with "The combination of lot/serial number and product must be unique within a company including when no company is defined.\nThe following combinations contain duplicates:\n - Product: Paint, Lot/Serial Number: L1"
 
 **Given** instead the existing lot has **no** company
 

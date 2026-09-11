@@ -151,7 +151,7 @@ replaying the whole history.
 **First in first out** (`fifo`). A costing method under which the goods that entered
 first are considered to leave first. An outgoing movement is valued by consuming the
 oldest incoming movements that are still considered on hand. Labelled "First In First Out
-(FIFO)", whose parenthesised fragment stands for *first in first out*.
+(first in first out)", whose parenthesised fragment stands for *first in first out*.
 
 **Gross unit price.** The unit price of a journal item net of its discount, used by the
 price-difference computation. Its formula depends on whether a price-included tax is

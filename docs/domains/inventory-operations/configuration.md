@@ -15,7 +15,7 @@ These are the switches a person sees on the inventory settings screen. Each one 
 | Storage Locations | multi-location group (`stock.group_stock_multi_locations`) | Exposes Locations everywhere, exposes the internal-transfer Operation Types, exposes put-away rules and the source and destination Location fields on documents. |
 | Multi-Step Routes | advanced-routing group (`stock.group_adv_location`) | Exposes Routes and Stock Rules. Turning it on forces the multi-location group on as well; turning the multi-location group off forces this one off. |
 | Lots & Serial Numbers | lot group (`stock.group_production_lot`) | Exposes Lots and the lot fields on detail lines. Also granted to portal users. |
-| Print GS1 Barcodes for Lots & Serial Numbers | structured-barcode group (`stock.group_stock_lot_print_gs1`) | Adds the structured barcode variants of the lot labels. |
+| Print Global Standards One Barcodes for Lots & Serial Numbers | structured-barcode group (`stock.group_stock_lot_print_gs1`) | Adds the structured barcode variants of the lot labels. |
 | Display Lots & Serial Numbers on Delivery Slips | lot-on-slip group (`stock.group_lot_on_delivery_slip`) | Prints the lot and serial numbers on the delivery document. Also granted to portal users. Forced off when the lot group is switched off. |
 | Packages | container group (`stock.group_tracking_lot`) | Exposes containers, the put-in-pack action and the container fields. |
 | Consignment | owner group (`stock.group_tracking_owner`) | Exposes the owner fields on quantity records and detail lines. |
@@ -121,8 +121,8 @@ A Scrap is created with the literal name "New" and draws its real reference from
 
 | Name | Method key |
 |---|---|
-| First In First Out (FIFO) | `fifo` |
-| Last In First Out (LIFO) | `lifo` |
+| First In First Out (first in first out) | `fifo` |
+| Last In First Out (last in first out) | `lifo` |
 | Closest Location | `closest` |
 | Least Packages | `least_packages` |
 
@@ -140,7 +140,7 @@ Two defaults are set so that every contact points at the shared Locations unless
 
 | Name | Company | Active | Sequence | Selectable on |
 |---|---|---|---|---|
-| Replenish on Order (MTO) | shared | no | 5 | product categories |
+| Replenish on Order (make to order) | shared | no | 5 | product categories |
 
 Its sequence is deliberately lower than the resupply Routes' so that it is examined first. Each Warehouse owns exactly one Stock Rule inside it.
 
@@ -173,7 +173,7 @@ The batch capability ships one discussion subtype, "Stage Changed", for Batch Tr
 | Manage Multiple Stock Locations | Exposes Locations. | — |
 | Manage Multiple Warehouses | Exposes Warehouses. | — |
 | Manage Lots / Serial Numbers | Exposes Lots. | — |
-| Print GS1 Barcodes for Lot & Serial Numbers | Exposes the structured lot label formats. | — |
+| Print Global Standards One Barcodes for Lot & Serial Numbers | Exposes the structured lot label formats. | — |
 | Display Serial & Lot Number in Delivery Slips | Prints lots on the delivery document. | — |
 | Manage Packages | Exposes containers. | — |
 | Manage Push and Pull inventory flows | Exposes Routes and Rules. | — |

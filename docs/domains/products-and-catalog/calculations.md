@@ -708,7 +708,7 @@ no_variant_attributes_price_extra
     = sum_of( price_extra of each Template Attribute Value V in the chosen combination
               such that  V.price_extra ≠ 0
                     and  V belongs to this variant's template
-                    and  V is NOT one of this variant's own combination members )
+                    and  V is not one of this variant's own combination members )
 ```
 
 The last condition — rather than "V's attribute never creates variants" — is deliberate: an
@@ -1402,7 +1402,7 @@ year    = century × 100 + two_digit_year
 5. Otherwise the date is that year, month and day. If the combination is not a valid calendar date,
    raise:
 
-   > A GS1 barcode nomenclature pattern was matched. However, the barcode failed to be converted to
+   > A Global Standards One barcode nomenclature pattern was matched. However, the barcode failed to be converted to
    > a valid date: '*the underlying parser's message*'
 
 **Worked examples**, evaluated with a current year of 2026 (so current century 20, current year

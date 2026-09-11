@@ -460,3 +460,73 @@ An **unreconciliation** deletes the matchings and the full marker, and reverses 
 | Match items on a trade account under cash-basis taxes | the company's cash-basis journal | as specified in `../taxes/` | the tax transfer lines are reconciled with each other |
 | Undo a reconciliation | — | reversals of the exchange and cash-basis entries | all matchings removed |
 | Confirm a Payment whose method has no outstanding account | — | none | none |
+
+---
+
+## 10. The four direction-and-kind combinations of a payment entry
+
+The same two lines carry four different meanings, decided by the direction and the counterparty kind. All four use the same formula; only the sign of the liquidity amount and the choice of the destination account differ.
+
+| # | Direction | Counterparty kind | Business meaning | Liquidity line | Counterpart line |
+|---|---|---|---|---|---|
+| 1 | `inbound` | `customer` | A customer pays an invoice. | debit the outstanding-receipts account | credit the counterparty's receivable account |
+| 2 | `outbound` | `customer` | The company refunds a customer, for example against a credit note. | credit the outstanding-payments account | debit the counterparty's receivable account |
+| 3 | `outbound` | `supplier` | The company pays a vendor bill. | credit the outstanding-payments account | debit the counterparty's payable account |
+| 4 | `inbound` | `supplier` | A vendor refunds the company, for example against a vendor credit note. | debit the outstanding-receipts account | credit the counterparty's payable account |
+
+Worked at 750.00 in the company currency:
+
+| # | Account | Debit | Credit |
+|---|---|---|---|
+| 1 | Outstanding Receipts | 750.00 | |
+| 1 | Accounts Receivable | | 750.00 |
+| 2 | Outstanding Payments | | 750.00 |
+| 2 | Accounts Receivable | 750.00 | |
+| 3 | Outstanding Payments | | 750.00 |
+| 3 | Accounts Payable | 750.00 | |
+| 4 | Outstanding Receipts | 750.00 | |
+| 4 | Accounts Payable | | 750.00 |
+
+The outstanding account used is **not** chosen by the direction directly: it is the payment account of the selected payment method line. The shipped configuration gives inbound lines the outstanding-receipts account and outbound lines the outstanding-payments account, which produces the table above; a different configuration produces a different pair of accounts without changing any other rule.
+
+---
+
+## 11. Dating and reversing the derived entries
+
+### 11.1 The three dates involved
+
+| Entry | Date |
+|---|---|
+| Payment entry | the Payment's own date |
+| Bank Transaction entry | the transaction's own date |
+| Exchange-difference entry | the later of the two matched items' dates, taken through the exchange journal's accounting-date rule so that it lands past any lock date, and then raised again to the date of each item processed |
+| Cash-basis tax entry | the later of the settlement date and the day after the company's fiscal lock date for the cash-basis journal |
+| Reversal produced by unreconciliation | the original entry's own date, or the day after the latest lock date that date would violate |
+
+### 11.2 The reversal on unreconciliation
+
+For each derived entry collected when matchings are deleted:
+
+1. Split them into those still in draft and those posted.
+2. For each posted entry, compute whether it affects the tax report, then compute its reversal date: its own date, or, when that date violates one or more lock dates, the day after the latest of them.
+3. Reverse the posted entries with the cancel flag, so that the original and the reversal are matched with each other and both are neutralised, each with the reference "Reversal of: <the original entry number>".
+4. Delete the draft entries outright.
+
+### 11.3 What is never reversed
+
+The matched items themselves. Deleting a matching does not touch the debit, the credit or the foreign amount of the items it linked; only the derived residuals change. This is why unreconciling is always safe with respect to the documents' own accounting.
+
+---
+
+## 12. Company attribution of the derived entries
+
+A matching's company decides where its exchange-difference and cash-basis entries land:
+
+```formula
+company_of_matching = the debit item's company    when the debit item's entry is an invoice-like document
+                    = the credit item's company   otherwise
+```
+
+The exchange-difference entry additionally re-derives the company from its own items: the company of the invoice-like entries among them when there are any, otherwise the company of the items, otherwise the company passed explicitly. If none resolves, no entry is prepared at all.
+
+The practical consequence is that, when an invoice of a branch is settled by a payment of the parent, the exchange difference and the cash-basis entry are written in the **branch** that carries the invoice.

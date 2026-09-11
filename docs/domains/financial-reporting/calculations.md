@@ -1829,8 +1829,15 @@ itself (§14.10) and one hundred and sixty-two by the country packages. Together
 thousand and seventy-six lines, six thousand five hundred and fifty-five expressions and two
 hundred and seventy-five columns.
 
-The names below are reproduced exactly as the data ships them; where a name is an abbreviation
-used by a tax authority it is a data value, not prose.
+**A note on the names below.** Report identifiers and report names are *reproduced identifiers*:
+they are the exact stored values a rebuild must keep, because the country packages, the filing
+formats and the variant selectors depend on them. Where such a stored name is an abbreviation
+coined by a tax authority — a form number, a national return code, a letter series — it is
+reproduced verbatim as a data value and is not an abbreviation used in the prose of this
+specification. In particular, the abbreviation appearing in many of these names is the national
+form name for the value-added tax return; the abbreviation appearing in the Australian series is
+the national form name for the business activity statement; and the identifier prefix `l10n_`
+followed by a two-letter country code is the stored package name of a country package.
 
 ### 15.1 Distribution by size
 

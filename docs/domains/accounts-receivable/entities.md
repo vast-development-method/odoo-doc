@@ -712,7 +712,7 @@ Worked example: a customer with a limit of 10 000.00, a receivable balance of 7 
 awaiting invoicing, and a draft invoice of 3 000.00 produces a total credit of 10 500.00, which
 exceeds the limit, and therefore the two lines:
 
-> ACME Industries has reached its credit limit of: $10,000.00
+> Acme Industries has reached its credit limit of: $10,000.00
 > Total amount due (including this document): $10,500.00
 
 ---

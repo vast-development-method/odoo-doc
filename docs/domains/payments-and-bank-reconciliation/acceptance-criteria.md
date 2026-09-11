@@ -876,7 +876,7 @@ Unless a scenario says otherwise:
 ### I.10 A partner mapping
 
 **Given** a model with a label condition *contains* `NORTHW`, exactly one line naming the counterparty *Northwind* and no account
-**When** a transaction labelled "SEPA NORTHW 0012" with no counterparty is processed
+**When** a transaction labelled "CREDIT TRANSFER NORTHW 0012" with no counterparty is processed
 **Then** the transaction's counterparty is set to *Northwind*, no counterpart line is produced, and the search continues for a counterpart model
 **And** the mapping's *can be proposed* flag is false, so it is never offered as a proposal.
 

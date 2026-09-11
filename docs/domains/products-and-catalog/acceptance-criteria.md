@@ -1160,10 +1160,10 @@ created for it automatically.
 **When** a document of kind "web address" is given the address `www.example.com`.
 **Then** the form refuses it with
 
-> Please enter a valid URL.
+> Please enter a valid uniform resource locator.
 > Example: *the constant example address*
 > (blank line)
-> Invalid URL: www.example.com
+> Invalid uniform resource locator: www.example.com
 
 ### M-7 — Deleting a document deletes its attachment
 

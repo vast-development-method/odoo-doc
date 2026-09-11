@@ -219,7 +219,7 @@ Both formats have the same shape:
 |---|---|
 | Product | the product name for a template, the display name for a variant |
 | `UOM` (the literal column header; it abbreviates "unit of measure") | the product's default unit name |
-| Quantity (*q* UoM) | one column per requested quantity, holding the pricelist price at that quantity |
+| Quantity (*q* unit of measure) | one column per requested quantity, holding the pricelist price at that quantity |
 
 Rows are one per product; when a template has more than one variant, the template row is replaced by
 one row per variant. In the spreadsheet format each column is widened to the longest cell it

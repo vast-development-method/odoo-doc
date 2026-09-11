@@ -985,7 +985,7 @@ only accepts products whose costing method is `fifo` or `average`,
 
 **And when** the receipt contains **only** such products, the computation fails with
 **"You cannot apply landed costs on the chosen Transfers(s). Landed costs can only be
-applied for products with FIFO or average costing method."**
+applied for products with first in first out or average costing method."**
 
 ### G9. A landed cost on a product using periodic valuation
 
@@ -2856,7 +2856,7 @@ category, a service product "Freight" flagged as a landed cost,
 **And** at step 4 the landed cost document is created with one cost line of 20.00; but
 the split computation finds **no eligible movement**, because the product uses standard
 price, and fails with **"You cannot apply landed costs on the chosen Transfers(s). Landed
-costs can only be applied for products with FIFO or average costing method."**
+costs can only be applied for products with first in first out or average costing method."**
 
 **And** the inventory valuation account's net balance is 90.00, matching the product's
 total value of 10 × 9.00.

@@ -2,6 +2,8 @@
 
 Everything this domain exposes: the navigation a person sees, the screens and what each one shows, the operations that can be called remotely with their inputs and outputs, the routes, the printable documents, the notifications, and the import and export formats.
 
+> **Reproduced literals.** A few strings in this file are reproduced exactly as the system emits them — error messages, selection labels, generated record names — and therefore keep abbreviations that this specification would otherwise spell out. They are: `UoM` for unit of measure, `SN` for serial number, `ZPL` for the Zebra printer command language, `PDF` for Portable Document Format, `GS1` for Global Standards One, and the suffix `(MTO)` for make to order, that is the supply method this specification calls *advanced* or *trigger another rule*. Wherever such a string is quoted, the quotation is verbatim and must be reproduced character for character.
+
 ---
 
 # 1. Navigation
@@ -289,12 +291,12 @@ The domain exposes no public (unauthenticated) route.
 | Reception Report | Transfer (and Batch Transfer) | — | The report of section 2.9 as a document. |
 | Reception Report Label | Stock Move | — | One label per allocated move; the number of copies is the demand rounded up to the next whole number. |
 | Package Barcode with Contents | Package, Package History | — | The container's barcode and a list of its contents. |
-| Package Barcode (PDF) | Package, Package History | — | The container's barcode alone. |
+| Package Barcode (portable document) | Package, Package History | — | The container's barcode alone. |
 | Package Barcode (ZPL) | Package, Package History | — | The same, as printer-language output. |
 | Location Barcode | Location | — | The Location's barcode and full name. |
-| Lot/Serial Number (PDF) | Lot | — | The lot's barcode and name; the structured variant when the structured-barcode group is active. |
+| Lot/Serial Number (portable document) | Lot | — | The lot's barcode and name; the structured variant when the structured-barcode group is active. |
 | Lot/Serial Number (ZPL) | Lot | — | The same, as printer-language output. |
-| Operation type (PDF) and (ZPL) | Operation Type | — | The type's barcode. |
+| Operation type (portable document) and (ZPL) | Operation Type | — | The type's barcode. |
 | Product Label (ZPL) | Product | — | The product's barcode, name and, in the price variants, its price. |
 | Packaging Barcodes (ZPL) | packaging unit | — | The packaging unit's barcode. |
 | Product Routes Report | Routes Report wizard | — | A diagram of the rules that apply to one product across the chosen Warehouses. |

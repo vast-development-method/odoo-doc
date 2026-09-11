@@ -2,6 +2,8 @@
 
 This file specifies every entity owned by the inventory operations domain: its purpose, its lifecycle, its complete field table, its relations, its uniqueness rules, its defaults, its computed fields and the exact rule behind each, its ordering, its display rule, its archival behavior and its multi-company behavior.
 
+> **Reproduced literals.** A few strings in this file are reproduced exactly as the system emits them — error messages, selection labels, generated record names — and therefore keep abbreviations that this specification would otherwise spell out. They are: `UoM` for unit of measure, `SN` for serial number, `ZPL` for the Zebra printer command language, `PDF` for Portable Document Format, `GS1` for Global Standards One, and the suffix `(MTO)` for make to order, that is the supply method this specification calls *advanced* or *trigger another rule*. Wherever such a string is quoted, the quotation is verbatim and must be reproduced character for character.
+
 Reading conventions used throughout:
 
 - Each entity is introduced as **Name** (`transport.name`, table `storage_name`). The transport name is the identifier used by remote operations; the storage name is the database table.
@@ -519,7 +521,7 @@ An extra database index exists on the tuple (product, source Location, destinati
 | Allowed units (`allowed_uom_ids`) | many-to-many to Unit of Measure, computed, not stored | Same rule as on the move. |
 | Product Category (`product_category_name`) | text, related | Read-only. |
 | Quantity (`quantity`) | decimal, computed and stored, writable, precision Product Unit | Not copied. In the line unit. Must be greater than or equal to zero: "You can not enter negative quantities." Computed from a chosen quantity record when one is picked: see `calculations.md`, section "Quantity from a picked quantity record". |
-| Quantity in Product UoM (`quantity_product_uom`) | decimal, computed and stored, precision Product Unit | Not copied. The quantity converted to the product unit, rounding half away from zero. |
+| Quantity in Product unit of measure (`quantity_product_uom`) | decimal, computed and stored, precision Product Unit | Not copied. The quantity converted to the product unit, rounding half away from zero. |
 | Picked (`picked`) | boolean, computed and stored, writable | Not copied. Forced true when the move is done or the screen asked for automatic picking. On creation it defaults to the move's own picked flag. |
 | Source Package (`package_id`) | link to Package | Company scoped. Deletion of the container is restricted. Restricted to containers located in the line's source Location. |
 | Lot/Serial Number (`lot_id`) | link to Lot | Indexed, company scoped. Restricted to lots of the line's product. |

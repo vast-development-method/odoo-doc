@@ -74,7 +74,7 @@ purchase user or purchase administrator privilege, placed at sequence 135.
 | Share | Purchase Order | The form's action menu | Everyone who can read the record | Produces a portal share link for the order. |
 | Send Reminder | Purchase Order | The form's action menu | Holders of the receipt-reminder privilege | Opens the email composer pre-loaded with the reminder template for the single selected order. |
 | Merge RFQs | Purchase Order | The list's action menu | Holders of the accounting-invoicing privilege | Runs the merge algorithm on the selection. |
-| Confirm RFQ | Purchase Order | The list and kanban action menus | Everyone who can write the record | Confirms every selected order; when the confirmation returns the alternative question, that dialog is opened. |
+| Confirm request for quotation | Purchase Order | The list and kanban action menus | Everyone who can write the record | Confirms every selected order; when the confirmation returns the alternative question, that dialog is opened. |
 | Add/Remove Followers | Purchase Order | The list and kanban action menus | Everyone who can write the record | Opens the follower-editing assistant for the selection. |
 | Accrued Expense Entry | Purchase Order | The form and list action menus | Holders of the accounting-user privilege | Opens the accrual assistant. |
 | Purchase Order (print) | Purchase Order | The print menu | Every internal user | Produces the purchase order document. |
@@ -88,13 +88,13 @@ purchase user or purchase administrator privilege, placed at sequence 135.
 
 | Button | Shown when | Privilege | Effect |
 |---|---|---|---|
-| Send RFQ (highlighted) | status is `draft` | — | Opens the email composer with the request-for-quotation template. |
+| Send request for quotation (highlighted) | status is `draft` | — | Opens the email composer with the request-for-quotation template. |
 | Confirm Order (highlighted) | status is `sent` | — | Confirms; requests analytic validation. |
 | Approve Order (highlighted) | status is `to approve` | Purchase administrator | Approves. |
-| Send RFQ | status is `sent` | — | Same as above, not highlighted. |
+| Send request for quotation | status is `sent` | — | Same as above, not highlighted. |
 | Confirm Order | status is `draft` | — | Confirms. |
 | Upload bill | status is `purchase` | — | A file-upload control that creates a vendor bill from the dropped documents. |
-| Send PO | status is `purchase` | — | Opens the email composer with the purchase-order template. |
+| Send purchase order | status is `purchase` | — | Opens the email composer with the purchase-order template. |
 | Acknowledge | status is `purchase` and the order is not acknowledged | — | Sets the acknowledged flag. |
 | Set to Draft | status is `cancel` | — | Returns the order to draft. |
 | Print | status is not `purchase` | Any internal user | Produces the quotation document and moves a draft order to sent. |
@@ -482,9 +482,9 @@ deadline for a draft or sent order, or the formatted total for a confirmed one.
 
 | Subtype | Posted when | Subscribed by default |
 |---|---|---|
-| RFQ Sent | The status becomes sent | No |
-| RFQ Confirmed | The status becomes to approve, or becomes purchase from any status other than to approve | No |
-| RFQ Approved | The status becomes purchase from to approve | No |
+| request for quotation Sent | The status becomes sent | No |
+| request for quotation Confirmed | The status becomes to approve, or becomes purchase from any status other than to approve | No |
+| request for quotation Approved | The status becomes purchase from to approve | No |
 
 ### 12.4 Automatic notes
 

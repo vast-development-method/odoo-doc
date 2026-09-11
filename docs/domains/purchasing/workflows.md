@@ -701,7 +701,7 @@ product at 4.25 each, the company currency throughout, product reference unit "U
    purchase.
 2. If some lines could not be cleared because their order was already cancelled or confirmed,
    a notification appears: title *"Some not cleared"*, message *"Some quantities were not
-   cleared because their status is not a RFQ status."*
+   cleared because their status is not a request for quotation status."*
 3. If there was nothing at all to clear, the notification is: title *"Nothing to clear"*,
    message *"There are no quantities to clear."*
 4. The buyer then confirms the winning order. Because the order belongs to a group with open
@@ -1077,7 +1077,7 @@ changes.
 
 **Precondition** the product is a service whose *subcontract service* flag is set for the
 selling company. That flag may only be set on a service (*"Product that is not a service can
-not create RFQ."*) and only when the product has at least one vendor (*"Please define the
+not create request for quotation."*) and only when the product has at least one vendor (*"Please define the
 vendor from whom you would like to purchase this service automatically."*).
 
 ### 14.1 First generation
@@ -1136,7 +1136,7 @@ and whose product carries the flag and has not already generated a purchase line
 **Performed by** a buyer, on a multiple selection.
 
 1. Keep only the selected records whose status is draft or sent. If fewer than two remain,
-   refuse with *"Please select at least two purchase orders with state RFQ and RFQ sent to
+   refuse with *"Please select at least two purchase orders with state request for quotation and request for quotation sent to
    merge."*
 2. Group them by the **merge key**: vendor, currency and dropship address; plus, when inventory
    is installed, the operation type; plus, when agreements are installed, the agreement.
