@@ -1503,15 +1503,26 @@ exists."*
 A customer invoice may carry a *payment reference*: the string the customer is asked to quote when
 paying, so that the incoming bank line can be matched automatically. It is computed, on posting, for
 a customer invoice that has none. Which generator is used is decided by two fields on the journal:
-the reference **model** and the reference **type**. The six combinations:
+the reference **model** (field `invoice_reference_model`, labelled Communication Standard) and the
+reference **type** (field `invoice_reference_type`, labelled Communication Type). Their stored
+selection values are reproduced below because the pairing decides the generator; the labels are the
+ones shown in the interface.
 
-## 9.1 Model "odoo", type "invoice"
+| Stored model value | Label | Stored type value | Label |
+| --- | --- | --- | --- |
+| `odoo` | Full Reference | `invoice` | Based on Invoice |
+| `euro` | European | `partner` | Based on Customer |
+| `number` | Numbers only | | |
+
+The six combinations:
+
+## 9.1 Full Reference, Based on Invoice
 
 The document number itself.
 
 Example: `INV/2026/00042`.
 
-## 9.2 Model "odoo", type "partner"
+## 9.2 Full Reference, Based on Customer
 
 ```formula
 reference = "CUST" + "/" + ( partner reference , or the partner identifier when there is none )
@@ -1519,19 +1530,19 @@ reference = "CUST" + "/" + ( partner reference , or the partner identifier when 
 
 Example: a customer whose internal reference is `dumb customer 97` gives `CUST/dumb customer 97`.
 
-## 9.3 Model "number", type "invoice"
+## 9.3 Numbers only, Based on Invoice
 
 Take the result of 9.1 and keep only its digits.
 
 Example: `INV/2026/00042` gives `202600042`.
 
-## 9.4 Model "number", type "partner"
+## 9.4 Numbers only, Based on Customer
 
 Take the result of 9.2 and keep only its digits.
 
 Example: `CUST/customer 97` gives `97`.
 
-## 9.5 Model "euro", type "invoice" — the structured creditor reference
+## 9.5 European, Based on Invoice — the structured creditor reference
 
 The reference follows the international creditor reference standard.
 
@@ -1562,7 +1573,7 @@ The reference follows the international creditor reference standard.
 - groups of four over `INV000037`: `INV0`, `0003`, `7`
 - reference = `RF67 INV0 0003 7`
 
-## 9.6 Model "euro", type "partner"
+## 9.6 European, Based on Customer
 
 1. *J* as in 9.5.
 2. Take the partner's internal reference, keep only its digits, and take the last 21 characters; when

@@ -783,7 +783,7 @@ record rule restricts the wizard to its creator.
 | Discount Product (`sale_discount_product_id`) | Link to Product Variant | Company-checked. Domain: service products invoiced on ordered quantities. The product carried by global-discount lines. Created on demand by the discount dialogue. |
 | Downpayment Account (`downpayment_account_id`) | Link to Account | Tracked. Domain: accounts of the income, other-income or current-liability types. Overrides the account used on advance-invoice lines. |
 | Default Sale Template (`sale_order_template_id`) | Link to Quotation Template | Company-checked. Applied to new quotations of the company. |
-| Sale onboarding payment method (`sale_onboarding_payment_method`) | Selection | Records the choice made in the guided setup: `digital_signature` "Sign online", `paypal`, `stripe`, `other` "Pay with another payment provider", `manual` "Manual Payment". |
+| Sale onboarding payment method (`sale_onboarding_payment_method`) | Selection | Records the choice made in the guided setup. Values: `digital_signature` "Sign online"; `paypal` and `stripe`, each naming one specific third-party payment provider offered by the guided setup; `other` "Pay with another payment provider"; `manual` "Manual Payment". |
 
 ### 12.2 Customer (`res.partner`)
 

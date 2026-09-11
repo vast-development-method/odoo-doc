@@ -949,29 +949,38 @@ These records exist only for the duration of one user interaction. Each is liste
 |---|---|---|
 | Transfers (`pick_ids`) | many-to-many to Transfer | The Transfers awaiting a decision. |
 | Show transfers (`show_transfers`) | boolean | True when more than one Transfer is being validated, in which case the screen lists them individually. |
-| Lines (`backorder_confirmation_line_ids`) | one-to-many of Backorder Confirmation Line | One line per Transfer, each with a "to backorder" switch. |
+| Lines (`backorder_confirmation_line_ids`) | one-to-many of Backorder Confirmation Line | One line per Transfer, each with a "to backorder" switch, all defaulted to true when the screen opens. |
 
-**Backorder Confirmation Line** (`stock.backorder.confirmation.line`): Transfer (`picking_id`), Confirmation (`backorder_confirmation_id`), To Backorder (`to_backorder`, boolean, default true).
+**Backorder Confirmation Line** (`stock.backorder.confirmation.line`): Immediate Transfer (`backorder_confirmation_id`), Transfer (`picking_id`), To Backorder (`to_backorder`, boolean).
 
-Actions: *Create backorder* re-runs the validation with the backorder decision taken; *No backorder* re-runs it declaring every Transfer as not to be backordered. When the list view is used, only the Transfers whose switch is off are declared as not to be backordered.
+Two actions:
+
+- **Create backorder.** Split the lines into those whose switch is on and those whose switch is off. For the ones whose switch is **off**, first log the shortage activity (see below). Then re-run the validation of the Transfers named in the calling context, with the backorder step suppressed and with the switched-off Transfers declared as not to be backordered.
+- **No backorder.** Log the shortage activity for every Transfer being validated, then re-run their validation with the backorder step suppressed and every one of them declared as not to be backordered.
+
+**The shortage activity.** For each Transfer concerned, collect the moves whose demand is strictly greater than their picked quantity (`calculations.md`, section 20.1, step 3), remembering for each the pair (picked quantity, demand). When the collection is not empty, schedule the warning activity on the downstream documents: the destination moves are grouped by (their Transfer, the product's responsible), and one activity is created per group with a rendered note naming the originating Transfer, the per-move old and new quantities, and the impacted Transfers found by walking the destination moves transitively.
 
 ## 24.2 Inventory Adjustment Reference (`stock.inventory.adjustment.name`)
 
 | Field (storage name) | Type | Meaning |
 |---|---|---|
 | Quantities (`quant_ids`) | many-to-many to Stock Quantity | The records whose counts will be applied. |
-| Inventory Reference (`inventory_adjustment_name`) | text | A free label stamped as the reference of every adjustment move created. |
+| Inventory Reason (`inventory_adjustment_name`) | text | Default "Physical Inventory". A free label stamped as the reference of every adjustment move created. |
+| Counting date (`counting_date`) | date and time | Default the current instant. The date written onto the resulting moves. |
 
-Action: apply the counts of the listed quantity records, passing the label along.
+Action *Apply*: restrict the listed records to those whose counted flag is set, then apply their counts with the label and the counting date passed along. Both values reach the adjustment as a calling-context entry, so every move created carries the label as its reference and the counting date as its date.
 
 ## 24.3 Inventory Conflict (`stock.inventory.conflict`)
 
 | Field (storage name) | Type | Meaning |
 |---|---|---|
-| Quantities (`quant_ids`) | many-to-many to Stock Quantity | All the records being applied. |
-| Conflicting quantities (`quant_to_fix_ids`) | many-to-many to Stock Quantity | The subset whose on-hand quantity moved since the count was entered. |
+| Quants (`quant_ids`) | many-to-many to Stock Quantity | All the records being applied. |
+| Conflicts (`quant_to_fix_ids`) | many-to-many to Stock Quantity | The subset whose on-hand quantity moved since the count was entered. |
 
-Actions: *Keep counted quantity* applies the counts as entered; *Discard* clears the counted quantities of the conflicting records.
+Two actions, both of which then apply every record of the set:
+
+- **Keep counted quantity** — for every record, rewrite the difference as `counted quantity − on-hand quantity`, so that the person's count becomes the new truth.
+- **Keep difference** — for every record, rewrite the counted quantity as `on-hand quantity + recorded difference`, so that the *correction* the person intended is preserved and re-applied on top of whatever happened meanwhile.
 
 ## 24.4 Inventory Warning (`stock.inventory.warning`)
 
@@ -979,39 +988,56 @@ Actions: *Keep counted quantity* applies the counts as entered; *Discard* clears
 |---|---|---|
 | Quantities (`quant_ids`) | many-to-many to Stock Quantity | The records concerned. |
 
-Two variants are shown: one warns that counted quantities are already set before re-setting them, the other warns before clearing them.
+Two variants are shown from two different entry points:
+
+- The **reset** variant, titled "Quantities To Reset", clears the counted quantity, the difference, the counted flag and the assignee of every listed record.
+- The **set** variant, titled "Quantities Already Set", copies the on-hand quantity into the counted quantity of only those listed records whose counted flag is **not** already set, leaving the already-counted ones untouched.
 
 ## 24.5 Request a Count (`stock.request.count`)
 
 | Field (storage name) | Type | Meaning |
 |---|---|---|
-| Inventory Date (`inventory_date`) | date | Required. The date to schedule. |
-| User (`user_id`) | link to User | The person asked to count. |
-| Quantities (`quant_ids`) | many-to-many to Stock Quantity | The records to schedule. |
-| Set Count (`set_count`) | selection, default `empty` | `empty` "Leave Empty", `set` "Set Current Value". |
+| Scheduled at (`inventory_date`) | date | Required, default the current instant. The date to schedule. |
+| Assign to (`user_id`) | link to User | The person asked to count. Restricted to members of the inventory user group. |
+| Quantities (`quant_ids`) | many-to-many to Stock Quantity | The records the request starts from. |
+| Show expected quantity (`show_expected_quantity`) | boolean, computed, writable | Reads and writes the system parameter `stock.show_expected_quantity_count`; when true the counting screen shows the theoretical quantity beside the counted one. |
 
-Action: write the date and the user on every listed record; when the choice is "Set Current Value" also copy each record's on-hand quantity into its counted quantity; when it is "Leave Empty" clear the counted quantity and its flag.
+Action *Request a count*, per request:
+
+1. Start from the listed records.
+2. When the lot group is active and at least one listed record carries a tracked product, **extend** the set with every sibling record sharing the same (product, Location) pair, so that a count of one lot of a product forces the whole product at that Location to be counted.
+3. Write, in counting mode, the scheduled date on every record of the extended set, and the assignee too when one was chosen.
+
+The counted quantity is **not** touched by this action.
 
 ## 24.6 Quantity Relocation (`stock.quant.relocate`)
 
 | Field (storage name) | Type | Meaning |
 |---|---|---|
 | Quantities (`quant_ids`) | many-to-many to Stock Quantity | The records to move. |
-| Destination Location (`dest_location_id`) | link to Location | Where to move them. |
-| Destination Package (`dest_package_id`) | link to Package | Which container to put them in. |
-| Destination package name (`dest_package_id_domain`) | text, computed | The allowed containers. |
-| Message (`message`) | text | The label written as the reference of the generated moves; default "Quantity Relocated". |
-| Partial container warning (`partial_package_names`) | text, computed | Names the containers only part of whose content is being moved. |
+| Company (`company_id`) | link to Company, related | Read-only. |
+| Destination location (`dest_location_id`) | link to Location | Restricted to internal Locations of that company. |
+| Destination package (`dest_package_id`) | link to Package, computed and stored, writable | Restricted by the computed allowed set below; cleared automatically when the current value stops satisfying it. |
+| Allowed containers (`dest_package_id_domain`) | text, computed | Containers of that company or of none, and — when a destination Location was chosen — with no Location or with that Location; when no destination Location was chosen but the records all sit in one Location, with no Location or with that Location. |
+| Reason for relocation (`message`) | long text | Written as the reference of the generated moves; when left empty the reference is "Quantity Relocated". |
+| Partial container (`is_partial_package`) and their names (`partial_package_names`) | boolean and text, computed | True, and the comma-separated display names, when at least one container of the selection has contents that are **not** part of the selection. |
+| Multiple locations (`is_multi_location`) | boolean, computed | True when the selected records sit in more than one Location and no destination Location was chosen. |
 
-Action: create and immediately complete one adjustment-style move per quantity record, from its current Location and container to the chosen Location and container.
+Action *Relocate*:
+
+1. Do nothing at all when neither a destination Location nor a destination container was chosen.
+2. Clear the counted quantities of the selected records.
+3. When containers are only partly selected and no destination container was chosen, first relocate the records belonging to those partly-selected containers **unpacked** — they leave their container behind — and remove them from the working set.
+4. Relocate the remaining records to the chosen Location and container.
+5. Re-open the appropriate screen: the lot's own quantity list when the action started from one lot, the product's own quantity list when it started from one product, and the general quantity list otherwise.
 
 ## 24.7 Quantity History (`stock.quantity.history`)
 
 | Field (storage name) | Type | Meaning |
 |---|---|---|
-| Inventory at Date (`inventory_datetime`) | date and time | Required, default now. |
+| Inventory at Date (`inventory_datetime`) | date and time | Required, default the current instant. |
 
-Action: open the quantity list evaluated as of that instant.
+Action *Open*: open the storable-product list — restricted to one product or one product template when the calling context names one — with the chosen instant carried as the as-of date, so that every quantity column is evaluated at that instant. The screen's title is the formatted instant.
 
 ## 24.8 Return Transfer (`stock.return.picking`) and its line (`stock.return.picking.line`)
 

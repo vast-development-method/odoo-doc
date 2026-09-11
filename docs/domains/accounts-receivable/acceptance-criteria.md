@@ -775,7 +775,7 @@ non-zero total).
 **Given instead** a draft customer invoice whose total is 0.00,
 **Then** it does not qualify and its payment status is forced to `not_paid` by the fallback branch.
 
-### H8. The legacy status is never overwritten
+### H8. The imported-balance status is never overwritten
 
 **Given** an imported document whose payment status is the imported-balance value (`invoicing_legacy`),
 **When** any reconciliation changes,

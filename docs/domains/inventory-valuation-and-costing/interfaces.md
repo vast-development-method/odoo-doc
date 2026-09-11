@@ -4,6 +4,14 @@ Window actions and menus as the user navigates them, views and what each shows, 
 remote operations with their inputs and outputs, client-side routes, reports and
 printable documents, notifications, and import and export considerations.
 
+> **Reproduced text.** Quoted, bolded strings in this file are user-facing text the
+> system emits character for character — error messages, selection labels, button
+> labels, action titles. Where such a string contains an abbreviation it belongs to
+> the emitted string, not to this specification's prose: "FIFO" stands for *first in
+> first out*, "AVCO" for *average cost*, "WIP" for *work in progress*, "MOs" for
+> *manufacturing orders*, "BoM" for *bill of materials*, `STJ` for the inventory
+> valuation journal code and `LC/` for the landed cost sequence prefix.
+
 ---
 
 ## 1. Navigation

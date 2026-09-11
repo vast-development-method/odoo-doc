@@ -5,6 +5,14 @@ domain. Formulas are written as plain mathematics; quantities are named in words
 
 Read [glossary.md](glossary.md) first if any term is unfamiliar.
 
+> **Reproduced text.** Quoted, bolded strings in this file are user-facing text the
+> system emits character for character — error messages, selection labels, button
+> labels, action titles. Where such a string contains an abbreviation it belongs to
+> the emitted string, not to this specification's prose: "FIFO" stands for *first in
+> first out*, "AVCO" for *average cost*, "WIP" for *work in progress*, "MOs" for
+> *manufacturing orders*, "BoM" for *bill of materials*, `STJ` for the inventory
+> valuation journal code and `LC/` for the landed cost sequence prefix.
+
 ---
 
 ## 0. Precision, rounding and units
@@ -1346,7 +1354,7 @@ price_subtotal_difference = relevant_quantity × price_unit_difference
 ```
 
 where the gross unit price is the line's unit price net of discount, as defined in
-[entities.md](entities.md#13-journal-item-accountmoveline).
+[entities.md](entities.md#13-journal-item-accountmoveline-table-accountmoveline).
 
 ### 10.3 When a difference is posted
 
