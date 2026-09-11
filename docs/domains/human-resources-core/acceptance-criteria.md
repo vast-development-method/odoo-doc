@@ -163,7 +163,7 @@ preferences.
 **Then** a notification is posted on her employee record addressed to Olga's contact, reading
 "Personal information update.", then "The following fields were modified by Nadia Farrell",
 then a two-item list naming the labels of the two fields, then in italics "You are receiving
-this message because you are the HR Responsible of this employee."
+this message because you are the human resources Responsible of this employee."
 
 **And given instead** that the employee has **no** Human Resources Responsible, **then** no
 notification is posted at all.
@@ -1502,7 +1502,7 @@ the wage itself, **4 000.00**.
 **And when** she asks with gap removal **off**, **then** the first version date is
 **1 March 2021**.
 
-**And when** Lin Chen, who is not an officer, asks, **then** the operation fails with "Only HR
+**And when** Lin Chen, who is not an officer, asks, **then** the operation fails with "Only human resources
 users can access first version date on an employee."
 
 ### M6. A version with no end date never triggers the gap cut

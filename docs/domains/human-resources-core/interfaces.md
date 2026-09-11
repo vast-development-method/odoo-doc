@@ -97,7 +97,7 @@ Two menu entries are removed dynamically rather than by group:
 | Set Present | Employee, as a contextual action | Declares the selected employees present. Administrator only. |
 | Set Absent | Employee, as a contextual action | Declares the selected employees absent. Administrator only. |
 | Add a log note | Employee, as a contextual action | Posts, on each selected employee's thread, "*the employee name* has been noted as *the stored presence state* today". Administrator only. |
-| Send a SMS | Employee, as a contextual action | Opens the text-message composer in mass mode against the employees' work mobile numbers, with the shipped absence template. Administrator only. |
+| Send a text message | Employee, as a contextual action | Opens the text-message composer in mass mode against the employees' work mobile numbers, with the shipped absence template. Administrator only. |
 | Create a Time Off | Employee, as a contextual action | For a single employee, opens a time-off request pre-filled with that employee; for several, opens the multi-employee generation wizard pre-filled with today's date on both ends and the name "Unplanned Absence". Administrator only. |
 | Skill History Report | Department, as a contextual action on the form | Opens the skill report narrowed to that department. |
 | Print Resume | Employee, as a contextual print action on list, cards and form | Opens the curriculum vitae wizard. |

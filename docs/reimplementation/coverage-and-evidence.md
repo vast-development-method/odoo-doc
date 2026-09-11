@@ -58,24 +58,24 @@ Every entity in the catalogue is assigned to exactly one owning domain, so there
 
 ## Narrative coverage by domain
 
-Of 45 domains, 12 have all eleven documents, 14 are partially written and 19 are not yet started. The narrative currently holds 156,971 lines.
+Of 45 domains, 13 have all eleven documents, 13 are partially written and 19 are not yet started. The narrative currently holds 160,587 lines.
 
 A domain is counted complete when all eleven documents exist. Depth is reported separately, because an eleven-document folder of thin documents is not a specification.
 
 | Domain | Documents | Lines | Entities | Fields | Operations | Messages | Narrative |
 |---|---|---|---|---|---|---|---|
+| [contacts-and-organizations](../domains/contacts-and-organizations/) | 10 of 11 | 10,770 | 132 | 2,435 | 2,890 | 516 | in progress |
 | [inventory-valuation-and-costing](../domains/inventory-valuation-and-costing/) | 11 of 11 | 10,135 | 6 | 62 | 35 | 6 | complete |
-| [contacts-and-organizations](../domains/contacts-and-organizations/) | 9 of 11 | 10,037 | 132 | 2,435 | 2,890 | 516 | in progress |
+| [manufacturing](../domains/manufacturing/) | 10 of 11 | 9,766 | 28 | 357 | 492 | 78 | in progress |
 | [point-of-sale](../domains/point-of-sale/) | 10 of 11 | 9,700 | 30 | 584 | 740 | 189 | in progress |
+| [human-resources-core](../domains/human-resources-core/) | 11 of 11 | 9,181 | 31 | 564 | 476 | 43 | complete |
 | [sales](../domains/sales/) | 11 of 11 | 9,015 | 15 | 447 | 729 | 83 | complete |
-| [taxes](../domains/taxes/) | 11 of 11 | 8,683 | 59 | 1,533 | 2,988 | 461 | complete |
+| [taxes](../domains/taxes/) | 11 of 11 | 8,880 | 59 | 1,533 | 2,988 | 461 | complete |
 | [products-and-catalog](../domains/products-and-catalog/) | 11 of 11 | 8,632 | 30 | 501 | 784 | 110 | complete |
-| [human-resources-core](../domains/human-resources-core/) | 10 of 11 | 8,609 | 31 | 564 | 476 | 43 | in progress |
-| [manufacturing](../domains/manufacturing/) | 9 of 11 | 8,297 | 28 | 357 | 492 | 78 | in progress |
 | [accounts-receivable](../domains/accounts-receivable/) | 11 of 11 | 8,251 | 57 | 1,522 | 2,951 | 461 | complete |
-| [financial-reporting](../domains/financial-reporting/) | 11 of 11 | 8,124 | 57 | 1,509 | 2,942 | 457 | complete |
+| [inventory-operations](../domains/inventory-operations/) | 11 of 11 | 8,194 | 55 | 968 | 1,260 | 145 | complete |
+| [financial-reporting](../domains/financial-reporting/) | 11 of 11 | 8,135 | 57 | 1,509 | 2,942 | 457 | complete |
 | [payments-and-bank-reconciliation](../domains/payments-and-bank-reconciliation/) | 11 of 11 | 8,061 | 59 | 1,543 | 2,971 | 465 | complete |
-| [inventory-operations](../domains/inventory-operations/) | 11 of 11 | 8,019 | 55 | 968 | 1,260 | 145 | complete |
 | [general-ledger](../domains/general-ledger/) | 11 of 11 | 8,005 | 55 | 1,504 | 2,940 | 457 | complete |
 | [purchasing](../domains/purchasing/) | 11 of 11 | 7,876 | 13 | 232 | 298 | 29 | complete |
 | [identity-and-access](../domains/identity-and-access/) | 9 of 11 | 7,687 | 145 | 2,553 | 2,987 | 517 | in progress |
@@ -83,8 +83,8 @@ A domain is counted complete when all eleven documents exist. Depth is reported 
 | [units-of-measure-and-packaging](../domains/units-of-measure-and-packaging/) | 11 of 11 | 6,791 | 1 | 22 | 25 | 5 | complete |
 | [accounts-payable](../domains/accounts-payable/) | 11 of 11 | 6,014 | 57 | 1,514 | 2,947 | 461 | complete |
 | [messaging-and-activities](../domains/messaging-and-activities/) | 3 of 11 | 4,056 | 89 | 918 | 1,277 | 139 | in progress |
+| [time-off](../domains/time-off/) | 3 of 11 | 1,410 | 16 | 278 | 285 | 56 | in progress |
 | [customer-relationship-management](../domains/customer-relationship-management/) | 2 of 11 | 967 | 40 | 388 | 392 | 40 | in progress |
-| [time-off](../domains/time-off/) | 2 of 11 | 951 | 16 | 278 | 285 | 56 | in progress |
 | [pricing-and-pricelists](../domains/pricing-and-pricelists/) | 2 of 11 | 741 | 27 | 481 | 762 | 99 | in progress |
 | [multi-currency](../domains/multi-currency/) | 2 of 11 | 669 | 179 | 3,918 | 5,791 | 960 | in progress |
 | [attendances-and-working-time](../domains/attendances-and-working-time/) | 1 of 11 | 183 | 10 | 151 | 194 | 15 | in progress |
@@ -120,24 +120,24 @@ A domain is counted complete when all eleven documents exist. Depth is reported 
 | attendances-and-working-time | 183 | — | — | — | — | — | — | — | — | — | — |
 | automation-and-integration | — | — | — | — | — | — | — | — | — | — | — |
 | calendar-and-scheduling | — | — | — | — | — | — | — | — | — | — | — |
-| contacts-and-organizations | 250 | 1384 | 346 | 807 | 775 | 2847 | 209 | 3187 | — | — | 232 |
+| contacts-and-organizations | 250 | 1384 | 346 | 807 | 775 | 2847 | 209 | 3187 | 733 | — | 232 |
 | customer-relationship-management | 164 | 803 | — | — | — | — | — | — | — | — | — |
 | delivery-and-shipping | — | — | — | — | — | — | — | — | — | — | — |
 | electronic-invoicing-and-document-exchange | — | — | — | — | — | — | — | — | — | — | — |
 | events | — | — | — | — | — | — | — | — | — | — | — |
 | expenses | 139 | — | — | — | — | — | — | — | — | — | — |
-| financial-reporting | 157 | 867 | 373 | 504 | 654 | 2282 | 461 | 330 | 372 | 1700 | 424 |
+| financial-reporting | 157 | 867 | 373 | 504 | 654 | 2293 | 461 | 330 | 372 | 1700 | 424 |
 | fiscal-localizations | — | — | — | — | — | — | — | — | — | — | — |
 | fleet | — | — | — | — | — | — | — | — | — | — | — |
 | general-ledger | 100 | 1226 | 449 | 837 | 705 | 1868 | 383 | 388 | 514 | 1332 | 203 |
-| human-resources-core | 215 | 1606 | 474 | 811 | 802 | 1499 | 102 | 552 | 554 | 1994 | — |
+| human-resources-core | 215 | 1606 | 474 | 811 | 802 | 1499 | 102 | 552 | 554 | 1994 | 572 |
 | identity-and-access | 177 | 2123 | 517 | 776 | 1681 | 1207 | 99 | 633 | 474 | — | — |
-| inventory-operations | 104 | 1150 | 454 | 717 | 663 | 1774 | 114 | 371 | 538 | 1794 | 340 |
+| inventory-operations | 104 | 1150 | 454 | 717 | 663 | 1774 | 114 | 371 | 538 | 1794 | 515 |
 | inventory-valuation-and-costing | 219 | 1305 | 276 | 840 | 556 | 1947 | 797 | 370 | 551 | 2882 | 392 |
 | learning-surveys-and-gamification | — | — | — | — | — | — | — | — | — | — | — |
 | loyalty-and-promotions | — | — | — | — | — | — | — | — | — | — | — |
 | lunch-ordering | — | — | — | — | — | — | — | — | — | — | — |
-| manufacturing | 206 | 2084 | 447 | 1118 | 695 | 1752 | 721 | 577 | 697 | — | — |
+| manufacturing | 206 | 2084 | 447 | 1118 | 695 | 1752 | 721 | 577 | 697 | 1469 | — |
 | marketing-and-mass-mailing | — | — | — | — | — | — | — | — | — | — | — |
 | messaging-and-activities | 240 | 2872 | 944 | — | — | — | — | — | — | — | — |
 | multi-currency | 177 | 492 | — | — | — | — | — | — | — | — | — |
@@ -153,8 +153,8 @@ A domain is counted complete when all eleven documents exist. Depth is reported 
 | replenishment-and-procurement | — | — | — | — | — | — | — | — | — | — | — |
 | sales | 199 | 1038 | 547 | 1177 | 679 | 1202 | 571 | 480 | 496 | 1860 | 766 |
 | spreadsheets-and-dashboards | — | — | — | — | — | — | — | — | — | — | — |
-| taxes | 78 | 727 | 292 | 475 | 480 | 3737 | 445 | 294 | 331 | 1451 | 373 |
-| time-off | 147 | 804 | — | — | — | — | — | — | — | — | — |
+| taxes | 78 | 727 | 292 | 475 | 480 | 3737 | 642 | 294 | 331 | 1451 | 373 |
+| time-off | 147 | 804 | 459 | — | — | — | — | — | — | — | — |
 | timesheets | — | — | — | — | — | — | — | — | — | — | — |
 | units-of-measure-and-packaging | 228 | 629 | 292 | 655 | 783 | 1915 | 245 | 420 | 405 | 924 | 295 |
 | website-and-storefront | — | — | — | — | — | — | — | — | — | — | — |
@@ -168,12 +168,12 @@ A dash means the document does not yet exist. A number is its line count.
 |---|---|---|---|
 | purpose | README.md documentation | 1 | 92 |
 | purpose | data documentation | 1 | 11 |
-| purpose | domain specification | 203 | 157,079 |
+| purpose | domain specification | 207 | 160,695 |
 | purpose | interfaces documentation | 1 | 12 |
-| purpose | machine-readable catalogue | 2,519 | 4,060,385 |
+| purpose | machine-readable catalogue | 2,519 | 4,075,589 |
 | purpose | overview documentation | 6 | 6,259 |
-| purpose | references documentation | 1,005 | 187,489 |
-| purpose | reimplementation documentation | 7 | 867 |
+| purpose | references documentation | 1,005 | 188,115 |
+| purpose | reimplementation documentation | 7 | 875 |
 | purpose | repository root | 2 | 201 |
 | purpose | runtime documentation | 1 | 16 |
 

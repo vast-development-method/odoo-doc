@@ -348,7 +348,7 @@ Twelve, listed with their ordering in
 | | | | Plan Training (20) | Manager |
 | | | | Training (30) | Employee |
 | Offboarding | Employee | the main company | Organize knowledge transfer inside the team (10) | Manager |
-| | | | Take Back HR Materials (20) | Manager |
+| | | | Take Back human resources Materials (20) | Manager |
 
 The activity summaries are reproduced exactly as shipped; the abbreviations inside them are
 part of the shipped text and are not expanded here.

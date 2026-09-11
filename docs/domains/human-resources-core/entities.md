@@ -1468,7 +1468,7 @@ department, and when an employee's department or user is changed.
 **Constraints.**
 
 - Changing a plan's target entity away from the Employee while it still names a department
-  is refused: "Plan *the plan names* cannot use a department as it is used only for some HR
+  is refused: "Plan *the plan names* cannot use a department as it is used only for some human resources
   plans."
 - Changing a plan's target entity away from the Employee while any of its templates uses a
   coach, manager or employee responsible kind is refused: "Plan activities *the activity

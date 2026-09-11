@@ -1685,7 +1685,7 @@ Let `N` be the sanitized number.
 
 **Step 3 — length and alphabet.** Let `T` be the template for `cc` with its spaces removed. If the length of `N` differs from the length of `T`, or `N` contains any character that is not a letter or a digit:
 
-> The IBAN does not seem to be correct. You should have entered something like this <the template with its spaces>
+> The international bank account number does not seem to be correct. You should have entered something like this <the template with its spaces>
 > Where B = National bank code, S = Branch code, C = Account No, k = Check digit
 
 **Step 4 — rotate.** Move the first four characters of `N` to the end:
