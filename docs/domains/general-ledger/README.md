@@ -63,7 +63,6 @@ This folder describes the hooks those domains attach to (the analytic distributi
 | Resequence wizard | `account.resequence.wizard` | transient | Renumbers a selected set of entries in a chosen order |
 | Validate entries wizard | `validate.account.move` | transient | Posts a selected set of draft entries in bulk |
 | Secure entries wizard | `account.secure.entries.wizard` | transient | Hashes all eligible entries up to a chosen date |
-| Change lock date wizard | `account.change.lock.date` | transient | Edits the company lock dates and records the change in the audit trail |
 | Chart template mechanism | `account.chart.template` | none (abstract) | Loads a country chart of accounts and all the records that come with it |
 
 ## Reading order

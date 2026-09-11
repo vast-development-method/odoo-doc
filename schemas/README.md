@@ -1,14 +1,16 @@
-# Machine-readable catalogs
+# Machine-readable catalogues
 
-All catalogs are JavaScript Object Notation documents, encoded in Unicode Transformation Format eight bits, with keys in lower snake case. Every catalog has a top-level `catalog` object with `name`, `description`, `record_count` and `generated_from` (the specification revision), then `records`.
+Structured facts for tooling, code generation and test generation. Every catalogue is a document with a `catalog` header carrying its name, description, record count and what it was generated from, followed by a `records` array. Keys are lower snake case. Identifiers in the records are reproduced storage and transport names, and each record also carries a full name in words where one exists.
 
-| Folder | Catalogs |
+Three kinds of catalogue are mixed here and they carry different weight. A **declared** catalogue comes from parsing every capability package definition. An **observed** catalogue comes from installing every package and introspecting the running result. An **authored** catalogue is written and reviewed by hand. [Coverage and evidence](../docs/reimplementation/coverage-and-evidence.md) explains why the distinction matters before you rely on an entry.
+
+| Folder | Content |
 |---|---|
-| `data/` | `entity-index.json`, `entities/<transport name>.json` (one per entity), `physical-tables.json`, `relations.json`, `selection-values.json`, `constraints.json`, `computed-fields.json`, `reference-data/*.json` |
-| `interfaces/` | `routes.json`, `window-actions.json`, `server-actions.json`, `client-actions.json`, `address-actions.json`, `report-actions.json`, `menus.json`, `views/<transport name>.json`, `mail-templates.json`, `remote-operations.json`, `web-templates.json` |
-| `operational/` | `scheduled-jobs.json`, `sequences.json`, `groups.json`, `privileges.json`, `access-rights.json`, `record-rules.json`, `system-parameters.json`, `decimal-precisions.json`, `message-subtypes.json`, `activity-types.json` |
-| `source-artifacts/` | `packages.json`, `package-dependency-graph.json`, `package-contents.json`, `chart-templates.json` |
-| `source-file-distribution/` | `files.json` (every file of this repository with purpose, domain, size and line count), `summary.json` |
-| `traceability/` | `entity-name-dictionary.json`, `capability-to-entity.json`, `entity-to-document.json`, `acceptance-to-workflow.json`, `coverage.json` |
+| [Data](data/README.md) | Entities, fields, relations, selection values, constraints, computed fields, the live physical schema and the shipped reference data |
+| [Interfaces](interfaces/README.md) | Routes, actions, menus, views, report definitions and templates |
+| [Operational](operational/README.md) | Scheduled jobs, sequences, groups, access rights, record rules, parameters and precisions |
+| [Mathematics](mathematics/README.md) | Every calculation that carries money, quantity, time or a rate, with operands, procedure, rounding and worked examples |
+| [Source artifacts](source-artifacts/README.md) | Capability packages, their dependency graph and the country chart templates |
+| [Source file distribution](source-file-distribution/README.md) | Every file of this repository with its purpose, domain, size and line count |
+| [Traceability](traceability/README.md) | The entity name dictionary and the maps that link capabilities, entities, documents and scenarios |
 
-Identifiers in the catalogs are reproduced storage and transport names; each record also carries `full_name` in words.
