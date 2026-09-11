@@ -388,3 +388,64 @@ The learning wizard opens only under the nine conditions of `workflows.md` §8.3
 | Deleting a bill in the middle of a numbering series | Refused for non-managers; a manager gets a warning but may proceed, and the gap flags of the neighbours are updated |
 | Two bills of the same vendor, same date, same total, but different currencies | Not duplicates: the currency must match |
 | A vendor credit note detected as a duplicate of a bill | Impossible: the type-compatibility condition pairs `in_invoice` with `in_receipt` and `out_invoice` with `out_receipt`, and otherwise requires equality; `in_refund` only matches `in_refund` |
+
+---
+
+## 17. Permission checks, layer by layer
+
+An operation on a purchase document passes through five independent layers. All five must allow it.
+
+| Layer | What it checks | Failure |
+|---|---|---|
+| 1. Access rights | The group-level matrix of `configuration.md` §5.2: may this group create / read / update / delete this entity at all? | a generic access error naming the entity and the operation |
+| 2. Record rules | The multi-company rule (the document's company is among the user's allowed companies) and, for a portal user, the ownership rule | a generic access error |
+| 3. Field-level groups | Some fields are visible only to a group: the payment widgets and the credit warning to the invoicing or read-only accounting groups; the deductibility column to the partial-deductibility group; the amount in words to the technical-features group | the field is simply absent |
+| 4. Domain rules | The explicit checks of this file: the review authority, the numbering-pattern override, the deletion-in-the-middle-of-a-chain rule | the specific messages listed above |
+| 5. State rules | The guards of `state-machines.md` | the specific messages listed above |
+
+### 17.1 What each role can do, end to end
+
+| Operation | Invoicing | Read-only Accounting | Accountant | Administrator | Portal |
+|---|---|---|---|---|---|
+| See a purchase document | yes | yes | yes | yes | only its own, and only posted or cancelled |
+| Create a purchase document | yes | no | yes | yes | no |
+| Edit a draft purchase document | yes | no | yes | yes | no |
+| Post | yes | no | yes | yes | no |
+| Mass post through the dialogue | yes | no | yes | yes | no |
+| Mark reviewed | depends on the review predicate | no | yes | yes | no |
+| Reset to draft | yes | no | yes | yes | no |
+| Cancel | yes | no | yes | yes | no |
+| Reverse | yes | no | yes | yes | no |
+| Raise a debit note | yes | no | yes | yes | no |
+| Delete a draft that is last in its chain | yes | no | yes | yes | no |
+| Delete a draft in the middle of a chain | no | no | no | yes | no |
+| Write a number not matching the journal pattern | no | no | no | yes | no |
+| Print cheques | no | no | yes | yes (through the invoicing group it implies) | no |
+| Configure a journal's cheque settings | no | no | yes | yes | no |
+| Configure the company's cheque layout and the automatic-validation switch | no | no | no | yes | no |
+| Configure payment terms | no | no | no | yes | no |
+| Read the analysis report | yes | yes | yes | yes | no |
+
+The **Accountant** group is the union of *Basic* (which implies *Invoicing*) and *Read-only Accounting*; the **Administrator** group implies *Invoicing* directly, which is why it holds write access on documents despite its own access row granting only read.
+
+---
+
+## 18. What the system never does
+
+Stating the negatives explicitly, because an implementation is easy to over-build here.
+
+| The system does **not** | Why it matters |
+|---|---|
+| refuse to post a document that has a detected duplicate | detection is advisory; only **automatic** posting is suppressed |
+| refuse to post a document that carries an abnormal warning, except through the optional dialogue | the same |
+| clear the number when a document is reset to draft or cancelled | so that the numbering series keeps no hole |
+| re-use the number of a cancelled document | the same |
+| detach the supplier's file when a purchase document is reset to draft | only sale documents detach, so that their printable document can be regenerated |
+| recompute the unit price or the taxes of a line marked imported | a decoder's values are authoritative |
+| refuse an archived account on a line marked imported | the same |
+| enforce uniqueness of the vendor reference | two suppliers may legitimately use the same number; only duplicate **detection** exists |
+| enforce that the bill date is not in the future | only the accounting date is constrained |
+| refuse a cheque number that duplicates a **cancelled** cheque | the uniqueness check compares posted payments only |
+| produce any journal entry when printing, unmarking or renumbering a cheque | only posting and voiding move the ledger |
+| create a document from a message with no attachment | the route is dropped and a bounce is sent |
+| decode a file posted by a supplier on an existing document | decoding requires an active internal user |

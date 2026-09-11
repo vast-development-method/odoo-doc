@@ -192,7 +192,7 @@ A failure in phase A leaves every selected order untouched.
 
 ### 4.5 Phase E — downstream document creation
 
-7. The extension point `_action_confirm` runs with the cleaned context. Every coupling contributes
+7. The downstream-creation extension point runs with the cleaned context. Every coupling contributes
    one step; the order below is the order in which the couplings wrap each other, from the
    outermost (running first) to the innermost.
 
