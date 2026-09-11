@@ -279,3 +279,147 @@ Account Code Mapping (`account.code.mapping`) is not stored either. It exists on
 The synthetic identifier is built as the account identifier multiplied by ten thousand plus the company identifier; the two parts are recovered by integer division and remainder. Rows exist only for the companies the acting user may see, ordered by the company sequence then the company name. Reading the model without restricting it to specific accounts is refused with the message "Account Code Mapping cannot be accessed directly. It is designed to be used only through the Chart of Accounts."
 
 ---
+
+## 6. Journal
+
+Journal (`account.journal`, table `account_journal`).
+
+### Purpose
+
+A book of entries. Every Journal Entry belongs to exactly one Journal. The Journal determines the numbering prefix of its entries, the default account proposed on their lines, the accounts used for liquidity and for unidentified bank transactions, whether entries are secured with a hash chain, which payment methods are available, and which incoming electronic-mail address creates documents.
+
+### Lifecycle
+
+1. Created by loading a chart template, by the journal screen, or automatically when a bank account is configured.
+2. Used by entries. From the first entry on, the company of the journal can no longer change.
+3. Archived when obsolete. Archiving is refused while the journal still holds draft entries.
+4. Deleted only when nothing references it; deleting a journal deletes its payment method lines and, when no other journal uses it, the bank account record it pointed to.
+
+### Field table
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `name` | Text, translatable | Required. The journal name. |
+| `name_placeholder` | Text, computed, not stored | The suggested name shown in the empty name box: the default name of the type followed, in parentheses, by the trailing number of the code (or `1`). The default names are Customer Invoices, Vendor Bills, Cash, Bank, Credit Card and Miscellaneous Operations. When no type is chosen yet, the placeholder is "Select a type". |
+| `code` | Text, at most 5 characters | Required. Labelled "Sequence Prefix". Computed with a default rule, stored, editable, precomputed. Default: the type prefix (`INV`, `BILL`, `CSH`, `BNK`, `CCD`, `MISC`) followed by the smallest integer from 1 to 99 that yields a code not already used in the company. |
+| `active` | Boolean | Default true. |
+| `type` | Selection | Required. `sale` (Sales), `purchase` (Purchase), `cash` (Cash), `bank` (Bank), `credit` (Credit Card), `general` (Miscellaneous). |
+| `sequence` | Integer | Default 10. Orders journals on the dashboard and in lists. |
+| `company_id` | Link to Company | Required, read-only after creation, indexed, default the active company. |
+| `currency_id` | Link to Currency | Optional. When set and different from the company currency, the journal works in that foreign currency: its liquidity account is forced to the same currency, its balance figures are expressed in it, and the journal display name carries the currency name in parentheses. |
+| `country_code` | Text, related | The code of the fiscal country of the company. |
+| `default_account_id` | Link to Account | The account proposed on lines of entries of this journal and, for liquidity journals, the account that holds the money. Restricted to the account types listed below per journal type. Deleting the account is refused while a journal points to it. Not copied when the journal is duplicated. |
+| `default_account_type` | Text, computed, not stored | The account-type pattern used to filter the default account: `asset_cash` for bank and cash, `liability_credit_card` for credit card, `income%` for sale, `expense%` for purchase, `%` otherwise. |
+| `suspense_account_id` | Link to Account | Computed, stored, editable. For bank, cash and credit-card journals: the account on which a bank transaction is parked until it is matched with a business document. Restricted to current-asset accounts. The computation sets it to the previous value when one exists, otherwise to the company journal-suspense account, otherwise to nothing; for other journal types it is cleared. |
+| `profit_account_id` | Link to Account | Used to book a cash surplus when the counted cash exceeds the computed balance. Restricted to income and other-income accounts. |
+| `loss_account_id` | Link to Account | Used to book a cash shortage. Restricted to expense accounts. |
+| `non_deductible_account_id` | Link to Account | Account used to register the private (non-deductible) share of mixed expenses. |
+| `restrict_mode_hash_table` | Boolean | "Secure Posted Entries with Hash". When true, posting an entry retroactively hashes every entry of the same numbering chain from the new entry back to the last already hashed one. |
+| `refund_sequence` | Boolean | "Dedicated Credit Note Sequence". Computed from the type, stored, editable: true for sale and purchase journals. When true, credit notes get their own numbering chain, distinct from invoices. |
+| `payment_sequence` | Boolean | "Dedicated Payment Sequence". Computed from the type, stored, editable, precomputed: true for bank, cash and credit-card journals. When true, payments and bank transactions posted in the journal get their own numbering chain. |
+| `sequence_override_regex` | Long text | An explicit pattern that overrides the automatic understanding of the numbering format. It may define the named parts `prefix1`, `year`, `prefix2`, `month`, `prefix3`, `seq` and `suffix`. Used when a legally imposed number would otherwise be misread. |
+| `invoice_reference_type` | Selection | Required, default `invoice`. `partner` (Based on Customer) or `invoice` (Based on Invoice). Which subject the structured payment reference identifies. |
+| `invoice_reference_model` | Selection | Required. `odoo` (Full Reference), `euro` (European structured reference), `number` (Numbers only). Default: the first value whose name begins with the lowercase country code of the company, otherwise the full-reference model. |
+| `bank_account_id` | Link to Bank Account | The bank account of the company behind a bank journal. Restricted to bank accounts whose holder is the company partner. Indexed when set. Not copied. Deleting the bank account is refused while a journal points to it. |
+| `bank_acc_number` | Text, related and writable | The account number of that bank account; writing it on a bank journal without a bank account creates one. |
+| `bank_id` | Link to Bank, related and writable | The bank of that bank account. |
+| `bank_statements_source` | Selection | Default `undefined` ("Undefined Yet"). How bank statements reach the journal; other values are contributed by connector packages. |
+| `company_partner_id` | Link to Partner, related, not stored | The partner record of the company; used to constrain the bank account choice. |
+| `inbound_payment_method_line_ids` | Sub-records: Payment Method Line | Money-in methods of a liquidity journal, each with its outstanding-receipts account. Computed from the type and the currency, stored, editable. Not copied. The computation replaces the whole list with one line per default inbound method (the manual method) whenever the type or currency changes, preserving the previously chosen account when its currency still matches. |
+| `outbound_payment_method_line_ids` | Sub-records: Payment Method Line | Money-out methods, each with its outstanding-payments account. Same rules. |
+| `available_payment_method_ids` | Multiple links to Payment Method, computed, not stored | The methods that may still be added, given the multiplicity rule of each method (see below). |
+| `selected_payment_method_codes` | Text, computed, not stored | The codes of the chosen methods, joined by commas and surrounded by commas, used to show or hide method-specific fields. |
+| `journal_group_ids` | Multiple links to Journal Group | The ledger groups this journal participates in. |
+| `alias_name` | Text | The local part of the electronic-mail address that creates documents in this journal. Only sale and purchase journals have one. |
+| `incoming_einvoice_notification_email` | Text | Semicolon-separated addresses that receive a copy of every sent and received invoice of this journal. |
+| `accounting_date` | Date, computed, not stored | The accounting date an entry of this journal would receive today (or at the date given in the context), after applying the lock-date shifting rule. |
+| `has_invalid_statements` | Boolean, computed, not stored | True when the journal holds a bank statement that is not valid or not complete. |
+| `invoice_template_pdf_report_id` | Link to Report | Which printable invoice template this journal uses. |
+| `available_invoice_template_pdf_report_ids` | Sub-records: Report, computed | The templates that may be chosen. |
+| `is_self_billing` | Boolean | The journal is for self-billing documents; invoices then use a separate numbering chain per partner. |
+| `show_fetch_in_einvoices_button`, `show_refresh_out_einvoices_status_button` | Booleans, computed | Whether the electronic-invoice fetch buttons are shown; always false in the core and switched on by exchange packages. |
+
+### Allowed account types for the default account
+
+| Journal type | Allowed account types for the default account |
+|---|---|
+| `bank` | Bank and Cash, Credit Card |
+| `credit` | Credit Card |
+| `cash` | Bank and Cash |
+| `sale` | Income, Other Income |
+| `purchase` | Expenses, Depreciation, Cost of Revenue |
+| `general` | every type except Off-Balance Sheet is offered; the list is the full set of business types |
+
+### Uniqueness
+
+The pair (company, code) is unique. Message: "Journal codes must be unique per company."
+
+### Payment method multiplicity
+
+Each payment method declares a mode:
+
+| Mode | Rule |
+|---|---|
+| `unique` | The method may be attached to **one journal per company**. |
+| `electronic` | The method may be attached to one journal per company **and per provider**. |
+| `multi` | The method may be attached to any number of journals and repeated on a journal. |
+
+Two lines of the same journal and the same direction may not carry the same method **and** the same name when the method is unique or electronic. Message: "You can't have two payment method lines of the same payment type (*inbound* or *outbound*) and with the same name (*the line name*) on a single journal." When the uniqueness across journals is broken the message is "Some payment methods supposed to be unique already exists somewhere else." followed by the offending method names in parentheses.
+
+### Automatic completion at creation
+
+When a journal is created, missing values are filled before the record is written:
+
+1. If the type is missing and the creation comes from a file import, the type becomes `general`.
+2. The company defaults to the active company.
+3. For a bank or cash journal: the name defaults to the bank account number, then to the placeholder; a liquidity account is created when none is given; the profit and loss accounts default to the company cash-difference income and expense accounts.
+4. For a purchase journal: the default account falls back to the company-wide default expense account of product categories.
+5. For a sale journal: the default account falls back to the company-wide default income account of product categories.
+6. For a credit-card journal: the default account is the first credit-card account of the company, or a newly created one.
+7. On import without a code, the code is the first five characters of the name; if that collides, the next free type-based code is taken. If none can be found the creation fails with "Cannot generate an unused journal code. Please change the name for journal *the journal name*."
+8. For sale and purchase journals, an incoming-mail local part is prepared and made unique.
+
+### Creating the liquidity account of a new bank, cash or credit-card journal
+
+1. Read any existing account of the company to learn how many characters codes have; use six when there is none.
+2. Take the company bank-account code prefix for a bank or credit-card journal; for a cash journal take the cash prefix, falling back to the bank prefix; otherwise use an empty prefix.
+3. Pad the prefix with trailing zeros up to the code length; that is the starting code.
+4. Find the first free code from that starting point with the walk described for accounts.
+5. Create an account with the journal name, that code, type "Bank and Cash" (or "Credit Card" for a credit-card journal), the journal currency, and the company.
+
+### Duplication
+
+Duplicating a journal invents a free code by stripping the digits from the original code and appending the smallest integer that is not already used in the company, truncated to five characters; the name becomes the original name followed by "(copy)". When no code can be found the copy fails with "Could not compute any code for the copy automatically. Please create it manually."
+
+### Display name
+
+The journal name; when the journal has a foreign currency different from the company currency, the currency name is appended in parentheses.
+
+### Ordering
+
+By the sequence number, then the type, then the code.
+
+### Multi-company behavior
+
+A journal belongs to exactly one company and cannot change company once entries exist. Accounts selected on a journal must be visible to the company of the journal or to one of its parents.
+
+---
+
+## 7. Journal Group
+
+Journal Group (`account.journal.group`, table `account_journal_group`).
+
+A named selection of journals, expressed **by exclusion**: the group contains every journal of the company except those listed. It is offered as a filter called "Ledger" in the reports and in the journal-item list.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `name` | Text, translatable | Required. Labelled "Ledger group". |
+| `company_id` | Link to Company | Default the active company. When empty the group is available to every company. |
+| `excluded_journal_ids` | Multiple links to Journal | The journals **not** in the group. Archived journals are included in the choice list. |
+| `sequence` | Integer | Default 10. Display order. |
+
+Uniqueness: the pair (company, name). Message: "A Ledger group name must be unique per company."
+
+Filtering an entry or a journal item by a ledger group is translated into "the journal is not one of the excluded journals of that group".
+
+---
