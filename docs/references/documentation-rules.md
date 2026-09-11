@@ -10,6 +10,20 @@ The system is referred to as "the system", "the platform" or "the application". 
 
 **Why.** A specification that leans on the reader recognising a product becomes a pointer to that product instead of a description of it. A reader who cannot look the product up must still be able to build the system. That constraint is what forces the specification to be complete.
 
+### The carve-out for contractual strings
+
+A small number of stored values and user-visible messages contain the product name, and a compatible rebuild has to reproduce them exactly. A stored selection value is written into the database and read by integrations. A user-visible message is quoted in support procedures and asserted by tests. Changing either would break the compatibility this specification exists to preserve.
+
+Such strings are therefore reproduced verbatim, always in code font when they are stored values and always in quotation marks when they are messages, and the document says at that point that the string is reproduced rather than authored. Three kinds qualify and nothing else does:
+
+1. Stored selection values, sequence codes and external identifiers.
+2. Verbatim user-facing messages, including error text and the labels a client displays.
+3. Addresses of third-party services that the system contacts, where the address is part of the integration contract.
+
+The specification's own prose never uses the product name, not even to explain one of these strings. Where a reader needs to know what the string means, the explanation describes its function: a stored value is "the full-reference numbering style", not a name to recognise.
+
+**Why the carve-out is narrow.** The test is whether changing the string would change observable behaviour for some party outside the system. If it would, the string is data and is reproduced. If it would not, it is prose and is rewritten.
+
 ## Rule two: no implementation language and no code
 
 No file contains source code in any language: no statements, no function signatures, no class declarations, no decorators, no query language, no markup fragments, no configuration file excerpts. No file names a programming language, a framework, a database product, a template engine, a web server, a package manager or a library.
