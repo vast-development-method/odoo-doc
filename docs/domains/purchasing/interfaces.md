@@ -305,7 +305,7 @@ contract of the platform.
 | `action_purchase_comparison` | none | an instruction opening the purchase history | — |
 | `retrieve_dashboard` | none | the dashboard structure of section 6 | Read-only. |
 | `send_reminder_preview` | none | a toast message, or nothing | Sends the reminder to the acting user only. |
-| `_send_reminder_mail` | an optional single-order flag | an instruction opening the composer, or nothing | The reminder logic; also the body of the scheduled job. |
+| Send the vendor reminder | an optional single-order flag | an instruction opening the composer, or nothing | The reminder logic; also the body of the scheduled job. |
 | `get_acknowledge_url` | none | the portal address with the acknowledgement flag | — |
 | `get_confirm_url` | an optional kind | a portal address | Retained for compatibility with older links; the kinds *reminder*, *reception* and *decline* all resolve to the acknowledgement address. |
 | `get_update_url` | none | the portal address with the update flag | — |
@@ -313,7 +313,7 @@ contract of the platform.
 | `action_view_picking` | none | an instruction opening the transfers | Present when inventory is installed. |
 | `action_purchase_order_suggest` | the suggestion parameters in the context | the net change in the number of lines | Fills the order from the replenishment suggestion. Present when inventory is installed. |
 | `action_add_from_catalog` | none | an instruction opening the product catalog | — |
-| `_update_order_line_info` | a product, a quantity, an optional section | the resulting discounted unit price | The catalog's write path. |
+| Update a catalog line | a product, a quantity, an optional section | the resulting discounted unit price | The catalog's write path. |
 | `action_create_alternative` | none | an instruction opening the creation assistant | Present when the agreements capability is installed. |
 | `action_compare_alternative_lines` | none | an instruction opening the comparison list | Same. |
 | `get_tender_best_lines` | none | three lists of line identifiers: best total, best arrival date, best unit price | Same. |
@@ -327,7 +327,7 @@ contract of the platform.
 |---|---|---|---|
 | `action_open_order` | none | an instruction opening the order | — |
 | `action_add_from_catalog` | the order identifier in the context | an instruction opening the catalog | — |
-| `_get_product_catalog_lines_data` | none | a structure with the quantity, the price, a read-only flag, the unit name, and optionally a minimum quantity, a unit factor and a warning | The catalog's read path. Raises when the selection spans more than one product. |
+| Read a catalog line | none | a structure with the quantity, the price, a read-only flag, the unit name, and optionally a minimum quantity, a unit factor and a warning | The catalog's read path. Raises when the selection spans more than one product. |
 | `action_product_forecast_report` | none | an instruction opening the forecast report positioned on this line | Present when inventory is installed. |
 | `action_clear_quantities` | none | nothing, or a notification | Sets the quantity of every selected line to zero unless its order is cancelled or confirmed. Present when the agreements capability is installed. |
 | `action_choose` | none | nothing, or a notification | Clears the competing lines of the same products across the alternative group. Same. |
@@ -347,9 +347,9 @@ contract of the platform.
 |---|---|
 | `action_purchase_matching` | Opens the matching screen scoped to this bill. |
 | `action_view_source_purchase_orders` | Opens the source orders. |
-| `_find_and_set_purchase_orders` | Given candidate references, a vendor, a total, a scan flag and a time budget, matches and links the bill to open orders. This is the entry point electronic and scanned document importers call. |
-| `_add_purchase_order_lines` | Appends the given purchase order lines to the bill as new lines. |
-| `_set_purchase_orders` | Replaces or appends the lines of the given orders, inserting a section per order. |
+| Find and link source orders | Given candidate references, a vendor, a total, a scan flag and a time budget, matches and links the bill to open orders. This is the entry point electronic and scanned document importers call. |
+| Append order lines to the bill | Appends the given purchase order lines to the bill as new lines. |
+| Replace or append the lines of given orders | Replaces or appends the lines of the given orders, inserting a section per order. |
 
 ### 9.5 On a Purchase and Bill Line Match Entry
 
@@ -522,7 +522,7 @@ deadline for a draft or sent order, or the formatted total for a confirmed one.
 |---|---|---|
 | Vendor email | Outbound | The three message templates of section 12. |
 | Vendor portal | Inbound | The routes of section 10: viewing, acknowledging, updating expected arrivals, downloading the structured order. |
-| Structured order document, export | Outbound | One machine-readable document per configured builder, embedded in the printed file and downloadable from the portal. The shipped builder produces an order document conforming to the pan-European public procurement online network's ordering profile, version 3.5, identified by the customisation identifier `urn:fdc:peppol.eu:poacc:trns:order:3`. |
+| Structured order document, export | Outbound | One machine-readable document per configured builder, embedded in the printed file and downloadable from the portal. The shipped builder produces an order document conforming to the pan-European public procurement online network's ordering profile identified by the customisation identifier `urn:fdc:peppol.eu:poacc:trns:order:3`. |
 | Structured order document, import | Inbound | A received file is recognised as such an order document when its customisation identifier is exactly that value; a decoder of priority 20 then builds a purchase order from it. Information that cannot be mapped raises the to-do activity of section 12.5. |
 | Vendor bill documents | Inbound | Attachments dropped on an order create a bill and are attached to it. Attachments processed by the platform's document import produce bills that are then matched to orders by the algorithm of [`workflows.md`](workflows.md). |
 | Vendor order documents | Inbound | Attachments dropped on the requests-for-quotation screen create one order per attachment, with the acting user's partner pre-set. |

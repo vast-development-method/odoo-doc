@@ -426,7 +426,7 @@ legitimately lack them:
 | Creating the receipt at approval | The buyer may not hold inventory rights. |
 | Storing the suggestion parameters back onto the vendor partner | A buyer may not be allowed to modify partners. |
 | Reading the on-time delivery rate's underlying products | The rate must be computable without product read rights. |
-| Reading the agreement behind an upstream document when tracing a shortage | Users without purchasing rights must still see where a shortage is coming from. |
+| Reading the agreement behind a source document when tracing a shortage | Users without purchasing rights must still see where a shortage is coming from. |
 | Computing a line's received quantity | The computation reads stock moves. |
 | Marking a tax as used because a purchase order line references it | The reader may not see purchase orders. |
 

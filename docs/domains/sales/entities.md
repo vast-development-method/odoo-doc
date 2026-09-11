@@ -352,7 +352,7 @@ Its practical life cycle is:
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
 | Invoice Lines (`invoice_lines`) | Set of Invoice Line, relation `sale_order_line_invoice_rel` (columns `order_line_id`, `invoice_line_id`) | Not copied. |
-| Invoiced Quantity (`qty_invoiced`) | Decimal, precision `Product Unit` | Computed and stored. Signed sum over the linked invoice lines, converting each invoice line's quantity into the order line's unit without rounding; invoice lines add, credit-note lines subtract; lines of a cancelled invoice are skipped unless the invoice carries the legacy-invoicing payment state. |
+| Invoiced Quantity (`qty_invoiced`) | Decimal, precision `Product Unit` | Computed and stored. Signed sum over the linked invoice lines, converting each invoice line's quantity into the order line's unit without rounding; invoice lines add, credit-note lines subtract; lines of a cancelled invoice are skipped unless the invoice carries the externally-invoiced payment state, whose reproduced value is `invoicing_legacy`. |
 | Invoiced Quantity (posted) (`qty_invoiced_posted`) | Decimal, precision `Product Unit` | Computed, not stored. The same sum restricted to posted invoices, with rounding on the unit conversion, and signed by the document direction. |
 | Quantity To Invoice (`qty_to_invoice`) | Decimal, precision `Product Unit` | Computed and stored. See [calculations.md](calculations.md), "Quantity to invoice". |
 | Invoice Status (`invoice_status`) | Selection | Computed and stored. Values: `upselling` "Upselling Opportunity", `invoiced` "Fully Invoiced", `to invoice` "To Invoice", `no` "Nothing to Invoice". |

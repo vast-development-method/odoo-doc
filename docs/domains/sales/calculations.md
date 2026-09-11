@@ -623,7 +623,7 @@ later than that accrual date. Otherwise the stored delivered quantity is reused 
 
 ```formula
 qty_invoiced = Σ over invoice lines IL linked to the order line , where
-                  IL's invoice is not cancelled, or its payment state is the legacy-invoicing state :
+                  IL's invoice is not cancelled, or its payment state is the externally-invoiced state (`invoicing_legacy`) :
 
                   + convert( IL.quantity , from = IL unit , to = line unit , round = no )
                         when IL's invoice is a customer invoice
@@ -639,7 +639,7 @@ not here.
 ### 6.2 Invoiced quantity restricted to posted invoices
 
 ```formula
-qty_invoiced_posted = Σ over invoice lines IL whose invoice is posted, or carries the legacy state :
+qty_invoiced_posted = Σ over invoice lines IL whose invoice is posted, or carries the externally-invoiced state :
                         convert( IL.quantity , from = IL unit , to = line unit , round = yes )
                         × ( − direction_sign( IL's invoice ) )
 ```
@@ -651,7 +651,7 @@ unit conversion is rounded here.
 ### 6.3 Untaxed invoiced amount
 
 ```formula
-untaxed_amount_invoiced = Σ over invoice lines IL whose invoice is posted, or carries the legacy state :
+untaxed_amount_invoiced = Σ over invoice lines IL whose invoice is posted, or carries the externally-invoiced state :
                               + convert_currency( IL.price_subtotal , to = order currency ,
                                                   on = invoice date or today )
                                     when IL's invoice is a customer invoice
@@ -663,7 +663,7 @@ untaxed_amount_invoiced = Σ over invoice lines IL whose invoice is posted, or c
 ### 6.4 Invoiced amount, tax included
 
 ```formula
-amount_invoiced = Σ over invoice lines IL whose invoice is posted, or carries the legacy state :
+amount_invoiced = Σ over invoice lines IL whose invoice is posted, or carries the externally-invoiced state :
                       convert_currency( IL.price_total , to = order currency ,
                                         on = invoice date or today )
                       × ( − direction_sign( IL's invoice ) )

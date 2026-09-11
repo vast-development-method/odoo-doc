@@ -349,11 +349,11 @@ an advance paid to the vendor rather than goods to receive.
 
 - **Default ordering.** Order, then sequence, then identifier. This is the printing order and
   the order in which sections claim the lines that follow them.
-- **Accountable line constraint** (database check named `_accountable_required_fields`): a line
+- **Accountable line constraint** (a database check on accountable lines): a line
   must satisfy *display type is set* **or** *it is a down payment* **or** *(product, unit and
   expected arrival are all set)*. Violation message: *"Missing required fields on accountable
   purchase order line."*
-- **Non-accountable line constraint** (database check named `_non_accountable_null_fields`): a
+- **Non-accountable line constraint** (a database check on non-accountable lines): a
   line must satisfy *display type is empty* **or** *(product is empty and unit price is zero
   and total quantity is zero and unit is empty and expected arrival is empty)*. Violation
   message: *"Forbidden values on non-accountable purchase order line"*.
