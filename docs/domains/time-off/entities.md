@@ -1146,7 +1146,7 @@ schedule's own time zone**.
 
 Every creation, modification and deletion of a resource-less exclusion triggers the
 restatement procedure of
-[workflows.md, chapter 11](workflows.md#11-create-change-or-delete-a-public-holiday).
+[workflows.md, chapter 11](workflows.md#9-create-change-or-delete-a-public-holiday).
 
 ---
 
@@ -1160,7 +1160,7 @@ restatement procedure of
 | `reason` | Reason | long text | optional · empty | The cancellation reason, posted on the request's thread and sent to the responsible approvers. |
 
 Confirming runs the user cancellation of
-[workflows.md, chapter 7](workflows.md#72-cancel) and returns a success notification reading
+[workflows.md, chapter 7](workflows.md#42-cancel) and returns a success notification reading
 *"Your time off has been cancelled."*
 
 ### 12.2 Generate Time Off Wizard (`hr.leave.generate.multi.wizard`)
@@ -1180,7 +1180,7 @@ Confirming runs the user cancellation of
 A user who is not an Officer may only use the "By Employee" mode; any other choice raises
 *"As Time Off Responsible, you can only use the allocation mode 'By Employee'."* The
 generation procedure is
-[workflows.md, chapter 8](workflows.md#8-generate-time-off-for-multiple-employees).
+[workflows.md, chapter 8](workflows.md#7-generate-time-off-for-multiple-employees).
 
 ### 12.3 Generate Allocations Wizard (`hr.leave.allocation.generate.multi.wizard`)
 
@@ -1235,7 +1235,7 @@ change of hierarchical parent; the restatement of future absences when the worki
 changes; the bulk rewrite of the department on requests and allocations when the department
 or the parent changes; the emptying of the approver link on archiving; and the widening of
 absence intervals when availability is published. Each is specified in
-[workflows.md](workflows.md#12-change-an-employees-working-schedule-through-an-employee-version)
+[workflows.md](workflows.md#10-change-an-employees-working-schedule-through-an-employee-version)
 and [business-rules.md](business-rules.md#9-access-visibility-and-company-consistency).
 
 ### 13.2 Public Employee (`hr.employee.public`)
@@ -1260,7 +1260,7 @@ No fields are added. The behaviour added is: creating or changing a version that
 working schedule refuses, reopens or splits the affected absences, and a change of working
 schedule restates the day amount of every hour-based allocation from its stored hour amount,
 which preserves the hours already accrued. See
-[workflows.md, chapter 12](workflows.md#12-change-an-employees-working-schedule-through-an-employee-version).
+[workflows.md, chapter 12](workflows.md#10-change-an-employees-working-schedule-through-an-employee-version).
 The French localization package additionally fills the gaps in the generated work entries of
 a French part-time employee whose absence had its end date extended.
 

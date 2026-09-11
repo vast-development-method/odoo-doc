@@ -186,7 +186,7 @@ Every data-bound element of a workbook — each list, each data-bound pivot, eac
 | Never loaded | no load has been started | the loading marker, and a load is started |
 | Loading | a load is in flight | the loading marker |
 | Valid | the load finished and the answer was usable | the value |
-| Model invalid | the load failed because the element's entity does not exist | the message of rule [SD-020](business-rules.md#sd-020) |
+| Model invalid | the load failed because the element's entity does not exist | the message of rule [SD-034](business-rules.md#sd-034) |
 | Load failed | the load failed for any other reason | the failure's own message |
 | Stale | the element's definition or its filter conditions changed | the loading marker, and a reload is started |
 

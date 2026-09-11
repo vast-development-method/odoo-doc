@@ -160,7 +160,7 @@ A filter may carry a default. The default applies whenever the reader has not se
 | `relation` | an operator and either a list of record identifiers or the single marker `current_user` in place of the list |
 | `date` | one of twelve period names: the nine relative periods of §5.1, or `this_month`, `this_quarter`, `this_year` |
 
-A default that does not match the table is refused when the filter is created or edited, with rule [SD-022](business-rules.md#sd-022).
+A default that does not match the table is refused when the filter is created or edited, with rule [SD-042](business-rules.md#sd-042).
 
 ### 4.1 Resolving a default at reading time
 
@@ -249,7 +249,7 @@ A filter names a concept — a period, a salesperson, a country. An element name
 
 ### 6.2 Validity
 
-A matching that carries a non-zero offset but no `chain` or no `type` is refused, with rule [SD-022](business-rules.md#sd-022). A matching with no `chain` at all is valid and simply means that this filter does not narrow this element.
+A matching that carries a non-zero offset but no `chain` or no `type` is refused, with rule [SD-045](business-rules.md#sd-045). A matching with no `chain` at all is valid and simply means that this filter does not narrow this element.
 
 ### 6.3 The offset
 
@@ -321,6 +321,6 @@ The public page of a shared dashboard shows only those filters whose rendered va
 
 Three workbook functions read filters; they are listed with their arguments in [`interfaces.md`](interfaces.md) §7 and specified here.
 
-- `ODOO.FILTER.VALUE` takes a filter label and yields that filter's display value — one cell for most kinds, two stacked cells for a date filter and for a numeric filter using `between`. A label that matches no filter raises rule [SD-021](business-rules.md#sd-021). The label is matched after both the given label and each filter's label have been passed through the workbook's own translation, so that a formula written in one language keeps working in another. Escaped quotation marks in the given label are unescaped before matching.
+- `ODOO.FILTER.VALUE` takes a filter label and yields that filter's display value — one cell for most kinds, two stacked cells for a date filter and for a numeric filter using `between`. A label that matches no filter raises rule [SD-037](business-rules.md#sd-037). The label is matched after both the given label and each filter's label have been passed through the workbook's own translation, so that a formula written in one language keeps working in another. Escaped quotation marks in the given label are unescaped before matching.
 - `ODOO.FILTER.LABEL` takes the same argument and yields a *name* rather than a value: for a relational filter, the display names of the selected records joined by a comma and a space, or the raw value when nothing is selected; for a date filter whose window covers whole months, a compact name — the month and year when the window is one month, "Q" and the quarter and the year when it is one quarter, the year alone when it spans a whole year — and otherwise the two stacked dates; for every other kind, the display value unchanged.
 - `ODOO.FILTER.VALUE.V18` is the same rule as `ODOO.FILTER.LABEL` under a second name. It exists so that a workbook written before the two were separated keeps producing what it produced then. It is not offered in the function list.
