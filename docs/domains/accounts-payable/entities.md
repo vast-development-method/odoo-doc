@@ -692,3 +692,122 @@ Only three aspects matter here.
 - **Active flag**: an archived account may not be used on a document being posted.
 - **Allow outgoing payment** (*trusted*): a company account that is not trusted blocks the posting of an **inbound** document. On a purchase document the account belongs to the supplier, so this rule does not fire; it is stated here because the same posting routine serves both directions.
 - **Currency**: participates in the ranking of candidate accounts (see `calculations.md` §3).
+
+---
+
+## 17. Mail Alias (`mail.alias`) — as configured by a purchase journal
+
+Only the aspects the payable domain determines are stated here; the alias entity belongs to `../messaging-and-activities/`.
+
+| Aspect | Value set by a purchase journal |
+|---|---|
+| Target model | the Journal Entry |
+| Local part (`alias_name`) | derived by the rule of `configuration.md` §3.2; forced empty for journals that are neither sale nor purchase |
+| Defaults | company = the journal's company; document type = `in_invoice`; journal = the journal itself |
+| Routing behaviour | a message with **no attachment** does not create a document; a bounce is sent instead (see `workflows.md` §3 step 3) |
+| Uniqueness | at creation the local part is suffixed with `-«journal code»` when another alias in the same domain already uses it |
+| Type change | changing the journal's type rewrites the alias defaults and the local part, unless the synchronisation is explicitly skipped |
+
+The journal exposes a boolean saying whether the alias fields should be shown at all: they are shown only when at least one alias domain exists in the database.
+
+---
+
+## 18. Account (`account.account`) — payable-relevant aspects
+
+| Aspect | Relevance to this domain |
+|---|---|
+| `account_type` = `liability_payable` | Exactly the payable term lines of a purchase document may sit on such an account, and exactly they carry a maturity date |
+| `account_type` = `expense`, `expense_direct_cost`, `asset_fixed` | The account types offered when the system looks for the most frequently used account of a vendor |
+| `internal_group` = `expense` | The group used by the quick-encoding account-and-taxes lookup for an outbound document |
+| `reconcile` | A payable account must be reconcilable for a bill to be settled by reconciliation |
+| `tax_ids` | The taxes an account suggests to a line that has no product; only the **purchase**-typed ones are used on a purchase document |
+| `active` | An archived account blocks posting, except on a line marked imported |
+| `currency_id` | An account that forces a secondary currency refuses a line whose currency is neither that one nor the company currency |
+| `company_ids` | Posting refuses an account belonging to none of the document company's own or parent companies |
+| `account_type` = `off_balance` | Such an account may not be mixed with others, may not carry taxes and may not be reconciled |
+
+---
+
+## 19. Fiscal Position (`account.fiscal.position`) — payable-relevant aspects
+
+| Aspect | Relevance |
+|---|---|
+| detection | On a bill or a vendor credit note the position is detected from the vendor and the delivery address. On a **purchase receipt** the company's default purchase receipt position wins outright |
+| tax mapping | Applied to the taxes proposed on every product line, and to the taxes used when adapting a product's purchase price |
+| account mapping | Applied to the **payable** account chosen for the term line, and to the expense accounts read from a product |
+| country | Together with the company's fiscal country it determines the document's tax country, which constrains which taxes the lines may carry |
+| foreign tax registration | When the position declares one, its country becomes the document's tax country |
+
+---
+
+## 20. Attachment (`ir.attachment`) — payable-relevant aspects
+
+| Aspect | Relevance |
+|---|---|
+| owning model and identifier | Written to the document for a file that qualifies to stay visible; cleared for one that does not |
+| owning field | An attachment bound to a field (such as the printable document) is never treated as a free attachment |
+| media type | Determines whether the file stays visible (see §9.3) and whether it is a Portable Document Format container to unwrap |
+| raw bytes | The input of the decoder and of the tree parser |
+| restrictive audit trail | An attachment of a document that has been posted before, in a company with the restrictive audit trail, is protected from deletion |
+
+---
+
+## 21. Relations between the entities of this domain
+
+| From | Relation | To | Cardinality | On delete |
+|---|---|---|---|---|
+| Journal Entry | journal | Journal | many to one | restrict (a journal with entries cannot be deleted) |
+| Journal Entry | partner | Partner | many to one | restrict |
+| Journal Entry | commercial partner | Partner | many to one | restrict |
+| Journal Entry | recipient bank account | Partner Bank Account | many to one | restrict |
+| Journal Entry | payment term | Payment Term | many to one | blocked by an explicit refusal when documents reference it |
+| Journal Entry | fiscal position | Fiscal Position | many to one | restrict |
+| Journal Entry | lines | Journal Item | one to many | cascade |
+| Journal Entry | reversed entry | Journal Entry | many to one | — |
+| Journal Entry | debit origin | Journal Entry | many to one | — |
+| Journal Entry | recurrence origin | Journal Entry | many to one | — |
+| Journal Entry | matched payments | Payment | many to many, through `account_move__account_payment` with columns `invoice_id` and `payment_id` | — |
+| Journal Item | document | Journal Entry | many to one | cascade |
+| Journal Item | account | Account | many to one | restrict |
+| Journal Item | product | Product | many to one | restrict |
+| Journal Item | unit | Unit of Measure | many to one | restrict |
+| Journal Item | taxes | Tax | many to many, through `account_move_line_account_tax_rel` with columns `account_move_line_id` and `account_tax_id` | — |
+| Journal Item | originator tax distribution line | Tax Distribution Line | many to one | restrict |
+| Journal Item | reporting grids | Account Tag | many to many | restrict |
+| Journal Item | matched debits / credits | Partial Reconciliation | one to many | — |
+| Journal Item | full reconciliation | Full Reconciliation | many to one | — |
+| Payment Term | lines | Payment Term Line | one to many | cascade |
+| Journal | cheque sequence | Sequence | many to one | — |
+| Payment | payment method line | Payment Method Line | many to one | — |
+| Invoice Analysis Report row | document, journal, company, partner, product, account, currency | the respective entities | many to one, read-only | — |
+
+### 21.1 Diagram
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "Journal (purchase)" as J
+    state "Journal Entry (bill)" as M
+    state "Journal Item" as L
+    state "Payment Term" as T
+    state "Payment (cheque)" as P
+    state "Invoice Analysis row" as R
+    J --> M: numbers
+    M --> L: owns
+    T --> M: distributes the total
+    M --> P: reconciled by
+    L --> R: one row per product line
+```
+
+---
+
+## 22. Ordering summary
+
+| Entity | Order |
+|---|---|
+| Journal Entry | accounting date descending, number descending, bill date descending, identifier descending |
+| Journal Item | the document's order, then the line sequence; dynamic lines sort at fixed sequences 10000 (tax), 11000 (rounding) and 12000 (payable term) |
+| Payment Term | sequence, then identifier |
+| Payment Term Line | identifier — that is, **creation order**, which is what makes "the last line is the balance" well defined |
+| Invoice Analysis Report | bill date descending |
+| Stub lines on a cheque | grouped into Bills then Refunds, each group ordered by due date falling back to accounting date |
