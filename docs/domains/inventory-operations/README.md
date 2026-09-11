@@ -102,3 +102,37 @@ Entities of other domains that carry fields specified here: Company (`res.compan
 - The domain defines no accounting entries of its own. `accounting-effects.md` explains what it hands over and to whom.
 - Expiry dates on lots and the first-expired-first-out removal ordering are referenced by a help text and by an optional context switch (`with_expiration`) but the dates themselves and the strategy record are supplied by a companion package; only the hooks are specified here and marked as such.
 - Barcode-driven screens are described only through the data contract they use (barcode fields, barcode rule types, aggregate barcode generation, reusable versus disposable package behavior); the interactive screens themselves belong to a companion package.
+
+## How to read the algorithms
+
+Five algorithms are the heart of the domain and everything else is scaffolding around them. Read them in this order:
+
+1. **Gathering** (`calculations.md`, section 3) — turns "I need product X at location L" into an ordered list of Stock Quantity records. Everything that takes goods out of anywhere goes through it.
+2. **The reservation-quantity computation** (section 3.3) — decides how much of that list may be taken, including the clamping, the unit re-expression and the negative-pocket absorption.
+3. **The reservation algorithm** (section 5) — turns the result into Stock Move Lines and reserved counters, with three branches: bypassing sources, unchained moves, chained moves.
+4. **The completion algorithm** (section 16) and **the line completion** (section 17) — actually move the goods.
+5. **The validation algorithm** (section 20) — the sequence a person triggers, which wraps the completion in the sanity check, the backorder decision and the follow-up actions.
+
+Three more are needed to understand where goods end up rather than where they come from: **put-away selection** (section 9), the **whole-container** passes (section 10) and **move merging** (section 13).
+
+## What an implementation must get exactly right
+
+In order of how much damage an error does:
+
+| Rank | Thing | Why |
+|---|---|---|
+| 1 | The reserved counter invariant (`business-rules.md`, invariant 14.2) | Every promise the system makes to a document rests on it. |
+| 2 | The gathering order per removal strategy | It decides which physical goods leave, and therefore the cost the valuation domain computes. |
+| 3 | The completion order (`calculations.md`, section 16) | Backorders, pushes and re-reservations all depend on happening at the right step. |
+| 4 | The status derivations | Every screen, every filter and every counter is built on them. |
+| 5 | The rounding table (`calculations.md`, section 35) | The difference between a backorder and no backorder is often one comparison at the wrong precision. |
+| 6 | The merge key | Getting it wrong either fragments documents or silently fuses different costs. |
+| 7 | The put-away specificity sort | It decides which shelf, and a wrong shelf is a lost item. |
+
+## Conventions in this folder
+
+- Entity names are written in full and in title case. The transport name and the storage name are given in code font at the first mention in each file.
+- Quantities always name the unit they are expressed in: the *product unit*, the *line unit* or the *packaging unit*.
+- Algorithms are numbered steps with explicit preconditions and failure conditions. Every failure names the exact message.
+- Formulas are plain mathematics in fenced blocks labelled `formula`, with the rounding rule stated next to them.
+- Reproduced identifiers — storage names, transport names, selection values, route paths — are in code font and are the only abbreviations used; each file that contains one glosses it at the top.

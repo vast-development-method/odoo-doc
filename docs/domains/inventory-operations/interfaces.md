@@ -536,3 +536,82 @@ Three of the operations return a client-side action rather than a window action;
 | Multi-print | Validating a Transfer when the Operation Types ask for automatic printing | The list of report actions, and optionally one follow-up action (the Reception Report). |
 | Display notification | Merging batches; reverting an adjustment with nothing to revert; adding lines to a wave | A title, a message with one substitution slot, an optional list of links each with a label and an address, whether the notification is sticky, and optionally a follow-up action that closes the current screen. |
 | Soft reload | Adding lines to a wave from inside the wave screen | None. |
+
+---
+
+# 14. The printable documents, section by section
+
+## 14.1 The delivery document
+
+Rendered for a Transfer. The contact used for the address block is the Transfer's contact; the delivery address is shown only when the Transfer goes to an external Location, that is when its Operation Type kind is delivery and either the first move or the Transfer names a contact.
+
+**Header.** The Transfer's reference as the title; the source document; the scheduled date; the contact; the shipping and invoicing addresses when they differ.
+
+**Section 1 — Ordered quantities.** One row per Stock Move that has a demand, with:
+
+| Column | Content |
+|---|---|
+| Product | The product's display name, with the move's transfer description underneath, that description stripped of a leading repetition of the product name |
+| Ordered | The move's demand, formatted at the `Product Unit` precision, followed by the line unit's name when the multiple-units group is active, and underneath, in a muted style, the packaging quantity and the packaging unit's name |
+| Delivered | The move's processed quantity, formatted the same way, and underneath the same quantity converted into the packaging unit |
+
+**Section 2 — Delivered detail.** Present when the Transfer has detail lines. One block per outermost destination container, then one block for the loose lines. The rows come from the aggregation of `calculations.md`, section 24.9, so they are grouped by product, description, unit and packaging unit rather than by line.
+
+| Column | Content | Shown when |
+|---|---|---|
+| Product | The aggregated product and description | always |
+| Package | The container's name, or its path inside the outermost one for a nested container | the Transfer has more than one level of containers |
+| Lot/Serial Number | The lot names of the lines in the group | the lot-on-slip group is active and at least one line carries a lot |
+| Delivered | The aggregated processed quantity with its unit | always |
+
+**Section 3 — Remaining quantities not yet delivered.** Present when the Transfer has backorders. One row per product still owed, from the same aggregation walked over the backorder chain: the product, and the quantity still owed.
+
+**Footer.** The signature image when one was captured, above the contact's name.
+
+## 14.2 The picking document
+
+Rendered for a Transfer. Optimised for a person walking the warehouse rather than for a customer.
+
+**Header.** The reference as a barcode and as text; the Operation Type; the source and destination Locations; the scheduled date; the source document; the contact.
+
+**Body.** One row per Stock Move, or per detail line when the Operation Type asks to show detailed operations, with: the product as a barcode and as text, the description, the source Location, the destination Location, the lot, the source container, the destination container, the demand, the processed quantity and the unit. The Location, lot and container columns appear only when their respective groups are active.
+
+Printing this document sets the Transfer's printed flag, which excludes it from further automatic grouping of new moves. The flag is also set when the document is rendered for a Transfer whose status is ready.
+
+## 14.3 The container document
+
+Rendered for a Transfer. One page per outermost container of the Transfer, each with: the container's name as a barcode and as text, its type, its dimensions, its weight, and a list of its contents — product, lot, quantity, unit — including the contents of every nested container, each nested container introduced by its own name.
+
+For a done Transfer the content is read from the Package History snapshots rather than from the containers, so the document still prints correctly after the containers have been re-used.
+
+## 14.4 The count sheet
+
+Rendered for a set of Stock Quantity records. One row per record with: the product, the Location, the lot, the container, the owner, the on-hand quantity, the unit, and an empty column for the person to write the count in. Grouped by Location.
+
+## 14.5 The reception report
+
+Rendered for one or more Transfers. Grouped by the source document of each demand. Each group is introduced by that document's name, its scheduled date, its contact and its priority. Each row carries the product, the quantity, the unit and its state: assignable, already assigned, or expected but not assignable.
+
+## 14.6 The label documents
+
+| Document | Content |
+|---|---|
+| Product label | The product's barcode, its display name, and its price in the price variants. Four sheet layouts and one printer-language layout with four templates. |
+| Lot label | The lot's barcode — the structured variant when the structured-barcode group is active — its name, and the product's name. |
+| Container label | The container's barcode and name, with or without the content list. |
+| Location label | The Location's barcode and full name. |
+| Operation type label | The Operation Type's barcode and display name. |
+| Packaging label | The packaging unit's barcode and name. |
+| Reception report label | One label per allocated move, carrying the product, the quantity and the source document, repeated as many times as the demand rounded up. |
+
+## 14.7 The routes diagram
+
+Rendered from the Routes Report wizard. For each chosen Warehouse, a diagram whose nodes are Locations and whose edges are Stock Rules, each edge labelled with the Operation Type, the action, the supply method and the lead time. The rules the chosen product would actually take are highlighted.
+
+## 14.8 The traceability document
+
+Rendered through the route of section 4, in landscape. One row per unfolded node of the tree, with the seven columns of `calculations.md`, section 26.3, indented by level. The title is the display name of the record the report was opened from.
+
+## 14.9 The batch document
+
+Rendered for a Batch Transfer. One combined picking list covering every Transfer of the batch, the Transfers appearing in batch-sequence order — which the dispatch capability sets from the contacts' postal codes — each introduced by its reference and its contact, followed by its rows in the same shape as the picking document.
