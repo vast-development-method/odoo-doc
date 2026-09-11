@@ -1685,3 +1685,117 @@ This index is the contract for anything that reads or writes the domain from out
 | `width` | Package Type | decimal |  | Width |
 | `xdock_type_id` | Warehouse | link | Operation Type | Cross Dock Type |
 | `zip` | Transfer | text |  | Zip |
+
+---
+
+# 26. Lifecycles in detail
+
+The field tables above say what each entity *is*. This section says what happens to it over time: who creates it, what each event changes, and what finally becomes of it. Only the six entities whose lifecycle is non-trivial are covered; the others are created, edited and deleted without side effects beyond their constraints.
+
+## 26.1 A Transfer, from creation to archive
+
+| Event | What changes on the Transfer | What changes elsewhere |
+|---|---|---|
+| Created by hand | A reference is drawn from the Operation Type's sequence; the two Locations are resolved from the Operation Type and the contact; the shipping policy is copied from the Operation Type; the responsible is the creator; the status is `draft`; the lock flag is on. | Nothing. |
+| Created by the rule engine | The same, but the creating moves supply the origin, the contact and the Locations, and the responsible is left empty. | The moves are written into it in the same operation. |
+| A move flagged additional is added | Nothing directly. | The automatic confirmation runs, which confirms every draft move of the Transfer. |
+| Confirmed | The status is derived from the moves. | Draft moves are confirmed, grouped, merged; supply requests are raised; eligible moves are reserved; the replenishment scheduler is triggered. |
+| Reserved | The status is re-derived. | Detail lines are created; reserved counters rise; put-away runs; whole containers are detected. |
+| Unreserved | The status is re-derived. | Unpicked detail lines are deleted; reserved counters fall. |
+| A container is created by put in pack | Nothing directly. | The chosen lines get a destination container; put-away may re-run; the container label may print. |
+| The scheduled date is written | Stored. | Every move's date is rewritten. |
+| A Location is written | Stored. | Every move whose destination usage is not inventory loss gets the same Location. |
+| The Operation Type is written | A new reference is drawn; both Locations are reset. | The moves' Operation Type follows on the next screen interaction. |
+| The lock flag is toggled | Stored. | Nothing; it only gates future edits. |
+| The transfer document is printed | The printed flag is set. | The Transfer stops absorbing newly created moves. |
+| Validated | The status becomes `done`; the completion instant is stamped; the priority is reset. | See the validation algorithm; a backorder may be created, messages sent, documents queued. |
+| Cancelled | The status becomes `cancel`; the lock flag is forced on. | Every move is cancelled, with all the propagation that implies. |
+| A signature is written | Stored as an attachment. | The delivery document is rendered and attached to a message. |
+| Returned | Nothing on the original except its return counter. | A new Transfer is created pointing back at it. |
+| Deleted | Gone. | Its moves are cancelled and deleted first; a chained non-draft move blocks the whole deletion. |
+
+A Transfer is never archived: it has no active flag. A completed Transfer stays forever and is the only durable record of what physically happened.
+
+## 26.2 A Stock Move, from creation to completion
+
+| Event | What changes on the move | What changes elsewhere |
+|---|---|---|
+| Created | The status is `draft` unless the Transfer is done; the Locations, Operation Type, unit, contact, priority and description are all derived; the reordering rules of the affected products and Warehouses are marked for recomputation. | Nothing physical. |
+| Confirmed | The status becomes `waiting` or `confirmed`; the reservation date may be stamped. | A supply request may be raised; a Transfer may be created or joined; the move may be merged away. |
+| Merged away | The record is cancelled and deleted. | Its detail lines are re-linked to the survivor; its chain links are transferred. |
+| Merged into | Its demand, date, chain links, status and origin are rewritten. | The other moves disappear. |
+| Reserved | The status becomes `partially_available` or `assigned`. | Detail lines exist; counters rise; put-away runs. |
+| Its demand is raised | The status may drop to `partially_available`. | A note is posted. |
+| Its demand is lowered below what is reserved | The move is unreserved entirely and re-derived. | Counters fall; a note is posted; a vendor-sourced move is re-reserved at once. |
+| Its source Location is changed | Its Warehouse is recomputed; its supply method may reset; its chain links may be cleared. | Lines that fall outside the new Location are deleted; the move is re-reserved. |
+| Split | Its demand is reduced; its status is re-derived; its reservation is preserved. | A new move is produced with the same chain links, unit price and deadline. |
+| Completed | The status becomes `done`; the date becomes the completion instant. | Quantities move; counters are released; pushes create the next step; destination moves are re-reserved. |
+| Cancelled | The status becomes `cancel`; the picked flag, the chain links and the supply method are reset. | Downstream and possibly upstream moves are cancelled or unlinked; a warning activity is scheduled. |
+| Deleted | Gone. | Only possible when draft or cancelled and unchained; its detail lines go with it. |
+
+## 26.3 A Stock Move Line, from creation to completion
+
+| Event | What changes on the line | What changes elsewhere |
+|---|---|---|
+| Created during a reservation | It carries the record's Location, lot, container and owner, and the taken quantity. | The reserved counter of that key rises; the move's status is recomputed. |
+| Created by hand on an open Transfer | The same, plus a move is found or created for it with a demand of zero. | Same. |
+| Created by hand on a **done** Transfer | It is created done and picked, with a move created for it whose demand equals its quantity. | The quantity moves immediately; the downstream moves are unreserved and re-reserved. |
+| Its quantity or a characteristic is changed while open | Stored. | The old key is unreserved in full and the new key is reserved up to availability; the move's status is recomputed; the line's date may be re-stamped. |
+| It is ticked as picked | Stored; the date is re-stamped. | The move becomes picked. |
+| Put-away runs on it | Its destination Location is rewritten. | Nothing. |
+| Put in pack runs on it | Its destination container is set. | The container's own Location and destination chain may change; put-away may re-run. |
+| Completed | Its date becomes the completion instant. | The quantity leaves the source and enters the destination; reservations are released; other reservations may be freed. |
+| Changed after completion | Stored. | The whole movement is undone and redone; a note is posted; the downstream moves are re-reserved. |
+| Deleted while open | Gone. | The reserved counter of its key falls; the move's status is recomputed; its destination container may be freed. |
+| Deleted while done or cancelled | Refused. | — |
+
+## 26.4 A Stock Quantity record, from creation to deletion
+
+A quantity record is never created or deleted by a person under normal operation. It appears the first time goods reach a (product, Location, lot, container, owner) combination and disappears when nothing is left.
+
+| Event | Effect |
+|---|---|
+| Goods arrive at a new combination | The record is created with the arriving quantity and an incoming date taken as the minimum of the candidate dates. |
+| Goods arrive at an existing combination | The on-hand quantity rises; the incoming date is lowered to the oldest candidate. |
+| Goods leave | The on-hand quantity falls, possibly below zero. |
+| A reservation is taken | The reserved quantity rises, never above what a reservation asks and never below zero. |
+| A reservation is released | The reserved quantity falls, clamped at zero. |
+| A count is entered | The counted quantity and the counted flag are set; the difference is computed. |
+| A count is applied | An adjustment move is created and completed; the counted fields are cleared; the scheduled date is recomputed; the Location's last-count date is stamped. |
+| A concurrent write cannot take the lock | A duplicate record is created instead of waiting. |
+| The merge pass runs | Duplicates are collapsed into the lowest identifier, summing quantities, clamping the reservation at zero and keeping the oldest incoming date. |
+| The clean-reservations pass runs | The reserved quantity is rewritten to match the open detail lines, or zeroed for a bypassing Location. |
+| The empty-record pass runs | A record with nothing on hand, nothing reserved, nothing counted and no assignee is deleted. |
+| A manager deletes it | The deletion is replaced by an adjustment to zero. |
+
+## 26.5 A Lot, from creation to the end of traceability
+
+| Event | Effect |
+|---|---|
+| Created by hand | The name is typed or drawn from the product's lot sequence; the company is computed from the product; the uniqueness check runs. |
+| Created at completion | A typed lot name on a detail line that matches no existing Lot creates one, with the line's company when the product belongs to a company. For a lot-tracked product one Lot is created per distinct name; for a serial-tracked product one per line. |
+| Goods arrive under it | Quantity records carrying the Lot appear; its on-hand quantity rises; its single-Location field becomes that Location. |
+| Goods under it are split across Locations | Its single-Location field becomes empty. |
+| Its single-Location field is written | Every positive quantity record of the Lot is relocated, unpacking when the source container holds other lots. |
+| It is delivered | The delivery discovery walk finds the outgoing Transfer; the contact list follows. |
+| It is consumed to produce another lot | The production genealogy records the link; the delivery discovery propagates the child's Transfers up to it. |
+| Its product is changed | Refused once completed detail lines exist for it with another product. |
+| Its company is changed | Refused while it sits in a Location of another company. |
+
+A Lot is never archived and never deleted by the domain: it is the anchor of traceability and must outlive the goods.
+
+## 26.6 A Package, from creation to re-use
+
+| Event | Effect |
+|---|---|
+| Created by put in pack | The name is drawn from the container type's sequence or the shared one; it has no Location yet, because nothing is in it. |
+| Assigned as a destination container | It gains open detail lines and therefore Transfers; its outermost container is itself until it is nested. |
+| Nested by put in pack | Its destination container is set; its outermost container becomes that chain's last element; put-away re-runs on the whole group. |
+| Promoted | Its destination container becomes its current parent, because every sibling is being moved too. |
+| The Transfer is validated | A history snapshot is written; the quantities move carrying it; its parent container becomes its destination container; its destination container is cleared; its own Location follows its contents. |
+| Removed from a Transfer | The entire-package lines are deleted, the others lose their destination container, the chain is cleared where it is now empty, and put-away re-runs. |
+| Unpacked | Its child containers lose their parent; its own contents are relocated out of it with the reference "Quantities unpacked". |
+| Emptied | Its Location becomes empty, because no positive record and no child container remains. |
+| Re-used | It is simply assigned again; a reusable container is never taken over as an entire package, so its goods are taken out of it rather than travelling with it. |
+
+A container is never archived. A container whose type is reusable is expected to cycle indefinitely; a disposable one usually ends its life at the customer, keeping only its history snapshots behind.
