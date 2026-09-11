@@ -345,9 +345,10 @@ field and a search term, and a grouping key.
 | `milestone_id` | Search in Milestone | 70 | only when milestones apply |
 | `partner_id` | Search in Customer | 80 | the customer matches by name |
 
-"Milestones apply" means: exactly one task in the listing's scope has the milestone feature on and
-a milestone set. When they do not apply, a sort, grouping or search on the milestone falls back to
-the default.
+"Milestones apply" means: **at least one** task in the listing's scope has the milestone feature
+on and a milestone set. The test is performed as a count capped at one, compared with one. When
+milestones do not apply, a sort or a grouping on the milestone falls back to the default, and a
+search field of "milestone" is reset to "all".
 
 The default sort is the first of the sorted sort keys — "Newest". The default grouping is
 `project_id` on the general listing and `stage_id` on a project's page.

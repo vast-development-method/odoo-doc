@@ -176,12 +176,13 @@ Changing the country of a report has a side effect on the tax tags of its tax ta
 because a tax tag is unique per (name, applicability, country). For every tax tag expression of
 every line of every report whose country actually changes:
 
-1. Find the signed tag pair currently matching the expression's formula in the *old* country.
+1. Find the tag currently matching the expression's formula in the *old* country — the tag
+   whose name is that formula with any leading minus removed.
 2. Find every report expression related to those tags.
 3. If **all** of those related expressions belong to reports that are being changed in the same
    operation, move the tags to the new country by writing the new country onto them.
-4. Otherwise, leave the old tags alone (another report still needs them) and, if no tag pair with
-   the same name already exists in the new country, create the pair there.
+4. Otherwise, leave the old tags alone (another report still needs them) and, if no tag with the
+   same name already exists in the new country, create one there.
 
 ### 1.11 Duplication
 
@@ -361,7 +362,7 @@ that label shows an empty cell in that column.
 | Stored value | Engine | What the formula is | What the subformula is |
 |---|---|---|---|
 | `domain` | Record filter | A record filter over Journal Items, written in the platform's filter language: a list of conditions, each a triple of field path, operator and value, combined by the prefix operators for logical and, or and not. | Mandatory. One of `sum`, `sum_if_pos`, `sum_if_neg`, `count_rows`, each optionally prefixed with `-` to reverse the sign. |
-| `tax_tags` | Tax tag | A tag name, optionally prefixed with `-`. Matches the signed tag pair whose names are the plus-prefixed and minus-prefixed forms of the name. | Not used by the engine itself. |
+| `tax_tags` | Tax tag | A tag name, optionally prefixed with `-`. Matches the single tag whose name is that formula with any leading minus removed. The leading minus is a sign instruction on the expression, not part of the tag's name. | Not used by the engine itself. |
 | `aggregation` | Aggregation | An arithmetic expression over references of the shape *line code*`.`*expression label* and numeric literals, or the single keyword `sum_children`. | Optional. One of the bound clauses `if_above`, `if_below`, `if_between`, `if_other_expr_above`, `if_other_expr_below`, the cross-report selector `cross_report`, or the division guard `ignore_zero_division`. |
 | `account_codes` | Account code prefix | A signed sum of terms, each term being an account code prefix or a tag selector, optionally with excluded sub-prefixes and optionally with a balance-character filter. | Not used. |
 | `external` | External value | Either `sum` or `most_recent`. | Optional. `editable`, `rounding=`*n*, or both separated by a semicolon. |
@@ -510,7 +511,10 @@ Twenty of the shipped expressions are labelled `_applied_carryover_balance` and 
 
 ### 3.11 Tax tag housekeeping
 
-Expressions of the `tax_tags` engine own the signed tag pairs that connect taxes to report lines.
+Expressions of the `tax_tags` engine own the tags that connect taxes to report lines. **Exactly
+one tag exists per (formula name without its leading minus, country).** There is no pair of
+plus-named and minus-named tags: a formula of `X` and a formula of `-X`, in the same country,
+address the same tag record and report opposite figures.
 
 **On creation.** For every created expression whose engine is `tax_tags`, take the formula as the
 tag name and the report's country as the country. If no tag with that name (with any leading minus
@@ -824,6 +828,36 @@ balance forward:
 
 ---
 
+### 6.5 Account Group
+
+**Account Group** (`account.group`, table `account_group`). Defined by the General Ledger domain
+and consumed here by the hierarchy filter ([`calculations.md`](calculations.md) §11.7).
+
+| Field (storage name) | Type | Meaning as used here |
+|---|---|---|
+| Name (`name`) | Translated text | Required. The group's label, shown after the prefix range. |
+| Starting Prefix (`code_prefix_start`) | Text, derived and stored, overridable | The first account code prefix the group covers. Derived rule: when empty, or when greater than the ending prefix, it takes the ending prefix. Also the record ordering key. |
+| Ending Prefix (`code_prefix_end`) | Text, derived and stored, overridable | The last account code prefix the group covers. Derived rule: when empty, or when lower than the starting prefix, it takes the starting prefix. |
+| Parent Group (`parent_id`) | Link to one Account Group | Optional, indexed, read-only, deleted with the parent. Gives the hierarchy its depth. |
+| Company (`company_id`) | Link to one Company | Required, read-only, defaults to the root company of the active company. |
+
+Stored check: the starting prefix and the ending prefix must have the same number of characters.
+Message: *The length of the starting and the ending code prefix must be the same*.
+
+Display rule:
+
+```formula
+display_name = starting_prefix + " " + name                                when the two prefixes are equal
+display_name = starting_prefix + "-" + ending_prefix + " " + name          otherwise
+```
+
+Ordering: by starting prefix, so the hierarchy reads in chart order.
+
+Deletion: deleting a group deletes its descendants, because the parent link cascades. Accounts
+are untouched and fall back to the next matching group, or to the top level when none matches.
+
+---
+
 ## 7. Relations between the entities of this domain
 
 ```mermaid
@@ -835,7 +869,7 @@ erDiagram
     REPORT_LINE ||--o{ REPORT_LINE : "parent of"
     REPORT_LINE ||--o{ REPORT_EXPRESSION : "has expressions"
     REPORT_EXPRESSION ||--o{ REPORT_EXTERNAL_VALUE : "receives external values"
-    REPORT_EXPRESSION }o--o{ ACCOUNT_TAG : "owns signed tag pair"
+    REPORT_EXPRESSION }o--o{ ACCOUNT_TAG : "owns the matching tag"
     REPORT_EXPRESSION }o--o{ REPORT_EXPRESSION : "aggregation depends on"
     REPORT_COLUMN }o--|| REPORT_EXPRESSION : "displays label of"
 ```
@@ -857,11 +891,11 @@ Cardinality notes:
 
 | Trigger | Record affected | Effect |
 |---|---|---|
-| Creating an expression with engine `tax_tags` | Account Tag | Creates the signed pair in the report's country when it does not exist. |
+| Creating an expression with engine `tax_tags` | Account Tag | Creates the tag in the report's country when no tag of that name exists there. |
 | Changing an expression's engine to `tax_tags` | Account Tag | Same, before the write. |
 | Changing the formula of a `tax_tags` expression | Account Tag | Renames the pair when this domain owns it exclusively, otherwise creates a new pair. |
 | Deleting a `tax_tags` expression | Account Tag, Tax Repartition Line | Unlinks the tag from every repartition line, then archives the tag if Journal Items use it, else deletes it. |
-| Changing a report's country | Account Tag | Moves or duplicates the tag pairs as described in §1.10. |
+| Changing a report's country | Account Tag | Moves or duplicates the tags as described in §1.10. |
 | Editing a cell of an editable external expression | Report External Value | Creates or updates a manual value at the report's *date to*, for the active company. |
 | Closing a period on a report with carry-over | Report External Value | Creates one carry-over value per carrying expression, dated at the last day of the closed period. |
 | Validating a tax return | Journal Entry, and the company's tax lock date | Creates and posts the tax closing entry (see [`accounting-effects.md`](accounting-effects.md)) and moves the tax lock date forward. |

@@ -162,7 +162,7 @@ languages.** Nothing expires; nothing is recomputed on a timer.
 | Record | Entity | Values |
 |---|---|---|
 | The main Party | Party | name `My Company`; organization flag set; company left empty; street, city, postal code and telephone all empty strings; the stored image set to the shipped default logo file. Created with the organization default in its context. Marked as not to be overwritten by later package updates. |
-| The system Party | Party | name `System`; company set to the main company; electronic mail address `odoobot@example.com`; **archived**. This is the Party of the built-in super-user. |
+| The system Party | Party | name `System`; company set to the main company; an electronic mail address at the reserved example domain; **archived**. This is the Party of the built-in super-user. |
 | The administrator Party | Party | name `Administrator`; company set to the main company. |
 | The public Party | Party | name `Public user`; **archived**. This is the Party of the built-in public user. |
 | The main company | Company | name `My Company`; Party set to the main Party; currency set to the currency of the United States. |

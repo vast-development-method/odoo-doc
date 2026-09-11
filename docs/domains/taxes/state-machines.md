@@ -290,3 +290,86 @@ For the avoidance of doubt, the following look like states and are not:
 | Distribution line kind (`repartition_type`) and document kind (`document_type`) | Structural classifications. |
 | Report expression engine (`engine`) | A configuration mode of the report definition. |
 | Foreign registration banner mode (`foreign_vat_header_mode`) | A purely derived presentation hint. |
+
+---
+
+## 9. The recomputation decision of a draft entry
+
+Not a stored state, but a decision machine an implementer must reproduce exactly: on every save of
+a draft entry, the system decides **whether** to recompute the tax journal items and, if so,
+**whether** to keep the amounts of the existing ones.
+
+### 9.1 The three outcomes
+
+| Outcome | Meaning |
+|---|---|
+| Skip | Nothing is recomputed; the existing tax items stay exactly as they are. |
+| Recompute from scratch | The engine runs and the existing tax amounts are ignored; the tax items are rebuilt from the base lines alone. |
+| Recompute keeping the amounts | The engine runs, but the totals are pulled back onto the amounts of the existing tax items, so that a manually typed tax survives. |
+| Recompute re-deriving the balances | A special case of the previous one: the amounts in document currency are kept and the company-currency balances are re-derived from the new rate. |
+
+### 9.2 The decision
+
+Evaluated in this order; the first matching row decides.
+
+| # | Condition | Outcome |
+|---|---|---|
+| 1 | The entry is not a draft | Skip |
+| 2 | The entry is an invoice and its currency or its kind changed | Recompute from scratch |
+| 3 | A base item that carried taxes has disappeared | Recompute, keeping the amounts only if at least one tax item also changed |
+| 4 | At least one base item changed, and none of the changed items carries or carried taxes | Recompute keeping the amounts |
+| 5 | At least one base item changed, and the set of tax items itself changed, or one of their fields is being written by the caller | Recompute keeping the amounts |
+| 6 | At least one base item changed, otherwise | Recompute from scratch |
+| 7 | (after 4, 5 or 6 chose to keep the amounts) any changed base item has a non-zero amount or balance supplied explicitly | **Skip** — the caller supplied a complete entry |
+| 8 | Only the currency rate changed | Recompute re-deriving the balances |
+| 9 | Nothing relevant changed | Skip |
+
+"Changed" is measured against a snapshot taken before the write. The snapshot covers, per base
+item, the grouping-key fields plus the price, quantity, discount and deductibility for an invoice,
+or the amount in document currency for a non-invoice; and per tax item, its amount in document
+currency, its balance and its analytic distribution.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Posted: entry is not a draft
+    Posted --> [*]: skip
+    [*] --> CurrencyOrTypeChanged: invoice currency or kind changed
+    CurrencyOrTypeChanged --> FromScratch
+    [*] --> BaseRemoved: a taxed base item disappeared
+    BaseRemoved --> KeepAmounts: a tax item also changed
+    BaseRemoved --> FromScratch: no tax item changed
+    [*] --> BaseChanged: a base item changed
+    BaseChanged --> KeepAmounts: changed items carry no tax, or the tax items changed
+    BaseChanged --> FromScratch: otherwise
+    KeepAmounts --> SkipComplete: a changed item supplied its own amounts
+    [*] --> RateChanged: only the rate changed
+    RateChanged --> RederiveBalances
+    [*] --> [*]: nothing relevant changed
+```
+
+### 9.3 Why it matters
+
+Getting this wrong is invisible until a user types a tax amount by hand. Recomputing from scratch
+when the amounts should have been kept silently discards the manual figure; keeping the amounts
+when they should have been recomputed silently keeps a stale figure after a price change.
+
+---
+
+## 10. The lifecycle of a report tag on a journal item
+
+A journal item's tags are written once, when the item is created or recomputed, and never
+maintained afterwards.
+
+| Event | Effect on the tags of an existing posted item |
+|---|---|
+| The tax's distribution tags are changed | none |
+| The tax's distribution is restructured | none |
+| The tag is renamed | the item follows, because it points at the record |
+| The tag is archived | the item keeps it and reports keep reading it |
+| The tag is deleted | refused while an item carries it; the deletion path archives instead |
+| The maintenance operation is run with a starting date on or before the item's date | the tags are rebuilt from the current configuration |
+| The entry is reversed | the reversal's items get the tags the **current** configuration gives, for the opposite document kind |
+
+This is deliberate: a posted tax return must not change because a configuration was edited
+afterwards. The maintenance operation is the one explicit exception, and it is gated by a starting
+date defaulting to the day after the tax lock date.

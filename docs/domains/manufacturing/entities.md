@@ -928,7 +928,7 @@ order's company (or of the active company when the order's company is not access
 | Real Duration (`duration`) | decimal (minutes), computed, not stored | Sum of the real durations of the Work Orders. |
 | Operations are planned (`is_planned`) | boolean, computed, stored | True when at least one Work Order has both a planned start and a planned finish. False when there are no Work Orders. |
 | Delay Alert Date (`delay_alert_date`) | date and time, computed, not stored, searchable | The latest delay-alert date among the component moves. |
-| Delay popover (`json_popover`) | text holding a structured document, computed, not stored | Empty for done, cancelled or non-delayed orders. Otherwise a document naming the delay alert date and the late upstream documents reachable from the component moves' origin moves. |
+| Delay popover (`json_popover`) | text holding a structured document, computed, not stored | Empty for done, cancelled or non-delayed orders. Otherwise a document naming the delay alert date and the late supplying documents reachable from the component moves' origin moves. |
 | Is delayed (`is_delayed`) | boolean, computed, not stored, searchable | True when the state is `confirmed`, `progress` or `to_close` and the deadline is set and is either in the past or earlier than the planned finish. |
 | Date Category (`search_date_category`) | selection, not stored, search only | `before`, `yesterday`, `today`, `day_1` (Tomorrow), `day_2` (The day after tomorrow), `after`. Translates to a date range on the start date. |
 | Forecasted issue (`forecasted_issue`) | boolean, computed, not stored | True when the forecast quantity of the product at the destination warehouse on the start date — increased by this order's total quantity when the order is still a draft — is negative. |
@@ -1084,7 +1084,7 @@ equals the order quantity.
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
 | State (`state`) | selection | Computed, stored, indexed, readonly, tracked, not copied. Values `draft` (Draft), `confirmed` (Confirmed), `progress` (In Progress), `to_close` (To Close), `done` (Done), `cancel` (Cancelled). Full rules in [state-machines.md](state-machines.md). |
-| MO Readiness (`reservation_state`) | selection | Computed, stored, indexed, readonly, tracked, not copied. Values `confirmed` (Waiting), `assigned` (Ready), `waiting` (Waiting Another Operation). Empty for draft, done and cancelled orders. |
+| Manufacturing Order readiness, labelled `MO Readiness` (`reservation_state`) | selection | Computed, stored, indexed, readonly, tracked, not copied. Values `confirmed` (Waiting), `assigned` (Ready), `waiting` (Waiting Another Operation). Empty for draft, done and cancelled orders. |
 | Component Status (`components_availability`) | text, computed, not stored | "Available", "Not Available", or the text "Exp *the formatted date*". |
 | Component availability state (`components_availability_state`) | selection, computed, not stored, searchable | `available` (Available), `expected` (Expected), `late` (Late), `unavailable` (Not Available). |
 | Allowed to Unreserve (`unreserve_visible`) | boolean, computed, not stored | True when no component move is marked picked and at least one component move line exists, and the order is neither done nor cancelled. |
@@ -1355,7 +1355,7 @@ Manufacturing Order.
 | Popover data (`json_popover`) | text holding a structured document, computed, not stored | See §13.6. |
 | Show Popover (`show_json_popover`) | boolean, computed, not stored | True when the popover carries at least one message. |
 | Consumption policy (`consumption`) | selection, related to the order's policy | |
-| Carried Quantity (`qty_reported_from_previous_wo`) | decimal, precision "Product Unit" | Not copied. The quantity already produced upstream in the backorder chain and awaiting allocation at this Work Order. |
+| Carried Quantity (`qty_reported_from_previous_wo`) | decimal, precision "Product Unit" | Not copied. The quantity already produced earlier in the backorder chain and awaiting allocation at this Work Order. |
 | Is planned (`is_planned`) | boolean, related to the order | |
 | Allow dependencies (`allow_workorder_dependencies`) | boolean, related to the order | |
 | Blocked By (`blocked_by_workorder_ids`) | many-to-many to Work Order, relation table `mrp_workorder_dependencies_rel` (columns `workorder_id`, `blocked_by_id`) | Restricted to Work Orders of the same order, excluding itself, where dependencies are allowed. Not copied. |
@@ -1723,7 +1723,7 @@ and zero when the move belongs to no component order or has no unit.
 | Transfer assignment | The assignment key gains the created production order and the production group, and the search domain requires the same production group. |
 | Procurement values | The procurement carries the production group and the recipe line. |
 | Source document | A move with no other source document reports its finished order or its component order. |
-| Upstream documents | A finished move of a running order reports that order and its responsible as the upstream document. |
+| Supplying documents | A finished move of a running order reports that order and its responsible as the supplying document. |
 | Consuming | A move whose operation type has code `mrp_operation` counts as consuming. |
 | Assignment | A component or finished move is never automatically assigned to a transfer. |
 | Move line values | A component move's line carries the order; a finished move of a lot-tracked product for the order's own product carries the order's producing lot. |
@@ -1754,7 +1754,7 @@ suppressed procurement:
 
    bounded below, when the move has origin moves, by the negative of the sum of the demands
    of the origin moves that are neither done nor cancelled (so a reduction never cancels
-   more than exists upstream).
+   more than exists in the supplying moves).
 5. Run the resulting procurements.
 
 ---

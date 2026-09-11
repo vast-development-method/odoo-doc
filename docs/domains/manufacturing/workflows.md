@@ -244,7 +244,7 @@ demand that created them so that completing them reserves the demand.
 10. Only the orders that were `draft` are written to `confirmed`.
 
 **Postconditions.** The order is `confirmed`; its readiness is computed from its component
-moves; upstream procurements have been launched for made-to-order components.
+moves; supplying procurements have been launched for made-to-order components.
 
 ### 4.2 Reserving
 
@@ -473,7 +473,7 @@ order that is already done."**
 **Steps.**
 
 1. For every component move that is neither done nor cancelled and that has origin moves,
-   prepare an exception activity on the upstream documents.
+   prepare an exception activity on the supplying documents.
 2. Unless the caller suppresses activities, log a downside-quantity activity on the parent
    document of every finished move that is neither done nor cancelled, marked as a
    cancellation.
@@ -523,8 +523,8 @@ callers do.
 1. `factor = new_quantity ÷ old_quantity`.
 2. Rescale every component move that is neither done nor cancelled, rounding upward at the
    move's unit, and record the change for the exception log.
-3. For every component move whose change matters upstream, prepare an exception activity on
-   the upstream documents, and log them.
+3. For every component move whose change matters to the documents supplying it, prepare an exception activity on
+   the supplying documents, and log them.
 4. Rescale the finished moves: for each, `delta = (new − old) × unit_factor`; a move with
    downstream moves and a non-zero delta is **copied** with just the delta and the copy is
    confirmed, so that the downstream chain is extended; otherwise the move's demand is
@@ -590,7 +590,7 @@ assigning a recipe would otherwise reset them.
    unmatched move is queued for removal. Each remaining indexed by-product produces a new
    finished move.
 8. In a two- or three-step warehouse configuration, set the demand of the queued moves to
-   zero before cancelling them (so the upstream pick is reduced rather than orphaned), then
+   zero before cancelling them (so the supplying pick is reduced rather than orphaned), then
    cancel and delete them.
 9. Assign the recipe.
 
@@ -641,7 +641,7 @@ split."** or **"Only manufacturing orders with a Bill of Materials can be split.
 
 **Steps.**
 
-1. Collect the upstream links per recipe line and the downstream links per by-product line.
+1. Collect the origin links per recipe line and the downstream links per by-product line.
 2. Create one new order with the shared product and recipe, the shared operation type, the
    **sum of the total quantities** as its quantity, the product's own unit, the shared final
    location when every order has one and they agree, the shared responsible when all orders
@@ -650,14 +650,14 @@ split."** or **"Only manufacturing orders with a Bill of Materials can be split.
 3. Re-stamp every Stock Move of the merged orders' production groups onto the new order's
    production group, so the transfers follow.
 4. Copy the merged groups' parents and children onto the new group.
-5. Restore the upstream links on the new order's component moves and the downstream links on
+5. Restore the origin links on the new order's component moves and the downstream links on
    its finished moves.
 6. Point every downstream move of the merged orders at the new order.
 7. When any merged order was `confirmed`, adjust the procurement method of the new order's
    component moves, write `confirmed` onto its moves, and confirm it.
 8. Cancel the merged orders with activities suppressed, detach them from their groups, and
    delete any group left with no orders.
-9. Push the new order's start date onto the deadline of the upstream moves feeding its
+9. Push the new order's start date onto the deadline of the origin moves feeding its
    components.
 10. Post on every merged order "This production has been merge in *the new order*".
 
@@ -1041,7 +1041,7 @@ is printed immediately in the configured format.
 ### 12.4 Exception activities
 
 - **Cancelling** an order or **reducing** the quantity of a component move logs an
-  exception activity on the upstream documents that were supplying that component, naming
+  exception activity on the supplying documents that were supplying that component, naming
   the order and the quantities.
 - **Cancelling** a finished move logs a downside-quantity activity on the downstream
   documents that were waiting for it.

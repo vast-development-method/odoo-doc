@@ -10,7 +10,7 @@ Five state fields exist:
 | Field | Entity | Nature |
 |---|---|---|
 | State (`state`) | Manufacturing Order (`mrp.production`) | Computed and stored, with several transitions forced outside the computation. |
-| MO Readiness (`reservation_state`) | Manufacturing Order | Computed and stored, derived from the component moves. |
+| Manufacturing Order readiness, labelled `MO Readiness` (`reservation_state`) | Manufacturing Order | Computed and stored, derived from the component moves. |
 | Status (`state`) | Work Order (`mrp.workorder`) | Computed and stored for two of its values, set explicitly for the other three. |
 | Status (`state`) | Unbuild Order (`mrp.unbuild`) | Set explicitly. |
 | Workcenter Status (`working_state`) | Work Centre (`mrp.workcenter`) | Computed and stored, derived from the open time logs. |
@@ -77,7 +77,7 @@ evaluates the following conditions **in order** and stops at the first that hold
 | `confirmed` or `progress` | `to_close` | Finish the last Work Order, or set the quantity producing to the full quantity | Computation rule 4 or 5. | None. |
 | `confirmed`, `progress` or `to_close` | `done` | Mark as done | Sanity checks pass (company consistency and serial-number uniqueness); the consumption check passes or is confirmed; the backorder question is answered. | The full completion algorithm of [workflows.md](workflows.md) §5: backorders are split off, the inventory is posted, the moves with no quantity are set to done with a zero demand rather than cancelled, the finish date becomes the current instant, the priority is reset to `0`, the order is locked, and the state is written to `done`. |
 | `confirmed`, `progress` or `to_close` | `done` | Cancel, when the recipe's consumption policy is `flexible` | The order is not already `done` or `cancel` after the cancellation pass. | See the cancel row: a flexible order whose remaining moves are all done or cancelled is written to `done` rather than left in progress. |
-| `draft`, `confirmed`, `progress` or `to_close` | `cancel` | Cancel | The order is not `done`; otherwise the operation is refused. | (1) For every component move that is neither done nor cancelled and that has origin moves, an exception activity is prepared on the upstream documents. (2) An activity is logged on the parent order when a child order is cancelled. (3) Every Work Order that is not done or cancelled is cancelled. (4) Every component and finished move that is not done or cancelled is cancelled, with the order-level cancellation check suppressed. (5) Every transfer of the order that is neither done nor cancelled, that has no downstream moves and whose orders are not done, is cancelled. (6) The prepared exception activities are logged, excluding those whose parent is this order itself or a cancelled transfer. (7) Orders whose recipe policy is `flexible` and that are still neither done nor cancelled are written to `done`. |
+| `draft`, `confirmed`, `progress` or `to_close` | `cancel` | Cancel | The order is not `done`; otherwise the operation is refused. | (1) For every component move that is neither done nor cancelled and that has origin moves, an exception activity is prepared on the supplying documents. (2) An activity is logged on the parent order when a child order is cancelled. (3) Every Work Order that is not done or cancelled is cancelled. (4) Every component and finished move that is not done or cancelled is cancelled, with the order-level cancellation check suppressed. (5) Every transfer of the order that is neither done nor cancelled, that has no downstream moves and whose orders are not done, is cancelled. (6) The prepared exception activities are logged, excluding those whose parent is this order itself or a cancelled transfer. (7) Orders whose recipe policy is `flexible` and that are still neither done nor cancelled are written to `done`. |
 | `cancel` | — | Delete | Every order in the batch is cancelled. | The order is removed; the Work Orders that are not done are removed first. |
 | `done` | `done` | Unlock, edit produced quantity, relock | The order is unlocked. | The quantity of the done finished move for the order's product is rewritten. |
 
@@ -102,10 +102,10 @@ stateDiagram-v2
     [*] --> draft : create
     draft --> confirmed : confirm / plan
     draft --> cancel : cancel
-    confirmed --> progress : consume, start a work order,\nor set a quantity producing
-    confirmed --> to_close : set the full quantity producing\nor finish every work order
+    confirmed --> progress : consume, start a work order, or set a quantity producing
+    confirmed --> to_close : set the full quantity producing or finish every work order
     confirmed --> cancel : cancel
-    progress --> to_close : finish every work order\nor reach the full quantity
+    progress --> to_close : finish every work order or reach the full quantity
     progress --> cancel : cancel
     progress --> done : mark as done
     to_close --> done : mark as done
@@ -161,7 +161,7 @@ Recomputed whenever the order state or the state of a component move changes.
 | From | To | Trigger | Guard | Side effects |
 |---|---|---|---|---|
 | *(empty)* | `confirmed` / `waiting` | Confirm the order | The component moves become `confirmed` or `waiting`. | None. |
-| `confirmed` | `assigned` | Reserve (explicit reserve action, scheduler, or the arrival of an upstream receipt) | Every relevant component move reaches `assigned`, or the partial-availability upgrade applies. | The order becomes startable. |
+| `confirmed` | `assigned` | Reserve (explicit reserve action, scheduler, or the arrival of an incoming receipt) | Every relevant component move reaches `assigned`, or the partial-availability upgrade applies. | The order becomes startable. |
 | `assigned` | `confirmed` | Unreserve | The component move lines are removed. | Unreserving is only offered when no component move is picked. |
 | `confirmed` or `assigned` | *(empty)* | Mark done or cancel | The order leaves the running states. | None. |
 
@@ -173,7 +173,7 @@ stateDiagram-v2
     none --> waiting : confirm, components depend on another operation
     none --> confirmed : confirm, components not reserved
     none --> assigned : confirm, components already reserved
-    waiting --> confirmed : upstream operation done
+    waiting --> confirmed : preceding operation done
     confirmed --> assigned : reserve
     assigned --> confirmed : unreserve
     confirmed --> none : mark done or cancel
@@ -261,8 +261,8 @@ stateDiagram-v2
     ready --> cancel : cancel
     blocked --> cancel : cancel
     progress --> cancel : cancel
-    done --> ready : set state to in progress\n(intermediate step)
-    cancel --> ready : set state to in progress\n(intermediate step)
+    done --> ready : set state to in progress (intermediate step)
+    cancel --> ready : set state to in progress (intermediate step)
 ```
 
 ### 3.6 Planning as a state-adjacent operation
@@ -339,7 +339,7 @@ are cleared, and the order's planned flag becomes false.
 ```mermaid
 stateDiagram-v2
     [*] --> draft : create
-    draft --> draft : validate with insufficient stock\n(warning opened)
+    draft --> draft : validate with insufficient stock (warning opened)
     draft --> done : unbuild
     done --> [*] : (deletion refused)
 ```

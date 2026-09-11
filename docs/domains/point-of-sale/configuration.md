@@ -3,6 +3,11 @@
 Settings, system parameters, numbering sequences, shipped default records, security
 groups, the access rights matrix, record rules and scheduled jobs.
 
+**A note on reproduced text.** Storage names, parameter keys, selection values and the
+names of shipped records are reproduced exactly, in code font or in quotation marks,
+because external contracts and stored data depend on them. Everything else is written in
+full words.
+
 ---
 
 ## 1. Company settings
@@ -14,7 +19,7 @@ These live on the company record and apply to every point of sale of that compan
 | Update quantities in stock (`point_of_sale_update_stock_quantities`) | Selection | `real` | `closing` "At the session closing" creates one delivery document per destination for the whole session when the session is validated; `real` "In real time" creates one delivery document per order at sale time. The value is frozen onto each session at its creation, so a mid-session change cannot split one session across both behaviors. |
 | Self-service invoicing (`point_of_sale_use_ticket_qr_code`) | Boolean | true | Prints the link to the invoice request page on the receipt. |
 | Generate a code on the receipt (`point_of_sale_ticket_unique_code`) | Boolean | false | Adds a five-character alphanumeric code to the receipt so that the customer can claim an invoice without being signed in. |
-| Receipt portal link display (`point_of_sale_ticket_portal_url_display_mode`) | Selection, required | `qr_code_and_url` | How the link is printed: `qr_code` "QR code", `url` "URL", `qr_code_and_url` "QR code + URL". |
+| Receipt portal link display (`point_of_sale_ticket_portal_url_display_mode`) | Selection, required | `qr_code_and_url` | How the link is printed: `qr_code` as a scannable quick response code only, `url` as a printed uniform resource locator only, `qr_code_and_url` as both. |
 | Default receivable account for the counter (`account_default_pos_receivable_account_id`) | Many to one → Account | From the chart template | The intermediary account used by the closing entry when a payment method does not name its own. |
 | Barcode nomenclature (`nomenclature_id`) | Many to one → Barcode Nomenclature | From the chart template or the shipped default | The nomenclature the selling application uses to interpret scanned codes. |
 | Default sale tax (`account_sale_tax_id`) | Many to one → Tax | From the chart template | Not specific to this domain, but exposed on the counter settings screen. |

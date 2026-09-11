@@ -473,3 +473,134 @@ true.
    document is a sales document.
 4. The block is not produced at all for a non-invoice entry, because such an entry may mix
    currencies.
+
+---
+
+## 15. Loading a chart of accounts template
+
+**Performed by** the System when a company's chart of accounts is installed.
+
+**Precondition** the company has no accounting data yet, or the template is being reloaded onto a
+company whose data still matches the template.
+
+1. The template's tax groups are created, each with its country and its settlement accounts.
+2. The template's taxes are created. Each tax record in the template carries, on its first row,
+   the name, the description, the invoice label, the amount, the tax type, the tax group, the
+   fiscal positions it belongs to and the taxes it replaces; and, on that row and the rows that
+   follow it, one distribution line each, given as a document kind, a percentage, a line kind and
+   an account.
+3. **System** suspends the cash basis transition account check while the template loads, so that a
+   deferred tax may be created before its transition account exists.
+4. The template's fiscal positions are created with their detection criteria and their sequence.
+5. The links between fiscal positions and taxes, and between a replacement tax and the taxes it
+   replaces, are established from the two columns on the tax rows.
+6. **System** recomputes the company's domestic fiscal position.
+7. **Records created**: Tax Groups, Taxes, Tax Distribution Lines, Fiscal Positions, Fiscal
+   Position Account Mappings.
+
+Country-specific templates, and the country catalogue of what each ships, belong to
+`../fiscal-localizations/`.
+
+---
+
+## 16. Consumers of the engine outside the accounting documents
+
+Every consumer follows the same four-step contract. An implementer must reproduce the contract,
+not each consumer's own code.
+
+```
+1. Build a base line per taxable amount, choosing the sign, the special mode, the rate and the
+   refund flag appropriate to the consumer.
+2. Add the tax details to every base line at once, passing the company.
+3. Round the tax details of all the base lines together, passing the company and, when the records
+   already exist, the existing tax lines.
+4. Read whatever is needed: the totals block, the aggregated amounts, or the accounting entries.
+```
+
+Steps two and three must see **every** base line of the document at the same time; calling them
+per line reproduces the "round per line" behaviour even when the company asked for "round per tax".
+
+### 16.1 An order
+
+**Performed by** the sales or purchasing domain whenever an order line changes.
+
+1. One base line per order line, with the order's currency, the line's price, quantity and
+   discount, no special mode and the order's rate.
+2. Steps two and three.
+3. The totals block is produced and shown; no accounting entry is produced.
+4. When the order is invoiced, the invoice lines carry the same prices and taxes, so the invoice's
+   totals block agrees with the order's to the cent.
+
+### 16.2 An expense
+
+**Performed by** the expenses domain whenever the amount, the quantity or the taxes change.
+
+1. One base line for the expense, with the vendor as partner, the special mode **total included**
+   and the expense's own currency rate.
+2. Steps two and three.
+3. The tax amount shown on the expense is the total with taxes minus the untaxed total.
+4. The default taxes of an expense are the product's **purchase** taxes restricted to the
+   expense's company.
+
+The "total included" mode is what makes an employee's typed amount mean "what I actually paid",
+whatever the taxes' own price-inclusion says.
+
+### 16.3 A bank statement line matched by a reconciliation model
+
+**Performed by** the reconciliation component.
+
+1. The model's line proposes an amount and a set of taxes.
+2. One base line is built with the sign of the statement line.
+3. Steps two, three and four; the resulting tax items are added to the statement line's entry.
+
+### 16.4 A point-of-sale order
+
+**Performed by** the point-of-sale client while offline, and again by the server on
+synchronisation.
+
+1. The client received, at session opening, every tax it may need, with the fields listed in
+   `interfaces.md` section 3.5.
+2. The client runs the mirrored engine on its own order lines.
+3. On synchronisation the server rebuilds the base lines from the stored order and runs the same
+   steps.
+4. The two results must be identical. Any divergence between the two implementations of a step
+   marked *mirrored* shows up here first.
+
+### 16.5 A loyalty or promotion reward line
+
+**Performed by** the promotions domain.
+
+1. The discountable base lines are prepared, which drops every fixed and custom-formula tax into
+   its own tax-free base line.
+2. The reduction to a target amount is run with the reward's amount kind and amount.
+3. The result is frozen into manual amounts, so that a later recomputation of the document cannot
+   move the reward by a cent.
+
+### 16.6 A down payment deduction
+
+**Performed by** the sales domain when a final invoice deducts a previous down payment.
+
+1. The original lines are prepared with no computation key.
+2. The down-payment lines are prepared with the computation key `down_payment` and a negative
+   amount.
+3. Steps two and three see both sets at once, but the two redistribution passes group by the key,
+   so each subset rounds on its own.
+
+---
+
+## 17. Diagnosing a wrong total
+
+A checklist for an implementer whose numbers do not match.
+
+| Symptom | Most likely cause |
+|---|---|
+| The document total is off by one cent, and the per-line subtotals look right | The delta of `calculations.md` section 7.6 is not being added to the base line's balance. |
+| The sum of the tax journal items differs from the tax shown in the totals block | The residue redistribution of `calculations.md` section 8.2 is missing. |
+| A price-included tax is counted twice | The untaxed total is being taken from the raw base instead of the first result's base. |
+| Two price-included taxes give a different base from the specified one | The two taxes are being cascaded instead of batched. |
+| A fixed tax changes the result of a price-included tax in the wrong direction | The fixed tax is not being evaluated in the first pass, or the propagation table of section 5.1 is being applied with the effective rather than the configured price-inclusion flag. |
+| A credit note's tax lands on the wrong account | The refund distribution is not being used. |
+| The tax return double-counts a base | Two taxes of different exigibility share a base tag on one line, which the validation of `business-rules.md` section 5.2 should have refused. |
+| The total changes when the document is saved | The two implementations of the engine disagree on a *mirrored* step. |
+| A down payment deduction moves the final invoice's total | The computation key is not taking part in the redistribution groupings. |
+| Amounts in the company currency drift from the document currency | The two currencies are not being rounded and redistributed independently, or the conversion is being done as a multiplication instead of a division by the rate. |

@@ -423,7 +423,7 @@ manual recognition entry and its automatic reversal.
 | Date (`date`) | The posting date. Defaults to the current instant. |
 | Reversal Date (`reversal_date`) | Computed from the date: when it is empty or not after the date, it becomes the date plus one day; otherwise it is left as chosen. Required. |
 | Journal (`journal_id`) | Required. Defaults to the company-dependent fallback of the product category's stock journal. |
-| Reference (`reference`) | Defaults to "Manufacturing WIP - *the list of order references*", or "Manufacturing WIP - Manual Entry" when no order qualifies. |
+| Reference (`reference`) | Defaults to the reproduced text `Manufacturing WIP - ` (manufacturing work in progress) followed by *the list of order references*, or by "Manual Entry" when no order qualifies. |
 | Lines (`line_ids`) | Computed from the date, editable. |
 | Orders (`mo_ids`) | The selected orders, filtered to those in state `progress`, `to_close` or `confirmed`. |
 
@@ -451,9 +451,9 @@ The three lines are:
 
 | Line | Label | Account | Side | Amount |
 |---|---|---|---|---|
-| 1 | WIP - Component Value | The company-dependent fallback of the product category's stock valuation account | credit | *component_value* |
-| 2 | WIP - Overhead | The company's production work-in-progress overhead account, falling back to the company-dependent fallback of the category's production account | credit | *overhead_value* |
-| 3 | Manufacturing WIP - *the list of order references* (or "Manual Entry") | The company's production work-in-progress account | debit | *component_value + overhead_value* |
+| 1 | `WIP - Component Value` (work in progress — component value) | The company-dependent fallback of the product category's stock valuation account | credit | *component_value* |
+| 2 | `WIP - Overhead` (work in progress — overhead) | The company's production work-in-progress overhead account, falling back to the company-dependent fallback of the category's production account | credit | *overhead_value* |
+| 3 | `Manufacturing WIP - ` (manufacturing work in progress) followed by *the list of order references*, or by "Manual Entry" | The company's production work-in-progress account | debit | *component_value + overhead_value* |
 
 The lines are recomputed whenever the date changes, unless the assistant holds manual lines
 and no order is selected.

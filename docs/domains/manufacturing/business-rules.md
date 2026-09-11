@@ -18,6 +18,11 @@ Three kinds of refusal exist and behave differently:
 A fourth kind, the **interactive warning**, does not refuse anything: it is shown while the
 user edits a form and the user may ignore it.
 
+Some reproduced messages contain abbreviations of their own — `BoM` for Bill of Materials
+and `MO` for Manufacturing Order. They are reproduced exactly as the system emits them,
+because an implementation must produce the same text; they are not used in the prose of
+this repository.
+
 ---
 
 ## 1. Bill of Materials
@@ -672,7 +677,7 @@ These statements must hold at every commit boundary.
 | An order is split into more pieces than 999. | The zero padding is computed as `3 − 1 − floor(log10(sequence))`, which becomes negative and adds no zeros; the suffix is simply the hyphen and the number. |
 | A move's demand is zero when a kit must be exploded. | The explosion factor is computed from the **done** quantity instead, and the generated moves carry the exploded quantity as their done quantity rather than their demand. |
 | A finished move already carries a done quantity when the order is closed. | The distribution writes `(qty_producing − qty_produced) × unit_factor`, so the already-produced part is not counted twice. |
-| A tracked component's upstream supply is short. | The distribution caps the consumed quantity at `available − taken`, where *available* is the sum of the done origin quantities and *taken* the sum already consumed by sibling moves. |
+| A tracked component's supplying chain is short. | The distribution caps the consumed quantity at `available − taken`, where *available* is the sum of the done origin quantities and *taken* the sum already consumed by sibling moves. |
 | A manual-consumption move is already picked when the producing quantity changes. | It is skipped by the distribution; its value stands. |
 | A by-product move is already picked. | It is never rewritten by the distribution. |
 | A work centre's efficiency is zero or empty. | The operation total-duration formula falls back to 100 percent. |
@@ -686,7 +691,7 @@ These statements must hold at every commit boundary.
 | An order's operation type is changed on a running order. | A new reference is allocated from the new type's sequence, the matching Stock Reference is renamed, and every component move is unreserved and re-reserved. |
 | A recipe is updated while an order is running. | The order is flagged as carrying an outdated recipe; applying the update rewrites the components, by-products and Work Orders, preserving the Work Orders that are in progress, done or cancelled. |
 | A recipe is updated and the order's product no longer matches. | The outdated flag is **cleared** on confirmed orders whose product or product template no longer matches the recipe. |
-| Cancelling a move of a running order in a two- or three-step configuration. | The move's demand is set to zero before it is cancelled, so the upstream pick shrinks rather than being orphaned. |
+| Cancelling a move of a running order in a two- or three-step configuration. | The move's demand is set to zero before it is cancelled, so the supplying pick shrinks rather than being orphaned. |
 | An order for a product with a kit recipe. | The recipe domain of an order only offers `normal` recipes, so a kit product can only be ordered through its components. |
 | A procurement for a kit product. | It is replaced, before any rule runs, by one procurement per exploded leaf component. |
 | A negative procurement reaches the manufacture rule. | No order is created. |

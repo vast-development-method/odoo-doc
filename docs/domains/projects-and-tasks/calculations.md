@@ -785,7 +785,8 @@ numbers and revenues as **positive** numbers, so that a margin is obtained by pl
 | `other_invoice_revenues` | Customer Invoices | 9 | revenues | customer invoice and credit-note lines carrying the project's analytic account and not already attached to a counted sales order item |
 | `purchase_order` | Purchase Orders | 10 | costs | confirmed purchase order lines carrying the project's analytic account |
 | `other_purchase_costs` | Vendor Bills | 11 | costs | vendor bill and refund lines carrying the project's analytic account and not already attached to a counted purchase order line |
-| `other_costs` | Materials | 12 | costs | timesheet-domain analytic lines classified as material costs |
+| `other_costs` | Materials | 12 | costs | two independent producers: timesheet-domain analytic lines classified as material costs (§6.9), and analytic lines of category "inventory entry" (§6.14). The second producer emits the entry with sequence **15**, not 12 — see §6.14. |
+| `expenses` | Expenses | 13 | costs | employee expenses in a settled state carrying the project's analytic account (§6.13) |
 | `other_revenues_aal` | Other Revenues | 14 | revenues | analytic lines on the project's account with no journal item behind them and a positive amount |
 | `other_costs_aal` | Other Costs | 15 | costs | the same, with a negative amount |
 | `downpayments` | Down Payments | 20 | revenues | advance-invoice sales order items |
@@ -803,7 +804,9 @@ one:
 2. **Sales contribution.** Adds the sales-order-item sections and the down-payment section (§6.5),
    then the invoice sections (§6.6), then asks the purchase contribution to run (§6.7 and §6.8).
 3. **Purchase contribution.** Adds `purchase_order` and `other_purchase_costs` (§6.7, §6.8).
-4. **Timesheet contribution.** Wraps everything: merges the timesheet analytic-line figures into
+4. **Expense contribution.** Adds `expenses` (§6.13).
+5. **Inventory contribution.** Adds the inventory variant of `other_costs` (§6.14).
+6. **Timesheet contribution.** Wraps everything: merges the timesheet analytic-line figures into
    the sections already present and appends the ones that do not yet exist (§6.9).
 
 When the project is **not** billable, the whole contract is empty and the profitability panel is
@@ -1284,7 +1287,8 @@ below.
 | `cost_of_goods_sold` | the same three | the cost-of-goods-sold journal items of those invoices |
 | `purchase_order` | the purchasing privilege, or the invoicing privilege, or the accounting read privilege | the purchase orders |
 | `other_purchase_costs` | the invoicing privilege, or the accounting read privilege | the vendor bills |
-| `other_revenues_aal`, `other_costs_aal` | the accounting read privilege | the analytic lines, grouped by date, with a dedicated pivot and graph presentation |
+| `other_revenues_aal`, `other_costs_aal`, and the inventory variant of `other_costs` | the accounting read privilege | the analytic lines, grouped by date, with a dedicated pivot and graph presentation |
+| `expenses` | the expense team-approver privilege | the expenses |
 | the `billable_*`, `non_billable`, `timesheet_revenues` sections | the timesheet-approver privilege, and exactly one project in the set | the timesheet lines |
 
 The action value has three keys: the name of the operation to call, its kind, and the arguments —
@@ -1355,6 +1359,110 @@ show_profitability_panel = true                          [ without it ]
 
 The helper text inviting the user to configure analytic accounting is shown when the acting user
 holds the analytic-accounting privilege (without the sales-linked package) or always (with it).
+
+### 6.13 Section `expenses`
+
+Contributed by the expense-linked package. It captures employee expenses that have reached a
+settled state and that carry the project's analytic account.
+
+**Source filter.**
+
+```formula
+expense.state ∈ { posted, in_payment, paid }
+AND project.account_id ∈ keys of expense.analytic_distribution
+```
+
+**Computation.**
+
+1. Group the matching expenses by currency, summing the untaxed amount expressed in that currency
+   and collecting the identifiers.
+2. Convert each group into the project's currency, using the project's company as the conversion
+   context:
+
+```formula
+amount_billed = Σ over currencies c of convert( untaxed_amount_sum[c], from c, to project.currency_id, company = project.company_id )
+```
+
+3. Emit one cost entry:
+
+```
+{ "id": "expenses", "sequence": 13, "billed": − amount_billed, "to_bill": 0.0 }
+```
+
+   and add both figures to the cost totals. Nothing is emitted when no expense matched or when
+   the project has no analytic account.
+
+4. The action is attached only when the acting user holds the expense team-approver privilege.
+
+**Note on the analytic share.** Unlike every other section, this one does **not** weight the
+amount by the analytic share: an expense carrying the project's account contributes its whole
+untaxed amount, whatever percentage the distribution declares.
+
+**Double-counting protections added by this contribution.**
+
+| # | Mechanism |
+|---|---|
+| 1 | Every journal item that has an expense behind it is added to the "already claimed" list, so that neither `other_invoice_revenues` nor `other_purchase_costs` counts it again. |
+| 2 | The vendor-bill filter of §6.8 additionally excludes lines that have an expense behind them. |
+| 3 | The analytic-line filter of §6.9 additionally excludes lines whose journal item has an expense behind it. |
+
+*Worked example.* A project in euro with three settled expenses: 120.00 EUR, 80.00 EUR and
+50.00 US dollars at 0.90 euro per dollar.
+
+```formula
+amount_billed = (120.00 + 80.00) + (50.00 × 0.90) = 200.00 + 45.00 = 245.00
+entry = { expenses, 13, billed −245.00, to_bill 0.00 }
+```
+
+### 6.14 Section `other_costs` from inventory
+
+Contributed by the inventory-valuation-linked package. It captures the analytic lines that record
+the cost of goods moved for the project.
+
+**Source filter.**
+
+```formula
+analytic_line.account_id = project.account_id
+AND analytic_line.move_line_id is empty
+AND analytic_line.category = "inventory entry"
+```
+
+(with the time-recording package installed, the base filter also requires the analytic line to
+have no project, as in §6.4.)
+
+Note that §6.4 **excludes** exactly this category, so the two sections partition the
+journal-item-free analytic lines between them.
+
+**Computation.** Identical in shape to §6.4, but summing **all** amounts into one bucket rather
+than splitting them by sign:
+
+```formula
+total_costs = Σ over currencies c of convert( Σ of the amounts in c, from c, to project.currency_id, company = project.company_id )
+```
+
+**Emission.** Nothing when no line matched. Otherwise exactly one cost entry:
+
+```
+{ "id": "other_costs", "sequence": 15, "billed": total_costs, "to_bill": 0.0 }
+```
+
+Two peculiarities that a faithful re-implementation must reproduce:
+
+1. the entry's identifier is `other_costs`, whose declared sequence is **12**, but the emitted
+   sequence is the one declared for `other_revenues_aal`'s companion, **15**;
+2. the action attached to the entry, when the acting user holds the accounting read privilege, is
+   the one registered for `other_costs_aal`, not the one for `other_costs` — so the drill-down
+   opens the analytic lines with the grouped-by-date presentation.
+
+Only the `billed` figure is added to the cost totals; the `to_bill` figure is not (it is zero).
+
+*Worked example.* A project in euro with two inventory-entry analytic lines on its account,
+−310.00 EUR and −45.00 EUR.
+
+```formula
+total_costs = −355.00
+entry = { other_costs, 15, billed −355.00, to_bill 0.00 }
+```
 
 ---
 

@@ -82,7 +82,7 @@ Two menu entries are removed dynamically rather than by group:
 | Skills Inventory | — | Employee Skill Report | list, pivot | none beyond the record rules | |
 | Skill History Report | — | Employee Skill Report | graph, pivot, list | narrowed to one department when opened from a department | |
 | Certification | — | Certification Report | list, pivot | none beyond the record rules | |
-| Organisation Chart | — | Employee | the hierarchy view | none | |
+| Org Chart | `org-chart` | Employee | hierarchy, cards, list, form, activity, graph, pivot; on a small screen the hierarchy view is forced | none | Uses the employee search view. Its empty-state text reads "Create an employee." and "Find all the information on employees." |
 | Register Departure | — | Departure Registration Wizard | form, as a dialogue | — | Opened automatically when a single employee is archived. |
 | Bank Account Allocation | — | Bank Account Allocation Wizard | form, as a dialogue | — | |
 | Create User | — | User | the simplified user form, as a dialogue | — | Pre-filled from the employee. |
@@ -131,13 +131,22 @@ work email, the work telephone and the work mobile; the tags; the free extra pro
 
 | Tab | Groups of fields |
 |---|---|
-| Work | *Work*: Company, Department, Job Position, Job Title, Manager. *Location*: Work Address, Work Location. *Departure*: Departure Reason, Additional Information, Departure Date. *Note*: Additional Note. |
+| Work | *Work*: Company, Department, Job Position, Job Title, Manager. *Location*: Work Address, Work Location. *Usual work location* (added by the home-working capability): the seven weekday location choices, an empty one meaning a non-working day. *Departure*: Departure Reason, Additional Information, Departure Date. *Note*: Additional Note. *Organization chart* (added by the organisation chart capability): the reporting chain around this person. |
 | Resume | The resume lines and the skills, with the internal career history derived from versions interleaved. |
 | Personal | *Private Contact*: Private Email, Private Telephone, and the bank accounts with the multiple-account and trust indicators. *Personal Information*: Legal Name, Date of Birth, Show Date of Birth to All Employees, Place of Birth, Country of Birth, Gender. *Emergency Contact*: Emergency Contact, Emergency Telephone. *Visa and Work Permit*: Visa Number, Visa Expiration Date, Work Permit Number, Work Permit Expiration Date, Work Permit File Name, Work Permit Document. *Citizenship*: Nationality, National Identification Number, Social Security Number, Passport Number, Passport Expiration Date. *Location*: the six private address fields, the Home-Work Distance and its unit. *Family*: Marital Status, Spouse Legal Name, Spouse Date of Birth, Dependent Children. *Education*: Certificate Level, Field of Study. *Documents*: Identity Card Copy, Driving Licence. |
 | Payroll | Currency, Contract Start Date, Contract End Date, Wage, Employee Kind, Contract Type, Salary Structure Type, Working Hours. Administrator only. |
 | Settings | *User*: User, Time Zone. *Approvers*: Human Resources Responsible. *Application Settings* ▸ *Attendance/Point of Sale*: Personal Identification Number, Badge Identifier. |
 
-Duplication of the form is disabled.
+Duplication of the form is disabled. The form saves itself as values are entered, and can also
+be saved by hand at any time.
+
+**Tabs contributed by companion capabilities.**
+
+| Tab | Contributed by | Shows |
+|---|---|---|
+| Certifications | the skills capability | The employee's certification assertions with their validity windows; shown only when at least one certification-flagged skill type exists. |
+| Badges | the recognition capability | The badges granted to this person, with the grant that a notification link may highlight. |
+| Equipment (as a button) | the equipment capability | The count of assigned items, opening the list. |
 
 ### 3.2 Employee search view
 
@@ -161,7 +170,7 @@ only.
 | List | Name, department, job position, manager, work telephone, work electronic mail address, company. |
 | Activity list | The same, plus the activity summary rendered by a dedicated template that prints each activity's icon, summary, responsible and deadline. |
 | Graph and pivot | Headcount analyses; the pivot is extended by the organisation chart capability with subordinate counts. |
-| Hierarchy | The organisation chart, added by the organisation chart capability. |
+| Hierarchy | The organisation chart, added by the organisation chart capability. Each node is a card tinted with the department colour and carrying the department name as its hover text, the employee's image, the employee's name, the presence indicator and the job title. Nodes are draggable, so a manager can be reassigned by moving a card, and the chart descends through the direct-subordinate collection. |
 | Activity | The activity board. |
 
 ### 3.4 Public Employee views
@@ -207,6 +216,32 @@ requirements, expected skills), list, cards and search.
 | Employee Skill list | The skill, the level and the validity window. |
 | Job Skill form | The skill type, the skill and the level. |
 | Resume Line form, list, cards, calendar, search | The title, the dates, the type, the description, the course kind, the external address and the certificate document. A separate inherited form is used for training attendances. |
+
+### 3.9 Wizard forms
+
+**Departure Registration Wizard.** Titled "Employee Termination" when opened from the archive
+action and "Register Departure" when opened from the action. Two side-by-side groups: on the
+left, the Employees as removable tags, the Departure Reason as a non-editable, non-creatable,
+non-openable choice, and the Contract End Date; on the right, a label "Close Activities" above
+a column of switches — "Contract" (the set-contract-end-date switch), "Related User" (shown
+only when at least one selected employee has a user), and, with the equipment capability,
+"Free Equiments" (spelled exactly so). Below both, a label "Detailed Reason" above the
+Additional Information field, whose placeholder reads "Give more details about the reason of
+archiving the employee." The footer offers "Apply" and "Discard".
+
+**Bank Account Allocation Wizard.** One row per bank account showing the account number, the
+amount, the amount kind, the derived symbol (a currency symbol or a per-cent sign) and the
+trust switch, ordered by the row's order number.
+
+**Home-working Location Wizard.** The date, the derived weekday name, the location, and the
+"Recurring" switch.
+
+**Curriculum Vitae Export Wizard.** The selected employees, the primary and secondary colours,
+and the three display switches — "Skills", "Contact Information" and "Others" — each shown
+only when it is applicable to the selection.
+
+**Contract Template Wizard.** A single choice of template, restricted to the acting company's
+templates.
 
 ---
 
@@ -541,7 +576,35 @@ user exporting "employees" exports Public Employee rows.
 
 ---
 
-## 13. External service integrations
+## 13. Two thin bridges to the messaging domain
+
+### 13.1 The assistant bot in the preferences form
+
+The assistant-bot bridge changes **only** where the notification alert widget appears in the
+two user forms this domain owns:
+
+- in the simplified user form used when creating a user from an employee, the alert widget is
+  **removed**;
+- in the preferences form, an alert widget is inserted **before** the form's sheet.
+
+Nothing else is added: no field, no operation, no route.
+
+### 13.2 Live chat filters keyed on the reporting line
+
+The live chat bridge adds a "My Team" filter to three search views, each defined in terms of
+this domain's reporting structures:
+
+| Search view | The filter's condition |
+|---|---|
+| Live chat sessions | the session has a member whose contact's users include me, **or** a member whose contact's employees report to me |
+| Sessions looking for help | the session has a member whose contact's user's employee is a member of my department or one of its descendants |
+| Live chat channel analysis | the row's contact's users include me, **or** the row's contact's employees report to me |
+
+Nothing else is added.
+
+---
+
+## 14. External service integrations
 
 This domain integrates with no external service. The only outward-facing surfaces are:
 

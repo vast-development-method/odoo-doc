@@ -4,6 +4,16 @@ This file specifies the decisions the system takes about permission and identity
 algorithms, the exact conditions under which each fails, and the exact message produced. Three
 procedures are load-bearing for the whole platform and are given as fully numbered algorithms:
 
+> **Note on reproduced texts.** Message texts, button labels and screen titles are reproduced
+> **verbatim**, exactly as the system emits them, because external tests and user documentation
+> depend on them. Where such a reproduced text contains an abbreviation, the abbreviation belongs to
+> the text and is not this document's own prose. The abbreviations that occur are: *API* for
+> application programming interface; *2FA* for two-factor authentication; *LDAP* for the central
+> directory protocol; *DN* for distinguished name; *OAuth* and *UID* for the delegated sign-in
+> protocol and its subject identifier; *JSON* for the structured-literal notation; *HTTP* for the
+> transport protocol; *ID* for identifier. Outside such reproduced texts, every term is written in
+> full.
+
 - **the access-checking algorithm** (section 2),
 - **the rule-combination semantics** (section 3),
 - **the privilege-elevation semantics** (section 5).

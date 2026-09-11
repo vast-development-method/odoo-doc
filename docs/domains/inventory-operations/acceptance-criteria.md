@@ -1792,3 +1792,548 @@ Every assertion about a quantity is an assertion about the value **after** round
 **When** one of its rules is given the company Beta
 
 **Then** it fails with "Rule *the rule display name* belongs to Beta while the route belongs to Acme."
+
+---
+
+# Y. Put-away, further cases
+
+## Scenario 121 — Put-away with the "last used" sublocation mode
+
+**Given** a Put-away Rule sends BOLT arriving in `WH/Stock` to `WH/Stock/Zone A` with the sublocation mode "Last Used"
+**And** the most recent completed detail line of BOLT whose destination Location is inside `WH/Stock/Zone A` landed in `WH/Stock/Zone A/Bin 7`
+
+**When** BOLT arrives in `WH/Stock`
+
+**Then** the rule's target is replaced by `WH/Stock/Zone A/Bin 7` before the capacity check runs
+**And**, the rule naming no storage category, that Location is returned as soon as it passes the check.
+
+**Given** instead there is no such completed line
+
+**Then** the target stays `WH/Stock/Zone A`.
+
+**Given** the rule also names the container type "Pallet" and the goods arrive in a pallet
+
+**Then** the search for the last used Location is additionally restricted to lines whose destination container is of that type.
+
+## Scenario 122 — Put-away prefers a location that already holds the product
+
+**Given** a Put-away Rule sends BOLT arriving in `WH/Stock` to `WH/Stock/Zone A` with the closest-location mode and the storage category "Shelf"
+**And** `WH/Stock/Zone A` has three children carrying that category: `Bin 1` (empty), `Bin 2` (holds 4.00 BOLT), `Bin 3` (empty)
+
+**When** 2 BOLT arrive
+
+**Then** the first pass walks the children looking for one whose occupancy figure for BOLT is strictly positive; `Bin 2` qualifies and passes the capacity check, so `Bin 2` is chosen
+**And** the second pass is never reached.
+
+**Given** instead `Bin 2` fails the capacity check
+
+**Then** `Bin 2` is added to the rejected set, the first pass finds nothing else, and the second pass walks the same children in order and chooses `Bin 1`.
+
+## Scenario 123 — Put-away with no rule at all
+
+**Given** `WH/Stock` has no Put-away Rule
+
+**When** goods arrive in `WH/Stock`
+
+**Then** no rule is selected, no occupancy map is built, and the answer is `WH/Stock` itself.
+
+**Given** instead the arrival Location is the **virtual** Location `WH` and it has internal descendants
+
+**Then** the answer is the **first** of those descendants.
+
+## Scenario 124 — Put-away occupancy counts future arrivals
+
+**Given** `WH/Stock/Shelf A` holds 10.00 BOLT and an open detail line of another Transfer will bring 15.00 more into it
+**And** the Storage Category on that Shelf caps BOLT at 30
+
+**When** 8 BOLT are put away
+
+**Then** the occupancy figure is 10 + 15 = **25**
+**And** the second quantity test `8 + 25 = 33 > 30` rejects the Shelf.
+
+**Given** instead the 15.00 line is one of the lines currently being put away, and is therefore in the excluded set
+
+**Then** the occupancy figure is **10** and the Shelf is accepted.
+
+## Scenario 125 — Container-type capacity
+
+**Given** the Storage Category "Rack" caps containers of type "Pallet" at **4**
+**And** `WH/Stock/Rack 1` carries it and already holds 3 pallets, with one more pallet on an open detail line targeting it
+
+**When** a further pallet is put away
+
+**Then** the occupancy figure is 3 + 1 = **4**
+**And** the test `occupancy ≥ 4` rejects the Location.
+
+---
+
+# Z. Reservation, further cases
+
+## Scenario 126 — Reserving a chained move
+
+**Given** a two-step receipt has been validated: the receipt move put 10.00 BOLT into `WH/Input/Bay 2`, inside container `PACK0010`, under no lot
+**And** the storage move demands 10 and has the receipt move as originating move
+
+**When** the storage move is reserved
+
+**Then** the incoming side of the distribution map has one entry: (`WH/Input/Bay 2`, no lot, `PACK0010`, no owner) → 10.00
+**And** the outgoing side is empty, there being no sibling
+**And** the map is therefore {that key: 10.00}
+**And** one detail line is created by a **strict** reservation at exactly that key
+**And** the move becomes `assigned`.
+
+**Given** instead a sibling storage move of demand 4 was already reserved against the same key in the same pass
+
+**Then** the outgoing side carries 4.00 for that key and the map offers only 6.00
+**And** this move reserves 6.00 and becomes `partially_available`.
+
+## Scenario 127 — A chained move whose goods were counted away
+
+**Given** the same starting point, but an inventory adjustment removed 3.00 BOLT from `WH/Input/Bay 2` after the receipt
+
+**When** the storage move is reserved
+
+**Then** the distribution map still offers 10.00, because it is computed from the completed detail lines, not from the current stock
+**But** the strict reservation at that key can only take 7.00, because that is what the quantity record holds
+**And** the move becomes `partially_available` with 7.00 reserved.
+
+## Scenario 128 — A bypassing chained move
+
+**Given** a move whose source Location is the shared customer Location (a return) has an originating move that delivered 5.00 BOLT
+
+**When** it is reserved
+
+**Then** branch A applies: the distribution map is walked and detail lines are created **without** raising any reserved counter, carrying the Locations, lots, containers and owners the map names
+**And** the move becomes `assigned`.
+
+## Scenario 129 — Reserving a serial-tracked move that bypasses reservation
+
+**Given** a receipt of 3 DRILL, whose source Location bypasses reservation
+**And** the Operation Type allows creating lots
+
+**When** the move is reserved
+
+**Then** three detail lines of exactly one unit each are created, with no lot yet
+**And** the move's serial-number count is set to its demand, **3**.
+
+## Scenario 130 — Reserving twice does not double up
+
+**Given** a move of 10 BOLT is already `partially_available` with 6.00 reserved
+
+**When** the reservation is run again and 4.00 is now available
+
+**Then** the missing quantity is computed as 10 − 6 = **4**
+**And** exactly 4.00 more is reserved
+**And** the move becomes `assigned` with 10.00 reserved in total.
+
+## Scenario 131 — Reservation extends an existing line rather than adding one
+
+**Given** a move of 10 BOLT has one detail line of 6.00 from `WH/Stock`, no lot, no container, no owner, no destination container
+**And** 4.00 more becomes available at exactly that key
+
+**When** the move is reserved again
+
+**Then** the candidate map finds that line and the newly taken 4.00 is **added to it**, giving one line of 10.00, rather than creating a second line.
+
+**Given** instead the line already has a destination container
+
+**Then** it is not a candidate and a second line is created.
+
+## Scenario 132 — Reservation with a lot requested
+
+**Given** PAINT in `WH/Stock` has 4.00 under lot `L1` and 6.00 with no lot
+**And** a move of 10 PAINT is reserved loosely with no lot requested
+
+**Then** the gathering returns the lot-bearing record first
+**And** 4.00 is taken from `L1` and 6.00 from the lot-less record
+**And** two detail lines are created, the first carrying `L1`.
+
+## Scenario 133 — Assigning lots directly on a move
+
+**Given** a move of 5 PAINT is `confirmed` with no detail line
+**And** `WH/Stock` holds 3.00 of `L1` and 4.00 of `L2`
+
+**When** the person writes the lot list `[L1, L2]` on the move
+
+**Then** the free quantity is 5, and the surplus is 5 − 2 = **3**
+**And** for `L1`, the take is `min(3, max(3 + 1, 1)) = 3`, so a line of 3.00 is created and the surplus becomes 3 − (3 − 1) = **1**
+**And** for `L2`, the take is `min(4, max(1 + 1, 1)) = 2`, so a line of 2.00 is created
+**And** the move's processed quantity is forcibly recomputed to **5.00**.
+
+**Given** instead the product is serial-tracked
+
+**Then** each created line is forced to exactly one unit in the product unit, whatever the take computed.
+
+**Given** instead the move bypasses reservation and there is one existing line with no lot
+
+**Then** the first lot reuses that line and the second creates a new one of one unit.
+
+---
+
+# AA. Merging, further cases
+
+## Scenario 134 — Moves with different descriptions do not merge
+
+**Given** two otherwise identical moves whose transfer descriptions differ
+
+**Then** they do **not** merge, because the description is part of the merge key.
+
+**But** the **negative** key drops the description, so a negative move whose description differs from a positive one can still be absorbed by it.
+
+## Scenario 135 — Unit prices that differ only by representation
+
+**Given** the `Product Price` precision is 2 and the company currency has 2 decimal places
+**And** two moves carry the unit prices 3.0000000001 and 3.0
+
+**Then** both are formatted as the string "3.00" for the purposes of the key, so the moves **do** merge.
+
+## Scenario 136 — A move that is picked is not cancelled by the merge
+
+**Given** a positive move of demand 3 is fully consumed by a negative move of demand −4, and the positive move is **picked**
+
+**Then** its demand becomes 0 but it is **not** cancelled.
+
+## Scenario 137 — Merging does not touch done, cancelled or draft moves
+
+**Given** a Transfer holds one done move, one cancelled move and two identical confirmed moves
+
+**When** the merge runs
+
+**Then** only the two confirmed moves are considered and merged; the done and cancelled ones are untouched.
+
+---
+
+# AB. Completion, further cases
+
+## Scenario 138 — An unpicked line of a picked move is deleted
+
+**Given** a move is picked and has two detail lines, one picked with 4.00 and one unpicked with 3.00
+
+**When** the Transfer is validated
+
+**Then** the unpicked line is deleted before anything moves
+**And** only 4.00 travels
+**And** the backorder test compares 4.00 against the demand.
+
+## Scenario 139 — A move that is not picked at all
+
+**Given** a Transfer has two moves; move A is picked with 5.00 and move B is not picked at all although it has a processed quantity of 2.00
+
+**When** the Transfer is validated with backorders allowed
+
+**Then** move B is **not** cancelled (backorders are allowed and its demand is non-zero)
+**And** move B is excluded from the set to complete, because it is not picked
+**And** move B is therefore carried whole into the backorder.
+
+**Given** instead backorders are forbidden
+
+**Then** move B is cancelled.
+
+## Scenario 140 — The picked-marking step
+
+**Given** a Transfer has three moves with processed quantities 5, 3 and 0, and none of them is picked, and none of them is a scrap move
+
+**When** the Transfer is validated
+
+**Then** the pre-completion hook finds a quantity and no pick, and marks **every** move of the Transfer as picked — including the one with a zero quantity
+**And** the pruning step then cancels or backorders the zero one according to the backorder decision.
+
+**Given** instead one move is already picked
+
+**Then** the marking does not run, and the unpicked ones stay unpicked.
+
+## Scenario 141 — A scrap move never triggers the picked marking
+
+**Given** a Transfer has one ordinary move with a quantity and one scrap move
+
+**Then** the scrap move — whose destination usage is inventory loss — is skipped when deciding whether anything is picked.
+
+## Scenario 142 — Completion re-reserves the downstream moves in their own company
+
+**Given** a completed move has two destination moves, one in company A and one in company B
+
+**Then** the destination moves are grouped by company and each group is reserved with elevated rights **in its own company**, so that the company-dependent Locations and defaults resolve correctly.
+
+## Scenario 143 — Completion of a move with the same source and destination container
+
+**Given** a detail line has `PACK0011` as both source and destination container
+
+**When** the Transfer is validated
+
+**Then** after the quantities have moved, the empty-record deletion pass runs, because a container that is both source and destination typically leaves a zero record behind.
+
+---
+
+# AC. Backorders, further cases
+
+## Scenario 144 — A backorder inherits the return link
+
+**Given** a return Transfer is validated short and a backorder is created
+
+**Then** the backorder's return link points at the same original Transfer as its parent's
+**And** the backorder therefore also ignores the Operation Type's backorder policy.
+
+## Scenario 145 — A backorder is reserved only when the type reserves at confirmation
+
+**Given** the Operation Type reserves **manually**
+
+**When** a backorder is created
+
+**Then** its availability is **not** checked; its moves stay `confirmed`.
+
+**Given** instead the type reserves at confirmation
+
+**Then** the availability is checked at once.
+
+## Scenario 146 — Backorder moves are confirmed without creating supply requests
+
+**Given** a short move whose supply method is advanced
+
+**When** the backorder move is created
+
+**Then** it is confirmed with supply-request creation **disabled**, so no new supply request is raised for the carried-over quantity; the move simply waits.
+
+## Scenario 147 — Backorder moves do not disturb the containers being validated
+
+**Given** the Transfer being validated has containers on its detail lines
+
+**When** the backorder moves are confirmed
+
+**Then** the whole-container detection is suppressed for that confirmation, so the destination containers of the lines being validated are not rewritten.
+
+---
+
+# AD. Chains and cancellation
+
+## Scenario 148 — Cancelling one of two siblings
+
+**Given** moves A1 and A2 both feed move B
+**And** A1 propagates cancellation
+
+**When** A1 is cancelled
+
+**Then** the sibling A2 is not cancelled
+**And** because not every sibling is cancelled, B is **not** cancelled either
+**And** B keeps its link to A2.
+
+**When** A2 is then also cancelled
+
+**Then** every sibling of A2 is now cancelled, so B is cancelled too — provided B's source Location equals A2's destination Location.
+
+## Scenario 149 — Cancelling a move whose destination is elsewhere
+
+**Given** move A propagates cancellation, and its destination move B sources from a Location that is **not** A's destination Location
+
+**When** A is cancelled
+
+**Then** B is not cancelled; instead B's supply method is reset to take-from-stock and its link to A is dropped.
+
+## Scenario 150 — Cancelling upstream as well
+
+**Given** the system parameter that cancels originating moves is set
+**And** move B propagates cancellation and has an originating move A that is not done
+
+**When** B is cancelled
+
+**Then** A is cancelled too.
+
+## Scenario 151 — A move that does not propagate cancellation
+
+**Given** move A does **not** propagate cancellation and every sibling of A is done or cancelled
+
+**When** A is cancelled
+
+**Then** the destination moves keep existing but are switched to take-from-stock and lose their link to A.
+
+---
+
+# AE. Sequences and numbering, further cases
+
+## Scenario 152 — Two warehouses share a sequence name
+
+**Given** a Warehouse named "Acme" already owns a sequence named "Acme Sequence in"
+
+**When** a second Warehouse also named "Acme" (in another company) is created
+
+**Then** the new receipt sequence is renamed "Acme Sequence in (copy)(*the new sequence's identifier*)" so that the two can be told apart.
+
+## Scenario 153 — An operation type created without a warehouse
+
+**When** an inventory manager creates an Operation Type with the sequence prefix `SPEC` and no Warehouse
+
+**Then** its sequence is named "Sequence SPEC", its prefix is `SPEC` with no slashes added, and its padding is 5
+**And** the first Transfer of that type is numbered `SPEC00001`.
+
+## Scenario 154 — A container type with its own sequence
+
+**Given** the Package Type "Pallet" has the sequence prefix `PLT/`
+
+**Then** its sequence is named "Package Type Sequence PLT/", its prefix is `PLT/` and its padding is **7**
+**And** a container of that type created without a name is `PLT/0000001`.
+
+**Given** instead the type has no sequence
+
+**Then** the container draws from the shared container sequence and is `PACK0000001`.
+
+---
+
+# AF. Housekeeping and concurrency
+
+## Scenario 155 — Two concurrent reservations of the same goods
+
+**Given** two transactions both reserve BOLT at `WH/Stock` at the same instant
+
+**Then** the first takes the write lock on the first candidate record
+**And** the second, unable to take it, creates a **new** record instead of waiting
+**And** both transactions succeed
+**And** the merge pass later collapses the two records into one, keeping the lowest identifier, summing the quantities and the reservations (clamped at zero) and keeping the oldest incoming date.
+
+## Scenario 156 — The housekeeping pass is skipped
+
+**Given** the system parameter that skips the housekeeping pass is set
+
+**When** the quantity screens are opened
+
+**Then** no merging, no reservation cleaning and no empty-record deletion happens
+**And** the daily scheduler still runs all three.
+
+---
+
+# AG. Weights and dispatch
+
+## Scenario 157 — A container with a manual shipping weight
+
+**Given** container `PACK0012` of type "Box" (base weight 1.2) holds 10.00 BOLT (weight 0.5) and has a manual shipping weight of **9.00**
+
+**Then** the Transfer's shipping weight counts **9.00** for that container, not 1.2 + 5 = 6.2.
+
+## Scenario 158 — A nested container's weight during a transfer
+
+**Given** `PALLET2` is the destination container of `BOX1` and `BOX2`
+**And** `BOX1` holds 4.00 BOLT and `BOX2` holds 6.00 BOLT on the Transfer's lines
+**And** the base weights are: pallet 20, box 1.2
+
+**Then** the weight of `PALLET2` for that Transfer is 20 + (1.2 + 4 × 0.5) + (1.2 + 6 × 0.5) = 20 + 3.2 + 4.2 = **27.4**.
+
+## Scenario 159 — Ordering a batch by postal code
+
+**Given** a batch holds four delivery Transfers whose contacts' postal codes are `1000`, `9000`, empty and `3000`
+
+**When** the batch is created or its Transfer list changes
+
+**Then** the Transfers are sorted ascending by postal code with the empty one first, giving the order: empty, `1000`, `3000`, `9000`
+**And** their batch sequences are stamped 0, 1, 2, 3.
+
+---
+
+# AH. Errors at the boundaries
+
+## Scenario 160 — Deleting a chained move
+
+**Given** a confirmed move has an originating move
+
+**When** it is deleted
+
+**Then** it fails with "You can not delete moves linked to another operation".
+
+**Given** instead the move is in draft
+
+**Then** the deletion succeeds and its detail lines are deleted with it.
+
+## Scenario 161 — Deleting a transfer
+
+**When** a Transfer is deleted
+
+**Then** its moves are first cancelled and then deleted; a chained non-draft move among them blocks the whole deletion.
+
+## Scenario 162 — Deleting a location that has children
+
+**When** a Location with descendants is deleted
+
+**Then** the whole subtree is deleted.
+
+**When** the shared inter-company Location is among them
+
+**Then** it fails with "The Inter-company transit location is required by the Inventory app and cannot be deleted, but you can archive it."
+
+## Scenario 163 — Writing the real quantity of a move
+
+**When** a caller writes the computed real-quantity field directly
+
+**Then** it fails with "The requested operation cannot be processed because of a programming error setting the `product_qty` field instead of the `product_uom_qty`."
+
+## Scenario 164 — Unreserving more than exists
+
+**When** a negative reservation of 10.00 is requested where only 4.00 is reserved in total
+
+**Then** it fails with "It is not possible to unreserve more products of BOLT than you have in stock."
+
+## Scenario 165 — An unimplemented removal strategy
+
+**Given** a Removal Strategy record whose method key is `random`
+**And** it is set on `WH/Stock`
+
+**When** anything is gathered from `WH/Stock`
+
+**Then** it fails with "Removal strategy random not implemented."
+
+---
+
+# AI. End-to-end
+
+## Scenario 166 — A full three-step delivery of a tracked product in containers
+
+**Given** the Warehouse delivers in three steps
+**And** `WH/Stock/Shelf A` holds 20.00 PAINT under lot `L1`, with the first in first out strategy
+**And** the container group and the lot group are active
+
+**When** a need for 12 PAINT at `Customers` reaches the rule engine
+
+**Then** a pick move is created from `WH/Stock` towards `WH/Packing Zone` with `Customers` as final Location, grouped into `WH/PICK/00010`, and reserved: one detail line of 12.00 from `WH/Stock/Shelf A` carrying lot `L1`.
+
+**When** the pick is validated
+
+**Then** 12.00 PAINT of `L1` sit in `WH/Packing Zone`
+**And** a pack move is created into `WH/PACK/00007`, reserved against exactly (`WH/Packing Zone`, `L1`, no container).
+
+**When** the person packs the 12 units into a new container `PACK0020` of type "Box" and validates the pack Transfer
+
+**Then** the container history snapshot is written first, recording `PACK0020`, its Location before (`WH/Packing Zone`) and after (`WH/Output`)
+**And** 12.00 PAINT of `L1` sit in `WH/Output` inside `PACK0020`
+**And** a delivery move is created into `WH/OUT/00015` and reserved against (`WH/Output`, `L1`, `PACK0020`)
+**And** the whole-container detection sees that the delivery's lines reproduce the container exactly, so each line gets `PACK0020` as destination container and the entire-package flag.
+
+**When** the delivery is validated
+
+**Then** 12.00 PAINT of `L1` sit at `Customers` inside `PACK0020`
+**And** the delivery document prints one container with its contents rather than a loose line
+**And** the traceability tree of `L1` shows four completed lines: the original receipt, the pick, the pack and the delivery
+**And** the delivery discovery of `L1` returns `WH/OUT/00015`.
+
+## Scenario 167 — A receipt, a partial storage, a count and a return
+
+**Given** the Warehouse receives in two steps
+
+**When** 20 BOLT are received into `WH/Input` and the receipt is validated
+
+**Then** a storage Transfer of 20 is created and reserved.
+
+**When** only 15 are stored and a backorder is created
+
+**Then** the storage Transfer is done with 15, `WH/Stock` holds 15.00, `WH/Input` holds 5.00, and a backorder of 5 exists.
+
+**When** a count of `WH/Input` finds only 4
+
+**Then** an adjustment move of 1 from `WH/Input` to `Inventory adjustment` is created and completed
+**And** the backorder's reservation is reduced: the reservation-cleaning pass, or the next reservation attempt, leaves it `partially_available` with 4.00.
+
+**When** the backorder is validated with 4 and no further backorder
+
+**Then** `WH/Stock` holds 19.00 and `WH/Input` holds 0.00.
+
+**When** the original receipt is then returned for 3
+
+**Then** a return Transfer is created from `WH/Input` — the receipt's destination Location — towards the return type's default destination
+**And** validating it moves 3.00 out of `WH/Input`, which has nothing, so `WH/Input` goes to **−3.00** and the reservation-freeing routine runs.
+
+This last step is the expected behavior, not a defect: a return of a receipt whose goods have already been stored has to be corrected by a further internal transfer, or by returning the storage step instead.

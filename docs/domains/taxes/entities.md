@@ -725,3 +725,155 @@ erDiagram
     PAYMENT ||--o{ PAYMENT_WITHHOLDING_LINE : "owns"
     PAYMENT_WITHHOLDING_LINE }o--|| TAX : "applies"
 ```
+
+---
+
+## 13. Storage-name index
+
+Every reproduced identifier used in this folder, with the entity it belongs to and its full name in
+words. An implementer who must remain compatible with an external contract reproduces these names
+exactly.
+
+### 13.1 Entities
+
+| Transport name | Table | Full name |
+|---|---|---|
+| `account.tax` | `account_tax` | Tax |
+| `account.tax.repartition.line` | `account_tax_repartition_line` | Tax Distribution Line |
+| `account.tax.group` | `account_tax_group` | Tax Group |
+| `account.fiscal.position` | `account_fiscal_position` | Fiscal Position |
+| `account.fiscal.position.account` | `account_fiscal_position_account` | Fiscal Position Account Mapping |
+| `account.account.tag` | `account_account_tag` | Account Tag |
+| `account.report` | `account_report` | Accounting Report |
+| `account.report.line` | `account_report_line` | Accounting Report Line |
+| `account.report.expression` | `account_report_expression` | Accounting Report Expression |
+| `account.report.column` | `account_report_column` | Accounting Report Column |
+| `account.report.external.value` | `account_report_external_value` | Accounting Report External Value |
+| `account.withholding.line` | none (abstract) | Withholding Line |
+| `account.payment.withholding.line` | `account_payment_withholding_line` | Payment Withholding Line |
+| `account.payment.register.withholding.line` | `account_payment_register_withholding_line` | Payment Register Withholding Line |
+
+### 13.2 Join tables
+
+| Table | Columns | What it links |
+|---|---|---|
+| `account_tax_filiation_rel` | `parent_tax`, `child_tax` | A Group of Taxes to its children |
+| `account_tax_alternatives` | `src_tax_id`, `dest_tax_id` | A domestic tax to the tax that replaces it |
+| `account_fiscal_position_account_tax_rel` | `account_fiscal_position_id`, `account_tax_id` | A Fiscal Position to the taxes that belong to it |
+| `account_move_line_account_tax_rel` | `account_move_line_id`, `account_tax_id` | A Journal Item to its base taxes |
+| `account_account_tax_default_rel` | `account_id`, `tax_id` | An Account to its default taxes |
+| `product_taxes_rel` | `prod_id`, `tax_id` | A Product Template to its sales taxes |
+| `product_supplier_taxes_rel` | `prod_id`, `tax_id` | A Product Template to its purchase taxes |
+| `account_reconcile_model_line_account_tax_rel` | `account_reconcile_model_line_id`, `account_tax_id` | A Reconciliation Model Line to its taxes |
+| `account_account_account_tag` | — | An Account to its tags |
+
+### 13.3 Selection values
+
+| Field | Values |
+|---|---|
+| Tax Type (`type_tax_use`) | `sale`, `purchase`, `none` |
+| Tax Scope (`tax_scope`) | `service`, `consu` |
+| Tax Computation (`amount_type`) | `group`, `fixed`, `percent`, `division`, and `code` when the custom formula capability is installed |
+| Included in Price override (`price_include_override`) | `tax_included`, `tax_excluded` |
+| Tax Exigibility (`tax_exigibility`) | `on_invoice`, `on_payment` |
+| Distribution line kind (`repartition_type`) | `base`, `tax` |
+| Distribution line document kind (`document_type`) | `invoice`, `refund` |
+| Account Tag applicability (`applicability`) | `accounts`, `taxes`, `products` |
+| Report expression engine (`engine`) | `domain`, `tax_tags`, `aggregation`, `account_codes`, `external`, `custom` |
+| Report expression date scope (`date_scope`) | `from_beginning`, `from_fiscalyear`, `to_beginning_of_fiscalyear`, `to_beginning_of_period`, `strict_range`, `previous_return_period` |
+| Report availability (`availability_condition`) | `country`, `coa`, `always` |
+| Report multi-company filter (`filter_multi_company`) | `selector`, `tax_units` |
+| Company rounding method (`tax_calculation_rounding_method`) | `round_globally`, `round_per_line` |
+| Company default price inclusion (`account_price_include`) | `tax_included`, `tax_excluded` |
+| Foreign registration banner (`foreign_vat_header_mode`) | `templates_found`, `no_template` |
+| Withholding placeholder kind (`placeholder_type`) | `given_by_sequence`, `given_by_name`, `not_defined` |
+| Withholding owner payment direction (`comodel_payment_type`) | `outbound`, `inbound` |
+| Base line special mode (engine value, not stored) | `false`, `total_excluded`, `total_included` |
+| Base line special type (engine value, not stored) | `false`, `early_payment`, `cash_rounding`, `non_deductible`, `global_discount`, `down_payment` |
+| Journal item display kind, values this domain sets | `tax`, `non_deductible_tax` |
+
+### 13.4 Route paths
+
+| Path | Purpose |
+|---|---|
+| `/base_vat/1/webhook_update_vies` | The callback of the cross-border verification relay |
+
+---
+
+## 14. Tax-related fields on the payment entities
+
+### 14.1 Payment (`account.payment`)
+
+*Added by the withholding capability.*
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Show the withholding section (`display_withholding`) | boolean, computed, not stored | True when the payment's company owns at least one tax flagged "withhold on payment" whose tax type matches the payment direction — sales for an incoming payment, purchases for an outgoing one. |
+| Withhold Tax Amounts (`should_withhold_tax`) | boolean | Computed from the presence of withholding lines, stored, still writable, not copied. |
+| Withholding Lines (`withholding_line_ids`) | collection of Payment Withholding Lines | |
+| Payment-method outstanding account (`withholding_payment_account_id`) | link to one Account, related, read-only | The outstanding account of the payment method line, used to decide whether a separate one must be chosen. |
+| Outstanding Account (`outstanding_account_id`) | link to one Account | Made writable by this capability, because a withholding payment needs an explicit one. Recomputed when the withholding switch changes. |
+| Hide the account column (`withholding_hide_tax_base_account`) | boolean, computed, not stored | True when the company has a withholding tax base account, in which case the per-line account column is hidden. |
+
+**Synchronisation.** The withholding lines and the withholding switch are added to the set of
+fields that force the payment's journal entry to be rebuilt.
+
+**Editing a line** refreshes the certificate-number hints of every line whose hint kind changed.
+
+### 14.2 Register Payment wizard (`account.payment.register`)
+
+*Added by the withholding capability.*
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Show the withholding section (`display_withholding`) | boolean, computed, not stored | True when the company owns a matching withholding tax **and** the wizard will create a single journal entry. For a batch containing refunds the direction is inverted before the match. |
+| Withhold Tax Amounts (`should_withhold_tax`) | boolean | Computed from the presence of lines, stored, still writable, not copied. |
+| Withholding Lines (`withholding_line_ids`) | collection of Payment Register Withholding Lines | Computed, stored, still writable. Cleared when the section is hidden or the wizard is not editable; otherwise derived once, the first time, from the base lines of every document in the first batch. |
+| Net Amount (`withholding_net_amount`) | monetary, computed, stored | The payment amount minus the sum of the line amounts; zero when the wizard is not editable. |
+| Journal default account (`withholding_default_account_id`) | link to one Account, related, read-only | |
+| Outstanding Account (`withholding_outstanding_account_id`) | link to one Account | Computed, stored, still writable, not copied. Cleared when the withholding switch is off; left alone when the payment method line already has an outstanding account; otherwise proposed as the outstanding account of the most recent payment made with the same payment method line whose method had no outstanding account but which had one. Restricted to accounts of a current-asset or current-liability kind, plus the journal's default account. |
+| Payment-method outstanding account (`withholding_payment_account_id`) | link to one Account, related, read-only | |
+| Hide the account column (`withholding_hide_tax_base_account`) | boolean, computed, not stored | As on the payment. |
+
+**On confirmation** the wizard copies every withholding line onto the created payment, dropping the
+wizard link and the hint, writes the chosen outstanding account onto the payment, and — when that
+account does not allow reconciliation and is not of a cash, credit-card or off-balance kind —
+switches reconciliation on for it.
+
+**The total still to pay.** The wizard computes, for the first batch, the total of the payment-term
+items of the underlying documents expressed in the wizard's currency, converting each item as
+follows: same currency, take the amount in document currency; the item is in a foreign currency
+and the wizard is in the company currency, convert the amount in document currency at the payment
+date; the item is in the company currency and the wizard is not, convert the balance; otherwise
+convert the balance. That total is the denominator of the split factor of section 8.3.
+
+---
+
+## 15. Field-level cross-reference
+
+Where to find the rules for each non-obvious field.
+
+| Field | Specified in |
+|---|---|
+| `amount_type` and `amount` | `calculations.md` section 4 |
+| `price_include_override` and `price_include` | `calculations.md` sections 4.3, 4.5 and 5 |
+| `include_base_amount` and `is_base_affected` | `calculations.md` sections 3.3 and 5 |
+| `sequence` on a Tax | `calculations.md` section 3.1 |
+| `children_tax_ids` | `calculations.md` sections 3.1 and 4.7 |
+| `tax_exigibility` and `cash_basis_transition_account_id` | `calculations.md` section 12, `accounting-effects.md` section 6 |
+| `has_negative_factor` | `calculations.md` section 6 step 2, `accounting-effects.md` section 4 |
+| `analytic` | `entities.md` section 1.7 |
+| `factor_percent` and `repartition_type` | `calculations.md` section 8.2 |
+| `tag_ids` on a distribution line | `calculations.md` sections 8.3 and 8.4 |
+| `use_in_tax_closing` | `entities.md` section 1.7, `accounting-effects.md` section 8 |
+| `tax_map` and `account_map` | `calculations.md` sections 11.1 and 11.2 |
+| `auto_apply`, `vat_required`, `country_id`, `country_group_id`, `state_ids`, `zip_from`, `zip_to` | `calculations.md` sections 11.3 and 11.4 |
+| `foreign_vat` | `calculations.md` section 15 |
+| `is_domestic` on a Tax and on a Fiscal Position | `entities.md` sections 1.3 and 4.6 |
+| `extra_tax_data` | `calculations.md` section 9.3 |
+| `tax_base_amount` | `accounting-effects.md` section 2 |
+| `tax_tag_ids` | `calculations.md` sections 8.3 and 8.4 |
+| `vies_valid` and `perform_vies_validation` | `calculations.md` section 15.5 |
+| `is_withholding_tax_on_payment` and `withholding_sequence_id` | `calculations.md` section 13 |
+| `formula` and `formula_decoded_info` | `calculations.md` section 4.6 |
+| `preceding_subtotal` and `pos_receipt_label` | `calculations.md` section 10 |

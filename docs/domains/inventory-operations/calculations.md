@@ -1772,3 +1772,179 @@ A move's printed description is resolved in this order:
 3. otherwise the product's generic description: for a **delivery** always the product's display name; for any other kind the product's description rendered as plain text when it is not empty, and the display name otherwise.
 
 The reading is done in the language of the Transfer's contact, else the move's contact, else the reader.
+
+---
+
+# 34. Three fully worked traces
+
+These traces follow one operation from the first read to the last write, naming every intermediate figure. They exist so that an implementation can be checked step by step rather than only by its end state.
+
+## 34.1 A reservation that partially succeeds
+
+**Starting state.** Product BOLT, product unit "Units" with a rounding step of 0.01. `WH/Stock` has two internal children. The `Product Unit` precision is 2. No removal strategy is set anywhere, so first in first out applies.
+
+| Quantity record | Location | Lot | Container | Owner | On hand | Reserved | Incoming date |
+|---|---|---|---|---|---|---|---|
+| Q1 | `WH/Stock/Shelf A` | — | — | — | 6.00 | 2.00 | 2 March |
+| Q2 | `WH/Stock/Shelf B` | — | `PACK0001` | — | 9.00 | 0.00 | 5 March |
+| Q3 | `WH/Stock/Shelf B` | — | — | — | −1.00 | 0.00 | 5 March |
+
+**The move.** Demand 12 Units, source `WH/Stock`, destination `Customers`, status `confirmed`, no detail line, not picked, supply method take-from-stock, no originating move.
+
+**Step 1 — the snapshot.** The move's processed quantity is 0, so the *already reserved* figure is 0.
+
+**Step 2 — the selected set.** The move is not picked and its status is `confirmed`, so it is selected.
+
+**Step 3 — the missing quantity.** `missing_line_units = 12 − 0 = 12`. Compared against zero at the product unit's rounding it is positive, so the move is processed. Converted to the product unit: `missing = 12`.
+
+**Step 4 — the branch.** The source Location's usage is internal, so reservation is not bypassed. The move has no originating move. Branch B applies.
+
+**Step 5 — the reservation-quantity computation.**
+
+- *Gathering.* Strategy `fifo`; loose matching at `WH/Stock` with no lot, container or owner requested; the filter is therefore "product is BOLT and Location is a descendant of `WH/Stock`". Ordering: incoming date ascending, then identifier ascending. Result: Q1 (2 March), then Q2 and Q3 (both 5 March, ordered by identifier: Q2 then Q3). The final "lots first" sort changes nothing, no record having a lot.
+- *Available quantity.* The product is untracked, so `available = (6 + 9 − 1) − (2 + 0 + 0) = 12.00`. Negative results are not allowed but the figure is positive.
+- *Full packaging.* Not requested.
+- *Clamp.* `wanted = min(12, 12) = 12`.
+- *Unit re-expression.* The line unit equals the product unit, so nothing changes.
+- *Serial check.* The product is untracked.
+- *Direction.* `wanted` is positive. Recompute `available` as the sum of **positive** on-hand quantities minus **all** reservations: `(6 + 9) − (2 + 0 + 0) = 13.00`.
+- *Negative pockets.* Q3's available quantity is −1.00, strictly negative, so the pocket for the key (`WH/Stock/Shelf B`, no lot, no container, no owner) is −1.00. Q1's and Q2's keys have no pocket, Q2 carrying a container and therefore a different key from Q3.
+- *Walk.*
+  - Q1: takeable = 6 − 2 = 4.00. No pocket for its key. `min(4, 12) = 4`. Append (Q1, 4.00). Remaining wanted 8.00, available 9.00.
+  - Q2: takeable = 9 − 0 = 9.00. Its key carries **no** pocket, because the pocket belongs to the container-less key. `min(9, 8) = 8`. Append (Q2, 8.00). Remaining wanted 0.00 → stop.
+- *Result.* [(Q1, 4.00), (Q2, 8.00)], total taken 12.00.
+
+**Step 6 — creating the lines.** No existing line, so no candidate. The two pairs have different keys, so no merging. Two lines are created:
+
+| Line | Source Location | Lot | Source container | Owner | Quantity |
+|---|---|---|---|---|---|
+| L1 | `WH/Stock/Shelf A` | — | — | — | 4.00 |
+| L2 | `WH/Stock/Shelf B` | — | `PACK0001` | — | 8.00 |
+
+Creating them raises the reserved counters: Q1 goes to 6.00 on hand / 6.00 reserved; Q2 goes to 9.00 on hand / 8.00 reserved.
+
+**Step 7 — the status.** `missing` was 12 and `taken` is 12, equal at the product unit's rounding, so the move is marked fully assigned.
+
+**Step 8 — put-away.** The lines are grouped by outermost destination container. L1 has none; L2 has none either, its `PACK0001` being a **source** container. Both are resolved line by line against `Customers`, which has no put-away rule, so both keep `Customers`.
+
+**Step 9 — whole containers.** The Transfer re-runs the whole-container detection. Grouping by source container gives one group for `PACK0001` holding L2 alone. The container's contents are 9.00 and the line claims 8.00, so the whole-container test fails and nothing is flagged.
+
+**End state.** The move is `assigned` with a processed quantity of 12.00; Q3 is untouched at −1.00; the available quantity of BOLT at `WH/Stock` is now `(6 + 9 − 1) − (6 + 8) = 0.00`.
+
+## 34.2 A validation that creates a backorder
+
+**Starting state.** The Transfer of the previous trace, plus a second move of 5 PAINT that could not be reserved at all. The Operation Type's backorder policy is "ask" and it reserves at confirmation. The Transfer's shipping policy is as soon as possible, so its status is `assigned`.
+
+**The person's input.** They set the BOLT move's processed quantity to 12 (it already is) and tick it as picked; they leave the PAINT move untouched.
+
+**Step 1 — immediate transfer.** The Transfer is not in draft, so nothing is copied.
+
+**Step 2 — sanity check.**
+- *No quantity at all?* At least one move that is neither done nor cancelled is picked, so *has pick* is true; the test therefore looks only at the picked moves; the BOLT move has 12.00, which is not zero; the Transfer passes.
+- *No moves?* It has two.
+- *Missing lots?* PAINT is lot-tracked and the Operation Type uses existing lots, but the PAINT line — there is none — contributes nothing, and the BOLT move is untracked. The Transfer passes.
+
+**Step 3 — picked marking.** At least one move is picked, so the marking does **not** run; the PAINT move stays unpicked.
+
+**Step 4 — the backorder decision.** The policy is "ask". For the BOLT move: it is picked and its picked quantity is 12, which is not below its demand of 12 — no trigger. For the PAINT move: its demand is 5 and it is **not** picked — trigger. The Transfer needs a decision, so the backorder screen opens.
+
+**Step 5 — the person chooses "Create backorder".** The validation resumes with the backorder step suppressed and nothing declared as not-to-be-backordered.
+
+**Step 6 — completion.**
+- *Prune.* The BOLT move is picked and both its lines are picked, so nothing is deleted. The PAINT move has a processed quantity of 0 and is not picked, so the first half of the condition is true; but backorders are allowed and its demand is 5, not zero, so it is **not** cancelled.
+- *Select.* The set to complete is the BOLT move alone: the PAINT move is excluded because it is not picked.
+- *Backorder moves.* The BOLT move's processed quantity (12.00) is not below its demand (12) at the `Product Unit` precision, so **no** backorder move is split off it.
+- *Move the goods.* L1 and L2 are completed in order (destination container descending, then identifier: neither has a destination container, so by identifier). For L1: release 4.00 of reservation on Q1; decrease Q1 by 4.00, leaving 2.00 on hand and 2.00 reserved, returning an available quantity of 0.00 and an incoming date of 2 March; increase `Customers` by 4.00 stamping 2 March. For L2: release 8.00 on Q2; decrease Q2 by 8.00, leaving 1.00 on hand and 0.00 reserved; increase `Customers` by 8.00 stamping 5 March. Neither returned a negative available quantity, so no reservation is freed.
+- *Status.* The BOLT move becomes `done` with the current instant as its date.
+- *Push.* `Customers` has no push rule.
+- *Propagate.* The BOLT move has no destination move.
+- *Transfer backorder.* The moves that are neither done nor cancelled are the PAINT move alone. A backorder Transfer is created by copying the original with an empty reference, no moves, no lines, the original as back-order link. The PAINT move is moved into it with its picked flag cleared. The backorder's responsible is cleared. A note is posted on the original.
+- *Reserve the backorder.* The Operation Type reserves at confirmation, so the backorder's availability is checked; PAINT is still unavailable, so its move stays `confirmed` and the backorder's status is `confirmed`.
+
+**Step 7 — after completion.** The completion instant is stamped on the original Transfer and its priority is reset. The Operation Type kind is delivery, so the re-reservation search does **not** run. The delivery confirmation message and text message are sent if the company asks for them.
+
+**End state.** The original Transfer is `done` with one move of 12; the backorder is `confirmed` with one move of 5; `WH/Stock` holds 3.00 BOLT (2.00 on Q1 plus 1.00 on Q2) minus the −1.00 on Q3, that is a net 2.00.
+
+## 34.3 A put-away that walks two rules
+
+**Starting state.** Arrival Location `WH/Stock`, whose internal descendants are `Bin 1`, `Bin 2` and `Bin 3`, all three carrying the Storage Category "Shelf" (maximum weight 40, product capacity 20 BOLT, mixing policy "If all products are same"). BOLT weighs 0.5.
+
+| Location | On hand | Open lines arriving |
+|---|---|---|
+| `Bin 1` | 18.00 BOLT | — |
+| `Bin 2` | 4.00 PAINT | — |
+| `Bin 3` | 0 | 5.00 BOLT |
+
+**The rules on `WH/Stock`:**
+
+| Rule | Product | Category | Container type | Target | Mode | Storage category | Priority |
+|---|---|---|---|---|---|---|---|
+| R1 | — | All | — | `WH/Stock` | No | — | 10 |
+| R2 | BOLT | — | — | `WH/Stock` | Closest Location | Shelf | 10 |
+
+**The request.** Put away 6.00 BOLT, no container, no packaging unit, no additional-quantity map.
+
+**Step 1 — container type.** None.
+
+**Step 2 — product set.** {BOLT}.
+
+**Step 3 — category chain.** BOLT's own category and its ancestors, say {Hardware, All}.
+
+**Step 4 — rule selection.** R1 passes (no product; its category "All" is in the chain; no container type). R2 passes (its product is in the set). Both selected.
+
+**Step 5 — specificity sort.** R2's key is (false, **true**, false, false); R1's key is (false, false, false, **true**). Comparing the four booleans in order, descending: R2 wins on the second element. Order: R2, then R1.
+
+**Step 6 — candidate Locations.** No Locations in the calling context, so the internal descendants of `WH/Stock`: `Bin 1`, `Bin 2`, `Bin 3` (and `WH/Stock` itself when it is internal, which it is).
+
+**Step 7 — the occupancy map.** At least one candidate carries a storage category, and no typed container is involved, so the map is a quantity map for BOLT:
+
+```
+Bin 1 : 18.00 (records) + 0 (lines) = 18.00
+Bin 2 : 0 + 0 = 0
+Bin 3 : 0 + 5.00 = 5.00
+WH/Stock : 0
+```
+
+**Step 8 — the walk, rule R2.** The mode is closest location, so the target `WH/Stock` is kept and its children are narrowed to those carrying the category "Shelf": `Bin 1`, `Bin 2`, `Bin 3`.
+
+*First pass — prefer a Location that already holds BOLT.* Walk in order:
+- `Bin 1`: occupancy 18.00 > 0, so it qualifies. Capacity check: forecasted weight = 18 × 0.5 = 9; mixing policy "same" — the only positive record is BOLT, and no open line targets `Bin 1` with another product, so it passes; weight test `40 < 9 + 0.5 × 6 = 12`? No; first quantity test `18 ≥ 20`? No; second `6 + 18 = 24 > 20`? **Yes** → the check fails. `Bin 1` is added to the rejected set.
+- `Bin 2`: occupancy 0, not strictly positive, skipped by this pass.
+- `Bin 3`: occupancy 5.00 > 0, so it qualifies. Capacity check: forecasted weight = 0 (records) − 0 (leaving) + 5 × 0.5 (arriving) = 2.5; mixing policy "same" — there is no positive record, but an open line targets `Bin 3` with BOLT, which is the same product, so it passes; weight test `40 < 2.5 + 3 = 5.5`? No; `5 ≥ 20`? No; `6 + 5 = 11 > 20`? No → the check **passes**. Return `Bin 3`.
+
+**Step 9 — the answer.** `Bin 3`. Rule R1 is never reached.
+
+**Variation.** Had `Bin 3` failed too, the first pass would have rejected it, the second pass would have walked `Bin 1` (already rejected, skipped), `Bin 2` (capacity check: the mixing policy "same" finds a positive PAINT record, so it **fails**) and `Bin 3` (already rejected). R2 would have returned nothing, the walk would have moved to R1, whose target `WH/Stock` carries no storage category — and `WH/Stock` itself has no storage category either, so its capacity check passes trivially and `WH/Stock` is returned.
+
+---
+
+# 35. Reference: every rounding decision in the domain
+
+| Place | Rounded at | Method |
+|---|---|---|
+| Converting the demand into the real quantity | the product unit's rounding step | half away from zero |
+| Converting a detail line's quantity into the product unit | the product unit's rounding step | half away from zero |
+| Summing the detail lines into the move's processed quantity | **not rounded** | — |
+| Comparing the processed quantity against the demand for the status | the line unit's rounding step | — |
+| Comparing the processed quantity against the demand for the backorder test | the `Product Unit` precision (a digit count) | — |
+| Comparing the processed quantity against the demand for the backorder **question** | the `Product Unit` precision | — |
+| Checking that a written processed quantity is representable | the `Product Unit` precision | half away from zero |
+| Checking a detail line at completion | both the line unit's rounding step and the `Product Unit` precision, compared against each other | half away from zero |
+| Re-expressing a reservation in the line unit | the line unit's rounding step, then back at the product unit's | down, then half away from zero |
+| Deciding whether a reserved quantity fits an existing line | the `Product Unit` precision | half away from zero |
+| Full-packaging reservation | the packaging unit's rounding step, then back | down, then half away from zero |
+| Splitting a move: choosing the new move's unit | the `Product Unit` precision | half away from zero |
+| Splitting a move: the surviving demand | the `Product Unit` precision | half away from zero after an unrounded conversion |
+| The unit price after absorbing a negative move | the `Product Price` precision | half away from zero |
+| The merge key's floating members | each field's own precision, formatted as text | half away from zero |
+| The whole-container test | the `Product Unit of Measure` precision | zero test |
+| Deleting empty quantity records | the greater of 6 digits and twice the shipped product-unit precision | — |
+| Distributing a processed quantity over the lines | **not rounded** during the walk | — |
+| Reducing a processed quantity | **not rounded** during the walk | — |
+| Aggregating for a printed document | the move's line unit | — |
+| The traceability quantity | the `Product Unit` precision | half away from zero |
+| The label count per unit | whole part of the line quantity | truncated |
+| Reception report labels | whole number at or above the demand | up |
+| The product quantity figures | the product unit's rounding step | — |
+
+Everything not in this table is exact arithmetic.

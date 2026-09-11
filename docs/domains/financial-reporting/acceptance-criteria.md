@@ -597,11 +597,13 @@ Tax Return Lock Date (31 March 2026).*
 amount to be carried to the next period,
 **and** a report line coded `box_81` with three expressions:
 
-| Label | Engine | Formula | Subformula |
-|---|---|---|---|
-| `_applied_carryover_balance` | `external` | `sum` | — |
-| `_carryover_balance` | `aggregation` | `box_81_movement.balance + box_81._applied_carryover_balance` | `if_below(EUR(0))` |
-| `balance` | `aggregation` | `box_81_movement.balance + box_81._applied_carryover_balance` | `if_above(EUR(0))` |
+| Label | Engine | Formula | Subformula | Date scope |
+|---|---|---|---|---|
+| `tag` | `tax_tags` | `81` | — | `strict_range` |
+| `_applied_carryover_balance` | `external` | `most_recent` | — | `previous_return_period` |
+| `balance_unbound` | `aggregation` | `box_81._applied_carryover_balance + box_81.tag` | — | `strict_range` |
+| `_carryover_balance` | `aggregation` | `box_81.balance_unbound` | `if_below(EUR(0))` | `strict_range` |
+| `balance` | `aggregation` | `box_81.balance_unbound` | `if_above(EUR(0))` | `strict_range` |
 
 **and** a monthly periodicity,
 **and** March 2026 whose own movement on box 81 is −420.00 and which has nothing carried in,
@@ -635,7 +637,9 @@ carried_out = −420.00        (if_below(EUR(0)) admits it)
 **Given** Scenario 5.1,
 **and** April 2026 whose own movement on box 81 is 1 130.00,
 **When** the accountant opens the April return,
-**Then**
+**Then** the carry-in expression, whose date scope is `previous_return_period`, widens its window
+to the whole of March 2026 and finds the record dated 2026-03-31,
+**And**
 
 ```formula
 carried_in  = −420.00
@@ -707,6 +711,44 @@ expression _carryover_balance.*,
 **When** a manager sets its carry-over target to `box_81._applied_carryover_balance`,
 **Then** the write is refused with: *You cannot use the field carryover_target in an expression
 that does not have the label starting with _carryover_.*
+
+**Scenario 5.8 — A skipped period breaks the chain.**
+
+**Given** Scenario 5.1, so a carry-over of −420.00 is dated 2026-03-31,
+**and** the April return is never validated,
+**When** the accountant opens the May return, whose carry-in expression widens its window to the
+whole of April 2026,
+**Then** the carry-in is **0.00**, because no carry-over record is dated in April,
+**And** the March amount is not silently accumulated into May,
+**And** the accountant must close April before closing May.
+
+**Scenario 5.9 — Variant B: the unbounded figure is displayed.**
+
+**Given** the Belgian pattern of §15.4 of [`calculations.md`](calculations.md), in which box 81
+has a `balance` expression with **no** bound clause,
+**and** March 2026 whose own movement is −420.00 and nothing carried in,
+**Then** the rendered report shows **−420.00** on box 81,
+**And** the carry-out expression still computes −420.00 and one carry-over record is written,
+**And** the national filing file writes **0** for box 81,
+**And** the April report shows `−420.00 + 1 130.00 = 710.00`, exactly as in Scenario 5.2.
+
+**Scenario 5.10 — Most recent, not sum.**
+
+**Given** two carry-over records targeting the same expression, both dated inside the previous
+return period, with values −420.00 and −500.00, the second created later,
+**Then** the carry-in expression, whose formula is `most_recent`, reads **−500.00**, not
+−920.00.
+
+**Scenario 5.11 — Clamping the carry-out between two bounds.**
+
+**Given** a definition in which the carry-out expression is `VP14.debit` with the subformula
+`if_between(EUR(0), EUR(100))`, used where the law says a debt below one hundred is carried
+rather than paid,
+**Then** a debit of 42.00 is carried out as 42.00 and the period pays nothing of it,
+**And** a debit of 180.00 is carried out as 100.00 — clamped to the upper bound — which is the
+documented behavior of `if_between`, and the definition must therefore not rely on
+`if_between` to mean "carry only if below one hundred"; the shipped Italian definition does use
+this clause and a rebuild must reproduce the clamp, not a zeroing.
 
 ---
 

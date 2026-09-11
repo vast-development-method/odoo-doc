@@ -730,7 +730,7 @@ observable behaviour after a crash differs.
    children — the skip applies to the write, not to the walk. In practice the subsidiary's children
    are also skipped because they are re-filtered at each level.
 6. **The first-contact guard only fires on the bulk-load path.** Creating one contact through the
-   ordinary path does *not* copy its address up to an address-less parent; the upstream push in the
+   ordinary path does *not* copy its address up to an address-less parent; the upward push in the
    synchronization does that instead, and only when the child's address differs from the parent's
    after inheritance — which, for a childless parent with an empty address, it does.
 7. **The company-registration number travels down but not up.** Unlike the tax number.

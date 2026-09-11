@@ -623,6 +623,18 @@ Inputs: one employee, a window start moment as text, an optional window stop mom
 The result is a map from date, rendered as a four-digit year, a hyphen, a two-digit month, a
 hyphen and a two-digit day, to the value true.
 
+**Flexible schedules.** A working schedule marked as flexible-hours declares no attendance
+lines, so it reports **no** day as unusual. An employee on such a schedule therefore has every
+day of the window marked as usual, weekends included — which is the intended effect: a person
+with flexible hours has no non-working days to shade.
+
+**Worked contrast.** The same employee, over the window 1 January to 31 December 2025:
+
+| Schedule | The entry for Saturday 4 January 2025 |
+|---|---|
+| Standard 40 Hours (Monday to Friday) | present and true — the day is unusual |
+| A flexible-hours schedule | present and **false** — the day is not unusual |
+
 ---
 
 ## 8. Attendee availability for a meeting

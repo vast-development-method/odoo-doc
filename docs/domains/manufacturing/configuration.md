@@ -309,15 +309,16 @@ The first warehouse is additionally set to resupply by manufacturing.
 
 ### 6.4 Message subtypes
 
-Five subtypes on the Manufacturing Order, none of them subscribed to by default:
+Five subtypes on the Manufacturing Order, none of them subscribed to by default. Their
+stored names abbreviate "Manufacturing Order" and are reproduced here exactly.
 
-| Name and description | Sequence |
-|---|---|
-| MO Confirmed | 101 |
-| MO Progress | 102 |
-| MO To Close | 103 |
-| MO Done | 104 |
-| MO Cancelled | 105 |
+| Name and description (reproduced) | Meaning in words | Sequence |
+|---|---|---|
+| `MO Confirmed` | Manufacturing Order confirmed | 101 |
+| `MO Progress` | Manufacturing Order in progress | 102 |
+| `MO To Close` | Manufacturing Order to close | 103 |
+| `MO Done` | Manufacturing Order done | 104 |
+| `MO Cancelled` | Manufacturing Order cancelled | 105 |
 
 ### 6.5 Digest tip
 
@@ -391,8 +392,8 @@ The route contains, per configuration:
 | Rule field | Action | Procurement method | Route | Source | Destination | Operation type | Name | Active when |
 |---|---|---|---|---|---|---|---|---|
 | `manufacture_pull_id` | `manufacture` | make to order | Manufacture (global) | — | Stock | Manufacturing | *the warehouse-and-location rule name* with the suffix "Production" | resupply by manufacturing is on |
-| `manufacture_mto_pull_id` | `pull` | make to order | Replenish on Order (global) | Stock | Production | Manufacturing | *the rule name* with the suffix "MTO" | resupply by manufacturing is on |
-| `pbm_mto_pull_id` | `pull` | make to order | Replenish on Order (global) | Stock | Pre-Production | Pick Components | *the rule name* with the suffix "MTO" | resupply is on **and** the configuration is not one step |
+| `manufacture_mto_pull_id` | `pull` | make to order | Replenish on Order (global) | Stock | Production | Manufacturing | *the rule name* with the reproduced suffix `MTO` (make to order) | resupply by manufacturing is on |
+| `pbm_mto_pull_id` | `pull` | make to order | Replenish on Order (global) | Stock | Pre-Production | Pick Components | *the rule name* with the reproduced suffix `MTO` (make to order) | resupply is on **and** the configuration is not one step |
 
 The manufacture rule additionally propagates cancellation exactly when the configuration is
 three steps. Both make-to-order rules are created with automatic execution set to manual,

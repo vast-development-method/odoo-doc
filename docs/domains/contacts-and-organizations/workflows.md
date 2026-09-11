@@ -124,7 +124,7 @@ name.
   same tax registration number, so nothing changes;
 - the parent's address is inherited — the parent's address is a copy of this Party's, so nothing
   changes;
-- the upstream address push finds no difference and is skipped;
+- the upward address push finds no difference and is skipped;
 - the downstream push runs on the children, which were just re-parented away and are therefore no
   longer children of this Party.
 
@@ -596,8 +596,8 @@ the classification codes returned by the service.
 |---|---|
 | the configured provider has no implementation | `Provider <the technical name> is not implemented for geolocation service.` |
 | the transport fails | `Error with geolocation server: <the underlying error>` |
-| the second provider has no key | `API key for GeoCoding (Places) required.\nVisit <the provider's key documentation address> for more information.` |
-| the second provider returns an error status | `Unable to geolocate, received the error:\n<the provider's message>\n\nGoogle made this a paid feature.\nYou should first enable billing on your Google account.\nThen, go to Developer Console, and enable the APIs:\nGeocoding, Maps Static, Maps Javascript.\n` |
+| the second provider has no key | a message stating that a key for the geocoding service is required, followed by a line feed and an invitation to visit the provider's key documentation address for more information |
+| the second provider returns an error status | a message reading `Unable to geolocate, received the error:` followed by the provider's own message, then a blank line, then three sentences telling the operator that the provider has made the feature chargeable, that billing must be enabled on the provider account, and that the geocoding, static-map and browser-map services must be switched on in the provider's developer console |
 | the reverse lookup is attempted while tests run | `OpenStreetMap calls disabled in testing environment.` |
 
 A provider returning "no results" is not a failure: the operation returns nothing and the two-stage

@@ -370,3 +370,144 @@ transition is not a state field but a comparison.
 The delta actually printed is the difference between the order's current lines and the
 accepted document: added quantities, removed quantities, changed notes and newly fired
 courses.
+
+---
+
+## 10. Every state-bearing field of the domain
+
+| Entity | Field (storage name) | Kind | Values | Specified in |
+| --- | --- | --- | --- | --- |
+| Point of Sale Session | Status (`state`) | Stored selection, required, indexed, not copied | `opening_control`, `opened`, `closing_control`, `closed` | Section 1 |
+| Point of Sale Session | Recovery session (`rescue`) | Stored boolean, read-only, not copied | true, false | Section 1.6 |
+| Point of Sale Order | Status (`state`) | Stored selection, read-only, indexed, not copied | `draft`, `paid`, `done`, `cancel` | Section 2 |
+| Point of Sale Order | Invoice status (`invoice_status`) | Computed selection, not stored | `invoiced`, `to_invoice` | Section 3 |
+| Point of Sale Order | To invoice (`to_invoice`) | Stored boolean, not copied | true, false — the *intention*, as against the invoice status which is the *fact* | Section 3 |
+| Point of Sale Order | Is a refund (`is_refund`) | Stored boolean, read-only | true, false | Section 2 |
+| Point of Sale Order | Already tipped (`is_tipped`) | Stored boolean, read-only | true, false | Section 11 |
+| Point of Sale Order | Edited (`is_edited`) | Computed boolean, not stored | true, false | Section 12 |
+| Point of Sale Order | Has deleted line (`has_deleted_line`) | Stored boolean, one-way | once true, never false again | Section 12 |
+| Point of Sale Payment | Payment status (`payment_status`) | Stored free text written by the terminal | see section 4 | Section 4 |
+| Point of Sale Payment | Is change (`is_change`) | Stored boolean | true, false | Section 2 |
+| Restaurant Order Course | Fired (`fired`) | Stored boolean with a stamped instant | true, false | Section 11 |
+| Point of Sale Configuration | Active (`active`) | Stored boolean | true, false; may not be cleared while a session is open | Section 13 |
+| Point of Sale Payment Method | Active (`active`) | Stored boolean | true, false; archived methods are still loaded | Section 13 |
+| Restaurant Floor, Restaurant Table, Point of Sale Preset (through its images) | Active (`active`) | Stored boolean | true, false | Section 13 |
+
+---
+
+## 11. Two boolean state machines
+
+### 11.1 The fired flag of a restaurant course
+
+| From | To | Trigger | Side effects |
+| --- | --- | --- | --- |
+| not fired | fired | The waiter fires the course, on creation or on write | The fired instant is stamped with the current instant, but **only when it was empty**; a course created already fired receives the stamp at creation. The course's lines are sent to the preparation printers. |
+| fired | fired | Firing again | The fired instant is **not** re-stamped, because the stamp is only applied when it is empty. |
+
+There is no transition back: a course that has reached the kitchen cannot be un-fired.
+
+### 11.2 The already-tipped flag of an order
+
+| From | To | Trigger | Side effects |
+| --- | --- | --- | --- |
+| not tipped | tipped | A deferred tip is applied to an order that was validated for the goods only | The order's tip amount is set and the terminal authorisation is increased. |
+
+The transition is one-way. Because the order is already in the `paid` or `done` state, an
+ordinary transmission of it takes the "existing and not unfinished" branch and changes
+nothing; the tip is applied by a dedicated operation.
+
+---
+
+## 12. What each order state permits
+
+| Operation | `draft` | `paid` | `done` | `cancel` |
+| --- | --- | --- | --- | --- |
+| Add, change or delete a line | yes | no | no | no |
+| Add or change a tender | yes | yes, unless the order has been printed | no, the amount write is refused | no |
+| Delete the order | yes, after an automatic cancellation | no | no | yes |
+| Cancel the order | yes | no | no | already cancelled |
+| Mark paid | yes, when fully tendered | already paid | no | no |
+| Invoice | no | yes | yes, a second invoice is not produced because the invoice link is already filled | no |
+| Refund | no | yes | yes | no |
+| Contribute to the closing entry | no, and it blocks the closing | yes | yes | no |
+| Appear in the sales details document | no | yes | yes | no |
+| Appear in the session's closed-order set | no | yes | yes | no |
+| Be re-homed to another session on transmission | yes | not applicable, the transmission is a no-operation | not applicable | not applicable |
+
+---
+
+## 13. Archival as a state
+
+Four entities of this domain carry an active flag, and archiving behaves differently on
+each.
+
+| Entity | Archiving is refused when | Archived records are still |
+| --- | --- | --- |
+| Point of Sale Configuration | A session of the configuration is not closed. Setting the flag back to true is always allowed. | Hidden from the dashboard; their sessions and orders remain readable. |
+| Point of Sale Payment Method | — | **Loaded into the selling application**, deliberately, so that historical orders remain readable. |
+| Restaurant Floor | A configuration using it has an active session, or an unfinished order sits on one of its tables. | Hidden from the floor plan; deactivating a floor deactivates every one of its tables first. |
+| Restaurant Table | A session of a configuration serving its floor is not closed, or the table carries unfinished orders. | Hidden from the floor plan; excluded from the self-ordering code sheet. |
+
+Two related protections are not archival but behave like it:
+
+- An **operation type** used by a configuration may not be archived.
+- A **journal** attached to a payment method may not be archived.
+
+---
+
+## 14. The combined lifecycle
+
+The diagram below shows the two principal state machines side by side, with the points at
+which they interact.
+
+```mermaid
+stateDiagram-v2
+    state "Session" as S {
+        [*] --> opening_control
+        opening_control --> opened
+        opened --> closing_control
+        closing_control --> closed
+        closed --> [*]
+    }
+    state "Order" as O {
+        [*] --> draft
+        draft --> paid
+        draft --> cancel
+        paid --> done
+        done --> [*]
+        cancel --> [*]
+    }
+    opened --> draft : orders may be created
+    draft --> closing_control : blocks the transition while any order is unfinished
+    closing_control --> paid : orders transmitted here are re-homed to another session
+    closed --> done : every paid order becomes posted when the closing entry is posted
+    paid --> done : invoicing an order posts it immediately
+```
+
+Read the cross-links as follows:
+
+1. Orders may only be created against a session in the `opened` state; a session in
+   `opening_control` has not started trading and a session in `closing_control` or
+   `closed` re-homes the order.
+2. A session cannot leave the `opened` state while any of its orders due now or earlier is
+   in the `draft` state.
+3. Posting the closing entry moves every `paid` order of the session to `done` in one
+   write; a closing entry with no line does not.
+4. Invoicing an order moves it to `done` independently of its session, and, when the
+   session is already `closed`, creates the reversal entry that takes it back out of the
+   closing entry.
+
+---
+
+## 15. Failure and recovery paths
+
+| Failure | State left behind | Recovery |
+| --- | --- | --- |
+| The closing entry does not balance | The session stays in `closing_control`; the transaction is rolled back so that the deferred transfers, the statement lines and the accounting payments created during the attempt are undone | The operator forces a close with a balancing account and amount, or corrects the underlying configuration and retries |
+| A delivery cannot be completed | The order still reaches `paid`; the transfer is left in an earlier state | The session reports a failed transfer; the operator completes it manually from the transfer list |
+| An order reaches the server after its session closed | No state is left inconsistent; the order is created in another open session | A rescue session is opened when there is no other open session |
+| Two cashiers close the same session | The first closes it; the second is told so and redirected | The orders the second still held are captured by a rescue session |
+| A transmission fails | The order stays in the browser's local store, still `draft` on the client | The transmission is retried; the universally unique identifier makes a replay harmless |
+| An invoicing attempt collides with another | Nothing is written; the second attempt is refused | The operator retries once the first has finished |
+| A tax line has no account | Nothing is written | The operator sets the account on the repartition line and retries |
+| A cash difference must be posted and the account is missing | The closing entry has already been posted by then, so the session is left with a posted entry and no difference line; the error stops the validation before the session is marked closed | The operator sets the account on the cash journal and retries; the difference line is then created and the session reaches `closed` |

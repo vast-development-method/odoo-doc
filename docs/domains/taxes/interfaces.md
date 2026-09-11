@@ -329,3 +329,130 @@ the **rounded** amounts for document-level figures.
 The structured document stored on a journal item is itself an interface: it is what makes a
 manually adjusted tax survive a save, a reload and a reversal. Its shape and its reload conditions
 are in `calculations.md` section 9.3.
+
+---
+
+## 9. The client-side mirror
+
+The engine exists twice: once on the server and once in the browser and the point-of-sale client.
+The two copies must produce identical numbers for identical inputs, because a total computed while
+a document is being edited must not change when the document is saved. This section states the
+contract between them.
+
+### 9.1 Which steps are mirrored
+
+| Step | Mirrored | Why |
+|---|---|---|
+| Preparing a base line from a record or a set of values | yes | the client edits lines |
+| Flattening and sorting | yes | |
+| Batching | yes | |
+| Every amount formula, including the custom formula | yes | |
+| The extra-base propagation table | yes | |
+| The single-line computation | yes | |
+| The dual-currency conversion | yes | |
+| The smooth delta distribution | yes | |
+| The three document-wide rounding passes | yes | |
+| Aggregating tax details | yes | |
+| The totals block, except the non-deductible part | yes | the client shows the totals |
+| The non-deductible part of the totals block | **no** | vendor bills are not edited offline |
+| Exporting and importing the stored extra tax data | yes | the client must not lose a manual amount |
+| Reversing the stored extra tax data by the quantity | **no** | reversal is a server operation |
+| Turning a refund base line back into a normal one | **no** | server-only helper |
+| Preparing a tax line from an existing record | **no** | the client has no journal items |
+| The accounting derivation and the production of tax entries | **no** | the client posts nothing |
+| The realignment on existing tax entries | **no** | |
+| The cash basis mechanism | **no** | |
+| The withholding mechanism | **no** | it runs at payment time |
+| The fiscal position lookup tables | computed on the server, **used** by the client | |
+| The unit price adaptation | yes | the client applies fiscal positions while editing |
+| Splitting, merging, reducing to a target amount, dispatching | yes | discounts and down payments are edited on the client |
+| The per-country number checks | **no** | validation happens on save |
+
+### 9.2 What the client must be given
+
+Per tax, at the moment the client may need it:
+
+| Datum | Used for |
+|---|---|
+| identifier | grouping and the manual-amount table |
+| amount | every formula |
+| computation kind | the formula choice and the batching test |
+| sequence | the ordering |
+| the effective price-inclusion flag | the batching test and the evaluation pass |
+| "affect base of subsequent taxes" | batching and propagation |
+| "base affected by previous taxes" | batching and propagation |
+| the children, for a Group of Taxes | flattening |
+| "has a negative distribution factor" | the reverse-charge mirror record |
+| the tax group's identifier, sequence, name, preceding subtotal and receipt label | the totals block |
+| the normalised formula, for a custom-formula tax | evaluation |
+| the product field names and the unit-of-measure field names the formulas read | preloading |
+
+Per currency: its rounding step and its number of decimal places, for both the document currency
+and the company currency.
+
+Per product that may appear on a line: the values of the field names above, read with elevated
+rights.
+
+### 9.3 What the client must never assume
+
+- That a tax it does not know about is absent. A filter may have removed a tax from the evaluation
+  while keeping it on the line.
+- That the untaxed total equals the raw base. It equals the first result's base.
+- That a line's balance equals its rounded untaxed total. It equals that total plus the delta.
+- That rounding one line at a time gives the document total. It does not, under "round per tax".
+
+---
+
+## 10. Ordering constraints on the engine's operations
+
+Calling the operations of section 3.1 out of order produces wrong numbers rather than an error. The
+constraints are:
+
+```
+prepare the base lines
+  → add the tax details to ALL of them
+    → round the tax details of ALL of them together
+      → (optionally) add the accounting data
+        → produce the tax entries
+      → (optionally) aggregate
+      → (optionally) produce the totals block
+```
+
+| Constraint | Consequence of breaking it |
+|---|---|
+| Add the tax details to every base line before rounding any of them | the redistribution has nothing to redistribute over |
+| Round all the base lines in one call | the "round per tax" method degenerates to "round per line" |
+| Add the accounting data only after rounding | the distribution shares are computed from unrounded amounts |
+| Produce the tax entries only after the accounting data | there are no grouping keys yet |
+| Produce the totals block only after rounding | the block shows unrounded figures |
+| Pass the existing tax entries to the rounding call, not to the production call alone | manually typed tax amounts are lost |
+
+---
+
+## 11. The shape of the aggregated result
+
+Every aggregation returns, per grouping key, twenty-four monetary values plus two bookkeeping
+entries. They are listed here in full because structured document formats consume them directly.
+
+| Name | Meaning |
+|---|---|
+| `base_amount_currency` / `base_amount` | the rounded base of this key, in the document and the company currency |
+| `raw_base_amount_currency` / `raw_base_amount` | the same before rounding |
+| `target_base_amount_currency` / `target_base_amount` | the same considering the manual amounts |
+| `tax_amount_currency` / `tax_amount` | the rounded tax of this key |
+| `raw_tax_amount_currency` / `raw_tax_amount` | the same before rounding |
+| `target_tax_amount_currency` / `target_tax_amount` | the same considering the manual amounts |
+| `total_excluded_currency` / `total_excluded` | the untaxed total of the base lines contributing to this key, including their deltas |
+| `raw_total_excluded_currency` / `raw_total_excluded` | the same before rounding |
+| `target_total_excluded_currency` / `target_total_excluded` | the same considering the manual amounts |
+| `taxes_data` (per base line) | the subset of that line's tax results aggregated under this key |
+| `base_line_x_taxes_data` (across base lines) | one pair per contributing base line: the line and its subset |
+
+**The propagation rule inside an aggregation.** When a tax *A* affects the base of a tax *B*, the
+untaxed total reported under *B*'s key is increased by *A*'s tax amount, in both the raw and the
+rounded form. This is what makes an aggregation by tax report, for *B*, a base that already
+contains *A*.
+
+**The grouping function must never return nothing for a line that has taxes.** Returning nothing is
+reserved for the "no tax at all" case, which the aggregation signals by calling the function once
+with an empty tax result.
