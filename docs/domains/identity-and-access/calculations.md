@@ -812,18 +812,22 @@ same field are discarded.
 
 ### 9.2 The consequence of the ordering
 
-The ordering is ascending on the user column, then the company column, then the identifier. In the
-ordering used by the storage layer, an **empty** value sorts **before** a set value. Therefore, among
-the rows that survive the filter:
+The ordering is **ascending** on the user column, then the company column, then the identifier. The
+placement of absent values is load-bearing and must be reproduced exactly: under ascending order, an
+**absent** value sorts **after** every present value. Therefore, among the rows that survive the
+filter:
 
-1. a row with **no user and no company** comes first;
-2. then a row with **no user** and the acting company;
-3. then a row with the acting user and **no company**;
-4. then a row with the acting user and the acting company.
+1. a row with the acting user **and** the acting company comes first;
+2. then a row with the acting user and **no** company;
+3. then a row with **no** user and the acting company;
+4. then a row with **no** user and **no** company.
 
-So the **least specific** default wins. This is the behaviour to reproduce; it is not what a reader
-would assume, and it is therefore stated here explicitly rather than described as "most specific
-wins".
+Within a tie, the smaller identifier comes first.
+
+So the **most specific** default wins. A re-implementation whose storage engine places absent values
+first under ascending order must state the placement explicitly — "user ascending, absent values
+last; company ascending, absent values last; identifier ascending" — otherwise the precedence is
+exactly inverted.
 
 ### 9.3 Worked example
 
@@ -837,12 +841,18 @@ company is 2. Four defaults exist:
 | 33 | 88 | — | payment term 7 (*45 Days*) |
 | 34 | 88 | 2 | payment term 9 (*60 Days*) |
 
-All four pass the filter. The ordering puts 31 first (empty user, empty company), then 32 (empty
-user, company 2), then 33 (user 88, empty company), then 34. The first row for the payment-term
-field is 31, so the applied default is **payment term 1**.
+All four pass the filter. The ordering puts 34 first (user 88, company 2), then 33 (user 88, no
+company), then 32 (no user, company 2), then 31 (no user, no company). The first row for the
+payment-term field is 34, so the applied default is **payment term 9**.
 
-If row 31 is deleted, the winner becomes row 32 (payment term 4). If both 31 and 32 are deleted, the
-winner becomes row 33 (payment term 7).
+If row 34 is deleted, the winner becomes row 33 (payment term 7). If both 34 and 33 are deleted, the
+winner becomes row 32 (payment term 4). If only row 31 remains, it wins.
+
+A second worked case, with two rows of the same scope: rows 40 and 41 both have no user and no
+company and both target the payment term, with values *payment term 2* and *payment term 5*. They
+tie on both scope columns, so the identifier decides and row 40 wins. In practice this cannot arise
+through the setting operation, which rewrites the existing row of a scope instead of adding a second
+one; it can arise only when rows are inserted directly.
 
 ### 9.4 Setting a default
 

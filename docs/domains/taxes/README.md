@@ -69,7 +69,7 @@ Entities of other domains that carry tax-related fields specified here: Journal 
 | `../multi-currency/` | Currency rounding precision and decimal places, conversion rates used for company-currency amounts, exchange difference entries |
 | `../analytic-accounting/` | Analytic distribution carried by tax lines when the tax is analytic |
 | `../contacts-and-organizations/` | Partner country, state, postal code, value-added tax number, country groups |
-| `../products/` | Product sale and purchase taxes, product account tags, list price handling |
+| `../products-and-catalog/` | Product sale and purchase taxes, product account tags, list price handling |
 | `../point-of-sale/` | Consumer of the same engine on the client side; tax fields loaded |
 | `../sales/`, `../purchasing/` | Order lines call the engine and fiscal positions identically |
 

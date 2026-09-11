@@ -371,3 +371,76 @@ because each of them means at least two different things:
 | "included" | price-included, or included in a total | **price-included** |
 | "rounding" | the currency step, the method, or the cash rounding feature | *rounding step*, **rounding method**, **cash rounding** |
 | "exigible" alone | due, or already posted to the tax account | **exigibility** with its two values |
+
+---
+
+## How to read the formulas in this folder
+
+Formulas are written in fenced blocks labelled `formula`. They use only the symbols
+× ÷ + − = and parentheses, plus the named operations below. They are not code and are not tied to
+any language.
+
+| Notation | Meaning |
+|---|---|
+| `round_to_currency( v )` | `round_to_step( v , the currency's rounding step , half away from zero )` |
+| `round_to_document_currency( v )` | the same with the document currency's step |
+| `round_to_company_currency( v )` | the same with the company currency's step |
+| `round_to_step( v , s , method )` | the primitive of `calculations.md` section 2.1 |
+| `a mod b` | the remainder of a Euclidean division whose result carries the sign of the divisor, so that minus three modulo eleven is eight |
+| `floor( v )` | the largest integer not greater than *v* |
+| `truncate( v )` | the integer part of *v*, discarding the fraction, towards zero |
+| `sign( v )` | minus one when *v* is negative, plus one otherwise |
+| `\| v \|` | the absolute value of *v* |
+| `weighted_sum( number , weights )` | the sum of each weight times the digit it is paired with, paired from the left unless the text says otherwise |
+| `d1 … dn` | the characters of a number read left to right, numbered from one |
+| `batch_percentage( B )` | the sum of the amounts of the taxes in the batch *B*, divided by one hundred |
+| `doubling_checksum( s )` | the primitive of `calculations.md` section 15.2.2 |
+| `alphabet[ i ]` | the character at position *i* of the stated alphabet, counted from zero |
+
+A step written as *"round per line"* or *"round per tax"* always refers to the company's rounding
+method; a step written as *"half away from zero"* or *"half to even"* always refers to the
+tie-breaking rule of the rounding primitive. The two are independent.
+
+---
+
+## Additional terms
+
+**Batch percentage.** The sum of the amounts of every tax in a **batch**, divided by one hundred.
+It is the number a price-included percentage extraction divides by, and the number a price-excluded
+division tax divides by after being subtracted from one.
+
+**Combined all-in-one computation.** The single operation that prepares a base line, computes it,
+derives its accounting data and returns everything at once, for a caller that has only one line
+and no document. It reports the raw per-result base rather than the rounded one, and it adds a
+"total posted to no account" figure.
+
+**Effective price inclusion.** The price-inclusion flag the engine actually uses for a tax: false
+for a **reverse charge**, true under the mode *total included*, false under the mode *total
+excluded*, and the tax's own flag otherwise. Distinct from the tax's configured flag, which is
+what the propagation table of `calculations.md` section 5.1 consults.
+
+**Fallback mapping.** The approximate base-to-tax pairing used when the exact one finds nothing,
+described in `calculations.md` section 16.4.
+
+**Hard lock date.** The lock date that lock exceptions do not relax. The tax lock check consults
+it, so a user holding an exception is still refused.
+
+**Mirrored step.** A step of the engine that exists in both implementations and must produce
+identical numbers. Listed in `interfaces.md` section 9.1.
+
+**Running-total allocation.** The technique of allocating a total over an ordered list by rounding
+the cumulative allocation and taking differences, so that the parts always add back to the total.
+Used by the base-to-tax reconstruction of `calculations.md` section 16.
+
+**Source item.** In the base-to-tax reconstruction, the journal item a contribution came from:
+either the base item itself, or the tax item of a base-affecting tax.
+
+**Tail test.** The condition, in the base-to-tax reconstruction, that a base item's
+affecting-tax list must end with the tax item's originator tax followed by the tax item's own
+affecting-tax list.
+
+**Target amount.** See the entry in the main list; note that under a **manual amount** the target
+is the manual value, which is what pins the document total.
+
+**Withheld amount.** The positive amount a **withholding line** retains, obtained by negating the
+engine's negative tax amount.
