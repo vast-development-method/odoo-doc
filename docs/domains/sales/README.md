@@ -130,3 +130,70 @@ the Customer (`res.partner`), the Product Template and Product Variant (`product
   quantity of zero and a unit price equal to the advance amount for its tax group.
 - Wherever the text says "industry-standard default", the behaviour is not stated by the code and
   the value given is the conventional one that a re-implementation should adopt.
+
+---
+
+## 6. Coverage map
+
+Where each subject of the domain is specified.
+
+| Subject | File and section |
+|---|---|
+| Order state machine, lock, expiration | [state-machines.md](state-machines.md), sections 1 to 3 |
+| Invoice status per line and per order | [state-machines.md](state-machines.md), sections 4 and 5 |
+| Delivery status | [state-machines.md](state-machines.md), section 6 |
+| Advance-line state and its effect on printing | [state-machines.md](state-machines.md), section 7 |
+| Customer acceptance combinations | [state-machines.md](state-machines.md), section 8 |
+| Archive states | [state-machines.md](state-machines.md), section 10 |
+| Validity and expiration dates | [calculations.md](calculations.md), section 1.1 |
+| Currency and the frozen order rate | [calculations.md](calculations.md), sections 1.2 and 1.3 |
+| Expected date and the shipping policy | [calculations.md](calculations.md), section 1.4 |
+| Prepayment amount and the confirmation threshold | [calculations.md](calculations.md), sections 1.5 to 1.8 |
+| Line description and the variant suffix | [calculations.md](calculations.md), sections 2.1 and 2.2 |
+| Unit price, display price, discount derivation | [calculations.md](calculations.md), sections 2.3 to 2.5 |
+| Combo price proration | [calculations.md](calculations.md), section 2.6 |
+| Line and order amounts, early payment discount | [calculations.md](calculations.md), sections 3 and 4 |
+| Margins | [calculations.md](calculations.md), section 4.5 |
+| Delivered quantity per method | [calculations.md](calculations.md), section 5 |
+| Invoiced quantities and amounts | [calculations.md](calculations.md), section 6 |
+| Advance invoices and their deduction | [calculations.md](calculations.md), section 7 |
+| Invoice preparation mapping, field by field | [calculations.md](calculations.md), section 8 |
+| Global discount wizard | [calculations.md](calculations.md), section 9 |
+| Analysis measures | [calculations.md](calculations.md), section 10 |
+| Product and team aggregates | [calculations.md](calculations.md), section 11 |
+| Revenue accrual amount | [calculations.md](calculations.md), section 12 |
+| Duplicate detection | [calculations.md](calculations.md), section 13 |
+| Rounding summary | [calculations.md](calculations.md), section 14 |
+| Creating and pricing a quotation | [workflows.md](workflows.md), sections 1 and 2 |
+| Sending a quotation | [workflows.md](workflows.md), section 3 |
+| The confirmation algorithm and everything it triggers | [workflows.md](workflows.md), section 4 |
+| The customer portal acceptance flow | [workflows.md](workflows.md), section 5 |
+| Payment post-processing and automatic invoicing | [workflows.md](workflows.md), section 6 |
+| Cancellation and reset | [workflows.md](workflows.md), section 7 |
+| The invoicing algorithm, including advances | [workflows.md](workflows.md), section 8 |
+| Credit notes and returns | [workflows.md](workflows.md), section 9 |
+| Upselling | [workflows.md](workflows.md), section 10 |
+| Discounts, payment links, accruals | [workflows.md](workflows.md), sections 11 to 13 |
+| Team assignment and membership | [workflows.md](workflows.md), sections 14 and 15 |
+| Structured document import, catalogue, the message job | [workflows.md](workflows.md), sections 16 to 18 |
+| Product and combo configurators | [workflows.md](workflows.md), section 19 |
+| Optional products from the customer page | [workflows.md](workflows.md), section 20 |
+| Constraints, messages, locking, edge cases | [business-rules.md](business-rules.md) |
+| Invariants | [business-rules.md](business-rules.md), section 14 |
+| What the domain posts and does not post | [accounting-effects.md](accounting-effects.md) |
+| Settings, parameters, sequences, groups, rules, jobs | [configuration.md](configuration.md) |
+| Menus, views, buttons, operations, addresses, documents | [interfaces.md](interfaces.md) |
+| Numbered scenarios with concrete numbers | [acceptance-criteria.md](acceptance-criteria.md) |
+
+## 7. How to verify a re-implementation
+
+1. Build the fixture of [acceptance-criteria.md](acceptance-criteria.md) and run every scenario of
+   groups A to Z in order; each states its expected outcome numerically.
+2. Check the invariants of [business-rules.md](business-rules.md), section 14, after every
+   scenario.
+3. Check the accounting hand-over checks of [accounting-effects.md](accounting-effects.md),
+   section 9.
+4. Reproduce every error message of [business-rules.md](business-rules.md) verbatim; external
+   automation and user training depend on the exact wording.
+5. Reproduce every identifier of [glossary.md](glossary.md) exactly: storage names, transport
+   names, selection values, route paths, sequence codes and parameter keys are external contracts.

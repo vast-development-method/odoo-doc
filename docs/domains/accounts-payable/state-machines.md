@@ -340,3 +340,95 @@ stateDiagram-v2
 | A cancelled bill | `cancel` | the value it had, recomputed to `not_paid` because cancelling removed every reconciliation | unchanged | `no` |
 
 Note that cancelling a document removes every reconciliation on its lines, which drives the payment status of **the counterpart documents** back to `partial` or `not_paid`.
+
+---
+
+## 7. The attachment and decoding lifecycle
+
+Attachments are not a state field, but they move through a well-defined sequence of conditions that an implementation must reproduce. The states below are properties of a **file-data record** rather than stored values.
+
+### 7.1 States
+
+| State | Meaning |
+|---|---|
+| `stored` | The file exists as an attachment, owned by nothing in particular |
+| `converted` | The file has been turned into a file-data record: its bytes, media type, parsed tree and format label are known |
+| `unwrapped` | Every file embedded in it has been extracted and converted in turn; extracted files carry the container as their origin and have **no** stored attachment of their own |
+| `grouped` | The file has been assigned to a group; one document will be created per group |
+| `attached` | The file's media type (or its parsed tree) qualifies it to stay visible on the document; its owning model and identifier now point at that document |
+| `detached` | The file did not qualify; its owning model and identifier have been cleared, so it no longer clutters the document |
+| `decoder resolved` | A decoder and its priority are known, or it is known that none applies |
+| `elected` | This is the highest-priority file of its group and will be the one decoded |
+| `decoded` | The decoder ran and wrote onto the document |
+| `refused` | The decoder answered a reason; nothing was written and the reason was posted |
+| `failed` | The decoder raised; the transaction was rolled back and the error was posted |
+| `skipped` | No decoder applied, or its priority was zero |
+
+### 7.2 Transitions
+
+| From | To | Trigger | Guard | Side effects |
+|---|---|---|---|---|
+| `stored` | `converted` | Any import entry point | — | The parsed tree is attempted; a parse failure is logged and yields no tree |
+| `converted` | `unwrapped` | Any import entry point | The file is a Portable Document Format container | Each embedded file becomes a converted record with the container as origin; recursion continues |
+| `converted` / `unwrapped` | `grouped` | Grouping | — | Either the origin rule or the mixed-types rule applies |
+| `grouped` | `attached` | Fixing the document's attachments | The media type is one of the visible kinds, or the file parses as a tree | The owning model and identifier are written |
+| `grouped` | `detached` | The same step | Otherwise | The owning model and identifier are cleared |
+| `grouped` | `decoder resolved` | Decoding | — | The decoder and priority are computed once and cached on the record |
+| `decoder resolved` | `elected` | Decoding | It sorts first by *(has a decoder, priority)* | — |
+| `elected` | `skipped` | Decoding | No decoder, or priority zero | A technical log line |
+| `elected` | `decoded` | Decoding | The decoder answered nothing | The document now carries the decoded values; the lines it created are marked imported |
+| `elected` | `refused` | Decoding | The decoder answered a reason | *Attachment «file name» not imported: «reason»* |
+| `elected` | `failed` | Decoding | The decoder raised anything but a redirecting warning | Roll back; the three-part error message |
+
+### 7.3 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> stored
+    stored --> converted: convert to a file-data record
+    converted --> unwrapped: extract embedded files
+    converted --> grouped: grouping
+    unwrapped --> grouped: grouping
+    grouped --> attached: visible media type or parsed tree
+    grouped --> detached: any other media type
+    grouped --> decoder_resolved: resolve the decoder
+    decoder_resolved --> elected: highest priority of the group
+    decoder_resolved --> not_elected: a lower-priority sibling
+    elected --> skipped: no decoder or priority zero
+    elected --> decoded: decoder answered nothing
+    elected --> refused: decoder answered a reason
+    elected --> failed: decoder raised
+```
+
+---
+
+## 8. The duplicate-warning state
+
+Also not a stored state, but a three-valued condition every implementation must reproduce on a purchase document.
+
+| Condition | Value | What is shown |
+|---|---|---|
+| the duplicate set is empty | **none** | nothing |
+| the duplicate set is non-empty and the exact flag is true | **exact** | the red banner, with the delete action when at least one duplicate is a draft |
+| the duplicate set is non-empty, the exact flag is false, and the document is `draft` | **probable** | the amber banner, with the same conditional delete action |
+| the duplicate set is non-empty, the exact flag is false, and the document is `posted` or `cancel` | **none** | nothing — a probable duplicate is only worth flagging while it can still be avoided |
+
+The value is recomputed on every change to the vendor reference, the type, the partner, the bill date, the tax totals or the currency, and it is never stored.
+
+Effect on the other machines: the **exact** and **probable** values both suppress automatic posting (see §1.2); neither ever blocks manual posting.
+
+---
+
+## 9. Summary of guards, by transition
+
+| Transition | Guards, in the order they are evaluated |
+|---|---|
+| draft → posted | invoicing group; quick-encoding total matches; recipient bank account active; recipient bank account trusted for an inbound document; total not negative; vendor present; bill date present; account and journal coherence per line; not already posted or cancelled; at least one accountable line; not scheduled in the future under hard posting; journal active; currency active; no archived account; no cross-company account; no archived analytic account |
+| posted → draft | posted or cancelled; no cancellation request needed; not an exchange-difference entry; not a cash-basis entry; not hashed; the reviewer authority when the document is reviewed |
+| cancel → draft | the same |
+| draft → cancel | (after the automatic reset) every selected document is draft |
+| posted → reversed | posted; one company; the reversal journal has the same type |
+| draft → deleted | not the middle of a numbering chain, unless the caller is an accounting manager or quick encoding is on; not posted before under a restrictive audit trail; the deletability rules of §1.6 |
+| payment draft → in process | the recipient bank account is trusted when the method requires one |
+| cheque unsent → sent | the cheque method; not already sent; one bank journal; a resolvable layout |
+| cheque sent → cancelled | the cheque method; status in process; already sent; the underlying entry is resettable |
