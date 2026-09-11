@@ -1394,9 +1394,9 @@ list
 ### 21.8 The flag path
 
 **Given** the country `Belgium` with code `BE`
-**Then** the flag path is `/base/static/img/country_flags/be.png`
-**And given** the country `Réunion` with code `RE`, the path is
-`/base/static/img/country_flags/fr.png`
+**Then** the flag path is the flag directory followed by `be.png`
+**And given** the country `Réunion` with code `RE`, the path is the flag directory followed by
+`fr.png`, because `RE` is one of the ten mapped overrides
 **And given** `Antarctica` with code `AQ`, the path is empty
 
 ### 21.9 The country group codes of a country with no group

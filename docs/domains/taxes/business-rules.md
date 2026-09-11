@@ -542,11 +542,11 @@ without blocking.
 | The &lt;label&gt; number [&lt;number&gt;] for &lt;record&gt; does not seem to be valid. \nNote: the expected format is &lt;example&gt; | validation | section 9.2 |
 | The &lt;label&gt; number [&lt;number&gt;] does not seem to be valid. \nNote: the expected format is &lt;example&gt; | validation | section 9.2 |
 | If you are trying to input a European number, this is the expected format: &lt;example&gt; | appended | section 9.2 |
-| Invalid IAP the cross-border registration checking service endpoint | operation refused | section 9.6 |
+| `Invalid IAP VIES endpoint` | operation refused | section 9.6 |
 | You cannot set a partner as an invoicing address of another if they have a different &lt;label&gt;. | operation refused | section 9.5 |
 | Update with children taxes that are child of multiple parents is not supported. | operation refused | `workflows.md` section 9 |
-| The the cross-border registration checking service check is pending. The status will be updated soon. | logged message | `state-machines.md` section 5.2 |
-| The the cross-border registration checking service check failed. Please check the Tax ID manually. | logged message | `state-machines.md` section 5.2 |
+| `The VIES check is pending. The status will be updated soon.` | logged message | `state-machines.md` section 5.2 |
+| `The VIES check failed. Please check the Tax ID manually.` | logged message | `state-machines.md` section 5.2 |
 | The Intra-Community validity has been updated to: &lt;status&gt;. | logged message | `state-machines.md` section 5.2 |
 | Untaxed Amount | label | the default subtotal name in the totals block |
 | &lt;name&gt; (copy) | label | the name of a duplicated tax |
