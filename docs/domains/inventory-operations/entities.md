@@ -926,7 +926,7 @@ On **Location**: Equipment Count (`equipment_count`, integer, computed, not stor
 
 | Entity | Field (storage name) | Meaning |
 |---|---|---|
-| Company | Annual Inventory Month (`annual_inventory_month`) | Selection of the twelve months; default February. The month of the yearly count. |
+| Company | Annual Inventory Month (`annual_inventory_month`) | Selection of the twelve months, values `1` "January" through `12` "December"; default `12` "December". The month of the yearly count. Leaving it empty switches the yearly count off. |
 | Company | Day of the month (`annual_inventory_day`) | Integer, default 31. Clamped into the valid range of the chosen month. |
 | Company | Internal Transit Location (`internal_transit_location_id`) | The transit Location used between the company's warehouses. Created with the company. |
 | Company | Email confirmation on delivery (`stock_move_email_validation`) and its template (`stock_mail_confirmation_template_id`) | Whether a delivery confirmation message is posted at validation and with which template. |
