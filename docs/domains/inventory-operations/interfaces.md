@@ -615,3 +615,126 @@ Rendered through the route of section 4, in landscape. One row per unfolded node
 ## 14.9 The batch document
 
 Rendered for a Batch Transfer. One combined picking list covering every Transfer of the batch, the Transfers appearing in batch-sequence order — which the dispatch capability sets from the contacts' postal codes — each introduced by its reference and its contact, followed by its rows in the same shape as the picking document.
+
+---
+
+# 15. Index of named operations
+
+Every operation this domain exposes under a stable name, alphabetically, with the entity it is called on and a one-line contract. The names are reproduced exactly because external callers depend on them.
+
+| Operation | Entity | Contract |
+|---|---|---|
+| `action_add_entire_packs` | Transfer | Given container identifiers, add them and their descendants; returns true when the Transfer is open, false otherwise. |
+| `action_add_operations` | Transfer | Returns the detail-line chooser used when building a wave. |
+| `action_add_packages` | Stock Move | Returns the container chooser; fails without a Transfer in context. |
+| `action_add_to_picking` | Package | Adds the containers to the Transfer named in context. |
+| `action_apply_all` | Stock Quantity | Returns the reference-label screen for every record matching the active filter. |
+| `action_apply_inventory` | Stock Quantity | Applies the counts, or returns the conflict screen; takes an optional date. |
+| `action_assign` | Transfer, Batch Transfer | Confirms the drafts, then reserves in priority and deadline order. |
+| `action_assign` | Reception report | Links incoming moves to demands; takes the demand identifiers, the quantities and the incoming identifiers. |
+| `action_batch` / `action_wave` | Operation Type | Returns the batch or wave list of that type. |
+| `action_batch_detailed_operations` | Batch Transfer | Returns the detail-line list of the batch. |
+| `action_cancel` | Transfer | Cancels the moves and locks the Transfer. |
+| `action_cancel` | Batch Transfer | Cancels the batch and detaches its Transfers. |
+| `action_cancel` | Insufficient Quantity for Scrap | Deletes the Scrap unless the context forbids it. |
+| `action_clear_inventory_quantity` | Stock Quantity | Clears the counted quantity, the difference, the flag and the assignee. |
+| `action_confirm` | Transfer | Confirms the draft moves and triggers the replenishment scheduler. |
+| `action_confirm` | Batch Transfer | Confirms the batch and its Transfers. |
+| `action_create_exchanges` | Return Transfer | Creates the return, then the exchange or the supply requests. |
+| `action_create_returns` | Return Transfer | Creates the return and opens it. |
+| `action_create_returns_all` | Return Transfer | Pre-fills every line with what is still returnable, then creates the return. |
+| `action_detailed_operations` | Transfer | Returns the detail-line list of the Transfer. |
+| `action_done` | Batch Transfer | Validates the batch, detaching the empty Transfers first. |
+| `action_done` | Package Destination | Writes the chosen Location on the lines and re-runs put in pack. |
+| `action_done` | Insufficient Quantity for Scrap | Performs the scrap despite the shortage. |
+| `action_generate_lot_line_vals` | Stock Move | Returns detail-line values for a generated or pasted list of lot names. |
+| `action_get_stock_move_lines` | Scrap | Returns the detail lines of the scrap move. |
+| `action_get_stock_picking` | Scrap | Returns the Transfer the scrap belongs to. |
+| `action_inventory_history` | Stock Quantity | Returns the completed adjustment lines that touched the record. |
+| `action_keep_counted_quantity` | Inventory Conflict | Rewrites each difference as counted minus on hand, then applies. |
+| `action_keep_difference` | Inventory Conflict | Rewrites each counted quantity as on hand plus difference, then applies. |
+| `action_lot_open_quants` | Lot | Returns the lot's quantity records. |
+| `action_lot_open_transfers` | Lot | Returns the outgoing Transfers that carried the lot. |
+| `action_merge` | Batch Transfer | Merges the selected batches and returns a notification. |
+| `action_next_transfer` | Transfer | Returns the next Transfers of the chain. |
+| `action_open_add_to_wave` | Stock Move Line | Adds the lines to the wave in context, or returns the wave chooser. |
+| `action_open_label_layout` | Transfer, Batch Transfer | Returns the product-label wizard. |
+| `action_open_label_type` | Transfer | Returns the label-kind chooser when lots exist, else the product-label wizard. |
+| `action_open_reference` | Stock Move, Stock Move Line | Returns the scrap, the Transfer, or the record itself. |
+| `action_picking_move_tree` | Transfer | Returns the moves of the Transfer in the picking layout. |
+| `action_print` | Batch Transfer | Returns the batch document. |
+| `action_product_forecast_report` | Stock Move | Returns the forecast screen for the product and Warehouse. |
+| `action_put_in_pack` | Transfer, Batch Transfer, Stock Move Line, Package, Put in Pack | Creates or reuses a container and assigns it. |
+| `action_relocate_quants` | Quantity Relocation | Relocates the records, unpacking partly-selected containers first. |
+| `action_remove_package` | Package | Removes the containers from the Transfers named in context. |
+| `action_request_count` | Request a Count | Writes the date and the assignee on the extended record set. |
+| `action_reset` | Stock Quantity | Returns the reset warning screen. |
+| `action_reset` / `action_set` | Inventory Warning | Clears, or sets, the counted quantities. |
+| `action_revert_inventory` | Stock Move Line | Creates and completes the mirror adjustment moves. |
+| `action_see_move_scrap` | Transfer | Returns the scraps of the Transfer. |
+| `action_see_package_histories` | Transfer | Returns the container snapshots of the Transfer. |
+| `action_see_packages` | Transfer, Batch Transfer | Returns the containers, or the snapshots for a done document. |
+| `action_see_returns` | Transfer | Returns the returns of the Transfer. |
+| `action_set_inventory_quantity` | Stock Quantity | Copies the on-hand quantity into the counted quantity, or warns first. |
+| `action_set_inventory_quantity_zero` | Stock Quantity | Sets the counted quantity to zero, applying at once in report mode. |
+| `action_show_details` | Stock Move | Returns the detail screen of the move. |
+| `action_show_package` | Package History | Returns the container the snapshot describes. |
+| `action_split_transfer` | Transfer | Splits the Transfer into a backorder without validating. |
+| `action_stock_quant_relocate` | Stock Quantity | Returns the relocation screen. |
+| `action_toggle_is_locked` | Transfer | Flips the lock flag. |
+| `action_unassign` | Reception report | Unlinks incoming moves from a demand. |
+| `action_validate` | Scrap | Performs the scrap, or returns the shortage screen. |
+| `action_view_all_routes` | Warehouse | Returns every Route of the Warehouse. |
+| `action_view_batch` | Transfer | Returns the batch the Transfer belongs to. |
+| `action_view_inventory` | Stock Quantity | Returns the physical inventory list. |
+| `action_view_orderpoints` | Stock Quantity | Returns the reordering rules of the product. |
+| `action_view_picking` | Package | Returns the Transfers that touched the containers. |
+| `action_view_quants` | Stock Quantity | Returns the quantity list with pivot and graph. |
+| `action_view_reception_report` | Transfer, Batch Transfer | Returns the Reception Report. |
+| `action_view_stock_moves` | Stock Quantity | Returns the detail lines that touched the record. |
+| `button_scrap` | Transfer | Returns the scrap screen pre-filled from the Transfer. |
+| `button_validate` | Transfer | Runs the validation algorithm. |
+| `calculate_date_category` | Transfer | Maps a date and time to one of the six categories. |
+| `date_category_to_domain` | Transfer | Maps a category to filter conditions. |
+| `do_print_picking` | Transfer | Marks the Transfer printed and returns the picking document. |
+| `do_replenish` | Scrap | Raises a supply request for the scrapped quantity. |
+| `do_scrap` | Scrap | Performs the scrap unconditionally. |
+| `do_unreserve` | Transfer | Unreserves the moves. |
+| `generate_lot_names` | Lot | Generates a series of names from a first name and a count. |
+| `get_action_click_graph` | Transfer | Returns the graph list action. |
+| `get_action_picking_tree_backorder` | Operation Type | Returns the backorder list. |
+| `get_action_picking_tree_incoming` / `_outgoing` / `_internal` | Transfer, Operation Type | Return the kind-restricted lists. |
+| `get_action_picking_tree_late` / `_ready` / `_waiting` | Operation Type | Return the corresponding lists. |
+| `get_action_picking_type_moves_analysis` | Operation Type | Returns the move list of the type. |
+| `get_action_picking_type_ready_moves` | Operation Type | Returns the ready moves of the type. |
+| `get_aggregate_barcodes` | Stock Quantity | Returns the aggregate barcode strings. |
+| `get_current_warehouses` | Warehouse | Returns the readable Warehouses with identifier, name and short name. |
+| `get_empty_list_help` | Transfer | Returns the empty-state guidance for the reader's kind. |
+| `get_import_templates` | Stock Quantity | Returns the import template entry. |
+| `get_lines` / `get_main_lines` | Traceability Report | Return the tree nodes of one level. |
+| `get_move_line_quant_match` | Stock Move Line | Returns the record-to-line matching for the detail screen. |
+| `get_pdf` / `get_pdf_lines` | Traceability Report | Render the printable tree. |
+| `get_report_data` | Reception report | Returns the report content shaped for a screen. |
+| `get_stock_picking_action_picking_type` | Operation Type | Returns the Transfer list for the type's kind. |
+| `open_at_date` | Quantity History | Opens the product list evaluated at an instant. |
+| `order_on_zip` | Batch Transfer | Re-sorts the Transfers by postal code and stamps the batch sequence. |
+| `print_report` | Routes Report | Renders the routes diagram. |
+| `process` | Backorder Confirmation | Resumes the validation with the answers given. |
+| `process` | Label Type Chooser, Lot Label Layout | Opens or renders the chosen labels. |
+| `process_cancel_backorder` | Backorder Confirmation | Resumes the validation declaring every Transfer as not to be backordered. |
+| `send_sms` / `dont_send_sms` | Text Message Confirmation | Marks the company warned and resumes the validation, the second also turning the setting off. |
+| `split_lots` | Stock Move | Parses a pasted list of lot names into values. |
+| `unpack` | Package | Detaches the children and relocates the contents out of the container. |
+
+---
+
+# 16. What the domain does **not** expose
+
+To make the boundary explicit:
+
+- No public route. Every route requires a signed-in user.
+- No webhook, inbound or outbound.
+- No scheduled export.
+- No document-exchange format. Goods movements are not exchanged electronically by this domain.
+- No portal view. A customer never sees a Transfer through this domain; the portal views of a sales order are owned by `../sales/` and by `../website-and-storefront/`.
+- No payment, no invoice, no journal entry. See `accounting-effects.md`.

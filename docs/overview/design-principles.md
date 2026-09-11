@@ -17,7 +17,7 @@ The ten:
 9. [Extension over modification](#9-extension-over-modification)
 10. [Declared dependencies over manual invalidation](#10-declared-dependencies-over-manual-invalidation)
 
-A closing section, [when the principles conflict](#11-when-the-principles-conflict), states how the system resolves the cases where two of them pull in opposite directions, and a final section lists [the acceptance criteria](#12-acceptance-criteria) that check a rebuild has actually adopted them.
+Four closing sections follow: [when the principles conflict](#11-when-the-principles-conflict) states how the system resolves the cases where two of them pull in opposite directions; [the measured footprint](#12-the-measured-footprint-of-each-principle) gives the counts that show each principle is actually applied rather than merely intended; [signals of divergence](#13-signals-that-a-rebuild-has-diverged) lists the observable symptoms of a rebuild that abandoned one; [principles deliberately not adopted](#14-principles-deliberately-not-adopted) states what the system is **not**, because a rebuild that adds one of them will also diverge; and [the acceptance criteria](#15-acceptance-criteria) check a rebuild has actually adopted them.
 
 ---
 
@@ -564,7 +564,227 @@ An extension that changes what a computation reads must also change what it decl
 
 ---
 
-## 12. Acceptance criteria
+## 12. The measured footprint of each principle
+
+A principle that is stated but rarely applied is an aspiration. The counts below come from parsing the complete definition of the shipped system and from introspecting a full installation. They are the evidence that each principle is structural.
+
+### 12.1 Everything is an entity
+
+| Measure | Count |
+|---|---|
+| Entities catalogued | 983 |
+| — persistent | 600 |
+| — transient | 222 |
+| — abstract | 161 |
+| Persistent tables in a full installation | 1,240 |
+| Fields declared across entities | 14,028 |
+| Fields resolved at run time, after every extension | 23,235 |
+| Operations catalogued on entities | 18,344 |
+
+Of the 983 entities, the ones describing the system to itself — the entity catalogue, the field catalogue, the selection-value catalogue, the constraint catalogue, the relation catalogue, the embedded-parent catalogue, external identifiers, packages, package dependencies, package exclusions, package categories, views, view customisations, menus, the six action kinds, embedded actions, configuration steps, access rights, record rules, groups, privilege families, scheduled jobs and their triggers, sequences and their date ranges, system parameters, per-entity defaults, saved filters, logging records and profiling records — number more than thirty. **Every one of them is an ordinary entity with ordinary fields, ordinary access rights and ordinary views.**
+
+That 222 of the 983 entities are transient is itself a consequence of the principle: a multi-step dialog is a record, so the whole field, default, computation, on-change and validation machinery is available inside a dialog with no special case.
+
+### 12.2 The interface is data
+
+| Measure | Count |
+|---|---|
+| View declarations | 3,671 |
+| Window actions | 978 |
+| Menus | 893 |
+| Printable report definitions | 94 |
+| Routes exposed over the transport | 1,023 |
+
+Nearly four thousand view declarations describe every screen of the system. None of them is code.
+
+### 12.3 Configuration is data
+
+| Measure | Count |
+|---|---|
+| Shipped reference data sets | 155 |
+| Country chart template data sets | 1,078 |
+| System parameters shipped | a small fixed set, listed in the operational catalogue |
+| Decimal precision settings | a small fixed set, one per kind of quantity |
+| Capability packages catalogued | 620 |
+
+The 1,078 country chart template data sets are the clearest illustration: the accounting behaviour of more than a hundred jurisdictions is expressed entirely as records, not as code branches.
+
+### 12.4 External identifiers
+
+Every one of the 155 shipped reference data sets, every one of the 3,671 views, every one of the 978 window actions, every one of the 893 menus, every one of the 1,933 access rights and every one of the 576 record rules is addressed by an external identifier. A full installation therefore holds tens of thousands of identifier rows, which is the price of reloadability and removability.
+
+### 12.5 Archival over deletion
+
+Entities carrying the archive flag are the ones whose records outlive their usefulness: parties, products, users, companies, accounts, journals, taxes, price lists, warehouses, locations, employees, projects, campaigns, and most configuration entities. Entities **not** carrying it are the ones whose records are events rather than things: journal items, stock moves, messages, notifications, attendance records.
+
+The rule of thumb the catalogue follows: **a thing is archivable; an event is not.** An event that should not have happened is reversed, not archived.
+
+### 12.6 Audit fields
+
+The four audit fields exist on essentially every one of the 1,240 persistent tables and every transient one, which is roughly five thousand columns and two and a half thousand foreign keys whose only purpose is provenance. Turning them off is so rare that a transient entity attempting it is refused outright.
+
+### 12.7 Company scope
+
+| Measure | Count |
+|---|---|
+| Record rules | 576 |
+| — of which the multi-company global rules | the large majority of the global ones |
+| Company-dependent fields declared | 52 |
+
+The small number of company-dependent fields against the large number of company-scoped entities is informative: **most records belong to one company; only a few shared records need a per-company value.** The 52 are concentrated on parties, products and product categories — exactly the shared master data whose accounting treatment differs per company.
+
+### 12.8 Currency and precision
+
+| Measure | Count |
+|---|---|
+| Monetary fields declared | 232 |
+| Decimal-number fields declared | 697 |
+| Integer fields declared | 1,155 |
+
+Every one of the 232 monetary fields names a currency field, and the registry build refuses any that does not. The 697 decimal-number fields split into those with a declared precision — quantities, rates, percentages — which are stored in fixed-point form and rounded on assignment, and those without, which are stored as floating-point numbers and are not rounded.
+
+### 12.9 Extension over modification
+
+| Measure | Count |
+|---|---|
+| Capability packages | 620 |
+| — declaring automatic installation | 402 |
+| — presented as applications | 34 |
+| Dependency edges between packages | 1,286 |
+| Entities carrying at least one adopted abstract behaviour | several hundred |
+| — adopting the thread behaviour | 82 |
+| — adopting the activity behaviour | 60 |
+| Entities embedding a parent record | 12 |
+
+The most extended entities show how far the mechanism is pushed:
+
+| Entity | Extended by |
+|---|---|
+| Chart of Accounts Template | 179 packages |
+| Party | 125 packages |
+| Settings | 124 packages |
+| Company | 120 packages |
+| Journal Entry | 115 packages |
+| Product Template | 57 packages |
+| User | 53 packages |
+| Sales Order | 43 packages |
+| Tax | 42 packages |
+| Journal Item | 40 packages |
+
+One hundred and fifteen packages contribute to the journal entry. No two of them know about each other. **A rebuild that cannot compose 115 independent contributions into one entity cannot install the shipped catalogue.**
+
+That only 12 entities embed a parent, against several hundred that adopt an abstract behaviour, is also informative: embedding is for the rare case of one real-world thing recorded from two angles; adoption is the everyday mechanism.
+
+### 12.10 Declared dependencies
+
+| Measure | Count |
+|---|---|
+| Computed fields | 3,979 |
+| — of which stored, and therefore maintained by recomputation | 1,537 |
+| Related fields | 1,616 |
+| Relational fields mapped | 3,985 |
+| Fields marked for change tracking | 476 |
+| Fields marked translatable | 324 |
+| Fields carrying a group restriction | 587 |
+| Fields carrying an index | 894 |
+
+Nearly four thousand computed fields, of which more than fifteen hundred are stored, means the trigger forest is large and the recomputation machinery is exercised on almost every write. **A rebuild that computes on read instead will produce the same values and a system that cannot sort, group or filter by any of those fifteen hundred.**
+
+---
+
+## 13. Signals that a rebuild has diverged
+
+Each principle abandoned produces a characteristic symptom. These are what to look for in an implementation that claims equivalence.
+
+| Principle abandoned | Symptom |
+|---|---|
+| Everything is an entity | Adding a capability requires editing a configuration file, restarting a process, or changing a client. The list of screens cannot be queried. An access right cannot be exported. |
+| The interface is data | A new field needs a client change. Two capabilities cannot both add something to the same screen. A user cannot be given a different screen from a colleague without a code branch. |
+| Configuration is data | Two installations of the same version behave differently and the difference cannot be found in the database. A configuration change is not in the audit trail. Copying the database does not copy the behaviour. |
+| External identifiers | Loading the same reference data twice duplicates it. Removing a capability leaves its records behind, or removes records another capability also owns. A package update cannot withdraw a record it no longer ships. |
+| Archival over deletion | Old documents lose the names of the things they refer to. Withdrawing a product requires re-pointing every reference, or is refused. Deleting is the only way to take something out of use, and it is therefore permitted where it should not be. |
+| Audit fields | "Who changed this" cannot be answered without a separate audit mechanism. Optimistic concurrency detection is unavailable. Transient records cannot be aged out. |
+| Company scope per record | Reference data is duplicated per company. An inter-company operation is an integration. Consolidated reporting is an extract. Adding a company is a deployment. Or, in the failure direction: one company's records appear in another's lists. |
+| Currency and precision | Document totals differ from the sum of their lines by small amounts. A currency with three decimal places or zero decimal places misbehaves. A quantity comparison says two visually identical values differ. Amounts in two currencies are summed. |
+| Extension over modification | Adding a capability requires editing another's source. Two capabilities cannot both extend the same screen or operation. Removing a capability leaves fragments. A tenant's customisation is lost on update. |
+| Declared dependencies | A derived value is correct when changed through the screen and stale when changed through the transport, an import or a scheduled job. A document total drifts from its lines. A new way of changing a line silently breaks a total nobody remembered. |
+
+### 13.1 The three most expensive divergences
+
+Ranked by how much of the system they invalidate:
+
+1. **Declared dependencies.** Abandoning them does not fail loudly; it produces stale derived values on exactly the paths nobody tested. Every financial total, every inventory quantity and every progress indicator in the system is a computed field. A rebuild that recomputes only where the original screen recomputes will pass a screen-driven test suite and fail in production.
+2. **Extension over modification.** Abandoning it makes the shipped catalogue uninstallable: 620 packages contributing to 983 entities, one of which is extended by 179 of them, cannot be expressed as a set of mutually-aware modules.
+3. **Currency and precision.** Abandoning it produces a system whose numbers are almost right, which is worse than a system whose numbers are obviously wrong, because the discrepancies accumulate silently in the ledger.
+
+---
+
+## 14. Principles deliberately not adopted
+
+A rebuild can diverge by **adding** a principle as easily as by dropping one. The following are recognisable alternatives that the system deliberately does not use, and adopting one will change observable behaviour.
+
+### 14.1 Event sourcing
+
+**Not used.** The system stores **current state** in tables, with a conversation and a field-tracking history alongside. It does not store a log of events from which state is derived.
+
+Consequences of the choice, which a rebuild must reproduce:
+
+- A record's current value is read directly, not folded from a stream.
+- The history is **partial and declared**: only the fields marked for tracking have a recorded history, and only at transaction granularity.
+- There is no way to reconstruct the state of a record at an arbitrary past instant. Where the business requires that — an accounting period, an inventory valuation — the system stores **explicit periodic records** (a valuation layer, a posted entry, a stock quantity snapshot) rather than replaying a log.
+- Correcting a mistake is a **reversal**, which creates a compensating record, not a rewrite of history.
+
+A rebuild that uses event sourcing internally may still be equivalent, provided the externally visible records, their identifiers, their audit fields and their tracking entries are the same. A rebuild that exposes an event log as the source of truth is not.
+
+### 14.2 Separating reads from writes
+
+**Not used.** The same entities, the same fields and the same access rules serve reading and writing. There is no separate read model.
+
+Consequences:
+
+- A value written is immediately readable in the same transaction, through the unit of work.
+- A search sees uncommitted changes of its own transaction, because the unit of work flushes before querying.
+- There is no eventual consistency anywhere inside a transaction.
+
+The one concession is the **read-only cursor** for endpoints declared read-only, which may be served by a replica — and even that re-runs the whole endpoint on a read/write cursor if it attempts a write, precisely so that the programming model stays single.
+
+### 14.3 Soft-deleting everything
+
+**Not used.** Archival is opt-in per entity, by declaring the flag; most event-like entities do not have it. Deletion is real deletion.
+
+A rebuild that adds a deleted flag to every table would change: the meaning of uniqueness constraints, the cost of every query, the behaviour of removal when a package is uninstalled, and the semantics of the reversal operations that exist precisely because deletion is not available.
+
+### 14.4 A separate audit log
+
+**Not used.** Provenance is the four audit fields; history is field tracking into the conversation. There is no universal write-ahead audit table.
+
+Consequences: tracking is **declared per field** and costs a message per record per transaction; untracked fields have no history at all. A rebuild that logs every write to a shadow table would answer more questions and would also store an order of magnitude more data and behave differently under bulk operations.
+
+### 14.5 Denormalising for read performance
+
+**Used sparingly and always declared.** Where a value is duplicated — a company copied onto every line, a party copied onto every journal item, a total stored on a document — it is a **stored computed field** with declared dependencies, maintained by the recomputation machinery.
+
+A rebuild that denormalises without the declared dependency has produced a cache it must invalidate by hand, which is exactly what [principle ten](#10-declared-dependencies-over-manual-invalidation) exists to avoid.
+
+### 14.6 Per-tenant schema variation beyond packages and user-defined fields
+
+**Not used.** Two tenants with the same installed packages have the same schema. The only per-tenant schema variation is the set of installed packages and the user-defined entities and fields recorded in the database, both of which go through the same registry build and the same schema synchronisation.
+
+A rebuild that lets a tenant's schema drift arbitrarily loses the ability to install, update and remove packages predictably.
+
+### 14.7 Compile-time knowledge of the model
+
+**Not used.** The registry is built at run time from whatever packages are installed, and can be rebuilt while the process is running. Nothing about the entities is fixed at build time.
+
+This is what makes installing a package without a restart possible, and it is why the registry must be signalled between workers. A rebuild that generates code from the model at build time must still reproduce the run-time install path, or accept that installing a capability is a deployment.
+
+### 14.8 A message bus as the authority for coherence
+
+**Not used as the authority.** Coherence between workers is achieved by counters **in the tenant's own database**, read on the same cursor as the data. A bus may be added to reduce latency, but the counters remain the authority, because a worker that can read the data can always read the counters and there is therefore no window in which a stale registry is used against new data.
+
+---
+
+## 15. Acceptance criteria
 
 These check that a rebuild has adopted the principles, not merely the tables.
 
