@@ -156,7 +156,7 @@ account, partner, label, analytic distribution, due date, amount in currency, cu
 (summed), credit (summed), discount date, discount amount and tax grids, plus a cut-off button on
 income and expense lines of a posted document. It is read-only unless the document is draft.
 
-When the payment status is the legacy value and the document is not a plain entry, a notice replaces
+When the payment status is the imported-balance value (`invoicing_legacy`) and the document is not a plain entry, a notice replaces
 the editing affordances:
 
 > This entry has been generated through the Invoicing app, before installing Accounting. Its balance
@@ -277,7 +277,7 @@ described in words.
 | `/my/invoices` and `/my/invoices/page/<number>` | web page | signed-in user | The customer's list of documents, with sorting, filtering, a date range and paging. |
 | `/my/invoices/<identifier>` | web page | public (an access token authorises an anonymous visitor) | The document page. Accepts a report kind (web page, printable file or plain text), a download flag, a payment flag, a custom amount and a signed amount token. Redirects to the portal home when access is refused or the document is missing. |
 | `/my/invoices/overdue` | web page, read only | public | The batch payment page for the signed-in customer's overdue invoices. Redirects to the document list when there is nothing to pay. |
-| `/my/journal/<identifier>/unsubscribe` | web page, read and write | public | Removes an address from a journal's incoming-document notification list, authorised by a signed token. Responses: the confirmation page; "Invalid token" with a forbidden status; "Already unsubscribed" with a not-found status; "Deprecated link" with a gone status for the legacy form. |
+| `/my/journal/<identifier>/unsubscribe` | web page, read and write | public | Removes an address from a journal's incoming-document notification list, authorised by a signed token. Responses: the confirmation page; "Invalid token" with a forbidden status; "Already unsubscribed" with a not-found status; "Deprecated link" with a gone status for the earlier link form. |
 | `/account/download_invoice_attachments/<attachments>` | file download | signed-in user | Returns the named attachments, as one file or a compressed archive. |
 | `/account/download_invoice_documents/<documents>/<kind>` | file download | signed-in user | Returns the documents' files of the given kind. |
 | `/account/download_move_attachments/<documents>` | file download | signed-in user | Returns every attachment of the documents. |
@@ -361,7 +361,7 @@ figures.
 - The gross total.
 - When cash rounding applies, the rounding row is part of the same structure (as a net row for the
   "add a rounding line" strategy, as part of the tax row for the "biggest tax" strategy).
-- When payments exist and the payment status is not the legacy one: one row per non-exchange payment,
+- When payments exist and the payment status is not the imported-balance one: one row per non-exchange payment,
   labelled "Paid on " or "Reversed on " followed by its date, and then a bold **Amount Due** row.
 - When the company asks for it: "Total amount in words:" followed by the spelled-out total.
 - When the company asks for it and the currencies differ: a second totals block in the company

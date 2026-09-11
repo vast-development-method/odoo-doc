@@ -270,9 +270,22 @@ A journal of type `purchase` may not hold a sale document and vice versa (see `b
 
 ---
 
-## 10. Onboarding
+## 10. Onboarding and the empty-state offers
 
-The accounting onboarding panel includes a *bill* step whose purpose is to get the first vendor bill into the system. It offers the sample bill of `workflows.md` §20, and it is the entry point that makes the upload zone visible on the purchase journal card. The sample offer is hidden when the demonstration data is not installed.
+There is **no onboarding panel for a purchase journal.** The dashboard maps journal types to onboarding panels as follows:
+
+| Journal type | Onboarding panel |
+|---|---|
+| `sale` | the invoice onboarding |
+| `general` | the dashboard onboarding, whose steps are *Set Company Data*, *Set Periods* and *Review Chart of Accounts* |
+| every other type, **including `purchase`** | none |
+
+What a purchase journal card offers instead, when it holds no document at all, is:
+
+1. the **upload zone**, with the image of a bill and the text *Drop and let the AI process your bills automatically.*;
+2. the **sample bill** offer of `workflows.md` §20, which is hidden when the demonstration data is not installed — the availability test is simply whether the demonstration partner record exists.
+
+The other onboarding steps shipped by the accounting package — *Set Company Data*, *Documents Layout*, *Set Periods*, *Review Chart of Accounts*, *Taxes* — are shared configuration and are specified in `../general-ledger/configuration.md`.
 
 ---
 

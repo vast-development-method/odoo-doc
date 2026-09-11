@@ -205,7 +205,7 @@ the auto-post end date is reached.
 ### 2.1 States
 
 See [`entities.md`](entities.md), section 1.9, for the value table. The status is recomputed, never
-written directly, with two exceptions: the legacy value is never overwritten, and the blocked value
+written directly, with two exceptions: the imported-balance value (`invoicing_legacy`) is never overwritten, and the blocked value
 is set and cleared by an explicit user action.
 
 ### 2.2 Diagram
@@ -232,7 +232,7 @@ stateDiagram-v2
 ### 2.3 The computation
 
 1. Split the documents into four groups:
-   - documents whose current status is the legacy value — left untouched;
+   - documents whose current status is the imported-balance value (`invoicing_legacy`) — left untouched;
    - documents whose current status is blocked — left untouched;
    - documents that *qualify*: the document is an invoice (receipts included) **and** either it is
      posted, or it is draft with a non-zero total in its currency;

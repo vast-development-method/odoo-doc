@@ -289,7 +289,7 @@ credit note or a purchase receipt.
 opposite sign to the document, which the user may attach to the document in one click.
 
 **Overdue.** A posted customer invoice or sales receipt, not draft or cancelled, whose payment status
-is none of in payment, paid, reversed, blocked or legacy, and whose due date is strictly before
+is none of in payment, paid, reversed, blocked or the imported-balance value, and whose due date is strictly before
 today.
 
 ---
@@ -304,7 +304,7 @@ so the incoming bank line can be matched automatically. Computed at posting from
 reference model and type.
 
 **Payment status** (`payment_state`). The settlement state of a document: not paid, partially paid,
-in payment, paid, reversed, blocked, or the frozen legacy value.
+in payment, paid, reversed, blocked, or the frozen imported-balance value.
 
 **Payment term** (`account.payment.term`). A named instalment plan, optionally carrying one early
 payment discount.

@@ -290,7 +290,7 @@ message with its attachments.
    `/invoice/transaction/overdue`.
 
 An invoice is **overdue** when it is neither draft nor cancelled, its type is customer invoice or
-sales receipt, its payment status is none of in payment, paid, reversed, blocked or legacy, and its
+sales receipt, its payment status is none of in payment, paid, reversed, blocked or the imported-balance value, and its
 due date is strictly before today.
 
 ---

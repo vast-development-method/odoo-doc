@@ -777,9 +777,9 @@ non-zero total).
 
 ### H8. The legacy status is never overwritten
 
-**Given** an imported document whose payment status is the legacy value,
+**Given** an imported document whose payment status is the imported-balance value (`invoicing_legacy`),
 **When** any reconciliation changes,
-**Then** the payment status stays the legacy value.
+**Then** the payment status stays the imported-balance value (`invoicing_legacy`).
 
 ---
 

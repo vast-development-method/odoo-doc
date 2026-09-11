@@ -40,7 +40,8 @@ in inventory value is posted as a period variation at the closing.
 
 **Average cost** (`average`). A costing method under which the unit cost of a product is
 the weighted average of everything that entered and is still on hand, recomputed every
-time goods enter. Labelled "Average Cost (AVCO)".
+time goods enter. The label the system emits for it is "Average Cost (AVCO)", whose
+parenthesised fragment stands for *average cost*.
 
 **Average replay.** The algorithm that reconstructs the average unit cost and total value
 of a product by walking its incoming and outgoing movements in date order, starting from
@@ -150,7 +151,7 @@ replaying the whole history.
 **First in first out** (`fifo`). A costing method under which the goods that entered
 first are considered to leave first. An outgoing movement is valued by consuming the
 oldest incoming movements that are still considered on hand. Labelled "First In First Out
-(FIFO)".
+(FIFO)", whose parenthesised fragment stands for *first in first out*.
 
 **Gross unit price.** The unit price of a journal item net of its discount, used by the
 price-difference computation. Its formula depends on whether a price-included tax is
