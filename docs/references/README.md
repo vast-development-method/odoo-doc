@@ -36,6 +36,14 @@ An entity page is the fastest way to answer "what does this record hold and what
 | [State fields](state-fields.md) | Every state field with its stored values and labels, linked to the document that specifies its transitions |
 | [Selection values](selection-values.md) | Every field whose value comes from a fixed set, with the complete set |
 
+## Persistence
+
+| Page | Content |
+|---|---|
+| [Physical tables](physical-tables.md) | Every table a full installation creates, with every column, its storage type and meaning, its defaults and precision, and every index and constraint |
+| [Relations](relations.md) | Every relational field: cardinality, target, inverse, association table and deletion behaviour |
+| [Computed fields](computed-fields.md) | The recomputation graph: every derived field, the rule that computes it, what it depends on, and whether it is stored |
+
 ## Data and packaging
 
 | Page | Content |

@@ -805,3 +805,399 @@ do **not** multiply the quantity by a rounded ratio. Section 8 works this throug
 |---|---|---|---|---|---|
 | m² | ft² | 10.763915051182416 | 10.77 | 10.76 | 10.76 |
 | ft² | m² | 0.092903 | 0.1 | 0.09 | 0.09 |
+
+### 7.1 Cross-tree pairs
+
+Every pair of units drawn from two different trees is **not convertible**. The table of
+convertible tree pairs is the diagonal and nothing else:
+
+| | Counting | Working time | Length | Surface | Volume | Mass | Energy |
+|---|---|---|---|---|---|---|---|
+| **Counting** | convertible | no | no | no | no | no | no |
+| **Working time** | no | convertible | no | no | no | no | no |
+| **Length** | no | no | convertible | no | no | no | no |
+| **Surface** | no | no | no | convertible | no | no | no |
+| **Volume** | no | no | no | no | convertible | no | no |
+| **Mass** | no | no | no | no | no | convertible | no |
+| **Energy** | no | no | no | no | no | no | convertible |
+
+In particular: **there is no relationship between length and volume**, even though the shipped
+volume tree contains a cubic inch and the shipped length tree contains an inch. A rebuild must not
+attempt to derive one from the other. Likewise mass and volume are unrelated; a density is not
+part of this model.
+
+---
+
+## 8. The mandatory worked examples
+
+Each example is worked from the stored data, through the algorithm of section 6, to the stored
+result. Unless stated, the precision is the shipped two digits and the rounding method is the
+conversion default, away from zero.
+
+### 8.1 Two and a half dozens into units
+
+**Given.** A quantity of two and one half, expressed in `Dozens` (absolute quantity twelve). The
+destination is `Units` (absolute quantity one).
+
+**Step 1 — short-circuits.** The source unit exists; the quantity is not zero; source and
+destination differ; a destination is supplied. No short-circuit applies.
+
+**Step 2 — scale.**
+
+```formula
+amount = 2.5 × 12 = 30
+amount = 30 ÷ 1 = 30
+```
+
+**Step 3 — round.**
+
+```formula
+result = round_away_from_zero( 30 , step = 0.01 ) = 30
+```
+
+Thirty is already a whole multiple of one hundredth, so no rounding occurs. The compensation term
+at a normalised magnitude of three thousand is about three thousand divided by two raised to the
+fiftieth, far below one step, so it does not push the value to the next step.
+
+**Result: 30 units.**
+
+**Under every rounding method** the answer is thirty, because the exact value lands on the grid.
+At a precision of zero digits the answer is still thirty, for the same reason.
+
+**Interpretation.** Two and a half dozens is a legitimate quantity to enter: nothing forbids a
+fractional number of packagings. The system will happily plan a move of thirty items described as
+"two and a half dozens". If the business requires whole packagings, that is enforced by the
+reservation policy of section 11, not by the conversion.
+
+### 8.2 Seven units into dozens at a rounding of one hundredth
+
+**Given.** A quantity of seven, expressed in `Units` (absolute quantity one). The destination is
+`Dozens` (absolute quantity twelve). The precision is two digits, so the step is one hundredth.
+
+**Step 1 — short-circuits.** None applies.
+
+**Step 2 — scale.**
+
+```formula
+amount = 7 × 1 = 7
+amount = 7 ÷ 12 = 0.5833333333333334
+```
+
+**Step 3 — round, away from zero (the default).** Normalise by multiplying by one hundred:
+fifty-eight and one third. The compensation term at that magnitude is about fifty-eight divided
+by two raised to the fiftieth. Add one minus the compensation term, with the sign of the value:
+fifty-nine and one third minus a negligible amount. Truncate towards zero: fifty-nine.
+Denormalise by dividing by one hundred.
+
+```formula
+result = 0.59 dozens
+```
+
+**Step 3 alternative — round, half away from zero.** Normalise: fifty-eight and one third. Add
+the compensation term. Round half away from zero to a whole number: fifty-eight. Denormalise.
+
+```formula
+result = 0.58 dozens
+```
+
+**Step 3 alternative — round, towards zero.** Fifty-eight. Result: **0.58 dozens.**
+
+**Results at other precisions.**
+
+| Precision digits | Step | Away from zero | Half away from zero | Towards zero |
+|---|---|---|---|---|
+| 0 | one | 1 | 1 | 0 |
+| 2 | one hundredth | 0.59 | 0.58 | 0.58 |
+| 3 | one thousandth | 0.584 | 0.583 | 0.583 |
+| 4 | one ten-thousandth | 0.5834 | 0.5833 | 0.5833 |
+
+**Interpretation.** At the shipped precision, seven items cannot be described exactly in dozens.
+The default conversion over-states by one hundredth of a dozen, which is twelve hundredths of an
+item. This is intentional: a system that under-stated would allow a customer to be shipped less
+than they ordered after a unit change.
+
+### 8.3 One pound into kilograms
+
+**Given.** A quantity of one, expressed in `lb` (absolute quantity four hundred fifty-three and
+five hundred ninety-two thousandths). The destination is `kg` (absolute quantity one thousand).
+
+**Step 1 — short-circuits.** None applies.
+
+**Step 2 — scale.**
+
+```formula
+amount = 1 × 453.592 = 453.592
+amount = 453.592 ÷ 1000 = 0.453592
+```
+
+**Step 3 — round.**
+
+| Precision digits | Away from zero | Half away from zero | Towards zero |
+|---|---|---|---|
+| 0 | 1 | 0 | 0 |
+| 2 (shipped) | **0.46** | 0.45 | 0.45 |
+| 3 | 0.454 | 0.454 | 0.453 |
+| 6 | 0.453592 | 0.453592 | 0.453592 |
+
+**Result at the shipped precision: 0.46 kilograms.**
+
+**Where the four hundred fifty-three and five hundred ninety-two thousandths comes from.** The
+pound is not defined against the gram directly. It is defined as sixteen ounces, and the ounce as
+twenty-eight and three thousand four hundred ninety-five ten-thousandths grams. The chain is:
+
+```formula
+absolute_quantity(oz) = 28.3495 × 1 = 28.3495
+absolute_quantity(lb) = 16 × 28.3495 = 453.592
+```
+
+This is a rounded international pound: the exact value is four hundred fifty-three and fifty-nine
+thousand two hundred thirty-seven ten-millionths grams. The shipped data is therefore accurate to
+seven significant figures, not exact. A rebuild must use the shipped chain, not the exact
+definition, or the conversion matrix will not match.
+
+**The reverse direction.** One kilogram into pounds:
+
+```formula
+amount = 1 × 1000 ÷ 453.592 = 2.2046244201837775
+result (away from zero)      = 2.21
+result (half away from zero) = 2.2
+result (towards zero)        = 2.2
+```
+
+### 8.4 One hundred grams into kilograms at a rounding of one thousandth
+
+**Given.** A quantity of one hundred, expressed in `g` (absolute quantity one). The destination is
+`kg` (absolute quantity one thousand). The precision is three digits, so the step is one
+thousandth.
+
+**Step 1 — short-circuits.** None applies.
+
+**Step 2 — scale.**
+
+```formula
+amount = 100 × 1 = 100
+amount = 100 ÷ 1000 = 0.1
+```
+
+**Step 3 — round.** Normalise by multiplying by one thousand (the accurately inverted step, taken
+from the lookup table, is exactly one thousand): one hundred. One hundred is already whole, so
+every rounding method returns one hundred. Denormalise by dividing by one thousand.
+
+```formula
+result = 0.1 kilograms
+```
+
+**Result: 0.1 kilograms**, under every rounding method, and also at precisions of one and two
+digits. At a precision of zero digits the results diverge: away from zero gives one kilogram,
+half away from zero gives zero, towards zero gives zero.
+
+**Contrast with one gram into kilograms.** One gram is one thousandth of a kilogram, which is
+exactly representable at three digits but **not** at the shipped two digits:
+
+| Precision digits | Exact value | Away from zero | Half away from zero | Towards zero |
+|---|---|---|---|---|
+| 2 (shipped) | 0.001 | **0.01** | 0 | 0 |
+| 3 | 0.001 | 0.001 | 0.001 | 0.001 |
+| 4 | 0.001 | 0.001 | 0.001 | 0.001 |
+
+At the shipped precision one gram becomes **ten** grams' worth of kilogram under the default
+method, and **nothing at all** under half away from zero. This is the single most dangerous
+configuration in the domain: a business that keeps stock in grams and sells in kilograms must
+raise the `Product Unit` precision to at least three digits, or accept a ten-fold rounding error
+on single-gram quantities.
+
+### 8.5 Ordering five boxes of twelve when stock is kept in units
+
+**Given.**
+
+- A product whose own unit is `Units`.
+- An additional trading unit `Box of 12`: reference unit `Units`, contains twelve, absolute
+  quantity twelve.
+- A customer order line for a quantity of five in `Box of 12`.
+- Stock is counted, reserved and moved in `Units`.
+
+**Step 1 — the order line.** The line stores a quantity of five and a unit of `Box of 12`. The
+allowed-unit list for the line is the product's own unit together with its additional units, so
+`Box of 12` is selectable. The price on the line is a price per box (see 8.6).
+
+**Step 2 — the stock move created on confirmation.** The move inherits the line's quantity and
+the line's unit:
+
+- the move's demand is five;
+- the move's unit is `Box of 12`;
+- the move's packaging unit is set from the originating document's unit, which is `Box of 12`;
+- the move's packaging quantity is the demand converted from the move's unit into the packaging
+  unit, which is an identity here and gives five.
+
+**Step 3 — the move's real quantity.** The move stores a second copy of the quantity in the
+product's own unit, rounded **half away from zero**:
+
+```formula
+real_quantity = round_half_away_from_zero( 5 × 12 ÷ 1 , step = 0.01 ) = 60
+```
+
+**Step 4 — reservation.** The warehouse reserves against quantities on hand, which are held in
+the product's own unit. It needs sixty units. Suppose ninety-two units are on hand and
+unreserved.
+
+Because the move's unit is not the product's own unit, the reservation applies a protective
+double conversion (section 12.4): the available quantity of sixty (the smaller of the wanted
+sixty and the available ninety-two) is converted **towards zero** into the move's unit, then back
+**half away from zero** into the product's unit:
+
+```formula
+quantity_in_move_unit  = round_towards_zero( 60 × 1 ÷ 12 , step = 0.01 ) = 5
+quantity_in_own_unit   = round_half_away_from_zero( 5 × 12 ÷ 1 , step = 0.01 ) = 60
+```
+
+Sixty units are reserved. The purpose of the double conversion is visible when only fifty-eight
+units are available: fifty-eight units is four and eighty-three hundredths boxes towards zero,
+which is fifty-seven and ninety-six hundredths units back — so fifty-seven and ninety-six
+hundredths are reserved rather than fifty-eight, guaranteeing the reservation is expressible in
+the move's unit.
+
+**Step 5 — the move line.** A move line is created with a quantity in the operator's unit. If the
+operator picks in `Units`, the move line's unit is `Units` and its quantity is sixty; its
+quantity in the product's unit is sixty. If the operator picks in `Box of 12`, the move line's
+unit is `Box of 12`, its quantity is five, and its quantity in the product's unit is
+
+```formula
+round_half_away_from_zero( 5 × 12 ÷ 1 ) = 60
+```
+
+**Step 6 — the move's picked quantity.** The move's picked quantity is the sum of its move lines'
+quantities, each converted into the **move's** unit **without rounding**. With one move line of
+sixty units:
+
+```formula
+picked_in_move_unit = 60 × 1 ÷ 12 = 5     (unrounded)
+```
+
+**Step 7 — quantities on hand.** Sixty units leave stock. Quantities on hand never mention boxes.
+
+**Step 8 — the invoice.** The invoice line copies the order line's unit and quantity: five `Box of
+12`. The invoiced quantity reported back onto the order line is converted from the invoice line's
+unit into the order line's unit, which is an identity here.
+
+**Summary table of the same five boxes, seen from each document.**
+
+| Record | Unit stored | Quantity stored | Second copy in product's unit | Rounding used |
+|---|---|---|---|---|
+| Sales order line | `Box of 12` | 5 | none | — |
+| Stock move | `Box of 12` | 5 (demand) | 60 (real quantity) | half away from zero |
+| Stock move, packaging fields | `Box of 12` | 5 (packaging quantity) | — | away from zero |
+| Stock move line, picked in units | `Units` | 60 | 60 | half away from zero |
+| Stock move line, picked in boxes | `Box of 12` | 5 | 60 | half away from zero |
+| Quantity on hand | implied `Units` | −60 | — | — |
+| Invoice line | `Box of 12` | 5 | — | — |
+
+**The same scenario with a box of twelve dozens.** If the additional unit is instead `Box of 12
+Dozens` (absolute quantity one hundred forty-four), five boxes are seven hundred twenty units,
+the move's real quantity is seven hundred twenty, and every other row of the table scales by
+twelve. The arithmetic is identical; only the absolute quantity changes.
+
+### 8.6 A price of twenty-four per dozen converted to a price per unit
+
+**Given.** A price of twenty-four, expressed **per one `Dozens`**. The destination is a price
+**per one `Units`**.
+
+Price conversion is the *inverse* of quantity conversion, because a price is a quantity in the
+denominator. The formula is in section 10; applied here:
+
+```formula
+price_per_destination = price_per_source × absolute_quantity( destination_unit ) ÷ absolute_quantity( source_unit )
+price_per_unit        = 24 × 1 ÷ 12 = 2
+```
+
+**Result: 2 per unit.** No rounding is applied: price conversion never rounds.
+
+**Check by multiplication.** Twelve units at two each is twenty-four, which is one dozen at
+twenty-four. The conversion is consistent.
+
+**The reverse direction.** A price of two per unit converted to a price per dozen:
+
+```formula
+price_per_dozen = 2 × 12 ÷ 1 = 24
+```
+
+**A price that does not divide evenly.** Twenty-four per box of twelve dozens, converted to a
+price per unit:
+
+```formula
+price_per_unit = 24 × 1 ÷ 144 = 0.16666666666666666
+```
+
+The result is **not** rounded to sixteen hundredths or seventeen hundredths by this operation. It
+is returned at full precision, and the caller — a price list rule, an order line, an invoice
+line — applies its own currency rounding afterwards. A rebuild that rounds inside the price
+conversion will produce line totals that differ by fractions of a currency unit on large
+quantities. One hundred forty-four units at the unrounded price is exactly twenty-four; at a price
+rounded to seventeen hundredths it would be twenty-four and forty-eight hundredths.
+
+**A price per unit converted to a price per pack of six.** One and one half per unit:
+
+```formula
+price_per_pack = 1.5 × 6 ÷ 1 = 9
+```
+
+**A price per kilogram converted to a price per gram.** One hundred per kilogram:
+
+```formula
+price_per_gram = 100 × 1 ÷ 1000 = 0.1
+```
+
+**A realistic retail price per unit converted to a price per dozen.** Nineteen and ninety-nine
+hundredths per unit:
+
+```formula
+price_per_dozen = 19.99 × 12 ÷ 1 = 239.88
+```
+
+---
+
+## 9. The shared-ancestor test
+
+### 9.1 Purpose
+
+Decides whether two units can meaningfully be converted. It is the only tree-membership test in
+the domain, and it works purely on the materialised paths, so it costs no database access beyond
+the two records.
+
+### 9.2 Algorithm
+
+1. Assert each side is exactly one unit.
+2. Split each unit's hierarchy path on the solidus character, producing an ordered list of
+   ancestor identifiers from the root downwards.
+3. Walk the two lists in parallel from the beginning. While the elements are equal, collect them.
+   Stop at the first difference or when either list is exhausted.
+4. Return true when at least one element was collected, false otherwise.
+
+### 9.3 Consequences
+
+- Two units in the same tree always share at least the root element and therefore return true,
+  whatever their depth or their relative position.
+- Two units in different trees differ at the first element and therefore return false.
+- A unit shares an ancestor with itself.
+- The test is symmetric.
+- The test says nothing about *how far apart* two units are, and nothing about whether the
+  conversion will round to zero.
+
+### 9.4 Where the test is applied
+
+| Caller | What it guards |
+|---|---|
+| Service product configuration | Whether a product's own unit belongs to the working-time tree, which decides whether the product can be sold as time and delivered from recorded time. |
+| Sales line delivered-quantity recording | Whether the line's unit belongs to the working-time tree, and whether the company's time unit can be converted into the line's unit. |
+| Label printing for picked goods | Whether the picked unit belongs to the counting tree, which decides whether one label per item is meaningful. |
+| Lot and serial number label printing | The same test on the move line's unit. |
+| Incoming electronic document processing | Whether the unit named on the incoming document belongs to the same tree as the matched product's own unit; if not, the document's unit is discarded and the product's own unit is used instead. |
+
+### 9.5 Worked examples
+
+| First unit | Path | Second unit | Path | Common prefix | Result |
+|---|---|---|---|---|---|
+| `Dozens` | root `Units`, then `Dozens` | `Pack of 6` | root `Units`, then `Pack of 6` | the root | share an ancestor |
+| `Units` | root `Units` | `Pallet of 40 Boxes` | root `Units`, `Dozens`, `Box`, `Pallet` | the root | share an ancestor |
+| `kg` | root `g`, then `kg` | `L` | root `ml`, then `L` | none | do not share an ancestor |
+| `Hours` | root `Hours` | `Hours` | root `Hours` | the root | share an ancestor |
+| `in³` | root `ml`, `L`, `in³` | `in` | root `mm`, `cm`, `in` | none | do not share an ancestor |
