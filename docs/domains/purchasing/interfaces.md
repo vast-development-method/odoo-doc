@@ -291,7 +291,7 @@ contract of the platform.
 | Operation | Inputs | Output | Effect |
 |---|---|---|---|
 | `action_rfq_send` | The context flag `send_rfq` decides which template is used | An instruction to open the email composer | Prepares the composer; marks the order as sent when the message is posted. |
-| `button_confirm` | none | `true`, or an instruction to open the alternative question | Confirms, as specified in [`workflows.md`](workflows.md). |
+| `button_confirm` | none | a success indicator, or an instruction to open the alternative question | Confirms, as specified in [`workflows.md`](workflows.md). |
 | `button_approve` | an optional force flag, currently ignored by the guard | an empty instruction | Approves the orders whose approval test succeeds. |
 | `button_draft` | none | an empty instruction | Sets the status to draft. |
 | `button_cancel` | none | none | Cancels, subject to the lock and bill guards. |
