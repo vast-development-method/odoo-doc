@@ -749,10 +749,11 @@ written directly:
 
 See [calculations.md](calculations.md) section 9 for the exact ordering. In summary: for one entity
 and one condition, rows whose user is empty or the acting user and whose company is empty or the
-acting company are read, ordered by user, then company, then identifier, and the **first** row seen
-for each field wins. Because an empty value sorts before a set value in the ordering used, this
-makes a global default win over a per-user one — see the calculation section for the precise
-consequence and the worked example.
+acting company are read, ordered ascending by user, then company, then identifier, with **absent
+values placed last**, and the **first** row seen for each field wins. The effect is that the most
+specific default wins: (acting user, acting company), then (acting user, no company), then (no
+user, acting company), then (no user, no company). The placement of absent values is part of the
+specification; reversing it would invert the precedence exactly.
 
 ### 10.4 Cache and side effects
 

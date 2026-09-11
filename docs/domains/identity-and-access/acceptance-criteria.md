@@ -1375,12 +1375,14 @@ returned to the sign-in page with no dialogue.
 
 **When** the defaults of the Sales Order entity are read
 
-**Then** the applied value is **payment term 1**, because the ordering is user, then company, then
-identifier, and an empty value sorts first
+**Then** the applied value is **payment term 9**, because the ordering is ascending by user, then
+company, then identifier, with absent values placed **last**, so the most specific row wins
 
-**And** deleting row 31 makes the winner payment term 4
+**And** deleting row 34 makes the winner payment term 7
 
-**And** deleting rows 31 and 32 makes the winner payment term 7.
+**And** deleting rows 34 and 33 makes the winner payment term 4
+
+**And** deleting rows 34, 33 and 32 makes the winner payment term 1.
 
 ### Scenario 13.2 — Setting a default validates the value
 
