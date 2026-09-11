@@ -120,13 +120,13 @@ stateDiagram-v2
     Done : 1_done — Done
     Cancelled : 1_canceled — Cancelled
 
-    InProgress --> Waiting : blocking task open\n(dependency feature on)
+    InProgress --> Waiting : blocking task open (dependency feature on)
     ChangesRequested --> Waiting : blocking task open
     Approved --> Waiting : blocking task open
-    Waiting --> InProgress : all blocking tasks closed\nor feature switched off
+    Waiting --> InProgress : all blocking tasks closed, or feature switched off
 
-    InProgress --> ChangesRequested : review sends back /\nrating below 4 + automatic status
-    InProgress --> Approved : review accepts /\nrating 4 or 5 + automatic status
+    InProgress --> ChangesRequested : review sends back, or rating below 4 with automatic status
+    InProgress --> Approved : review accepts, or rating 4 or 5 with automatic status
     ChangesRequested --> Approved : review accepts
     Approved --> ChangesRequested : review sends back
 
@@ -410,21 +410,20 @@ stateDiagram-v2
 
 ```mermaid
 stateDiagram-v2
-    [*] --> NotReached : milestone created
-    NotReached : is_reached = false
-    Reached : is_reached = true
-    NotReached --> Reached : tick\n(reached date = today)
-    Reached --> NotReached : untick\n(reached date cleared)
+    [*] --> Pending : milestone created
+    Pending : not reached, deadline absent or in the future
+    Late : not reached, deadline strictly before today
+    Ready : not reached, every attached task closed and at least one closed
+    Reached : reached, date stamped
 
-    state NotReached {
-        [*] --> Pending
-        Pending : deadline in the future or absent
-        Late : deadline strictly before today
-        Ready : every attached task closed, at least one
-        Pending --> Late : today passes the deadline
-        Pending --> Ready : last open task closes
-        Late --> Ready : last open task closes
-    }
+    Pending --> Late : today passes the deadline
+    Pending --> Ready : the last open task closes
+    Late --> Ready : the last open task closes
+    Pending --> Reached : tick
+    Late --> Reached : tick
+    Ready --> Reached : tick
+    Reached --> Pending : untick, deadline still ahead
+    Reached --> Late : untick, deadline already passed
 ```
 
 ---
@@ -462,11 +461,11 @@ answer before anyone is notified.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Requested : rating request created\n(token generated, value 0)
+    [*] --> Requested : rating request created (token generated, value 0)
     Requested : consumed = false
     Answered : consumed = true, value 1..5
     Requested --> Answered : customer submits 1, 3 or 5
-    Answered --> Answered : customer submits again\n(message updated in place)
+    Answered --> Answered : customer submits again (message updated in place)
     Answered --> Requested : reset (new token, value 0)
     Answered --> [*] : rating or rated record deleted
     Requested --> [*] : rating or rated record deleted
