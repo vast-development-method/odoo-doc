@@ -1799,3 +1799,326 @@ A Lot is never archived and never deleted by the domain: it is the anchor of tra
 | Re-used | It is simply assigned again; a reusable container is never taken over as an entire package, so its goods are taken out of it rather than travelling with it. |
 
 A container is never archived. A container whose type is reusable is expected to cycle indefinitely; a disposable one usually ends its life at the customer, keeping only its history snapshots behind.
+
+---
+
+# 27. Relation map
+
+Every relation the domain's entities declare, grouped by the entity that declares it. "Points at one" is a stored link; "owns many" is the reverse of a link declared on the target; "links to many" is a symmetric many-to-many.
+
+Reading this map together with the index of section 25 gives the complete shape of the data model.
+
+### Batch Transfer
+
+| Field | Relation | Target |
+|---|---|---|
+| `allowed_picking_ids` | owns many | Transfer |
+| `company_id` | points at one | Company |
+| `dock_id` | points at one | Location |
+| `driver_id` | points at one | Contact |
+| `move_ids` | owns many | Stock Move |
+| `move_line_ids` | owns many | Stock Move Line |
+| `picking_ids` | owns many | Transfer |
+| `picking_type_id` | points at one | Operation Type |
+| `user_id` | points at one | User |
+| `vehicle_category_id` | points at one | Vehicle Model Category |
+| `vehicle_id` | points at one | Vehicle |
+| `warehouse_id` | points at one | Warehouse |
+
+### Daily quantity series
+
+| Field | Relation | Target |
+|---|---|---|
+| `company_id` | points at one | Company |
+| `product_id` | points at one | Product |
+| `product_tmpl_id` | points at one | Product Template |
+| `warehouse_id` | points at one | Warehouse |
+
+### Document Reference
+
+| Field | Relation | Target |
+|---|---|---|
+| `move_ids` | links to many | Stock Move |
+| `picking_ids` | links to many | Transfer |
+
+### Location
+
+| Field | Relation | Target |
+|---|---|---|
+| `child_ids` | owns many | Location |
+| `child_internal_location_ids` | links to many | Location |
+| `company_id` | points at one | Company |
+| `incoming_move_line_ids` | owns many | Stock Move Line |
+| `location_id` | points at one | Location |
+| `outgoing_move_line_ids` | owns many | Stock Move Line |
+| `putaway_rule_ids` | owns many | Put-away Rule |
+| `quant_ids` | owns many | Stock Quantity |
+| `removal_strategy_id` | points at one | Removal Strategy |
+| `storage_category_id` | points at one | Storage Category |
+| `warehouse_id` | points at one | Warehouse |
+| `warehouse_view_ids` | owns many | Warehouse |
+
+### Lot
+
+| Field | Relation | Target |
+|---|---|---|
+| `company_id` | points at one | Company |
+| `delivery_ids` | links to many | Transfer |
+| `location_id` | points at one | Location |
+| `partner_ids` | links to many | Contact |
+| `product_id` | points at one | Product |
+| `product_uom_id` | points at one | Unit of Measure |
+| `quant_ids` | owns many | Stock Quantity |
+
+### Operation Type
+
+| Field | Relation | Target |
+|---|---|---|
+| `company_id` | points at one | Company |
+| `default_location_dest_id` | points at one | Location |
+| `default_location_src_id` | points at one | Location |
+| `dock_ids` | links to many | Location |
+| `favorite_user_ids` | links to many | User |
+| `return_picking_type_id` | points at one | Operation Type |
+| `sequence_id` | points at one | Numbering Sequence |
+| `warehouse_id` | points at one | Warehouse |
+| `wave_category_ids` | links to many | Product Category |
+| `wave_location_ids` | links to many | Location |
+
+### Package
+
+| Field | Relation | Target |
+|---|---|---|
+| `all_children_package_ids` | owns many | Package |
+| `child_package_dest_ids` | owns many | Package |
+| `child_package_ids` | owns many | Package |
+| `company_id` | points at one | Company |
+| `contained_quant_ids` | owns many | Stock Quantity |
+| `location_dest_id` | points at one | Location |
+| `location_id` | points at one | Location |
+| `move_line_ids` | owns many | Stock Move Line |
+| `outermost_package_id` | points at one | Package |
+| `owner_id` | points at one | Contact |
+| `package_dest_id` | points at one | Package |
+| `package_type_id` | points at one | Package Type |
+| `parent_package_id` | points at one | Package |
+| `picking_ids` | links to many | Transfer |
+| `quant_ids` | owns many | Stock Quantity |
+
+### Package History
+
+| Field | Relation | Target |
+|---|---|---|
+| `company_id` | points at one | Company |
+| `location_dest_id` | points at one | Location |
+| `location_id` | points at one | Location |
+| `move_line_ids` | owns many | Stock Move Line |
+| `outermost_dest_id` | points at one | Package |
+| `package_id` | points at one | Package |
+| `package_type_id` | points at one | Package Type |
+| `parent_dest_id` | points at one | Package |
+| `parent_orig_id` | points at one | Package |
+| `picking_ids` | links to many | Transfer |
+
+### Package Type
+
+| Field | Relation | Target |
+|---|---|---|
+| `company_id` | points at one | Company |
+| `route_ids` | links to many | Route |
+| `sequence_id` | points at one | Numbering Sequence |
+| `storage_category_capacity_ids` | owns many | Storage Category Capacity |
+
+### Put-away Rule
+
+| Field | Relation | Target |
+|---|---|---|
+| `category_id` | points at one | Product Category |
+| `company_id` | points at one | Company |
+| `location_in_id` | points at one | Location |
+| `location_out_id` | points at one | Location |
+| `package_type_ids` | links to many | Package Type |
+| `product_id` | points at one | Product |
+| `storage_category_id` | points at one | Storage Category |
+
+### Route
+
+| Field | Relation | Target |
+|---|---|---|
+| `categ_ids` | links to many | Product Category |
+| `company_id` | points at one | Company |
+| `product_ids` | links to many | Product Template |
+| `rule_ids` | owns many | Stock Rule |
+| `supplied_wh_id` | points at one | Warehouse |
+| `supplier_wh_id` | points at one | Warehouse |
+| `warehouse_domain_ids` | owns many | Warehouse |
+| `warehouse_ids` | links to many | Warehouse |
+
+### Scrap
+
+| Field | Relation | Target |
+|---|---|---|
+| `allowed_uom_ids` | links to many | Unit of Measure |
+| `company_id` | points at one | Company |
+| `location_id` | points at one | Location |
+| `lot_id` | points at one | Lot |
+| `move_ids` | owns many | Stock Move |
+| `owner_id` | points at one | Contact |
+| `package_id` | points at one | Package |
+| `picking_id` | points at one | Transfer |
+| `product_id` | points at one | Product |
+| `product_uom_id` | points at one | Unit of Measure |
+| `scrap_location_id` | points at one | Location |
+| `scrap_reason_tag_ids` | links to many | Scrap Reason Tag |
+
+### Stock Move
+
+| Field | Relation | Target |
+|---|---|---|
+| `allowed_uom_ids` | links to many | Unit of Measure |
+| `company_id` | points at one | Company |
+| `location_dest_id` | points at one | Location |
+| `location_final_id` | points at one | Location |
+| `location_id` | points at one | Location |
+| `lot_ids` | links to many | Lot |
+| `move_dest_ids` | links to many | Stock Move |
+| `move_line_ids` | owns many | Stock Move Line |
+| `move_orig_ids` | links to many | Stock Move |
+| `never_product_template_attribute_value_ids` | links to many | Product Attribute Value |
+| `orderpoint_id` | points at one | Reordering Rule |
+| `origin_returned_move_id` | points at one | Stock Move |
+| `package_ids` | owns many | Package |
+| `packaging_uom_id` | points at one | Unit of Measure |
+| `partner_id` | points at one | Contact |
+| `picking_id` | points at one | Transfer |
+| `picking_type_id` | points at one | Operation Type |
+| `product_category_id` | points at one | Product Category |
+| `product_id` | points at one | Product |
+| `product_tmpl_id` | points at one | Product Template |
+| `product_uom` | points at one | Unit of Measure |
+| `reference_ids` | links to many | Document Reference |
+| `restrict_partner_id` | points at one | Contact |
+| `returned_move_ids` | owns many | Stock Move |
+| `route_ids` | links to many | Route |
+| `rule_id` | points at one | Stock Rule |
+| `scrap_id` | points at one | Scrap |
+| `warehouse_id` | points at one | Warehouse |
+
+### Stock Move Line
+
+| Field | Relation | Target |
+|---|---|---|
+| `allowed_uom_ids` | links to many | Unit of Measure |
+| `company_id` | points at one | Company |
+| `consume_line_ids` | links to many | Stock Move Line |
+| `location_dest_id` | points at one | Location |
+| `location_id` | points at one | Location |
+| `lot_id` | points at one | Lot |
+| `move_id` | points at one | Stock Move |
+| `owner_id` | points at one | Contact |
+| `package_history_id` | points at one | Package History |
+| `package_id` | points at one | Package |
+| `picking_id` | points at one | Transfer |
+| `picking_type_id` | points at one | Operation Type |
+| `produce_line_ids` | links to many | Stock Move Line |
+| `product_id` | points at one | Product |
+| `product_uom_id` | points at one | Unit of Measure |
+| `quant_id` | points at one | Stock Quantity |
+| `result_package_id` | points at one | Package |
+
+### Stock Quantity
+
+| Field | Relation | Target |
+|---|---|---|
+| `location_id` | points at one | Location |
+| `lot_id` | points at one | Lot |
+| `owner_id` | points at one | Contact |
+| `package_id` | points at one | Package |
+| `product_id` | points at one | Product |
+| `product_tmpl_id` | points at one | Product Template |
+| `product_uom_id` | points at one | Unit of Measure |
+| `user_id` | points at one | User |
+| `warehouse_id` | points at one | Warehouse |
+
+### Stock Rule
+
+| Field | Relation | Target |
+|---|---|---|
+| `company_id` | points at one | Company |
+| `location_dest_id` | points at one | Location |
+| `location_src_id` | points at one | Location |
+| `partner_address_id` | points at one | Contact |
+| `picking_type_id` | points at one | Operation Type |
+| `route_id` | points at one | Route |
+| `warehouse_id` | points at one | Warehouse |
+
+### Storage Category
+
+| Field | Relation | Target |
+|---|---|---|
+| `capacity_ids` | owns many | Storage Category Capacity |
+| `company_id` | points at one | Company |
+| `location_ids` | owns many | Location |
+| `package_capacity_ids` | owns many | Storage Category Capacity |
+| `product_capacity_ids` | owns many | Storage Category Capacity |
+
+### Storage Category Capacity
+
+| Field | Relation | Target |
+|---|---|---|
+| `company_id` | points at one | Company |
+| `package_type_id` | points at one | Package Type |
+| `product_id` | points at one | Product |
+| `storage_category_id` | points at one | Storage Category |
+
+### Transfer
+
+| Field | Relation | Target |
+|---|---|---|
+| `backorder_id` | points at one | Transfer |
+| `backorder_ids` | owns many | Transfer |
+| `batch_id` | points at one | Batch Transfer |
+| `company_id` | points at one | Company |
+| `location_dest_id` | points at one | Location |
+| `location_id` | points at one | Location |
+| `lot_id` | points at one | Lot |
+| `move_ids` | owns many | Stock Move |
+| `move_line_ids` | owns many | Stock Move Line |
+| `owner_id` | points at one | Contact |
+| `package_history_ids` | links to many | Package History |
+| `partner_country_id` | points at one | Country |
+| `partner_id` | points at one | Contact |
+| `picking_type_id` | points at one | Operation Type |
+| `product_id` | points at one | Product |
+| `reference_ids` | links to many | Document Reference |
+| `return_id` | points at one | Transfer |
+| `return_ids` | owns many | Transfer |
+| `user_id` | points at one | User |
+| `warehouse_address_id` | points at one | Contact |
+
+### Warehouse
+
+| Field | Relation | Target |
+|---|---|---|
+| `company_id` | points at one | Company |
+| `delivery_route_id` | points at one | Route |
+| `in_type_id` | points at one | Operation Type |
+| `int_type_id` | points at one | Operation Type |
+| `lot_stock_id` | points at one | Location |
+| `mto_pull_id` | points at one | Stock Rule |
+| `out_type_id` | points at one | Operation Type |
+| `pack_type_id` | points at one | Operation Type |
+| `partner_id` | points at one | Contact |
+| `pick_type_id` | points at one | Operation Type |
+| `qc_type_id` | points at one | Operation Type |
+| `reception_route_id` | points at one | Route |
+| `resupply_route_ids` | owns many | Route |
+| `resupply_wh_ids` | links to many | Warehouse |
+| `route_ids` | links to many | Route |
+| `store_type_id` | points at one | Operation Type |
+| `view_location_id` | points at one | Location |
+| `wh_input_stock_loc_id` | points at one | Location |
+| `wh_output_stock_loc_id` | points at one | Location |
+| `wh_pack_stock_loc_id` | points at one | Location |
+| `wh_qc_stock_loc_id` | points at one | Location |
+| `xdock_type_id` | points at one | Operation Type |
