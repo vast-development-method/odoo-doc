@@ -586,3 +586,489 @@ Duplicating an entry:
 Journal Entries have no archived state. The equivalents are the cancelled state and the reversal.
 
 ---
+
+## 9. Journal Item
+
+Journal Item (`account.move.line`, table `account_move_line`).
+
+### Purpose
+
+One posting line of a Journal Entry: an account, an amount on the debit or the credit side expressed in the company currency, and optionally the same amount expressed in a foreign currency. A Journal Item is the atom of the ledger: every report, every reconciliation and every balance is an aggregation of Journal Items.
+
+Some items are not postings at all: items whose display type is a section, a subsection or a note carry no account and no amount and exist only to structure the printed document.
+
+### Lifecycle
+
+A Journal Item exists only inside a Journal Entry and is deleted with it. While the entry is draft the item can be freely created, modified and deleted. Once the entry is posted:
+
+- Deleting an item with a non-zero amount is refused.
+- Changing the taxes is refused.
+- Changing any amount, account, currency, partner or date is checked against the lock dates and breaks any reconciliation the item takes part in.
+- Any change is written into the audit trail of the entry.
+
+### Parent and context fields
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `move_id` | Link to Journal Entry | Required, read-only, indexed. Deleted with the entry. |
+| `journal_id` | Link to Journal, related to the entry, stored, indexed | Not copied. Denormalised for reporting. |
+| `company_id` | Link to Company, related, stored, read-only, indexed | Denormalised. |
+| `company_currency_id` | Link to Currency, related, stored | The currency in which the debit, credit and balance are expressed. |
+| `move_name` | Text, related to the entry number, stored, indexed | Denormalised. |
+| `parent_state` | Selection, related to the entry state, stored | Lets reports and searches filter posted items without joining. |
+| `date` | Date, related to the entry date, stored, not copied | Aggregated with a minimum when grouped. |
+| `invoice_date` | Date, related, stored, not copied | Aggregated with a minimum. |
+| `ref` | Text, related to the entry reference, stored, not copied, word-indexed | |
+| `move_type` | Selection, related | |
+| `sequence` | Integer | The display order inside the entry. Computed from the display type, stored, editable, precomputed: 10 000 for a tax line, 11 000 for a rounding line, 12 000 for a payment-term line, 100 for everything else. |
+| `journal_group_id` | Link to Journal Group, not stored | Search-only, same rule as on the entry. |
+
+### Accounting fields
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `account_id` | Link to Account | Required for every item that is not a section, subsection or note (enforced by a database check). Computed, stored, editable, precomputed, with an inverse. Tracked. Deleting the account is refused while items exist. Off-balance accounts are excluded from the selection list. |
+| `account_name`, `account_code` | Text, related | Denormalised for report configuration. |
+| `name` | Text | The item label. Computed from the product and the entry reference, stored, editable, precomputed. Tracked. |
+| `debit` | Money in company currency | Computed from the balance, stored, precomputed, with an inverse. Equal to the balance when it is positive, zero otherwise (reversed under storno accounting). |
+| `credit` | Money in company currency | Computed from the balance, stored, precomputed, with an inverse. Equal to minus the balance when it is negative, zero otherwise (reversed under storno accounting). |
+| `balance` | Money in company currency | Computed, stored, editable, precomputed. Tracked. The signed amount: debit minus credit. This is the field actually written; debit and credit are derived from it. |
+| `amount_currency` | Money in the item currency | Computed from the balance and the rate, stored, editable, precomputed, with an inverse. The same economic amount expressed in the item currency. |
+| `currency_id` | Link to Currency | Required. Computed, stored, editable, precomputed. The company currency for a cost-of-goods-sold line; the document currency for an invoice-like document; otherwise the previous value or the company currency. |
+| `currency_rate` | Number, computed, not stored | The rate from the company currency to the item currency at the relevant date. |
+| `is_same_currency` | Boolean, computed, not stored | True when the item currency equals the company currency. |
+| `cumulated_balance` | Money, computed, not stored | The running total of the balance over the current list ordering and filter. Only computed when the list view requests it. |
+| `partner_id` | Link to Partner | Computed from the entry partner (its commercial entity), stored, editable, precomputed, with an inverse. Deleting the partner is refused while items exist. |
+| `date_maturity` | Date | The due date of a receivable or payable item. Indexed, tracked. |
+| `is_storno` | Boolean | Computed, stored, editable, precomputed. Marks an item booked as a negative amount on its natural side. |
+| `display_type` | Selection | Required. Computed, stored, editable, precomputed. See the table below. |
+| `quantity` | Number | The optional quantity of the line. Computed, stored, editable, precomputed: one for a product line, nothing otherwise. |
+| `product_id`, `product_uom_id`, `price_unit`, `discount`, `price_subtotal`, `price_total`, `deductible_amount` | various | Commercial fields of an invoice line; specified in `../accounts-receivable/` and `../accounts-payable/`. |
+| `is_imported` | Boolean | The line was captured automatically (import, decoding of a received document) rather than typed. Relaxes the archived-account check. |
+
+### Display types
+
+| Value | Label | Accountable | Meaning |
+|---|---|---|---|
+| `product` | Product | yes | An ordinary line: goods, services or a free posting |
+| `cogs` | Cost of Goods Sold | yes | A cost line added by inventory valuation |
+| `tax` | Tax | yes | A line produced by the tax engine |
+| `discount` | Discount | yes | A line carrying a separately booked discount |
+| `rounding` | Rounding | yes | A cash-rounding line |
+| `payment_term` | Payment Term | yes | A receivable or payable instalment line |
+| `epd` | Early Payment Discount | yes | A line produced by an early-payment discount |
+| `non_deductible_product_total`, `non_deductible_product`, `non_deductible_tax` | Non Deductible … | yes | Lines isolating the private share of a mixed expense |
+| `line_section` | Section | no | A heading in the printed document |
+| `line_subsection` | Subsection | no | A second-level heading |
+| `line_note` | Note | no | A free text row |
+
+The three non-accountable types are the only ones for which the account, the debit, the credit and the foreign amount must all be empty or zero; a database check enforces this in both directions.
+
+### Tax fields
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `tax_ids` | Multiple links to Tax | The taxes that apply **to** this line (a base line). Computed, stored, editable, precomputed. Tracked. |
+| `tax_line_id` | Link to Tax, related through the distribution line, stored | Set on a tax line; identifies the tax that produced it. |
+| `tax_repartition_line_id` | Link to Tax Distribution Line | Read-only. The distribution line that produced this tax line. |
+| `tax_group_id` | Link to Tax Group, related, stored | The group of the originating tax. |
+| `group_tax_id` | Link to Tax, indexed when set | The group of taxes this line originates from, when the tax was a group. |
+| `tax_base_amount` | Money in company currency, read-only | The base on which this tax line was computed. |
+| `tax_tag_ids` | Multiple links to Account Tag | The tax grids this item feeds. Tracked. A tag cannot be deleted while items reference it. |
+| `extra_tax_data` | Structured data | Internal data of the tax engine for this line. |
+
+### Reconciliation fields
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `amount_residual` | Money in company currency, computed, stored | What is left to match, in the company currency. |
+| `amount_residual_currency` | Money in the item currency, computed, stored | What is left to match, in the item currency. |
+| `reconciled` | Boolean, computed, stored | True when both residuals are zero at their respective precisions. |
+| `full_reconcile_id` | Link to Full Reconciliation | Read-only, not copied, indexed when set. Set when the matched group nets to zero. |
+| `matched_debit_ids` | Sub-records: Partial Reconciliation | The partial matches in which this item is the **credit** side (the counterpart items are debits). |
+| `matched_credit_ids` | Sub-records: Partial Reconciliation | The partial matches in which this item is the **debit** side. |
+| `matching_number` | Text, indexed, not copied | The label of the matched group: the identifier of the full reconciliation when the group is closed, the letter `P` followed by a number while the group is only partially matched, or the letter `I` followed by anything for a number imported from another system and not yet turned into real matches. |
+| `is_account_reconcile` | Boolean, related to the account | Whether the account allows matching. |
+| `reconciled_lines_ids` | Multiple links to Journal Item, computed with an inverse | Every item matched with this one. Writing it triggers a reconciliation of the whole set. |
+| `reconciled_lines_excluding_exchange_diff_ids` | Multiple links to Journal Item, computed | The same set without the exchange-difference items. |
+| `exchange_move_ids` | Multiple links to Journal Entry, computed | The exchange-difference entries produced by the matches of this item. |
+
+The residual is zero for an item on an account that neither allows matching nor is a bank-and-cash or credit-card account.
+
+### Analytic fields
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `analytic_distribution` | Structured data, with an inverse | A map from analytic account (or a combination of analytic accounts) to a percentage. Writing it deletes and recreates the analytic lines of a posted item. |
+| `analytic_line_ids` | Sub-records: Analytic Line | The analytic postings derived from this item. |
+| `has_invalid_analytics` | Boolean, computed, not stored | True when the distribution breaks a mandatory analytic applicability rule. |
+
+The content of the distribution and the rules that validate it belong to `../analytic-accounting/`.
+
+### Early-payment fields
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| `discount_date` | Date, read-only, stored | Last day on which the discounted amount may be paid |
+| `discount_amount_currency` | Money in the item currency, stored | The discounted amount to pay |
+| `discount_balance` | Money in company currency, stored | The discounted balance |
+| `payment_date` | Date, computed, not stored | The nearer of the discount date and the due date; searchable |
+
+### Database checks
+
+| Name | Condition | Message |
+|---|---|---|
+| Credit or debit | For every accountable item, the product of debit and credit must be zero | "Wrong credit or debit value in accounting entry!" |
+| Sign coherence | For every accountable item, the balance and the foreign amount must have the same sign (both may be zero) | "The amount expressed in the secondary currency must be positive when account is debited and negative when account is credited. If the currency is the same as the one from the company, this amount must strictly be equal to the balance." |
+| Account required | Every accountable item must have an account | "Missing required account on accountable line." |
+| Non-accountable emptiness | A section, subsection or note must have a zero foreign amount, a zero debit, a zero credit and no account | "Forbidden balance or account on non-accountable line" |
+
+### Ordering
+
+Descending date, then descending entry number, then ascending identifier.
+
+### Display name
+
+The item label, prefixed by the entry number and the entry reference when they exist, in the form "*number* *reference* *label*" with the parts that exist joined by spaces.
+
+### Indexes
+
+On (partner, reference); on (descending date, descending entry number, identifier); on (account, partner) restricted to unreconciled items; on the journal restricted to items with a negative residual; on (account, date). The account column is deliberately **not** indexed on its own because it is covered by the pair with the date.
+
+---
+
+## 10. Partial Reconciliation
+
+Partial Reconciliation (`account.partial.reconcile`, table `account_partial_reconcile`).
+
+### Purpose
+
+One matched amount between exactly one debit item and exactly one credit item. Reconciling an invoice with a payment creates one Partial Reconciliation; reconciling an invoice with three payments creates three. The Partial Reconciliation carries **three** amounts, because the debit item and the credit item may be expressed in different currencies: the amount in the company currency, the amount in the currency of the debit item, and the amount in the currency of the credit item. All three are always positive.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `debit_move_id` | Link to Journal Item | Required, indexed. The item whose balance is positive. |
+| `credit_move_id` | Link to Journal Item | Required, indexed. The item whose balance is negative. |
+| `full_reconcile_id` | Link to Full Reconciliation | Not copied, indexed when set. Filled when the group closes. |
+| `exchange_move_id` | Link to Journal Entry | Indexed when set. The exchange-difference entry this match produced, if any. |
+| `draft_caba_move_vals` | Structured data | The values that produced the draft cash-basis entry, kept so that posting can detect that the source document changed in the meantime. |
+| `company_currency_id` | Link to Currency, related to the company | |
+| `debit_currency_id` | Link to Currency, related to the debit item, stored, precomputed | Required in effect: a validation refuses a match whose two currencies are not both known. |
+| `credit_currency_id` | Link to Currency, related to the credit item, stored, precomputed | Same. |
+| `amount` | Money in company currency | Always positive. The matched amount in the company currency. |
+| `debit_amount_currency` | Money in the debit currency | Always positive. The matched amount seen from the debit item. |
+| `credit_amount_currency` | Money in the credit currency | Always positive. The matched amount seen from the credit item. |
+| `company_id` | Link to Company | Computed, stored, editable, precomputed: the company of the debit item when its entry is an invoice-like document, otherwise the company of the credit item. This decides where exchange-difference and cash-basis entries are created. |
+| `max_date` | Date, computed, stored, precomputed | The later of the two item dates. Used to place the match on the aged balance reports. |
+
+### Validation
+
+A match whose debit currency or credit currency is unknown is refused with the message "Missing foreign currencies on partials having ids: *the identifiers*".
+
+### Creation side effects
+
+1. Any payment that was "in process" and whose amount now matches the amount of the match becomes "paid".
+2. The matching numbers of both items and of every item transitively matched with them are recomputed.
+
+### Deletion side effects
+
+1. Any payment that was "paid" and whose amount matched becomes "in process" again.
+2. The cash-basis entries created from this match and the exchange-difference entry of this match are collected.
+3. The full reconciliation, if any, is deleted.
+4. Collected entries that are not draft are reversed with a cancelling reversal dated at the date of the original, pushed to the day after the latest violated lock date when the original date is locked, and referenced "Reversal of: *the entry number*". Collected draft entries are simply deleted.
+5. The matching numbers of the surviving items are recomputed.
+
+---
+
+## 11. Full Reconciliation
+
+Full Reconciliation (`account.full.reconcile`, table `account_full_reconcile`).
+
+### Purpose
+
+The marker that a set of matched items nets exactly to zero. It carries no amount: its only role is to give the group a stable identifier that becomes the matching number printed on every item of the group.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `partial_reconcile_ids` | Sub-records: Partial Reconciliation | Every match that belongs to this closed group. |
+| `reconciled_line_ids` | Sub-records: Journal Item | Every item of the closed group. |
+
+### Creation
+
+Creating a Full Reconciliation writes its identifier into the `full_reconcile_id` of every listed item and of every listed match in one operation, then recomputes the matching numbers of those items. The matching number of an item inside a closed group is the decimal identifier of the Full Reconciliation.
+
+### Deletion
+
+Deleting a Full Reconciliation clears the link on the items and recomputes their matching numbers: an item that still takes part in surviving matches falls back to the partial form (`P` followed by a number) and an item with no surviving match loses its matching number entirely.
+
+---
+
+## 12. Lock Exception
+
+Lock Exception (`account.lock_exception`, table `account_lock_exception`).
+
+### Purpose
+
+A time-limited and optionally user-limited relaxation of **one** soft lock date, for **one** company. It lets a named user (or everybody) record entries in a period that is otherwise closed, while leaving an auditable trace of exactly who could do what and for how long.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `active` | Boolean | Default true. Set to false when the exception is revoked. |
+| `state` | Selection, computed, not stored | `revoked` when inactive; `expired` when active with an end moment in the past; `active` otherwise. Searchable. |
+| `company_id` | Link to Company | Required, read-only, default the active company. |
+| `user_id` | Link to User | Default the acting user. When empty the exception applies to **everyone**. |
+| `reason` | Text | Free explanation shown in the audit trail. |
+| `end_datetime` | Date and time | When empty the exception never expires. |
+| `lock_date_field` | Selection | Required. Which lock date is relaxed: `fiscalyear_lock_date` (Global Lock Date), `tax_lock_date` (Tax Return Lock Date), `sale_lock_date` (Sales Lock Date), `purchase_lock_date` (Purchase Lock Date). The hard lock date can never be relaxed. |
+| `lock_date` | Date | The value the lock date takes for the beneficiary. An empty value means "no lock date at all". |
+| `company_lock_date` | Date, not copied | The value the company lock date had when the exception was created; used to bound the audit query. |
+| `fiscalyear_lock_date`, `tax_lock_date`, `sale_lock_date`, `purchase_lock_date` | Dates, computed, not stored | Convenience views: the field named by `lock_date_field` returns `lock_date`; the three others return the maximal representable date, meaning "unchanged". |
+
+### Creation
+
+A creation may be expressed either with the pair (`lock_date_field`, `lock_date`) or by assigning one of the four convenience fields; exactly one convenience field must be given, otherwise the creation fails with "A single exception must change exactly one lock date field."
+
+At creation the exception records the current company lock date and posts a message on the company audit trail of the form:
+
+> *link labelled "Exception"* for *the user display name, or the word "everyone"* valid until *the end moment* for '*the reason*'.
+
+with a tracked value showing the lock date moving from the company value to the exception value. The parts "valid until …" and "for '…'" are omitted when there is no end moment and no reason.
+
+### Duplication
+
+Duplicating an exception is refused: "You cannot duplicate a Lock Date Exception."
+
+### Revocation
+
+Revoking sets the record inactive and stamps the end moment with the current time. Revocation requires the accounting-adviser group; otherwise it fails with "You cannot revoke Lock Date Exceptions. Ask someone with the 'Adviser' role."
+
+### Re-creation when the company lock date moves
+
+When a company lock date is written, every active exception for that field that relaxed the **previous** value is copied (so that the copy records the new company value) and the original is revoked. The beneficiary therefore keeps the same relaxation but the trace shows against which company value it was granted.
+
+### Index
+
+An index exists on (company, user, end moment) restricted to active exceptions, because the lookup of the applicable exception happens on every lock check.
+
+---
+
+## 13. Automatic Sequence (abstract behavior)
+
+`sequence.mixin` is not a table: it is a shared behavior that any numbered document adopts. In this domain the Journal Entry adopts it. The behavior declares which field holds the number (here `name`), which field holds the date that governs the period (here `date`), and which field groups the numbering chains (here `journal_id`).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `sequence_prefix` | Text, computed, stored | Everything in the number before the trailing digit block. |
+| `sequence_number` | Integer, computed, stored | The trailing digit block as an integer, zero when absent. |
+
+The full numbering grammar, the five reset periodicities, the derivation of the format from the previous number, the locking discipline that guarantees uniqueness under concurrency, and the chain-end test are specified in `calculations.md`.
+
+Two database indexes are created for the adopting table: one on (grouping field, descending prefix, descending number, number field) and one on (grouping field, descending identifier, prefix). A unique index on the number field is expected; without one, concurrent numbering can produce duplicates.
+
+---
+
+## 14. Company — ledger fields
+
+Only the fields that belong to the general ledger are listed. Tax settings are in `../taxes/`, currency settings in `../multi-currency/`, invoice-presentation settings in `../accounts-receivable/`.
+
+### Fiscal year
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `fiscalyear_last_day` | Integer | Required, default 31. The day of the month on which the fiscal year ends. Delegated to the root company. |
+| `fiscalyear_last_month` | Selection of the twelve months | Required, default December. Delegated to the root company. |
+
+Validation: unless the chosen pair is the twenty-ninth of February (which is accepted because the year is unknown), the day must be between one and the number of days of that month in the year of the opening entry, or in the current year when there is no opening entry. Message: "Invalid fiscal year last day".
+
+### Lock dates
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `fiscalyear_lock_date` | Date | "Global Lock Date". Tracked. Any entry dated on or before it is refused and, at posting, postponed. |
+| `tax_lock_date` | Date | "Tax Return Lock Date". Tracked. Applies only to entries that affect the tax report. Set automatically when a tax closing entry is posted. |
+| `sale_lock_date` | Date | "Sales Lock Date". Tracked. Applies only to entries in a sale journal. |
+| `purchase_lock_date` | Date | "Purchase Lock date". Tracked. Applies only to entries in a purchase journal. |
+| `hard_lock_date` | Date | "Hard Lock Date". Tracked. Irreversible: it can never be removed and never be moved backwards, and no exception can relax it. |
+| `user_fiscalyear_lock_date`, `user_tax_lock_date`, `user_sale_lock_date`, `user_purchase_lock_date` | Dates, computed, not stored | The effective value of each soft lock date **for the acting user**, after applying the applicable exception and after taking the maximum over the company and all its ancestors. |
+| `user_hard_lock_date` | Date, computed, not stored | The maximum hard lock date over the company and all its ancestors. |
+
+### Default accounts and journals
+
+| Field (storage name) | Meaning |
+|---|---|
+| `transfer_account_id` | Intermediary account used when money moves from one liquidity account to another; restricted to reconcilable current-asset accounts |
+| `account_journal_suspense_account_id` | The default suspense account proposed on new liquidity journals |
+| `default_cash_difference_income_account_id`, `default_cash_difference_expense_account_id` | The default profit and loss accounts proposed on new liquidity journals |
+| `currency_exchange_journal_id` | The miscellaneous journal in which exchange-difference entries are booked |
+| `income_currency_exchange_account_id` | The income account credited by an exchange gain; restricted to the income group |
+| `expense_currency_exchange_account_id` | The expense account debited by an exchange loss; restricted to expense and other-expense types |
+| `account_journal_early_pay_discount_gain_account_id`, `account_journal_early_pay_discount_loss_account_id` | The write-off accounts of an early-payment discount |
+| `expense_accrual_account_id`, `revenue_accrual_account_id` | The accounts used by the automatic transfer wizard when it moves an amount to another period; restricted respectively to liability accounts that are not payable or receivable, and to asset accounts that are not payable or receivable |
+| `automatic_entry_default_journal_id` | The miscellaneous journal used by default by the automatic transfer wizard |
+| `income_account_id`, `expense_account_id` | The default income and expense accounts of the company, also written as the default income and expense accounts of product categories |
+| `price_difference_account_id` | The account that absorbs the difference between a standard cost and a billed price |
+| `account_discount_income_allocation_id`, `account_discount_expense_allocation_id` | The accounts used when a discount is booked separately |
+| `account_default_pos_receivable_account_id` | The receivable account used by point-of-sale sessions |
+
+### Chart and prefixes
+
+| Field (storage name) | Meaning |
+|---|---|
+| `expects_chart_of_accounts` | Default true. Whether this company needs a chart of accounts at all |
+| `chart_template` | The identifier of the loaded chart template; the list of choices depends on the company country |
+| `bank_account_code_prefix`, `cash_account_code_prefix`, `transfer_account_code_prefix` | The code prefixes used when a liquidity or transfer account has to be created |
+
+Changing a bank or cash prefix renumbers the existing bank-and-cash and credit-card accounts of the company that start with the old prefix: the new code is the new prefix followed by the old code with the old prefix removed, leading zeros stripped and the remainder right-aligned with zeros to the original width.
+
+### Opening entry
+
+| Field (storage name) | Meaning |
+|---|---|
+| `account_opening_move_id` | The Journal Entry holding the initial balances of every account |
+| `account_opening_journal_id` | Related: the journal of that entry, writable |
+| `account_opening_date` | The date of the opening; the entry is dated the day before it |
+
+### Other ledger switches
+
+| Field (storage name) | Meaning |
+|---|---|
+| `account_storno` | Storno accounting. Computed from the fiscal country, stored, editable: true by default in the countries that require it. Delegated to the root company |
+| `restrictive_audit_trail` | When true, the log messages of journal entries may not be deleted and a posted entry may never be deleted |
+| `force_restrictive_audit_trail` | Computed, always false in the core; a country package sets it to true and the restrictive audit trail then cannot be switched off |
+| `anglo_saxon_accounting` | Whether the cost of goods sold is recognised at invoicing rather than at delivery |
+| `autopost_bills` | Default true. Whether vendor bills from trusted partners are posted automatically |
+| `batch_payment_sequence_id` | Read-only, not copied. The numbering sequence used for group payment communications |
+
+The list of countries in which storno accounting is mandatory is: Bosnia and Herzegovina, China, Czechia, Croatia, Poland, Romania, Serbia, Russia, Slovenia, Slovakia, Ukraine. The countries in which it is offered but not mandatory are Austria, Switzerland, Germany and Italy.
+
+### Write-time behavior
+
+- Writing any lock date runs the lock validation described in `business-rules.md`.
+- Writing the currency is refused when any journal item exists in the company or in a descendant: "You cannot change the currency of the company since some journal items already exist".
+- Writing a soft lock date revokes and re-creates every active exception that relaxed the previous value.
+- Creating a company loads the chart template of its first ancestor, if any, and creates its group-payment numbering sequence.
+
+---
+
+## 15. Partner — ledger fields
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `property_account_receivable_id` | Link to Account, per company | The receivable account used for this counterpart. |
+| `property_account_payable_id` | Link to Account, per company | The payable account used for this counterpart. |
+| `credit` | Money, computed, not stored, searchable | The total residual of the unreconciled posted items of this partner on **receivable** accounts, for the active company hierarchy. |
+| `debit` | Money, computed, not stored, searchable | Minus the total residual of the unreconciled posted items of this partner on **payable** accounts, for the active company hierarchy. |
+| `total_invoiced` | Money, computed, not stored | The sum of the untaxed subtotals of the customer invoices and credit notes of this partner and its children, excluding draft and cancelled documents. |
+| `days_sales_outstanding` | Number, computed, not stored | See `calculations.md`. |
+| `account_move_count` | Integer, computed | How many entries mention this partner; visible only to accounting users. |
+| `trust` | Selection, per company | `good` (Good Debtor), `normal` (Normal Debtor), `bad` (Bad Debtor). |
+
+The computation of the credit and debit totals is deliberately company-hierarchy-wide: it uses every posted, unreconciled item on a receivable or payable account whose company is the root of the active company or a descendant of it.
+
+---
+
+## 16. Wizard entities
+
+These are transient records: they exist only for the duration of one user interaction and are purged by housekeeping.
+
+### 16.1 Reversal wizard
+
+`account.move.reversal`.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `move_ids` | Multiple links to Journal Entry | The entries to reverse. Only posted entries are offered. Filled from the selection. |
+| `new_move_ids` | Multiple links to Journal Entry | The entries produced. |
+| `date` | Date | Default today. The date of the reversal. |
+| `reason` | Text | Free text appended to the reference of the reversal. |
+| `journal_id` | Link to Journal | Required. Computed from the selection (the first active journal of the selected entries), stored, editable. Must be of the same type as the journal of the entries. |
+| `company_id` | Link to Company | Required, read-only. |
+| `available_journal_ids` | Multiple links to Journal, computed | The journals of the company whose type matches one of the selected entries. |
+| `residual`, `currency_id`, `move_type` | computed | Shown only when exactly one entry is selected, to size the credit note. |
+
+Opening the wizard fails when the selection spans several companies ("All selected moves for reversal must belong to the same company.") or contains an entry that is not posted ("To reverse a journal entry, it has to be posted first."). Choosing a journal of a different type fails with "Journal should be the same type as the reversed entry."
+
+### 16.2 Automatic transfer wizard
+
+`account.automatic.entry.wizard`.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `action` | Selection | Required. `change_period` (Change Period) or `change_account` (Change Account). |
+| `move_line_ids` | Multiple links to Journal Item | The items to act on, taken from the selection. |
+| `date` | Date | Required, default today. The date of the new entry. |
+| `journal_id` | Link to Journal | Required, restricted to miscellaneous journals. Computed from the company default, with an inverse that stores the choice back on the company. |
+| `company_id` | Link to Company | Required, read-only; the root company of the selected items. |
+| `company_currency_id` | Link to Currency, related | |
+| `percentage` | Number | The share of each item to move. Computed from the total amount, stored, editable. Must be greater than zero and at most one hundred when the action is "Change Period". |
+| `total_amount` | Money in company currency | Computed from the percentage, stored, editable. The two fields are inverse views of each other. |
+| `account_type` | Selection, computed, stored | `income` (Revenue) when the sum of the selected balances is negative, `expense` (Expense) otherwise. Decides which accrual account is used. |
+| `expense_accrual_account`, `revenue_accrual_account` | Links to Account | Computed from the company, editable, with inverses that store the choice back on the company. Receivable, payable and off-balance accounts are excluded. |
+| `destination_account_id` | Link to Account | The target account of a "Change Account" transfer. |
+| `lock_date_message` | Text, computed | The lock-date warning of the first selected item, if any. |
+| `display_currency_helper` | Boolean, computed | True when the destination account restricts the currency, so that a conversion warning is shown. |
+| `move_data`, `preview_move_data` | Structured text, computed | The entries that will be created, and a trimmed version of them for the preview panel (at most four entries, four or five columns). |
+
+Opening the wizard fails when the selection is not journal items ("This can only be used on journal items"), when any selected item belongs to an entry that is not posted ("Oops! You can only change the period or account for posted entries! Other ones aren't up for an adventure like that!"), when any selected item is reconciled ("Oops! You can only change the period or account for items that are not yet reconciled! Other ones aren't up for an adventure like that!"), when the items span several company hierarchies ("You cannot use this wizard on journal entries belonging to different companies.") or when no action is possible ("No possible action found with the selected lines."). Choosing a date inside a locked period fails with "The date selected is protected by: *the list of lock dates*."
+
+### 16.3 Resequence wizard
+
+`account.resequence.wizard`.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `move_ids` | Multiple links to Journal Entry | The entries to renumber, taken from the selection. |
+| `first_name` | Text | Required. Computed as the smallest existing number of the selection, editable. The first number of the new series; its shape also decides the reset periodicity. |
+| `sequence_number_reset` | Text, computed | The periodicity deduced from the first number. |
+| `ordering` | Selection | Required, default `keep`. `keep` (Keep current order) assigns the new numbers in the order of the current prefix and number; `date` (Reorder by accounting date) assigns them in the order of the accounting date, then the current number, then the identifier. |
+| `first_date`, `end_date` | Dates | Informative bounds of the operation. |
+| `new_values` | Structured text, computed | The proposed new number of every selected entry, under both orderings. |
+| `preview_moves` | Structured text, computed | A condensed version for the preview: the first three rows, the last row, every row whose two orderings disagree, and every row that opens a new period; the skipped rows are collapsed into a row labelled "… (*count* other)". |
+
+Opening the wizard fails when the selection spans several journals ("You can only resequence items from the same journal"), when the journal has a dedicated credit-note numbering and the selection mixes credit notes with other documents ("The sequences of this journal are different for Invoices and Refunds but you selected some of both types.") or when the journal has a dedicated payment numbering and the selection mixes payments with other documents ("The sequences of this journal are different for Payments and non-Payments but you selected some of both types.").
+
+### 16.4 Validate entries wizard
+
+`validate.account.move`.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `move_ids` | Multiple links to Journal Entry | The draft entries to post. Filled from a selection of entries or from a journal. |
+| `force_post` | Boolean | "Force". Post entries dated in the future immediately instead of scheduling them. |
+| `display_force_post` | Boolean, computed | True when at least one selected entry is dated in the future. |
+| `force_hash` | Boolean | "Force Hash". Post entries of hash-secured journals too. |
+| `display_force_hash` | Boolean, computed | True when at least one selected entry belongs to a hash-secured journal. |
+| `is_entries` | Boolean, computed | True when at least one selected document is a plain entry. |
+| `abnormal_date_partner_ids`, `abnormal_amount_partner_ids` | Sub-records: Partner, computed | The partners of the selected documents that carry an abnormal-date or abnormal-amount warning. |
+| `ignore_abnormal_date`, `ignore_abnormal_amount` | Booleans | When ticked, the corresponding warning is switched off permanently for those partners. |
+
+Opening the wizard with no draft entry fails with "There are no journal items in the draft state to post."
+
+### 16.5 Secure entries wizard
+
+`account.secure.entries.wizard`.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `company_id` | Link to Company | Required, read-only, default the active company. |
+| `hash_date` | Date | Required. "Hash All Entries". Computed from the maximum hashable date, stored, editable. Every eligible entry dated on or before it is hashed. |
+| `max_hash_date` | Date, computed | The highest date such that every posted entry up to and including it is already secured. Computed as the day before the earliest date among the entries that still need hashing and the entries that cannot be hashed; empty when nothing remains. |
+| `move_to_hash_ids` | Multiple links to Journal Entry, computed | Exactly the entries that will be hashed. |
+| `chains_to_hash_with_gaps` | Structured data, computed | The first and last entry of every chain whose hashing would leave a numbering gap. |
+| `not_hashable_unlocked_move_ids` | Multiple links to Journal Entry, computed | Entries before the date that cannot be hashed and are not protected by the hard lock date. |
+| `unreconciled_bank_statement_line_ids` | Multiple links to Statement Line, computed | Unreconciled bank transactions before the date; their whole numbering chain is excluded from the operation. |
+| `warnings` | Structured data, computed | The warnings to display, each with a message, a severity, a button label and an action. |
+
+The warning messages are:
+
+| Key | Message |
+|---|---|
+| unreconciled transactions | "There are still unreconciled bank statement lines before the selected date. The entries from journal prefixes containing them will not be secured: *the list of prefixes*" (severity: danger) |
+| draft entries | "There are still draft entries before the selected date." |
+| not hashable | "There are entries that cannot be hashed. They can be protected by the Hard Lock Date." |
+| gap | "Securing these entries will create at least one gap in the sequence." |
+| beyond the date | "Securing these entries will also secure entries after the selected date." |
+
+Running the wizard without a date fails with "Set a date. The moves will be secured up to including this date."
+
+---

@@ -639,45 +639,67 @@ views described in [interfaces.md](interfaces.md).
 
 ### 8.3 Column table
 
+Every column is read-only.
+
 | Column (storage name) | Type | Meaning and rules |
 |---|---|---|
-| Order Reference (`name`) | Text | The line description. |
-| Order Date (`date`) | Date and time | The order date. |
-| Order Status (`state`) | Selection | Mirrors the order status, with the same four values. |
-| Invoice Status (`invoice_status`) | Selection | Mirrors the line invoice status. |
-| Product Variant (`product_id`) | Link to Product Variant | |
-| Product Template (`product_tmpl_id`) | Link to Product Template | |
-| Product Category (`categ_id`) | Link to Product Category | |
-| Unit (`product_uom`) | Link to Unit of Measure | The line's unit. |
-| Qty Ordered (`product_uom_qty`) | Decimal, precision `Product Unit` | The ordered quantity converted into the product's reference unit. |
-| Qty Delivered (`qty_delivered`) | Decimal, precision `Product Unit` | Converted likewise. |
-| Qty To Be Invoiced (`qty_to_invoice`) | Decimal, precision `Product Unit` | Converted likewise. |
-| Qty Invoiced (`qty_invoiced`) | Decimal, precision `Product Unit` | Converted likewise. |
-| Untaxed Total (`price_subtotal`) | Money | The line subtotal converted into the company currency. |
-| Total (`price_total`) | Money | The line total converted into the company currency. |
-| Amount To Invoice (`amount_to_invoice`) | Money | Converted likewise. |
-| Amount Invoiced (`amount_invoiced`) | Money | Converted likewise. |
-| Gross Weight (`weight`), Volume (`volume`) | Decimals | The product's weight and volume multiplied by the ordered quantity in the reference unit. |
+| Order Reference (`name`) | Text | The order reference of the source order. |
+| Order Date (`date`) | Date and time | The order date of the source order. |
 | Customer (`partner_id`) | Link to Customer | |
-| Commercial Entity (`commercial_partner_id`) | Link to Customer | The customer's commercial parent. |
-| Country (`country_id`), State (`state_id`), Industry (`industry_id`) | Links | Taken from the customer. |
-| Customer Country Group (`partner_zip`) and similar geography columns | Text | Taken from the customer address. |
-| Salesperson (`user_id`) | Link to User | |
-| Sales Team (`team_id`) | Link to Sales Team | |
 | Company (`company_id`) | Link to Company | |
-| Currency (`currency_id`) | Link to Currency | The company currency of the row. |
-| Campaign (`campaign_id`), Medium (`medium_id`), Source (`source_id`) | Links | Campaign tracking dimensions copied from the order. |
-| Order (`order_id`) | Link to Sales Order | |
-| Order Line (`order_reference`) | Reference | A polymorphic reference used to drill from a row to its source document. |
-| Customer Lead Time (`delay`) | Decimal | Average lead time in days. |
-| Line Status (`line_invoice_status`) | Selection | The per-line invoice status. |
-| Discount % (`discount`) | Decimal, precision `Discount` | |
-| Discount Amount (`discount_amount`) | Money | The monetary value of the discount, in company currency. |
+| Price list (`pricelist_id`) | Link to Price list | |
+| Sales Team (`team_id`) | Link to Sales Team | |
+| Salesperson (`user_id`) | Link to User | |
+| Status (`state`) | Selection | The four order statuses with the same labels. |
+| Order Invoice Status (`invoice_status`) | Selection | The four order-level invoice statuses. |
+| Campaign (`campaign_id`), Medium (`medium_id`), Source (`source_id`) | Links | Campaign tracking dimensions of the order. |
+| Customer Entity (`commercial_partner_id`) | Link to Customer | The commercial parent of the customer. |
+| Customer Country (`country_id`) | Link to Country | From the customer record. |
+| Customer Industry (`industry_id`) | Link to Industry | From the customer record. |
+| Customer postal code (`partner_zip`) | Text | From the customer record. |
+| Customer State (`state_id`) | Link to Country State | From the customer record. |
+| Order (`order_reference`) | Polymorphic reference | Points at the source order; aggregated by counting distinct values, which is how "number of orders" is measured. |
+| Product Category (`categ_id`) | Link to Product Category | |
+| Product Variant (`product_id`) | Link to Product Variant | |
+| Product (`product_tmpl_id`) | Link to Product Template | |
+| Unit (`product_uom_id`) | Link to Unit of Measure | The product's reference unit, not the line's unit. |
+| Qty Ordered (`product_uom_qty`) | Decimal | Sum over the grouped lines of the ordered quantity converted from the line unit to the product reference unit. Zero when the line has no product. |
+| Qty Delivered (`qty_delivered`) | Decimal | Same conversion applied to the delivered quantity. |
+| Qty To Deliver (`qty_to_deliver`) | Decimal | Same conversion applied to ordered minus delivered. |
+| Qty Invoiced (`qty_invoiced`) | Decimal | Same conversion applied to the invoiced quantity. |
+| Qty To Invoice (`qty_to_invoice`) | Decimal | Same conversion applied to the quantity to invoice. |
+| Unit Price (`price_unit`) | Decimal, averaged | Average of the line unit prices converted into the presentation currency. |
+| Untaxed Total (`price_subtotal`) | Money | Sum of the line subtotals converted into the presentation currency. |
+| Total (`price_total`) | Money | Sum of the line totals converted into the presentation currency. |
+| Untaxed Amount To Invoice (`untaxed_amount_to_invoice`) | Money | Sum, converted; computed for product lines and for advance-invoice lines. |
+| Untaxed Amount Invoiced (`untaxed_amount_invoiced`) | Money | Sum, converted; same scope. |
+| Invoice Status (`line_invoice_status`) | Selection | The per-line invoice status. |
+| Gross Weight (`weight`) | Decimal | Sum of the product weight multiplied by the converted ordered quantity. |
+| Volume (`volume`) | Decimal | Sum of the product volume multiplied by the converted ordered quantity. |
+| Discount % (`discount`) | Decimal, averaged | The line discount percentage. |
+| Discount Amount (`discount_amount`) | Money | Sum of unit price × ordered quantity × discount ÷ 100, converted into the presentation currency. |
+| # of Lines (`nbr`) | Integer | Count of source rows in the group. |
+| Currency (`currency_id`) | Link to Currency | Always the currency of the reading company. |
 
-Rows are restricted by a multi-company record rule and by the per-salesperson and all-orders rules
-described in [configuration.md](configuration.md).
+### 8.4 How a row is built
 
----
+1. The source is the order-line table joined to the order, the customer, the product variant, the
+   product template, the line unit, the product reference unit and a currency conversion table
+   keyed by company.
+2. Only lines whose display type is empty are kept; sections, subsections and notes never appear.
+3. Rows are grouped by product variant, order, unit price, line invoice status, product reference
+   unit, product category, order reference, order date, customer, salesperson, order status, order
+   invoice status, company, the three campaign dimensions, price list, team, product template, the
+   five customer attributes, the advance-invoice flag, the discount percentage, the order
+   identifier and the currency conversion rate.
+4. Quantities are converted between units by multiplying by the line unit's factor and dividing by
+   the product reference unit's factor.
+5. Monetary values are converted by dividing by the order's stored currency rate and multiplying by
+   the conversion rate of the presentation currency; a rate that is absent or zero is treated as
+   one.
+
+The row identifier is the smallest line identifier in the group, which lets the drill-down open the
+source document.
 
 ## 9. Advance Payment Invoice Wizard
 
