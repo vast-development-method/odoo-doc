@@ -1948,3 +1948,109 @@ WH/Stock : 0
 | The product quantity figures | the product unit's rounding step | — |
 
 Everything not in this table is exact arithmetic.
+
+---
+
+# 36. How the algorithms compose
+
+The algorithms of this file are not independent; each one calls a small, fixed set of the others. This section states the call graph, so that an implementation can be built bottom-up and tested at each level.
+
+## 36.1 The layers
+
+**Layer 0 — arithmetic.** Unit conversion, rounding and comparison, all owned by `../units-of-measure-and-packaging/`. Nothing in this domain re-implements them.
+
+**Layer 1 — the quantity records.**
+- Available quantity of one record (section 1.1) — calls nothing.
+- Available quantity of a set (section 1.2) — calls gathering.
+- Increase or decrease a figure (section 4.1) — calls gathering and the available quantity of a set.
+
+**Layer 2 — choosing goods.**
+- Selecting the removal strategy (section 2.1) — calls nothing.
+- The least-packages pre-selection (section 2.3) — calls nothing but the database.
+- Gathering (section 3.2) — calls the strategy selection and the pre-selection.
+- The reservation-quantity computation (section 3.3) — calls gathering and the available quantity of a set.
+
+**Layer 3 — placing goods.**
+- The capacity check (section 9.4) — calls the Location weight.
+- The rule walk (section 9.3) — calls the capacity check.
+- Put-away selection (section 9.1) — calls the occupancy map and the rule walk.
+- Applying put-away to lines (section 9.5) — calls put-away selection once per group or once per line.
+
+**Layer 4 — the move operations.**
+- Creating a detail line (section 5.5) — calls the increase-or-decrease routine.
+- Creating or extending the lines for a reservation (section 5.4) — calls creating a detail line.
+- What the parents brought (section 5.3) — calls nothing but the chain.
+- The reservation algorithm (section 5) — calls sections 5.2, 5.3, 5.4, the reservation-quantity computation, applying put-away and the whole-container detection.
+- Unreserving (section 6) — calls the deletion of detail lines, which calls the increase-or-decrease routine.
+- Changing a line (section 7) — calls the increase-or-decrease routine and, on a done line, the freeing of reservations.
+- Freeing reservations (section 7.4) — calls the reservation algorithm on the victims.
+- Distributing a processed quantity (section 8.2) — calls the reservation-quantity computation and applying put-away.
+- Reducing a processed quantity (section 8.3) — calls the deletion of detail lines.
+- Splitting (section 14) — calls nothing but the status recomputation.
+- Merging (section 13) — calls the relevant-status subroutine.
+
+**Layer 5 — completion.**
+- Completing the detail lines (section 17) — calls the container snapshots, the increase-or-decrease routine, the freeing of reservations and the application of destination containers.
+- Backorder moves (section 15) — calls splitting.
+- The completion algorithm (section 16) — calls confirmation, the pruning, backorder moves, section 17, the push rules and the reservation algorithm.
+- The push rules (section 18) — call the rule engine of `../replenishment-and-procurement/`, then the completion's own confirmation.
+
+**Layer 6 — the document operations.**
+- The Transfer backorder (section 19) — calls the status recomputation and the reservation algorithm.
+- The validation algorithm (section 20) — calls confirmation, the sanity check, the backorder decision, the completion algorithm, the Transfer backorder, the re-reservation search and the automatic printing.
+- The counting application (section 23.2) — calls the completion algorithm and the next-count-date computation.
+- The Reception Report assignment (section 25.2) — calls splitting and the reservation algorithm.
+
+## 36.2 The three places where an algorithm calls itself
+
+| Algorithm | Recursion | Termination |
+|---|---|---|
+| The push rules, transparent mode (section 18.2) | Re-runs the push step on the same move after rewriting its destination | Stops when the destination Location did not change |
+| Applying destination containers (section 10.5) | Recurses onto the parents of the processed containers | A processed set is carried along and never revisited |
+| Container promotion (section 10.4) | Recurses onto the destination containers just set | Stops when no container of the set gained one |
+| Freeing reservations (section 7.4) | Re-reserves the victims, which may itself free further reservations | Every visited line is added to an untouchable set that is carried into the recursion |
+
+## 36.3 Where a caller must not reorder the steps
+
+| Algorithm | Constraint |
+|---|---|
+| The reservation algorithm | The *already reserved* snapshot must be taken before any line is created, because creating one invalidates the field. |
+| The reservation algorithm, branch C | The distribution map must be reduced by the move's **existing** lines before the map is walked, otherwise a second pass double-counts. |
+| The completion algorithm | The pruning must happen before the backorder split, because pruning can cancel a move that would otherwise be split; and the backorder split must happen before the lines are completed, because completing changes the processed quantity. |
+| Completing the lines | The container snapshots must be written before any quantity moves. |
+| Completing the lines | For one line, the order is: release the reservation, take from the source, compensate lot-less negatives, put into the destination, free other reservations. Any other order leaves a counter wrong. |
+| The validation algorithm | The immediate-transfer step must precede the sanity check, otherwise a Transfer created and validated in one gesture is refused for having no quantity. |
+| The validation algorithm | The picked marking must precede the backorder decision, otherwise every line looks unpicked and a backorder is always proposed. |
+| Merging | Negative moves must be detached from their Transfer before anything is written, so that the change notes are not posted on a document that is about to lose the move. |
+| Cancelling | The propagation decisions must be taken before the chain links are cleared. |
+| The warehouse write | The Locations must exist before the Operation Types are rebuilt, and the Operation Types before the Routes, because the rules name both. |
+
+---
+
+# 37. Reference: the shape of the reservation result
+
+Several algorithms exchange the same two intermediate structures. They are named here once.
+
+## 37.1 The reservation pair list
+
+Produced by the reservation-quantity computation (section 3.3) and consumed by section 5.4 and by section 8.2.
+
+A list of pairs, each carrying a Stock Quantity record and a signed quantity **in the product unit**. A positive quantity means "take this much from this record"; a negative one means "give this much back to this record". The list preserves the gathering order, so the first pair is always the record the removal strategy chose first. The sum of the quantities is at most the wanted quantity in absolute value, and may be strictly less when availability ran out.
+
+## 37.2 The distribution map
+
+Produced by section 5.3 and consumed by branches A and C of the reservation algorithm.
+
+A map from the four-part key (Location, lot, container, owner) to a quantity **in the product unit**, holding only strictly positive entries. Its meaning is "this much of what my predecessors delivered, at exactly these characteristics, has not yet been claimed by me or by my siblings".
+
+## 37.3 The occupancy map
+
+Produced by section 9.2 and consumed by the capacity check.
+
+A map from Location to a figure whose meaning depends on the request: a count of containers of one type, or a quantity of one product in the product unit. Entries may be negative when the caller supplied negative additional quantities.
+
+## 37.4 The detail-line value list
+
+Produced by sections 5.4, 8.2 and 27.5, and consumed by the line creation.
+
+A list of value dictionaries, each carrying at least: the move, the product, the unit, the source Location, the destination Location, the Transfer, the company and the quantity; and optionally the lot, the typed lot name, the source container, the destination container and the owner. The line creation turns each one into a record and raises the reserved counters.
