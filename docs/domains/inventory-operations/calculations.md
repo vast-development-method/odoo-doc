@@ -1623,7 +1623,7 @@ The sign is deliberately inverted for done moves: the current stock already cont
 
 Group everything by (product, product template, state, date, company, warehouse) and sum the quantities. The row identifier is the smallest underlying identifier of the group; rows built from quantity records use the negated record identifier so that they cannot collide with rows built from moves.
 
-**Worked example.** Today is 11 September 2026, the horizon is 1 month, and warehouse `WH` holds 30 units of BOLT. One delivery move of 8 is planned for 20 September and one done receipt of 5 was completed on 5 September.
+**Worked example.** Today is 11 September 2026, the horizon is 1 month, and warehouse `WH` holds 30 units of Bolt. One delivery move of 8 is planned for 20 September and one done receipt of 5 was completed on 5 September.
 
 - From the quantity record: every day from 11 August to 11 October carries `forecast` +30.
 - From the planned delivery: `out` −8 on 20 September; and `forecast` −8 on every day from 20 September to 11 October.

@@ -298,3 +298,157 @@ Set to true when the transfer document is printed. Its only behavioral effect is
 | true → false | The counts are applied, or the clear action is used, or a count is requested with the "leave empty" choice. | The counted quantity, the difference and the assignee are cleared. |
 
 While the flag is true, the record also exposes the *outdated* indicator, which turns true as soon as the on-hand quantity moves without the count being re-entered.
+
+---
+
+# 7. How the state fields interact
+
+The five state fields are not independent. This section states, for each pair that interacts, exactly which one drives which.
+
+| Driver | Driven | Rule |
+|---|---|---|
+| Stock Move status | Transfer status | The Transfer status is recomputed whenever any of its moves' statuses changes, whenever a move is added or removed, and whenever the shipping policy changes. It is never written directly. |
+| Stock Move status | Stock Move Line status | The line's status **is** the move's status, stored redundantly so that lines can be filtered without joining. |
+| Stock Move Line quantities | Stock Move status | Creating, changing or deleting a line recomputes its move's status through the rule of section 1.3, because the move's processed quantity is the sum of the lines. |
+| Transfer status | Stock Move status | Only in one direction and only at creation: a move created on a done Transfer is created done and picked. |
+| Transfer status | Batch Transfer status | The batch status is recomputed whenever any of its Transfers' statuses changes, and only ever moves forward. |
+| Batch Transfer status | Transfer status | Only through actions: confirming a batch confirms its Transfers, validating a batch validates them. |
+| Scrap status | Stock Move status | Validating a Scrap creates and immediately completes exactly one move. |
+| Stock Move status | Scrap status | None. The Scrap is not recomputed from its move. |
+
+**The one asymmetry worth naming.** A Transfer whose moves are all done is `done`, but a Transfer whose only done moves are scraps and which also has a move cancelled for another reason is `cancel`. This is the single place where a Transfer's status is not simply the aggregate of its moves.
+
+---
+
+# 8. Reaching each state: the complete entry list
+
+## 8.1 Stock Move
+
+| State | Every way to reach it |
+|---|---|
+| `draft` | Created by hand; created by a copy; created by a rule before confirmation; created by a split of a confirmed move (the split move is created in draft and then confirmed by the caller); created by the return screen. |
+| `waiting` | Confirmed with originating moves; confirmed with the advanced supply method; recomputed after an originating link is added; recomputed after a demand change that leaves the move short with a blocking predecessor. |
+| `confirmed` | Confirmed with nothing blocking; recomputed after the last blocking predecessor finished; recomputed after unreserving; written directly by the Reception Report when it splits a demand (so that no unintended reservation is created); recomputed after a demand change. |
+| `partially_available` | Reserved partially; the demand of an assigned move is raised; recomputed when the processed quantity is non-zero and below the demand. |
+| `assigned` | Reserved fully; reserved with a bypassing source Location; the demand is zero; recomputed when the processed quantity is at least the demand; recomputed when the least important open move is confirmed with a zero demand. |
+| `done` | Completed through the completion algorithm; created directly on a done Transfer; created directly by an adjustment, a relocation, a scrap or an unpack, all of which complete immediately. |
+| `cancel` | Cancelled directly; cancelled by the propagation from an upstream move; cancelled by the pruning step of a completion with backorders forbidden; cancelled by the merge when its demand reaches zero; cancelled and then deleted by the merge when it is absorbed; cancelled by deleting its Transfer. |
+
+## 8.2 Transfer
+
+| State | Every way to reach it |
+|---|---|
+| `draft` | Created; a move in draft is added; every move is in draft. |
+| `waiting` | Derived when the relevant status among the moves is `waiting`. |
+| `confirmed` | Derived when the relevant status is `confirmed`, which with the all-at-once policy also covers the case where the most important open move is only partially available. |
+| `assigned` | Derived when the relevant status is `assigned` or `partially_available`; derived unconditionally when the source Location bypasses reservation and every move takes from stock. |
+| `done` | Derived when every move is done or cancelled and it is not the all-scraps case. |
+| `cancel` | Derived when every move is cancelled; derived in the all-scraps case; written directly when the Transfer has no move at all and is cancelled. |
+
+## 8.3 Batch Transfer
+
+| State | Every way to reach it |
+|---|---|
+| `draft` | Created. |
+| `in_progress` | Confirmed by hand; confirmed automatically at creation when the Operation Type auto-confirms. |
+| `done` | Derived when every Transfer is done or cancelled and at least one is done. |
+| `cancel` | Cancelled by hand; derived when every Transfer is cancelled; written when the last Transfer is removed from an in-progress batch. |
+
+## 8.4 Scrap
+
+| State | Every way to reach it |
+|---|---|
+| `draft` | Created. |
+| `done` | Validated; validated through the shortage confirmation. |
+
+---
+
+# 9. Leaving each state: what is still possible
+
+## 9.1 A draft move
+
+Everything: change the product, the unit, the Locations, the demand, the Operation Type; delete it; confirm it; cancel it. A draft move holds no reservation and promises nothing to anybody.
+
+## 9.2 A waiting or confirmed move
+
+- The demand may be changed; the reservation consequences of `business-rules.md`, section 5.1, apply.
+- The Locations may be changed; the consequences of `business-rules.md`, section 5.2, apply.
+- The unit may be changed.
+- It may be reserved, cancelled, split or merged.
+- It may **not** be deleted when it is chained.
+
+## 9.3 A partially available or assigned move
+
+Everything a confirmed move allows, plus: it may be unreserved; it may be completed. Raising its demand downgrades it; lowering its demand below what is reserved unreserves it entirely and then re-reserves from scratch.
+
+## 9.4 A done move
+
+- Its date may be changed, which copies onto its lines.
+- Its detail lines' quantities and characteristics may be changed while the Transfer is unlocked, which replays the movement.
+- It may **not** be cancelled, unreserved, split, merged, deleted, or have its unit changed.
+- A new detail line may be added to it, which moves the quantity immediately.
+
+## 9.5 A cancelled move
+
+- Its processed quantity may not be written.
+- It may be deleted when it is not chained.
+- It holds no reservation, no originating links and the take-from-stock supply method, because cancellation clears all three.
+
+---
+
+# 10. The state of a transfer, worked through every combination
+
+Two moves, as-soon-as-possible policy, both with a positive demand. The table gives the relevant status among the moves and the resulting Transfer status.
+
+| Move A | Move B | Relevant status | Transfer |
+|---|---|---|---|
+| draft | draft | — | `draft` |
+| draft | assigned | — | `draft` |
+| cancel | cancel | — | `cancel` |
+| done | done | — | `done` |
+| done | cancel | — | `done` |
+| done into inventory loss | cancel not into inventory loss | — | `cancel` |
+| waiting | waiting | `waiting` | `waiting` |
+| waiting | confirmed | `confirmed` | `confirmed` |
+| waiting | partially_available | `partially_available` | `assigned` |
+| waiting | assigned | `partially_available` | `assigned` |
+| confirmed | confirmed | `confirmed` | `confirmed` |
+| confirmed | partially_available | `partially_available` | `assigned` |
+| confirmed | assigned | `partially_available` | `assigned` |
+| partially_available | partially_available | `partially_available` | `assigned` |
+| partially_available | assigned | `assigned` | `assigned` |
+| assigned | assigned | `assigned` | `assigned` |
+| assigned | cancel | `assigned` | `assigned` |
+| assigned | done | `assigned` | `assigned` |
+
+The same table with the **all-at-once** policy:
+
+| Move A | Move B | Relevant status | Transfer |
+|---|---|---|---|
+| waiting | waiting | `waiting` | `waiting` |
+| waiting | confirmed | `waiting` | `waiting` |
+| waiting | partially_available | `waiting` | `waiting` |
+| waiting | assigned | `assigned` | `assigned` |
+| confirmed | confirmed | `confirmed` | `confirmed` |
+| confirmed | partially_available | `confirmed` | `confirmed` |
+| confirmed | assigned | `assigned` | `assigned` |
+| partially_available | partially_available | `confirmed` | `confirmed` |
+| partially_available | assigned | `assigned` | `assigned` |
+| assigned | assigned | `assigned` | `assigned` |
+
+Read the all-at-once rows through the subroutine: the moves are sorted by importance descending (assigned 4, waiting 3, partially available 2, confirmed 1), the **most** important one is examined, and `confirmed` and `partially_available` both answer `confirmed` while anything else answers its own status. That is why a pair of `waiting` moves answers `waiting` and a `waiting` beside an `assigned` answers `assigned`: `waiting` outranks `partially_available` and `confirmed` in the importance order.
+
+---
+
+# 11. A note on the two "waiting" labels
+
+Three different things are called waiting, and they must not be confused:
+
+| Thing | Value | Label | Meaning |
+|---|---|---|---|
+| A move blocked upstream | `waiting` | "Waiting Another Move" | Something must happen before this move can even be attempted. |
+| A move that is not blocked but has nothing reserved | `confirmed` | "Waiting" | The move may be attempted at any time; there is simply no stock. |
+| A Transfer blocked upstream | `waiting` | "Waiting Another Operation" | Same as the first, at document level. |
+| A Transfer that is not blocked but cannot be processed | `confirmed` | "Waiting" | Same as the second, at document level. |
+
+The stored value `confirmed` therefore carries the label "Waiting" on both entities, while the stored value `waiting` carries a label that names the blockage. An implementation must keep the stored values, not the labels, as the contract.

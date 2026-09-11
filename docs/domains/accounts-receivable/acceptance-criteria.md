@@ -7,7 +7,7 @@ otherwise, the shared fixture is:
 | --- | --- |
 | Company | Northwind Trading, currency the euro, calendar fiscal year, tax rounding "Round per Tax" |
 | Sale journal | code `INV`, dedicated credit note sequence on, dedicated debit note sequence on, communication type "Based on Invoice", communication standard "Full Reference" |
-| Customer | ACME Industries, receivable account `1200 Trade Receivables`, no credit limit, payment term "Immediate Payment" |
+| Customer | Acme Industries, receivable account `1200 Trade Receivables`, no credit limit, payment term "Immediate Payment" |
 | Income account | `7000 Product Sales` |
 | Tax account | `4510 Tax Received` |
 | Tax "Sales 21 %" | percentage, 21 %, not price-included, exigible on invoice |
@@ -24,7 +24,7 @@ otherwise, the shared fixture is:
 ### A1. Happy path: a three-line invoice with two taxes
 
 **Given** the shared fixture,
-**and** a new draft customer invoice for ACME Industries dated 2026-03-15 with the payment term
+**and** a new draft customer invoice for Acme Industries dated 2026-03-15 with the payment term
 "Immediate Payment",
 **and** three lines: 12 × Consulting hour at 85.00 with no discount; 40 × Printed manual at 14.50
 with a 10 % discount; 1 × Digital subscription at 299.00 with no discount,
@@ -61,10 +61,10 @@ date 2026-03-15,
 
 ### A2. Product defaulting
 
-**Given** a new draft customer invoice for ACME Industries,
+**Given** a new draft customer invoice for Acme Industries,
 **When** a line is created and the product "Consulting hour" is chosen,
 **Then** the label becomes "Consulting hour" (plus the sales description on a second line when the
-product has one, rendered in ACME Industries' language),
+product has one, rendered in Acme Industries' language),
 **and** the unit becomes the product's reference unit,
 **and** the unit price becomes 85.00,
 **and** the taxes become {Sales 21 %},
@@ -75,8 +75,8 @@ product has one, rendered in ACME Industries' language),
 
 **Given** a fiscal position "Intra-community" that maps Sales 21 % to Sales 0 % and `7000 Product
 Sales` to `7001 Product Sales (EU)`,
-**and** ACME Industries carries that fiscal position,
-**When** a new draft customer invoice is created for ACME Industries and a line with the product
+**and** Acme Industries carries that fiscal position,
+**When** a new draft customer invoice is created for Acme Industries and a line with the product
 "Consulting hour" is added,
 **Then** the line's taxes are {Sales 0 %},
 **and** the line's account is `7001 Product Sales (EU)`,
@@ -139,7 +139,7 @@ unspecified order:
 
 ### A10. Posting a zero-total invoice
 
-**Given** a draft customer invoice for ACME Industries with one line of quantity 1 and unit price
+**Given** a draft customer invoice for Acme Industries with one line of quantity 1 and unit price
 0.00 and no tax,
 **When** it is posted,
 **Then** the payment status is `paid` (the residual is zero and there is no counterpart at all),
@@ -147,9 +147,9 @@ unspecified order:
 
 ### A11. The customer rank increases
 
-**Given** ACME Industries with a customer rank of 3,
-**When** one customer invoice for ACME Industries is posted,
-**Then** ACME Industries' customer rank becomes 4,
+**Given** Acme Industries with a customer rank of 3,
+**When** one customer invoice for Acme Industries is posted,
+**Then** Acme Industries' customer rank becomes 4,
 **and** its commercial entity's customer rank also increases by one when it is a different record.
 
 ---
@@ -643,7 +643,7 @@ mode is off,
 ### G2. Full reference, based on customer
 
 **Given** the standard "Full Reference" and type "Based on Customer",
-**and** ACME Industries whose internal reference is `ACM-17`,
+**and** Acme Industries whose internal reference is `ACM-17`,
 **When** the invoice is posted,
 **Then** the payment reference is `CUST/ACM-17`.
 
@@ -1065,7 +1065,7 @@ tax changes.
 ### M1. Sending one invoice by e-mail
 
 **Given** the posted invoice of A1,
-**and** ACME Industries whose invoice sending method is "by Email" and whose e-mail address is set,
+**and** Acme Industries whose invoice sending method is "by Email" and whose e-mail address is set,
 **When** the user presses **Send**, keeps the defaults, and confirms,
 **Then** the printable document is rendered with the resolved layout and stored as the document's
 file attachment,
@@ -1156,7 +1156,7 @@ with the button "Go to cron configuration".
 
 ### N1. The list page
 
-**Given** ACME Industries' portal user,
+**Given** Acme Industries' portal user,
 **and** three documents: a posted invoice, a posted credit note and a draft invoice,
 **When** the user opens the document list,
 **Then** only the two posted documents appear (the record rule excludes draft and cancelled),
@@ -1164,14 +1164,14 @@ with the button "Go to cron configuration".
 
 ### N2. Receipts are invisible in the portal
 
-**Given** a posted sales receipt for ACME Industries,
+**Given** a posted sales receipt for Acme Industries,
 **When** the portal user opens the document list,
 **Then** the receipt does **not** appear, because the portal record rule covers only customer
 invoices, customer credit notes, vendor bills and vendor credit notes.
 
 ### N3. The overdue count
 
-**Given** two posted customer invoices for ACME Industries: one due 2026-02-01 with a residual of
+**Given** two posted customer invoices for Acme Industries: one due 2026-02-01 with a residual of
 500.00 and one due 2026-04-01 with a residual of 300.00,
 **and** today is 2026-03-15,
 **Then** the overdue count is 1.
@@ -1218,7 +1218,7 @@ invoices, customer credit notes, vendor bills and vendor credit notes.
 
 ### N9. Batch payment of overdue invoices
 
-**Given** three overdue customer invoices for ACME Industries, all in euros, of 500.00, 300.00 and
+**Given** three overdue customer invoices for Acme Industries, all in euros, of 500.00, 300.00 and
 200.00,
 **When** the portal user opens the overdue page,
 **Then** the total offered is 1 000.00,
@@ -1266,7 +1266,7 @@ invoices, customer credit notes, vendor bills and vendor credit notes.
 
 ### O1. Below the limit
 
-**Given** the credit limit feature on, ACME Industries with a limit of 10 000.00 and a receivable
+**Given** the credit limit feature on, Acme Industries with a limit of 10 000.00 and a receivable
 balance of 7 500.00,
 **and** a draft customer invoice of 2 000.00,
 **Then** the total credit is 9 500.00 and no warning appears.
@@ -1275,7 +1275,7 @@ balance of 7 500.00,
 
 **Given** the same setup with a draft customer invoice of 3 000.00,
 **Then** the total credit is 10 500.00 and the warning reads:
-> ACME Industries has reached its credit limit of: €10,000.00
+> Acme Industries has reached its credit limit of: €10,000.00
 > Total amount due (including this document): €10,500.00
 
 ### O3. With orders awaiting invoicing
@@ -1294,7 +1294,7 @@ invoices.
 ### O5. The partner limit toggle
 
 **Given** a company default credit limit of 5 000.00,
-**When** ACME Industries' "Partner Limit" toggle is switched off,
+**When** Acme Industries' "Partner Limit" toggle is switched off,
 **Then** its credit limit becomes 5 000.00,
 **and** the toggle reads as off because the limit equals the company default.
 
@@ -1307,7 +1307,7 @@ invoices.
 
 ### P1. Two identical customer invoices
 
-**Given** a posted customer invoice for ACME Industries dated 2026-03-15 with a total of 2 182.76 in
+**Given** a posted customer invoice for Acme Industries dated 2026-03-15 with a total of 2 182.76 in
 euros,
 **When** a second draft customer invoice for the same customer, the same date, the same total and
 the same currency is created,
@@ -1602,7 +1602,7 @@ setting the day to 31 clamps to 2026-02-28.
 
 1. **Given** the fixture, a payment term "2/10 net 45" with one line of 100 % at 45 days, an early
    discount of 2 % within 10 days, mode "On early payment".
-2. **When** a customer invoice dated 2026-03-15 is created for ACME Industries with 12 × Consulting
+2. **When** a customer invoice dated 2026-03-15 is created for Acme Industries with 12 × Consulting
    hour at 85.00 and posted,
    **Then** the number is `INV/2026/00001`, the total is 1 234.20 (1 020.00 net plus 214.20 of tax),
    the single instalment is due 2026-04-29, the discount deadline is 2026-03-25 and the discounted

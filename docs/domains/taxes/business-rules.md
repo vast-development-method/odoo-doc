@@ -185,10 +185,10 @@ a foreign registration number is present.
 
 | # | Rule | Message |
 |---|---|---|
-| 1 | A country is set. | The country of the foreign VAT number could not be detected. Please assign a country to the fiscal position. |
-| 2 | When the country equals the company's fiscal country and that country has states, at least one state is selected. | You cannot create a fiscal position with a foreign VAT within your fiscal country without assigning it a state. |
+| 1 | A country is set. | The country of the foreign value-added tax number could not be detected. Please assign a country to the fiscal position. |
+| 2 | When the country equals the company's fiscal country and that country has states, at least one state is selected. | You cannot create a fiscal position with a foreign value-added tax within your fiscal country without assigning it a state. |
 | 3 | When both a country and a country group are set, the country belongs to the group. | You cannot create a fiscal position with a country outside of the selected country group. |
-| 4 | No other fiscal position of the same company already holds a **different** foreign registration number for the same country. | A fiscal position with a foreign VAT already exists in this country. |
+| 4 | No other fiscal position of the same company already holds a **different** foreign registration number for the same country. | A fiscal position with a foreign value-added tax already exists in this country. |
 
 Rule 4 permits several fiscal positions to carry the **same** number for the same country.
 
@@ -350,7 +350,7 @@ that removes every withholding tax, unless the caller explicitly asked for them.
 A number consisting of the single character solidus means "explicitly no number" and is always
 accepted. Any other single character is refused in error mode:
 
-> To explicitly indicate no (valid) VAT, use '/' instead.
+> To explicitly indicate no (valid) value-added tax, use '/' instead.
 
 (The message ends with a trailing space.)
 
@@ -397,7 +397,7 @@ installation has no control over the numbers); or the country has no check routi
   request is sent.
 - When **no** company at all has the verification switch on, the flag is set to false with no call.
 - The relay endpoint must be one of the two known addresses:
-  > Invalid IAP VIES endpoint
+  > Invalid IAP the cross-border registration checking service endpoint
 - During a file import, the recomputation of the flag is cancelled entirely.
 - The callback route verifies the signed token before applying a status; a token that does not
   verify is logged and ignored with no change.

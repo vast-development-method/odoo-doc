@@ -2,6 +2,8 @@
 
 Each workflow below is an end-to-end sequence: who performs it, what must be true before it starts, the numbered steps, and the records created or updated at each step. Where a step runs an algorithm, the algorithm is named and located in `calculations.md` rather than repeated.
 
+> **Reproduced literals.** A few strings in this file are reproduced exactly as the system emits them — error messages, selection labels, generated record names — and therefore keep abbreviations that this specification would otherwise spell out. They are: `UoM` for unit of measure, `SN` for serial number, `ZPL` for the Zebra printer command language, `PDF` for Portable Document Format, `GS1` for Global Standards One, and the suffix `(MTO)` for make to order, that is the supply method this specification calls *advanced* or *trigger another rule*. Wherever such a string is quoted, the quotation is verbatim and must be reproduced character for character.
+
 Roles used in this file:
 
 | Role | Security group | Typical actions |

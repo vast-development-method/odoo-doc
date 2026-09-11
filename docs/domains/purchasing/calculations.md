@@ -163,13 +163,13 @@ An order may be approved by the acting user when:
 ```formula
 approval_allowed =
         ( company.po_double_validation = "one_step" )
-     OR ( company.po_double_validation = "two_step"
-          AND amount_total < convert( company.po_double_validation_amount ,
+     or ( company.po_double_validation = "two_step"
+          and amount_total < convert( company.po_double_validation_amount ,
                                       from = active_company.currency ,
                                       to   = order.currency ,
                                       company = order.company ,
                                       date = date_part( date_order ) or today ) )
-     OR user_has_privilege( purchase_administrator )
+     or user_has_privilege( purchase_administrator )
 ```
 
 The comparison is a strict "less than": an order whose total is **exactly** the threshold
@@ -243,7 +243,7 @@ qty_received = Σ over m in M of contribution(m)
 ```formula
 contribution(m) =
    − convert_quantity( m.quantity , m.unit , u , rounding = half_up )
-        when m is a purchase return AND ( m has no original move OR m.to_refund )
+        when m is a purchase return and ( m has no original move or m.to_refund )
      0  when m is a purchase return otherwise
      0  when m returns a dropshipped move and m is not itself a dropship return
      0  when m returns a purchase return and not m.to_refund
@@ -499,7 +499,7 @@ Per purchase order line:
 qty_total   = line.product_uom_qty
 qty_on_time = Σ over move details d of
                  ( d.quantity × d.unit_factor ÷ product_unit_factor )
-                 when d's move is done AND date_part(line.date_planned) ≥ date_part(move.date)
+                 when d's move is done and date_part(line.date_planned) ≥ date_part(move.date)
                  else 0
 ```
 
@@ -775,7 +775,7 @@ line's remaining quantity:
 
 ```formula
 candidate  ⇔  invoice_line.price_unit = purchase_line.price_unit
-              AND invoice_line.quantity ≤ purchase_line.product_qty − purchase_line.qty_invoiced
+              and invoice_line.quantity ≤ purchase_line.product_qty − purchase_line.qty_invoiced
 ```
 
 Ties are broken by the textual similarity ratio between the bill line's label and the order
@@ -939,8 +939,8 @@ average would be 20.00; the weighted average is (100 × 10.00 + 5 × 30.00) ÷ 1
 The stored search for late orders is built from two parts combined with a logical *and*:
 
 ```formula
-order_part = ( state = "purchase" ) AND ( date_planned ≤ now )
-             AND ( no transfer exists OR some transfer's state ∉ { done , cancel } )   [with inventory]
+order_part = ( state = "purchase" ) and ( date_planned ≤ now )
+             and ( no transfer exists or some transfer's state ∉ { done , cancel } )   [with inventory]
 line_part  = ( qty_received < product_qty )
 ```
 

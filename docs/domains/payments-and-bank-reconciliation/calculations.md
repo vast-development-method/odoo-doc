@@ -2237,3 +2237,169 @@ For a liquidity journal the card shows a filled line graph of the balance over t
    3. Walk the daily totals from the most recent to the oldest. For each, prepend a point dated on that day at the current running amount, then subtract that day's total from the running amount. Prepending, rather than appending, is what makes the curve read forwards while being computed backwards.
    4. If the oldest date processed is not exactly thirty days ago, prepend one last point dated thirty days ago at the remaining running amount, so the curve always starts a month back.
 4. Each point carries the value rounded to the journal's currency, a short date label and a long date label, both formatted in the user's language.
+
+---
+
+## 18. Selecting the journal, the methods and the recipient account
+
+The register-payment screen and the Payment record share the same selection logic, expressed here once.
+
+### 18.1 The journals available for a batch
+
+```formula
+journals = every Journal whose company is visible from the batch's company
+           AND whose type is one of 'bank', 'cash', 'credit'
+
+available = journals having at least one INBOUND  payment method line   when the batch's direction is inbound
+          = journals having at least one OUTBOUND payment method line   otherwise
+```
+
+On the register-payment screen the available set is the **union** over every batch. On a Payment the set is built slightly differently: the journals considered are those whose company is an ancestor **or** a descendant of the active company, and the filter is the same.
+
+### 18.2 The journal chosen for a batch
+
+Let `company` be the batch's company with the fewest ancestors, `wanted_currency` the batch's currency and `wanted_account` the batch's recipient bank account.
+
+```formula
+base = Journals of `company`
+       whose type is one of 'bank', 'cash', 'credit'
+       AND that are in the screen's available set
+
+if wanted_account is set:
+    try, in this order:
+        1. base AND currency = wanted_currency AND bank account = wanted_account
+        2. base AND                                bank account = wanted_account
+        3. base AND currency = wanted_currency
+        4. base
+else:
+    try, in this order:
+        1. base AND currency = wanted_currency
+        2. base
+
+return the first journal found, in the journal ordering; nothing when none matches
+```
+
+The order encodes the preference: a journal that matches both the currency and the account is best; matching the account alone beats matching the currency alone; and any liquidity journal is better than none.
+
+### 18.3 When the chosen journal is overridden
+
+On the register-payment screen the journal is recomputed whenever the available set changes, and only when the current journal is no longer in it. The recomputation, in order:
+
+1. If exactly one preferred payment method line is named on the documents being paid, use that line's journal.
+2. Otherwise, when the screen is editable, use the journal chosen for the single batch (section 18.2).
+3. Otherwise, use the first liquidity journal of the screen's company that is in the available set.
+
+### 18.4 The recipient bank accounts available for a batch
+
+```formula
+if the batch's direction is inbound:
+    available = the journal's own bank account          (money is received on the company's account)
+else:
+    company   = the batch's company with the fewest ancestors
+    available = the bank accounts of the batch's counterparties
+                whose company is empty or equal to `company`
+```
+
+The account finally used is the batch's own recipient account when it is among the available ones, otherwise the first available one.
+
+### 18.5 The payment method line chosen
+
+On a Payment, in order:
+
+1. the counterparty's default inbound line when the direction is inbound and that line is available;
+2. the counterparty's default outbound line when the direction is outbound and that line is available;
+3. the current line when it is still available;
+4. the first available line;
+5. none.
+
+On the register-payment screen, in order:
+
+1. keep the current line when it is still available;
+2. otherwise, when exactly one preferred payment method line is named on the documents and it is available, use it;
+3. otherwise the first available line;
+4. otherwise none.
+
+When a batch's direction differs from the direction of the line chosen on the screen, that batch uses the first available line of the journal for **its own** direction instead.
+
+### 18.6 Whether grouping is offered
+
+```formula
+if there is exactly one batch:
+    can_group = ( the batch has more than one journal item )
+            AND NOT ( the batch's items all belong to ONE document AND that document is invoice-like )
+else:
+    lines_to_pay = the journal items behind the common and by-default buckets of section 12.6
+    can_group    = any batch has more than one of its items inside lines_to_pay
+```
+
+And the switch's own default:
+
+```formula
+group_payment = ( every item of the single batch belongs to one document )   when the screen is editable
+              = false                                                        otherwise
+```
+
+### 18.7 How many payments will be created, and how many are blocked
+
+```formula
+total = the number of batches                                   when grouping is on
+      = the number of journal items to be paid                  when grouping is off
+
+for each batch:
+    account = the account chosen on the screen, when there is one,
+              otherwise the batch's own chosen account (section 18.4)
+    if a recipient account is required:
+        if there is no account          : add the batch's counterparties to the missing list
+        else if the account is untrusted:
+            blocked ← blocked + 1                               when grouping is on
+                    + the number of the batch's items to be paid when grouping is off
+            add the account to the untrusted list
+```
+
+### 18.8 Edit mode
+
+```formula
+edit_mode = the screen is editable
+        AND ( the first batch has exactly one journal item OR grouping is on )
+```
+
+In edit mode exactly one Payment is created, from the screen's own values. Outside it, Payments are created from the batch values, one per batch when grouping is on and one per document when it is off.
+
+---
+
+## 19. The memo of a payment
+
+### 19.1 The rule
+
+```formula
+if the journal items belong to exactly ONE document:
+    memo = that document's payment reference,
+           or its own reference,
+           or its number
+else if ANY of the documents is an OUTBOUND document (a vendor bill, an outgoing credit note, an incoming receipt):
+    memo = the distinct values of ( payment reference, or reference, or number )
+           over every document, with the empty ones dropped, sorted, joined by ", "
+else:
+    memo = the next value of the company's group-payment sequence
+```
+
+### 19.2 Which items the rule reads
+
+```formula
+if the screen is editable AND the installment mode is 'full', OR the user typed a custom amount:
+    read every selected journal item
+else:
+    read only the journal items behind the common and by-default buckets of section 12.6
+```
+
+So, when a user pays only the next installment of several documents, the memo names only the documents actually being paid.
+
+### 19.3 Worked examples
+
+| Selection | Memo |
+|---|---|
+| one customer invoice whose payment reference is `INV/2026/0007` | `INV/2026/0007` |
+| one customer invoice with no payment reference and no reference, numbered `INV/2026/0007` | `INV/2026/0007` |
+| two vendor bills referenced `BILL-2` and `BILL-1` | `BILL-1, BILL-2` |
+| two customer invoices | the next group-payment number, for example `GROUP/2026/00001` |
+| three customer invoices of which only the next installment of two is being paid | still the next group-payment number, because more than one document is being paid |

@@ -113,7 +113,7 @@ produced exactly one bill.
 Two rules, checked in this order:
 
 1. At least two of the selected records must be in the draft or sent status.
-   **Message.** *Please select at least two purchase orders with state RFQ and RFQ sent to
+   **Message.** *Please select at least two purchase orders with state request for quotation and request for quotation sent to
    merge.*
 2. After grouping by the merge key, at least one group must hold more than one record.
    **Message.** *In selected purchase order to merge these details must be same\nVendor,

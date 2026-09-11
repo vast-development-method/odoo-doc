@@ -133,7 +133,7 @@ Created once per root company when a chart of accounts is loaded. A branch compa
 | cash difference gain | Cash Difference Gain | prefix `999` | `income_other` | no | the company's cash-difference income account, and every liquidity journal's profit account |
 | cash difference loss | Cash Difference Loss | prefix `999` | `expense` | no | the company's cash-difference expense account, and every liquidity journal's loss account |
 | cash discount loss | Cash Discount Loss | code `999998` | `expense` | no | the company's early-discount loss account |
-| cash discount gain | Cash Discount Gain | code `999999` (the counterpart of the loss account) | `income_other` | no | the company's early-discount gain account |
+| cash discount gain | Cash Discount Gain | code `999997` | `income_other` | no | the company's early-discount gain account |
 
 The two outstanding accounts are created without being stored on any company field: they are looked up by reference name when needed.
 

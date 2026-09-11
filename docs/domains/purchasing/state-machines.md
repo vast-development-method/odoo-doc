@@ -31,8 +31,8 @@ copied when the record is duplicated, read-only to the user.
 
 | Value | Label | Meaning |
 |---|---|---|
-| `draft` | RFQ | A request for quotation being prepared. Everything is editable. No receipt, no bill, no commitment. This is the state a new record and a duplicate start in. |
-| `sent` | RFQ Sent | The same request for quotation, after it has been emailed or printed for the vendor. Behaviourally identical to draft in every guard; the distinction exists so that buyers can see what has left the building and so that the dashboard can count it. |
+| `draft` | request for quotation | A request for quotation being prepared. Everything is editable. No receipt, no bill, no commitment. This is the state a new record and a duplicate start in. |
+| `sent` | request for quotation Sent | The same request for quotation, after it has been emailed or printed for the vendor. Behaviourally identical to draft in every guard; the distinction exists so that buyers can see what has left the building and so that the dashboard can count it. |
 | `to approve` | To Approve | The buyer has confirmed the request but the amount exceeded the company's double-validation threshold and the buyer is not a purchase administrator. The document waits for a second person. |
 | `purchase` | Purchase Order | A committed order. Receipts exist (when inventory is installed), billing is open, vendor prices have been learned, and the confirmation date is set. |
 | `cancel` | Cancelled | The order is void. It is the only state from which the record may be deleted. |
@@ -86,10 +86,10 @@ from and where it goes:
 
 | Previous status | New status | Subtype used |
 |---|---|---|
-| `to approve` | `purchase` | RFQ Approved |
-| anything else | `purchase` | RFQ Confirmed |
-| any | `to approve` | RFQ Confirmed |
-| any | `sent` | RFQ Sent |
+| `to approve` | `purchase` | request for quotation Approved |
+| anything else | `purchase` | request for quotation Confirmed |
+| any | `to approve` | request for quotation Confirmed |
+| any | `sent` | request for quotation Sent |
 | any | any other | The generic tracking subtype |
 
 All three purchase subtypes are off by default, so following an order does not by itself

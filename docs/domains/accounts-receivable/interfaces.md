@@ -480,13 +480,13 @@ Without a bank account, no code is produced. A currency must always be supplied,
 **Eligibility.** Refused, with one message per failing condition joined by a line break, when:
 
 - the currency is not the euro:
-  > Can't generate a SEPA QR Code with the *currency name* currency.
+  > Can't generate a Single Euro Payments Area quick response Code with the *currency name* currency.
 - the account is not an international bank account number:
-  > Can't generate a SEPA QR code if the account type isn't IBAN.
+  > Can't generate a Single Euro Payments Area quick response code if the account type isn't international bank account number.
 - the sanitised account number's first two characters are not the country code of a Single Euro
   Payments Area country that uses international bank account numbers (the area's country list minus
   the territories that share another country's account prefix):
-  > Can't generate a SEPA QR code with a non SEPA iban.
+  > Can't generate a Single Euro Payments Area quick response code with a non Single Euro Payments Area iban.
 
 **Data check.** The account must have either an account holder name or a partner name:
 
@@ -520,10 +520,10 @@ the framing; each country variant supplies the merchant account information, the
 field and the merchant category code.
 
 **Eligibility.** Without a bank account:
-> A bank account is required for EMV QR Code generation.
+> A bank account is required for EMV quick response Code generation.
 
 With a bank account but no country variant that matches its country:
-> No EMV QR Code is available for the country of the account *the account number*.
+> No EMV quick response Code is available for the country of the account *the account number*.
 
 **Data check.** In order, the first failure is reported:
 
@@ -563,13 +563,13 @@ characters. The checksum is a sixteen-bit cyclic redundancy check with the gener
 ```formula
 crc = 0xFFFF
 for each byte b of the text:
-    crc = crc XOR ( b shifted left by 8 )
+    crc = crc exclusive or ( b shifted left by 8 )
     repeat 8 times:
-        if crc AND 0x8000 is non-zero:
-            crc = ( crc shifted left by 1 ) XOR 0x1021
+        if crc and 0x8000 is non-zero:
+            crc = ( crc shifted left by 1 ) exclusive or 0x1021
         else:
             crc = crc shifted left by 1
-    crc = crc AND 0xFFFF
+    crc = crc and 0xFFFF
 checksum = crc written as four upper-case hexadecimal digits
 ```
 

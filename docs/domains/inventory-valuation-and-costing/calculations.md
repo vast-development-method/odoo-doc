@@ -864,7 +864,7 @@ The total value reported is 66.67 after currency rounding, and the unit cost is
    ```
 
 4. If no line survives, refuse with the error **"You cannot apply landed costs on the
-   chosen _the target label_(s). Landed costs can only be applied for products with FIFO
+   chosen _the target label_(s). Landed costs can only be applied for products with first in first out
    or average costing method."**, where the target label is "Transfers" or "Manufacturing
    Orders".
 

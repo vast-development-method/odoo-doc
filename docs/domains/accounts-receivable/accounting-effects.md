@@ -63,12 +63,12 @@ account `4510 Tax Received`:
 
 | # | Account | Label | Partner | Debit | Credit | Maturity |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 7000 Product Sales | Consulting hour | ACME Industries | | 1 020.00 | |
-| 2 | 7000 Product Sales | Printed manual | ACME Industries | | 522.00 | |
-| 3 | 7000 Product Sales | Digital subscription | ACME Industries | | 299.00 | |
-| 4 | 4510 Tax Received | Sales 21 % | ACME Industries | | 323.82 | |
-| 5 | 4510 Tax Received | Sales 6 % | ACME Industries | | 17.94 | |
-| 6 | 1200 Trade Receivables | INV/2026/00042 | ACME Industries | 2 182.76 | | 2026-03-15 |
+| 1 | 7000 Product Sales | Consulting hour | Acme Industries | | 1 020.00 | |
+| 2 | 7000 Product Sales | Printed manual | Acme Industries | | 522.00 | |
+| 3 | 7000 Product Sales | Digital subscription | Acme Industries | | 299.00 | |
+| 4 | 4510 Tax Received | Sales 21 % | Acme Industries | | 323.82 | |
+| 5 | 4510 Tax Received | Sales 6 % | Acme Industries | | 17.94 | |
+| 6 | 1200 Trade Receivables | INV/2026/00042 | Acme Industries | 2 182.76 | | 2026-03-15 |
 
 ---
 
@@ -525,7 +525,7 @@ its unit price is negative.
 
 All examples use the fixture of [`acceptance-criteria.md`](acceptance-criteria.md): the euro as the
 company currency, the accounts `7000 Product Sales`, `4510 Tax Received`, `1200 Trade Receivables`,
-and the customer ACME Industries.
+and the customer Acme Industries.
 
 ### 12.1 A plain customer invoice with one tax
 

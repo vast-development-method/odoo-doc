@@ -395,8 +395,8 @@ For quick reference, every reproduced selection value of the domain with its lab
 
 | Value | Label |
 |---|---|
-| `draft` | RFQ |
-| `sent` | RFQ Sent |
+| `draft` | request for quotation |
+| `sent` | request for quotation Sent |
 | `to approve` | To Approve |
 | `purchase` | Purchase Order |
 | `cancel` | Cancelled |
@@ -504,8 +504,8 @@ For quick reference, every reproduced selection value of the domain with its lab
 
 | Value | Label |
 |---|---|
-| `draft` | Draft RFQ |
-| `sent` | RFQ Sent |
+| `draft` | Draft request for quotation |
+| `sent` | request for quotation Sent |
 | `to approve` | To Approve |
 | `purchase` | Purchase Order |
 | `cancel` | Cancelled |

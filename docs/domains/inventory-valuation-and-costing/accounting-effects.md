@@ -702,8 +702,8 @@ category inventory journal.
 
 **Date.** The wizard's date.
 
-**Reference.** The wizard's reference, whose default is **"Manufacturing WIP - _the list
-of order names_"**, or **"Manufacturing WIP - Manual Entry"** when no order qualifies.
+**Reference.** The wizard's reference, whose default is **"Manufacturing work in progress - _the list
+of order names_"**, or **"Manufacturing work in progress - Manual Entry"** when no order qualifies.
 
 **Type.** A plain journal entry, carrying the selected manufacturing orders in its
 work-in-progress order collection.

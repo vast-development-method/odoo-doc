@@ -1504,7 +1504,7 @@ marked valid by that register.
 ```
 adapt( price_unit , original_taxes , new_taxes ) :
  1. If the two sets are identical, return the price unchanged.
- 2. If at least one tax of the original set is NOT price-included, return the price unchanged.
+ 2. If at least one tax of the original set is not price-included, return the price unchanged.
  3. Compute the original taxes on a quantity of one with the "round per tax" method and no special
     mode; take the resulting untaxed total as the new price.
  4. Compute the new taxes on that price, quantity one, "round per tax", special mode
@@ -3184,3 +3184,554 @@ partner for the acting company, the flag is true. Verification applies when the 
 country, the partner's number does not start with the company's fiscal country code, the company's
 switch is on, and either the company's country belongs to the union or the partner's country is one
 in which some company holds a foreign registration.
+
+### 15.6 Worked verifications
+
+Each walk-through takes the example number the error message quotes, shows the cleaning, the
+arithmetic and the comparison. They are the fastest way to confirm an implementation of section
+15.4.
+
+**Argentina — `20055361682`.** Eleven digits; the first two are `20`, which is in the permitted
+list.
+
+```formula
+5×2 + 4×0 + 3×0 + 2×5 + 7×5 + 6×3 + 5×6 + 4×1 + 3×6 + 2×8
+  = 10 + 0 + 0 + 10 + 35 + 18 + 30 + 4 + 18 + 16 = 141
+141 mod 11 = 9
+character at position 11 − 9 = 2 of "012345678990" is "2"
+last digit = 2  →  valid
+```
+
+**Austria — `ATU12345675`.** The prefix is dropped, leaving `U12345675`: the letter U followed by
+eight digits.
+
+```formula
+doubling_checksum( "1234567" ) = 1
+check_digit = ( 6 − 1 ) mod 10 = 5
+last digit = 5  →  valid
+```
+
+**Belgium — `BE0477472701`.** The prefix is dropped, leaving ten digits beginning with zero.
+
+```formula
+first eight digits as an integer = 4 774 727
+last two digits as an integer    =         1
+( 4 774 727 + 1 ) mod 97 = 4 774 728 mod 97 = 0  →  valid
+```
+
+**Bulgaria — `BG1234567892`.** Ten digits, so the three alternatives are tried; the third succeeds.
+
+```formula
+4×1 + 3×2 + 2×3 + 7×4 + 6×5 + 5×6 + 4×7 + 3×8 + 2×9
+  = 4 + 6 + 6 + 28 + 30 + 30 + 28 + 24 + 18 = 174
+174 mod 11 = 9
+check_digit = ( 11 − 174 ) mod 11 = ( −163 ) mod 11 = 2
+last digit = 2  →  valid
+```
+
+**Chile — `76086428-5`.** The hyphen is removed and re-inserted by the normaliser; the body is
+`76086428`.
+
+```formula
+reading the body right to left with the cycling weights 2,3,4,5,6,7,2,3 …
+  the actual weights used are, from the rightmost digit: 9,8,7,6,5,4,9,8
+  (the expression 4 + ((5 − i) mod 6) for i = 0,1,2,… gives 9,8,7,6,5,4,9,8)
+9×8 + 8×2 + 7×4 + 6×6 + 5×8 + 4×0 + 9×6 + 8×7
+  = 72 + 16 + 28 + 36 + 40 + 0 + 54 + 56 = 302
+302 mod 11 = 5
+character at position 5 of "0123456789K" is "5"
+check character = 5  →  valid
+```
+
+**Colombia — `213123432-1`.** The body is `213123432`.
+
+```formula
+weights 3,7,13,17,19,23,29,37,41 applied right to left
+3×2 + 7×3 + 13×4 + 17×3 + 19×2 + 23×1 + 29×3 + 37×1 + 41×2
+  = 6 + 21 + 52 + 51 + 38 + 23 + 87 + 37 + 82 = 397
+397 mod 11 = 1
+character at position 1 of "01987654321" is "1"
+check digit = 1  →  valid
+```
+
+**Cyprus — `CY10259033P`.** The body is `10259033`, the check character `P`.
+
+```formula
+translate the digits at the odd positions 1,3,5,7 → 1,2,9,3 become 0,5,21,7
+sum of translated odd positions = 0 + 5 + 21 + 7 = 33
+sum of the even positions 0,5,0,3                =  8
+total = 41 ;  41 mod 26 = 15
+letter at position 15 of the alphabet = "P"  →  valid
+```
+
+**Czechia — `CZ12345679`.** Eight digits, not starting with nine.
+
+```formula
+8×1 + 7×2 + 6×3 + 5×4 + 4×5 + 3×6 + 2×7 = 8 + 14 + 18 + 20 + 20 + 18 + 14 = 112
+112 mod 11 = 2
+check = ( 11 − 112 ) mod 11 = 9 ;  ( 9 or 1 ) mod 10 = 9
+last digit = 9  →  valid
+```
+
+**Denmark — `DK12345674`.**
+
+```formula
+2×1 + 7×2 + 6×3 + 5×4 + 4×5 + 3×6 + 2×7 + 1×4
+  = 2 + 14 + 18 + 20 + 20 + 18 + 14 + 4 = 110
+110 mod 11 = 0  →  valid
+```
+
+**Estonia — `EE123456780`.**
+
+```formula
+3×1 + 7×2 + 1×3 + 3×4 + 7×5 + 1×6 + 3×7 + 7×8 + 1×0
+  = 3 + 14 + 3 + 12 + 35 + 6 + 21 + 56 + 0 = 150
+150 mod 10 = 0  →  valid
+```
+
+**Finland — `FI12345671`.**
+
+```formula
+7×1 + 9×2 + 10×3 + 5×4 + 8×5 + 4×6 + 2×7 + 1×1
+  = 7 + 18 + 30 + 20 + 40 + 24 + 14 + 1 = 154
+154 mod 11 = 0  →  valid
+```
+
+**France — `FR23334175221`.** Both leading characters are digits, so the numeric branch applies.
+
+```formula
+digits 3..11 = 334175221 ;  append "12" → 33417522112
+33 417 522 112 mod 97 = 23
+first two digits = 23  →  valid
+and, because digits 3..5 are not "000", 334175221 must also satisfy
+the doubling checksum as a company registration number, which it does
+```
+
+**Germany — `DE123456788`.** Nine digits, first digit not zero; the recursive modulus eleven over
+ten.
+
+```formula
+check starts at 5
+after "1":  ((5 × 2) mod 11 + 1) mod 10 = (10 + 1) mod 10 = 1
+after "2":  ((1 × 2) mod 11 + 2) mod 10 = (2 + 2) mod 10 = 4
+after "3":  ((4 × 2) mod 11 + 3) mod 10 = (8 + 3) mod 10 = 1
+after "4":  ((1 × 2) mod 11 + 4) mod 10 = (2 + 4) mod 10 = 6
+after "5":  ((6 × 2) mod 11 + 5) mod 10 = (1 + 5) mod 10 = 6
+after "6":  ((6 × 2) mod 11 + 6) mod 10 = (1 + 6) mod 10 = 7
+after "7":  ((7 × 2) mod 11 + 7) mod 10 = (3 + 7) mod 10 = 0
+after "8":  ((10 × 2) mod 11 + 8) mod 10 = (9 + 8) mod 10 = 7
+after "8":  ((7 × 2) mod 11 + 8) mod 10 = (3 + 8) mod 10 = 1
+final = 1  →  valid
+```
+
+Note the "or ten" rule in the third line from the end: when the running value is zero it is read
+as ten before doubling.
+
+**Greece — `EL123456783`.** The union prefix is dropped, leaving nine digits.
+
+```formula
+running = 0
+for each of 1,2,3,4,5,6,7,8 :  running = running × 2 + digit
+  → 1, 4, 11, 26, 57, 120, 247, 502
+check_digit = ( 502 × 2 mod 11 ) mod 10 = ( 1004 mod 11 ) mod 10 = 3 mod 10 = 3
+last digit = 3  →  valid
+```
+
+**Hungary — `HU12345676`.** Eight digits.
+
+```formula
+9×1 + 7×2 + 3×3 + 1×4 + 9×5 + 7×6 + 3×7 + 1×6
+  = 9 + 14 + 9 + 4 + 45 + 42 + 21 + 6 = 150
+150 mod 10 = 0  →  valid
+```
+
+**Ireland — `IE1234567FA`.** Nine characters; the first seven are digits, so the first branch
+applies and the check character is computed on the seven digits followed by the ninth character.
+
+```formula
+the value fed to the check routine is "1234567" + "A" = "1234567A", already eight characters
+8×1 + 7×2 + 6×3 + 5×4 + 4×5 + 3×6 + 2×7 = 8 + 14 + 18 + 20 + 20 + 18 + 14 = 112
+plus 9 × the position of "A" in "WABCDEFGHIJKLMNOPQRSTUV" = 9 × 1 = 9
+total = 121 ;  121 mod 23 = 6
+character at position 6 of that alphabet = "F"
+eighth character = "F"  →  valid
+```
+
+**Italy — `IT12345670017`.** Eleven digits; the office code `001` lies in the permitted range; the
+doubling checksum over the eleven digits is zero.
+
+**Latvia — `LV41234567891`.** Eleven digits whose first digit is four, greater than three, so the
+legal-person branch applies.
+
+```formula
+9×4 + 1×1 + 4×2 + 8×3 + 3×4 + 10×5 + 2×6 + 5×7 + 7×8 + 6×9 + 1×1
+  = 36 + 1 + 8 + 24 + 12 + 50 + 12 + 35 + 56 + 54 + 1 = 289
+289 mod 11 = 3  →  valid (the required remainder for a legal person is three, not zero)
+```
+
+**Lithuania — `LT123456715`.** Nine digits with a one in position eight.
+
+```formula
+weights 1,2,3,4,5,6,7,8,9 cycling every nine, applied to "12345671"
+1×1 + 2×2 + 3×3 + 4×4 + 5×5 + 6×6 + 7×7 + 8×1
+  = 1 + 4 + 9 + 16 + 25 + 36 + 49 + 8 = 148
+148 mod 11 = 5 , which is not ten, so no second pass
+check_digit = ( 5 mod 11 ) mod 10 = 5
+last digit = 5  →  valid
+```
+
+**Luxembourg — `LU12345613`.**
+
+```formula
+first six digits as an integer = 123 456
+123 456 mod 89 = 13 , written on two digits as "13"
+last two digits = "13"  →  valid
+```
+
+**Malta — `MT12345634`.**
+
+```formula
+3×1 + 4×2 + 6×3 + 7×4 + 8×5 + 9×6 + 10×3 + 1×4
+  = 3 + 8 + 18 + 28 + 40 + 54 + 30 + 4 = 185
+185 mod 37 = 0  →  valid
+```
+
+**Netherlands — `NL123456782B90`.** Twelve characters; the tenth is the letter B; the first nine
+form a strictly positive number; the last two form a strictly positive number.
+
+```formula
+the citizen-service-number branch on "123456782" :
+9×1 + 8×2 + 7×3 + 6×4 + 5×5 + 4×6 + 3×7 + 2×8 = 9 + 16 + 21 + 24 + 25 + 24 + 21 + 16 = 156
+156 − 2 = 154 ;  154 mod 11 = 0  →  valid
+```
+
+**Norway — `NO123456785`.** Nine digits after any three-letter suffix is dropped.
+
+```formula
+3×1 + 2×2 + 7×3 + 6×4 + 5×5 + 4×6 + 3×7 + 2×8
+  = 3 + 4 + 21 + 24 + 25 + 24 + 21 + 16 = 138
+138 mod 11 = 6 ;  check = 11 − 6 = 5 , neither eleven nor ten
+last digit = 5  →  valid
+```
+
+**Peru — a constructed example.** Eleven digits beginning with `20`.
+
+```formula
+body = 2010006660
+5×2 + 4×0 + 3×1 + 2×0 + 7×0 + 6×0 + 5×6 + 4×6 + 3×6 + 2×0
+  = 10 + 0 + 3 + 0 + 0 + 0 + 30 + 24 + 18 + 0 = 85
+85 mod 11 = 8 ;  check = 11 − 8 = 3 , neither ten nor eleven
+the complete number is 20100066603
+```
+
+**Poland — `PL1234567883`.**
+
+```formula
+6×1 + 5×2 + 7×3 + 2×4 + 3×5 + 4×6 + 5×7 + 6×8 + 7×8 + (−1)×3
+  = 6 + 10 + 21 + 8 + 15 + 24 + 35 + 48 + 56 − 3 = 220
+220 mod 11 = 0  →  valid
+```
+
+The negative weight on the last digit is what turns the usual "compare to a check digit" into a
+"the whole thing is a multiple of eleven" test.
+
+**Portugal — `PT123456789`.**
+
+```formula
+9×1 + 8×2 + 7×3 + 6×4 + 5×5 + 4×6 + 3×7 + 2×8
+  = 9 + 16 + 21 + 24 + 25 + 24 + 21 + 16 = 156
+156 mod 11 = 2 ;  check = ( ( 11 − 156 ) mod 11 ) mod 10 = ( (−145) mod 11 ) mod 10 = 9
+last digit = 9  →  valid
+```
+
+**Romania — `RO1234567897`.** Nine-digit body, so the company branch applies.
+
+```formula
+left-pad "12345678" to nine characters → "012345678"
+weights 7,5,3,2,1,7,5,3,2
+7×0 + 5×1 + 3×2 + 2×3 + 1×4 + 7×5 + 5×6 + 3×7 + 2×8
+  = 0 + 5 + 6 + 6 + 4 + 35 + 30 + 21 + 16 = 123
+check = ( ( 10 × 123 ) mod 11 ) mod 10 = ( 1230 mod 11 ) mod 10 = 9 mod 10 = 9
+```
+
+The example quoted by the message is `RO1234567897`, whose body is `123456789` and whose check
+digit is `7`; running the same arithmetic on that body gives:
+
+```formula
+left-pad "123456789" to nine characters → already nine
+7×1 + 5×2 + 3×3 + 2×4 + 1×5 + 7×6 + 5×7 + 3×8 + 2×9
+  = 7 + 10 + 9 + 8 + 5 + 42 + 35 + 24 + 18 = 158
+check = ( ( 10 × 158 ) mod 11 ) mod 10 = ( 1580 mod 11 ) mod 10 = 7  →  valid
+```
+
+**Russia — `123456789047`.** Twelve digits, so both check digits are verified.
+
+```formula
+weights1 = 7,2,4,10,3,5,9,4,6,8 over "1234567890"
+7×1 + 2×2 + 4×3 + 10×4 + 3×5 + 5×6 + 9×7 + 4×8 + 6×9 + 8×0
+  = 7 + 4 + 12 + 40 + 15 + 30 + 63 + 32 + 54 + 0 = 257
+257 mod 11 = 4  =  the eleventh digit  →  first check passes
+
+weights2 = 3,7,2,4,10,3,5,9,4,6,8 over "12345678904"
+3×1 + 7×2 + 2×3 + 4×4 + 10×5 + 3×6 + 5×7 + 9×8 + 4×9 + 6×0 + 8×4
+  = 3 + 14 + 6 + 16 + 50 + 18 + 35 + 72 + 36 + 0 + 32 = 282
+282 mod 11 = 7  =  the twelfth digit  →  valid
+```
+
+**Serbia — `RS101134702`.** The country prefix is dropped, leaving nine digits; the recursive
+modulus eleven over ten gives a final value of one.
+
+**Slovakia — `SK2022749619`.** Ten digits, first digit not zero, third digit is two which is in the
+permitted set.
+
+```formula
+2 022 749 619 mod 11 = 0  →  valid
+```
+
+**Slovenia — `SI12345679`.**
+
+```formula
+8×1 + 7×2 + 6×3 + 5×4 + 4×5 + 3×6 + 2×7 = 112
+112 mod 11 = 2 ;  check = 11 − 2 = 9 , not ten
+last digit = 9  →  valid
+```
+
+**Spain — `ESA12345674`.** First character `A`, so the legal-person branch applies.
+
+```formula
+doubling_check_digit( "1234567" ) = 4
+the last character must be "4" or the letter at position 4 of "JABCDEFGHI", which is "D"
+last character = "4"  →  valid
+```
+
+**Sweden — `SE123456789701`.** The last two characters are `01`; the first ten digits must satisfy
+the doubling checksum, and `1234567897` does.
+
+**Switzerland — `CHE-123.456.788 TVA`.** The application's own check extracts the nine digits
+`123456788`.
+
+```formula
+5×1 + 4×2 + 3×3 + 2×4 + 7×5 + 6×6 + 5×7 + 4×8
+  = 5 + 8 + 9 + 8 + 35 + 36 + 35 + 32 = 168
+168 mod 11 = 3 ;  check = ( 11 − 3 ) mod 11 = 8
+ninth digit = 8  →  valid
+```
+
+**United Kingdom — `GB123456782`.** Nine digits; the first three read as `123`, which is at least
+one hundred, so the relaxed acceptance applies.
+
+```formula
+8×1 + 7×2 + 6×3 + 5×4 + 4×5 + 3×6 + 2×7 + 10×8 + 1×2
+  = 8 + 14 + 18 + 20 + 20 + 18 + 14 + 80 + 2 = 194
+194 mod 97 = 0 , which is one of the three accepted remainders  →  valid
+```
+
+**Japan — `T7000012050002`.** The leading `T` is dropped, leaving thirteen digits.
+
+```formula
+weights 1,2,1,2,… applied to digits 2..13 read RIGHT to LEFT:
+digits 2..13 = 000012050002 ; read right to left: 2,0,0,0,5,0,2,1,0,0,0,0
+1×2 + 2×0 + 1×0 + 2×0 + 1×5 + 2×0 + 1×2 + 2×1 + 1×0 + 2×0 + 1×0 + 2×0
+  = 2 + 0 + 0 + 0 + 5 + 0 + 2 + 2 = 11
+11 mod 9 = 2 ;  check = 9 − 2 = 7
+first digit = 7  →  valid
+```
+
+**Venezuela — `V-12345678-1`.** The kind letter V gives a kind digit of one.
+
+```formula
+checksum = 1 × 4 + ( 3×1 + 2×2 + 7×3 + 6×4 + 5×5 + 4×6 + 3×7 + 2×8 )
+         = 4 + ( 3 + 4 + 21 + 24 + 25 + 24 + 21 + 16 ) = 4 + 138 = 142
+142 mod 11 = 10 ;  check = 11 − 10 = 1 , not greater than nine
+last digit = 1  →  valid
+```
+
+**Uruguay — `219999830019`.** Twelve digits; the first two lie between `01` and `22`; characters
+three to eight are not all zero; characters nine to eleven are `001`.
+
+```formula
+weights 4,3,2,9,8,7,6,5,4,3,2 over "21999983001"
+4×2 + 3×1 + 2×9 + 9×9 + 8×9 + 7×9 + 6×8 + 5×3 + 4×0 + 3×0 + 2×1
+  = 8 + 3 + 18 + 81 + 72 + 63 + 48 + 15 + 0 + 0 + 2 = 310
+check = ( − 310 ) mod 11 = 9
+last digit = 9  →  valid
+```
+
+**Brazil, legal person — a constructed example.**
+
+```formula
+body = 112223330001
+first check digit:
+  5×1 + 4×1 + 3×2 + 2×2 + 9×2 + 8×3 + 7×3 + 6×3 + 5×0 + 4×0 + 3×0 + 2×1
+    = 5 + 4 + 6 + 4 + 18 + 24 + 21 + 18 + 0 + 0 + 0 + 2 = 102
+  ( 11 − 102 ) mod 11 mod 10 = ( −91 ) mod 11 mod 10 = 8 mod 10 = 8
+second check digit, over the twelve values plus the first check digit:
+  6×1 + 5×1 + 4×2 + 3×2 + 2×2 + 9×3 + 8×3 + 7×3 + 6×0 + 5×0 + 4×0 + 3×1 + 2×8
+    = 6 + 5 + 8 + 6 + 4 + 27 + 24 + 21 + 0 + 0 + 0 + 3 + 16 = 120
+  ( 11 − 120 ) mod 11 mod 10 = ( −109 ) mod 11 mod 10 = 1
+the complete number is 11222333000181
+```
+
+**Taiwan — `04595257`.** The seventh digit is five, not seven, so the simple branch applies.
+
+```formula
+multipliers 1,2,1,2,1,2,4,1 against 0,4,5,9,5,2,5,7
+products = 0, 8, 5, 18, 5, 4, 20, 7
+digit sum = 0 + 8 + 5 + (1+8) + 5 + 4 + (2+0) + 7 = 40
+40 mod 5 = 0  →  valid
+```
+
+Under the older rule the test was a division by ten, and forty would have failed.
+
+**Turkey, natural person — a constructed example.**
+
+```formula
+body = 123456789
+check1 = ( 10 − ( 3×1 + 1×2 + 3×3 + 1×4 + 3×5 + 1×6 + 3×7 + 1×8 + 3×9 ) ) mod 10
+       = ( 10 − ( 3 + 2 + 9 + 4 + 15 + 6 + 21 + 8 + 27 ) ) mod 10
+       = ( 10 − 95 ) mod 10 = 5
+check2 = ( 5 + ( 1+2+3+4+5+6+7+8+9 ) ) mod 10 = ( 5 + 45 ) mod 10 = 0
+the complete number is 12345678950
+```
+
+**Mozambique — a constructed example.**
+
+```formula
+body = 12345678
+8×1 + 9×2 + 4×3 + 5×4 + 6×5 + 7×6 + 8×7 + 9×8
+  = 8 + 18 + 12 + 20 + 30 + 42 + 56 + 72 = 258
+258 mod 11 = 5
+character at position 5 of "01234567891" is "5"
+the complete number is 123456785
+```
+
+**Montenegro — a constructed example.**
+
+```formula
+body = 1234567
+8×1 + 7×2 + 6×3 + 5×4 + 4×5 + 3×6 + 2×7 = 8 + 14 + 18 + 20 + 20 + 18 + 14 = 112
+check = ( ( − 112 ) mod 11 ) mod 10 = 9 mod 10 = 9
+the complete number is 12345679
+```
+
+**North Macedonia — a constructed example.**
+
+```formula
+body = 123456789012
+7×1 + 6×2 + 5×3 + 4×4 + 3×5 + 2×6 + 7×7 + 6×8 + 5×9 + 4×0 + 3×1 + 2×2
+  = 7 + 12 + 15 + 16 + 15 + 12 + 49 + 48 + 45 + 0 + 3 + 4 = 226
+check = ( ( − 226 ) mod 11 ) mod 10 = 5
+the complete number is 1234567890125
+```
+
+**Paraguay — a constructed example.**
+
+```formula
+body = 80000000 , read right to left with the weights 2,3,4,5,6,7,8,9
+2×0 + 3×0 + 4×0 + 5×0 + 6×0 + 7×0 + 8×0 + 9×8 = 72
+check = ( ( − 72 ) mod 11 ) mod 10 = 5
+the complete number is 800000005
+```
+
+**Guatemala — a constructed example.**
+
+```formula
+body = 1120122 , read right to left with the weights 2,3,4,5,6,7,8
+c = ( − ( 2×2 + 3×2 + 4×1 + 5×0 + 6×2 + 7×1 + 8×1 ) ) mod 11
+  = ( − ( 4 + 6 + 4 + 0 + 12 + 7 + 8 ) ) mod 11 = ( − 41 ) mod 11 = 3
+check character = "3"
+the complete number is 11201223
+```
+
+**Israel — a constructed example.** Nine digits beginning with five and satisfying the doubling
+checksum: taking `500000009`, the checksum is four, so the number is **not** valid; the smallest
+valid nine-digit number beginning with five is obtained by adjusting the last digit so that the
+checksum reaches zero.
+
+### 15.7 The example quoted for each country
+
+The error message quotes one example per country. Where the example is a sentence rather than a
+number, the sentence is reproduced.
+
+| Country | Example quoted |
+|---|---|
+| Albania | `ALJ91402501L` |
+| Argentina | `20055361682` |
+| Austria | `ATU12345675` |
+| Australia | `83 914 571 673` |
+| Belgium | `BE0477472701` |
+| Bulgaria | `BG1234567892` |
+| Brazil | either eleven digits for a natural person or fourteen characters for a legal person |
+| Costa Rica | `3101012009` |
+| Switzerland | `CHE-123.456.788 TVA` or `CHE-123.456.788 MWST` or `CHE-123.456.788 IVA` |
+| Chile | `76086428-5` |
+| Colombia | `213123432-1` |
+| Cyprus | `CY10259033P` |
+| Czechia | `CZ12345679` |
+| Germany | `DE123456788` or `12/345/67890` |
+| Denmark | `DK12345674` |
+| Dominican Republic | `1-01-85004-3` or `101850043` |
+| Ecuador | `1792060346001` or `1792060346` |
+| Estonia | `EE123456780` |
+| Spain | `ESA12345674` |
+| Finland | `FI12345671` |
+| France | `FR23334175221` |
+| United Kingdom | `GB123456782` or `XI123456782` |
+| Greece | `EL123456783` |
+| Hungary | `HU12345676` or `12345678-1-11` or `8071592153` |
+| Croatia | `HR01234567896` |
+| Indonesia | `1234567890123456` |
+| Ireland | `IE1234567FA` |
+| Israel | nine digits respecting the doubling checksum |
+| India | `12AAAAA1234AAZA` |
+| Iceland | `IS062199` |
+| Italy | `IT12345670017` |
+| Japan | `T7000012050002` |
+| Korea | `123-45-67890` or `1234567890` |
+| Lithuania | `LT123456715` |
+| Luxembourg | `LU12345613` |
+| Latvia | `LV41234567891` |
+| Morocco | `12345678` |
+| Monaco | `FR53000004605` |
+| Malta | `MT12345634` |
+| Mexico | `GODE561231GR8` |
+| Netherlands | `NL123456782B90` |
+| Norway | `NO123456785` |
+| New Zealand | `49-098-576` or `49098576` |
+| Peru | `10XXXXXXXXY` or `20XXXXXXXXY` or `15XXXXXXXXY` or `16XXXXXXXXY` or `17XXXXXXXXY` |
+| Philippines | `123-456-789-123` |
+| Poland | `PL1234567883` |
+| Portugal | `PT123456789` |
+| Romania | `RO1234567897` or `8001011234567` or `9000123456789` |
+| Serbia | `RS101134702` |
+| Russia | `123456789047` |
+| Sweden | `SE123456789701` |
+| Slovenia | `SI12345679` |
+| Slovakia | `SK2022749619` |
+| San Marino | `SM24165` |
+| Thailand | `1234545678781` |
+| Turkey | eleven digits for a natural person or ten digits for a company |
+| Ukraine | `12345678` or `UA12345678`, `1234567890`, or `123456789012` |
+| Uruguay | twelve digits, all numbers, valid check digit, for example `219999830019` |
+| Uzbekistan | `123456789` for a company or `12345678901234` for an individual |
+| Venezuela | `V-12345678-1`, `V123456781` or `V-12.345.678-1` |
+| Northern Ireland | `XI123456782` |
+| Saudi Arabia | fifteen digits, the first and the last being a three |
+
+### 15.8 Implementation checklist for the number checks
+
+1. Implement the six shared primitives of section 15.2 exactly, including the "or ten" and "or
+   thirty-six" folds of the recursive schemes and the base-thirty-six expansion of the modulus
+   ninety-seven over ten.
+2. Implement the cleaning rules **per country**: they differ in which characters are removed and
+   whether the country prefix is dropped.
+3. Implement the pipeline of section 15.1 before any country routine; in particular the prefix
+   translation for Greece and Northern Ireland, the union retry and the doubled-prefix test.
+4. Where a country accepts several kinds of number, try them in the stated order and accept when
+   any of them succeeds.
+5. Where the specification says "no check digit", do **not** invent one: the number is accepted on
+   its shape alone.
+6. Where a country has no routine at all, accept the number unchanged.
+7. Normalise **before** checking, and store the normalised form.
+8. Return both the normalised number and the country code the number was validated for; the caller
+   uses the second value to decide whether a fiscal position requiring a registration matches.

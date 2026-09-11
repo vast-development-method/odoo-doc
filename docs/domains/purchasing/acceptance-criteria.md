@@ -696,7 +696,7 @@ Unless a scenario says otherwise, assume:
 - **When** Bea chooses a line on another one.
 - **Then** the confirmed order's line is **not** cleared and a notification appears with the
   title *Some not cleared* and the message *Some quantities were not cleared because their
-  status is not a RFQ status.*
+  status is not a request for quotation status.*
 
 **7.3 Choosing when there is nothing to clear**
 
@@ -850,7 +850,7 @@ Unless a scenario says otherwise, assume:
 
 - **Given** one draft request and one confirmed order selected together.
 - **When** *Merge RFQs* is pressed.
-- **Then** it is refused with *Please select at least two purchase orders with state RFQ and RFQ
+- **Then** it is refused with *Please select at least two purchase orders with state request for quotation and request for quotation
   sent to merge.*
 
 **9.4 Records that do not share a merge key**

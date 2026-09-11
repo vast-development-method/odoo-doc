@@ -445,3 +445,359 @@ longer exists. Only then is the record removed.
 
 Deletion is restricted by access rights: salespeople may create and modify leads but may not delete
 them; only the sales administrator group may.
+
+---
+
+## 2. Stage
+
+**Stage** (`crm.stage`, table `crm_stage`).
+
+### 2.1 Purpose
+
+A Stage is one column of the pipeline. It expresses how far a deal has progressed. Stages are
+ordered by a sequence number; the further along the sequence, the closer to a decision. A stage
+may be flagged as a won stage, which makes every record in it a won deal.
+
+A stage may be global (available to every team) or restricted to a set of teams.
+
+### 2.2 Field table
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Stage name (`name`) | single line text | **Required.** Translatable. |
+| Sequence (`sequence`) | integer | Default 1. Lower means earlier in the pipeline. |
+| Is won stage (`is_won`) | boolean | Default false. When true, every lead in this stage is treated as won and must carry probability 100. |
+| Days to rot (`rotting_threshold_days`) | integer | Default 0. A record that has not been updated for more than this many days is highlighted as rotting. Zero disables the feature. Changing the value does not retroactively alter the rotting state of records last updated before the change. |
+| Requirements (`requirements`) | long text | Internal guidance shown as a tooltip on the stage title, for example "Offer sent to customer". |
+| Sales Teams (`team_ids`) | many-sided link to Sales Team | Empty means the stage is available to every team. On delete of a team: **restricted**. |
+| Folded in pipeline (`fold`) | boolean | When true the column is collapsed in the pipeline view when it holds no record. |
+| Team count (`team_count`) | integer | Not stored, interface only. The total number of teams in the database (used to decide whether to display the team restriction widget). |
+| Colour (`color`) | integer | Presentation only. |
+
+### 2.3 Ordering and display
+
+- **Default ordering**: sequence ascending, then name, then identifier.
+- **Display name**: the value of `name`.
+
+### 2.4 Side effects of writing
+
+Writing the won flag has a cascading effect, because a lead in a won stage must have probability
+100:
+
+1. Perform the write.
+2. If the won flag was part of the write, collect **all** leads whose stage is one of the written
+   stages.
+3. If the flag was set to true, force those leads to probability 100 and automated probability 100.
+4. If the flag was set to false, recompute the probability of those leads from the automatic
+   computation.
+
+Because this can touch a large number of records, the interface warns the user before saving with
+the title "Do you really want to update this stage?" and the message "Changing the value of 'Is Won
+Stage' may induce a large number of operations, as the probabilities of opportunities in this stage
+will be recomputed on saving." The warning is suppressed when the stage is being created.
+
+### 2.5 Archival, multi-company, deletion
+
+A Stage has no active flag and no company: stages are global to the database and are shared across
+companies. A stage that is referenced by at least one lead cannot be deleted, because the reference
+from the lead is restrictive.
+
+---
+
+## 3. Tag
+
+**Tag** (`crm.tag`, table `crm_tag`).
+
+### 3.1 Purpose
+
+A free classification label attached to leads and opportunities (and, where the sales capability is
+present, to sales documents as well). Tags are used for reporting and, importantly, as a predictive
+variable: a tag can raise or lower the computed probability.
+
+### 3.2 Field table
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Tag name (`name`) | single line text | **Required.** Translatable. **Unique** across the database. |
+| Colour (`color`) | integer | Default: a pseudo-random integer between 1 and 11 inclusive, drawn at creation. |
+
+### 3.3 Uniqueness
+
+A stored uniqueness rule on the name rejects a duplicate with the message "Tag name already
+exists!".
+
+### 3.4 Ordering and display
+
+- **Default ordering**: identifier.
+- **Display name**: the value of `name`.
+
+---
+
+## 4. Lost Reason
+
+**Lost Reason** (`crm.lost.reason`, table `crm_lost_reason`).
+
+### 4.1 Purpose
+
+A reusable explanation of why a deal was lost. Recording it turns the loss into a measurable fact.
+
+### 4.2 Field table
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Description (`name`) | single line text | **Required.** Translatable. |
+| Active (`active`) | boolean | Default true. Archiving a reason keeps it on the historical records but removes it from the selection list. |
+| Leads count (`leads_count`) | integer | Not stored. The number of leads carrying this reason, counted **including archived leads** — which is essential, since a lost lead is archived. |
+
+### 4.3 Default records
+
+Three reasons are created on installation and are not overwritten afterwards: "Too expensive", "We
+don't have people/skills" and "Not enough stock".
+
+### 4.4 Ordering, display, deletion
+
+- **Default ordering**: identifier.
+- **Display name**: the value of `name`.
+- A reason that is referenced by a lead cannot be deleted, because the reference is restrictive.
+
+---
+
+## 5. Recurring Plan
+
+**Recurring Plan** (`crm.recurring.plan`, table `crm_recurring_plan`).
+
+### 5.1 Purpose
+
+A named duration expressed in months. It is the divisor that turns a recurring revenue quoted over
+a whole term into a monthly figure.
+
+### 5.2 Field table
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Plan name (`name`) | single line text | **Required.** Translatable. |
+| Number of months (`number_of_months`) | integer | **Required.** Must be greater than or equal to zero (stored check). A plan with zero months behaves, in the monthly conversion, as a plan of one month — see `calculations.md`. |
+| Active (`active`) | boolean | Default true. |
+| Sequence (`sequence`) | integer | Default 10. Determines the order of the selection list. |
+
+### 5.3 Constraint
+
+The stored check on the number of months rejects a negative value with the message "The number of
+month can't be negative."
+
+### 5.4 Default records
+
+Four plans are created on installation and are not overwritten afterwards:
+
+| Name | Months |
+|---|---|
+| Monthly | 1 |
+| Yearly | 12 |
+| Over 3 years | 36 |
+| Over 5 years | 60 |
+
+### 5.5 Ordering and display
+
+- **Default ordering**: sequence.
+- **Display name**: the value of `name`.
+
+---
+
+## 6. Scoring Frequency
+
+**Scoring Frequency** (`crm.lead.scoring.frequency`, table `crm_lead_scoring_frequency`).
+
+### 6.1 Purpose
+
+One cell of the frequency table that drives the predictive probability. A cell records, for one
+Sales Team (or for "no team"), one variable and one value of that variable, how many won deals and
+how many lost deals carried that value.
+
+Counts are stored as decimals, not integers, because the table is deliberately seeded with a
+fractional increment of one tenth to avoid zero frequencies (see `calculations.md`, section on the
+zero-frequency correction).
+
+### 6.2 Field table
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Variable (`variable`) | single line text | The storage name of the lead field the cell is about, for example `stage_id`, `country_id`, `email_state`, or the special value `tag_id` used for individual tags. Indexed. |
+| Value (`value`) | single line text | The value of that variable, **always stored as text**: a numeric identifier is stored as its decimal representation, a selection value as its technical value, a boolean absence as the text `False`. |
+| Won count (`won_count`) | decimal with one decimal place | The number of won deals carrying this variable and value. |
+| Lost count (`lost_count`) | decimal with one decimal place | The number of lost deals carrying this variable and value. |
+| Sales Team (`team_id`) | link to Sales Team | The team the cell belongs to. Empty means the cell is the aggregate "no team" bucket. On delete of the team: **cascade** — but see the team deletion routine in section 9.5, which first folds the counts into the "no team" bucket. |
+
+### 6.3 Uniqueness
+
+There is no stored uniqueness rule on the triple (team, variable, value). Uniqueness is maintained
+procedurally by the update routine, which looks up an existing cell before creating one.
+
+### 6.4 Ordering and display
+
+- **Default ordering**: identifier. The probability computation explicitly reads the table ordered
+  by team ascending, then identifier, so that the per-team grouping is contiguous.
+- **Display name**: the identifier.
+
+---
+
+## 7. Scoring Frequency Field
+
+**Scoring Frequency Field** (`crm.lead.scoring.frequency.field`, table
+`crm_lead_scoring_frequency_field`).
+
+### 7.1 Purpose
+
+The catalogue of Lead fields that an administrator may select as predictive variables. Selecting a
+field here does not by itself activate it; activation happens when the field's storage name is
+written into the configuration parameter listing the scoring variables.
+
+### 7.2 Field table
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Field (`field_id`) | link to Model Field | **Required.** Restricted to fields of the Lead model. On delete: **cascade**. |
+| Field label (`name`) | single line text | Related to the field's description; read-only; translatable. |
+| Colour (`color`) | integer | Default: a pseudo-random integer between 1 and 11 inclusive. |
+
+### 7.3 Default records
+
+Seven catalogue entries are created on installation, for the Lead fields `state_id` (state),
+`country_id` (country), `phone_state` (telephone quality), `email_state` (electronic mail quality),
+`source_id` (source), `lang_id` (language) and `tag_ids` (tags).
+
+### 7.4 Ordering and display
+
+- **Default ordering**: identifier.
+- **Display name**: the field label.
+
+---
+
+## 8. Shared routines referenced by the Lead computations
+
+These routines are used by more than one computed field and by the wizards. They are specified once
+here and referred to by number elsewhere.
+
+### 8.1 Stage search
+
+**Inputs**: an optional team identifier, an optional extra filter, an ordering (default: sequence
+then identifier) and a limit (default: one).
+
+1. Build the set of relevant team identifiers: the supplied team identifier if any, plus the team
+   of every record in the current selection.
+2. If the set is non-empty, the base filter is "the stage has no team restriction **or** the
+   stage's teams include one of the relevant teams". If the set is empty, the base filter is "the
+   stage has no team restriction".
+3. Add the extra filter if supplied.
+4. Search stages with that filter, that ordering and that limit and return them.
+
+### 8.2 Default team selection
+
+**Inputs**: an optional user (default: the acting user) and an optional extra filter.
+
+Let the *valid company set* be the empty company plus every company that is both among the target
+user's allowed companies and among the companies currently enabled for the acting user. Let the
+*context default team* be the team named by a default supplied in the calling context, if any.
+
+1. Search the teams whose company is in the valid company set and where the target user is either
+   the leader or a member. Call this set *my teams*, ordered by the entity's default ordering
+   (sequence ascending, then creation date descending, then identifier descending).
+2. If *my teams* is non-empty **and** an extra filter was supplied: narrow *my teams* by the
+   filter. If the context default team is in the narrowed set, return it; otherwise return the
+   first of the narrowed set.
+3. Otherwise, if *my teams* is non-empty: if the context default team is in *my teams*, return it;
+   otherwise return the first of *my teams*.
+4. Otherwise, if a context default team exists, return it.
+5. Otherwise, search all teams whose company is in the valid company set. If an extra filter was
+   supplied, return the first team matching it. If none matches or no filter was supplied, return
+   the first team of that search.
+6. If nothing is found, return nothing.
+
+### 8.3 Address block synchronisation
+
+**Input**: a Contact (possibly empty).
+
+1. If **any** of the six address fields of the Contact is non-empty, the result is the Contact's
+   values for all six fields — including the empty ones, so that an address is never mixed between
+   two sources.
+2. Otherwise the result is the lead's own current values for all six fields — that is, nothing
+   changes.
+
+### 8.4 Contact electronic mail update test
+
+**Input**: a flag "force empty" (default: true). **Output**: true when the Contact's address ought
+to be replaced by the lead's.
+
+1. If the lead has no Contact, the answer is false.
+2. If "force empty" is false **and** the lead's address is empty, the answer is false. (This guard
+   stops an empty lead value from erasing a valid Contact value.)
+3. If the lead's raw address text equals the Contact's raw address text, the answer is false.
+4. Normalise both addresses (strip the display name, lower-case); if either cannot be normalised,
+   fall back to the raw text, and treat an empty string as an absence.
+5. The answer is true when the two normalised values differ.
+
+### 8.5 Contact telephone update test
+
+Identical in shape to section 8.4, with one difference: instead of normalising, both numbers are
+formatted using the telephone formatting routine (which uses the record's country and the
+company's country), falling back to the raw text when formatting fails, and treating an empty
+string as an absence.
+
+### 8.6 Values to copy from a Contact onto a Lead
+
+**Input**: a Contact. **Output**: a set of lead values.
+
+1. Start from the address block of section 8.3.
+2. For each of the fields telephone, job position and website: take the Contact's value if it is
+   non-empty, otherwise keep the lead's current value.
+3. If the Contact has a language code, resolve it to a Language record and set the lead's language
+   to it.
+4. Apply the contact-name rule of section 1.4.6 and the company-name rule of section 1.4.7.
+
+### 8.7 Values to create a Contact from a Lead
+
+**Inputs**: a name, a flag "is a company", a parent identifier.
+
+The created Contact receives:
+
+| Contact field | Value taken from the lead |
+|---|---|
+| `name` | the supplied name |
+| `user_id` | the salesperson named as a default in the calling context, otherwise the lead's salesperson |
+| `comment` | the lead's notes |
+| `phone` | the lead's telephone |
+| `email` | the **first** address extracted from the lead's electronic mail field |
+| `function` | the lead's job position |
+| `street`, `street2`, `zip`, `city`, `country_id`, `state_id` | the lead's address block |
+| `website` | the lead's website |
+| `parent_id` | the supplied parent identifier |
+| `is_company` | the supplied flag |
+| `company_name` | the lead's company name, but **only** when the new Contact is not itself a company and has no parent |
+| `type` | the fixed value `contact` |
+| `lang` | the lead's language code, but only when that language is active |
+| `partner_latitude`, `partner_longitude` | the lead's geographic coordinates, when the partner network capability is present |
+
+### 8.8 Customer creation from a Lead
+
+**Input**: an optional parent Contact. **Output**: the Contact to link.
+
+1. Determine the individual's name: the lead's contact name if set; otherwise the name part parsed
+   out of the lead's electronic mail address; otherwise nothing.
+2. Determine the organisation Contact:
+   - if a parent was supplied, that parent;
+   - otherwise, if the lead has a company name, **create** a Contact flagged as a company with that
+     name using the values of section 8.7;
+   - otherwise, if the lead already has a Contact, that Contact;
+   - otherwise nothing.
+3. If an individual's name was determined, **create** a Contact with that name, not flagged as a
+   company, whose parent is the organisation Contact determined above (possibly empty), and return
+   it.
+4. Otherwise, if an organisation Contact exists, return it.
+5. Otherwise, **create** a Contact named after the lead's title, not flagged as a company, and
+   return it.
+
+### 8.9 Matching an existing Contact
+
+1. If the lead already has a Contact, return it.
+2. Otherwise, if the lead has a normalised or raw electronic mail address, look up a Contact by
+   that address **without creating one**, and return the result.
+3. Otherwise return nothing.

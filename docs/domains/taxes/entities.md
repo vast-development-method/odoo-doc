@@ -147,7 +147,7 @@ The analytic distribution written on the tax Journal Item produced by a distribu
 
 ```formula
 analytic_distribution_of_tax_line =
-    analytic_distribution_of_base_line          if tax.analytic OR NOT distribution_line.use_in_tax_closing
+    analytic_distribution_of_base_line          if tax.analytic or not distribution_line.use_in_tax_closing
     empty                                       otherwise
 ```
 
@@ -577,8 +577,8 @@ A withholding line is treated as belonging to a refund — and therefore uses th
 distribution of its tax — when:
 
 ```formula
-is_refund =  (tax_type = 'sale'     AND payment_direction = 'outbound')
-          OR (tax_type = 'purchase' AND payment_direction = 'inbound')
+is_refund =  (tax_type = 'sale'     and payment_direction = 'outbound')
+          or (tax_type = 'purchase' and payment_direction = 'inbound')
 ```
 
 ---

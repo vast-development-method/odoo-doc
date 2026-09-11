@@ -288,12 +288,12 @@ document:
 
 ```
 computation kind equals the read kind
-AND tax type equals the read type
-AND amount equals the read amount
-AND, when the read values came from an invoice being predicted, country equals that invoice's tax country
-AND, when a name was read, name equals it
-AND, when an exigibility was read, exigibility equals it
-AND, when a document-format tax category code was read and the field exists,
+and tax type equals the read type
+and amount equals the read amount
+and, when the read values came from an invoice being predicted, country equals that invoice's tax country
+and, when a name was read, name equals it
+and, when an exigibility was read, exigibility equals it
+and, when a document-format tax category code was read and the field exists,
     that code is the read one or empty
 ```
 
