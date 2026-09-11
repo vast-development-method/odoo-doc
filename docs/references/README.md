@@ -31,6 +31,8 @@ An entity page is the fastest way to answer "what does this record hold and what
 | [Sequences](sequences.md) | Every numbering sequence with its format |
 | [Groups and access](groups-and-access.md) | Every group, every access right and every record rule |
 | [Validation messages](validation-messages.md) | Every user-facing message with the entity and operation that raises it |
+| [State fields](state-fields.md) | Every state field with its stored values and labels, linked to the document that specifies its transitions |
+| [Selection values](selection-values.md) | Every field whose value comes from a fixed set, with the complete set |
 
 ## Data and packaging
 
