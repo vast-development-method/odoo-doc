@@ -18,7 +18,7 @@ These are stored on the Company (`res.company`, table `res_company`) and are the
 | Discount Product (`sale_discount_product_id`) | Link to Product Variant | empty | The product carried by the lines the global-discount dialogue creates. Restricted to service products invoiced on ordered quantities. Created on demand. |
 | Downpayment Account (`downpayment_account_id`) | Link to Account | empty | Overrides the account used on advance-invoice lines. Restricted to accounts of the income, other-income and current-liability types. Tracked. |
 | Default Sale Template (`sale_order_template_id`) | Link to Quotation Template | empty | Applied to every new quotation of the company. Cleared automatically when the quotation-template feature is switched off or when the template is archived. |
-| Sale onboarding payment method (`sale_onboarding_payment_method`) | Selection | empty | Records the guided-setup choice: `digital_signature` "Sign online", `paypal`, `stripe`, `other` "Pay with another payment provider", `manual` "Manual Payment". |
+| Sale onboarding payment method (`sale_onboarding_payment_method`) | Selection | empty | Records the guided-setup choice. Values: `digital_signature` "Sign online"; `paypal` and `stripe`, each naming one specific third-party payment provider offered by the guided setup; `other` "Pay with another payment provider"; `manual` "Manual Payment". |
 
 ---
 

@@ -479,3 +479,118 @@ The labels of the two aggregate lines become *«document number» - private part
 - It produces no entry when a document is **cancelled**, **reset to draft**, **uploaded**, **decoded**, **marked reviewed**, or **detected as a duplicate**.
 - It produces no entry when a cheque is **printed**, **unmarked as sent** or **renumbered**; only posting and voiding move the ledger.
 - The **analysis report** is a read-only view and produces nothing.
+
+---
+
+## 13. Consequences on the payable side of mechanisms owned by other domains
+
+These entries are **not** produced by this domain, but they are produced *because* of a purchase document, and an implementation that omits them will not balance. Each is fully specified where indicated.
+
+### 13.1 Cash-basis taxes on a bill
+
+When a purchase tax is exigible **on payment** rather than on invoice, posting the bill books the tax to the tax's **transition account** instead of the definitive tax account, and stamps no tax reporting grid on it. Then, each time a payable term line of that bill is partially reconciled, a **cash basis entry** is created in the company's cash basis journal, moving the paid proportion of the base and of the tax from the transition account to the definitive accounts and stamping the grids.
+
+The proportion is the share of the document total that the partial reconciliation settles. Unreconciling reverses the cash basis entry. A cash basis entry can never be reset to draft.
+
+The payable-side consequences to be aware of here:
+
+- a bill that carries only cash-basis taxes is **always tax exigible** only if it has no payable line, which it always has, so the flag is false and the tax lines wait for payment;
+- resetting the bill to draft after a partial payment is refused, because the reconciliation protection fires first;
+- posting a bill whose reconciliation's cash basis input values have changed deletes the stale cash basis entry so that the user must redo the reconciliation.
+
+Full specification: `../taxes/accounting-effects.md`.
+
+### 13.2 Exchange differences when paying a foreign-currency bill
+
+When a payable term line written in a foreign currency is reconciled against a payment booked at a different rate, the residual in company currency does not reach zero even though the residual in document currency does. The reconciliation therefore creates an **exchange difference entry** in the company's exchange journal, with one line on the payable account clearing the company-currency remainder and one line on the exchange gain or loss account.
+
+The payable-side consequences:
+
+- the exchange difference entry is **linked to the partial reconciliation**, and unreconciling reverses or deletes it;
+- an exchange difference entry can never be reset to draft, and it can never be deleted;
+- posting a draft bill that is already reconciled drags the related exchange difference entry into the same posting batch.
+
+Full specification: `../multi-currency/accounting-effects.md`.
+
+### 13.3 The outstanding payments account
+
+An outgoing payment does not touch the bank account directly: it credits the bank journal's **outstanding payments** account and debits the vendor's payable account. Only bank reconciliation moves the amount from the outstanding account to the bank account. This is why a cheque that has been written but not yet cashed leaves the payment in the `in_process` status and, in an installation that enables the value, leaves the bill in `in_payment`.
+
+When the journal's outstanding account is a **cash** account, posting goes straight to `paid`, because there is nothing to wait for.
+
+Full specification: `../payments-and-bank-reconciliation/accounting-effects.md`.
+
+### 13.4 Stock valuation on a bill line
+
+For a stockable product under perpetual valuation, the expense account of a bill line is replaced by the **stock input** account, and any difference between the standard price and the billed price is booked to the company's **price difference** account. The payable side contributes only the account substitution rule and the price difference account setting; the rest belongs to `../inventory-valuation-and-costing/`.
+
+### 13.5 Analytic lines
+
+Each expense line's analytic distribution creates one analytic line per analytic account named in the distribution, whose amount is the signed line balance times the distribution percentage. They are created in one batch at posting and deleted when the document is reset to draft. Tax lines of taxes flagged as analytic inherit the distribution of the base line that produced them.
+
+Full specification: `../analytic-accounting/`.
+
+---
+
+## 14. A complete worked ledger for one bill, from capture to settlement
+
+Bringing the pieces together. All amounts in Euro, the company currency.
+
+**Step 1 — the bill is posted** (the document of §2.5, `BILL/2026/01/0003`, 1 128.00 due 1 January 2026):
+
+| Account | Debit | Credit |
+|---|---|---|
+| 600000 Expenses | 800.00 | — |
+| 600100 Expenses (lamps) | 160.00 | — |
+| 131000 Tax Paid | 168.00 | — |
+| 400000 Account Payable | — | 1 128.00 |
+
+**Step 2 — a cheque of 400.00 is written on 20 January 2026** (`BNK1`, cheque number 00042):
+
+| Account | Label | Debit | Credit |
+|---|---|---|---|
+| 400000 Account Payable | Checks - 00042 | 400.00 | — |
+| 101402 Outstanding Payments | Checks - 00042 | — | 400.00 |
+
+reconciled against the bill's payable line for 400.00. Bill residual 728.00, status `partial`.
+
+**Step 3 — a vendor credit note of 208.00 is posted on 5 February 2026** (`RBILL/2026/02/0001`):
+
+| Account | Debit | Credit |
+|---|---|---|
+| 600100 Expenses (lamps) | — | 160.00 |
+| 131000 Tax Paid | — | 48.00 |
+| 400000 Account Payable | 208.00 | — |
+
+reconciled against the bill's payable line for 208.00. Bill residual 520.00, still `partial`; credit note residual 0, status `paid`.
+
+**Step 4 — a second cheque of 520.00 on 28 February 2026** (cheque number 00043):
+
+| Account | Label | Debit | Credit |
+|---|---|---|---|
+| 400000 Account Payable | Checks - 00043 | 520.00 | — |
+| 101402 Outstanding Payments | Checks - 00043 | — | 520.00 |
+
+Bill residual 0, status `paid` (or `in_payment` where the value is enabled).
+
+**Step 5 — the bank statement of 3 March 2026 clears both cheques**:
+
+| Account | Debit | Credit |
+|---|---|---|
+| 101402 Outstanding Payments | 920.00 | — |
+| 101401 Bank | — | 920.00 |
+
+Both payments become `paid`; the bill's status settles at `paid`.
+
+**Net position on each account**
+
+| Account | Net | Reading |
+|---|---|---|
+| 600000 Expenses | 800.00 debit | the chair was bought |
+| 600100 Expenses (lamps) | 0.00 | the lamps were bought and returned |
+| 131000 Tax Paid | 120.00 debit | the reclaimable tax, net of the return |
+| 400000 Account Payable | 0.00 | the supplier is square |
+| 101402 Outstanding Payments | 0.00 | both cheques cleared |
+| 101401 Bank | 920.00 credit | the money left |
+
+and 800.00 + 120.00 = 920.00. ✓

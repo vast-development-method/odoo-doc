@@ -314,7 +314,7 @@ See [`state-machines.md`](state-machines.md) sections 1.6 and 1.3. Summarised:
 
 - Blocking a paid or in-payment document:
   > You can't block a paid invoice.
-- The legacy payment status is never overwritten by the computation.
+- The imported-balance payment status (`invoicing_legacy`) is never overwritten by the computation.
 - The blocked payment status is never overwritten by the computation; it is cleared only by the
   toggle.
 

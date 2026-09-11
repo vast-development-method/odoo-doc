@@ -4,6 +4,14 @@ Each workflow is given as: who performs it, what must be true before it starts, 
 numbered steps, what records are created or changed at each step, and what is true when
 it ends. Cross-references point at the formulas and the journal entries.
 
+> **Reproduced text.** Quoted, bolded strings in this file are user-facing text the
+> system emits character for character — error messages, selection labels, button
+> labels, action titles. Where such a string contains an abbreviation it belongs to
+> the emitted string, not to this specification's prose: "FIFO" stands for *first in
+> first out*, "AVCO" for *average cost*, "WIP" for *work in progress*, "MOs" for
+> *manufacturing orders*, "BoM" for *bill of materials*, `STJ` for the inventory
+> valuation journal code and `LC/` for the landed cost sequence prefix.
+
 Roles referred to throughout:
 
 | Role | Meaning |
@@ -24,7 +32,7 @@ mode field is readable only by an accounting read-only user or an inventory mana
 
 **Preconditions.** A chart of accounts is installed for the company. The company has an
 inventory journal and an inventory valuation account (both are set by the chart of
-accounts installation; see [configuration.md](configuration.md#installation)).
+accounts installation; see [configuration.md](configuration.md#16-installation-hooks-in-order)).
 
 **Steps.**
 
@@ -713,7 +721,7 @@ having a completed subcontracting movement.
 **Performed by.** Inventory manager.
 
 **Preconditions.** The transfer is completed. The fiscal lock constraint must allow the
-change (see [business-rules.md](business-rules.md#fiscal-lock-on-transfer-dates)).
+change (see [business-rules.md](business-rules.md#71-fiscal-lock-on-transfer-dates)).
 
 **Steps.**
 
@@ -724,7 +732,7 @@ change (see [business-rules.md](business-rules.md#fiscal-lock-on-transfer-dates)
 3. The write happens; the stock quantity records are updated by the inventory operations
    domain.
 4. The re-valuation rule runs
-   ([entities.md](entities.md#7-stock-quantity-stockquant-table-stock_quant)):
+   ([entities.md](entities.md#7-stock-quantity-stockquant-table-stockquant)):
    - an **incoming** movement is fully re-valued from the priority chain — which, for a
      receipt against a purchase order, re-reads the order price for the new quantity;
    - an **outgoing** movement has its value **scaled** by the ratio of the new quantity to

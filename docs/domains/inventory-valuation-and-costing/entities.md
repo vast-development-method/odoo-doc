@@ -20,6 +20,14 @@ Field tables use three columns:
 Unless stated otherwise: a field is stored, writable, copied when the record is
 duplicated, not tracked, and not indexed.
 
+> **Reproduced text.** Quoted, bolded strings in this file are user-facing text the
+> system emits character for character — error messages, selection labels, button
+> labels, action titles. Where such a string contains an abbreviation it belongs to
+> the emitted string, not to this specification's prose: "FIFO" stands for *first in
+> first out*, "AVCO" for *average cost*, "WIP" for *work in progress*, "MOs" for
+> *manufacturing orders*, "BoM" for *bill of materials*, `STJ` for the inventory
+> valuation journal code and `LC/` for the landed cost sequence prefix.
+
 ---
 
 ## 1. Product Category (`product.category`, table `product_category`)
@@ -40,7 +48,7 @@ falls back to a company-level default; if that is also empty, the field is empty
 A category is created, edited and archived like any configuration record. It has no
 state field. Changing the costing method on a category triggers a recomputation of the
 unit cost of every product filed under it (see
-[calculations.md](calculations.md#costing-method-change)).
+[calculations.md](calculations.md#14-costing-method-change)).
 
 ### Fields added by this domain
 
@@ -73,7 +81,7 @@ When the costing method of a category changes:
 2. Every product filed under one of those categories is collected.
 3. The change is written.
 4. The unit cost of every collected product is recomputed with the new method (see
-   [calculations.md](calculations.md#costing-method-change)).
+   [calculations.md](calculations.md#14-costing-method-change)).
 5. For every collected product that has valuation by lot enabled, every lot of that
    product has its unit cost recomputed too.
 
@@ -83,7 +91,7 @@ Every valuation field is company dependent, so one category serves every company
 different settings. The company whose value is read is the company in the current scope.
 When a company is created, the company-level defaults are written as the fallback of the
 company-dependent fields for that company (see
-[configuration.md](configuration.md#company-creation-defaults)).
+[configuration.md](configuration.md#22-company-dependent-defaults-written-when-a-companys-category-defaults-are-set-up)).
 
 ---
 
@@ -237,7 +245,7 @@ These three are computed together. The algorithm, in order:
    that the current company's batch produced, falling back to the product's unit cost.
 
 The three batch routines are specified in
-[calculations.md](calculations.md#batch-valuation-routines).
+[calculations.md](calculations.md#4-batch-valuation-routines).
 
 ### Creation behaviour
 
@@ -352,7 +360,7 @@ own except in the adjustment dialog.
 ### Multi-company behaviour
 
 A record rule restricts visibility to records whose company is among the companies in the
-current scope (see [configuration.md](configuration.md#record-rules)).
+current scope (see [configuration.md](configuration.md#12-record-rules)).
 
 ---
 
@@ -387,7 +395,7 @@ closing balance — is derived from the values carried by movements.
 | Computed Value Description (`value_computed_justification`) | Text | Not stored. Computed. Empty unless the movement is incoming **and** the justification the movement would have with manual corrections ignored differs from the actual justification. Otherwise it reads **"Computed value: _the formatted value_"** followed by a newline and that alternative justification. This is what tells a reader that a manual correction is overriding a computable value. |
 | Manual Value (`value_manual`) | Monetary | Not stored. Computed as a mirror of the value field, with a write handler. Writing it creates a movement value correction record (see below). Exists so that a value can be set from a list view or a test without going through the dialog. |
 | Unit Cost (`standard_price`) | Float | Not stored. Computed: the unit cost of the product read in the company of the movement. Depends on the product's unit cost. Display figure used in the valuation list for products not using first in first out. |
-| Price Unit (`price_unit`) | Float | A unit price carried on the movement. Set by the manufacturing domain on finished-goods and by-product movements (see [calculations.md](calculations.md#production-value)). Read by the production branch of the value priority chain. |
+| Price Unit (`price_unit`) | Float | A unit price carried on the movement. Set by the manufacturing domain on finished-goods and by-product movements (see [calculations.md](calculations.md#8-production-value)). Read by the production branch of the value priority chain. |
 | Is Incoming (valued) (`is_in`) | Boolean | **Stored**, computed. Depends on the movement state and on its lines. False whenever the state is not completed. Otherwise: true when the movement has at least one line that counts as incoming and the movement is not a returned drop shipment. |
 | Is Outgoing (valued) (`is_out`) | Boolean | **Stored**, computed. Depends on the movement state and on its lines. False whenever the state is not completed. Otherwise: true when the movement has at least one line that counts as outgoing and the movement is not a drop shipment. |
 | Is Dropship (`is_dropship`) | Boolean | **Stored**, computed. Depends on the movement state. False whenever the state is not completed. Otherwise true when the movement is a drop shipment or a returned drop shipment. |
@@ -543,7 +551,7 @@ refresh.
   remembered quantity contributes its whole new quantity). If the delta is non-zero,
   re-value the movement **with that correction quantity**, which scales the existing
   value by *correction ÷ previous quantity* rather than re-running the costing method —
-  see [calculations.md](calculations.md#outgoing-correction).
+  see [calculations.md](calculations.md#23-outgoing-correction).
 
 Finally, all of the scheduled incoming movements are re-valued in one pass.
 
@@ -551,7 +559,7 @@ Finally, all of the scheduled incoming movements are re-valued in one pass.
 is excluded for valuation because of its owner, and it crosses the perimeter in either
 direction. The sum of such crossings, signed positive for outgoing and negative for
 incoming, is the *valued consigned quantity* used by the cost-of-goods-sold unit price
-(see [calculations.md](calculations.md#cost-of-goods-sold-unit-price)).
+(see [calculations.md](calculations.md#91-cost-of-goods-sold-unit-price-of-a-set-of-movements)).
 
 ---
 
@@ -784,7 +792,7 @@ The identifiers of the closing entries produced for a company are kept in a syst
 parameter named `<the company identifier>.stock_valuation_closing_ids`, holding a
 comma-separated list of journal entry identifiers, capped at the ten most recent (when an
 eleventh is appended, the oldest is dropped). See
-[configuration.md](configuration.md#system-parameters).
+[configuration.md](configuration.md#7-system-parameters).
 
 ---
 
@@ -826,10 +834,10 @@ display type is `cogs` is dropped from the copy.
 **Posting.** Unless the posting is being made to cancel another entry:
 
 1. The cost-of-goods-sold lines for customer invoices are built and created (see
-   [accounting-effects.md](accounting-effects.md#cost-of-goods-sold-at-the-customer-invoice)).
+   [accounting-effects.md](accounting-effects.md#2-cost-of-goods-sold-at-the-customer-invoice)).
 2. When the purchasing integration is installed, the price-difference lines for vendor
    bills under standard costing are built and created (see
-   [accounting-effects.md](accounting-effects.md#price-difference-at-the-vendor-bill)).
+   [accounting-effects.md](accounting-effects.md#4-price-difference-at-the-vendor-bill)).
 3. The generic posting runs.
 4. Every goods movement reachable from the lines of the entry that is incoming or a drop
    shipment is **re-valued**, because a newly posted bill changes the top of the value
@@ -897,13 +905,13 @@ landed value.
 ### Lifecycle
 
 Draft → Posted, or Draft → Cancelled. See
-[state-machines.md](state-machines.md#landed-cost-state-machine).
+[state-machines.md](state-machines.md#1-landed-cost-state-machine).
 
 ### Fields
 
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
-| Name (`name`) | Char | Read-only. Not copied. Tracked. Default: the literal text "New" until creation assigns a sequence number; see [configuration.md](configuration.md#sequences). |
+| Name (`name`) | Char | Read-only. Not copied. Tracked. Default: the literal text "New" until creation assigns a sequence number; see [configuration.md](configuration.md#8-sequences-and-numbering). |
 | Date (`date`) | Date | **Required.** Default: today in the user's time zone. Not copied. Tracked. Used as the date of the journal entry and as the cut-off when reading landed costs at a past date. |
 | Apply On (`target_model`) | Selection | **Required.** Default `picking`. Not copied. Values: `picking` — "Transfers"; and, when manufacturing landed costs are installed, `manufacturing` — "Manufacturing Orders" (with delete behaviour "set to default"). |
 | Transfers (`picking_ids`) | Many2many to Transfer (`stock.picking`) | Not copied. The transfers whose goods movements receive the cost. Cleared by an onchange whenever the target becomes something other than transfers. |
@@ -933,7 +941,7 @@ and an activity list. A state change to `done` is announced under the subtype na
 ### Deletion
 
 Deleting a document first attempts to cancel it, which refuses if it is posted (see
-[business-rules.md](business-rules.md#landed-cost-validations)). A draft or already
+[business-rules.md](state-machines.md#13-guard-failures-in-detail)). A draft or already
 cancelled document deletes, taking its cost lines and adjustment lines with it (both
 carry cascade delete).
 
@@ -1148,7 +1156,7 @@ worth, what does the ledger say it is worth, and what entry would reconcile the 
 11. Collect the accounts touched anywhere and read their names.
 
 The formulas behind steps 6, 7, 9 and 10 are in
-[calculations.md](calculations.md#inventory-valuation-closing).
+[calculations.md](calculations.md#11-the-inventory-valuation-closing).
 
 ---
 
@@ -1258,7 +1266,7 @@ on the bill line to the product's "is a landed cost" flag.
 ### Analytic Plan (`account.analytic.plan`) and Analytic Account (`account.analytic.account`)
 
 The distribution arithmetic used when mirroring a goods movement onto analytic lines is
-described in [calculations.md](calculations.md#analytic-distribution-of-a-movement).
+described in [calculations.md](calculations.md#12-analytic-distribution-of-a-movement).
 
 ### Analytic Line (`account.analytic.line`)
 
@@ -1276,7 +1284,7 @@ Order", with delete behaviour cascade.
 | Country Code (`country_code`) | Char | Not stored; reaches through the company to the code of its fiscal country. Used by localisations. |
 
 A constraint on the completion date refuses a date inside a locked fiscal period (see
-[business-rules.md](business-rules.md#fiscal-lock-on-transfer-dates)), and the
+[business-rules.md](business-rules.md#71-fiscal-lock-on-transfer-dates)), and the
 "is the date editable" computation additionally requires that a completed or cancelled
 transfer's date not fall in a locked period.
 

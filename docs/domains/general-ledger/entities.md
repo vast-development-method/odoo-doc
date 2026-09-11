@@ -1072,3 +1072,152 @@ The warning messages are:
 Running the wizard without a date fails with "Set a date. The moves will be secured up to including this date."
 
 ---
+
+## 17. Relations and deletion behavior
+
+The tables below list every relation that this domain owns, with the behavior when the target record is deleted. Three behaviors exist:
+
+| Behavior | Meaning |
+|---|---|
+| restrict | Deleting the target is refused while the link exists |
+| cascade | Deleting the target deletes the referring record |
+| clear | Deleting the target empties the link and leaves the referring record |
+
+"clear" is the behavior applied when nothing else is declared.
+
+### Relations of the Account
+
+| Link | Target | On deletion of the target | Notes |
+|---|---|---|---|
+| `company_ids` | Company | clear, then the "at least one company" validation refuses the result | |
+| `currency_id` | Currency | clear | |
+| `tag_ids` | Account Tag | **restrict** | A tag used by an account cannot be deleted |
+| `tax_ids` | Tax | clear | |
+| `code_mapping_ids` | Account Code Mapping | not stored | |
+
+Records that point **at** an Account and block its deletion: Journal Item (restrict), Journal default account (restrict), Journal suspense account (restrict), fiscal position account mapping (checked explicitly), tax distribution line (checked explicitly).
+
+### Relations of the Account Group
+
+| Link | Target | On deletion of the target |
+|---|---|---|
+| `parent_id` | Account Group | **cascade** — deleting a parent deletes its children, but the deletion routine re-parents the children first, so the cascade is never reached in practice |
+| `company_id` | Company | clear |
+
+### Relations of the Journal
+
+| Link | Target | On deletion of the target |
+|---|---|---|
+| `company_id` | Company | clear |
+| `currency_id` | Currency | clear |
+| `default_account_id` | Account | **restrict** |
+| `suspense_account_id` | Account | **restrict** |
+| `profit_account_id`, `loss_account_id`, `non_deductible_account_id` | Account | clear |
+| `bank_account_id` | Bank Account | **restrict** |
+| `journal_group_ids` | Journal Group | clear |
+| `inbound_payment_method_line_ids`, `outbound_payment_method_line_ids` | Payment Method Line | sub-records: deleted with the journal |
+| `invoice_template_pdf_report_id` | Report | clear |
+
+### Relations of the Journal Entry
+
+| Link | Target | On deletion of the target |
+|---|---|---|
+| `journal_id` | Journal | clear, then the required check refuses |
+| `company_id` | Company | clear |
+| `currency_id` | Currency | clear, then the required check refuses |
+| `line_ids` | Journal Item | sub-records: deleted with the entry |
+| `partner_id` | Partner | **restrict** |
+| `commercial_partner_id` | Partner | **restrict** |
+| `partner_shipping_id` | Partner | clear |
+| `partner_bank_id` | Bank Account | **restrict** |
+| `fiscal_position_id` | Fiscal Position | **restrict** |
+| `reversed_entry_id` | Journal Entry | clear |
+| `auto_post_origin_id` | Journal Entry | clear |
+| `origin_payment_id` | Payment | clear |
+| `statement_line_id` | Statement Line | clear |
+| `tax_cash_basis_rec_id` | Partial Reconciliation | clear |
+| `tax_cash_basis_origin_move_id` | Journal Entry | clear |
+| `invoice_payment_term_id` | Payment Term | clear |
+| `invoice_cash_rounding_id` | Cash Rounding | clear |
+| `invoice_incoterm_id` | Incoterm | clear |
+| `preferred_payment_method_line_id` | Payment Method Line | clear |
+| `invoice_user_id` | User | clear |
+
+### Relations of the Journal Item
+
+| Link | Target | On deletion of the target |
+|---|---|---|
+| `move_id` | Journal Entry | **cascade** |
+| `account_id` | Account | **restrict** |
+| `partner_id` | Partner | **restrict** |
+| `currency_id` | Currency | clear, then the required check refuses |
+| `product_id` | Product | **restrict** |
+| `product_uom_id` | Unit of Measure | **restrict** |
+| `tax_ids` | Tax | clear |
+| `tax_line_id` | Tax | **restrict** |
+| `tax_repartition_line_id` | Tax Distribution Line | **restrict** |
+| `tax_tag_ids` | Account Tag | **restrict** |
+| `group_tax_id` | Tax | clear |
+| `full_reconcile_id` | Full Reconciliation | clear, and the matching number is recomputed |
+| `matched_debit_ids`, `matched_credit_ids` | Partial Reconciliation | sub-records: the matches are deleted and the residuals recomputed |
+| `analytic_line_ids` | Analytic Line | sub-records |
+| `reconcile_model_id` | Reconciliation Model | clear |
+| `payment_id`, `statement_line_id`, `statement_id` | related, read-only | follow the entry |
+
+### Relations of the Partial Reconciliation
+
+| Link | Target | On deletion of the target |
+|---|---|---|
+| `debit_move_id`, `credit_move_id` | Journal Item | the match is deleted together with the item |
+| `full_reconcile_id` | Full Reconciliation | clear |
+| `exchange_move_id` | Journal Entry | clear |
+| `company_id` | Company | clear |
+
+### Relations of the Full Reconciliation
+
+| Link | Target | On deletion of the target |
+|---|---|---|
+| `partial_reconcile_ids` | Partial Reconciliation | sub-records |
+| `reconciled_line_ids` | Journal Item | sub-records |
+
+Deleting a Full Reconciliation clears the link on the items and recomputes their matching numbers.
+
+### Relations of the Lock Exception
+
+| Link | Target | On deletion of the target |
+|---|---|---|
+| `company_id` | Company | clear, then the required check refuses |
+| `user_id` | User | clear, which turns the exception into one for everybody |
+
+---
+
+## 18. Ordering rules
+
+| Entity | Ordering |
+|---|---|
+| Account | the code of the active company, then the display code |
+| Account Group | the start prefix |
+| Account Tag | by identifier (no explicit ordering) |
+| Journal | the display order number, then the type, then the code |
+| Journal Group | by identifier (the display order number is used by the client) |
+| Journal Entry | descending accounting date, descending number, descending document date, descending identifier |
+| Journal Item | descending accounting date, descending entry number, ascending identifier |
+| Journal Item **inside** an entry | the display order number derived from the display type (100 for ordinary lines, 10 000 for tax lines, 11 000 for rounding lines, 12 000 for payment-term lines), then the identifier |
+| Partial Reconciliation | by identifier |
+| Full Reconciliation | by identifier |
+| Lock Exception | by identifier |
+
+Two context switches change the account ordering in a selection list: a preferred account type is sorted first, and a set of preferred account identifiers is sorted first. A third switch sorts trade accounts before non-trade accounts.
+
+---
+
+## 19. Fields that are tracked in the audit trail
+
+| Entity | Tracked fields |
+|---|---|
+| Journal Entry | the number, the reference, the accounting date, the state, the document type, the reviewed flag, the counterpart, the currency, the recipient bank account, the salesperson, the payment reference, the payment status, the origin, the source electronic-mail address |
+| Journal Item | the label, the account, the balance, the taxes, the tax grids, the due date |
+| Account | the name, the code, the account type, the active flag, the reconcilable flag, the currency, the tags, the internal notes |
+| Company | the five lock dates, the restrictive audit trail switch |
+
+A change to a tracked field of a Journal Item is logged on its **entry**, not on the item, and only when the entry has been posted at least once.

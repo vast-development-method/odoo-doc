@@ -4,6 +4,14 @@ Every journal entry this domain produces, listed line by line with its account s
 rule, its side, its amount formula, its currency handling, its date, its partner, its
 analytic distribution, its tax handling and its reconciliation behaviour.
 
+> **Reproduced text.** Quoted, bolded strings in this file are user-facing text the
+> system emits character for character — error messages, selection labels, button
+> labels, action titles. Where such a string contains an abbreviation it belongs to
+> the emitted string, not to this specification's prose: "FIFO" stands for *first in
+> first out*, "AVCO" for *average cost*, "WIP" for *work in progress*, "MOs" for
+> *manufacturing orders*, "BoM" for *bill of materials*, `STJ` for the inventory
+> valuation journal code and `LC/` for the landed cost sequence prefix.
+
 Terms used throughout:
 
 - **Journal Entry** (`account.move`, table `account_move`) — the accounting document.
@@ -524,7 +532,7 @@ balance = Σ value of the periodic-valuation movements that went out into that l
 
 restricted to movements dated after the last closing instant and not after the report
 date. See
-[calculations.md](calculations.md#112-part-one--location-reclassification).
+[calculations.md](calculations.md#112-part-one-location-reclassification).
 
 ### 6.2 Part two — the global stock variation
 
@@ -567,7 +575,7 @@ amount = ( posted_ledger_value_today( account ) − extra_balance( account ) )
 ```
 
 See
-[calculations.md](calculations.md#114-part-three--the-continental-perpetual-period-variation).
+[calculations.md](calculations.md#114-part-three-the-continental-perpetual-period-variation).
 
 ### 6.4 Worked example of a complete closing
 

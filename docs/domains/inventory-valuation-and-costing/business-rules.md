@@ -6,6 +6,14 @@ behaviour of the domain, with the exact user-facing message where one exists.
 Messages are reproduced exactly as the system produces them; placeholders are written in
 words between underscores.
 
+> **Reproduced text.** Quoted, bolded strings in this file are user-facing text the
+> system emits character for character — error messages, selection labels, button
+> labels, action titles. Where such a string contains an abbreviation it belongs to
+> the emitted string, not to this specification's prose: "FIFO" stands for *first in
+> first out*, "AVCO" for *average cost*, "WIP" for *work in progress*, "MOs" for
+> *manufacturing orders*, "BoM" for *bill of materials*, `STJ` for the inventory
+> valuation journal code and `LC/` for the landed cost sequence prefix.
+
 ---
 
 ## 1. Complete list of error conditions
