@@ -1681,8 +1681,10 @@ out.
     becomes unusable.
 19. **The sign-up token is not stored**; invalidating it means changing the contact's sign-up type,
     or the contact's accounts, or signing in (which changes the most recent sign-in moment).
-20. **The default-value precedence** puts an unscoped default before a user-scoped one under the
-    ordering actually used; see [calculations.md](calculations.md) section 9.
+20. **The default-value precedence** depends on where the storage layer places absent values in an
+    ascending sort. They are placed **last**, so the most specific default wins; a storage layer
+    that places them first would invert the precedence exactly. See
+    [calculations.md](calculations.md) section 9.
 21. **The cooldown threshold differs** between the code's fallback (5) and the value written at
     database creation (10).
 22. **The anonymous account is archived** in the shipped data, and each company can mint its own.

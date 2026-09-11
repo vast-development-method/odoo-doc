@@ -1449,3 +1449,85 @@ Then the hint reads *"(= 121.00 Incl. Taxes, 1.00 Tax Withheld)"*.
 **V13 — No fragment at all.**
 Given a product with no tax.
 Then the hint is a single space.
+
+---
+
+## W. Reconstructing the base-to-tax mapping
+
+**W1 — A simple entry.**
+Given a posted invoice with one base item of one thousand carrying one tax of twenty-one percent,
+and the resulting tax item of two hundred ten.
+When the mapping is reconstructed.
+Then one row exists, pairing the base item with the tax item, with a base amount of one thousand
+and a tax amount of two hundred ten, and with the base item as the source item.
+
+**W2 — Two base items, one tax item.**
+Given two base items of one thousand and two thousand carrying the same tax, and one tax item of
+six hundred thirty.
+Then two rows exist, with base amounts of one thousand and two thousand and tax amounts of two
+hundred ten and four hundred twenty.
+
+**W3 — A tax affecting the base.**
+Given the illustrating entry of `calculations.md` section 16 — three base items of one thousand,
+two thousand and three thousand, a tax *ten affecting base* and two subsequent taxes.
+Then nine rows exist, exactly as tabulated in section 16.5, and each tax item's tax amounts add
+back to its own balance.
+
+**W4 — The tail test excludes the wrong base items.**
+Given the same entry.
+Then the tax item produced by the affecting tax on base item one is paired **only** with base item
+one, because base items two and three carry a different subsequent tax.
+
+**W5 — The fallback.**
+Given a posted entry whose tax configuration was changed afterwards, so that the exact pairing
+finds nothing for a tax item.
+Then the fallback pairs that tax item with every base item of the same entry and the same currency
+carrying its originator tax, with each base item's whole balance.
+
+**W6 — The fallback switched off.**
+Given the same entry and a caller that switched the fallback off.
+Then the orphan tax item produces no row at all.
+
+**W7 — A fixed tax contributes by quantity.**
+Given a base item with a quantity of seven and a fixed tax.
+Then the contribution used to allocate the tax amount is the absolute quantity carrying the sign of
+the balance, not the balance.
+
+**W8 — The exigible column.**
+Given a tax item of a tax exigible on payment, on the original invoice.
+Then the row's exigible column is false. Given the corresponding item of the cash basis entry, the
+column is true.
+
+**W9 — The row identifier.**
+Given a row pairing tax item forty-two, base item seven and source item seven.
+Then the row's identifier is the three identifiers joined by hyphens in that order.
+
+---
+
+## X. Regression fixtures
+
+Ten compact fixtures that together exercise every branch of the engine. An implementation that
+reproduces all ten is very unlikely to be wrong anywhere.
+
+| # | Configuration | Input | Expected untaxed / tax / total |
+|---|---|---|---|
+| X1 | one tax, twenty-one percent, price-excluded | one unit at 100.00 | 100.00 / 21.00 / 121.00 |
+| X2 | one tax, twenty-one percent, price-included | one unit at 121.00 | 100.00 / 21.00 / 121.00 |
+| X3 | fixed 0.05 per unit at sequence one, twenty percent at sequence two, both price-excluded, the fixed one affecting the base | seven units at 15.00 | 105.00 / 21.42 / 126.42 |
+| X4 | division ten percent, price-excluded | one unit at 180.00 | 180.00 / 20.00 / 200.00 |
+| X5 | group of ten percent and five percent, price-excluded | one unit at 100.00 | 100.00 / 15.00 / 115.00 |
+| X6 | two price-included ten percent taxes in one batch | one unit at 100.00 | 83.34 / 16.66 / 100.00 |
+| X7 | twenty-three percent price-excluded, round per line | three lines of 12.12 × 12.12 | 440.67 / 101.34 / 542.01 |
+| X8 | the same, round per tax | the same | 440.68 / 101.36 / 542.04 |
+| X9 | twenty-one percent price-included, round per tax | three lines of one unit at 21.53 | 53.38 / 11.21 / 64.59 |
+| X10 | ten percent price-excluded, a currency with no decimal places, round per tax | three lines of one unit at 105 | 315 / 32 / 347 |
+
+For X8, X9 and X10 the per-line split matters as much as the totals:
+
+| Fixture | Line 1 | Line 2 | Line 3 |
+|---|---|---|---|
+| X8 balances | 146.90 | 146.89 | 146.89 |
+| X8 taxes | 33.78 | 33.79 | 33.79 |
+| X9 balances | 17.80 | 17.79 | 17.79 |
+| X9 taxes | 3.73 | 3.74 | 3.74 |
+| X10 taxes | 10 | 11 | 11 |
