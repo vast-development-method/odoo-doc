@@ -277,7 +277,7 @@ Every read of a share — the page, the data and the download — passes through
 1. **Token part.** The token supplied in the address is compared with the stored token using a comparison whose duration does not depend on how many leading characters match. An empty supplied token fails immediately.
 2. **Rights part.** The dashboard is re-read *as the user who created the share*. That user must still be allowed to read it.
 
-A failure of either part is refused with the message of rule [SD-011](business-rules.md#sd-011). The second part is what makes a share revocable without deleting it: removing the sharing user from the dashboard's audience makes every previously handed-out address stop working, immediately and for everybody.
+A failure of either part is refused with the message of rule [SD-022](business-rules.md#sd-022). The second part is what makes a share revocable without deleting it: removing the sharing user from the dashboard's audience makes every previously handed-out address stop working, immediately and for everybody.
 
 ### 5.5 Ordering, display name, uniqueness, indexes
 

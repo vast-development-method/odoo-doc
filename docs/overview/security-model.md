@@ -882,3 +882,1092 @@ An entity declares one field with a requirement naming the portal-user group and
 | Only accountants may see journal entries at all | Access rights on the entity |
 | Only accountants may see journal entries of their own company | A record rule |
 | Only accountants may change the cost price, everyone may see it | A group requirement is **not** enough, since it governs both directions: use presentation-level read-only plus a validation or a rule |
+
+---
+
+## 8. The checks performed by each generic operation
+
+This section gives, for every generic operation, the exact sequence of authorisation steps and where they sit relative to the work. The full contracts of the operations are in [record operations and query notation](record-operations-and-query-notation.md).
+
+### 8.1 Summary
+
+| Operation | Access right | Record rules | Field restrictions | When the record rules are evaluated |
+|---|---|---|---|---|
+| Create | `create`, before anything | `create`, on the **created** records | Write, on every supplied key and every preloaded default key of the context | After insertion, before returning |
+| Read and fetch | `read` | `read`, through the query that fetches the columns | Read, on every explicitly named field | During the fetch; missing records are re-verified |
+| Search, count and search-and-fetch | `read` | `read`, as an extra query condition | Read, on every field named in the filter, the ordering and the fetch list | While building the query |
+| Grouped reading | `read` | `read`, as an extra query condition | Read, on every field named in the filter, the grouping keys, the aggregates and the ordering | While building the query |
+| Write | `write`, before anything | `write`, on the records **as they are before the write** | Write, on every supplied key | Before the write |
+| Delete | `unlink`, before anything | `unlink`, on the records | Before any deletion guard runs |
+| Copy | `create` and `read`, through the operations it performs | Both, through those operations | Both | Inside the underlying operations |
+| Name search | `read` | `read` | Read | Inside the underlying search |
+| Default values | None | See [8.8](#88-default-values) | Write, on exposed fields before routing them to the parent | See [8.8](#88-default-values) |
+| Reading a property definition | `read` | None | None | Not applicable |
+| Export | `read`, plus membership of the export group | `read` | Read | Inside the underlying search and fetch |
+| Data loading | `create` or `write` | Both | Write | Inside the underlying operations |
+| On-change | `read` | None, because the record is in memory | Read and write, for the fields touched | Not applicable |
+
+### 8.2 Create
+
+1. Check the access right for `create` on the empty record set — the entity level only.
+2. Take the union of the keys of every supplied value map together with every field named by a preloaded default key of the context. For each name: it must be a field, otherwise refuse with **"Invalid field '"** the name **"' in '"** the entity **"'"**; then check the write restriction of that field.
+3. Complete the value maps: defaults, audit fields, removal of forbidden keys, precomputed fields.
+4. For every assigned many-to-one field marked as bypassing the target's read permission, and only when the environment is **not** unrestricted, check the read access right and the read rules on the target record. This may refuse.
+5. Create or update the embedded parent records.
+6. Insert the records.
+7. Run the inverse rules, the validations and the company consistency check.
+8. Check access for `create` on the **created** record set — access right and record rules.
+9. Return the record set.
+
+Step 2 covers the context defaults because a default injected through the context is written exactly like an explicit value; without the check a caller could set a restricted field by naming it as a preloaded default.
+
+Step 4 exists because a link marked as bypassing the target's read permission makes later searches skip the target's record rules; the permission must therefore be paid once, at assignment time.
+
+Step 8 is what enforces record-level creation rules. Note the ordering: the records are **already inserted** when the check runs. A refusal aborts the transaction, which removes them, but any side effect a hook performed between step 6 and step 8 has already run inside that transaction and is rolled back with it.
+
+### 8.3 Read and fetch
+
+1. Drop the in-memory records from the set.
+2. Determine the fields to fetch. When a list of names is given, each must be a field and its read restriction is checked; the stored dependencies of a non-stored field are added only when they are prefetchable and their read restriction holds. When no list is given, take every prefetchable field whose read restriction holds, with no refusal.
+3. If at least one field to fetch has a column, build the query as a search restricted to the identifiers of the set with archived records included — which applies the access right and the record rules. Otherwise check access for `read` on the set directly; if that check reports that a record no longer exists, restrict the set to the records that still exist and check again, then take the identifiers unordered.
+4. Fetch the columns through the query and place them in the cache.
+5. Compare the records the query returned with the set. If they differ, take the difference restricted to the records that still exist; if that remainder is not empty, raise the record-rule refusal for `read`.
+
+Step 5 is what turns "the query silently dropped a record" into an explicit refusal: a caller that asked for specific records must be told, while a caller that performed a search gets a shorter list without a refusal.
+
+Reading a single field of a single record goes through the same path: the field restriction is checked first, the value is taken from the cache, and a cache miss triggers the fetch above for the record's prefetch set.
+
+### 8.4 Search
+
+1. Decide whether access is verified: it is, unless the environment is unrestricted or the internal bypass flag is set.
+2. If access is verified, check the access right for `read` on the empty record set.
+3. Add the archive condition unless it is switched off or the filter already names the archive field.
+4. Normalise the filter. This is where every field named in it has its read restriction checked, as the conditions are converted.
+5. If access is verified, compose the record-rule filter for `read`. If it is statically false, return the empty result. Otherwise add it to the query, evaluated unrestricted.
+6. Apply the ordering — each ordering term has its read restriction checked — then the limit and the offset.
+7. Return the query.
+
+The internal bypass flag of step 1 is used when the caller has already decided that the related records must not be filtered again ([section 10.2](#102-computation-with-elevated-rights)). It is never reachable from outside.
+
+Counting and search-and-fetch are the same procedure with a counting or a fetching tail. Search-and-fetch additionally checks the read restriction of every field in its fetch list, and does so **even when the query is statically empty**, so that the refusal does not depend on the data.
+
+### 8.5 Grouped reading
+
+1. Check the access right for `read` on the empty record set.
+2. Build the query through the search procedure, which applies the record rules.
+3. Build the grouping keys; each names a field whose read restriction is checked.
+4. Build the aggregates; each names a field whose read restriction is checked.
+5. Build the ordering and the post-aggregation filter, with the same checks.
+6. When a grouping key follows a many-to-one link, the join to the linked entity is restricted by that entity's own record rules unless the environment is unrestricted. The join alias then depends on the acting identifier, so that two users do not share a cached query plan.
+7. When a grouping key is a many-to-many, the association is joined through a sub-selection on the linked entity that applies that entity's record rules, unless the field is marked as bypassing the target's read permission.
+
+### 8.6 Write
+
+1. If the record set is empty, succeed without any check.
+2. Check access for `write` — access right and record rules, evaluated on the **current** values.
+3. For each supplied key: it must be a field, otherwise refuse with **"Invalid field '"** the name **"' in '"** the entity **"'"**; then check the write restriction of that field.
+4. Remove the forbidden keys: the identifier, the stored hierarchy path, and — unless the acting identity is the root identity during a registry load — the four audit fields.
+5. Set the audit fields.
+6. Write the values, run the inverse rules, run the validations.
+7. Run the company consistency check when the entity enables it.
+
+**There is no post-write record check.** A user who may write a record may therefore write values that move it out of their own visibility; the write succeeds and the record becomes invisible afterwards. A rebuild must reproduce this, because many workflows depend on it: assigning a document to another team, moving a document to another company where the rules allow the write.
+
+When the write reaches an embedded parent and the parent refuses, the parent's message is wrapped with the embedding wrapper of [section 6.7](#67-the-refusal-message).
+
+### 8.7 Delete
+
+1. If the record set is empty, succeed.
+2. Check access for `unlink` — access right and record rules.
+3. Run the deletion guards declared on the entity.
+4. Flush pending writes.
+5. Delete the records, their external identifiers, the user default values that name them and their attachments.
+
+The check precedes every guard, so a guard never runs for a record the user may not delete.
+
+### 8.8 Default values
+
+Resolving default values performs no access-right or record-rule check of its own: it returns proposed values, not stored data. Two checks do apply:
+
+1. An **exposed** field is routed to the parent entity's default computation only when its write restriction holds.
+2. When a default value for a relational field is a list of commands and the environment is **not** unrestricted, each command is checked before the value is normalised: a delete command checks `unlink` on the named targets; an update command checks `write` on the named target; for a one-to-many field, a detach or attach command also checks `write` on the named target.
+
+This prevents a caller from using a context default to delete or modify records it may not touch.
+
+### 8.9 Duplication
+
+Duplication reads the source records — access right, record rules and read restrictions — and creates the copies — access right, record rules and write restrictions. Fields the acting user may not read are absent from the copied values and therefore take their default value on the copy. Nothing else is done for security.
+
+### 8.10 Name search
+
+Name search performs an ordinary search and therefore applies both layers. Invoking it unrestricted returns records the acting user could not otherwise see; this is the intended way for a privileged flow to resolve a name. The display name is read through the ordinary field machinery, except that the platform reads it unrestricted when it builds a refusal message ([section 6.7](#67-the-refusal-message)).
+
+### 8.11 Export
+
+Exporting a selection requires, in addition to the read permissions, membership of the export group `base.group_allow_export` (allowed to export). The group is implied by the settings group and is granted explicitly to the root identity. A user who lacks it may read the records on screen but may not download them.
+
+### 8.12 In-memory records
+
+A record with no database identifier yet, used by the form on-change protocol, is exempt from the record rules, because there is no stored record to test. The access right and the field restrictions still apply. A record set may not mix in-memory and stored records on any write path; attempting it is refused with **"\<record set\> contains a mix of real and new records. It is not supported."**
+
+---
+
+## 9. Relational safeguards
+
+Relations are the main way a check can be circumvented, because following a link reads another entity's records. Four mechanisms govern this.
+
+### 9.1 Sub-conditions with or without the target's rules
+
+A condition on a relational field takes one of two forms.
+
+| Form | Meaning |
+|---|---|
+| Checked | The sub-selection on the target entity applies the target's access right and record rules |
+| Unchecked | The sub-selection applies **neither**; only the sub-condition itself restricts the records |
+
+Rewriting rules:
+
+1. A checked form becomes an unchecked form when the environment is unrestricted, or when the field is marked as bypassing the target's read permission.
+2. A checked form on an **exposed** field is always rewritten to the unchecked form on the embedding link, because the embedding already carries the parent's rules through the composition of [6.4](#64-the-combination-rule), and applying them twice would be both wasteful and wrong.
+3. A condition naming a dotted path is rewritten into nested checked forms, one per step.
+4. The field restriction of every field named anywhere in the expression, including inside sub-conditions, is checked on the entity that owns it.
+
+In-memory evaluation, used by record verification and by filtering a record set against a condition, mirrors this: for the unchecked form the linked records are read unrestricted and a marker is placed in the context; when a nested **checked** form is then encountered, the marker causes the elevation to be dropped again and the linked records to be reduced to those the acting user may read. Without the marker, a nested checked form inside an unchecked one would silently inherit the elevation.
+
+### 9.2 Fields that bypass the target's read permission
+
+A many-to-one field may be declared to bypass the target's read permission in searches. Two obligations follow:
+
+1. Assigning such a field in a restricted environment checks read access on the target record at assignment time, both on creation ([8.2](#82-create), step 4) and on write. The refusal message on write is **"Failed to write field "** the field name, followed by a new line and the target's own refusal message.
+2. The link field of an embedding always bypasses the target's read permission, because the parent's rules are already folded into the child's composed filter.
+
+### 9.3 Command protection on sensitive entities
+
+Writing a to-many field executes **commands**: create a target record, update a target record, delete a target record, attach, detach, replace the whole list. Executing them with the caller's elevation would let a privileged flow that only meant to touch the owning entity modify a sensitive target entity.
+
+An entity may therefore declare that it **refuses privileged commands**. When a to-many field points at such an entity, the commands are executed in an environment whose unrestricted flag is cleared **and** whose acting identifier is reset to the transaction's default identity. The commands are therefore evaluated against the real user of the request, whatever identity the caller had switched to.
+
+The entities that refuse privileged commands are: Entity Catalogue, Field Catalogue, Selection Value Catalogue, Entity Constraint Catalogue, Association Table Catalogue, Access Right, External Identifier, Record Rule, Group, User, User Sign-in Log, Password Change Line, Application Key, Action, Window Action, Window Action View Mode, Address Action, Server Action, Client Action, Report Action, Configuration Step, Front-end Asset, System Parameter, Scheduled Job, Scheduled Job Trigger, User Default Value, Log Entry, Outgoing Mail Server, Package Category, Package, Package Dependency, Package Exclusion, Performance Profile, Sequence, Sequence Date Range, Menu, View, Tenant-local View Customisation, Language, Party, Party Tag, and the two internal placeholder entities used for unknown references.
+
+### 9.4 Reading a relation
+
+Reading a relational field returns a record set of the target entity. The values are **not** filtered by the target's rules at read time; the filtering happens when the linked records are themselves read. Two consequences:
+
+- A user may hold a record set of records they cannot read; the refusal arrives at the first field access.
+- A to-many is different: the stored list is materialised through a search on the target entity, so the target's rules **do** apply and the list is silently shortened.
+
+**Worked example.** A container record links to two target records, one admitted and one excluded by a global rule on the target entity. Read by the root identity, the list has two members. Read by the public user, the list has one member, the admitted one. Replacing the list as the public user with both identifiers is refused. Replacing it as the root identity with both identifiers succeeds, and the public user still sees one member while the root identity sees two. Clearing the list as the public user removes **both** records, because the clear command applies to the whole stored list, not to the filtered view.
+
+---
+
+## 10. The unrestricted actor and the elevate-privileges contract
+
+### 10.1 What "unrestricted" means
+
+An environment carries a boolean flag. When it is set, **every gate is bypassed**:
+
+- access rights are not consulted;
+- record rules yield "everything";
+- field restrictions are satisfied for reading and writing;
+- the company authorisation check on the allowed-company list is skipped;
+- entities that refuse privileged relational commands still refuse them, and the commands are de-elevated by [9.3](#93-command-protection-on-sensitive-entities). This is the one thing that becomes *more* restrictive.
+
+| Aspect | Unrestricted | Restricted |
+|---|---|---|
+| Access right | Skipped | Enforced |
+| Record rules | Skipped | Enforced |
+| Field restriction for reading and writing | Skipped | Enforced |
+| Field restriction for the field descriptions and the view filtering | **Still applied** | Applied |
+| Audit fields | The acting user | The acting user |
+| The acting user inside a record-rule expression | The acting user | The acting user |
+| The current and allowed companies | **Not validated** against the user's allowed companies | Validated |
+| Commands on entities that refuse privileged commands | Reset to the transaction's default identity, not elevated | Not elevated |
+| Operation exposure | Unchanged | Unchanged |
+
+The last row matters: entering unrestricted mode never makes a private operation callable from outside. Layer 6 is decided before any environment is built.
+
+### 10.2 Computation with elevated rights
+
+- A **computed** field may declare whether its computation runs elevated. The default is: elevated when the field is stored, not elevated when it is not.
+- A **related** field's computation runs elevated by default. A related field whose computation does not run elevated, and which is not stored, cannot be converted into a query expression at all; conditions on it are then evaluated by following the path in memory.
+- When a related field's computation runs elevated, the condition it produces uses the **unchecked** sub-condition form of [9.1](#91-sub-conditions-with-or-without-the-targets-rules) at every step; otherwise it uses the checked form.
+- When a computed field's computation runs elevated, the values it derives from records the acting user cannot read are nevertheless exposed. This is intentional: a total that aggregates hidden lines is still a correct total. A field that must not leak hidden data must not declare an elevated computation.
+
+Failure handling during batch computation: when computing a field for a large set refuses, the platform retries the computation **record by record**, in chunks, so that one forbidden record does not poison the whole batch. Records that still refuse propagate the refusal to their own reader.
+
+### 10.3 What it does not change
+
+| Unchanged | Consequence |
+|---|---|
+| The acting user identifier | The audit fields record the real actor. A record created by an elevated operation on behalf of a user records that user as its creator. |
+| The context | Language, time zone and company selection are carried over, except for the cleaning rule of [10.5](#105-context-cleaning-on-elevation). |
+| The transaction and the unit of work | An elevated operation's writes are in the same transaction and visible to the surrounding restricted operation. |
+| Declared validations | They still run — indeed they always run elevated anyway. |
+| Database constraints | They still apply. |
+| Company consistency | It still applies where declared, because it is a validation and not a permission. |
+
+### 10.4 The root identity
+
+The reserved root identifier is special in one way only: **any environment whose acting user is the root identity is unrestricted**, whether or not the flag was requested. There is no way to construct a restricted environment for the root identity.
+
+### 10.5 Context cleaning on elevation
+
+When a **restricted** environment derives an **unrestricted** one and does not supply a context, the context is cleaned: every key that names a preloaded default value is removed. Every other key survives, including the language, the time zone, the company selection and the keys that bind a specific active record.
+
+The reason: a preloaded default supplied by a less-privileged caller would otherwise silently set a field the caller may not write.
+
+When the caller supplies a context explicitly, no cleaning happens: the caller has taken responsibility.
+
+### 10.6 The elevate-privileges contract
+
+> An operation that elevates privileges takes responsibility for every access decision the gates would have made.
+
+The obligations:
+
+1. **Elevate the narrowest possible scope.** Elevate around the one read or write that needs it, not around a whole operation.
+2. **Re-impose the intended restriction explicitly.** If the reason for elevating is "the user may not read the tax record but the invoice needs it", read the tax record elevated and do not expose it further.
+3. **Never elevate on data the caller supplied.** Elevating and then writing a record whose identifier came from the request is how a caller performs an operation they could not perform directly. Where an elevated write must act on caller-supplied identifiers, check access on them **before** elevating.
+4. **Never elevate to search.** An elevated search returns records the user cannot see; passing them back is a disclosure. Where an elevated search is genuinely needed — to compute an aggregate, to check existence — return only the derived answer.
+5. **Do not elevate to work around a refusal.** A refusal that keeps recurring is a missing access right or an over-tight rule, not a case for elevation.
+
+The shape of a privileged flow follows from those obligations:
+
+1. An operation reachable from outside never trusts its record set or its arguments; it performs its reads and writes through the ordinary path, so that layers 3 to 5 run.
+2. A private operation may elevate, and is the only place where elevation is introduced.
+3. Elevation is introduced as narrowly as possible, around the single read or write that needs it, never around a whole workflow.
+4. An elevated write to a to-many field whose target refuses privileged commands is automatically de-elevated ([9.3](#93-command-protection-on-sensitive-entities)); such a write must therefore be expressed as a direct write on the target entity if it is genuinely intended.
+
+### 10.7 Switching the acting user
+
+Switching the acting user to another user produces a **restricted** environment for that user, unless the new user is the root identity, in which case it is unrestricted by [10.4](#104-the-root-identity).
+
+This is different from elevating: it evaluates every gate as that other user. It is used when an operation must act genuinely on someone's behalf — rendering a notification as its recipient would see it, previewing a portal page, running a scheduled job as a configured user.
+
+Switching to an empty user is a no-operation and returns the same environment.
+
+### 10.8 Where elevation is unavoidable
+
+| Case | Why |
+|---|---|
+| Computing a stored field | A stored value is shared by every reader, so it must not depend on who triggered it. Stored computations are elevated by default. |
+| Declared validations | A validation may need to read records the user cannot, to check a global invariant. |
+| Reading the acting user record | Otherwise establishing the user's own groups would require reading the user, which requires knowing the groups. |
+| Resolving the implied-group closure | Same reason. |
+| Package installation and the registry build | No user exists yet, and the schema must be changed. |
+| Walking a hierarchy for the hierarchy operators | The whole tree must be walked; the filtering of forbidden records is left to the rules applied to the search as a whole. |
+| Recomputation traversal | An archived or forbidden record's computed fields must still be maintained. |
+| Building a refusal message | The display names of the rejected records must be read; the cache entries are invalidated afterwards ([6.7](#67-the-refusal-message)). |
+
+---
+
+## 11. Which operations are reachable from outside
+
+### 11.1 The exposure rule
+
+An operation of an entity is callable from outside the server only when **all** of the following hold:
+
+1. Its name does not begin with an underscore.
+2. Its name is not one of the reserved attribute names of the runtime.
+3. It is not marked private.
+4. It is bound to a record set; an operation bound to the entity rather than to a record set is not callable.
+
+Otherwise the call is refused with **"Private methods (such as '"** the transport name, a dot, the operation name **"') cannot be called remotely."** for rules 1 and 2, and **"The method '"** the transport name, a dot, the operation name **"' cannot be called remotely."** for rules 3 and 4. A name that does not exist at all is refused with **"The method '"** the transport name, a dot, the name **"' does not exist"**.
+
+The private marker is inherited: if any lower definition of the operation carries it, the operation is private even when a later extension does not repeat the marker.
+
+The generic operations marked private, and therefore not callable from outside, include the raw fetch, the access-check operations, the identity and elevation switches, the context and company switches, the prefetch switch, and the duplication helper that returns value maps. The callable generic operations are the record operations listed in [record operations and query notation](record-operations-and-query-notation.md).
+
+### 11.2 The credential check on a direct service call
+
+A direct service call carries a tenant name, a user identifier and a credential. The credential is verified before the call:
+
+1. If the credential is empty, refuse.
+2. Apply the cooldown guard of [section 15.2](#152-the-cooldown-guard) for the acting sign-in name.
+3. Read the user; if the user is archived, refuse.
+4. Verify the credential as a non-interactive password check; an application key with no scope is accepted in place of the password.
+5. Cache the outcome under the pair of user identifier and credential for the lifetime of the process.
+
+A refusal here is an authentication refusal, not an authorisation refusal: it carries no detail.
+
+### 11.3 Retry and the acting identity
+
+A service call runs inside a retry loop — up to five attempts with randomised exponential backoff — for transaction serialisation conflicts. Each retry rebuilds the environment from the same acting identifier, unrestricted flag and context. The security decisions are therefore recomputed from scratch on each attempt, and a rule changed by a concurrent transaction takes effect on the retry.
+
+---
+
+## 12. Company scoping and company consistency
+
+Company scoping is **not** a separate layer. It is ordinary record-rule evaluation ([section 6](#6-record-rules)) using the two company values of the evaluation context, and an additional validation — the company consistency check — that prevents a document of one company from pointing at master data of another.
+
+What the gates need to know:
+
+| Point | Rule |
+|---|---|
+| The current company | The first identifier of the environment's ordered company selection, or the acting user's main company when the selection is empty |
+| The allowed companies | The listed companies, or **all** the user's companies when the selection is empty |
+| Authorisation of the selection | In a restricted environment every identifier in the selection must be among the user's companies, otherwise the operation is refused with **"Access to unauthorized or invalid companies."**; in an unrestricted environment the check is skipped |
+| The standard rule | Entities with a company field carry a **global** record rule admitting records whose company is empty or among the allowed companies, so it conjoins with everything else and can never be widened by a group rule |
+| The rule cache key | Includes the ordered company selection, so switching company changes the cache entry rather than invalidating anything ([section 19](#19-caching-and-invalidation-of-security-decisions)) |
+| Company consistency | A validation, not a permission: it runs whatever the acting identity and **also** in an unrestricted environment |
+| The multi-company hint | A refusal caused by a rule whose filter text mentions the company field carries the hint of [section 6.7](#67-the-refusal-message) |
+
+Everything else — the company tree and its branches, the allowed and activated company sets and how they travel, the five canonical rule shapes, the company filter of a target entity, the full consistency algorithm and its messages, per-company values, currency, cross-company flows and the caches keyed by company — is specified in [multi-company](multi-company.md).
+
+---
+
+## 13. The authentication level of a request endpoint
+
+Layers 3, 4 and 5 decide what an identity may do. This layer decides **which identity a request runs as**, and whether a request without an identity may reach the endpoint at all. It is declared on the endpoint, not on the data.
+
+### 13.1 The four built-in levels
+
+| Level | May run without an identity | The identity used when the request carries no valid session | Needs a tenant | Typical use |
+|---|---|---|---|---|
+| `none` | Yes | **No identity at all**: the environment has an empty acting identifier and every read and write through it fails | No | The sign-in page, the tenant selector, the version query, the tenant-independent service endpoints |
+| `public` | Yes | The **public user** ([section 3.3](#33-the-four-special-identities)), a real User record belonging only to the public-user group | Yes | Portal pages, published site pages, documents reached with a token |
+| `user` | No | Refused | Yes | The whole back office and every portal page that requires an account |
+| `bearer` | No | Refused, unless the request carries a valid application key in the authorisation header | Yes | Machine-to-machine endpoints |
+
+The level is a property of the endpoint. It is resolved by walking the endpoint's definition chain from the most general contribution to the most specific extension, starting from the default value `user` and overwriting it with every level a contribution declares. Three consequences:
+
+- an endpoint that declares nothing anywhere is at the `user` level, which is the safe default;
+- an extension that omits the level inherits the one its lower contribution declared;
+- an extension that declares a **different** level replaces it for everybody, including for the lower contribution's own paths. Lowering a level in an extension is therefore a real widening of exposure and must be treated as a security change.
+
+In the shipped catalogue of 911 request endpoints, 487 are at the `public` level, 312 at the `user` level, 39 at the `none` level, 4 at the `bearer` level, 19 at a level declared by a capability package ([13.4](#134-levels-declared-by-capability-packages)), and 50 inherit their level from the endpoint they extend.
+
+Four further endpoint attributes participate in request security and are declared next to the level:
+
+| Attribute | Default | Effect |
+|---|---|---|
+| Forgery protection | On for form-encoded endpoints, absent for structured-call endpoints | For every request whose method is not one of the four safe methods, a valid request-forgery token must be present ([14.10](#1410-the-request-forgery-token)). The structured-call dispatcher performs no such check: it is protected instead by requiring a structured content type, which a cross-site form submission cannot produce |
+| Cross-origin policy | Absent | When present, a preflight request to this endpoint is answered without authentication, and the declared origin value is returned to the caller |
+| Session persistence | On, except at the `bearer` level where it is off | Whether the request may save a modified session and set the session cookie |
+| Read-only execution | Off, except at the `none` level where it is on | Whether the request is first served against a read-only copy of the tenant; an endpoint marked read-only that nevertheless writes is replayed from the start against the primary. It changes no authorisation decision |
+
+### 13.2 The authentication procedure
+
+1. The level is `none` when the request is a cross-origin preflight for this endpoint; otherwise it is the endpoint's declared level.
+2. If the session carries an acting identifier, validate the session ([14.4](#144-validating-a-session)). If validation fails, sign the session out while keeping the tenant name and rebuild the environment with no acting identity and the session's context.
+3. Apply the level, as below.
+4. Any failure that is not an authentication refusal, a session-expiry signal or a transport-level error is written to the technical log and replaced by a bare authentication refusal carrying no detail.
+
+Applying each level:
+
+| Level | Procedure |
+|---|---|
+| `none` | Build an environment with an empty acting identifier and make it the transaction's default environment |
+| `public` | If the environment has no acting identifier, adopt the public user of the current site when the multi-site capability is installed and the request resolves to a site, and otherwise the platform's public user |
+| `user` | If the acting identifier is empty, or is one of the public identities, raise the session-expiry signal with the message **"Session expired"** |
+| `bearer` | Perform the bearer procedure of [13.3](#133-the-bearer-level), then apply the `user` level |
+
+The set of "public identities" is the platform's public user plus, when the multi-site capability is installed, the public user of the site the request resolves to. This is what prevents a portal page declared at the `user` level from being served to an anonymous visitor who was silently given a public identity by an earlier endpoint.
+
+### 13.3 The bearer level
+
+1. Take the token following the bearer scheme name in the authorisation request header; the scheme name is compared without regard to case.
+2. If a token is present, verify it as an application key with the **global** scope. If it does not resolve, refuse with an unauthorised response carrying the bearer challenge and the message **"Invalid application key"**. If the request already carries a session identity that differs from the key's owner, refuse with **"Session user does not match the used application key."** Otherwise adopt the key's owner as the acting identity and mark the session as not savable, because the request is stateless.
+3. Otherwise, if the request carries no acting identity at all, refuse with an unauthorised response carrying the bearer challenge and the message **"User not authenticated, use an application key with a bearer authorization header."**
+4. Otherwise, if the request does not carry the four browser fetch-metadata headers with the values that identify a top-level navigation started by a person — destination `document`, mode `navigate`, site `none` or `same-origin`, and the user-activation header set — refuse with an unauthorised response carrying the bearer challenge and the message **"Missing "Authorization" or fetch-metadata headers for interactive usage."**
+5. Apply the `user` level.
+
+Step 4 is the request-forgery defence of this level: an endpoint that accepts a bearer credential may also be reached interactively by a signed-in person, and in that case the platform requires the browser-supplied evidence that the request is a top-level navigation started by the person, not a cross-site request issued by a third-party page.
+
+An application key presented at the bearer level must have the **global** scope. A scoped key is refused, because the scope names a specific use — for example the trusted-browser scope of the second factor — and must not grant general access.
+
+### 13.4 Levels declared by capability packages
+
+The set of levels is extensible: a package adds a level by providing the procedure that the dispatcher invokes for that name. Two shipped shapes show the range.
+
+| Shape | Procedure |
+|---|---|
+| A **scoped-key level** for an external add-in | Read the authorisation header; refuse with a bad-request response and the message **"Access token missing"** when it is absent; strip the bearer scheme prefix when present; resolve the value as an application key **with the package's own scope**; refuse with **"Access token invalid"** when it does not resolve; adopt that key's owner as the acting identity and load their context. It never falls through to the `user` level, so no session is consulted at all. |
+| A **document-token level** for an invitation address | Read the token from the request parameters; resolve the one attendance record that carries it; refuse with a bad-request response and **"Invalid Invitation Token."** when there is none; when the request also carries a signed-in session whose identity is not the invited party, refuse with **"Invitation cannot be forwarded via email. This event/meeting belongs to \<invited address\> and you are logged in as \<signed-in address\>. Please ask organizer to add you."**; otherwise fall through to the `public` level |
+
+Both shapes obey the same two rules as the built-in levels: they either establish an acting identity or refuse, and they never touch layers 3 to 5.
+
+### 13.5 Consequences to reproduce
+
+1. An endpoint at the `public` level served to an anonymous visitor runs as a **real user record**, so all three data layers apply to it exactly as to any other user. "Public" is not a bypass.
+2. An endpoint at the `none` level has **no identity**: reading any entity through its environment fails, because the acting identifier is empty. Endpoints at that level must build their own environment explicitly if they need data.
+3. A session whose token no longer matches is signed out **before** the level is applied. The request therefore continues as an anonymous request: at the `public` level it silently becomes the public user, at the `user` level it is refused and the visitor is redirected to the sign-in page with the original address kept as the destination.
+4. A cross-origin preflight is never authenticated, so it never reveals whether an identity exists.
+
+---
+
+## 14. Session security
+
+A session is the server-side state that turns a browser cookie into an acting identity. It is specified here as a mechanism; the entity that records devices and the sign-in log is catalogued in [identity and access](../domains/identity-and-access/entities.md).
+
+### 14.1 What a session holds
+
+| Key | Meaning |
+|---|---|
+| Creation instant | The instant the session key was created; the rotation clock reads it |
+| Tenant name | The tenant the session is bound to |
+| Sign-in name | The sign-in name of the acting identity, for logging and for the sign-in form |
+| Acting identifier | The acting identifier; empty for an anonymous session |
+| Session token | The authenticator of the pair of session key and acting identity ([14.3](#143-the-session-token)) |
+| Context | The context the requests of this session start from: language, time zone, selected companies |
+| Debug flags | The debug-mode flags of the session |
+| Device traces | The list of device traces: platform, browser, network address, first and last activity |
+| Pending identifier and pending sign-in name | A **partial** session: the credential was accepted but the second factor is still pending |
+| Last identity check | The instant of the last successful re-authentication ([15.8](#158-the-re-authentication-gate)) |
+| Rotation bookkeeping | The next session key, the deletion instant, and the flag that says the previous sessions must be collected ([14.5](#145-rotation)) |
+
+Every value written into a session must be representable in the structured document format; a value that is not is refused at write time. A session is marked dirty by any modification and is written back at the end of the request when it is dirty, when the session identifier changed, and when session persistence is enabled for the endpoint.
+
+### 14.2 The session key
+
+The session key is the value carried by the session cookie.
+
+| Property | Value |
+|---|---|
+| Length | 84 characters |
+| Alphabet | The 64-character printable alphabet, case-sensitive |
+| Entropy | About 217.9 bits; even on a storage medium that ignores letter case, the first 42 characters alone carry about 160 bits |
+| Split | The **first 42 characters** are the stable part, the remaining 42 the authenticating part |
+| Cookie attributes | Not readable by scripts; maximum age equal to the inactivity limit |
+
+The split exists so that a rotation can replace the authenticating part while keeping the stable part: everything derived from the stable part — the request-forgery token, and any stored reference to the session — survives the rotation.
+
+### 14.3 The session token
+
+The session token binds the session key to the **current state of the credentials** of the acting identity. It is recomputed on every request and compared with the value stored in the session.
+
+1. Select one row for the user, made of the tenant secret parameter and every token-input column of the User entity, sorted by column name.
+2. If the selection did not return exactly one row, clear the registry caches and return "no token", which invalidates every session of that identity.
+3. Take the sequence of column-name and value pairs of that row, dropping every pair whose value is undefined.
+4. Render that sequence as text; this is the key.
+5. The token is the hexadecimal rendering of a keyed digest over the session key, using that key and a 256-bit secure hash.
+
+```formula
+session_token = hexadecimal( keyed_digest( key = rendering_of( token_input_pairs ) ,
+                                           message = session_key ,
+                                           function = a 256-bit secure hash ) )
+```
+
+The **token-input columns** are, in the foundation: the identifier, the sign-in name, the password verifier and the active flag. Capability packages extend the set: the second-factor capability adds the second-factor secret, the passkey capability adds the passkey collection, joined in because it is not a column of the user table.
+
+Two consequences follow, and they are the whole point of the mechanism:
+
+1. **Changing any token input signs the user out of every session.** Changing the password, the sign-in name, archiving the user, enrolling or disabling the second factor, adding or removing a passkey: every existing session token stops matching.
+2. **The flows that must not sign the person out recompute the token explicitly** for the current session after the change: an interactive password change, a transparent re-hash of the password during a successful verification, second-factor enrolment and removal, passkey creation and deletion. Each of those flushes pending writes, clears the registry caches and stores the freshly computed token on the session.
+
+Values that are **not** token inputs, and therefore do not sign anyone out when they change: the language, the time zone, the main company, the allowed companies, the group membership. Those do clear the registry caches, which hold the cached token, but the recomputed token is identical.
+
+Dropping undefined values in step 3 makes the token stable when a package contributing a token input is installed while the column is still empty for everybody: installing the second-factor capability does not sign anyone out, and enrolling does.
+
+The token is cached per session key inside the registry caches, so any operation clearing those caches forces a recomputation on the next request.
+
+### 14.4 Validating a session
+
+1. Collect the previous session of a soft rotation, when due: if the session is marked to collect and the creation instant plus 120 seconds is in the past, delete every stored session whose stable part matches this one's, clear the mark and save.
+2. If the session carries a deletion instant that has passed, it is invalid.
+3. Compute the expected session token for the session's acting identifier and key.
+4. If the expected value is "no token", the session is invalid.
+5. If the expected value equals the stored token, compared in **constant time**, update the device trace of the request; the session is valid.
+6. Otherwise the session is invalid.
+
+A rebuild must not use an early-exit comparison anywhere a token is checked; the same requirement applies to every token of [section 16](#16-external-access-with-signed-tokens).
+
+An invalid session is signed out while keeping the tenant name, and the request continues anonymously ([13.2](#132-the-authentication-procedure), step 2).
+
+### 14.5 Rotation
+
+| Trigger | Kind |
+|---|---|
+| The session is finalised — a credential was accepted and the second factor, if any, passed | Hard |
+| The session is signed out | Hard |
+| An expired-session redirect is produced for a session that had an identity | Hard |
+| The session has an identity, more than **three hours** have elapsed since its creation instant, the request path is not one of the three excluded polling paths, and the request does not carry the rotation-skip header | Soft |
+
+**Hard rotation.**
+
+1. Delete the stored session.
+2. Generate a fresh 84-character key.
+3. If the session has an identity, recompute and store the session token.
+4. Set the creation instant to now, clear the rotation mark and save.
+
+**Soft rotation.**
+
+1. Take the first 42 characters of the current key as the stable part.
+2. Read the stored session for the current key. If it already carries a next key, adopt that key as this session's key and stop; a concurrent request has already rotated and must not be rotated twice.
+3. Build the next key as the stable part followed by the last 42 characters of a freshly generated key.
+4. Write on the **old** stored session: the next key, and a deletion instant 120 seconds from now. Save it.
+5. Switch this session to the next key, mark it to collect the previous sessions, and remove the deletion instant and the next key from its own data.
+6. Recompute and store the session token.
+7. Set the creation instant to now, clear the rotation mark and save.
+
+The old session stays readable for **120 seconds** so that requests already in flight with the old cookie are not broken. It is unusable after that instant because step 2 of the validation rejects a session whose deletion instant has passed, and it is physically deleted by step 1 of the validation of the new session.
+
+**Worked example.** A person has been signed in for three hours and one minute; the browser fires three requests at once, all carrying the key whose stable part is *A* and whose authenticating part is *B*.
+
+| Event | Effect |
+|---|---|
+| Request one reaches the save phase | No next key is stored: it generates the key *A*+*B2*, stores that next key and a deletion instant 120 seconds ahead on *A*+*B*, saves *A*+*B2* with a fresh token, and sets the cookie to *A*+*B2* |
+| Request two reaches the save phase | It reads *A*+*B*, finds the next key *A*+*B2*, adopts it without generating anything, and sets the cookie to *A*+*B2* |
+| Request three was still validating when request one saved | *A*+*B* still exists and its deletion instant is in the future, so the request is served normally |
+| A request arrives 130 seconds later still carrying *A*+*B* | The deletion instant has passed: the session is invalid and the request continues anonymously |
+| The first request carrying *A*+*B2* | Collects and deletes every stored session whose stable part is *A*, then clears its own collection mark |
+| A request-forgery token issued before the rotation | Still valid, because it is derived from *A* alone |
+
+### 14.6 Expiry and housekeeping
+
+| Rule | Value |
+|---|---|
+| Cookie maximum age, and inactivity limit for stored sessions | The system parameter `session_maximum_inactivity_seconds`, default **seven days**; a non-numeric value records a warning and falls back to the default |
+| Stored-session sweep | A scheduled sweep deletes every stored session whose last modification is older than the inactivity limit |
+| Rotation interval | Three hours |
+| Previous-session retention after a soft rotation | 120 seconds |
+
+Because the cookie's maximum age is refreshed on every response that writes the session, and because the stored session's modification instant is refreshed by every save, the inactivity limit behaves as "seven days without any request", not as an absolute session lifetime.
+
+### 14.7 Signing out
+
+1. Remember the tenant name when the caller asked to keep it, otherwise drop it.
+2. Remember the debug flags.
+3. Clear the whole session.
+4. Reinstate the default session content, the remembered tenant name and the remembered debug flags.
+5. Set the context language to the language of the request, or the default language.
+6. Mark the session for hard rotation.
+7. Run the sign-out hook: the selected-companies cookie is expired with a maximum age of zero.
+
+The identity, the token, the partial-session keys and the re-authentication instant are all removed by step 3. The hard rotation of step 6 gives the visitor a brand new key, so a captured old cookie is worthless after signing out.
+
+### 14.8 The device trace
+
+Every validated request updates a trace inside the session:
+
+1. If the session carries the trace-disable flag, do nothing.
+2. Take the key made of the platform, the browser and the network address of the request.
+3. If a trace with that key exists: when the time since its last activity is at least 3,600 seconds, set the last activity to now, mark the session dirty and return the trace; otherwise return nothing.
+4. Otherwise append a new trace whose first and last activity are both now.
+
+A returned trace is written to the device register, which is what lets a person list the devices where their account is active and revoke them. The hourly threshold bounds the write rate to one record per device per hour.
+
+The trace-disable flag exists for automated technical sessions. No unprivileged identity can set it, directly or indirectly, and a session carrying it is still subject to every other audit mechanism: the technical logs and the audit fields of [section 2.4](#24-consequences-for-authorship-and-audit).
+
+### 14.9 Stateless requests
+
+A request authenticated with a bearer credential does not save its session and does not set a session cookie. Consequences: it carries no request-forgery token, it cannot be resumed, and the identity must be presented again on every call. A rebuild must not create a session as a side effect of a bearer call.
+
+### 14.10 The request-forgery token
+
+**Minting.**
+
+```formula
+expiry    = now + ( requested_validity_seconds , or one year when none is given )
+message   = first_42_characters( session_key ) + decimal_rendering( expiry )
+token     = hexadecimal( keyed_digest( key = tenant_secret , message = message ,
+                                       function = a 160-bit secure hash ) ) + "o" + expiry
+```
+
+**Validating.**
+
+1. If the token is empty, it is invalid.
+2. Split the token at the **last** occurrence of the separator letter into the digest part and the expiry part.
+3. If the expiry part is not a number, or is in the past, the token is invalid.
+4. Recompute the digest from the session key's stable part and the expiry part, and compare in constant time.
+
+**Applying.** For every request whose method is not one of the four safe methods, on an endpoint that requests forgery protection:
+
+1. If the request names no tenant, redirect to the tenant selector.
+2. Take the token from the request parameters and **remove it from them**.
+3. If it does not validate, write a warning to the technical log and refuse with the status code for a bad request and the message **"Session expired (invalid cross-site request forgery token)"**.
+
+Three properties to reproduce: the default validity of one year is a salt rather than a real limit, because it makes the token differ between issues and thereby defeats a compression-ratio attack; the token is derived from the **stable** part of the session key, so it survives a soft rotation; and the token is removed from the parameters before the endpoint runs, so an endpoint never sees it as an argument.
+
+### 14.11 Requests that carry no session
+
+Requests at the `none` level, and requests naming a tenant that does not exist, never touch the session store. A request whose cookie names a session that is not in the store starts a new, empty, anonymous session; it is saved only if something writes to it.
+
+---
+
+## 15. Establishing an identity
+
+This section specifies the procedures that produce an acting identity. The entity-level catalogue of credentials, second factors, devices and application keys is in [identity and access](../domains/identity-and-access/README.md); the algorithms are here because every one of them is a gate in front of layers 3 to 5.
+
+### 15.1 The interactive sign-in procedure
+
+1. Take the sign-in name from the credential.
+2. Inside the cooldown guard for that name ([15.2](#152-the-cooldown-guard)):
+   1. Take the first User whose sign-in name equals it, read unrestricted, in the entity's default order. If there is none, raise an authentication refusal.
+   2. Switch the environment to that user, unrestricted.
+   3. Verify the credential ([15.3](#153-verifying-a-password-credential)).
+   4. If the request carries a browser time-zone value, that value names a known time zone, and the user has no time zone or has never signed in, store it on the user.
+   5. Write one sign-in log record, authored by the user and stamped now.
+3. On a refusal, write a failed-sign-in line naming the sign-in name and the source address to the technical log, and re-raise.
+4. On success, write a successful-sign-in line naming the same.
+5. If the request supplied its own base address, the authenticated user is a settings administrator, and the system parameter freezing the base address is not set, store that address in the base-address system parameter.
+6. Return the result.
+
+The result of step 2 has **three members**, and every alternative credential kind a package adds must return the same shape:
+
+| Member | Values | Meaning |
+|---|---|---|
+| Acting identifier | An identifier | Who was authenticated |
+| Method | Password, application key, second-factor code, passkey, federated sign-in, directory sign-in, impersonation | How, for the audit trail and for the second-factor policy |
+| Second factor | Default, skip, enforce | Default defers to the user's second-factor policy, skip bypasses it because the method already proved possession of a device, enforce demands it whatever the policy |
+
+The session is then built:
+
+1. Authenticate as above.
+2. Set the session's acting identifier to empty, and store the pending sign-in name and the pending identifier — this is a **partial** session.
+3. If the result says skip, or the user has no second-factor step, finalise the session.
+4. Set the request's environment to the session's acting identity, which is still empty when a second factor is pending, and set the language from the pre-authenticated user.
+
+Finalising a session: remove the pending sign-in name and the pending identifier; write into the session the tenant name, the sign-in name, the acting identifier, the user's context (language, time zone) and the freshly computed session token; mark the session for hard rotation.
+
+A **partial session** therefore holds no acting identifier at all: until the second step succeeds, the visitor is anonymous everywhere except on the second-factor page, which reads the pending identifier explicitly.
+
+### 15.2 The cooldown guard
+
+Counters are kept per process, keyed by the **network address** of the request, each holding a failure count and the instant of the last failure, initially zero and never.
+
+On entry:
+
+1. Take the minimum from the system parameter `login_cooldown_after`, default 5. If it is zero, there is no cooldown at all.
+2. Take the delay from the system parameter `login_cooldown_duration`, default 60 seconds.
+3. If the failure count is at least the minimum and the time since the last failure is less than the delay, write a warning naming the address, the subject, the tenant, the failure count and the last failure instant, and refuse with **"Too many login failures, please wait a bit before trying again."**
+
+On an authentication refusal inside the guard, increase the failure count, set the last failure to now and re-raise. On success, drop the counter for that address entirely.
+
+Properties a rebuild must keep: the counter is keyed on the **source address**, not on the sign-in name, so that guessing many names from one source is throttled; a refused attempt inside the cooldown is not even evaluated, so it costs no password verification; and one success clears the counter. The counter is process-local and approximate by design; it is a rate limiter, not an accounting record. When the source address is a private-range address the platform additionally warns that a misconfigured intermediary may be collapsing every visitor onto one address.
+
+The same guard wraps the non-interactive credential check, the second-factor code check, and the programmatic creation and revocation of application keys.
+
+### 15.3 Verifying a password credential
+
+1. If the credential kind is not a password, or the password is empty, raise an authentication refusal.
+2. Determine whether the call is interactive; the default is interactive, with a warning when the caller did not say.
+3. If the call is interactive, or the user does not require key-only non-interactive access:
+   1. Read the stored password verifier directly.
+   2. Verify the password against it with the configured hashing scheme, which also reports a replacement verifier when the stored one uses an outdated work factor.
+   3. If a replacement was produced, store it; and when this happens inside a request for the acting user, flush pending writes, clear the registry caches, recompute the session token and store it on the session.
+   4. If the verification succeeded, return the user, the method "password" and the second-factor value "default".
+4. If the call is not interactive, verify the password as an application key with the global scope. If it resolves to this user, return the user, the method "application key" and the second-factor value "default". If the user requires key-only non-interactive access, write an informational line stating that a password was presented where only an application key is accepted.
+5. Otherwise raise an authentication refusal.
+
+"Requires key-only non-interactive access" is false by default and becomes true for a user who has enrolled a second factor: a second factor cannot be presented on a non-interactive call, so the password alone must stop working there and the caller must use an application key instead.
+
+Empty passwords are never accepted, in either direction: a user whose stored verifier is empty can never sign in, and setting an empty password is refused with **"Setting empty passwords is not allowed for security reasons!"**
+
+### 15.4 The second factor
+
+| Step | Rule |
+|---|---|
+| Enrolment | Only for oneself, refused otherwise with **"Two-factor authentication can only be enabled for yourself"**; only when not already enrolled, refused otherwise with **"Two-factor authentication already enabled"**; and only behind the re-authentication gate of [15.8](#158-the-re-authentication-gate). A secret of 160 bits is generated and shown, and the enrolment is confirmed by a matching code. |
+| Code shape | Six decimal digits, derived from the secret and a 30-second counter with a keyed digest |
+| Acceptance window | Every counter from the one 30 seconds in the past to the one 30 seconds in the future inclusive, so a code is accepted for about 90 seconds around its nominal period |
+| Replay | The matched counter is stored; a code whose counter is not strictly greater than the stored one is refused with **"Verification failed, please use the latest 6-digit code"** |
+| Wrong code | **"Verification failed, please double-check the 6-digit code"** |
+| Malformed input | **"Invalid authentication code format."** |
+| Rate limits | Five code checks per user per hour and five code messages per user per hour; exceeding them is refused with **"You reached the limit of code verifications for your account, please try again later."** and **"You reached the limit of authentication mails sent for your account, please try again later."**; a successful check clears the check counter |
+| Effect on sessions | The secret is a session-token input, so enrolling or disabling signs out every other session; the current session's token is recomputed so the person stays signed in |
+| Disabling | For oneself, or by a settings administrator, or in an unrestricted environment, always behind the re-authentication gate; it also revokes every trusted browser |
+
+The second step of the sign-in:
+
+1. If the session already has an identity, redirect to the destination.
+2. If the session has no pending identifier, redirect to the sign-in page.
+3. On a plain page request, take the trusted-browser cookie. If it is present and verifies as an application key with the browser scope belonging to the pending identifier, finalise the session, adopt the identity and redirect.
+4. On a submission carrying a code, verify the code as a credential of the second-factor kind inside the cooldown guard for the pending identifier. On refusal, re-render the page with the refusal message. On success, finalise the session and adopt the identity; and if the submission asked to remember this browser, mint a new application key with the browser scope, a name made of the browser and the platform with the resolved city and country appended in parentheses when available, and an expiry of now plus the trusted-browser age, then set it as a cookie that is not readable by scripts, is sent only on same-site navigations, and carries the same maximum age. Then redirect to the destination.
+
+The trusted-browser age is the system parameter `two_factor_trusted_device_age_days`, in days, default **90**; a non-positive or non-numeric value records a warning and falls back to the default.
+
+Because a trusted browser is a scoped application key, revoking trusted browsers is the same operation as deleting those keys, and a trusted-browser key can never be used as a bearer credential, because [13.3](#133-the-bearer-level) requires the global scope.
+
+### 15.5 Application keys
+
+| Property | Rule |
+|---|---|
+| Generation | 20 random bytes rendered as 40 hexadecimal characters; the key is shown once and never stored in clear |
+| Storage | The first **8** characters are stored in clear as a lookup index, with a database check constraining that column to exactly 8 characters; the whole key is stored hashed with a key-derivation function at 6,000 rounds |
+| Scope | Empty, meaning global, or a name; a scoped key is only accepted for that scope |
+| Expiry | A settings administrator or an unrestricted flow may create a key without expiry; anybody else must give one, refused otherwise with **"The application key must have an expiration date"**; it must be in the future, refused otherwise with **"You cannot set an expiration date in the past."**; and it must lie within the maximum duration granted by the user's groups, refused otherwise with **"You cannot exceed "** the duration **" days."** The maximum duration is the greatest per-group allowance among the user's groups, or one day when no group grants one. |
+| Verification | Select the records whose index matches, whose user is active, whose scope is empty or equal to the requested scope, and whose expiry is empty or in the future; verify the presented key against each stored hash; return the owner's identifier on a match |
+| Creation from the interface | Only for an internal user, refused otherwise with **"Only internal users can create application keys"**, and behind the re-authentication gate |
+| Deletion | Allowed for the owner or for a settings administrator, refused otherwise with **"You can not remove application keys unless they're yours or you are a system user"**; deletion clears the registry caches; deleting through the interface is behind the re-authentication gate |
+| Programmatic creation and revocation | Refused unless the caller is a settings administrator or the system parameter enabling programmatic keys is true, with **"Programmatic application keys are not enabled"**; limited to the number of non-expired keys per user given by the corresponding limit parameter, default **10**, with **"Limit of "** the limit **" application keys is reached for programmatic creation"**; the presented key must belong to the calling user, with **"The provided application key is invalid or does not belong to the current user."**; revoking an unknown key is refused with **"The provided application key is invalid."** |
+| Scope escalation | A global key may mint a key of any scope; a scoped key may only mint a key of its own scope |
+| Housekeeping | A scheduled sweep deletes every key whose expiry has passed |
+
+### 15.6 Impersonating another identity
+
+Switching the acting identity of a **session**, as opposed to switching it inside one environment ([2.3](#23-the-two-transitions)), is restricted to settings administrators, clears the registry caches, recomputes the session token, and can only be undone by signing out. The audit fields of every record written during the impersonation carry the impersonated identity, which is why the audit trail of [section 2.4](#24-consequences-for-authorship-and-audit) must be complemented by the technical log line written when the switch happens.
+
+### 15.7 The re-authentication gate
+
+An operation may be marked as requiring a recent proof of identity. The marked operations are: changing one's own password, creating an application key, deleting an application key, revoking all devices, enrolling a second factor, disabling a second factor, and deleting a passkey.
+
+**The gate.**
+
+1. If there is no request at all, refuse with **"This method can only be accessed over a request transport."**
+2. If the session recorded a successful re-authentication less than 600 seconds ago, run the operation and return its result.
+3. Otherwise create a pending-check record holding the caller's context restricted to the values representable in the structured document format, the entity name, the record identifiers, the operation name, and the positional and named arguments.
+4. Return a form action that opens that record.
+
+**The confirmation.**
+
+1. Verify the credential as an interactive credential of the record's author. The default method is the password; the passkey capability adds a passkey as an alternative method, chosen on the confirmation form. A refusal is reported with **"Incorrect Password, try again or click on Forgot Password to reset your password."**
+2. Set the session's re-authentication instant to now.
+3. Re-read the stored call, verify that the named operation is itself marked as requiring the gate, and run it with the stored arguments.
+
+Step 3 of the confirmation re-checks the mark. Without that check, the pending-check record would be a way to have any operation executed under the caller's identity.
+
+The pending-check record is protected by a record rule limiting it to its own author, and the field storing the pending call carries the never-accessible marker of [7.1](#71-the-declaration), so the stored arguments can never be read back through the ordinary read path.
+
+### 15.8 Password changes and account removal
+
+| Flow | Rules |
+|---|---|
+| Change one's own password | The old password must be supplied and must verify; the new password is trimmed and must not be empty; the confirmation must be identical, refused otherwise with **"The new password and its confirmation must be identical."**; every trusted browser of the user is revoked first; the session token is recomputed so the person stays signed in; a technical log line records who changed whose password from which address |
+| Change another user's password | Only through the administrator assistant; the assistant writes the new password and then clears its own stored value; a user may not use it on themselves, refused with **"Please use the change password wizard (in User Preferences or User menu) to change your own password."** |
+| The portal password page | Refuses empty fields with **"You cannot leave any password empty."**, mismatched confirmations with **"The new password and its confirmation must be identical."**, and a wrong current password with **"The old password you provided is incorrect, your password was not changed."**; on success it recomputes the session token |
+| Portal account removal | Only an external user may remove their own account, refused otherwise with **"Only the portal users can delete their accounts. The user(s) "** the names **" can not be deleted."**; the sign-in name is replaced by a unique dead value, the password is cleared, every application key is removed, the user and the related party are archived unrestricted, and a deletion request record is queued for the scheduled remover |
+
+---
+
+## 16. External access with signed tokens
+
+### 16.1 The problem
+
+A customer must be able to open their own quotation from a link in an electronic mail message without signing in, and without being able to open anyone else's. Neither access rights nor record rules can express this, because there is no identity to attach them to.
+
+A **token** is a bearer secret that grants access to **one thing** without an identity and without any group. Four kinds exist. None of them ever grants entity-wide permission: possession of a token authorises exactly the document, the field or the purpose that the token names, and the flow that accepts it then continues unrestricted on that one thing.
+
+| Kind | Stored | Shape | Grants | Expiry | Revocation |
+|---|---|---|---|---|---|
+| Record access token | Yes, on the record | A random universally unique value in text form | The portal view of that one record, and whatever that page exposes: reading the document and its attachments, posting a message, paying it | None | Clear or replace the stored value |
+| Correspondent signature | No, derived | A keyed digest of the tenant name, the record's access token and the correspondent's identifier | The right to act on that record **as that correspondent**: message authorship, unsubscribing | None | Changing the record's access token invalidates every signature for it |
+| Limited field token | No, derived | A keyed digest of the entity, the record, the field and an expiry instant, followed by a separator letter and the expiry in hexadecimal | Reading the binary content of one field of one record | Deterministic: at least 14 days, at most 42 days | Changing the tenant secret |
+| Signed payload token | No, derived | A version byte, the expiry as eight bytes, a 32-byte keyed digest, then the payload, all rendered in an address-safe alphabet | One purpose, carrying a payload the receiver re-checks | Explicit, or never when zero | Changing the tenant secret, or changing any payload value the receiver re-checks |
+
+All four are compared in constant time. All four derive from the tenant secret parameter, except the record access token, which is a stored random value.
+
+### 16.2 The record access token
+
+An entity that participates in external access adopts a behaviour that adds three fields:
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Portal address (`access_url`) | Text, computed | The path at which the record is served externally. |
+| Security token (`access_token`) | Text, not copied | An opaque random token. |
+| Access warning (`access_warning`) | Long text, computed | A message shown above the externally served page, empty by default. |
+
+Rules:
+
+1. The token is created **on demand**, the first time a link is produced, as a version-four universally unique identifier written unrestricted so that a user who may read but not write the record can still share it. It is not created at record creation, so records never shared carry no token.
+2. The token is **not copied** when a record is duplicated; a copy has no token until one is generated for it, and the copy is therefore not reachable with the original's link.
+3. The token may only be compared for equality or membership in a search filter. Any other comparison — a prefix match, a pattern match, an ordering comparison — is refused as unsupported, which removes the obvious way of probing the token space one character at a time.
+4. On the Attachment entity, the equivalent field additionally carries a group requirement naming the internal-user group, because an attachment's token is used to serve raw file content.
+5. Producing a share link first checks that the **producer** may read the record, so a user cannot mint a link to a record they cannot see.
+
+**Building a share address.**
+
+1. If a token was asked for and the entity has a token field, check read access on the record **as the acting user**, then ensure the token exists and add it to the parameters.
+2. If a correspondent identifier was given, add it and the correspondent signature of [16.3](#163-the-correspondent-signature) to the parameters.
+3. If a sign-up invitation was asked for and the record names a party, merge that party's invitation parameters ([16.5](#165-the-signed-payload-token)).
+4. The base address is the record's portal address, or the generic document-redirection endpoint when a redirection was asked for, in which case the entity name and the record identifier are added as parameters.
+5. Return the base address with the parameters appended.
+
+Step 1 is the authorisation rule of sharing: **a person may only mint a share link for a document they may read.** The token generation itself is unrestricted so that a person with read-only permission can still share.
+
+### 16.3 The correspondent signature
+
+A second, different token identifies *who* is using a link, so that a comment posted from an external page can be attributed. It is a keyed digest, not a stored value:
+
+```formula
+signature = hexadecimal( keyed_digest( key = tenant_secret ,
+                                       message = ( tenant_name , record_posting_token , correspondent_identifier ) ,
+                                       function = a 256-bit secure hash ) )
+```
+
+Rules:
+
+1. The key is the tenant's secret parameter. It is per tenant, so a signature from one tenant is worthless in another.
+2. The message includes the tenant name, so the same record identifier in two tenants signs differently.
+3. The message includes the record's own posting token, so revoking the token invalidates every correspondent signature for that record.
+4. The message includes the correspondent's identifier, so a signature identifies one correspondent for one record.
+5. The entity must declare which of its fields is the posting token used in the message; an entity that does not is refused with **"Model "** the entity description **" does not support token signature, as it does not have "** the field name **" field."**
+
+**Identifying an external author.**
+
+1. If a signature and a correspondent identifier are both present and the signature recomputes to the same value, the author is that correspondent.
+2. Otherwise, when the entity defines a logical parent that may be shared as a group, recompute the parent's signature for the same correspondent and compare; on a match the author is that correspondent.
+3. Otherwise, if a record access token is present and matches the record's, the author is the record's own main party, when it has one.
+4. Otherwise there is no identified author.
+
+The distinction matters: a plain record access token identifies **the document**, not the person, so a message posted with a token alone is attributed to the document's own party; a signature identifies **one correspondent**, so each recipient of the same shared document posts under their own name.
+
+### 16.4 The limited field token
+
+**Minting.** When no expiry is given:
+
+```formula
+period = 14 days , expressed in seconds
+start  = floor( now ÷ period ) × period
+jitter = period × checksum( entity_name , record_identifier , field_name ) ÷ 4294967295
+expiry = start + 2 × period + jitter
+token  = hexadecimal( keyed_digest( key = tenant_secret , scope = the binary-content scope ,
+                                    message = ( entity_name , record_identifier , field_name , expiry ) ,
+                                    function = a 256-bit secure hash ) ) + "o" + hexadecimal( expiry )
+```
+
+**Verifying.** Take the part of the token after the last separator letter as the expiry, recompute the token for that expiry, compare in constant time, and require that the expiry is still in the future.
+
+The expiry is computed from the current 14-day period, so the **same token is produced for at least 14 days**, which lets a browser cache the address, and it is never valid for more than 42 days. The jitter derived from a checksum of the record and field spreads the expiry instants of different documents so that they do not all expire at the same moment.
+
+### 16.5 The signed payload token
+
+**Minting.**
+
+```formula
+expiry_stamp = 0 when no expiry is asked , otherwise the whole-second timestamp
+message      = structured_document_rendering( payload_values )
+digest       = keyed_digest( key = tenant_secret , scope = scope ,
+                             message = "1:" + message + ":" + expiry_stamp ,
+                             function = a 256-bit secure hash )
+token        = version_byte + expiry_stamp as 8 bytes least significant first
+               + the 32 bytes of the digest + the bytes of the message ,
+               rendered in the address-safe 64-character alphabet without padding
+```
+
+**Verifying.**
+
+1. Decode the token; the first byte must be the version byte, otherwise refuse with **"Unknown token version"**.
+2. Take bytes one to eight as the expiry, the next thirty-two as the digest, and the remainder as the message.
+3. Recompute the digest from the scope, the message and the expiry.
+4. If it matches in constant time and the expiry is zero or still in the future, return the payload values; otherwise return nothing.
+
+| Element | Rule |
+|---|---|
+| Secret | The tenant's secret parameter unless an explicit secret is supplied. An empty secret is refused. |
+| Scope | A non-empty string naming the purpose. An empty scope is refused with **"Non-empty scope required"**. Including the scope means the same payload signed for two purposes yields two different signatures, so a signature cannot be replayed in another context. |
+| Payload | Any value with a stable textual representation. It is **not secret** — anybody holding the token can read it — but it is authenticated, which is what lets the receiver re-check it. |
+| Comparison | Constant-time. |
+
+The same construction is used wherever the system must hand out a value it will later have to trust: unsubscribe links, one-time sign-up links, confirmation links, callback addresses.
+
+**Invitation and password-reset links** use this token with the sign-up scope and a payload made of the party identifier, the party's user identifiers, the last sign-in instant and the token kind:
+
+| Rule | Effect |
+|---|---|
+| Validity | The system parameter for invitation validity, default **144** hours, for an invitation; the parameter for reset validity, default **4** hours, for a password reset |
+| One-shot by construction | The last sign-in instant is part of the payload, so the token stops verifying as soon as the invited person signs in |
+| Bound to the account state | The list of user identifiers of the party is part of the payload, so a token minted before an account existed stops verifying once one does |
+| Bound to the kind | The stored token kind on the party is part of the payload and is cleared when the invitation is consumed |
+| Failure | Resolving an invalid or expired token is refused with **"Signup token '"** the token **"' is not valid or expired"** |
+
+Consuming an invitation creates the account by **copying the portal template user**, which is how the new account gets exactly the groups of the template and nothing else. The three failures are **"Signup: invalid template user"** when the template is missing, **"Signup: no login given for new user"** and **"Signup: no name or partner given for new user"** when the values are incomplete. Uninvited sign-up is refused unless the invitation setting allows open registration, with **"Signup is not allowed for uninvited users"**, and a duplicate electronic mail address is refused with **"Another user is already registered using this email address."**
+
+### 16.6 The portal document check
+
+Every portal page that shows one document uses this procedure, and nothing else:
+
+1. Take the record in the acting user's environment, and the same record unrestricted, restricted to records that still exist.
+2. If the unrestricted form is empty, refuse with **"This document does not exist."**
+3. Try the read access check on the record as the acting user. On success, return the unrestricted record.
+4. On refusal: if no token was given, or the record carries no stored token, or the comparison of the two tokens is not equal, re-raise the refusal.
+5. Otherwise return the unrestricted record.
+
+Three properties are load-bearing and must be reproduced exactly:
+
+1. The procedure returns an **unrestricted** record in both branches. A person who legitimately has read permission and a visitor holding a token are served by the same page, which therefore does not have to be written twice.
+2. Because the returned record is unrestricted, **the page itself is the authorisation boundary**: whatever the page renders from that record is disclosed. A rebuild must keep portal page templates narrow.
+3. The existence of the record is revealed before the token is checked, since step 2 precedes step 4, so a wrong identifier and a wrong token are distinguishable. This is deliberate: the identifier alone is not a secret, the token is.
+
+The attachment-removal endpoint shows the same pattern with an extra state guard: the attachment must be reachable by permission or by token, must still be a pending upload not yet attached to a message, and must not be referenced by any message. The three refusals are **"The attachment does not exist or you do not have the rights to access it."**, **"The attachment "** the name **" cannot be removed because it is not in a pending state."** and **"The attachment "** the name **" cannot be removed because it is linked to a message."**
+
+### 16.7 Serving binary content
+
+1. Resolve the record from the external identifier, or from the entity and identifier. If nothing is found, refuse with the missing-record error.
+2. If a token was given and it verifies as a limited field token for this record and this field ([16.4](#164-the-limited-field-token)), return the record unrestricted.
+3. If the entity's own content rule allows it, return the record unrestricted.
+4. Otherwise check read access on the record as the acting user and return the record **restricted**.
+
+The content rule of step 3 answers "may this file be served even though the caller may not read the record". Its answer is **false** for every entity unless one of the following applies:
+
+| Entity | Rule |
+|---|---|
+| Attachment | A presented token must equal the attachment's stored token, otherwise the refusal **"Invalid access token"** is raised immediately; a **public** attachment is served; for an external user with an account, the attachment is served when the ordinary read check on the attachment passes, which by [16.8](#168-the-attachment-access-layer) delegates to the record the attachment belongs to |
+| Any entity with a publication flag, in the multi-site capability | Served when the record is published **and** the requested field carries no group requirement |
+| Catalogue entities exposed to a point of sale or self-ordering front end | Served for the specific fields those front ends need, when the record is enabled for that channel |
+
+After step 2 or step 3 the record is unrestricted, so the field is read without layer 5; step 4 is the only path that applies the ordinary checks, and it additionally applies the field restriction when the value is finally read.
+
+### 16.8 The attachment access layer
+
+The Attachment entity extends layer 4 with rules of its own. The extension runs **after** the generic evaluation of sections 5 and 6 and can only remove records, never add them.
+
+1. Run the generic evaluation for the operation, producing the forbidden set and any refusal. The remaining records are the set minus the forbidden ones; if nothing remains, stop, because everything is already refused.
+2. If the operation is create or delete, evaluate it as write from here on.
+3. Read, unrestricted, only the five security columns of the remaining records: the related entity, the related identifier, the author, the public flag and the related field.
+4. For each remaining attachment: if it is public and the operation is read, allow it. Otherwise, when the acting user is not a settings administrator: if it has no related record and its author is not the acting user, forbid it; and if it stores the content of a field, that field must exist on the related entity and the acting user must hold the field restriction for the operation, otherwise forbid it. If it has a related entity and a related identifier, remember the pair for step 5.
+5. Group the remembered pairs by entity and, for each entity, keep only the records the acting user may perform the operation on; every attachment whose pair did not survive is forbidden. One exception: when the related entity is the User entity and the related record is the acting user, the check is skipped, because a user normally may not write their own user record and would otherwise be unable to attach an image to their own signature.
+6. Invalidate the five security columns of the forbidden records, so that the unrestricted read of step 3 leaves nothing readable behind.
+7. The refusal message, when the generic evaluation produced none, is **"Sorry, you are not allowed to access this document. Please contact your system administrator."** followed by a blank line, **"(Operation: "** the operation **")"**, a blank line, and **"Records: "** up to six records **", User: "** the acting identifier.
+
+A write on an attachment that could be served as a static resource is refused with **"Sorry, you are not allowed to write on this document"**.
+
+Searches on attachments are rewritten rather than filtered afterwards:
+
+1. Unless the filter already names the identifier or the field marker, add the condition that the attachment stores no field content, so that the binary values of other entities' fields are invisible to ordinary searches.
+2. If the environment is unrestricted, or the filter is statically false, perform the ordinary search.
+3. Start the security filter with the condition that the attachment is public. If the filter does not restrict the related identifier, or allows an empty one, add the condition that the related identifier is empty for a settings administrator, or that it is empty **and** the author is the acting user otherwise.
+4. If the filter restricts the related entity to between one and five entities, then for each of them add the condition that the related entity is that one and the related identifier is in a sub-selection on that entity performed with the acting user's own rules — and, for a non-administrator, that the related field is one of the fields of that entity the acting user may read which are binary or point back at attachments, or is empty. Run the ordinary search with the filter and that security filter.
+5. Otherwise fall back to searching unrestricted in batches of the prefetch size, keeping the records that pass record verification for read, and stopping when enough have been collected.
+
+### 16.9 The shared-link redirection
+
+A shared link points at one generic endpoint that decides where the visitor should land. It is the place where tokens, identities and companies meet.
+
+1. If the entity or the identifier is missing, or the entity is unknown, go to the generic fallback.
+2. Read the record unrestricted, restricted to records that still exist. If it is empty, go to the generic fallback.
+3. **The portal branch first**, present when the portal capability is installed and the entity has a portal page: take the session identity, or the public user. Try the read access check on the record as that identity. On refusal, if the record has a stored access token and the presented token compares equal, take the record's portal action forced to the portal address, append the correspondent identifier and signature when the extra parameters carry them, and redirect there.
+4. **When a session identity exists**: if the entity is not readable at all for that identity, go to the generic fallback. Take the selected companies from the browser cookie, or the user's main company. Try the read access check on the record with those companies. On refusal, take the record's suggested company; if there is none, go to the generic fallback; otherwise retry with the companies plus the suggested one, storing the widened list in the cookie on success and going to the generic fallback on refusal. Then take the record's access action for that identity.
+5. **Otherwise**, take the record's access action for an anonymous visitor; if that action is an address action that is not marked public, redirect to the sign-in page keeping this redirection as the destination.
+6. An address action is followed directly; a window action is turned into a back-office address naming the root menu, the form view and the record; any other kind of action leads to the messaging page.
+7. When the visitor is anonymous or public and the record is not readable to them, redirect to the sign-in page keeping this redirection as the destination.
+
+The generic fallback is the messaging page for an internal user, the portal home page for an external user, and the sign-in page for an anonymous visitor. The suggested company and the widening rule are specified in [multi-company, section 11.4](multi-company.md#114-following-a-link-into-another-company).
+
+### 16.10 Neutralising a copy of a tenant
+
+When a tenant is copied for testing, the copy must not be able to act on the outside world with the original's credentials. A neutralisation pass disables outgoing message servers, scheduled jobs and external service credentials. It does **not** rotate the tenant secret, so signatures minted by the original still verify in the copy; a rebuild that wants stronger isolation must rotate the secret and accept that every outstanding link breaks.
+
+---
+
+## 17. External identities in practice
+
+### 17.1 What the public identity is and is not
+
+The public identity is an ordinary User record belonging only to the public-user group. It has no password that can be used to sign in interactively, it is not archived, and every layer applies to it. Requests reach it only through the `public` endpoint level ([13.2](#132-the-authentication-procedure)).
+
+One public identity exists per **site** when the multi-site capability is installed, selected by the site the request resolves to, and one can be created per **company** on demand ([multi-company, section 12.3](multi-company.md#123-the-public-identity-of-a-company)).
+
+### 17.2 The portal access pattern
+
+An external identity reaches data through three mechanisms, and only these three:
+
+| Mechanism | What it grants | Where it is decided |
+|---|---|---|
+| Access rights granted to the portal-user or public-user group | The right to touch the entity at all | [Section 5](#5-access-rights) |
+| Group record rules for the portal-user and public-user groups | The records of that entity that belong to the visitor's own commercial party, or that are published | [Section 6](#6-record-rules) |
+| A token | One document, whatever the visitor's groups say | [Section 16](#16-external-access-with-signed-tokens) |
+
+The canonical shape of the second mechanism, reproduced by every domain that has a portal page, is a group rule for the portal-user and public-user groups on the entity, for the read operation, admitting records whose party field is a descendant of the acting user's commercial party. For the documents that hang under such a document — lines, attachments, messages, deliveries — either the same rule applied through the parent link, or no rule at all plus a page that only ever renders the parent it has already authorised.
+
+Because group rules are disjoined and then conjoined with the global rules ([6.4](#64-the-combination-rule)), adding a portal rule can never widen what the global company rule allows. Example four of [section 6.6](#66-worked-examples) shows exactly that.
+
+### 17.3 What external identities never get
+
+| Capability | Rule |
+|---|---|
+| Extended refusal messages, with record identifiers and rule names | Refused: they require membership of the technical-features group **and** an internal user ([6.7](#67-the-refusal-message) and [7.5](#75-the-refusal-message)) |
+| Exporting a selection | Refused unless the export group was explicitly granted ([8.11](#811-export)) |
+| Creating an application key from the interface | Refused with "Only internal users can create application keys" |
+| Reading another person's group membership | Refused ([3.7](#37-asking-about-another-users-groups)) |
+| Reading their own user record | Only the self-readable fields, through the relaxation of [3.8](#38-reading-and-writing-ones-own-user-record) |
+| Reading the technical menus, the developer tools, the settings | Refused by the group requirements on those menus and views |
+
+An external identity granted an access right with **no group** receives it like everybody else. Such rights are therefore the main accidental way to expose data to the outside, which is why creating one records a warning ([5.1](#51-the-entity)).
+
+### 17.4 Posting a message from a portal page
+
+Posting a message on a shared document is the one write an unauthenticated visitor can perform. Its authorisation is the conjunction of:
+
+1. the document was resolved by the portal document check of [16.6](#166-the-portal-document-check), that is, either the visitor may read it or the token matched;
+2. the author is determined by the identification procedure of [16.3](#163-the-correspondent-signature); when no author can be identified, the message is refused;
+3. the entity declares which operation a message posting requires, read or write; the check is performed on the document, not on the message;
+4. the created message is attributed to the identified party, never to the public identity.
+
+---
+
+## 18. View loading and menu visibility
+
+### 18.1 The two-phase view pipeline
+
+A served view definition is produced in two phases with different caching.
+
+**Phase one, assembly, cached and user-independent.** The base definition and its extensions are combined, the field nodes are resolved against the entity, and every node carrying a group condition is annotated with the key of the **composed group expression** for that node:
+
+```formula
+node_expression = entity_expression( node ) AND view_expression( node )
+```
+
+where the view expression is the intersection of the requirements written on the node and on each of its ancestors, and the entity expression is the intersection of the permitted-users expression of the entity for read ([5.4](#54-the-permitted-users-expression)), the requirement of every field the node is bound to accumulated as the tree is walked, and the same computed recursively for an embedded view on a linked entity.
+
+The assembly is cached under the view identifier, the view kind, the small-screen flag, the language, and every context key naming an alternative view. It contains the nodes of **all** groups.
+
+**Phase two, filtering, per user and not cached.**
+
+1. For every annotated node, in document order: decode the expression from the annotation and test it against the acting user's effective groups. If it does not match, remove the node from the tree, re-attaching its trailing text to the previous sibling, or to the parent when there is none. If it does match and the node is a pure grouping wrapper with no other attribute, replace it by its children, in order, so that the surrounding layout is preserved.
+2. For every node annotated with an entity name for permission flags: if the node is a field node bound to a link, set its create and write flags from the access rights on the linked entity. Otherwise, for each of the three pairs — create with `create`, delete with `unlink`, edit with `write` — when the node does not already carry the flag and the access right does not hold, set the flag to false; and for a card view grouped by a link, do the same for the group-level flags against the linked entity.
+3. Apply the debug-mode flags: a node marked as technical is made invisible when the request is not in debug mode, and a node marked as non-technical is made invisible when the request is in debug mode.
+
+**Worked example.** A company form is served to a user who may not create, write or delete companies: the root node carries the three flags set to false. The same form served to a settings administrator carries none of the three, which the client reads as "allowed". A link node pointing at Currency carries its create and write flags false for the first user and true for the second.
+
+### 18.2 Access to a view definition itself
+
+A view may carry its own group list, which is a different mechanism from the node requirements: it gates whether the definition may be **opened** at all.
+
+1. If the view is an extension of another view, delegate the check to the base view.
+2. If the view's group list intersects the acting user's effective groups, allow.
+3. If the view's group list is not empty, refuse with **"View '"** the view key **"' accessible only to groups "** followed by the group names.
+4. Otherwise refuse with **"View '"** the view key **"' is private"**.
+
+A view with no group list is therefore private in this sense: it can be opened only through an action that names it, never directly. A group list may only be set on a primary view; setting it on an extension is refused with **"Inherited view cannot have 'groups' defined on the record. Use 'groups' attributes inside the view definition"**.
+
+### 18.3 Field descriptions served with the views
+
+The description map returned alongside the served views is built with the field filter of [7.6](#76-effects-on-what-a-client-receives), restricted to the field names the views actually reference. A field restricted away from the acting user is therefore absent from both the view tree and the description map.
+
+### 18.4 Menu visibility
+
+1. Take the acting user's effective groups; if the request is not in debug mode, remove the technical-features group from them.
+2. Take every menu whose group list is empty or intersects those groups, selected with a direct condition on the association table so that the Menu entity's own rules do not interfere.
+3. Start with an empty visible set.
+4. For each candidate that carries an action: if the action no longer exists, skip it. Determine the entity the action operates on — a window action, a report action and a server action each name one; other kinds name none. If there is such an entity and the acting user has no read access right on it, skip the candidate. Otherwise add the candidate to the visible set, and then every ancestor of it that is itself a candidate, stopping at the first ancestor already visible.
+5. Return the visible set.
+
+Three consequences:
+
+- A menu **without** an action is visible only when at least one of its descendants is visible. A folder never becomes visible on its own.
+- A menu **with** a group list is hidden from non-members even when the action's entity is readable.
+- A menu **without** a group list is visible exactly when its action's entity is readable, which is why most menus carry no group list at all.
+
+The result is cached under the acting user's effective group identifiers plus the debug-mode flag for the identifier set, and under the acting identifier, the debug-mode flag and the language for the assembled tree. Creating, writing or deleting any menu clears the caches.
+
+### 18.5 Action visibility
+
+An action record is readable through the ordinary layers. In addition, resolving an external identifier to a record and checking that the acting user may see it is available as a single operation: it resolves the identifier, then performs a search restricted to that record; when the search returns nothing it either refuses with **"Not enough access rights on the external identifier ""** the package name, a dot, the local name **"""**, or returns the entity name with an empty identifier, according to the caller's request.
+
+---
+
+## 19. Caching and invalidation of security decisions
+
+Security decisions are consulted many times per request and are therefore cached. Every cache must be invalidated exactly when the data it derives from changes.
+
+| Cached answer | Key | Invalidated when |
+|---|---|---|
+| A user's effective group identifiers | The user | The user's groups, active flag, language, time zone, main company or allowed companies change |
+| The set of entities a user may operate on, per operation | The acting user and the operation | Any access right is created, written or deleted |
+| The permitted-users expression for an entity and an operation | The entity and the operation | Any access right changes; any group changes |
+| The compact group definitions | None | Any group, any group external identifier, any access right or any record rule changes |
+| A user's companies | The user | Company membership or a company's active flag changes |
+| An entity's effective rule filter | The acting user, the unrestricted flag, the entity, the operation and the ordered allowed-company list, extended by any context key the entity adds to its cache-key list | Any record rule is created, written or deleted |
+| The session token | The session key | The registry caches are cleared |
+| The resolution of an external identifier | The identifier | The external identifier is written or deleted |
+| The assembled view | The view identifier, the view kind, the small-screen flag, the language and the alternative-view context keys | Any view changes |
+| The visible menu tree | The acting identifier, the debug-mode flag and the language | Any menu is created, written or deleted |
+
+Four rules:
+
+1. Every one of these invalidations also **signals other workers** through the counters of [the architecture, section 12](architecture.md#12-cross-process-coherence). A group changed by one worker must take effect in all of them.
+2. Creating, writing or deleting an access right, and changing the groups of any user, additionally clears the whole record cache and the registry caches, because a decision already made in this transaction may now be wrong. Creating or deleting a group, and changing an implication, additionally clears the group-definition cache. There is no partial invalidation: the operations are rare and the cost of a stale permission is unacceptable.
+3. Creating, writing or deleting a record rule flushes the unit of work before clearing the caches, so that the new rule is visible to everything that follows in the same transaction.
+4. Switching company changes the cache key of the rule filter rather than invalidating anything.
+
+In development mode the rule cache is switched off entirely, so that editing a rule takes effect immediately.

@@ -15,12 +15,12 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 
 ## 2. Configuring a dashboard
 
-**Actor.** A user holding the dashboard administrator group. Nobody else may create, write or delete a dashboard; rule [SD-004](business-rules.md#sd-004).
+**Actor.** A user holding the dashboard administrator group. Nobody else may create, write or delete a dashboard; rule [SD-014](business-rules.md#sd-014).
 
 1. From the group form, page "Spreadsheets", the administrator works on the group's dashboards directly. The list is not creatable from that page; a dashboard is added by the create control of the list embedded there, which the dashboards configuration provides, or by duplicating an existing one.
 2. Each row carries: a drag handle for the sequence, shown only to a technical user; the name; the access groups, as tags, required; the companies, as tags, shown only in a multi-company installation, with a placeholder reading "Visible to all" and with creation of new companies forbidden from the widget; the workbook itself, as a file control, shown only to a user in the extended-visibility group; the publication toggle; and, optionally shown, the dashboard group.
-3. Setting the name is required; rule [SD-003](business-rules.md#sd-003).
-4. Setting the dashboard group is required; rule [SD-003](business-rules.md#sd-003).
+3. Setting the name is required; rule [SD-004](business-rules.md#sd-004).
+4. Setting the dashboard group is required; rule [SD-005](business-rules.md#sd-005).
 5. Leaving the access groups empty removes the dashboard from everybody's workspace, because the audience rule of [`configuration.md`](configuration.md) §5 then matches nobody. The list control marks the field required to prevent that by accident.
 6. Leaving the companies empty means every company.
 7. Uploading a workbook file into the workbook control runs the validation of [`entities.md`](entities.md) §2.5 immediately, while the row is still being edited, and a bad file is refused before the row is saved; rules [SD-001](business-rules.md#sd-001) and [SD-002](business-rules.md#sd-002).
@@ -47,7 +47,7 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 **Actor.** Any internal user who may read the dashboard.
 
 1. The workspace issues a read to the dashboard reading route, addressing the dashboard by identifier. The entry moves to `Loading`.
-2. The route resolves the dashboard through the reader's rights. A dashboard that does not exist, or that the reader may not read, yields not found; rule [SD-014](business-rules.md#sd-014).
+2. The route resolves the dashboard through the reader's rights. A dashboard that does not exist, or that the reader may not read, yields not found; rule [SD-026](business-rules.md#sd-026).
 3. The route reads the active companies from the request: the companies cookie when present, otherwise the reader's own company. The value is a list of identifiers separated by hyphens, and each is read as a number. The rest of the work happens with exactly those companies active.
 4. The route decides between sample and live by the rule of [`state-machines.md`](state-machines.md) §5.2.
 5. **Sample branch.** The sample workbook is loaded from the path and returned as the structured answer `{snapshot, is_sample}` with the sample mark set to true. The procedure ends.
@@ -79,13 +79,13 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 ### 6.1 Evaluating a cell backed by a list
 
 1. The cell's formula names a list element, a row position and a field path.
-2. The element identifier is checked; an unknown element raises rule [SD-017](business-rules.md#sd-017).
-3. The field path is checked for emptiness; an empty path raises rule [SD-016](business-rules.md#sd-016).
+2. The element identifier is checked; an unknown element raises rule [SD-030](business-rules.md#sd-030).
+3. The field path is checked for emptiness; an empty path raises rule [SD-031](business-rules.md#sd-031).
 4. The data source is consulted. Its status decides what comes back, by [`state-machines.md`](state-machines.md) §6.2.
 5. A valid source returns the record at that position, converted from storage form to cell form by [`calculations.md`](calculations.md) §15, and a number format chosen by [`calculations.md`](calculations.md) §14.
 6. A position beyond the fetched window widens the window and returns the loading marker.
 7. A field path the source has not fetched yet is added to the fetch set and the loading marker is returned.
-8. A field path that does not exist, or that the reader may not read, raises rule [SD-018](business-rules.md#sd-018).
+8. A field path that does not exist, or that the reader may not read, raises rule [SD-032](business-rules.md#sd-032).
 
 ### 6.2 Drilling from a list cell to one record
 
@@ -107,7 +107,7 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 1. The reader clicks a bar, a slice or a point of a data-bound chart, or middle-clicks it to open in a new window.
 2. The clicked item is turned into a record selection by combining the chart's own selection with one condition per grouping level of the clicked item.
 3. A window action is opened showing a list and a form, titled with the clicked item's name, reusing `actionXmlId` when recorded.
-4. A chart that is instead linked to a menu opens that menu's action. A linked menu that has no action shows the notice of rule [SD-034](business-rules.md#sd-034) and nothing is opened.
+4. A chart that is instead linked to a menu opens that menu's action. A linked menu that has no action shows the notice of rule [SD-060](business-rules.md#sd-060) and nothing is opened.
 
 ### 6.5 Auditing an accounting cell
 
@@ -125,7 +125,7 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 **Actor.** Any internal user who may read the dashboard.
 
 1. The reader activates the star in the control panel of the open dashboard.
-2. The favourite operation is called on that dashboard alone; addressing more than one record is refused by rule [SD-020a](business-rules.md#sd-020a).
+2. The favourite operation is called on that dashboard alone; addressing more than one record is refused by rule [SD-020](business-rules.md#sd-020).
 3. The operation adds or removes the reader's user identifier in `favorite_user_ids`, with elevated rights.
 4. The workspace flips the mark it holds for that entry without refetching, so the star and the "FAVORITES" section update at once.
 
@@ -150,12 +150,12 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 
 1. The address is requested. The route reads the share with elevated rights.
 2. A share that does not exist yields not found.
-3. The access check of [`entities.md`](entities.md) §5.4 runs; a failure of either part is refused by rule [SD-011](business-rules.md#sd-011), answered as forbidden.
+3. The access check of [`entities.md`](entities.md) §5.4 runs; a failure of either part is refused by rule [SD-022](business-rules.md#sd-022), answered as forbidden.
 4. The route decides whether to offer a download: it offers one only when the *requesting* user holds the export group. An anonymous reader does not, so no download control is drawn for them.
 5. The public page is rendered: the dashboard's name, the sentence "Frozen and copied on" followed by the share's creation moment, a download control when step 4 allowed one, and the identity controls of the portal — the signed-in reader's menu, or a sign-in invitation.
 6. The page is handed the session description and, alongside it, the address of the data route, the address of the download when allowed, and the presentation mode `dashboard`.
 7. The page fetches the data route (§10), builds a workbook model in dashboard presentation mode marked as frozen, and renders it.
-8. Copying from a frozen workbook is refused by rule [SD-033](business-rules.md#sd-033), and the copy entries of the cell, column, row and edit menus are disabled.
+8. Copying from a frozen workbook is refused by rule [SD-056](business-rules.md#sd-056), and the copy entries of the cell, column, row and edit menus are disabled.
 9. The page offers, in its file menu, a download entry visible only when a download address was supplied.
 10. A dashboard-mode page with filters offers a control that reveals the filters and their frozen values; filters whose rendered value is empty are not shown.
 
@@ -165,7 +165,7 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 
 1. The data route is requested with the share identifier and the token.
 2. A share that does not exist yields not found.
-3. The access check of [`entities.md`](entities.md) §5.4 runs; a failure is refused by rule [SD-011](business-rules.md#sd-011).
+3. The access check of [`entities.md`](entities.md) §5.4 runs; a failure is refused by rule [SD-022](business-rules.md#sd-022).
 4. The stored frozen workbook is streamed back exactly as stored — the same document the sharing reader froze, with no locale substitution, no currency and no revisions.
 
 ## 11. Downloading the workbook file of a shared dashboard
@@ -174,8 +174,8 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 
 1. The download route is requested with the share identifier and the token. The route requires a signed-in user; an anonymous caller is sent to sign in.
 2. The share is read with elevated rights. A share that does not exist yields an empty set and the access check refuses it.
-3. The access check of [`entities.md`](entities.md) §5.4 runs; a failure is refused by rule [SD-011](business-rules.md#sd-011).
-4. The requesting user's export right is checked; a user without it is refused by rule [SD-013](business-rules.md#sd-013).
+3. The access check of [`entities.md`](entities.md) §5.4 runs; a failure is refused by rule [SD-022](business-rules.md#sd-022).
+4. The requesting user's export right is checked; a user without it is refused by rule [SD-023](business-rules.md#sd-023).
 5. The packaged workbook file stored in `excel_export` is streamed, named after the share — that is, after the dashboard.
 6. A share created without workbook-file parts has nothing in `excel_export` and the stream is empty.
 
