@@ -423,3 +423,166 @@ Uniqueness: the pair (company, name). Message: "A Ledger group name must be uniq
 Filtering an entry or a journal item by a ledger group is translated into "the journal is not one of the excluded journals of that group".
 
 ---
+
+## 8. Journal Entry
+
+Journal Entry (`account.move`, table `account_move`).
+
+### Purpose
+
+One accounting document. It holds a header (journal, date, number, state, partner, currency, reference) and a set of Journal Items that must sum to zero in the company currency. Every accounting document of the whole application is a Journal Entry: a plain miscellaneous entry, a customer invoice, a vendor bill, a credit note, a receipt, the entry of a payment, the entry of a bank transaction, an exchange-difference entry, a cash-basis tax entry, an opening entry.
+
+The document type (`move_type`) decides which additional behavior applies. This document specifies the entity as a whole and the behavior of a plain entry; the invoice-specific behavior is specified in `../accounts-receivable/` and `../accounts-payable/`.
+
+### Document types
+
+| Value | Label | Family | Direction | Reverse type |
+|---|---|---|---|---|
+| `entry` | Journal Entry | miscellaneous | outbound (sign +1) | `entry` |
+| `out_invoice` | Customer Invoice | sale | inbound (sign −1) | `out_refund` |
+| `out_refund` | Customer Credit Note | sale | outbound (sign +1) | `out_invoice` |
+| `in_invoice` | Vendor Bill | purchase | outbound (sign +1) | `in_refund` |
+| `in_refund` | Vendor Credit Note | purchase | inbound (sign −1) | `in_invoice` |
+| `out_receipt` | Sales Receipt | sale | inbound (sign −1) | `out_refund` |
+| `in_receipt` | Purchase Receipt | purchase | outbound (sign +1) | `in_refund` |
+
+The direction sign is 1 for a plain entry and for outbound documents, and −1 for inbound documents. Inbound documents are those that bring money in (customer invoices and sales receipts) or that reduce a payable (vendor credit notes). The sign converts a price into a balance and back.
+
+### Accounting fields
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `name` | Text | The document number. Computed (see the numbering rules), stored, editable, precomputed. Not copied. Tracked. Indexed for word search. The placeholder value `/` means "no number yet". |
+| `name_placeholder` | Text, computed, not stored | The number the document *would* get: shown in the empty number box when the document has no number, has a date, and is the first of its numbering chain. Computed by taking the next sequence format and incrementing the counter by one. |
+| `ref` | Text | A free reference. Not copied. Tracked. Indexed for word search. |
+| `date` | Date | Required, indexed. The **accounting date**: the date at which the entry enters the ledger and the date used by every report. Computed, stored, editable, precomputed. Not copied. Tracked. |
+| `state` | Selection | Required, read-only, default `draft`. Values `draft` (Draft), `posted` (Posted), `cancel` (Cancelled). Not copied. Tracked. |
+| `move_type` | Selection | Required, read-only after creation, indexed, default `entry`. Tracked. |
+| `is_storno` | Boolean, computed, not stored | True when the entry is a refund and the company uses storno accounting, or when it was explicitly flagged. Under storno accounting a reversal is booked as a negative amount on the same side instead of an amount on the opposite side. |
+| `journal_id` | Link to Journal | Required. Computed, stored, editable, precomputed, with an inverse. Restricted to the journals suitable for the document type. |
+| `journal_group_id` | Link to Journal Group, not stored | A search-only field: filtering by a ledger group filters on "journal not in the excluded journals of the group". |
+| `company_id` | Link to Company | Computed from the journal, stored, editable, precomputed, indexed, with an inverse. When the journal company is not among the ancestors of the current company, the entry takes the first accessible branch of the journal company (or of the active company). |
+| `company_currency_id` | Link to Currency, related | The currency of the company; the currency in which the balance invariant is checked. |
+| `currency_id` | Link to Currency | Required. The document currency. Computed, stored, editable, precomputed, with an inverse. Tracked. |
+| `line_ids` | Sub-records: Journal Item | Every item of the entry, including tax lines, payment-term lines, rounding lines and display-only lines. Copied when the entry is duplicated. |
+| `invoice_line_ids` | Sub-records: Journal Item | A view over `line_ids` restricted to product lines, sections, subsections and notes. Not copied. |
+| `posted_before` | Boolean | Not copied. True once the entry has been posted at least once. Governs the numbering reset rule and the audit-trail deletion rule. |
+| `checked` | Boolean | "Reviewed". Computed, stored, editable, tracked, not copied. The computation sets it to true when the entry is posted **and** either the journal is a miscellaneous journal or the acting user is allowed to review. |
+| `always_tax_exigible` | Boolean | Computed, stored, editable. True when the entry is not an invoice-like document **and** it collects no cash-basis values, meaning its tax lines are immediately reportable. |
+| `auto_post` | Selection | Required, default `no`, not copied. Values: `no` (No), `at_date` (At Date), `monthly` (Monthly), `quarterly` (Quarterly), `yearly` (Yearly). A value other than "No" means the entry is posted automatically by a scheduled job at its accounting date; the three periodic values additionally create the next occurrence. |
+| `auto_post_until` | Date | Not copied. Computed, stored, editable: cleared whenever the automatic posting is "No" or "At Date". The last date up to and including which the recurrence produces new entries. |
+| `auto_post_origin_id` | Link to Journal Entry | Read-only, not copied, indexed when set. The first entry of a recurrence; the original entry points to itself. |
+| `hide_post_button` | Boolean, computed, not stored | True when the entry is not draft, or when it is scheduled for automatic posting and its date is in the future. |
+| `made_sequence_gap` | Boolean, stored | True when this entry is the first one that breaks the natural numbering of its chain. Maintained by the gap-detection algorithm, not by an ordinary computation. |
+| `highest_name` | Text, computed, not stored | The last number used in the numbering chain this entry belongs to. |
+| `sequence_prefix` | Text, computed, stored | The part of the number before the trailing digit block. |
+| `sequence_number` | Integer, computed, stored | The trailing digit block of the number, as an integer; zero when there is none. |
+| `type_name` | Text, computed, not stored | The human label of the document type, with two overrides: a customer invoice is called "Invoice" and a customer credit note is called "Credit Note". |
+| `restrict_mode_hash_table` | Boolean, related to the journal | Whether the journal secures posted entries with a hash. |
+| `inalterable_hash` | Text, read-only, not copied, indexed when set | The hash of this entry in the chain (see the hash section of `calculations.md`). |
+| `secure_sequence_number` | Integer, read-only, not copied, indexed | The position of the entry in a legacy gapless securing sequence; entries hashed through the current mechanism have no value here and are ordered by prefix and number instead. |
+| `secured` | Boolean, computed, not stored | True when the entry carries a hash. Searchable only with the test "is true". |
+| `show_reset_to_draft_button` | Boolean, computed, not stored | True when the entry is not restricted by hashing, carries no hash, and is either cancelled or posted without a pending cancellation request. |
+| `need_cancel_request` | Boolean, computed, not stored | False in the core. A country package sets it to true for documents already declared to an authority, which then require an approved cancellation instead of a reset to draft. |
+| `audit_trail_message_ids` | Sub-records: Message | Every notification message logged on this entry; the audit trail. |
+| `attachment_ids` | Sub-records: Attachment | Files attached to the entry. |
+| `no_followup` | Boolean, computed with an inverse | Excludes the entry from dunning reports. For an invoice it reads and writes the flag of the first receivable or payable line; for anything else it is true. |
+| `partner_id` | Link to Partner | Optional on a plain entry. Tracked, indexed. Deleting the partner is refused while an entry points to it. Writing it recomputes the account of the payment-term lines. |
+| `commercial_partner_id` | Link to Partner, computed, stored, read-only | The commercial entity of the partner: the top-most company in the partner hierarchy. Used for the payable and receivable accounts and for grouping. |
+| `payment_reference` | Text | The communication the payer should quote. Computed, stored, editable, with an inverse, tracked, not copied. The computation fills it, for posted customer invoices only, with the structured reference derived from the journal settings. |
+| `sanitize_payment_reference` | Text, computed, not stored | The payment reference stripped of every character that is not a letter or a digit. A functional index exists on the same expression for matching bank transactions. |
+| `narration` | Rich text | Terms and conditions. Computed from the company settings, stored, editable. |
+| `invoice_origin` | Text | Read-only, tracked, not copied. The document or documents that generated this one. |
+| `reversed_entry_id` | Link to Journal Entry | Read-only, not copied, indexed when set. The entry this one reverses. |
+| `reversal_move_ids` | Sub-records: Journal Entry | The reversals of this entry. |
+| `origin_payment_id` | Link to Payment | Indexed when set, not copied. The payment whose journal entry this is. |
+| `matched_payment_ids` | Multiple links to Payment | The payments attached to this invoice. |
+| `statement_line_id` | Link to Statement Line | Indexed when set, not copied. The bank transaction whose journal entry this is. |
+| `tax_cash_basis_rec_id` | Link to Partial Reconciliation | Indexed when set. The partial reconciliation that produced this cash-basis entry. |
+| `tax_cash_basis_origin_move_id` | Link to Journal Entry | Read-only, indexed when set. The document whose taxes this cash-basis entry recognises. |
+| `tax_cash_basis_created_move_ids` | Sub-records: Journal Entry | The cash-basis entries created from this document. |
+| `exchange_diff_partial_ids` | Sub-records: Partial Reconciliation | The reconciliations that produced this exchange-difference entry. |
+| `adjusting_entry_origin_move_ids` / `adjusting_entries_move_ids` | Multiple links to Journal Entry | The two directions of the link created by the automatic transfer wizard between an origin entry and the adjusting entry it produced. |
+
+### Amount fields
+
+All of these are computed and stored. They are recomputed whenever a line balance, a line foreign amount, a line residual, a reconciliation or the state changes.
+
+| Field (storage name) | Currency | Meaning |
+|---|---|---|
+| `amount_untaxed` | document | Signed untaxed total in the document currency |
+| `amount_tax` | document | Signed tax total in the document currency |
+| `amount_total` | document | Signed grand total in the document currency |
+| `amount_residual` | document | Signed amount still due in the document currency |
+| `amount_untaxed_signed` | company | Untaxed total in the company currency, with the ledger sign |
+| `amount_untaxed_in_currency_signed` | document | Untaxed total in the document currency, with the ledger sign |
+| `amount_tax_signed` | company | Tax total in the company currency, with the ledger sign |
+| `amount_total_signed` | company | Grand total in the company currency, with the ledger sign; for a plain entry the absolute value |
+| `amount_total_in_currency_signed` | document | Grand total in the document currency, with the ledger sign; for a plain entry the absolute value |
+| `amount_residual_signed` | company | Amount still due in the company currency, with the ledger sign |
+| `amount_total_words` | — | The grand total spelled out in words in the language of the document |
+
+The exact formulas and the sign conventions are in `calculations.md`.
+
+### Payment status
+
+| Value | Label | Meaning |
+|---|---|---|
+| `not_paid` | Not Paid | Nothing has been matched against the document |
+| `in_payment` | In Payment | The document is fully matched but at least one counterpart payment is not itself matched with a bank transaction |
+| `paid` | Paid | The document is fully matched and every counterpart payment is matched with a bank transaction |
+| `partial` | Partially Paid | Some but not all of the document has been matched |
+| `reversed` | Reversed | The document is fully matched and the only counterparts are its own reversals |
+| `blocked` | Blocked | The user marked the document as not to be chased; set and cleared manually |
+| `invoicing_legacy` | Invoicing App Legacy | A value kept for documents created by a stand-alone invoicing installation; never produced by this domain |
+
+`status_in_payment` merges this with the document state for display: for a posted document it shows the payment status when it is partial, in payment, paid, reversed or blocked, otherwise "Sent" when the document was sent and otherwise the state; for a draft document it shows the payment status when it is partial, in payment, paid or blocked, otherwise the state.
+
+### Date fields
+
+| Field (storage name) | Meaning |
+|---|---|
+| `date` | The accounting date; see above |
+| `invoice_date` | The document date printed on an invoice or read from a bill. Indexed, not copied |
+| `invoice_date_due` | The due date; computed from the payment terms, stored, editable, indexed, not copied |
+| `delivery_date` | The date the goods or services were delivered; computed, stored, editable, precomputed, not copied |
+| `taxable_supply_date` | The date used for the tax point where a country requires one distinct from the document date |
+
+The **accounting date source** is the document date when there is one, otherwise the accounting date itself. The computation of the accounting date is:
+
+1. Take the accounting date source.
+2. When there is none, or the document is not an invoice-like document: if no accounting date exists yet, set it to today, and stop.
+3. When the document is **not** a sale document, shift the source through the accounting-date rule described in `calculations.md` (which pushes it out of any locked period and to the end of the numbering period when it lies in the past).
+4. If the resulting date differs from the current accounting date, write it, and schedule the recomputation of the item dates and of the number.
+
+### Uniqueness and indexes
+
+- A unique index enforces that the pair (number, journal) is unique **among posted entries whose number is not the placeholder `/`**. Message: "Another entry with the same name already exists."
+- Additional indexes exist on (journal, date), on (journal, company, date), on (journal, state, payment status, type, date), on the journal for unreviewed entries, on the reference for vendor documents, and on the sanitized payment reference.
+
+### Ordering
+
+Descending accounting date, then descending number, then descending document date, then descending identifier. In other words the newest entries first, and within a day the highest number first.
+
+### Display name
+
+- A draft entry shows "Draft" followed by the type name, then the reference in parentheses or the word "Unknown" when it has no number.
+- A cancelled entry shows the number followed by "(Cancelled)".
+- A posted entry shows the number.
+- When the display is requested in "full" mode the partner name and the date are appended.
+
+### Copying
+
+Duplicating an entry:
+
+- For a customer invoice or a vendor bill, only the *created* line commands are kept, so the copy is rebuilt from scratch rather than linking the original lines.
+- For a plain entry, the partner is cleared unless the copy is a cancelling reversal.
+- If the requested date, or the date of the original, falls on or before the fiscal lock date that applies to the user and the journal, the date of the copy is moved to the day after that lock date.
+- The journal is not copied when the original journal is archived.
+- A message is logged on the copy: "This entry has been duplicated from *link to the original*", or "This entry has been reversed from *link to the original*" when the copy is a reversal, followed by "This recurring entry originated from *link*" when the copy belongs to a recurrence.
+
+### Archival
+
+Journal Entries have no archived state. The equivalents are the cancelled state and the reversal.
+
+---
