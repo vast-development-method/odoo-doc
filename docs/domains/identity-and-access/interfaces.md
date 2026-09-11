@@ -391,7 +391,7 @@ three markers, which the page renders as:
 |---|---|---|---|
 | `/base_setup/data` | call | user | Returns the number of active internal accounts, the number of internal accounts that have never signed in, the ten newest such accounts as pairs of identifier and login, and an action opening them. Refused to anyone without *Access Rights* with the message *Access Denied*. |
 | `/base_setup/demo_active` | call | user | Whether any package carries demonstration data. |
-| `/kpi/summary` | call | — | Aggregates the indicator providers declared by the installed packages; authenticated with an application key verified directly against the key table. |
+| `/kpi/summary` | call | none, session not saved | Aggregates indicators for a **batch of databases hosted on the same server**. It takes a list of pairs (database name, application key), at most **500**, otherwise it raises `Too many credentials`. For each pair it opens the named database, verifies the key directly against the key table, checks that the database is on the same release series, runs every indicator provider declared by the installed packages, and collects the active internal accounts with their identifier, name, login and most recent sign-in moment. A database that is not found, whose key does not verify, or whose release series differs is **omitted from the result** rather than reported. Each provider runs inside its own attempt: a failure is logged and recorded as an entry naming the package, the provider and the message, and the transaction is rolled back after every provider, because providers must have no side effect. |
 
 ### 4.9 The customer-facing document path
 

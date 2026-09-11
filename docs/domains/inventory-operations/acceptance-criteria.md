@@ -2337,3 +2337,375 @@ Every assertion about a quantity is an assertion about the value **after** round
 **And** validating it moves 3.00 out of `WH/Input`, which has nothing, so `WH/Input` goes to **−3.00** and the reservation-freeing routine runs.
 
 This last step is the expected behavior, not a defect: a return of a receipt whose goods have already been stored has to be corrected by a further internal transfer, or by returning the storage step instead.
+
+---
+
+# AJ. Configuration acceptance
+
+## Scenario 168 — Creating the very first warehouse
+
+**Given** a fresh company "Acme" with a main contact and no Warehouse
+
+**When** a Warehouse named "Acme" with the short name `WH` is created
+
+**Then** exactly these Locations exist under a new virtual Location named `WH`:
+
+| Name | Usage | Active | Barcode |
+|---|---|---|---|
+| Stock | internal | yes | `WHSTOCK` |
+| Input | internal | no | `WHINPUT` |
+| Quality Control | internal | no | `WHQUALITY` |
+| Output | internal | no | `WHOUTPUT` |
+| Packing Zone | internal | no | `WHPACKING` |
+
+**And** the Stock Location is flagged as a replenishment Location
+**And** exactly eight Operation Types exist with the sequence prefixes `IN`, `QC`, `STOR`, `INT`, `PICK`, `PACK`, `OUT`, `XD`, of which `IN`, `OUT` and — when the multi-location group is active — `INT` are active and the rest are not
+**And** the receipt type and the delivery type name each other as return Operation Type
+**And** the receipt Route holds exactly one pull rule and the delivery Route exactly one pull rule
+**And** one supply-on-order rule exists inside the shared replenish-on-order Route
+**And** the company's main contact has its customer and vendor stock Locations pointed at the company's internal transit Location.
+
+## Scenario 169 — A second warehouse grants the multi-warehouse group
+
+**Given** the multi-warehouse group is not granted to internal users
+
+**When** a second active Warehouse is created for the same company
+
+**Then** the multi-warehouse group **and** the multi-location group are granted to every internal user
+**And** the internal-transfer Operation Type of every Warehouse becomes active.
+
+**When** the second Warehouse is archived, leaving one per company
+
+**Then** the multi-warehouse group is withdrawn from internal users and from every user who held it directly.
+
+## Scenario 170 — Switching a warehouse from one-step to two-step receipts and back
+
+**Given** the Warehouse receives in one step
+
+**When** it is switched to two steps
+
+**Then** `WH/Input` becomes active, `WH: Storage` becomes active, the receipt Route's single rule is **archived** and two rules are created, and the receipt Operation Type's default destination becomes `WH/Input`.
+
+**When** it is switched back to one step
+
+**Then** the two rules are archived, and the **originally archived** single rule is found by its Operation Type, source, destination, Route and action and re-activated rather than duplicated
+**And** `WH/Input` and `WH: Storage` become inactive again.
+
+## Scenario 171 — Cancel propagation in a three-step receipt
+
+**Given** the Warehouse receives in three steps
+
+**Then** the three generated rules carry the propagate-cancel flag as: first rule **set**, second rule **set**, third rule **cleared**.
+
+**When** the receipt is cancelled while every step is still open
+
+**Then** the quality control step is cancelled and the storage step is not; the storage step's supply method becomes take-from-stock and its link is dropped.
+
+## Scenario 172 — Access rights
+
+**Given** a user in the inventory **user** group but not the manager group
+
+**Then** they may create, read, write and delete Transfers, Stock Move Lines, Lots and containers
+**And** they may create, read and write Stock Moves but **not** delete them
+**And** they may create, read and write Stock Quantity records but **not** delete them
+**And** they may only read Warehouses, Locations, Operation Types, Routes, Stock Rules, Put-away Rules, Removal Strategies, Storage Categories and Package Types.
+
+**Given** a plain internal user in no inventory group
+
+**Then** they may read Warehouses, Locations, Operation Types, Routes, Stock Rules, Put-away Rules, Removal Strategies, Storage Categories, containers, Document References, the daily quantity series and Stock Quantity records
+**And** they may additionally create, read, write and delete Stock Move Lines
+**And** they may do nothing at all with Transfers, Stock Moves, Lots or Scraps.
+
+## Scenario 173 — Record rules and an empty company
+
+**Given** a Location with no company and a Location of company B, and a reader with only company A enabled
+
+**Then** the company-less Location is visible and the company B Location is not
+**And** the same holds for Lots, Stock Move Lines, Stock Quantity records, Stock Rules, Routes, containers and Storage Categories
+**But** Transfers, Operation Types, Warehouses, Stock Moves, Scraps, Put-away Rules and the daily quantity series of company B are invisible **and** so would a company-less one be, because their rules do not accept an empty company.
+
+## Scenario 174 — The daily scheduler
+
+**Given** the scheduler runs
+
+**Then** it performs, in order: the reordering rules whose trigger is automatic and whose product is active; the reservation of the moves whose status is confirmed or partially available, whose demand is non-zero and whose reservation date is on or before today or whose Operation Type reserves at confirmation, ordered by reservation date then priority descending then date then identifier, in chunks of one thousand with a commit after each; then the three housekeeping passes
+**And** a failure in any of them is logged and re-raised.
+
+---
+
+# AK. Barcode acceptance
+
+## Scenario 175 — Location and operation type barcodes
+
+**Given** the Warehouse short name is `Main Depot`
+
+**Then** the generated Location barcodes are `MAINDEPOTSTOCK`, `MAINDEPOTINPUT`, `MAINDEPOTQUALITY`, `MAINDEPOTOUTPUT` and `MAINDEPOTPACKING` — spaces removed, letters upper-cased
+**And** the generated Operation Type barcodes are `MAINDEPOTIN`, `MAINDEPOTOUT`, `MAINDEPOTPICK`, `MAINDEPOTPACK`, `MAINDEPOTQC`, `MAINDEPOTSTOR`, `MAINDEPOTINT` and `MAINDEPOTXD`.
+
+**Given** a Location of the same company already carries `MAINDEPOTSTOCK`
+
+**Then** the new Stock Location is created with **no** barcode, because the generation only applies a barcode that is free.
+
+## Scenario 176 — Reusable versus disposable containers
+
+**Given** container `TOTE1` is of a **reusable** type and holds exactly the goods one delivery needs
+
+**When** the delivery is reserved
+
+**Then** the whole-container detection does **not** flag the lines: a reusable container is excluded
+**And** the goods travel out of the tote rather than with it.
+
+**Given** instead `BOX1` is of a **disposable** type
+
+**Then** the lines are flagged and the box travels.
+
+---
+
+# AL. Availability and forecast acceptance
+
+## Scenario 177 — The availability text of a delivery
+
+**Given** a delivery Transfer in `confirmed` state whose only move has a forecast availability strictly below its real quantity
+
+**Then** the availability text is "Not Available" and the state is `late`.
+
+**Given** instead every move's forecast availability covers its real quantity, and the greatest forecast expected date among them is 20 September while the Transfer's scheduled date is 18 September
+
+**Then** the text is "Exp *20 September formatted for the reader*" and the state is `late`, because the scheduled date is earlier than the expected date.
+
+**Given** the scheduled date is 25 September instead
+
+**Then** the state is `expected`.
+
+**Given** no move has a forecast expected date
+
+**Then** the text stays "Available" and the state stays `available`.
+
+**Given** the Transfer is a receipt, or its status is draft, done or cancelled
+
+**Then** the text and the state are both empty.
+
+## Scenario 178 — Searching by availability state
+
+**When** a person filters Transfers on the availability state "Available"
+
+**Then** the Transfers whose status is done, cancelled or draft are excluded from the evaluation altogether
+**And** each remaining Transfer's moves are tested with the availability predicate, comparing each move's forecast expected date against its own Transfer's scheduled date
+**And** a Transfer with no move at all counts as **available**.
+
+**When** the person filters on the empty value
+
+**Then** the Transfers whose status is done, cancelled or draft **are** returned.
+
+---
+
+# AM. Aggregation acceptance
+
+## Scenario 179 — Two lines of one move with different lots
+
+**Given** a delivery move of 10 PAINT has two detail lines of 6 under `L1` and 4 under `L2`, same unit, same description, no container
+
+**Then** both lines produce the **same** aggregation key, because the key deliberately ignores the lot
+**And** the printed row shows a delivered quantity of 10 and, when the lot-on-slip group is active, both lot names.
+
+## Scenario 180 — A line in a container forms its own group
+
+**Given** the same move, but the `L2` line has the destination container `PACK0030`
+
+**Then** the `L2` line's key carries the container identifier as a suffix and therefore forms a second group
+**And** the printed document shows one loose row of 6 and one row of 4 under the container.
+
+## Scenario 181 — The ordered quantity across a backorder chain
+
+**Given** a Transfer delivered 6 of a demand of 10 and a backorder of 4 exists, itself partially delivered 3 with a second backorder of 1
+
+**When** the first Transfer's document is printed
+
+**Then** the group's ordered quantity starts at the move's demand, 6
+**And** the walk over the backorder chain adds 4 and then 1, giving 11
+**And** the quantities of the **other** lines of the same move — none here — are subtracted
+**And** the printed ordered quantity is 11, which is the original demand of 10 plus the 1 that the second backorder still owes; a reader should note that the figure is the sum of the surviving demands, not the historical original.
+
+---
+
+# AN. Reception report acceptance, continued
+
+## Scenario 182 — A draft incoming move is shown but not assignable
+
+**Given** a receipt Transfer is still in `draft` with a move of 6 BOLT
+**And** an open delivery demands 10 BOLT
+
+**When** the Reception Report is opened from the receipt
+
+**Then** the draft quantity is recorded as *expected* rather than *assignable*
+**And** the report shows a line of 6 under the delivery's source document, marked as not assignable
+**And** pressing Assign on it is not offered.
+
+## Scenario 183 — Already-assigned quantities are shown
+
+**Given** a receipt move of 10 BOLT already has a destination move of 4
+
+**When** the report is opened
+
+**Then** 4 is recorded as already assigned and 6 as assignable
+**And** the report shows one line of 4 marked as assigned with an Unassign button, and offers the remaining 6 to the open demands.
+
+## Scenario 184 — A done receipt may be allocated to an already reserved demand
+
+**Given** the receipt Transfer is `done`
+
+**Then** the search for demands additionally accepts moves whose status is `assigned`, because a done arrival can be linked to an already reserved demand
+**And** the partial-availability deduction is **not** applied, because the documents are done.
+
+---
+
+# AO. Text message and email acceptance
+
+## Scenario 185 — The one-time text message warning
+
+**Given** the company has text-message validation on, has never been warned, and a delivery Transfer's contact has a telephone number
+
+**When** the delivery is validated
+
+**Then** the validation stops and the one-time warning screen opens.
+
+**When** the person chooses to send
+
+**Then** the company is marked as warned and the validation resumes; at the end the confirmation text message is sent.
+
+**When** the person chooses not to send
+
+**Then** the company is marked as warned **and** its text-message validation setting is turned off; the validation resumes and no text message is sent, now or later.
+
+## Scenario 186 — The delivery confirmation email
+
+**Given** the company asks for email confirmation
+
+**When** a delivery is validated
+
+**Then** the company's delivery template is rendered and posted in the Transfer's thread, with the light notification layout, under the comment subtype, and forced to send immediately
+**And** the subject is "*the company name* Delivery Order (Ref *the reference*)".
+
+**Given** the Transfer is a receipt or an internal transfer
+
+**Then** nothing is posted.
+
+---
+
+# AP. Dispatch acceptance
+
+## Scenario 187 — Setting a dock on a receipt batch
+
+**Given** the receipt Operation Type uses dispatch management and lists `WH/Input` as a dock
+**And** a batch holds two receipt Transfers
+
+**When** the dock `WH/Input` is set
+
+**Then** every move of every Transfer of the batch has its **destination** Location rewritten to `WH/Input`, because the kind is receipt.
+
+**Given** instead the kind is delivery
+
+**Then** the **source** Location is rewritten.
+
+## Scenario 188 — Merging two dispatch batches
+
+**Given** two in-progress batches of the same delivery Operation Type, scheduled on 12 and 10 September, with different vehicles and docks
+
+**When** they are merged
+
+**Then** the survivor takes the responsible, description, scheduled date, **vehicle** and **dock** of the 10 September batch
+**And** setting that dock immediately rewrites the moves of every Transfer now in the survivor.
+
+---
+
+# AQ. Regression guards
+
+These scenarios exist to catch the mistakes an implementation is most likely to make.
+
+## Scenario 189 — The backorder test must not use the unit's rounding step
+
+**Given** a move whose line unit has a rounding step of 1, a demand of 10 and a processed quantity of 9.5
+**And** the `Product Unit` precision is 2
+
+**Then** comparing at the unit's rounding step would round 9.5 to 10 and conclude "equal"
+**But** the specification compares at two digits, where 9.50 is strictly below 10.00
+**And** a backorder move of 0.5 **is** created.
+
+## Scenario 190 — The gathering must not stop at the requested location
+
+**Given** BOLT sits only in `WH/Stock/Shelf A` and a move sources from `WH/Stock`
+
+**Then** the loose gathering must return the Shelf A record, because loose matching accepts descendants
+**And** an implementation that compared Locations for equality would reserve nothing.
+
+## Scenario 191 — Strict gathering must accept an empty lot
+
+**Given** a strict gathering for (PAINT, `WH/Stock`, lot `L1`, no container, no owner)
+
+**Then** it must return both the `L1` record and the lot-less record
+**And** only the *available quantity* computation, not the gathering, skips the lot-less one.
+
+## Scenario 192 — The final sort must put lots first
+
+**Given** two records with the same incoming date, one with a lot and one without, and the first in first out strategy
+
+**Then** the lot-bearing one must come first, whatever the identifiers, because the last sort applied is stable and puts lots before no lot.
+
+## Scenario 193 — A negative record must not be skipped by the available quantity
+
+**Given** records of −5.00 and 12.00 with identical keys
+
+**Then** the available quantity of the product at that Location must be **7.00**, not 12.00
+**And** the reservation must nevertheless take from the positive record only, offsetting the negative pocket.
+
+## Scenario 194 — The reserved counter must never go below zero
+
+**Given** a record with a reserved quantity of 2.00
+
+**When** a release of 5.00 is applied
+
+**Then** the reserved quantity becomes **0.00**, not −3.00.
+
+## Scenario 195 — Put-away must not count its own lines twice
+
+**Given** four lines of 5 units each are being put away into a Location capped at 18
+
+**Then** each line's resolution excludes the lines of its own group from the occupancy figure — and re-includes each one as soon as it has been resolved
+**And** the first three lines fit (0, 5, 10 occupancy) and the fourth does not (15 + 5 = 20 > 18), so the fourth goes elsewhere or stays in the arrival Location.
+
+## Scenario 196 — The completion must snapshot containers before moving them
+
+**Given** a Transfer moves container `PACK0040` from `WH/Stock` to `Customers`
+
+**Then** the history snapshot must record the Location `WH/Stock` as the origin
+**And** an implementation that wrote the snapshot after the movement would record `Customers` as both origin and destination.
+
+## Scenario 197 — The merge must detach negative moves before writing notes
+
+**Given** a negative move is about to be absorbed
+
+**Then** it must be detached from its Transfer **first**, so that the demand-change note is not posted on a document the person never sees.
+
+## Scenario 198 — Cancelling must clear the chain links last
+
+**Given** a move is cancelled
+
+**Then** the propagation decisions are taken **while** the chain links still exist, and only afterwards are the links cleared and the supply method reset
+**And** an implementation that cleared them first would never propagate anything.
+
+## Scenario 199 — Unreserving must not touch picked lines
+
+**Given** a move has one picked line of 3 and one unpicked line of 4
+
+**When** it is unreserved
+
+**Then** only the unpicked line is deleted, the reserved counter falls by 4 only, and the move's status is **not** recomputed by the unreserve itself — the deletion of the line does that.
+
+## Scenario 200 — Reducing a processed quantity must walk the lines backwards
+
+**Given** a move has three lines created in the strategy order: L1 of 4 from the oldest batch, L2 of 3, L3 of 3
+
+**When** the processed quantity is reduced by 5
+
+**Then** L3 is emptied first (3), then L2 is reduced by 2, leaving L1 untouched
+**And** an implementation that walked forwards would give back the oldest goods and destroy the first in first out choice.

@@ -24,7 +24,7 @@ mechanism that turns a checkbox on a configuration screen into a group membershi
 parameter, a user-defined default value or a package installation; user-defined default values
 themselves; the external-party portal; the guided setup panels; the privacy search that finds every
 record mentioning a person; and the recycling rules that periodically propose stale records for
-deletion or merging.
+archival or deletion.
 
 ---
 
@@ -41,8 +41,8 @@ deletion or merging.
 | Companies | A tree of companies with branches. Each user has one default company and a set of permitted companies; the *active* set is carried on every call and drives both the default company of new records and the standard multi-company record rule. |
 | Configuration settings | A non-persistent screen whose fields are reflected into group memberships, stored parameters, user-defined defaults and package installation requests when it is saved. |
 | Default values | Administrator-defined or user-defined default field values, scoped by user, by company and by an optional condition, with a documented precedence order. |
-| Password handling | Salted, iterated one-way hashing with automatic re-hashing on sign-in when the stored hash is out of date; self-service change; administrator-driven change; strength policy with a minimum length and a minimum estimated-guesses figure. |
-| Second factor | Time-based one-time codes from an authenticator application, with a rate limiter, trusted-device registration, recovery codes, and a fallback that mails a code. |
+| Password handling | Salted, iterated one-way hashing with automatic re-hashing on sign-in when the stored hash is out of date; self-service change; administrator-driven change; strength policy expressed as a minimum length, enforced on every write and surfaced to the sign-in, registration and customer-facing pages. |
+| Second factor | Time-based one-time codes from an authenticator application, with a rate limiter, trusted-browser registration and replay refusal; and a second method that mails a code, selected by an enforcement policy and needing no enrolment. |
 | Passkeys | Public-key credentials registered against the server's origin; sign-in without a password, and second-factor suppression when a passkey was used. |
 | Delegated sign-in | Sign-in through an external identity provider that returns a bearer token; provisioning of a user record on first use when sign-up is open. |
 | Directory sign-in | Sign-in verified against a central directory server, with optional provisioning from a template user and per-company directory configurations. |
@@ -53,7 +53,7 @@ deletion or merging.
 | External-party portal | The customer-facing pages, the portal mixin that gives a business document a shareable address and a signed token, the grant/revoke wizard, and the share wizard. |
 | Guided setup | Reusable onboarding panels made of steps, with per-company progress tracking. |
 | Privacy search | A search across every entity that declares a personal-data field, producing a log and offering anonymisation or deletion. |
-| Data recycling | Rules that periodically collect records matching a filter (typically "older than N days") or duplicate groups, and propose them for deletion or merging. |
+| Data recycling | Rules that periodically collect the records matching a filter and an optional age condition (typically "older than ninety days") and propose them for archival or deletion, either for an operator to validate or automatically. |
 
 ---
 
@@ -125,6 +125,48 @@ the sign-up token and expiry, the portal access flag and the personal-data searc
 Attachment (`ir.attachment`) gains the token-based read path; every business document that becomes
 portal-visible gains the mixin fields; the Mail Template entity carries the invitation, reset,
 second-factor and portal messages.
+
+---
+
+## 2.5 The three critical procedures
+
+Three procedures decide the behaviour of the whole platform, not merely of this domain. They are
+given as exact numbered algorithms and a re-implementation that diverges from any of them will
+diverge everywhere:
+
+| Procedure | Where | Why it is critical |
+|---|---|---|
+| The access-checking algorithm | [business-rules.md](business-rules.md) section 2 | Every read, create, modify and delete of every entity passes through it. Its four entry points, its short-circuits and its two refusal messages are observable contracts. |
+| The rule-combination semantics | [business-rules.md](business-rules.md) section 3 | Global rules intersect, grant rules unite, and the union is intersected with the global part. Getting this backwards makes a more powerful group **less** powerful, and silently exposes or hides records across every domain. |
+| The settings mechanism | [configuration.md](configuration.md) section 2 | A checkbox on a settings screen is not a stored value: it is projected into a user-defined default, a group implication, a system parameter or a package installation. The projection order — removals before additions — and the conversion rules are exact. |
+
+A fourth, the **privilege-elevation semantics**
+([business-rules.md](business-rules.md) section 5), is short but equally load-bearing: it defines
+precisely what elevation suspends (the entity, record and field layers) and what it does **not**
+(every constraint, including company consistency).
+
+---
+
+## 2.6 Which package contributes what
+
+| Capability | Contributed by |
+|---|---|
+| Users, groups, privileges, access rights, record rules, defaults, parameters, companies, application keys, devices, identity re-check, password wizards, the settings base | the foundation package |
+| The access-checking algorithm, the rule combination, privilege elevation, the company-consistency check, field-level restriction | the object layer |
+| The general settings screen, the setup dashboard, the indicator contract | the setup package |
+| Password strength policy, and its surfacing on the customer-facing and registration pages | the password-policy packages |
+| One-time codes from an authenticator application, the rate limiter, trusted browsers | the two-factor package |
+| Mailed one-time codes, the enforcement policy, the security notices, the enrolment invitation | the mailed two-factor package |
+| The second factor on the customer-facing pages | the two-factor portal package |
+| Public-key credentials | the passkey packages |
+| Sign-in through an external identity provider | the delegated sign-in package |
+| Sign-in against a central directory server | the directory package |
+| Invitations, registration, password reset, the external-user template, the reminder job | the sign-up package |
+| Session and inactivity limits, the re-authentication exchange, the lock screen | the session-timeout package |
+| The customer-facing area, the document mixin, the access token, the grant and share wizards | the portal package |
+| Guided setup panels | the onboarding package |
+| Personal-data search and log | the privacy package |
+| Recycling rules and candidates | the data-recycling package |
 
 ---
 

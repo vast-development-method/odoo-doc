@@ -806,7 +806,7 @@ the whole input text and the address stays empty. Creation values: `{name: "Deco
 **Worked example — an upper-cased address.**
 
 Input text: `Raoul <Raoul@GrosBedon.Example>` → the address is normalised to
-`raoul@grosbedon.example` (the local part is pure the basic character encoding so it is lower-cased; the domain is always
+`raoul@grosbedon.example` (the local part uses only basic Latin characters, so it is lower-cased; the domain is always
 lower-cased). Name `Raoul`.
 
 **Worked example — two addresses.**
@@ -858,7 +858,7 @@ Party whose stored value is `Sales@Deco.Example` is therefore found by a search 
 **Normalisation** of an address:
 
 1. Locate the local part and the domain part around the last at-sign.
-2. If the local part is purely the basic character encoding, lower-case it; otherwise leave it as it is, because the
+2. If the local part uses only basic Latin characters, lower-case it; otherwise leave it as it is, because the
    internationalised-mail extension makes non-ASCII local parts meaningful.
 3. Lower-case the domain part always.
 4. In strict mode, refuse to return anything when the input contained more than one address; in

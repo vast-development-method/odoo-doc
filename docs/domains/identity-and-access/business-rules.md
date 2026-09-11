@@ -658,15 +658,50 @@ runs on create and on write. It may also be invoked explicitly with a list of fi
 
 ### 7.3 The company-agreement filter
 
-The default filter for a target entity, given a set of companies:
+Every entity answers the question "which of your records agree with this set of companies?" with a
+filter. Four shapes exist; an entity declares which one it uses.
 
-- when the set is empty: `the target's company is empty`;
-- otherwise: `the target's company is one of <the identifiers> or is empty`.
+**Shape 1 — the default.** Given a set of companies:
 
-Two entities override it. The Company entity itself uses `identifier is one of <the identifiers>`
-with no empty case. The User entity uses `the user's permitted companies include one of <the
-identifiers>`, and the always-true filter when the set is empty — this is what allows a user whose
-main company is A but who is also permitted in B to be assigned to a record of company B.
+- when the set is empty: *the target's company is empty*;
+- otherwise: *the target's company is one of the given identifiers, or is empty*.
+
+So a company-less record agrees with everything, and a record of company C agrees only with a set
+containing C exactly.
+
+**Shape 2 — ancestor-or-self on a single-company field.** Used by the Contact, the Bank Account and
+the Currency:
+
+- when the set is empty: *the target's company is empty*;
+- otherwise: *the target's company is empty, or is one of the ancestors-or-selves of any of the
+  given companies*.
+
+The ancestor list is built by reading each given company's materialised hierarchy path and taking
+every identifier it names. The effect is that a record belonging to a **parent** company agrees with
+a document of a branch, while a record belonging to a branch does **not** agree with a document of
+the parent. This is what lets a group-level contact or currency be used by every branch.
+
+**Shape 3 — ancestor-or-self on a multi-company field.**
+
+- when the set is empty: *no restriction at all*;
+- otherwise: *the target's companies include one of the ancestors-or-selves of any of the given
+  companies*.
+
+**Shape 4 — the User entity's own.**
+
+- when the set is empty: *no restriction at all*;
+- otherwise: *the user's permitted companies include one of the given identifiers*.
+
+This is what allows an account whose default company is *Alpha*, but which is also permitted in
+*Beta*, to be assigned as the responsible person on a document of *Beta*.
+
+**Worked example.** Company 1 *Alpha* (root) and company 3 *Alpha North* (its branch, hierarchy
+path `1/3/`). A Sales Order of company 3 is checked against a Contact:
+
+- under shape 1, only a contact of company 3 or of no company agrees;
+- under shape 2 — which is what the Contact actually uses — the ancestor list of company 3 is
+  {1, 3}, so a contact of company 1, a contact of company 3 and a company-less contact all agree,
+  while a contact of company 2 does not.
 
 ### 7.4 The refusal
 
