@@ -715,3 +715,128 @@ The whole mechanism is deliberate: the system never blocks a physical movement b
 | Where did they go? | The traceability tree, walking downstream; for a lot, the delivery discovery. |
 | Who changed what after the fact? | The notes posted in the discussion thread by each edit of a done line. |
 | What did it weigh? | The stored shipping weight, frozen at validation unless a person rewrites it. |
+
+---
+
+# 38. Decision tables
+
+These tables collapse the branching of the main workflows into a form that can be checked line by line.
+
+## 38.1 What happens to a move at validation
+
+| Picked | Processed quantity | Adjustment move | Backorders allowed | Demand | Outcome |
+|---|---|---|---|---|---|
+| no | 0 | no | yes | > 0 | Not completed; carried whole into the backorder |
+| no | 0 | no | no | > 0 | Cancelled |
+| no | 0 | no | either | 0 | Cancelled |
+| no | > 0 | no | yes | > 0 | Not completed; carried whole into the backorder |
+| no | > 0 | no | no | > 0 | Cancelled |
+| yes | 0 | no | yes | > 0 | Not completed; carried whole into the backorder |
+| yes | 0 | no | no | > 0 | Cancelled |
+| yes | > 0 | no | yes | > processed | Completed for the processed quantity; a backorder move of the remainder is split off |
+| yes | > 0 | no | yes | = processed | Completed; no backorder move |
+| yes | > 0 | no | yes | < processed | Completed for the processed quantity; no backorder move (over-processing) |
+| yes | > 0 | no | no | > processed | Completed for the processed quantity; the demand is left as it was; no backorder |
+| either | any | yes | either | any | Completed; adjustment moves are exempt from the pruning and from the backorder split |
+
+## 38.2 Whether the backorder question is asked
+
+| Operation Type policy | Any move short or unpicked | Transfer is a return | Question asked | Backorder created |
+|---|---|---|---|---|
+| ask | no | either | no | no |
+| ask | yes | no | **yes** | as answered |
+| ask | yes | yes | no | yes |
+| always | either | either | no | yes |
+| never | either | either | no | no |
+
+A move counts as *short or unpicked* when it has a non-zero demand and is not picked, or when its picked quantity is strictly below its demand at the `Product Unit` precision.
+
+## 38.3 Which branch of the reservation runs
+
+| Source Location bypasses reservation | Product storable | Has originating moves | Branch |
+|---|---|---|---|
+| yes | either | either | A — create lines without touching counters |
+| no | no | either | A — the product itself bypasses |
+| no | yes | no | B — gather at the source Location |
+| no | yes | yes | C — distribute what the predecessors brought |
+
+## 38.4 Which name a container shows
+
+| Context asked for | Name shown |
+|---|---|
+| the record is done | the plain name |
+| the destination path | the greater-than-joined path of destination containers |
+| the source path | the greater-than-joined path of parent containers |
+| nothing in particular | the plain name |
+| the formatted form, and the type has all three dimensions | the chosen name, a tabulation, then the three dimensions between double hyphens |
+
+## 38.5 Which Location a Transfer resolves to
+
+| Operation Type kind | Default source | Default destination | Overridden by the contact when |
+|---|---|---|---|
+| receipt | the shared vendor Location | the input Location, or the stock Location for a one-step receipt | the source default has vendor usage and the contact defines its own vendor Location |
+| delivery | the output Location, or the stock Location for a one-step delivery | the shared customer Location | the destination default has customer usage and the contact defines its own customer Location |
+| internal | the stock Location | the stock Location | never |
+
+The override only applies when the contact's own Location differs from the system-wide default for that field, so a contact that merely inherits the shared Location changes nothing.
+
+## 38.6 Which document a validation prints
+
+| Operation Type switch | Document | Extra condition |
+|---|---|---|
+| Auto Print Delivery Slip | the delivery document | — |
+| Auto Print Return Slip | the return label | — |
+| Auto Print Reception Report | the reception report | the kind is not delivery and the moves have destination moves; the reader is in the reception-report group |
+| Auto Print Reception Report Labels | one label per destination move | the kind is not delivery; the reader is in the reception-report group |
+| Auto Print Product Labels | product labels in the configured format | — |
+| Auto Print Lot/SN Labels | lot labels in the configured format | the reader is in the lot group and the Transfer has lots |
+| Auto Print Packages | the container document | the reader is in the container group and the Transfer has destination containers |
+| Show Reception Report at Validation | the reception report screen | the reader is in the reception-report group and something remains to allocate |
+
+## 38.7 Which lot rule applies at completion
+
+| Product tracking | Operation Type creates lots | Operation Type uses existing lots | Line has a Lot | Line has a typed name | Outcome |
+|---|---|---|---|---|---|
+| none | — | — | — | — | Nothing required |
+| lot or serial | — | — | yes | — | Accepted as is |
+| lot or serial | no | no | no | — | Accepted **without** a lot |
+| lot or serial | yes | either | no | yes | The Lot is found or created and linked |
+| lot or serial | yes | either | no | no | Refused |
+| lot or serial | no | yes | no | — | Refused |
+
+A line whose move has **no** Operation Type at all, is not an adjustment move, has no Lot and does not belong to a Scrap is refused immediately, before any of the above is evaluated.
+
+## 38.8 Which record the gathering returns first
+
+| Strategy | First record |
+|---|---|
+| first in first out | the oldest incoming date; ties broken by the lowest identifier |
+| last in first out | the newest incoming date; ties broken by the highest identifier |
+| closest location | the alphabetically first full location name; ties broken by the highest identifier |
+| least packages | inside the chosen container set, the oldest incoming date |
+
+and in every case, among records that would otherwise tie, one carrying a lot comes before one carrying none.
+
+---
+
+# 39. Failure recovery
+
+What to do, and what the system does by itself, when each thing goes wrong.
+
+| Symptom | Cause | Recovery |
+|---|---|---|
+| A move stays `confirmed` although stock exists | Its Operation Type reserves manually, or its reservation date is in the future | Press the availability action, or change the reservation method |
+| A move stays `waiting` although its predecessor is done | The predecessor's completion did not re-reserve it — typically because the no-auto-reserve parameter is set | Press the availability action |
+| The reserved counters do not match the lines | A crash between two writes | The clean-reservations pass repairs it; it runs daily and whenever the quantity screens are opened |
+| Two identical quantity records exist | Concurrent reservations | The merge pass collapses them |
+| A quantity record sits at zero forever | Its assignee was never cleared | Clear the count; the empty-record pass then deletes it |
+| A Location cannot be archived | It or a descendant still holds stock | Relocate or count the stock to zero first |
+| A Warehouse cannot be archived | Open moves of its Operation Types, or foreign Operation Types using its Locations | Finish or cancel the moves; re-point the foreign Operation Types |
+| A negative quantity record persists | A delivery was validated before its receipt | Validate the receipt; the record returns to zero and is deleted |
+| A serial number appears in two places | A delivery was validated before its receipt | Same; the warning explains it resolves itself |
+| A container is stuck as a destination container of nothing | A chain was broken by a removal | The removal already clears the chain where it is empty; otherwise remove the container from the Transfer again |
+| A batch keeps a Transfer that is already done | Only possible if the automatic detachment was bypassed | Remove the Transfer from the batch by hand |
+| A backorder was created that should not have been | The policy is "ask" and the wrong answer was given | Cancel the backorder |
+| A backorder was **not** created that should have been | The policy is "never", or the Transfer is a return | Create a new Transfer by hand |
+| Goods went to the wrong shelf | A put-away rule or a capacity limit sent them there | Relocate the quantity records; then fix the rule |
+| A count was applied against stale figures | The conflict screen was answered with "Keep counted quantity" while a movement was in flight | Count again |

@@ -344,7 +344,8 @@ stateDiagram-v2
     KeepAmounts --> SkipComplete: a changed item supplied its own amounts
     [*] --> RateChanged: only the rate changed
     RateChanged --> RederiveBalances
-    [*] --> [*]: nothing relevant changed
+    [*] --> NoRelevantChange: nothing relevant changed
+    NoRelevantChange --> [*]: skip
 ```
 
 ### 9.3 Why it matters

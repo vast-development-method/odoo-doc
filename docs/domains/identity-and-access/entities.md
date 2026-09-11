@@ -2154,12 +2154,58 @@ candidate row is deleted.
 
 ## 29. Indicator Provider
 
-**Transport name** `kpi.provider` — abstract.
+**Transport name** `kpi.provider` — abstract, no table.
 
-A contract, not a table. An implementation returns a list of indicator descriptions, each carrying
-an identifier, a label, a numeric value and optionally a threshold and a target screen. The setup
-dashboard aggregates every implementation's list. It exists in this domain because the first
-implementation counts users and companies.
+A contract, not an entity with fields. An implementation returns a list of indicator descriptions.
+Each description is a map with exactly these keys:
+
+| Key | Meaning |
+|---|---|
+| identifier | A stable key for the indicator, unique across all providers. |
+| type | Either `integer` — the value is a number — or `return_status` — the value is one of the five statuses below. |
+| name | The indicator's label, in the acting user's language. |
+| value | For `integer`, the number. For `return_status`, one of: `late` (a filing of this kind is already overdue), `longterm` (the nearest uncompleted filing is due in more than three months), `to_do` (the nearest uncompleted filing is due within three months), `to_submit` (the nearest uncompleted filing is prepared but still needs an action), `done` (every foreseeable filing is completed). |
+
+The base implementation returns an empty list. Providers are also declared at the package level, so
+that they can be collected without loading the object layer; each declaration names a module path
+and a function within the package, and a declaration that cannot be imported, names no function or
+does not resolve to something callable is logged and skipped.
+
+Providers are aggregated by the batch indicator path (section 4.8 of
+[interfaces.md](interfaces.md)). Each provider runs inside its own attempt and the transaction is
+rolled back after it, because a provider is required to have **no side effect**.
+
+### 29.1 The setup dashboard figures
+
+A separate path serves the administration dashboard with three figures computed directly:
+
+| Figure | Definition |
+|---|---|
+| Active accounts | the number of accounts that are active and whose share flag is false |
+| Pending accounts | the number of such accounts that have **no** sign-in log entry |
+| The ten newest pending accounts | their identifiers and logins, newest identifier first, together with an action that opens them |
+
+It is refused to anyone whose closure does not contain *Access Rights*, with the message
+*Access Denied*. A companion path answers whether any installed package carries demonstration data.
+
+### 29.2 Bulk account creation from the dashboard
+
+The dashboard's "invite users" box calls a named operation taking a list of electronic mail
+addresses. It:
+
+1. normalises each address into a display name and a normalised address;
+2. refuses when the normalised-address field does not exist, with
+   *You have to install the Discuss application to use this feature.*;
+3. re-activates every **archived** account whose login is one of the raw or normalised addresses, or
+   whose normalised address is one of the normalised addresses, and records their normalised
+   addresses as handled;
+4. for every raw address that does not belong to a re-activated account and whose normalised form
+   has not already been handled, creates an account with that normalised address as login and
+   address, the parsed display name (falling back to the address) as name, and the active flag set,
+   in a context that marks the sign-up token as needing to be valid.
+
+The sign-up package extends it: accounts already in the *Invited* status whose login or address is
+among the given addresses are excluded from creation and are instead re-invited in creation mode.
 
 ---
 

@@ -452,3 +452,43 @@ Three different things are called waiting, and they must not be confused:
 | A Transfer that is not blocked but cannot be processed | `confirmed` | "Waiting" | Same as the second, at document level. |
 
 The stored value `confirmed` therefore carries the label "Waiting" on both entities, while the stored value `waiting` carries a label that names the blockage. An implementation must keep the stored values, not the labels, as the contract.
+
+---
+
+# 12. Guard conditions, collected
+
+Every guard that appears anywhere in this file, restated once as a testable predicate, so that an implementation can assert them.
+
+| Guard | Predicate |
+|---|---|
+| The move may be confirmed | its status is `draft` |
+| The move must wait upstream | it has at least one originating move, or its supply method is advanced |
+| The move may be reserved | it is not picked and its status is `confirmed`, `waiting` or `partially_available` — unless a quantity is forced, in which case any status is processed |
+| The move bypasses reservation | its source Location's usage is vendor, customer, inventory loss or production, or its product is not storable |
+| The move is eligible for automatic reservation | it bypasses reservation, or its Operation Type reserves at confirmation, or its reservation date is on or before today |
+| The move may be unreserved | it is not cancelled; it is not done unless its destination usage is inventory loss; it is not picked |
+| The move may be completed | it is picked, and either its processed quantity is strictly positive or it is an adjustment move, and it is not cancelled |
+| The move may be cancelled | it is not done, unless its destination usage is inventory loss |
+| The move may be split | its status is neither `done`, `cancel` nor `draft` |
+| The move may be merged | its status is neither `done`, `cancel` nor `draft`, and its whole merge key matches |
+| The move may be deleted | its status is `draft` or `cancel`, or it has no chain links |
+| Cancellation propagates downstream | the move propagates cancellation and every sibling is cancelled |
+| Cancellation unlinks downstream | the move does not propagate cancellation and every sibling is done or cancelled |
+| The destination move is cancelled rather than unlinked | it is not done and its source Location equals the cancelled move's destination Location |
+| The Transfer may be confirmed | at least one move is in `draft` |
+| The Transfer may be validated | its status is not `done` |
+| The Transfer may be returned | its status is `done` |
+| The Transfer may be split | at least one move has a non-zero processed quantity, not every move is fully processed, and no move is over-processed |
+| The Transfer ignores the backorder policy | its return link is set |
+| The Transfer shows the availability button | its status is `confirmed`, `waiting` or `assigned`; not every move is picked or fully processed; at least one move is open with a non-zero demand |
+| The batch may be confirmed | it has at least one Transfer |
+| The batch may be merged | at least two are selected, sharing one Operation Type, one kind (batch or wave) and one state, and that state is neither `done` nor `cancel` |
+| The batch may be deleted | its status is not `done` |
+| A Transfer belongs in a batch | it is of the same company, of the batch's Operation Type when the batch has one, and its status is `waiting`, `confirmed` or `assigned` — plus `draft` when the batch itself is `draft` |
+| The Scrap may be validated | its quantity is strictly positive at its unit's precision |
+| The Scrap may be deleted | its status is `draft` |
+| A container may be taken over as an entire package | its type is not reusable, and the lines of a single Transfer reproduce its contents exactly |
+| A container may be promoted into its parent | every child of the parent is being moved and the parent's type is not reusable |
+| A detail line requires a lot at completion | its product is tracked, its quantity is strictly positive, its move has an Operation Type, and that type allows creating or using existing lots, and the line has neither a Lot nor a typed name |
+| A quantity record may be deleted automatically | its on-hand, reserved and counted quantities all round to zero and it has no assignee |
+| A count may be applied without asking | no selected record is outdated |

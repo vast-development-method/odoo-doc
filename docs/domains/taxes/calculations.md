@@ -1450,7 +1450,7 @@ map_account( fiscal_position , account ) = the mapped destination when the accou
 ### 11.3 Automatic detection
 
 ```
-detect( partner , delivery_address ) :
+Detecting the fiscal position of a partner and a delivery address:
  1. If there is no partner, there is no fiscal position.
  2. Determine whether the transaction is inside the same economic union and whether both parties
     carry a number issued by the same country:
@@ -1502,7 +1502,7 @@ marked valid by that register.
 *Mirrored.* Substituting a price-included tax by another changes what the stored unit price means.
 
 ```
-adapt( price_unit , original_taxes , new_taxes ) :
+Adapting a unit price from an original set of taxes to a new set:
  1. If the two sets are identical, return the price unchanged.
  2. If at least one tax of the original set is not price-included, return the price unchanged.
  3. Compute the original taxes on a quantity of one with the "round per tax" method and no special

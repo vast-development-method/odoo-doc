@@ -1546,7 +1546,7 @@ Example: `CUST/customer 97` gives `97`.
 
 The reference follows the international creditor reference standard.
 
-1. Let *J* be the journal code when that code is pure the basic character encoding and alphanumeric; otherwise the journal's
+1. Let *J* be the journal code when that code is purely alphanumeric characters of the basic Latin set; otherwise the journal's
    internal identifier.
 2. Let *N* be the document's internal identifier, left-padded with zeros to six digits.
 3. Let the **data** be the concatenation *J* followed by *N*.

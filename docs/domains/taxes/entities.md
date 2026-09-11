@@ -216,16 +216,13 @@ of Taxes with no distribution lines at all is exempt from all of them.
 
 ### 2.5 Target account of a produced tax Journal Item
 
-```
-account_of_tax_journal_item =
-    tax.cash_basis_transition_account_id
-        when tax.tax_exigibility = 'on_payment'
-        and the caller did not force cash-basis exigibility
-        and the caller did not ask to bypass the transition account
-    distribution_line.account_id
-        otherwise
-and, if that result is empty, the account of the base line itself
-```
+The account of a tax journal item produced by a distribution line is chosen in this order:
+
+1. the tax's **cash basis transition account**, when the tax's exigibility is "based on payment"
+   **and** the caller did not force cash-basis exigibility **and** the caller did not ask to
+   bypass the transition account;
+2. otherwise the **distribution line's own account**;
+3. and, when the result of step 1 or 2 is empty, the **base line's own account**.
 
 ---
 
