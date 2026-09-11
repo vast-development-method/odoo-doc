@@ -169,5 +169,19 @@ variation.
 - A *reproduced identifier* is written in code font and is accompanied by its full name
   in words on first use in each file; these identifiers are part of the external contract
   and must be reproduced exactly.
+- **Reproduced user-facing text** — an error message, a selection label, a button label,
+  an action title, a sequence prefix — is given between double quotation marks, in bold,
+  exactly as the system emits it. Such quoted text is part of the external contract and
+  is reproduced character for character; where it contains an abbreviation, the
+  abbreviation belongs to the emitted string, not to this specification's prose. The
+  three costing labels are a case in point: the emitted labels are "Standard Price",
+  "First In First Out (FIFO)" and "Average Cost (AVCO)", where the parenthesised
+  fragments stand for *first in first out* and *average cost*; the prose of this folder
+  always writes those two terms in full. Likewise the emitted strings "Manufacturing WIP"
+  and "Post WIP" contain a fragment standing for *work in progress*, "WIP MOs of …"
+  contains a further fragment standing for *manufacturing orders*, "Compute Price from
+  BoM" contains a fragment standing for *bill of materials*, the field label "AVCO Value"
+  stands for *average cost value*, the journal code `STJ` stands for *inventory valuation
+  journal*, and the sequence prefix `LC/` stands for *landed cost*.
 - Where the code leaves a behaviour implicit, the text states the behaviour explicitly
   and marks it with the phrase **industry-standard default**.

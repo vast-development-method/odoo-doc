@@ -2325,3 +2325,548 @@ The live chat capability adds one selection value, `livechat` ("Livechat Convers
 Indexes: on the end moment restricted to running sessions; on the failure restricted to the two failure values; on the escalation flag restricted to true; and on (type, creation date) restricted to live chat sessions.
 
 The live chat capability also adds to the Channel Member: the history rows, the participant type (`agent`, `visitor`, `bot`, computed with an inverse), the script the member runs when it is a bot, and the skills the member had as an operator.
+
+---
+
+## 43. Mailing Group entities
+
+### 43.1 Mailing Group
+
+Mailing Group (`mail.group`, table `mail_group`). Adopts the required alias behavior.
+
+#### Purpose
+
+A public discussion list. People send messages to the list address; each message becomes a post that is relayed to every member. The list may be moderated, in which case each post waits for a decision.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `active` | Boolean | Default true. |
+| `name` | Text, translatable | Required. |
+| `description` | Long text | — |
+| `image_128` | Image | — |
+| `is_closed` | Boolean, not copied | A closed list can still be read, but messages sent to it bounce. |
+| `mail_group_message_ids` | Sub-records: Mailing Group Message | — |
+| `mail_group_message_last_month_count` | Integer, computed, not stored | The number of **accepted** posts created in the last month. |
+| `mail_group_message_count` | Integer, computed, not stored | The total number of posts. |
+| `mail_group_message_moderation_count` | Integer, computed, not stored | The number of posts awaiting moderation. |
+| `is_member` | Boolean, computed, not stored, per user | Whether the acting user's contact is a member. Always false for a public user. |
+| `member_ids` | Sub-records: Mailing Group Member | — |
+| `member_partner_ids` | Multiple links to Contact, computed, not stored, searchable | The contacts among the members. |
+| `member_count` | Integer, computed, not stored | — |
+| `is_moderator` | Boolean, computed, not stored, per user | Whether the acting user is a moderator. |
+| `moderation` | Boolean | Whether posts must be approved. |
+| `moderation_rule_count` | Integer, computed, not stored | — |
+| `moderation_rule_ids` | Sub-records: Mailing Group Moderation Rule | — |
+| `moderator_ids` | Multiple links to User | Restricted to internal users. |
+| `moderation_notify` | Boolean | Whether the author of a held post is told automatically. |
+| `moderation_notify_msg` | Rich text | The text of that automatic notice. |
+| `moderation_guidelines` | Boolean | Whether a new member automatically receives the guidelines. |
+| `moderation_guidelines_msg` | Rich text | The guidelines. |
+| `access_mode` | Selection | Required, default `public`. `public` = "Everyone"; `members` = "Members only"; `groups` = "Selected group of users". |
+| `access_group_id` | Link to Group | Default: the internal-user group. Used when the privacy mode is "selected group of users". |
+| `can_manage_group` | Boolean, computed, not stored, per user | True for a mailing-group administrator or a moderator of this list. |
+
+Ordering: open lists first, then newest created, then newest identifier.
+
+The alias created for a list points at the list model, forces the thread to the list itself, and carries the list's default values. The alias security policy defaults to "everyone" when the privacy mode is public and "followers" otherwise, and follows the privacy mode when it is changed.
+
+Switching moderation on adds the acting user to the moderators.
+
+#### Constraints
+
+| Rule | Message |
+|---|---|
+| Every moderator must have an address. | "Moderators must have an email address." |
+| Automatic notification requires a notification text. | "The notification message is missing." |
+| Automatic guidelines require a guidelines text. | "The guidelines description is missing." |
+| A moderated list must have at least one moderator. | "Moderated group must have moderators." |
+| Privacy "selected group of users" requires a group. | "The "Authorized Group" is missing." |
+
+#### Sending-side errors
+
+| Situation | Message returned to the sender |
+|---|---|
+| Privacy is "selected group of users" and the sender's address matches no user of that group | "Only selected groups of users can send email to the mailing list." |
+| Privacy is "members only" and the sender's address matches no member | "Only members can send email to the mailing list." |
+| The list is closed | the shipped closed-list bounce body |
+
+#### Other operational errors
+
+| Situation | Message |
+|---|---|
+| Sending guidelines without being an administrator or a moderator | "Only an administrator or a moderator can send guidelines to group members." |
+| Sending guidelines with an empty guidelines text | "The guidelines description is empty." |
+| Sending guidelines for a closed list | "You can not send guidelines for a closed group." |
+| The guidelines template is missing | "Template "mail_group.mail_template_guidelines" was not found. No email has been sent. Please contact an administrator to fix this issue." |
+| Joining a closed list | "You can not join a closed group." |
+| Joining with an unknown contact | "The partner can not be found." |
+| Relaying a post whose list does not match | "The group of the message do not match." |
+
+### 43.2 Mailing Group Member
+
+Mailing Group Member (`mail.group.member`, table `mail_group_member`).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `email` | Text, computed from the contact, stored, editable | The address. When a contact is set, the contact's address wins. |
+| `email_normalized` | Text, computed, stored, indexed | The normalized address, used for matching. |
+| `mail_group_id` | Link to Mailing Group | Required, indexed. On deletion, the row is deleted. |
+| `partner_id` | Link to Contact | On deletion, the row is deleted. A member may exist with an address only. |
+
+Uniqueness: (contact, list) — "This partner is already subscribed to the group". Note that two members with the **same address** but no contact are possible; leaving with the "all" flag removes them all.
+
+Display name: the address.
+
+### 43.3 Mailing Group Message
+
+Mailing Group Message (`mail.group.message`, table `mail_group_message`).
+
+A post of a list. It wraps a Message and adds the list-specific thread structure and the moderation state.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `attachment_ids`, `author_id`, `email_from`, `body`, `subject` | related to the wrapped Message, writable | Deliberately related rather than delegated, to keep the Message cache clean. |
+| `email_from_normalized` | Text, computed, stored | The normalized sender address. |
+| `mail_group_id` | Link to Mailing Group | Required, indexed. On deletion, the row is deleted. |
+| `mail_message_id` | Link to Message | Required, indexed, not copied. On deletion, the row is deleted. Created automatically when the post is created without one. |
+| `group_message_parent_id` | Link to Mailing Group Message, stored, indexed | The post this one answers, derived from the parent of the wrapped message. |
+| `group_message_child_ids` | Sub-records: Mailing Group Message | The answers. |
+| `author_moderation` | Selection, computed, not stored | `ban` ("Banned") or `allow` ("Whitelisted") when a rule exists for the sender address in this list; empty otherwise. |
+| `is_group_moderated` | Boolean, related to the list | — |
+| `moderation_status` | Selection, required, indexed, not copied | Default `pending_moderation`. One of `pending_moderation` ("Pending Moderation"), `accepted` ("Accepted"), `rejected` ("Rejected"). |
+| `moderator_id` | Link to User | Who decided. |
+| `create_date` | Date and time | Labelled "Posted". |
+
+Ordering: newest created first. Display name: the subject. The primary address field of the record is the sender address, which makes loop detection work on lists.
+
+Constraints: the wrapped message must belong to the list model — "Group message can only be linked to mail group. Current model is <model>."; and to this very list — "The record of the message should be the group."
+
+Moderation refuses to act on a post that is not pending: "This message can not be moderated" for a single post, "Those messages can not be moderated: <subjects>." for several.
+
+Duplicating a post duplicates the wrapped message as well.
+
+### 43.4 Mailing Group Moderation Rule
+
+Mailing Group Moderation Rule (`mail.group.moderation`, table `mail_group_moderation`).
+
+A permanent decision for one address in one list.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `email` | Text | Required. Always stored normalized; an address that cannot be normalized is refused with "Invalid email address “<value>”". |
+| `status` | Selection | Required, default `ban`. `allow` = "Always Allow"; `ban` = "Permanent Ban". |
+| `mail_group_id` | Link to Mailing Group | Required, indexed. On deletion, the row is deleted. |
+
+Uniqueness: (list, address) — "You can create only one rule for a given email address in a group."
+
+### 43.5 Mailing Group Rejection wizard
+
+Mailing Group Rejection (`mail.group.message.reject`, transient).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `subject` | Text, computed, stored, editable | The subject of the explanation sent back. |
+| `body` | Rich text | The explanation. Style attributes sanitized. |
+| `email_from_normalized` | Text, related to the post | — |
+| `mail_group_message_id` | Link to Mailing Group Message | Required, read-only. |
+| `action` | Selection | Required. `reject` = "Reject" (this post only) or `ban` = "Ban" (this post plus a permanent rule plus every other pending post of the same author in the same list). |
+| `send_email` | Boolean, computed | Whether to send the explanation to the author. |
+
+---
+
+## 44. Text Message entities
+
+### 44.1 Text Message
+
+Text Message (`sms.sms`, table `sms_sms`).
+
+One queued text message.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `uuid` | Text, read-only, not copied | Default: a freshly generated universally unique identifier without separators. The provider echoes it in delivery reports, which is how a report is matched back. Unique — "UUID must be unique". |
+| `number` | Text | The destination, already sanitized to international form. |
+| `body` | Long text | The text. |
+| `partner_id` | Link to Contact | The recipient when known. |
+| `mail_message_id` | Link to Message, indexed | The conversation entry this message belongs to, when it was sent from a document. |
+| `state` | Selection, required, read-only, not copied | Default `outgoing`. See the state table below. |
+| `failure_type` | Selection, not copied | See the table below. |
+| `sms_tracker_id` | Link to Text Message Tracker, computed, not stored | Found by matching the identifier. |
+| `to_delete` | Boolean | Default false. Marks the row for removal by the maintenance routine; the notifications are never removed. |
+
+Ordering: newest first. Display name: the number.
+
+#### States
+
+| Value | Label | Meaning |
+|---|---|---|
+| `outgoing` | In Queue | Waiting to be handed to the provider. |
+| `process` | Processing | Accepted by the provider, not yet handed to the carrier. |
+| `pending` | Sent | Handed over; delivery not confirmed. |
+| `sent` | Delivered | Confirmed delivered. |
+| `error` | Error | Failed. |
+| `canceled` | Cancelled | Abandoned before sending. |
+
+#### Failure types
+
+`unknown` (Unknown error), `sms_number_missing` (Missing Number), `sms_number_format` (Wrong Number Format), `sms_country_not_supported` (Country Not Supported), `sms_registration_needed` (Country-specific Registration Required), `sms_credit` (Insufficient Credit), `sms_server` (Server Error), `sms_acc` (Unregistered Account), plus three generated internally in mass mode: `sms_blacklist` (Blacklisted), `sms_duplicate` (Duplicate), `sms_optout` (Opted Out). The external-provider capability adds four more: authentication error, incorrect callback address, missing sending number, and identical sender and recipient.
+
+#### Delivery-report error classes
+
+Two named sets drive how a late delivery report is interpreted:
+
+- **bounce delivery errors**: invalid destination, not allowed, rejected. A report carrying one of these sets the notification to "bounced".
+- **delivery errors**: the three above plus expired and not delivered. A report carrying one of these sets the notification to "exception" with that failure type; anything else becomes the unknown failure type and the raw provider text is kept as the reason.
+
+#### Provider state mapping
+
+| Provider state | Resulting state |
+|---|---|
+| processing | `process` |
+| success | `pending` |
+| sent | `pending` |
+| delivered | `sent` |
+
+Anything else is a failure.
+
+Creating any text message immediately wakes the sending job.
+
+### 44.2 Text Message Template
+
+Text Message Template (`sms.template`, table `sms_template`). Adopts the render behavior and the template-reset behavior; allowed to render unrestricted expressions.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `name` | Text, translatable | — |
+| `model_id` | Link to Model definition | Required. Restricted to non-transient models that support text messaging. On deletion, the template is deleted. |
+| `model` | Text, related, stored, indexed, read-only | — |
+| `body` | Text, translatable | Required. The message, with inline placeholders. |
+| `sidebar_action_id` | Link to Window action, read-only, not copied | The contextual action that puts the template in the record's action menu. |
+
+Duplicating appends " (copy)" to the name. Deleting a template deletes its contextual action.
+
+### 44.3 Text Message Tracker
+
+Text Message Tracker (`sms.tracker`, table `sms_tracker`).
+
+The bridge between a provider identifier and a Notification. It exists separately because a text message row is deleted once sent while the notification must survive to receive the delivery report.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `sms_uuid` | Text | Required. Unique — "A record for this UUID already exists". |
+| `mail_notification_id` | Link to Notification, indexed when not empty | On deletion, the row is deleted. |
+
+#### State mapping to the notification
+
+| Text message state | Notification status |
+|---|---|
+| `canceled` | `canceled` |
+| `process` | `process` |
+| `error` | `exception` |
+| `outgoing` | `ready` |
+| `sent` | `sent` |
+| `pending` | `pending` |
+
+#### Monotonic status rule
+
+A status update is **ignored** when the notification already holds a status that is at least as advanced. The ignore sets are:
+
+| Incoming status | Ignored when the notification is already |
+|---|---|
+| `canceled` | cancelled, processing, sent, delivered |
+| `ready` | ready, processing, sent, delivered |
+| `process` | processing, sent, delivered |
+| `pending` | sent, delivered |
+| `bounce` | bounced, delivered |
+| `sent` | delivered |
+| `exception` | exception |
+
+This is what prevents a late "accepted" report from overwriting a confirmed delivery, and a cancellation from undoing something already handed to the carrier.
+
+### 44.4 Text Message Composer
+
+Text Message Composer (`sms.composer`, transient).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `composition_mode` | Selection, computed, stored, editable, required, precomputed | `numbers` ("Send to numbers"), `comment` ("Post on a document"), `mass` ("Send SMS in batch"). |
+| `res_model` | Text | The target model. |
+| `res_model_description` | Text, computed, not stored | Its label. |
+| `res_id` | Integer | The single target record. |
+| `res_ids` | Text | The serialized list of target records. |
+| `res_ids_count` | Integer, computed without elevation, not stored | How many recipients will be reached in batch mode, ignoring any active filter. |
+| `comment_single_recipient` | Boolean, computed without elevation, not stored | Whether exactly one recipient is targeted. |
+| `mass_keep_log` | Boolean | Default true. Log a note on each document. |
+| `mass_force_send` | Boolean | Default false. Send immediately rather than queueing. |
+| `use_exclusion_list` | Boolean | Default true, not copied. Honour the blacklist. |
+| `recipient_valid_count`, `recipient_invalid_count` | Integers, computed without elevation, not stored | — |
+| `recipient_single_description` | Long text, computed without elevation, not stored | The single recipient in words. |
+| `recipient_single_number` | Text, computed without elevation, not stored | The stored number of the single recipient. |
+| `recipient_single_number_itf` | Text, computed without elevation, stored, editable | The number actually used; changing it writes the number back onto the recipient's record. |
+| `recipient_single_valid` | Boolean, computed without elevation, not stored | — |
+| `number_field_name` | Text | Which field of the target model holds the number. |
+| `numbers` | Text | Free numbers, comma separated. |
+| `sanitized_numbers` | Text, computed without elevation, not stored | Their sanitized form. |
+| `template_id` | Link to Text Message Template | Restricted to templates of the target model. |
+| `body` | Long text, computed, stored, editable, required, precomputed | The text to send. |
+
+### 44.5 Provider entities
+
+**Provider Number** (`sms.twilio.number`, table `sms_twilio_number`): the company, a sequence, the sending number, the country and its code. Ordered by sequence then identifier. One number per country decides which sender is used for a destination.
+
+**Sending account wizards**: a phone-number registration wizard, a verification-code wizard and a sender-name wizard, each holding the account and the one value being set; plus a connection wizard holding the company, the provider choice, the account identifier, the authentication token, the list of numbers and a test number.
+
+The **Company** gains a provider choice (the platform's own service or the external provider), the external account identifier and token (readable only by the system group) and the list of numbers. The **Notification** and the **Text Message** both gain the four provider-specific failure types, and the Text Message gains the provider's own message identifier through its tracker and the company of the originating record.
+
+---
+
+## 45. Digest and Digest Tip
+
+### 45.1 Digest
+
+Digest (`digest.digest`, table `digest_digest`).
+
+A periodic summary electronic mail carrying a chosen set of indicators, each shown over three time windows with a comparison against the preceding window.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `name` | Text, translatable | Required. |
+| `user_ids` | Multiple links to User | The recipients. Restricted to non-portal users. |
+| `periodicity` | Selection | Required, default `daily`. `daily`, `weekly`, `monthly`, `quarterly`. |
+| `next_run_date` | Date | When the next sending is due. Filled at creation from the periodicity. |
+| `currency_id` | Link to Currency, related to the company, writable | Used to format monetary indicators. |
+| `company_id` | Link to Company | Default: the active company. Empty means "use the acting company at computation time". |
+| `available_fields` | Text, computed, not stored | The comma-separated list of the value fields of the enabled indicators; a diagnostic aid. |
+| `is_subscribed` | Boolean, computed, not stored, per user | Whether the acting user is a recipient. |
+| `state` | Selection, read-only | Default `activated`. Either "Activated" or "Deactivated". A deactivated digest is skipped by the job. |
+| `kpi_res_users_connected` | Boolean | Enable the indicator "Connected Users". |
+| `kpi_res_users_connected_value` | Integer, computed, not stored | Its value for the current window. |
+| `kpi_mail_message_total` | Boolean | Enable the indicator "Messages Sent". |
+| `kpi_mail_message_total_value` | Integer, computed, not stored | Its value for the current window. |
+
+Other capabilities add pairs of fields following the same naming convention: a switch whose name begins with the indicator prefix, and a value field with the same name plus the value suffix. Any field pair following that convention is picked up automatically, including fields added by a customization tool.
+
+#### The two indicators shipped by this domain
+
+| Indicator | Switch | Computation |
+|---|---|---|
+| Connected Users | `kpi_res_users_connected` | The number of users of the digest's companies whose last login moment falls in the window. Note that the company field consulted for users is the *multiple*-company field, not the single one. |
+| Messages Sent | `kpi_mail_message_total` | The number of Messages created in the window whose subtype is the discussion subtype and whose type is one of comment, incoming electronic mail or outgoing electronic mail. **This indicator is not restricted by company.** |
+
+The live chat capability adds three more, described in [calculations.md](calculations.md): the share of happy ratings, the number of conversations handled, and the average time to answer in seconds.
+
+#### The three time windows
+
+Every indicator is shown in three columns. The "now" used is the current moment, expressed in the time zone of the company's working calendar when one is set.
+
+| Column | Current window | Comparison window |
+|---|---|---|
+| Last 24 hours | from one day before now, to now | from two days before now, to one day before now |
+| Last 7 Days | from one week before now, to now | from two weeks before now, to one week before now |
+| Last 30 Days | from one month before now, to now | from two months before now, to one month before now |
+
+The margin shown next to each value is
+
+```formula
+margin = round( ( current_value − previous_value ) ÷ previous_value × 100 , 2 decimals )
+```
+
+and is zero whenever the two values are equal, or either of them is zero.
+
+Monetary values are abbreviated (thousands, millions) and prefixed or suffixed with the currency symbol according to the currency's symbol position. Decimal values are shown with exactly two decimals.
+
+An indicator the recipient may not read is silently dropped from that recipient's digest.
+
+#### The slow-down rule
+
+When the sending is automatic (not a manual send), the platform first checks, for each digest, whether **any** recipient has logged in within a period that depends on the current periodicity:
+
+| Periodicity | Look-back |
+|---|---|
+| daily | 2 days |
+| weekly | 7 days |
+| monthly | 1 month |
+| quarterly | 3 months |
+
+If no recipient logged in during that period, the digest is *slowed down*: the mail carries an explanatory line — "We have noticed you did not connect these last few days. We have automatically switched your preference to <new periodicity> Digests." — and after sending, the periodicity moves one step: daily becomes weekly, weekly becomes monthly, anything else becomes quarterly.
+
+After each send, the next run date becomes today plus one period (one day, one week, one month or three months).
+
+#### The sent electronic mail
+
+Subject: `<recipient company name>: <digest name>`. Sender: the address of the digest company's contact, else the acting user's address, else the address of the system user. Automatically deleted after sending. Two headers are added so that the recipient's mail client can offer a one-click unsubscribe: the unsubscribe address, the one-click marker, and a header suppressing automatic out-of-office answers.
+
+The unsubscribe address is `/digest/<digest identifier>/unsubscribe_oneclik` with the recipient identifier and a signed token. The token is a keyed digest over the pair (digest identifier, user identifier) with a fixed purpose string, so it cannot be forged or reused for another digest.
+
+### 45.2 Digest Tip
+
+Digest Tip (`digest.tip`, table `digest_tip`).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `sequence` | Integer | Default 1. Ordering. |
+| `name` | Text, translatable | — |
+| `user_ids` | Multiple links to User | The users who have **already** received the tip. A tip is proposed only to users not in this list. |
+| `tip_description` | Rich text, translatable, not sanitized | The tip content, rendered as a template. |
+| `group_id` | Link to Group | Default: the internal-user group. Only members of that group see the tip; an empty group means everyone. |
+
+Ordering: by sequence. Each digest sending consumes one tip: the first eligible tip is rendered into the message and the recipient is added to its "already received" list.
+
+---
+
+## 46. Postal Letter
+
+Postal Letter (`snailmail.letter`, table `snailmail_letter`).
+
+One document to be printed and posted by an external service.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `user_id` | Link to User | Who sent it. |
+| `model` | Text | Required. The model of the source document. |
+| `res_id` | Integer | Required. The source document. |
+| `partner_id` | Link to Contact | Required. The addressee. |
+| `company_id` | Link to Company | Required, read-only. Default: the active company. |
+| `report_template` | Link to Report definition | The report to render and attach, when the document is not already a file. |
+| `attachment_id` | Link to Attachment, indexed when not empty | The file to print. On deletion, the row is deleted. |
+| `attachment_datas` | Binary, related | The file content. |
+| `attachment_fname` | Text, related | The file name. |
+| `color` | Boolean | Default: the company's colour setting. |
+| `cover` | Boolean | Default: the company's cover-page setting. |
+| `duplex` | Boolean | Default: the company's double-sided setting. |
+| `state` | Selection, required, read-only, not copied | Default `pending`. `pending` ("In Queue"), `sent` ("Sent"), `error` ("Error"), `canceled` ("Cancelled"). |
+| `error_code` | Selection | One of: missing required fields, credit error, trial error, no price available, format error, unknown error, attachment error. |
+| `info_msg` | Rich text | The explanation shown to the user. |
+| `reference` | Text, computed, not stored, read-only | `<model>,<record identifier>`. |
+| `message_id` | Link to Message, indexed when not empty | The conversation entry created when the letter was created. |
+| `notification_ids` | Sub-records: Notification | — |
+| `street`, `street2`, `zip`, `city` | Text | The address, **copied from the addressee at creation** so that a later change of the contact does not rewrite history. |
+| `state_id` | Link to Country State | Same. |
+| `country_id` | Link to Country | Same. |
+
+Display name: `<attachment name> - <addressee name>` when there is an attachment, otherwise the addressee name.
+
+#### Creation side effects
+
+For each letter, in order:
+
+1. Post a message on the source document with the body "Letter sent by post with Snailmail" and the postal message type.
+2. Copy the addressee's postal address onto the letter.
+3. Create the letter.
+4. Create one Notification per letter: author taken from the posted message, recipient the addressee, channel "postal", already marked read (so it never appears in an inbox), status "ready", pointing at the letter.
+5. Check read access on the attachment.
+
+The company gains three settings — print in colour, add a cover page, print both sides — which supply the defaults above; the addressee gains "by Post" as a possible invoice-sending method; the Notification gains the postal channel, a link to the letter and the six postal failure types; and the Message gains the postal message type together with a flag and a search helper for messages whose postal delivery failed.
+
+---
+
+## 47. Satellite fields on shared records
+
+This domain adds fields to records owned by other domains. They are listed here because an implementation must create them, and because several other documents refer to them.
+
+### 47.1 Company
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `alias_domain_id` | Link to Alias Domain, indexed when not empty | Default: the first alias domain by ordering, when one exists. |
+| `bounce_email` | Text, computed, not stored | The bounce address of the company's alias domain. |
+| `bounce_formatted` | Text, computed, not stored | The same with the company name as display name. |
+| `catchall_email` | Text, computed, not stored | The catch-all address of the company's alias domain. |
+| `catchall_formatted` | Text, computed, not stored | The same with the company name as display name. |
+| `default_from_email` | Text, related to the alias domain, read-only | — |
+| `email_formatted` | Text, computed with elevated rights, not stored | The company contact's address in formatted form. |
+| `email_primary_color` | Text | Default `#FFFFFF`. The text colour of buttons in notification electronic mails. |
+| `email_secondary_color` | Text | Default `#875A7B`. The background colour of those buttons. |
+
+The postal capability adds the colour, cover-page and double-sided printing defaults. The text-message capability adds the provider choice, the external account identifier and token, and the list of sending numbers.
+
+### 47.2 Contact
+
+The Contact record adopts the activity behavior and the blacklist behavior, and its conversation is **not** flattened (replies form genuine threads).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `name` | Text | Tracked with order 1. |
+| `email` | Text | Tracked with order 1. |
+| `phone` | Text | Tracked with order 2. |
+| `parent_id` | Link to Contact | Tracked with order 3. |
+| `user_id` | Link to User | Tracked with order 4. |
+| `vat` | Text | Tracked with order 5. |
+| `contact_address_inline` | Text, computed, not stored | The full postal address on one line. Tracked. |
+| `im_status` | Text, computed with elevated rights, not stored | The derived presence status. |
+| `offline_since` | Date and time, computed with elevated rights, not stored | — |
+| `channel_ids` | Multiple links to Channel through the membership table, not copied | — |
+| `channel_member_ids` | Sub-records: Channel Member | — |
+| `is_in_call` | Boolean, computed, not stored | Readable only by the system group. |
+| `rtc_session_ids` | Sub-records: Call Session | — |
+
+The plugin capability adds two computed fields exposing the cached enrichment answer and the domain that was searched. The live chat capability adds the operator display name, the scripts whose operator this contact is, and the number of live chat channels the contact belongs to.
+
+### 47.3 User
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `role_ids` | Multiple links to Role | The roles the user belongs to; mentioning a role notifies them. |
+| `can_edit_role` | Boolean, computed, not stored | — |
+| `notification_type` | Selection, required, computed, stored, with an inverse | Default `email`. `email` = "By Emails"; `inbox` = "In Odoo". A portal or public user may only have the electronic-mail value — "Only internal user can receive notifications in Odoo". |
+| `presence_ids` | Sub-records: Presence | Readable only by the system group. |
+| `out_of_office_from`, `out_of_office_to` | Date and time | The absence window. |
+| `out_of_office_message` | Rich text | The automatic answer body. |
+| `is_out_of_office` | Boolean, computed, not stored | True inside the window. |
+| `im_status` | Text, computed with elevated rights, not stored | — |
+| `manual_im_status` | Selection | `away` ("Away"), `busy` ("Do Not Disturb"), `offline` ("Offline"). Overrides the detected presence. |
+| `outgoing_mail_server_id` | Link to Outgoing Mail Server, computed, not stored | The user's personal relay, if any. Readable only by internal users. |
+| `outgoing_mail_server_type` | Selection, computed, required | Default `default`. Other capabilities add provider-specific values. |
+| `has_external_mail_server` | Boolean, computed, not stored | — |
+
+The assistant-bot capability adds the onboarding state and a failure flag. The live chat capability adds the channels the user operates, the operator display name, the languages, the skills, the ongoing-session count, an in-call flag and an access flag; all of the display-name, language and skill fields are stored on the user's settings record and merely exposed here.
+
+### 47.4 Model registry entry
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `is_mail_thread` | Boolean | Default false. Whether the model has a conversation. |
+| `is_mail_activity` | Boolean | Default false. Whether the model has activities. |
+| `is_mail_blacklist` | Boolean | Default false. Whether the model honours the opt-out. |
+| `is_mail_thread_sms` | Boolean, computed, not stored, searchable | Whether the model supports text messaging. |
+
+Ordering of the registry is changed so that thread-enabled models come first.
+
+### 47.5 Field registry entry
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `tracking` | Integer | When set, every change of the field is tracked; the value is the display order of the change in the conversation. |
+
+### 47.6 Server Action
+
+The server action gains four kinds and the fields they need:
+
+| Kind | Added fields |
+|---|---|
+| `mail_post` ("Send Email") | the template, whether to subscribe the recipients, and how to send (as an electronic mail, as a message, or as an internal note) |
+| `followers` ("Add Followers") | the follower kind (a fixed list of contacts, or the contacts found in a named field of the record) and the corresponding contact list or field name |
+| `remove_followers` ("Remove Followers") | the same two |
+| `next_activity` ("Create Activity") | the activity type, the title, the note, the delay and its unit, and the assignee kind (a fixed user, or the user found in a named field) with the corresponding user or field name |
+
+The text-message capability adds a fifth kind, "Send SMS", with the text-message template and the same three sending modes.
+
+The server action record itself becomes a thread with activities, and the following of its own fields are tracked: name, model, created-record model, link field, update path, value, evaluation kind, webhook address and state.
+
+### 47.7 Scheduled Job
+
+The scheduled-job record becomes a thread with activities so that failures can be discussed and assigned. Four of its fields are tracked: the executing user, the interval number, the interval unit and the priority.
+
+### 47.8 Attachment
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `thumbnail` | Image | A generated preview. |
+| `has_thumbnail` | Boolean, computed, not stored | — |
+| `voice_ids` | Sub-records: Voice Metadata | Present when the attachment is a voice recording. |
+
+The attachment record also adopts the bus sender behavior, so its deletion can be broadcast to everyone displaying it.
+
+### 47.9 Window action view kind and view kind
+
+Both the window-action view list and the view kind gain the value `activity` ("Activity"), which is the calendar-like board of activities per record. Deleting the value cascades.
