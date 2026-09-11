@@ -1013,3 +1013,175 @@ Both entries are strictly balanced by construction: each has exactly two lines c
 | deductibility comparisons | two decimal digits |
 | cash rounding | the rule's own rounding precision, then the currency's rounding factor |
 | currency conversion of a product price | performed **without** rounding, then rounded only when stored |
+
+---
+
+## 18. The purchase journal dashboard numbers
+
+Each purchase journal card shows four counted-and-summed groups plus three indicators. All of them are computed in one pass over four queries.
+
+### 18.1 The four groups
+
+| Group | Query |
+|---|---|
+| **Drafts** | documents of the journal, in the user's companies, whose status is `draft` and whose type is any invoice-like type, receipts included |
+| **Waiting** (to pay) | documents of the journal, posted, whose payment status is `not_paid` or `partial`, whose type is one of the three purchase types |
+| **Late** | the same query as *Waiting*, restricted to the rows whose due date is strictly before today |
+| **To review** | documents of the journal, posted, whose reviewed flag is false — **no type restriction**, so a miscellaneous entry of a purchase journal also counts |
+
+Both the *Waiting* and the *Late* numbers come from a **single** query whose result rows carry a late indicator; the two groups are then the rows where that indicator is true and the rows where the "to pay" indicator is true.
+
+### 18.2 What each row carries
+
+For the drafts query the selected columns are: the journal; a document-currency total signed as
+
+```formula
+row_amount = amount_total × ( −1 when the type is out_refund or in_refund, otherwise +1 )
+```
+
+and a company-currency total signed as
+
+```formula
+row_amount_company = amount_total_signed × ( −1 when the type is in_invoice, in_refund or in_receipt, otherwise +1 )
+```
+
+plus the currency, the type, the bill date and the company.
+
+For the *Waiting and Late* query the selected columns are: the journal, the company, the currency, the late indicator (*due date is before today*), and two grouped sums:
+
+```formula
+group_amount_company = Σ amount_residual_signed
+group_amount         = Σ ( amount_residual × ( −1 when the type is in_invoice, otherwise +1 ) )
+```
+
+together with a row count. The grouping is by company, journal, currency, late indicator and the "to pay" indicator.
+
+For the *To review* query the same shape is used but over the **totals** rather than the residuals:
+
+```formula
+group_amount_company = Σ amount_total_signed
+group_amount         = Σ ( amount_total × ( −1 when the type is in_invoice, otherwise +1 ) )
+```
+
+### 18.3 Converting the rows into one number
+
+Given a target currency — the journal's currency when it has one, otherwise the journal's company's currency — the counter and the sum are built as:
+
+```formula
+count = Σ over rows of the row's count (1 when absent)
+```
+
+```formula
+sum = Σ over rows of:
+        row_amount_company                                      when the row's company currency equals the target currency
+        convert( row_amount, row_currency → target, at the row's bill date or today )   otherwise
+```
+
+and the result is rounded to the target currency.
+
+### 18.4 Display
+
+The purchase card then shows the title *Bills to pay*, the four counts, and the formatted sums. **The waiting and late sums are negated** for a purchase journal (they are shown as written for a sale journal), so that an amount owed to suppliers reads as a positive figure. The draft sum is not negated, because the query already signed it.
+
+Three further indicators:
+
+| Indicator | Meaning |
+|---|---|
+| irregular sequences | the journal has at least one numbering hole; the hint reads *Irregularities due to draft, cancelled or deleted bills with a sequence number since last lock date.* |
+| unhashed entries | the journal secures entries with a hash and at least one posted entry is not yet hashed |
+| sample data | the journal has **no** document at all; the card then offers the sample bill |
+
+---
+
+## 19. The numbering starting pattern
+
+The pattern from which a journal's first number is derived is assembled arithmetically. Let *d* be the accounting date, falling back to the bill date, falling back to today; let *L* be the company's fiscal year end day and *M* its fiscal year end month.
+
+```formula
+staggered = ( M ≠ 12 ) or ( L ≠ 31 )
+```
+
+If the year is **not** staggered:
+
+```formula
+year_part = the four digits of the year of d
+```
+
+If it **is** staggered, first clamp the end day to the length of that month:
+
+```formula
+L' = min( L , number_of_days( year of d , M ) )
+```
+
+then
+
+```formula
+year_part = "«last two digits of the year of d»-«last two digits of the year of d plus one»"   when d > date( year of d , M , L' )
+year_part = "«last two digits of the year of d minus one»-«last two digits of the year of d»"  otherwise
+```
+
+The pattern is then:
+
+| Journal type | Pattern |
+|---|---|
+| sale, bank, cash, credit card | `«code»/«year part»/00000`, or `«code»/«year part»/0000` when the year is staggered |
+| any other, **including purchase** | `«code»/«year part»/«two-digit month of d»/0000` |
+| any other, self-billing | `«code»«partner identifier padded to five with zeros»/«year part»/«two-digit month of d»/0000` |
+
+then prefixed with `R` for a credit note in a journal with a separate refund sequence, with `P` for a payment's entry in a journal with a separate payment sequence, and with `D` for a debit note in a journal with a dedicated debit note sequence.
+
+**Worked example.** Company with a fiscal year ending 30 June; purchase journal coded `BILL`; a bill whose accounting date is 12 September 2026.
+
+```formula
+staggered = ( 6 ≠ 12 ) → true
+L' = min( 30 , 30 ) = 30
+date( 2026 , 6 , 30 ) = 30 June 2026;  12 September 2026 > that
+year_part = "26-27"
+pattern   = "BILL/26-27/09/0000"
+```
+
+so the first bill of that month is numbered `BILL/26-27/09/0001`.
+
+**Second worked example.** Same company, a bill dated 3 March 2026.
+
+```formula
+3 March 2026 ≤ 30 June 2026
+year_part = "25-26"
+pattern   = "BILL/25-26/03/0000"
+```
+
+**Third worked example.** A self-billing purchase journal coded `SB`, commercial partner identifier 412, calendar fiscal year, bill dated 5 May 2026:
+
+```formula
+year_part          = "2026"
+partner_identifier = "00412"
+pattern            = "SB00412/2026/05/0000"
+```
+
+---
+
+## 20. File grouping arithmetic
+
+### 20.1 The similarity score
+
+```formula
+similarity( name_1 , name_2 ) = the length of the longest common contiguous substring of the two names
+```
+
+computed without any "junk character" heuristic, so that every character counts.
+
+**Worked example.** Three files arrive in one message: `INV-2026-0044.pdf`, `INV-2026-0044.xml` and `scan_44.jpg`.
+
+- The first two have different format labels (Portable Document Format versus none, since only the Portable Document Format label is recognised by the base implementation), so they do not clash.
+- Their similarity is the length of `INV-2026-0044.` = **14**.
+- `scan_44.jpg` shares at most `4` characters with either (`_44.` versus `44.`, giving 3, or `.` giving 1); the longest common substring is `44.` = 3.
+
+So the grouping places the first two together and, because the image also does not clash by format label with that group, the image joins the group with the highest similarity — which is still that same group. One bill is created carrying all three files. This is the intended outcome: one supplier document delivered in three representations.
+
+### 20.2 When files do clash
+
+**Worked example.** Five files `a.pdf`, `b.pdf`, `c.pdf`, `d.pdf`, `e.pdf` arrive in one message. Each carries the Portable Document Format label. The first file starts a group. The second finds that the only existing group already holds a file of that label, so it starts its own. And so on: five groups, five bills.
+
+### 20.3 Ordering
+
+Files are placed in **decreasing decoder priority**, so that the file most likely to be decodable anchors each group; files with no decoder are placed last and therefore attach themselves to an existing group rather than creating one, whenever their format label allows.

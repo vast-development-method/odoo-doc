@@ -91,3 +91,50 @@ Entities of other domains that carry payable-specific fields specified here: Acc
 ## Behaviour not present in the source set
 
 The following capabilities that are commonly associated with accounts payable are **not** implemented by the packages covered here and are only described as industry-standard defaults where a companion package is expected to add them: three-way matching between a purchase order, a receipt and a bill (only the matching hook and the origin parsing exist here — see `workflows.md`), payment runs and remittance advice batches, supplier statement reconciliation, cheque layouts themselves (this package defines the layout **selection** and its margins, but ships no drawable layout: the selection contains only the value `disabled` until a country package adds one), and the optical character recognition of scanned bills (only the decoder contract exists — see `workflows.md`). These points are called out where relevant.
+
+## How to read the specifications in this folder
+
+**Formulas.** Every formula is written in a fenced block labelled `formula`, in plain mathematics, using named quantities in words and the symbols × ÷ + − =. Rounding is always explicit: `round_to(currency, x)` rounds to the smallest representable step of that currency using the *round half away from zero* rule. Each formula is followed by an explanation of every quantity and by at least one worked numeric example.
+
+**Algorithms.** Numbered steps in prose, with preconditions, postconditions and failure conditions stated. Where the order of evaluation matters — and in this domain it almost always does, because the dynamic lines are rebuilt in a fixed order at every save — the order is stated explicitly.
+
+**Messages.** Error and warning texts are reproduced exactly as the system produces them, with placeholders translated into words between guillemets, for example *«the document number»*.
+
+**Identifiers.** Storage names, transport names and selection values appear in code font because external contracts depend on them; each is accompanied on first use by its full name in words.
+
+## The shape of a purchase document
+
+A purchase document is a single record that carries **two layers at once**:
+
+1. A **commercial layer** — the supplier, the supplier's own reference, the dates, the payment terms, the bank account to pay to, and a list of what was bought at what price.
+2. An **accounting layer** — a balanced set of journal items.
+
+The two layers are kept in step by a **synchronizer** that runs inside every save. It reads the commercial layer and rebuilds the dynamic journal items — tax lines, payable term lines, cash rounding lines, early payment discount lines and private-share lines — so that they always match. Understanding that synchronizer is the key to the whole domain, and the order in which it rebuilds each kind of line is given in `workflows.md` §1 step 6.
+
+Reading the domain in the order given above therefore means: first the vocabulary, then the two layers as data, then the states they move through, then the arithmetic that derives one layer from the other, then the ledger consequences, and only then the operational sequences.
+
+## What makes the payable side different from the receivable side
+
+The two sides share one entity and most of one algorithm. The differences that matter, all specified here, are:
+
+| Aspect | Receivable | Payable |
+|---|---|---|
+| Direction sign | −1 for an invoice | **+1** for a bill |
+| Term line account type | receivable | **payable** |
+| Term line side | debit | **credit** |
+| Document number | issued by the company | issued by the company, but the **supplier's own number** is recorded separately as the vendor reference |
+| Bill date at posting | filled with today when missing | **required**; posting refuses without it |
+| Bank account | the company's, and it must be trusted | the **supplier's**, and it must not be archived |
+| Line description | the product's sale description | the product's **purchase description** |
+| Line unit | the product's reference unit | the **supplier's purchase unit** when one is recorded |
+| Line price | the product's sale price | the product's **purchase price** |
+| Line taxes | the product's sale taxes | the product's **supplier taxes** |
+| Line account | the income account | the **expense account** |
+| Duplicate detection | same partner, same total, same date | **same reference within a calendar year**, or same partner, total and date |
+| Deductibility | not allowed | allowed, and generates private-share lines |
+| Capture | typed or generated from a sales order | typed, **uploaded, mailed in or decoded** |
+| Automatic posting | not offered | offered per vendor, with a learning wizard |
+| Abnormal detection | not offered | offered on amount and on billing frequency |
+| Attachments on reset to draft | detached, so the printable document can be regenerated | **kept**, because the file belongs to the supplier |
+| Payment | received | issued, possibly as a **printed cheque** |
+| Analysis report sign | positive | **negative** |

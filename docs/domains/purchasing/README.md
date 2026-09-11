@@ -9,6 +9,23 @@ language with behavioural equivalence: the same records, the same state transiti
 numbers, the same validation messages, the same documents and the same effects on inventory
 and on the ledger.
 
+## Conventions used throughout this folder
+
+- **Reproduced identifiers.** Storage names, transport names, column names, route paths and
+  selection values are reproduced exactly in code font — for example `partner_id` (the vendor
+  reference field), `purchase.order` (the purchase order entity), `amount_untaxed` (the untaxed
+  amount field) — because external contracts depend on them. Each one is accompanied by its
+  full name in words on first use in a document.
+- **Reproduced user-visible text.** Status labels, button labels, message-thread subtype names,
+  notification bodies and error messages are reproduced exactly as the system produces them,
+  because a rebuilt implementation must produce the same text. A few of those shipped strings
+  contain the short form of *request for quotation*; that short form appears here only inside
+  such a reproduced string, never in the specification's own prose. Runtime placeholders inside
+  a reproduced message are written in words — *the order name*, *the product name*, *the
+  company name*.
+- **Numbers.** Every worked example states its rounding and its precision. Currency amounts are
+  shown with the two decimals of the example currency.
+
 ## Scope
 
 The purchasing domain owns:

@@ -7,6 +7,12 @@ updated, and what must be true afterwards. Formulas referenced here are written 
 [`business-rules.md`](business-rules.md); statuses in
 [`state-machines.md`](state-machines.md).
 
+> **Reproduced text.** Status labels, button labels, subtype names and message bodies are
+> reproduced exactly as the system produces them, because a rebuilt implementation must
+> produce the same text. Some shipped strings contain the short form of *request for
+> quotation*; that short form appears only inside such reproduced strings and never in this
+> specification's own prose. See the conventions in [`README.md`](README.md).
+
 Roles used throughout:
 
 - **Buyer** — a user holding the purchase user privilege. Creates, sends, confirms and cancels

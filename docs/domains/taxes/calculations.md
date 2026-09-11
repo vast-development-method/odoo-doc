@@ -961,3 +961,2226 @@ point six six; delta plus one hundredth to line one's company untaxed delta.
 
 The two currencies are rounded and redistributed independently; the allocations do not have to land
 on the same line.
+
+---
+
+## 8. Deriving the accounting data
+
+*Server-only.* After the amounts are final, the engine turns them into the data an accounting entry
+needs: which distribution line produced what, on which account, with which report tags, and under
+which grouping key.
+
+### 8.1 Choosing the distribution
+
+```formula
+distribution_used =  tax.refund_repartition_line_ids     when base_line.is_refund is true
+                     tax.invoice_repartition_line_ids    otherwise
+```
+
+The refund flag of a base line coming from a document is set as follows:
+
+1. When the document kind is a customer credit note or a vendor refund, the flag is **true**.
+2. When the document kind is a miscellaneous entry:
+   - on a line that **is** a tax entry, the flag is true when its distribution line's document kind
+     is `refund`;
+   - otherwise, when the line's taxes contain both a sales tax and a purchase tax, the flag is
+     true when the line has no credit (that is, the line is a debit or zero);
+   - otherwise, taking the first tax only: the flag is true when that tax is a sales tax and the
+     line has no credit, or when that tax is a purchase tax and the line has no debit;
+   - and finally, if the line carries taxes and the entry is itself the reversal of another entry,
+     the flag is **inverted**.
+3. In every other case the flag is false.
+
+### 8.2 Splitting the amount over the distribution lines
+
+For each tax entry:
+
+1. Select the distribution lines of kind `tax` from the chosen distribution:
+   - for the **positive** half, those whose factor is greater than or equal to zero, with a sign of
+     plus one;
+   - for the **reverse-charge** half, those whose factor is strictly negative, with a sign of minus
+     one.
+2. For each selected distribution line:
+   ```formula
+   share_in_line_currency   = round_to_line_currency( tax_amount_in_line_currency  × factor × sign )
+   share_in_company_currency= round_to_company_currency( tax_amount_in_company_currency × factor × sign )
+   account                  = target account of the distribution line (entities, section 2.5),
+                              falling back to the base line's own account
+   ```
+3. Accumulate the shares. Because each share is rounded independently, the accumulated total may
+   differ from the tax amount by a unit of the last decimal place. The difference is therefore
+   redistributed: sort the shares by decreasing absolute amount in the line currency, then by
+   decreasing absolute amount in the company currency; compute
+   `delta = tax_amount − accumulated total`; distribute it with the smooth allocation of section
+   7.1 weighted by each share's own amount; add the allocations back.
+
+The sign convention means that a distribution of plus one hundred and minus one hundred produces
+two shares: `+tax_amount` for the positive line and `−(−tax_amount)` — that is `+tax_amount` — on
+the reverse-charge half, because the reverse-charge half already carries the negated amount. The
+net effect on the ledger is zero while both report tags are stamped.
+
+### 8.3 Tags on the base entry
+
+The base entry's tag set is built as:
+
+1. The product's own account tags (only those attached to the product), if there is a product.
+2. Plus, for every tax entry that is **not** a reverse-charge half and whose tax is exigible on
+   the invoice — or, when the caller explicitly asked for cash basis tags to be included, for every
+   such tax regardless of exigibility — the tags of the `base` distribution line of the chosen
+   distribution.
+
+### 8.4 Tags on a tax entry
+
+Walking the tax entries **backwards** and maintaining, per tax, the set of base tags of the taxes
+seen so far:
+
+1. Start the tax entry's tag set with the product's account tags.
+2. Add the distribution line's own tags, but only when the tax is exigible on the invoice or the
+   caller asked for cash basis tags to be included.
+3. If the tax affects the base of subsequent taxes, also add the **base tags of every other tax**
+   already recorded in the running set. This is what makes a tax that swells the base of a later
+   tax report its own amount inside that later tax's base grid.
+4. After processing the tax's entries, if the tax accepts being affected by previous taxes, record
+   its own base tags in the running set (again, only when exigible on invoice or when cash basis
+   tags were requested).
+
+### 8.5 Grouping keys
+
+Two tax entries are merged into one accounting entry when they share a grouping key.
+
+**Base part of the key** (from the base line):
+
+```
+( partner , currency , analytic distribution , account , the set of base taxes )
+```
+
+**Full key of a tax entry**: the base part, overridden and extended with
+
+```
+( distribution line , partner , currency , originator group of taxes ,
+  analytic distribution — kept only when the tax is analytic or the distribution line is not used
+  in the tax settlement, otherwise cleared ,
+  account of the distribution line, falling back to the base line's account ,
+  the set of downstream taxes the entry itself is subject to ,
+  the set of report tags ,
+  a technical "keep zero line" marker, false by default )
+```
+
+**Key of an existing tax entry** (used to decide whether it can be updated instead of recreated):
+
+```
+( distribution line , partner , currency , originator group of taxes ,
+  analytic distribution , account , set of base taxes , set of report tags )
+```
+
+The two keys are deliberately built from the same fields in the same order so that they can be
+compared directly.
+
+### 8.6 Producing the accounting entries
+
+1. For each base line, record the update it needs: its tag set, and its balance in each currency
+   computed as
+   ```formula
+   amount_in_line_currency    = sign × ( total_excluded_currency + delta_total_excluded_currency )
+   amount_in_company_currency = sign × ( total_excluded         + delta_total_excluded )
+   ```
+2. For each tax entry share, accumulate under its grouping key:
+   ```formula
+   name            = the manual tax line name if the base line carries one, else the tax name
+   tax_base_amount = tax_base_amount + sign × the tax entry's base amount in company currency
+   amount_currency = amount_currency + sign × the share in line currency
+   balance         = balance         + sign × the share in company currency
+   ```
+3. Drop every accumulated entry whose amount is zero in **both** currencies, unless its key carries
+   the "keep zero line" marker. Then strip every technical key (those whose name begins with a
+   double underscore) from the keys.
+4. Match against the supplied existing tax entries: an existing entry whose key is present in the
+   accumulation, and which has not already been matched, is scheduled for **update** with the
+   accumulated amounts; every other existing entry is scheduled for **deletion**; every
+   accumulated key left unmatched is scheduled for **creation**.
+
+### 8.7 Worked example (mandatory example 10): a refund and its tag signs
+
+Configuration. A sales tax of twenty-one percent whose invoice distribution is: base line tagged
+`+base 21`, tax line of one hundred percent on the tax account tagged `+tax 21`. Its refund
+distribution is: base line tagged `-base 21`, tax line of one hundred percent on the same tax
+account tagged `-tax 21`. The four tags are the tags created by four report expressions whose
+formulas are, respectively, `base 21`, `tax 21`, `-base 21` and `-tax 21` — in practice the same
+two tags are reused with the minus prefix, so the report negates them.
+
+**The invoice.** One customer invoice line, one unit at one thousand, sign minus one (a customer
+invoice's product line is a credit).
+
+| Entry | Account | Amount in line currency | Report tags |
+|---|---|---|---|
+| Base | revenue | −1 000.00 (credit) | `base 21` |
+| Tax | tax payable | −210.00 (credit) | `tax 21` |
+| Counterpart | receivable | +1 210.00 (debit) | none |
+
+The tax return line whose expression is `base 21` sums the balances carrying that tag: minus one
+thousand. The line whose expression is `tax 21` sums minus two hundred ten. Because a sales tax
+return is conventionally presented as a positive figure, the shipped report expressions for a sales
+grid use the **negating** form: their formula is written with a leading minus sign, the tag's
+"negate balance" flag is therefore true, and the reported figures are plus one thousand and plus
+two hundred ten.
+
+**The credit note for the whole invoice.** The same line, but the refund flag is true and the sign
+is plus one.
+
+| Entry | Account | Amount in line currency | Report tags |
+|---|---|---|---|
+| Base | revenue | +1 000.00 (debit) | `-base 21` → the tag named `base 21` with negation |
+| Tax | tax payable | +210.00 (debit) | `-tax 21` → the tag named `tax 21` with negation |
+| Counterpart | receivable | −1 210.00 (credit) | none |
+
+Two independent sign flips happen and they cancel:
+
+1. The **balance** flips because the document is a refund: plus one thousand instead of minus one
+   thousand.
+2. The **tag** changes to the refund distribution's tag, which in the shipped charts is the same
+   tag name carrying the opposite report sign.
+
+```formula
+reported_amount_on_the_grid = report_sign × sum of the balances of the tagged journal items
+where report_sign = −1 when the expression's formula starts with a minus sign, +1 otherwise
+```
+
+Invoice contribution to the sales base grid: report sign minus one times minus one thousand equals
+plus one thousand. Credit note contribution: report sign plus one times plus one thousand equals
+plus one thousand — **the wrong direction**, unless the refund distribution points at the
+oppositely signed expression, which is exactly why the refund distribution exists as a separate,
+independently taggable list. With the shipped configuration the credit note points at the
+expression whose formula is the negated one, so its contribution is minus one thousand and the
+period's net base is zero.
+
+**The rule to implement.** The refund distribution is not a sign convention applied by the engine;
+it is a second, fully independent mapping. The engine's only refund-specific behaviour is: pick
+the refund list instead of the invoice list. Everything else — which account, which factor, which
+tag, and therefore which sign appears on the return — is data.
+
+**Consistency guard.** The two lists must have the same length, the same kinds in the same order
+and the same percentages (entities, section 2.4), so that a refund can never redistribute an amount
+differently from the invoice it reverses. Only the accounts and the tags may differ.
+
+### 8.8 Re-deriving the tags of existing entries
+
+*Server-only.* A dedicated maintenance operation rebuilds the tag links of already-posted journal
+items after the distribution of a tax has been edited. It is specified in `workflows.md` section 9;
+its selection rule for the distribution to use on a miscellaneous entry is:
+
+| Tax type | Line balance | Distribution used |
+|---|---|---|
+| sales | less than or equal to zero | invoice |
+| sales | greater than zero | refund |
+| purchase | greater than or equal to zero | invoice |
+| purchase | less than zero | refund |
+
+For invoice-kind documents the invoice distribution is used, for refund-kind documents the refund
+distribution, and for a cash basis entry the kind of its originating document decides.
+
+---
+
+## 9. Manual amounts, computation keys and stored extra data
+
+### 9.1 Manual amounts
+
+Three optional inputs let a caller pin the result instead of letting the engine derive it:
+
+| Input | Effect |
+|---|---|
+| `manual_total_excluded_currency` | Replaces the rounded untaxed total in the line currency (pass three of section 7). |
+| `manual_total_excluded` | Replaces the rounded untaxed total in the company currency. |
+| `manual_tax_amounts` | A table keyed by tax identifier; each entry may carry any of `base_amount_currency`, `base_amount`, `tax_amount_currency`, `tax_amount`, each replacing the corresponding rounded amount. |
+
+Manual amounts do not change the *raw* amounts, so the "target" amounts used by the redistribution
+passes of sections 7.5 and 7.6 fall back to the manual values when they exist and to the raw values
+otherwise. That is what keeps the document total exactly on the pinned figure.
+
+A helper "freeze the current result" writes the current rounded amounts into the manual inputs:
+for each base line with at least one tax entry, the manual untaxed totals become the rounded totals
+plus their deltas, and the manual per-tax amounts become the current rounded base and tax amounts —
+skipping reverse-charge halves, and, when a filter is supplied, writing an empty entry (rather than
+no entry) for the taxes the filter rejects.
+
+### 9.2 Computation keys
+
+A computation key partitions one document into independent rounding subsets. Both redistribution
+passes (sections 7.5 and 7.6) include the key in their grouping, so lines carrying different keys
+never lend cents to each other.
+
+The canonical use is a final invoice that deducts a previous down payment: the original lines carry
+no key and total one thousand, while the negative down-payment lines carry the key `down_payment`
+and total minus three hundred. Each subset is rounded correctly on its own, so the invoice shows
+exactly seven hundred and the down payment is neither inflated nor deflated by a stray cent.
+
+Keys in use: `global_discount` and `down_payment`, each optionally suffixed. A base line whose
+stored key begins with `global_discount` is additionally marked with the special type
+`global_discount`; one beginning with `down_payment` is marked `down_payment`.
+
+### 9.3 Stored extra tax data
+
+*Mirrored.* Manual amounts and computation keys survive a save in a structured document stored on
+the journal item.
+
+**Export.** The stored document contains the computation key when there is one. When at least one
+manual value exists, it also contains those manual values **and** a snapshot of the inputs they
+were captured against: currency, unit price, discount, quantity and rate.
+
+**Import.** The computation key is always restored. The manual values are restored only when
+**every** one of the following holds:
+
+1. a stored manual per-tax table exists;
+2. the base line's currency is the stored currency;
+3. the base line's unit price equals the stored unit price, compared at the currency's precision;
+4. the base line's discount equals the stored discount, compared at the currency's precision;
+5. the base line's quantity equals the stored quantity, compared at the currency's precision;
+6. the number of flattened taxes on the base line equals the number of taxes in the stored table;
+7. every flattened tax of the base line is present in the stored table.
+
+When they are restored, the stored unit price replaces the base line's unit price, and every
+company-currency amount is re-expressed for the current rate:
+
+```formula
+rate_change = current_rate ÷ stored_rate            , or 1 when either rate is absent
+restored_company_amount = stored_company_amount ÷ rate_change
+```
+
+Line-currency amounts are restored unchanged.
+
+**Reversal.** When a document is reversed, the stored data is deep-copied and the quantity, both
+manual untaxed totals and every manual base and tax amount (in both currencies) are negated.
+
+### 9.4 Turning a refund base line back into a normal one
+
+*Server-only.* A helper produces, from a base line marked as a refund, an equivalent line that is
+not: the quantity is negated, the refund flag cleared, and every amount in the tax details — the
+four totals, both deltas, and each tax entry's four base and tax amounts, raw and rounded — is
+negated. This is used where a consumer needs all lines pointing the same way regardless of document
+kind.
+
+---
+
+## 10. The totals block
+
+*Mirrored (except the non-deductible part, which is server-only).* The totals block is the
+structured value a document exposes so that a screen or a printed page can show "untaxed amount",
+one line per tax group, optional intermediate subtotals, the cash rounding delta and the grand
+total — in the document currency and, optionally, in the company currency.
+
+### 10.1 Inputs and output shape
+
+Inputs: the rounded base lines, the document currency, the company, and an optional cash rounding
+configuration.
+
+Output keys: the two currencies and their rounding steps; a flag saying whether any tax group is
+involved; a flag saying whether every tax group shares the same displayed base; the untaxed amount,
+the tax amount and the grand total in both currencies; the cash rounding delta in both currencies
+when there is one; and an ordered list of subtotals, each with a name, a base amount, a tax amount
+and an ordered list of tax groups. Each tax group carries its identifier, its name, its
+point-of-sale label, the identifiers of the taxes aggregated into it, its base and tax amounts in
+both currencies, the base amount **to display** in both currencies, and, when applicable, the
+non-deductible tax amount in both currencies.
+
+### 10.2 Algorithm
+
+1. **Global amounts.** Aggregate every base line under a single key that is present only when the
+   line has at least one tax entry. Sum, over all keys: the untaxed totals including their deltas
+   into the block's untaxed amount, and the tax amounts into the block's tax amount, in both
+   currencies. Set "has tax groups" when at least one key was non-empty.
+2. **Per tax group.** Aggregate every base line by the tax group of each tax entry. Sort the
+   resulting groups by (group sequence, group identifier).
+3. For each group in that order:
+   a. Collect the distinct taxes that contributed to it.
+   b. **Displayed base.**
+      - If every contributing tax is of the fixed kind, there is **no** displayed base (the value
+        is explicitly absent, and the group shows no base at all).
+      - Else if every contributing tax is of the division kind **and** every one of them is
+        price-included, the displayed base is, summed over the contributing base lines, the untaxed
+        total plus its delta plus the tax amount of every division tax entry of that line. (For a
+        price-included division tax the meaningful base to show the customer is the tax-inclusive
+        amount.)
+      - Otherwise the displayed base is the group's plain base amount.
+   c. If a displayed base exists, record its textual representation at the currency's precision in
+      a set; that set is later used for the "same base" flag.
+   d. Determine the subtotal the group belongs to: the group's "preceding subtotal" label when set,
+      otherwise the label *"Untaxed Amount"*. The first group that names a given subtotal fixes
+      that subtotal's position in the output order.
+   e. Append the group to that subtotal.
+4. **Subtotals.** If no group at all was produced, create the single subtotal *"Untaxed Amount"*
+   with no groups. Order the subtotals by the position recorded in step 3d. Then walk them in
+   order, keeping a running accumulated tax amount that starts at zero:
+   ```formula
+   subtotal.base_amount = block.base_amount + accumulated_tax_amount
+   for each group in the subtotal:
+       subtotal.tax_amount      = subtotal.tax_amount      + group.tax_amount
+       accumulated_tax_amount   = accumulated_tax_amount   + group.tax_amount
+   ```
+   This is what makes a "preceding subtotal" behave like a cascading base: the second subtotal's
+   base is the untaxed amount plus the taxes of the first subtotal.
+5. **Cash rounding** — section 10.3.
+6. **Subtract the cash rounding from the untaxed amounts.** The cash rounding delta (zero when
+   there is none) is subtracted from the block's untaxed amount and from every subtotal's base
+   amount, in both currencies. Then the block's untaxed amount, as text at the currency's
+   precision, is added to the set of encountered bases, and the "same base" flag is set when that
+   set has exactly one member.
+7. **Non-deductible amounts** — section 10.4.
+8. **Grand total.**
+   ```formula
+   total_amount = base_amount + tax_amount + cash_rounding_delta      (per currency)
+   ```
+
+### 10.3 Cash rounding inside the totals block
+
+Two situations:
+
+**A. Cash rounding lines already exist among the base lines** (the document has been saved and the
+rounding line materialised). The block's cash rounding delta is the sum of those lines' rounded
+untaxed totals, in both currencies. Nothing else is computed.
+
+**B. No cash rounding line exists but a cash rounding configuration was supplied.** Let the
+configuration provide a rounding step, a rounding method and a strategy.
+
+```formula
+total_in_line_currency     = round_to_line_currency( base_amount_currency + tax_amount_currency )
+total_in_company_currency  = round_to_company_currency( base_amount + tax_amount )
+target_total               = round_to_step( total_in_line_currency , cash_rounding_step , cash_rounding_method )
+delta_in_line_currency     = target_total − total_in_line_currency
+rate                       = | total_in_line_currency ÷ total_in_company_currency |   , 0 when the company total is 0
+delta_in_company_currency  = round_to_company_currency( delta_in_line_currency ÷ rate )   , 0 when rate = 0
+```
+
+The two totals are rounded **first** so that a sub-unit floating residue cannot be magnified by the
+step rounding.
+
+If the delta is zero at the currency's precision, nothing happens. Otherwise:
+
+- **Strategy "add a rounding line".** The delta is recorded as the block's cash rounding delta and
+  added to the block's untaxed amount and to the *"Untaxed Amount"* subtotal's base amount, in both
+  currencies. (Step 6 then subtracts it again from the displayed untaxed amounts, so that the
+  rounding appears as its own figure rather than distorting the net.)
+- **Strategy "adjust the biggest tax".** Among every (subtotal, tax group) pair, pick the one whose
+  tax amount in the line currency is the largest. Add the delta to that group's tax amount, to that
+  subtotal's tax amount and to the block's tax amount, in both currencies. If there is no tax group
+  at all, the cash rounding silently does nothing and the delta is reset to zero.
+
+### 10.4 Non-deductible amounts
+
+*Server-only.* When at least one base line is marked with the special type `non_deductible` **and**
+carries taxes, those lines are aggregated by tax group and, for every group of every subtotal:
+
+```formula
+group.non_deductible_tax_amount = non_deductible tax amount of that group
+group.tax_amount    = group.tax_amount    − non_deductible tax amount
+group.base_amount   = group.base_amount   − non_deductible base amount
+subtotal.tax_amount = subtotal.tax_amount − non_deductible tax amount
+block.tax_amount    = block.tax_amount    − non_deductible tax amount
+```
+
+### 10.5 Excluding tax groups from the block
+
+A post-processing helper folds selected tax groups into the base: for each excluded group, its tax
+amount is added to the enclosing subtotal's base amount and to the block's base amount and
+subtracted from both tax amounts; the group itself disappears; a subtotal left with no group at all
+disappears too. Localizations use it to present a tax as part of the price.
+
+### 10.6 Worked example: two subtotals
+
+Two lines, each one unit at one hundred. Line one carries a tax *X* of ten percent whose tax group
+has no preceding subtotal. Line two carries a tax *Y* of five percent whose tax group has the
+preceding subtotal label "Total excluding surcharge".
+
+- Block untaxed amount: two hundred. Block tax amount: fifteen.
+- Group of *X* is met first (lower sequence), so the subtotal *"Untaxed Amount"* is registered at
+  position zero; group of *Y* registers "Total excluding surcharge" at position one.
+- Walking the subtotals:
+  - *"Untaxed Amount"*: base two hundred plus accumulated zero equals two hundred; tax ten;
+    accumulated becomes ten.
+  - *"Total excluding surcharge"*: base two hundred plus accumulated ten equals two hundred ten;
+    tax five; accumulated becomes fifteen.
+- Grand total: two hundred plus fifteen equals two hundred fifteen.
+
+### 10.7 Worked example: cash rounding to the nearest five cents
+
+One line, one unit at nine point nine nine, one tax of twenty-one percent price-excluded. Untaxed
+nine point nine nine, tax two point one zero, total twelve point zero nine. Cash rounding step five
+hundredths, method "half away from zero".
+
+```formula
+total              = 12.09
+target_total       = round_to_step( 12.09 , 0.05 , half away ) = 12.10
+delta              = 12.10 − 12.09 = 0.01
+```
+
+- Strategy "add a rounding line": the block reports untaxed nine point nine nine, tax two point one
+  zero, cash rounding one hundredth, grand total twelve point one zero.
+- Strategy "adjust the biggest tax": the single tax group's tax becomes two point one one; the block
+  reports untaxed nine point nine nine, tax two point one one, grand total twelve point one zero.
+
+---
+
+## 11. Fiscal positions
+
+### 11.1 Mapping taxes
+
+*Mirrored in spirit; the lookup table is server-computed.*
+
+```formula
+map_tax( fiscal_position , taxes ) :
+    when there is no fiscal position:            result = taxes unchanged
+    when the fiscal position has no taxes at all: result = the taxes that belong to no fiscal position
+    otherwise:  for each tax in taxes, in order, look it up in the fiscal position's tax table;
+                if found, append every replacement it maps to;
+                if not found, append the tax itself;
+                remove duplicates, keeping the first occurrence
+```
+
+The tax table of a fiscal position is built by walking the taxes attached to that fiscal position
+and, for each tax the attached tax declares as "replaces", recording the attached tax as a
+replacement of it. One replaced tax may therefore expand into several replacements — this is how a
+single domestic tax becomes a pair of reverse-charge taxes.
+
+### 11.2 Mapping accounts
+
+```formula
+map_account( fiscal_position , account ) = the mapped destination when the account appears as a
+                                           source in the fiscal position's account table,
+                                           otherwise the account itself
+```
+
+### 11.3 Automatic detection
+
+```
+detect( partner , delivery_address ) :
+ 1. If there is no partner, there is no fiscal position.
+ 2. Determine whether the transaction is inside the same economic union and whether both parties
+    carry a number issued by the same country:
+       both_numbers_present = the company has a tax identification number
+                              and the partner has one
+       inside_union = both_numbers_present
+                      and the first two characters of the company's number are the code of a member
+                          country of the union group
+                      and the first two characters of the partner's number are the code of a member
+                          country of the union group
+       same_country_prefix = both_numbers_present
+                      and the first two characters of the two numbers are equal
+ 3. If no delivery address was supplied, or if inside_union and same_country_prefix and the
+    partner's country equals the company's country, then the delivery address is the partner
+    itself.
+ 4. If the delivery address carries a manually chosen fiscal position, return it.
+    Otherwise, if the partner carries one, return it.
+ 5. If the partner has no country, there is no fiscal position.
+ 6. Search every fiscal position of the acting company whose "detect automatically" flag is set,
+    and return the first match according to section 11.4, evaluated against the delivery address.
+```
+
+### 11.4 Precedence and the match test
+
+Candidates are sorted by:
+
+1. the number of ancestors of their company, **descending** — a fiscal position defined on a branch
+   wins over one defined on its parent;
+2. then by their sequence, ascending.
+
+The first candidate that satisfies **all five** of the following predicates wins:
+
+| Predicate | Satisfied when |
+|---|---|
+| tax registration | the fiscal position does not require one, **or** the counterpart's registration is valid for the acting company |
+| postal code | the fiscal position has no complete range, **or** the counterpart's postal code lies between the two bounds inclusive, compared as text |
+| state | the fiscal position lists no state, **or** the counterpart's state is one of them |
+| country | the fiscal position names no country, **or** the counterpart's country is that country |
+| country group | the fiscal position names no group, **or** the counterpart's country is a member of the group **and** (the counterpart has no state, or that state is not one of the group's excluded states) |
+
+"The counterpart's registration is valid" means: the counterpart has a non-empty tax identification
+number, and — when the cross-border verification applies, that is when the counterpart's number is
+checked against the union register for this company and either the company's country is in the
+union or the counterpart's country hosts a foreign registration of the company — the number is also
+marked valid by that register.
+
+### 11.5 Adapting the unit price when taxes are substituted
+
+*Mirrored.* Substituting a price-included tax by another changes what the stored unit price means.
+
+```
+adapt( price_unit , original_taxes , new_taxes ) :
+ 1. If the two sets are identical, return the price unchanged.
+ 2. If at least one tax of the original set is NOT price-included, return the price unchanged.
+ 3. Compute the original taxes on a quantity of one with the "round per tax" method and no special
+    mode; take the resulting untaxed total as the new price.
+ 4. Compute the new taxes on that price, quantity one, "round per tax", special mode
+    'total_excluded'; let the delta be the sum of the tax amounts of those new taxes that are
+    themselves price-included.
+ 5. Return the price from step 3 plus that delta.
+```
+
+Step 2 is deliberate: a mapping from a price-**excluded** tax to a price-**included** one leaves the
+number alone, so that a rule mapping fifteen percent excluded to six percent included turns a price
+of one hundred into one hundred divided by one point zero six rather than into one hundred six.
+
+**Worked example (mandatory example 9): a fiscal position substitution.**
+
+Configuration. Domestic sales tax *D*: twenty-one percent, price-included, invoice distribution
+base tagged `base 21` and one tax line of one hundred percent on "tax payable" tagged `tax 21`.
+Intra-union reverse-charge tax *R*: twenty-one percent, price-excluded, invoice distribution base
+tagged `base intra-union` and two tax lines — plus one hundred percent on "tax payable" tagged
+`tax due` and minus one hundred percent on "tax deductible" tagged `tax deductible`. A fiscal
+position "Intra-union business" with "detect automatically" on, no country, the union country group,
+"tax registration required" on, and one tax: *R*, declaring that it replaces *D*. A fiscal position
+account mapping sends the domestic revenue account to the export revenue account.
+
+A product priced one hundred twenty-one with tax *D*, sold to a business established in another
+member country whose registration number is valid.
+
+1. **Detection.** The partner has a country in the union group, a valid registration, no postal
+   range and no state restriction; "Intra-union business" matches.
+2. **Account mapping.** The line's revenue account becomes the export revenue account.
+3. **Tax mapping.** The line's taxes are `[D]`; the tax table maps *D* to `[R]`; the line's taxes
+   become `[R]`.
+4. **Unit price adaptation.** The original set `[D]` is entirely price-included, so the adaptation
+   runs. Step 3: computing *D* on one hundred twenty-one gives an untaxed total of one hundred.
+   Step 4: computing *R* on one hundred with the mode `total_excluded` gives a tax amount of
+   twenty-one, but *R* is price-excluded, so the delta is zero. The new unit price is one hundred.
+5. **Computation.** Base one hundred; *R* produces two halves of plus twenty-one and minus
+   twenty-one.
+
+| Entry | Account | Amount | Report tags |
+|---|---|---|---|
+| Base | export revenue | −100.00 (credit) | `base intra-union` |
+| Tax, positive half | tax payable | −21.00 (credit) | `tax due` |
+| Tax, reverse-charge half | tax deductible | +21.00 (debit) | `tax deductible` |
+| Counterpart | receivable | +100.00 (debit) | none |
+
+The customer is invoiced one hundred, not one hundred twenty-one; the ledger nets to zero tax; the
+return reports a base of one hundred, a tax due of twenty-one and a deductible tax of twenty-one.
+
+### 11.6 The price hint shown next to a product price
+
+*Server-only.* For a product price *p* and the product's sales taxes restricted to the acting
+company:
+
+1. Run the engine once on quantity one at price *p*, giving a total with taxes and an untaxed
+   total.
+2. Build the hint from at most three fragments, in this order:
+   - *"<total with taxes> Incl. Taxes"*, only when the total with taxes differs from *p* at the
+     currency's precision;
+   - *"<untaxed total> Excl. Taxes"*, only when the untaxed total differs from *p*;
+   - when the withholding capability is installed and the withheld amount is non-zero,
+     *"<withheld amount> Tax Withheld"*, where the withheld amount is computed by a second run of
+     the engine with withholding taxes enabled, summing the negated tax amount of every withholding
+     tax.
+3. The hint is the fragments joined by a comma and a space, wrapped as *"(= …)"*. When there is no
+   fragment, the hint is a single space.
+
+A related helper computes the public price of a product: if the product has no sales tax, the price
+is unchanged; otherwise the taxes are computed on the given price and, when the resulting total
+with taxes equals the given price, that total is returned (the taxes are already included);
+otherwise the taxes are recomputed forcing the "price included" interpretation and the untaxed total
+is returned.
+
+### 11.7 Removing an inapplicable price-included tax from a price
+
+*Server-only.* When a product proposes taxes that the document does not use, any of the product's
+taxes that is price-included and absent from the document's tax set is removed from the price:
+the removed taxes are computed on the price and the untaxed total replaces it. When a company is
+given, both tax sets are first restricted to that company.
+
+---
+
+## 12. Cash basis: making a tax exigible at payment
+
+*Server-only.* A tax whose exigibility is "based on payment" is posted, at invoice time, on its
+**transition account** instead of its real tax account. When the invoice is reconciled, one
+additional journal entry per reconciliation moves the proportional share from the transition
+account to the real tax account and stamps the report tags.
+
+### 12.1 Deciding whether an entry is needed
+
+For a candidate document:
+
+1. Walk its journal items. A line whose account kind is receivable or payable is a **term line**;
+   accumulate, with a sign of plus one when its balance is positive and minus one otherwise, its
+   balance, its residual, its amount in document currency and its residual in document currency.
+2. A line that **is** a tax entry of a tax exigible on payment is collected with the treatment
+   `tax`.
+3. Otherwise, a line whose flattened base taxes contain at least one tax exigible on payment is
+   collected with the treatment `base`. (A line can therefore be collected as `base` even though it
+   is itself a tax entry of a different, invoice-exigible tax — only its base part is deferred.)
+4. If nothing was collected, or if there is no term line at all, no cash basis entry is ever
+   produced for this document.
+5. Collect the distinct currencies of the term lines and of the collected lines. If there is more
+   than one, no cash basis entry is produced — the mechanism does not support a document mixing
+   currencies.
+6. The document is **fully paid** when the total residual is zero in the company currency or the
+   total residual in document currency is zero in that currency.
+
+### 12.2 The paid percentage of one partial reconciliation
+
+For each partial reconciliation and for each of its two sides, let *M* be the document on that side
+and *counterpart* the document on the other side.
+
+```formula
+partial_amount            = the partial's amount                    (company currency)
+partial_amount_currency   = the partial's amount on M's side        (document currency)
+```
+
+When *M* is the debit side, the rate reference amounts are the negated balance and negated
+document-currency amount of the credit line; when *M* is the credit side, they are the balance and
+document-currency amount of the debit line. When both sides are themselves invoices — the case of a
+credit note reconciled against an invoice — the rate reference amounts are instead *M*'s own line
+amounts, the payment date is *M*'s own date and the settlement date is the later of the two
+reconciled lines' dates. Otherwise the payment date and the settlement date are both the
+counterpart line's date.
+
+```formula
+when the document currency is the company currency:
+    skip this side entirely if the partial amount is zero in the company currency
+    percentage = partial_amount ÷ total_balance
+otherwise:
+    skip this side entirely if the partial amount in document currency is zero in that currency
+    percentage = partial_amount_currency ÷ total_amount_currency
+```
+
+where `total_balance` and `total_amount_currency` are the signed totals of the term lines from
+section 12.1.
+
+The **payment rate**, used to convert each cash basis line back into the company currency, is:
+
+```formula
+when the two reconciled lines have different currencies:
+    payment_rate = the conversion rate from the company currency to the document currency,
+                   for the company, at the payment date
+                   (or, when the caller forced a rate at payment registration, that forced rate)
+when they share a currency and the rate reference balance is non-zero:
+    payment_rate = rate_reference_amount_currency ÷ rate_reference_balance
+otherwise:
+    payment_rate = 0
+```
+
+### 12.3 Composing the entry
+
+For each partial, one journal entry is created:
+
+- **Journal**: the company's cash basis journal. If the company has none:
+  *"There is no tax cash basis journal defined for the '<company name>' company.\nConfigure it in Accounting/Configuration/Settings"*
+- **Date**: the later of the settlement date and the day after the user's effective fiscal lock
+  date for that journal.
+- **Reference**: the originating document's number.
+- **Fiscal position**: the originating document's fiscal position.
+- Links: the partial reconciliation and the originating document.
+
+Then, for each collected line:
+
+```formula
+amount_currency = round_to_line_currency( line.amount_currency × percentage )
+balance         = amount_currency ÷ payment_rate          , or 0 when payment_rate = 0
+```
+
+with one correction: for a line collected as `tax`, when the document is now fully paid **or** the
+line's remaining residual in document currency is smaller in absolute value than the computed
+share, **and** this is the last partial being processed for that document, the share is replaced by
+the line's whole remaining residual. A running residual per tax line is decremented by each share
+so that successive partials never over-allocate. This is what guarantees that the sum of the cash
+basis entries of a fully paid invoice matches the invoice's tax to the cent.
+
+The shares are grouped so that as few journal items as possible are produced:
+
+- a `base` share's grouping key is (currency, partner, account, the set of taxes exigible on
+  payment, analytic distribution);
+- a `tax` share's grouping key is the same plus the distribution line.
+
+Shares sharing a key are added together (debit and credit are re-derived from the summed balance,
+and for tax shares the base amounts are summed too).
+
+Finally, for each grouped share, **two** journal items are created in a fixed alternating order —
+the counterpart first, then the share itself, with consecutive sequence numbers two apart — whose
+content is given in `accounting-effects.md` section 6.
+
+An entry is posted immediately when both reconciled documents are posted; otherwise it is left in
+draft until they are.
+
+### 12.4 Reconciling the transition account
+
+For every `tax` share whose original tax entry sits on a reconcilable account, the newly created
+counterpart item is reconciled with the original tax entry, so that the transition account empties
+as the invoice is paid. Items already reconciled, and counterparts whose amount rounded to zero,
+are skipped.
+
+### 12.5 Worked example (mandatory example 8): a payment of forty percent under deferred exigibility
+
+Configuration. A customer invoice in the company currency, one line of one thousand, one sales tax
+of twenty-one percent whose exigibility is "based on payment", transition account "tax to receive",
+real tax account "tax payable", cash basis journal "Cash Basis", company base account
+"cash basis base".
+
+**The invoice, posted.**
+
+| Journal item | Account | Debit | Credit | Base taxes | Tags |
+|---|---|---|---|---|---|
+| Product | revenue | | 1 000.00 | the cash basis tax | none (the base tags are withheld) |
+| Tax | tax to receive | | 210.00 | | none (the tax tags are withheld) |
+| Term | receivable | 1 210.00 | | | |
+
+No report tag is stamped, because at invoice time the tax is not yet exigible.
+
+**A payment of four hundred eighty-four is received and reconciled.**
+
+```formula
+total_amount_currency = 1 210.00        (the single term line)
+partial_amount        =   484.00
+percentage            = 484.00 ÷ 1 210.00 = 0.40
+payment_rate          = 1                (same currency, the reference amounts cancel)
+```
+
+Shares:
+
+```formula
+base share   = round( −1 000.00 × 0.40 ) = −400.00     (the product line is a credit)
+tax share    = round(   −210.00 × 0.40 ) =  −84.00
+```
+
+**The cash basis entry, dated on the payment date, in the cash basis journal:**
+
+| Sequence | Journal item | Account | Debit | Credit | Base taxes | Tags |
+|---|---|---|---|---|---|---|
+| 0 | base counterpart | cash basis base | 400.00 | | none | none |
+| 1 | base | cash basis base | | 400.00 | the cash basis tax | the base tags of the invoice distribution |
+| 2 | tax counterpart | tax to receive | 84.00 | | none | none |
+| 3 | tax | tax payable | | 84.00 | the cash basis tax | the tax tags of the invoice distribution |
+
+The two base items cancel each other on the same account; their only purpose is to carry the base
+amount into the tax return. The two tax items move eighty-four from the transition account to the
+real tax account. The counterpart at sequence two is then reconciled against the invoice's own tax
+item, leaving one hundred twenty-six on the transition account.
+
+**The remaining sixty percent, paid later.** Percentage zero point six; base share minus six
+hundred; tax share, since this is the last partial of a now fully paid invoice, is forced to the
+tax line's remaining residual of one hundred twenty-six rather than the computed one hundred
+twenty-six exactly — identical here, but the rule is what prevents a one-cent drift when the
+percentages do not divide evenly. The transition account reaches zero and the two tax items become
+fully reconciled.
+
+**A three-way split that needs the correction.** The same invoice paid in three instalments of four
+hundred three point three three, four hundred three point three three and four hundred three point
+three four. The percentages are zero point three three three three zero five seven eight,
+the same, and the remainder. The tax shares computed by percentage would be sixty-nine point
+nine nine, sixty-nine point nine nine and seventy point zero one, which sum to two hundred nine
+point nine nine. The last-partial correction replaces the third share by the residual of seventy
+point zero two, so the three shares sum to exactly two hundred ten.
+
+---
+
+## 13. Withholding at payment
+
+*Server-only.* A withholding tax is a tax with a **negative** amount and the flag "withhold on
+payment". Two rules keep it out of the ordinary flow:
+
+1. Whenever tax details are added to a base line, unless the caller explicitly asked for withholding
+   taxes to be calculated, a filter is installed that removes every withholding tax from the
+   evaluation. The tax therefore never appears on an invoice total.
+2. The tax label of a withholding tax is its invoice label only, never its name, so leaving the
+   label empty hides it from printed documents.
+
+### 13.1 Deriving the withholding lines of a payment
+
+Given the base lines of the documents about to be paid:
+
+1. Rebuild each base line with withholding calculation **enabled** and no filter, then run the
+   engine and the document-wide rounding on the rebuilt lines.
+2. Aggregate the results by the key
+   ```
+   ( name , analytic distribution , account , tax , skip flag , currency )
+   ```
+   where the name is the base line's manual tax line name if it has one, otherwise the tax's name;
+   the account is the company's withholding tax base account if set, otherwise the base line's
+   account; and the skip flag is true for every tax that is **not** a withholding tax.
+3. Ignore every group whose skip flag is true.
+4. Compare with the withholding lines that already exist, grouped by the same key:
+   - more than one existing line on a key: keep the first and delete the others;
+   - an existing line: update its four source amounts — base in document currency, base in company
+     currency, tax in document currency **negated**, tax in company currency **negated**;
+   - no existing line: create one with those four source amounts, the tax, the analytic
+     distribution, the account, the name, the source tax and the source currency;
+   - a key that exists only among the existing lines: delete those lines.
+
+The negation in step 4 is what turns the engine's negative tax amount into a positive "amount
+withheld".
+
+### 13.2 The net amount
+
+```formula
+withholding_net_amount = payment_amount − sum of the amounts of the withholding lines
+```
+
+Registering a payment whose net amount is negative is refused:
+*"The withholding net amount cannot be negative."*
+
+### 13.3 Turning the withholding lines into journal items
+
+1. **Before consuming any sequence value**, verify that every line has either a number or a tax
+   with a withholding sequence; otherwise refuse with
+   *"Please enter the withholding number for the tax <tax name>"*.
+2. For each line without a number, draw the next value of its tax's withholding sequence.
+3. Convert each line into a base line with:
+   ```formula
+   conversion_rate = rate from the company currency to the payment currency, at the payment date
+   sign            = +1 for an incoming payment, −1 for an outgoing one
+   price_unit      = the line's withholding base
+   quantity        = 1
+   account         = the line's account
+   computation_key = the line's own identifier (each line rounds independently)
+   manual_total_excluded_currency = the withholding base
+   manual_total_excluded          = round_to_company_currency( withholding base ÷ conversion_rate )
+   manual_tax_amounts for the line's tax:
+        base_amount_currency = the withholding base
+        base_amount          = round_to_company_currency( withholding base ÷ conversion_rate )
+        tax_amount_currency  = − the withholding amount
+        tax_amount           = round_to_company_currency( − withholding amount ÷ conversion_rate )
+   is_refund       = the rule of entities section 8.5
+   ```
+4. Run the engine, the document-wide rounding, the accounting derivation and the entry production
+   of section 8.6 on those base lines.
+5. Emit **one journal item per produced tax entry**, with its amounts **negated** and the payment's
+   partner, named *"WH Tax: <tax name>"*.
+6. Aggregate the base updates by their base grouping key extended with the tag set, summing the
+   amounts and collecting the line names. For each aggregate emit **two** journal items with the
+   payment's partner:
+   - *"WH Base: <names>"* with the aggregated amounts, **no** taxes and **no** tags;
+   - *"WH Base Counterpart: <names>"* with the negated amounts, no analytic distribution, and
+     keeping the taxes and the tags of the grouping key.
+
+### 13.4 Worked example (mandatory example 11): a withholding
+
+Configuration. A sales tax of fifteen percent, ordinary. A withholding tax of **minus one percent**
+with "withhold on payment" on, a withholding sequence with four-digit padding, and a distribution of
+one base line and one tax line of one hundred percent on the account "withholding tax credit". The
+company's withholding tax base account is "withholding base". Everything in the company currency.
+
+**The invoice.** One customer invoice line, one unit at one thousand, taxes: the fifteen percent tax
+only (the withholding tax is not put on the invoice).
+
+| Journal item | Account | Debit | Credit |
+|---|---|---|---|
+| Product | revenue | | 1 000.00 |
+| Tax 15% | tax payable | | 150.00 |
+| Term | receivable | 1 150.00 | |
+
+**Registering the payment.** The user switches "withhold tax amounts" on and adds a line with the
+withholding tax and a withholding base of one thousand.
+
+```formula
+original_base_amount = 1 000.00
+tax computation on 1 000.00 with the −1% tax  →  tax amount = −10.00
+original_tax_amount  = − ( −10.00 ) = 10.00
+base_amount          = 1 000.00        (typed by hand, so no paid factor is applied)
+amount               = round( 10.00 × 1 000.00 ÷ 1 000.00 ) = 10.00
+withholding_net_amount = 1 150.00 − 10.00 = 1 140.00
+```
+
+**The payment.** Its amount stays one thousand one hundred fifty — the customer's debt is settled in
+full — but only one thousand one hundred forty reaches the bank.
+
+| Journal item | Account | Debit | Credit | Base taxes |
+|---|---|---|---|---|
+| Liquidity | outstanding receipts | 1 140.00 | | |
+| Counterpart | receivable | | 1 150.00 | |
+| WH Tax: withholding | withholding tax credit | 10.00 | | |
+| WH Base | withholding base | 1 000.00 | | none |
+| WH Base Counterpart | withholding base | | 1 000.00 | the withholding tax |
+
+The two base items cancel on the withholding base account and exist only so that the withholding
+base reaches the tax return through the base tags of the withholding tax's distribution. The tax
+item records the amount the customer retained and paid to the authorities on the company's behalf,
+as a claim against the authorities.
+
+**With an instalment.** If the same invoice is paid in two instalments of five hundred seventy-five
+and the withholding line was derived from the documents rather than typed, the paid factor applies:
+
+```formula
+full_amount                = 1 150.00       (total still to pay for the batch)
+moves_total                = 1 150.00
+split_factor               = 1 150.00 ÷ 1 150.00 = 1
+percentage_paid_factor     = 575.00 ÷ 1 150.00 × 1 = 0.5
+base_amount                = round( 1 000.00 × 0.5 ) = 500.00
+amount                     = round( 10.00 × 500.00 ÷ 1 000.00 ) = 5.00
+withholding_net_amount     = 575.00 − 5.00 = 570.00
+```
+
+### 13.5 Constraints specific to withholding taxes
+
+- A withholding tax may not use the "group of taxes" or the "percentage tax included" computations:
+  *"Withholding On Payment taxes cannot use the 'Group of Taxes' or the 'Percentage Tax Included' computations."*
+- Switching "withhold on payment" on forces the exigibility back to "based on invoice" and the
+  price-inclusion override to "tax excluded".
+- Setting the amount to zero or above clears the flag.
+- The withholding feature is offered only when the acting company owns at least one withholding tax
+  matching the payment direction, and — on the register-payment wizard — only when the wizard will
+  create a single journal entry (a wizard that cannot be edited, or one that will split into one
+  payment per document, hides it).
+
+---
+
+## 14. Document-level helpers built on the engine
+
+*Mirrored.* These helpers all reduce or reshape a set of base lines while guaranteeing that no
+amount is lost.
+
+### 14.1 Which taxes can be discounted
+
+```formula
+can_be_discounted( tax ) = tax.amount_type is neither 'fixed' nor 'code'
+```
+
+A fixed tax and a custom-formula tax are per-unit charges; scaling them by a discount percentage
+would be wrong, so they are excluded from every proportional operation.
+
+### 14.2 Splitting a base line
+
+Given a list of weights, a base line is split into that many base lines such that computing taxes
+on the pieces gives exactly the same result as on the whole.
+
+1. Normalise the weights (section 7.1 step 4).
+2. Multiply every **raw** amount — the four totals, and each tax entry's four raw amounts — by the
+   normalised weight of the piece.
+3. Distribute every **rounded** amount with the smooth allocation of section 7.1, using the delta to
+   distribute equal to the whole's rounded amount and the weights equal to the pieces' weights. This
+   guarantees the pieces add back exactly to the whole.
+4. Set each piece's total with taxes to its untaxed total plus the sum of its tax amounts.
+5. Build each piece's base line with a unit price equal to the whole's unit price times the
+   normalised weight, and the piece's tax details attached.
+
+### 14.3 Merging two tax details
+
+The four totals and the two deltas are added. Tax entries are merged by tax, adding all eight
+amounts. Then, for every tax present in the first block but absent from the second — typically a
+fixed tax, whose base is an artefact — the second block's untaxed totals are added to that tax's
+base amounts and the second block's untaxed deltas are added to its rounded base amounts, so that
+the merged base stays meaningful.
+
+### 14.4 Reducing many base lines to few
+
+To minimise the number of lines a discount or a down payment has to create:
+
+1. Turn each base line into an equivalent line of quantity one whose unit price is the quantity
+   times the discounted unit price and whose discount is zero.
+2. Group by the set of taxes, extended by the caller's own grouping keys.
+3. Within a group, add the unit prices and merge the tax details (section 14.3).
+4. Drop groups whose unit price is zero at the currency's precision.
+5. Recompute the analytic distribution of each group as a weighted average of the members'
+   distributions, weighted by each member's raw untaxed total:
+   ```formula
+   weight_of_account = sum over members of ( member_distribution_percentage × member_raw_untaxed ÷ 100 )
+   new_percentage    = weight_of_account × 100 ÷ sum of member_raw_untaxed
+   new_percentage    = 100  when the sum of member raw untaxed totals is zero
+   ```
+   *Illustration.* A line of one thousand distributed one hundred percent to an account and a line
+   of minus one hundred distributed fifty percent to the same account give
+   `((1000 × 1) + (−100 × 0.5)) ÷ (1000 − 100) = 1.0555…`, that is one hundred five point five six
+   percent.
+
+### 14.5 Reaching a target amount
+
+Used by the global discount and by the down payment. Inputs: the base lines, an amount kind
+(`fixed` or `percent`) and an amount.
+
+1. Compute the current grand total in both currencies, and the current base and tax amounts per
+   tax.
+2. Turn the request into a percentage and a target grand total:
+   ```formula
+   sign       = −1 when the requested amount is negative, +1 otherwise
+   'fixed'  : percentage = |amount| ÷ current_total_in_line_currency   (0 when that total is 0)
+              target_total_currency = round_to_line_currency( amount )
+              target_total          = round_to_company_currency( target_total_currency ÷ rate )
+   'percent': percentage = |amount| ÷ 100
+              target_total_currency = round_to_line_currency( current_total_currency × sign × percentage )
+              target_total          = round_to_company_currency( current_total × sign × percentage )
+   ```
+3. The target base and tax amount of each tax are the current ones multiplied by the sign and the
+   percentage, rounded. The target untaxed total is the target grand total minus the sum of the
+   target tax amounts.
+4. Reduce the lines (section 14.4), scale each reduced line's unit price by the sign and the
+   percentage, and run the engine and the document-wide rounding on the result.
+5. Sort the new lines by (whether they carry a special type, untaxed total descending) and, per tax
+   and per currency, distribute the difference between the target and the achieved tax amount, and
+   likewise for the base amount, using the smooth allocation weighted by each entry's share.
+6. Distribute the remaining difference on the untaxed totals into the lines' untaxed deltas — and,
+   in the line currency, also into their unit prices.
+7. Freeze the result into manual amounts (section 9.1), so that recomputing the document cannot
+   move it.
+
+A **global discount** calls this with the negated amount after dropping every non-discountable tax;
+a **down payment** calls it with the amount as given after wrapping every non-discountable tax into
+the base.
+
+### 14.6 Dispatching taxes into separate base lines
+
+To exclude some taxes from a proportional operation without losing their amounts, each base line is
+partitioned into the taxes to keep and the taxes to exclude, and the excluded taxes' amounts are
+moved into new base lines that carry no tax at all. The resulting set has the same grand total as
+the original and can be scaled safely. Symmetric helpers exist to squash those extra lines back and
+to dispatch global-discount lines and return-of-merchandise lines.
+
+---
+
+## 15. Tax identification numbers
+
+*Server-only.* Every partner, and every fiscal position carrying a foreign registration, stores a
+tax identification number. The number is normalised and checked whenever it is written. This
+section gives the pipeline, the shared check primitives as arithmetic, and then one entry per
+country.
+
+### 15.1 The pipeline
+
+Inputs: a country, the number as typed, a label for the error message, and a validation mode which
+is one of *off*, *error* or *blank-on-failure*.
+
+1. If there is no country or no number, return the number unchanged and report no validated
+   country.
+2. If the number is exactly one character long:
+   - if it is a solidus, or the mode is *off*, return it unchanged;
+   - if the mode is *blank-on-failure*, return an empty number;
+   - if the mode is *error*, refuse with
+     *"To explicitly indicate no (valid) VAT, use '/' instead. "*.
+3. **Split the prefix.** The prefix is the first two characters uppercased when both are letters,
+   and empty otherwise. The remainder is everything after the first two characters with spaces
+   removed; when there is no prefix the remainder is the whole number.
+4. If the prefix is the two letters of the economic union itself and the country is not a member of
+   that union, return the number unchanged — a company outside the union that trades with
+   non-businesses inside it may carry such a number.
+5. Translate the prefix to a country code: two prefixes differ from the country code they denote —
+   the prefix used for Greece maps to the Greek country code, and the prefix used for Northern
+   Ireland maps to the United Kingdom country code. Otherwise the prefix is already the code.
+6. If that country code belongs to the union-prefix country group:
+   - when the stored country is itself in that group **and** a prefix was present, strip the prefix
+     from the number and remember the prefix as the "prefixed country";
+   - otherwise remember that a second, union-wide attempt may be needed.
+7. The **code to check** is the prefixed country when there is one, otherwise the stored country's
+   code.
+8. **Normalise** the number with the country's formatting routine (section 15.3).
+9. If the prefixed country is the Greek country code, replace it by the Greek union prefix.
+10. The **number to return** is the prefixed country concatenated with the normalised number.
+11. If the mode is *off*, or the caller asked for validation to be skipped, return now.
+12. Detect a **doubled prefix**: a prefixed country is present and the number to return starts with
+    that prefix twice.
+13. Run the country check (section 15.4) on the normalised number. If it fails, or the prefix is
+    doubled:
+    - when a union-wide attempt is pending, retry the whole pipeline against the country denoted by
+      the prefix with the original prefixed number; if that retry also fails, refuse with the
+      standard message followed by a blank line and
+      *"If you are trying to input a European number, this is the expected format: "* and the
+      country's example number;
+    - when the mode is *error*, refuse with the standard message;
+    - when the mode is *blank-on-failure*, return an empty number.
+
+**The standard message.** Let the label be *"VAT"*, replaced by the country's own label for the
+number when the checked country is the acting company's country and that country defines one.
+
+When the record label does not contain the text "False":
+
+> The **&lt;label&gt;** number [&lt;the number&gt;] for &lt;the record label&gt; does not seem to be valid.
+> Note: the expected format is &lt;the example&gt;
+
+Otherwise (the record has no name, as for the anonymous storefront user):
+
+> The **&lt;label&gt;** number [&lt;the number&gt;] does not seem to be valid.
+> Note: the expected format is &lt;the example&gt;
+
+The record label is *"partner [&lt;partner name&gt;]"* for a partner and
+*"fiscal position [&lt;fiscal position name&gt;]"* for a fiscal position. The note is omitted when the
+country has no example.
+
+**When no routine exists for a country the number is accepted unchanged.**
+
+### 15.2 Shared check primitives
+
+Throughout, `d1 … dn` are the characters of the number read left to right, `value(c)` is the
+position of a character in the stated alphabet (zero-based), and `mod` is the remainder of a
+Euclidean division whose result always has the sign of the divisor (so `−3 mod 11 = 8`).
+
+#### 15.2.1 Weighted modulus
+
+```formula
+weighted_sum( number , weights ) = sum over i of ( weight_i × digit_i )
+```
+
+The weights are paired with the digits from the left unless stated otherwise; when the weight list
+is shorter than the number, the surplus digits are ignored.
+
+#### 15.2.2 The doubling checksum (commonly called the Luhn checksum)
+
+Over an alphabet of size *n* (ten for plain digits):
+
+```formula
+v1 … vm = the alphabet positions of the characters, read RIGHT to LEFT
+checksum = (   sum of v at the odd positions 1, 3, 5, …
+             + sum over v at the even positions 2, 4, 6, … of
+                   ( floor( v × 2 ÷ n ) + ( v × 2 mod n ) )
+           ) mod n
+valid when checksum = 0
+check digit to append = alphabet[ ( n − checksum( number with alphabet[0] appended ) ) mod n ]
+```
+
+For plain digits, `floor(v × 2 ÷ 10) + (v × 2 mod 10)` is the familiar "double it and add the two
+digits together".
+
+#### 15.2.3 The recursive modulus eleven over ten
+
+```formula
+check = 5
+for each digit d, left to right:
+    check = ( ( ( check , or 10 when check is 0 ) × 2 ) mod 11 + d ) mod 10
+valid when check = 1
+check digit to append = ( 1 − ( ( check , or 10 when check is 0 ) × 2 ) mod 11 ) mod 10
+```
+
+#### 15.2.4 The recursive modulus thirty-seven over thirty-six
+
+The same shape over an alphabet of thirty-six characters (digits then letters):
+
+```formula
+check = 18
+for each character c, left to right:
+    check = ( ( ( check , or 36 when check is 0 ) × 2 ) mod 37 + value(c) ) mod 36
+valid when check = 1
+```
+
+#### 15.2.5 The modulus ninety-seven over ten
+
+```formula
+expand:   replace each character by the decimal writing of its value in base thirty-six
+          (digits become themselves, A becomes 10, B becomes 11, …, Z becomes 35)
+          and concatenate the results
+checksum = the resulting integer mod 97
+valid when checksum = 1
+check digits to append = 98 − ( checksum of the number with "00" appended )   , written on two digits
+```
+
+#### 15.2.6 Cleaning
+
+"Cleaning with a character set" means removing every character of that set from the number.
+"Trimming" removes leading and trailing white space. Unless stated otherwise, numbers are also
+uppercased.
+
+### 15.3 Normalisation routines
+
+Before the check, the number is passed through a country-specific normaliser. The default
+normaliser is the country's own "compact" routine listed with the check in section 15.4. Seven
+countries have an application-level normaliser that overrides it:
+
+| Country | Normalisation |
+|---|---|
+| Albania | Split the prefix off, compact the remainder (remove spaces, uppercase, drop a leading two-letter country code or the same code in parentheses), then re-join prefix and remainder. |
+| Economic union prefix | Return the number unchanged. |
+| Switzerland | Prepend the two-letter country code, apply the library's formatting for that country, then drop the two leading characters again. The result is the enterprise identifier written with a hyphen and two full stops followed by a space and the three-letter tax-regime suffix. |
+| Chile | Remove full stops, the two-letter country code, spaces and hyphens; uppercase; then, when more than two characters remain, re-insert a hyphen before the last character. |
+| Colombia | Apply the library formatting, then remove full stops and hyphens, then re-insert a hyphen before the last character when more than two characters remain. |
+| Vietnam | Apply the library formatting only when the number matches the ten-digit (optionally plus a three-digit branch) company pattern; otherwise leave it alone. |
+| Hungary | Compact; then, when the number matches the eight-digit plus one-digit plus two-digit company pattern, re-insert hyphens as `########-#-##`. |
+| Iceland | Split the prefix off, compact the remainder, re-join. |
+| San Marino | Prepend the two-letter country code, compact, then drop the two leading characters. |
+
+### 15.4 Per-country checks
+
+Each entry states: the accepted written forms, the cleaning applied, the structural checks, and
+the check-digit arithmetic. A number that passes all stated checks is valid. The example is the
+one the error message quotes.
+
+---
+
+**Albania** — example `ALJ91402501L`.
+Clean by removing spaces and uppercasing; drop a leading two-letter country code or that code in
+parentheses. The result must be exactly ten characters and must match: one letter among J, K, L, M;
+eight digits; one uppercase letter. No check digit.
+
+**Andorra** — clean by removing spaces, hyphens and full stops; uppercase; trim. Eight characters.
+The first and last must be letters and the six in between digits. The first letter must be one of
+A, C, D, E, F, G, L, O, P, U. When the first letter is F the six digits must not exceed `699999`;
+when it is A or L they must lie strictly between `699999` and `800000`. No check digit.
+
+**Argentina** — example `20055361682`.
+Clean by removing spaces and hyphens. Eleven digits. The first two must be one of
+20, 23, 24, 27, 30, 33, 34, 50, 51, 55.
+
+```formula
+weights = ( 5 , 4 , 3 , 2 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d10
+s = weighted_sum mod 11
+check_digit = the character at position ( 11 − s ) of the string "012345678990"
+valid when check_digit = d11
+```
+
+The odd trailing string makes both the remainder ten and the remainder eleven produce a zero and a
+nine respectively, as the national rule requires.
+
+**Australia** — example `83 914 571 673`.
+Clean by removing spaces. Eleven digits.
+
+```formula
+weights = ( 3 , 5 , 7 , 9 , 11 , 13 , 15 , 17 , 19 )  applied to d3 … d11
+s = − weighted_sum
+expected_first_two = 11 + ( ( s − 1 ) mod 89 )
+valid when the decimal writing of expected_first_two equals d1 d2
+```
+
+**Austria** — example `ATU12345675`.
+Clean by removing spaces, hyphens, solidi and full stops; uppercase; drop a leading country code.
+Nine characters: the letter U followed by eight digits.
+
+```formula
+check_digit = ( 6 − doubling_checksum( d2 … d8 ) ) mod 10
+valid when check_digit = d9
+```
+
+**Azerbaijan** — clean by removing spaces; left-pad with a zero when nine characters long. Ten
+digits. The last digit must be one or two.
+
+```formula
+weights = ( 4 , 1 , 8 , 6 , 2 , 7 , 5 , 3 )   applied to d1 … d8
+check = weighted_sum mod 11
+valid when check = d9
+```
+
+**Belarus** — clean by removing spaces, uppercasing, dropping a leading three-letter national
+prefix in either alphabet, and transliterating the ten Cyrillic letters that look like Latin ones
+into their Latin counterparts. Nine characters. Characters three to nine must be digits. The first
+two must be either both digits or both letters from the set A, B, C, E, H, K, M, O, P, T. The first
+character must be one of the digits one to seven or one of the letters A, B, C, E, H, K, M.
+
+```formula
+if the number is not all digits:
+    replace the second character by the index of that letter in "ABCEHKMOPT"
+alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+weights  = ( 29 , 23 , 19 , 17 , 13 , 7 , 5 , 3 )   applied to the first eight characters
+check    = ( sum of weight × value(character) ) mod 11
+invalid when check > 9
+valid when check = d9
+```
+
+**Belgium** — example `BE0477472701`.
+Clean by removing spaces, hyphens, solidi and full stops; uppercase; drop a leading country code;
+replace a leading `(0)` by a zero; left-pad with a zero when nine characters long. Ten digits,
+strictly positive, first digit zero or one.
+
+```formula
+checksum = ( the integer formed by d1 … d8 + the integer formed by d9 d10 ) mod 97
+valid when checksum = 0
+```
+
+**Bulgaria** — example `BG1234567892`.
+Clean by removing spaces, hyphens and full stops; uppercase; drop a leading country code. All
+digits.
+
+- **Nine digits** (legal persons):
+  ```formula
+  check = ( sum over i = 1..8 of i × di ) mod 11
+  if check = 10 :  check = ( sum over i = 1..8 of ( i + 2 ) × di ) mod 11
+  check_digit = check mod 10
+  valid when check_digit = d9
+  ```
+- **Ten digits**: valid when **any** of the following holds — the number is a valid national
+  personal number, or a valid foreigner's number, or the following check succeeds:
+  ```formula
+  weights = ( 4 , 3 , 2 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d9
+  check_digit = ( 11 − weighted_sum ) mod 11
+  valid when check_digit = d10
+  ```
+  *National personal number*: ten digits; the first six encode a date of birth where the month is
+  increased by forty for a year after 1999 and by twenty for a year before 1900;
+  ```formula
+  weights = ( 2 , 4 , 8 , 5 , 10 , 9 , 7 , 3 , 6 )  applied to d1 … d9
+  check_digit = ( weighted_sum mod 11 ) mod 10
+  ```
+  *Foreigner's number*: ten digits;
+  ```formula
+  weights = ( 21 , 19 , 17 , 13 , 11 , 9 , 7 , 3 , 1 )  applied to d1 … d9
+  check_digit = weighted_sum mod 10
+  ```
+- Any other length is invalid.
+
+**Brazil** — example: either eleven digits for a natural person or fourteen characters for a legal
+person. The number is valid when **either** check succeeds.
+
+*Natural person, eleven digits*, strictly positive:
+
+```formula
+d_check1 = ( 11 − sum over i = 1..9 of ( 10 − i + 1 ) × di ) mod 11 mod 10
+           that is, weights ( 10 , 9 , 8 , 7 , 6 , 5 , 4 , 3 , 2 )
+d_check2 = ( 11 − ( sum over i = 1..9 of ( 11 − i + 1 ) × di + 2 × d_check1 ) ) mod 11 mod 10
+           that is, weights ( 11 , 10 , 9 , 8 , 7 , 6 , 5 , 4 , 3 ) plus twice the first check digit
+valid when d_check1 d_check2 = d10 d11
+```
+
+*Legal person, fourteen characters*: clean by removing spaces, hyphens, full stops and solidi;
+uppercase. Must match "one or more digits or capital letters" and must not start with twelve zeros.
+
+```formula
+value(c) = the character's code point minus 48   (so '0'→0 … '9'→9, 'A'→17, … 'Z'→42)
+weights1 = ( 5 , 4 , 3 , 2 , 9 , 8 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to the first twelve characters
+d_check1 = ( 11 − weighted_sum1 ) mod 11 mod 10
+weights2 = ( 6 , 5 , 4 , 3 , 2 , 9 , 8 , 7 , 6 , 5 , 4 , 3 , 2 ) applied to those twelve values plus d_check1
+d_check2 = ( 11 − weighted_sum2 ) mod 11 mod 10
+valid when d_check1 d_check2 = the last two characters
+```
+
+**Canada** — clean by removing hyphens and spaces. Nine or fifteen digits. The first nine must be
+all digits and satisfy the doubling checksum. When fifteen characters long, characters ten and
+eleven must be one of the four registered programme codes (a capital R followed by C, M, P or T)
+and characters twelve to fifteen must be digits.
+
+**Switzerland** — example `CHE-123.456.788 TVA` (also written with the Italian or German suffix).
+The application supplies its own check and accepts, ignoring spaces:
+
+```
+E followed by nine digits, or E followed by a hyphen and three groups of three digits
+separated by full stops, then an optional space, then one of the three-letter tax-regime
+suffixes MWST, TVA or IVA
+```
+
+The three-letter suffix that spells the English abbreviation of the tax is **not** accepted.
+
+```formula
+take the nine digits of the enterprise identifier as n1 … n9
+weights = ( 5 , 4 , 3 , 2 , 7 , 6 , 5 , 4 )   applied to n1 … n8
+check_digit = ( 11 − ( weighted_sum mod 11 ) ) mod 11
+valid when check_digit = n9
+```
+
+The library form the normaliser produces additionally allows a fourth suffix and requires a
+three-letter country prefix; the application's own check is the one that decides validity.
+
+**Chile** — example `76086428-5`.
+Clean by removing spaces, hyphens and full stops; uppercase; drop a leading country code. Eight or
+nine characters; all but the last must be digits.
+
+```formula
+read the digits of the number without its last character from RIGHT to LEFT as v0 , v1 , v2 , …
+weight of v_i = 4 + ( ( 5 − i ) mod 6 )       (this cycles 2,3,4,5,6,7,2,3,…)
+s = sum of weight × value
+check_character = the character at position ( s mod 11 ) of the string "0123456789K"
+valid when check_character = the last character
+```
+
+**China** — clean by removing spaces and hyphens; uppercase. Eighteen characters; the first eight
+must be digits; every character must belong to the thirty-one-character alphabet
+`0123456789ABCDEFGHJKLMNPQRTUWXY` (the letters I, O, S, V, Z are excluded).
+
+```formula
+weights = ( 1 , 3 , 9 , 27 , 19 , 26 , 16 , 17 , 20 , 29 , 25 , 13 , 8 , 24 , 10 , 30 , 28 )
+          applied to the first seventeen characters
+total   = sum of weight × value(character)
+check_character = alphabet[ ( 31 − total ) mod 31 ]
+valid when check_character = the eighteenth character
+```
+
+**Colombia** — example `213123432-1`.
+Clean by removing full stops, commas, hyphens and spaces; uppercase. Between eight and sixteen
+digits.
+
+```formula
+weights = ( 3 , 7 , 13 , 17 , 19 , 23 , 29 , 37 , 41 , 43 , 47 , 53 , 59 , 67 , 71 )
+          applied to the digits BEFORE the last one, read RIGHT to LEFT
+s = weighted_sum mod 11
+check_digit = the character at position s of the string "01987654321"
+valid when check_digit = the last digit
+```
+
+**Costa Rica** — example `3101012009`.
+The application supplies its own check: the number must match one of
+- nine digits whose first is not zero (natural person),
+- ten digits (legal person or a particular residence permit class),
+- eleven or twelve digits whose first is not zero (another residence permit class).
+
+No check digit.
+
+**Cyprus** — example `CY10259033P`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Nine characters; the
+first eight must be digits. The first two digits may not be one followed by two.
+
+```formula
+translate = { 0→1 , 1→0 , 2→5 , 3→7 , 4→9 , 5→13 , 6→15 , 7→17 , 8→19 , 9→21 }
+s = sum of translate(d) over the digits at ODD positions 1, 3, 5, 7
+  + sum of d          over the digits at EVEN positions 2, 4, 6, 8
+check_letter = the letter at position ( s mod 26 ) of the plain Latin alphabet
+valid when check_letter = the ninth character
+```
+
+**Czechia** — example `CZ12345679`.
+Clean by removing spaces and solidi; uppercase; drop a leading country code. All digits.
+
+- **Eight digits**, not starting with nine:
+  ```formula
+  weights = ( 8 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d7
+  check = ( 11 − weighted_sum ) mod 11
+  check_digit = ( check , or 1 when check is 0 ) mod 10
+  valid when check_digit = d8
+  ```
+- **Nine digits starting with six**:
+  ```formula
+  weights = ( 8 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d2 … d8
+  check = weighted_sum mod 11
+  check_digit = ( 8 − ( 10 − check ) mod 11 ) mod 10
+  valid when check_digit = d9
+  ```
+- **Nine or ten digits** otherwise: the number must be a valid national personal number — the first
+  six digits encode a date of birth in which the month carries an offset of fifty for the second
+  sex and a further offset of twenty for a duplicate registration; for a ten-digit number the whole
+  number taken as an integer must satisfy `(integer without the last digit) mod 11 mod 10 = last digit`.
+- Any other length is invalid.
+
+**Germany** — example `DE123456788` or `12/345/67890`. Valid when **either** check succeeds.
+
+*Tax registration number*: clean by removing spaces, hyphens, full stops, solidi and commas;
+uppercase; drop a leading country code. Nine digits, first digit not zero, satisfying the recursive
+modulus eleven over ten (section 15.2.3).
+
+*Regional tax number*: clean the same way. Ten, eleven or thirteen digits, matching one of the two
+patterns of at least one of the sixteen regions. Each region defines a regional pattern and a
+country-wide pattern, written with the placeholder letters F for the tax-office code, B for the
+district, U for the serial and P for the check position; for example one region's regional pattern
+is two office digits, three district digits, four serial digits and one check digit, and its
+country-wide pattern prefixes a fixed two-digit region code and a zero. No check digit is verified.
+
+**Denmark** — example `DK12345674`.
+Clean by removing spaces, hyphens, full stops, commas, solidi and colons; uppercase; drop a leading
+country code. Eight digits, first digit not zero.
+
+```formula
+weights = ( 2 , 7 , 6 , 5 , 4 , 3 , 2 , 1 )   applied to d1 … d8
+valid when weighted_sum mod 11 = 0
+```
+
+**Dominican Republic** — example `1-01-85004-3` or `101850043`. Valid when **either** check
+succeeds.
+
+*Taxpayer number*: clean by removing spaces and hyphens. All digits. A published list of
+twenty-four historical numbers is accepted unconditionally. Otherwise nine digits and
+
+```formula
+weights = ( 7 , 9 , 8 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d8
+check = weighted_sum mod 11
+check_digit = ( ( 10 − check ) mod 9 ) + 1
+valid when check_digit = d9
+```
+
+*Identity card number*: clean the same way. A published list of several hundred historical numbers
+is accepted unconditionally. Otherwise eleven digits satisfying the doubling checksum.
+
+**Algeria** — clean by removing spaces. Fifteen or twenty digits. No check digit.
+
+**Ecuador** — example `1792060346001` or `1792060346`.
+The application supplies its own check: clean by removing spaces, hyphens and full stops;
+uppercase; trim. The number is valid when it is ten or thirteen characters long and entirely
+decimal. No check digit is verified.
+
+(The library check, which the application replaces, additionally validates the province code, the
+third digit's class and one of three weighted modulus-eleven checksums.)
+
+**Estonia** — example `EE123456780`.
+Clean by removing spaces; uppercase; drop a leading country code. Nine digits.
+
+```formula
+weights = ( 3 , 7 , 1 , 3 , 7 , 1 , 3 , 7 , 1 )   applied to d1 … d9
+valid when weighted_sum mod 10 = 0
+```
+
+**Egypt** — clean by removing spaces, hyphens and solidi, and mapping the two families of
+Arabic-Indic digit characters to plain digits. Nine digits. No check digit.
+
+**Spain** — example `ESA12345674`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Nine characters;
+characters two to eight must be digits.
+
+- First character K, L or M: the last character must equal the natural-person check letter
+  computed on characters two to eight.
+- First character a digit: the whole number is a natural-person number —
+  ```formula
+  check_letter = the letter at position ( the integer formed by d1 … d8 mod 23 )
+                 of the string "TRWAGMYFPDXBNJZSQVHLCKE"
+  valid when check_letter = d9
+  ```
+- First character X, Y or Z: a foreigner's number — replace the first character by its index in
+  "XYZ" (zero, one or two) and apply the natural-person rule.
+- Otherwise the first character must be one of A, B, C, D, E, F, G, H, J, N, P, Q, R, S, U, V and
+  the number is a legal-person number:
+  ```formula
+  c = doubling_check_digit( d2 … d8 )          (a digit)
+  the last character must be either c or the letter at position c of "JABCDEFGHI"
+  ```
+
+**Economic-union-wide number** — a number carried by a trader established outside the union. The
+prefix is either the two letters of the union or the two letters of the Isle of Man; the number is
+eleven characters long in the first case and twelve in the second; everything after the prefix must
+be digits; and characters three to five must be one of the twenty-eight numeric member-state codes.
+
+**Finland** — example `FI12345671`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Eight digits.
+
+```formula
+weights = ( 7 , 9 , 10 , 5 , 8 , 4 , 2 , 1 )   applied to d1 … d8
+valid when weighted_sum mod 11 = 0
+```
+
+**Faroe Islands** — clean by removing spaces, hyphens and full stops; uppercase; drop a leading
+country code. Six digits. No check digit.
+
+**France** — example `FR23334175221`.
+Clean by removing spaces, hyphens and full stops; uppercase; drop a leading country code. Eleven
+characters. The first two must belong to the thirty-three-character alphabet
+`0123456789ABCDEFGHJKLMNPQRSTUVWXYZ` (the letters I and O are excluded); characters three to eleven
+must be digits. When characters three to five are not three zeros, the last nine digits must
+themselves be a valid company registration number (nine digits satisfying the doubling checksum).
+
+```formula
+when the whole number is digits:
+    valid when the integer formed by d1 d2
+              = ( the integer formed by d3 … d11 followed by the digits "12" ) mod 97
+
+otherwise, let A = value of d1 and B = value of d2 in the thirty-three-character alphabet:
+    when d1 is a digit :  check = A × 24 + B − 10
+    when d1 is a letter:  check = A × 34 + B − 100
+    valid when ( the integer formed by d3 … d11 + 1 + floor( check ÷ 11 ) ) mod 11 = check mod 11
+```
+
+**United Kingdom** — example `GB123456782` (or the Northern Ireland prefix).
+Clean by removing spaces, hyphens and full stops; uppercase; drop a leading country code or the
+Northern Ireland prefix.
+
+- **Five characters**: the last three must be digits; the number must start with the
+  government-department prefix and be below five hundred, or with the health-authority prefix and
+  be five hundred or more. No check digit.
+- **Eleven characters** whose first six are one of the two eight-eight-eight department forms:
+  characters seven to eleven must be digits; the department rule above applies to characters seven
+  to nine; and
+  ```formula
+  valid when ( the integer formed by characters 7..9 ) mod 97 = the integer formed by characters 10..11
+  ```
+- **Nine or twelve digits**:
+  ```formula
+  weights  = ( 8 , 7 , 6 , 5 , 4 , 3 , 2 , 10 , 1 )   applied to d1 … d9
+  checksum = weighted_sum mod 97
+  when the integer formed by d1 d2 d3 is 100 or more:  valid when checksum is 0, 42 or 55
+  otherwise:                                           valid when checksum is 0
+  ```
+- Any other length is invalid.
+
+**Ghana** — clean by removing spaces; uppercase. Eleven characters matching: one letter among
+P, C, G, Q, V; two zeros; eight characters that are digits or capital letters.
+
+```formula
+check = ( sum over i = 1..9 of i × value of the character at position i + 1 ) mod 11
+check_character = "X" when check = 10 , otherwise the decimal digit check
+valid when check_character = the eleventh character
+```
+
+**Guinea** — clean by removing spaces and hyphens. Nine digits satisfying the doubling checksum.
+
+**Greece** — example `EL123456783`.
+Clean by removing spaces, hyphens, full stops, solidi and colons; uppercase; drop a leading union
+prefix or country code; left-pad with a zero when eight digits long. Five test numbers are accepted
+unconditionally: `047747270`, `047747210`, `047747220`, `117747270`, `127747270`. Otherwise nine
+digits and
+
+```formula
+checksum = 0
+for each of d1 … d8, left to right:  checksum = checksum × 2 + d
+check_digit = ( checksum × 2 mod 11 ) mod 10
+valid when check_digit = d9
+```
+
+**Guatemala** — clean by removing spaces and hyphens; uppercase; trim; remove leading zeros. Two
+test numbers, `11201220K` and `11201350K`, and every number matching "nine eight followed by ten
+digits followed by the letter K" are accepted unconditionally. Otherwise: between two and twelve
+characters; all but the last must be digits; the last must be a digit or the letter K.
+
+```formula
+read d1 … d(n−1) from RIGHT to LEFT with the weights 2, 3, 4, … increasing by one
+c = ( − weighted_sum ) mod 11
+check_character = "K" when c = 10 , otherwise the decimal digit c
+valid when check_character = the last character
+```
+
+**Croatia** — example `HR01234567896`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Eleven digits
+satisfying the recursive modulus eleven over ten (section 15.2.3).
+
+**Hungary** — example `HU12345676`, `12345678-1-11` or `8071592153`.
+Valid when **any** of the following holds:
+
+- the number matches eight digits, an optional hyphen, one digit between one and five, an optional
+  hyphen and two digits (a company number);
+- the number matches an eight followed by nine digits (a natural person's number);
+- the number is exactly eight digits (the union form);
+- the library check succeeds: clean by removing spaces and hyphens, uppercase, drop a leading
+  country code; eight digits and
+  ```formula
+  weights = ( 9 , 7 , 3 , 1 , 9 , 7 , 3 , 1 )   applied to d1 … d8
+  valid when weighted_sum mod 10 = 0
+  ```
+
+The union form of a company number is built as the country code followed by the first eight digits.
+
+**Indonesia** — example `1234567890123456`.
+The application supplies its own check: clean by removing spaces, hyphens and full stops; trim.
+The number must be fifteen or sixteen digits. A sixteen-digit number whose first digit is not zero
+is accepted with no further check. Otherwise the doubling checksum must hold over characters one to
+nine of a fifteen-digit number, or characters two to ten of a sixteen-digit number.
+
+**Ireland** — example `IE1234567FA`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Eight or nine
+characters. Character one and characters three to seven must be digits; characters eight onwards
+must belong to the twenty-three-letter alphabet `WABCDEFGHIJKLMNOPQRSTUV`.
+
+```formula
+check_letter( seven characters ) :
+    left-pad to eight characters with zeros
+    s = sum over i = 1..7 of ( 8 − i + 1 ) × digit_i            (weights 8,7,6,5,4,3,2)
+      + 9 × value of the eighth character in the alphabet above
+    result = the alphabet character at position ( s mod 23 )
+
+when d1 … d7 are all digits:
+    valid when d8 = check_letter( d1 … d7 followed by anything after d8 )
+when d2 is a letter or a plus sign or an asterisk:
+    valid when d8 = check_letter( d3 … d7 followed by d1 )
+otherwise invalid
+```
+
+**Israel** — example: nine digits satisfying the doubling checksum.
+Clean by removing spaces and hyphens; left-pad with zeros to nine characters. At most nine
+characters; all digits; strictly positive; and the doubling checksum must be zero.
+
+**India** — example `12AAAAA1234AAZA`.
+The application supplies its own check: the number must be exactly fifteen characters and match at
+least one of six patterns:
+
+| Pattern | Shape |
+|---|---|
+| ordinary, composition, casual taxpayer | two digits, five letters, four digits, one letter, one character that is a digit one to nine or a letter, one character among Z, z or the digits one to nine or the letters A to J in either case, one alphanumeric |
+| United Nations or other body | four digits, three capitals, five digits, the letter U or O, the letter N, one capital or digit |
+| revised non-resident | four digits, three capitals, five digits, three capitals |
+| non-resident | four digits, three letters, five digits, the letters N and R, one alphanumeric |
+| tax deducted at source | two digits, four letters, one alphanumeric, four digits, one letter, one digit one to nine or letter, the letter D or K, one alphanumeric |
+| tax collected at source | two digits, five letters, four digits, one letter, one digit one to nine or letter, the letter C, one alphanumeric |
+
+No check digit is verified by the application's check. (The library check the application replaces
+additionally validates the state code, the embedded permanent account number and a doubling
+checksum over the thirty-six-character alphabet.)
+
+**Iceland** — example `IS062199`.
+Clean by removing spaces; uppercase; drop a leading country code. Five or six digits. No check
+digit.
+
+**Italy** — example `IT12345670017`.
+Clean by removing spaces, hyphens and colons; uppercase; drop a leading country code. Eleven
+digits; the first seven may not all be zero; the office code formed by digits eight to ten must lie
+between `001` and `100` inclusive or be one of `120`, `121`, `888`, `999`; and the doubling
+checksum over the eleven digits must be zero.
+
+**Japan** — example `T7000012050002`.
+The application first drops a leading capital T, then applies the library check: clean by removing
+hyphens and spaces; thirteen digits;
+
+```formula
+weights = ( 1 , 2 , 1 , 2 , 1 , 2 , 1 , 2 , 1 , 2 , 1 , 2 )
+          applied to d2 … d13 read from RIGHT to LEFT
+s = weighted_sum mod 9
+check_digit = 9 − s
+valid when check_digit = d1
+```
+
+**Kenya** — clean by removing spaces and hyphens; uppercase. Eleven characters matching: the letter
+A or P, nine digits, one capital letter. No check digit.
+
+**Korea** — example `123-45-67890` or `1234567890`.
+Clean by removing spaces and hyphens. Ten digits. The first three read as a number must be at least
+`101`; digits four and five may not both be zero; digits six to nine may not all be zero. No check
+digit.
+
+**Lithuania** — example `LT123456715`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. All digits. Nine
+digits with a one in position eight, or twelve digits with a one in position eleven.
+
+```formula
+check = ( sum over i = 1..n−1 of ( 1 + ( ( i − 1 ) mod 9 ) ) × di ) mod 11
+if check = 10 :
+    check = sum over i = 1..n−1 of ( 1 + ( ( i + 1 ) mod 9 ) ) × di
+check_digit = ( check mod 11 ) mod 10
+valid when check_digit = dn
+```
+
+**Luxembourg** — example `LU12345613`.
+Clean by removing spaces, colons, full stops and hyphens; uppercase; drop a leading country code.
+Eight digits.
+
+```formula
+check_digits = ( the integer formed by d1 … d6 ) mod 89 , written on two digits
+valid when check_digits = d7 d8
+```
+
+**Latvia** — example `LV41234567891`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Eleven digits.
+
+- First digit greater than three (a legal person):
+  ```formula
+  weights = ( 9 , 1 , 4 , 8 , 3 , 10 , 2 , 5 , 7 , 6 , 1 )   applied to d1 … d11
+  valid when weighted_sum mod 11 = 3
+  ```
+- Otherwise (a natural person; when the number does not start with three two, the first six digits
+  must also form a valid date of birth whose century is given by the seventh digit as eighteen
+  hundred plus one hundred times that digit):
+  ```formula
+  weights = ( 10 , 5 , 8 , 4 , 2 , 1 , 6 , 3 , 7 , 9 )   applied to d1 … d10
+  check_digit = ( ( 1 + weighted_sum ) mod 11 ) mod 10
+  valid when check_digit = d11
+  ```
+
+**Morocco** — example `12345678`.
+The application supplies its own check: the number must be exactly eight digits. No check digit.
+(The library check the application replaces requires fifteen digits satisfying the modulus
+ninety-seven over ten.)
+
+**Monaco** — the French rules apply, with the extra requirement that characters three to five be
+three zeros; the normalised number carries the French country prefix.
+
+**Montenegro** — clean by removing spaces. Eight digits.
+
+```formula
+weights = ( 8 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d7
+check_digit = ( ( − weighted_sum ) mod 11 ) mod 10
+valid when check_digit = d8
+```
+
+**North Macedonia** — clean by removing spaces and hyphens; uppercase; drop a leading country code
+written in either alphabet. Thirteen digits.
+
+```formula
+weights = ( 7 , 6 , 5 , 4 , 3 , 2 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d12
+check_digit = ( ( − weighted_sum ) mod 11 ) mod 10
+valid when check_digit = d13
+```
+
+**Malta** — example `MT12345634`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Eight digits, first
+digit not zero.
+
+```formula
+weights = ( 3 , 4 , 6 , 7 , 8 , 9 , 10 , 1 )   applied to d1 … d8
+valid when weighted_sum mod 37 = 0
+```
+
+**Mexico** — example `GODE561231GR8`.
+The application supplies its own check. The number must match, in full:
+
+```
+three or four letters (capital or small, including the Spanish n with a tilde and the ampersand)
+optional space, hyphen or underscore
+two digits for the year, two digits for the month (first digit zero or one),
+two digits for the day (first digit zero to three)
+optional space, hyphen or underscore
+three characters that are letters, digits, the ampersand or the Spanish n with a tilde
+```
+
+The year is interpreted as nineteen hundred plus the two digits when they exceed thirty, and two
+thousand plus the two digits otherwise; the resulting year, month and day must form a real calendar
+date. No check digit is verified.
+
+**Mozambique** — clean by removing spaces, hyphens and full stops. Nine digits.
+
+```formula
+weights = ( 8 , 9 , 4 , 5 , 6 , 7 , 8 , 9 )   applied to d1 … d8
+check = weighted_sum mod 11
+check_digit = the character at position check of the string "01234567891"
+valid when check_digit = d9
+```
+
+**Netherlands** — example `NL123456782B90`.
+Clean by removing spaces, hyphens and full stops; uppercase; drop a leading country code; left-pad
+the part before the last three characters with zeros to nine digits. Twelve characters. Characters
+one to nine must be digits forming a strictly positive number; character ten must be the letter B;
+characters eleven and twelve must be digits forming a strictly positive number.
+
+Valid when **either**:
+
+```formula
+the citizen service number check on d1 … d9 succeeds:
+    ( sum over i = 1..8 of ( 9 − i + 1 ) × di ) − d9   is a multiple of 11
+        that is, weights ( 9 , 8 , 7 , 6 , 5 , 4 , 3 , 2 ) then subtract the last digit
+or the modulus ninety-seven over ten of the two-letter country code followed by the whole
+   twelve-character number equals one
+```
+
+**Norway** — example `NO123456785`.
+The application supplies its own check: an optional three-letter tax-regime suffix is dropped when
+the number is twelve characters long and ends with it; the remainder must be exactly nine digits.
+
+```formula
+weights = ( 3 , 2 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d8
+check = 11 − ( weighted_sum mod 11 )
+if check = 11 :  check = 0
+if check = 10 :  the number is invalid
+valid when check = d9
+```
+
+**New Zealand** — example `49-098-576` or `49098576`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Eight or nine digits;
+the number read as an integer must lie strictly between ten million and one hundred fifty million.
+
+```formula
+left-pad the digits before the last one to eight characters with zeros
+primary_weights   = ( 3 , 2 , 7 , 6 , 5 , 4 , 3 , 2 )
+s = ( − weighted_sum with the primary weights ) mod 11
+if s ≠ 10 :  check_digit = s
+otherwise :
+    secondary_weights = ( 7 , 4 , 3 , 2 , 5 , 2 , 7 , 6 )
+    check_digit = ( − weighted_sum with the secondary weights ) mod 11
+valid when check_digit = the last digit
+```
+
+**Peru** — example `10XXXXXXXXY`, `20…`, `15…`, `16…` or `17…`.
+The application supplies its own check: exactly eleven digits.
+
+```formula
+weights = the digits of the string "5432765432" , that is ( 5 , 4 , 3 , 2 , 7 , 6 , 5 , 4 , 3 , 2 )
+          applied to d1 … d10
+check = 11 − ( weighted_sum mod 11 )
+if check = 10 :  check = 0
+if check = 11 :  check = 1
+valid when check = d11
+```
+
+(The library check the application replaces additionally restricts the first two digits to 10, 15,
+17 or 20 and folds the remainder differently.)
+
+**Philippines** — example `123-456-789-123`.
+The application supplies its own check: between eleven and seventeen characters, matching three
+groups of three digits separated by hyphens, optionally followed by a hyphen and a branch code of
+three to five digits. No check digit.
+
+**Poland** — example `PL1234567883`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Ten digits.
+
+```formula
+weights = ( 6 , 5 , 7 , 2 , 3 , 4 , 5 , 6 , 7 , −1 )   applied to d1 … d10
+valid when weighted_sum mod 11 = 0
+```
+
+**Portugal** — example `PT123456789`.
+Clean by removing spaces, hyphens and full stops; uppercase; drop a leading country code. Nine
+digits, first digit not zero.
+
+```formula
+weights = ( 9 , 8 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d8
+check_digit = ( ( 11 − weighted_sum ) mod 11 ) mod 10
+valid when check_digit = d9
+```
+
+**Paraguay** — clean by removing spaces and hyphens; uppercase. At most nine digits.
+
+```formula
+read d1 … d(n−1) from RIGHT to LEFT with the weights 2, 3, 4, … increasing by one
+check_digit = ( ( − weighted_sum ) mod 11 ) mod 10
+valid when check_digit = dn
+```
+
+**Romania** — example `RO1234567897`, a thirteen-digit personal number, or a nine-digit code
+prefixed by nine thousand.
+Valid when **any** of the following holds:
+
+- the number matches: one digit one to nine, two digits for the year, a month between `01` and
+  `12`, a day between `01` and `31`, six further digits (a natural person's number);
+- the number matches four thousand-nine hundred, that is the four characters `9000`, followed by
+  nine digits;
+- the library check succeeds: clean by removing spaces and hyphens, uppercase, drop a leading
+  country code. A thirteen-digit number must be a valid national personal number; a number of two
+  to ten characters must satisfy
+  ```formula
+  left-pad the digits before the last one to nine characters with zeros
+  weights = ( 7 , 5 , 3 , 2 , 1 , 7 , 5 , 3 , 2 )
+  check_digit = ( ( 10 × weighted_sum ) mod 11 ) mod 10
+  valid when check_digit = the last digit
+  ```
+  with the additional requirement that the first character is not a zero.
+
+The national personal number is thirteen digits whose first digit is one to nine, whose digits two
+to seven form a valid date of birth (the century coming from the first digit: one and two mean the
+nineteen hundreds, three and four the eighteen hundreds, five and six the two thousands), whose
+digits eight and nine name a recognised county, and whose check digit is
+
+```formula
+weights = ( 2 , 7 , 9 , 1 , 4 , 6 , 3 , 5 , 8 , 2 , 7 , 9 )   applied to d1 … d12
+check = weighted_sum mod 11
+check_digit = 1 when check = 10 , otherwise check
+```
+
+**Serbia** — example `RS101134702`.
+The application first drops a leading country code, then applies the library check: clean by
+removing spaces, hyphens and full stops; nine digits satisfying the recursive modulus eleven over
+ten (section 15.2.3).
+
+**Russia** — example `123456789047`.
+The application supplies its own check: ten or twelve digits.
+
+- **Ten digits**:
+  ```formula
+  weights = ( 2 , 4 , 10 , 3 , 5 , 9 , 4 , 6 , 8 )   applied to d1 … d9
+  valid when ( weighted_sum mod 11 ) mod 10 = d10
+  ```
+- **Twelve digits**:
+  ```formula
+  weights1 = ( 7 , 2 , 4 , 10 , 3 , 5 , 9 , 4 , 6 , 8 )   applied to d1 … d10
+  valid so far when weighted_sum1 mod 11 = d11
+  weights2 = ( 3 , 7 , 2 , 4 , 10 , 3 , 5 , 9 , 4 , 6 , 8 )   applied to d1 … d11
+  valid when weighted_sum2 mod 11 = d12
+  ```
+  Note that the application's check compares the raw remainder, not the remainder folded to a
+  single digit; a remainder of ten therefore fails.
+
+**Sweden** — example `SE123456789701`.
+Clean by removing spaces, hyphens and full stops; uppercase; drop a leading country code. All
+digits; the last two must be `01`; and the first ten must be exactly ten digits satisfying the
+doubling checksum.
+
+**Singapore** — clean by removing white space; uppercase. Nine or ten characters.
+
+- **Nine characters** (a business): the first eight must be digits, the ninth a letter;
+  ```formula
+  weights = ( 10 , 4 , 9 , 3 , 8 , 2 , 7 , 1 )   applied to d1 … d8
+  check_letter = the character at position ( weighted_sum mod 11 ) of "XMKECAWLJDB"
+  valid when check_letter = the ninth character
+  ```
+- **Ten characters beginning with a digit** (a locally incorporated company): the first nine must
+  be digits, the first four may not exceed the current year;
+  ```formula
+  weights = ( 10 , 8 , 6 , 4 , 9 , 7 , 5 , 3 , 1 )   applied to d1 … d9
+  check_letter = the character at position ( weighted_sum mod 11 ) of "ZKCMDNERGWH"
+  valid when check_letter = the tenth character
+  ```
+- **Ten characters beginning with a letter** (another entity): the first must be R, S or T;
+  characters two and three must be digits and, when the first is T, may not exceed the last two
+  digits of the current year; characters four and five must name one of the thirty-eight recognised
+  entity kinds; characters six to nine must be digits;
+  ```formula
+  alphabet = "ABCDEFGHJKLMNPQRSTUVWX0123456789"
+  weights  = ( 4 , 3 , 5 , 3 , 10 , 2 , 2 , 5 , 7 )   applied to the first nine characters
+  check_character = alphabet[ ( weighted_sum − 5 ) mod 11 ]
+  valid when check_character = the tenth character
+  ```
+
+**Slovenia** — example `SI12345679`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Eight digits, not
+starting with zero.
+
+```formula
+weights = ( 8 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d7
+check = 11 − ( weighted_sum mod 11 )
+check_digit = 0 when check = 10 , otherwise check
+valid when check_digit = d8
+```
+
+**Slovakia** — example `SK2022749619`.
+Clean by removing spaces and hyphens; uppercase; drop a leading country code. Ten digits. Valid
+when the number is a valid national personal number, or when the first digit is not zero, the third
+digit is one of two, three, four, seven, eight or nine, and
+
+```formula
+valid when ( the integer formed by the ten digits ) mod 11 = 0
+```
+
+**San Marino** — example `SM24165`.
+Clean by removing full stops; trim; remove leading zeros. One to five digits. When fewer than three
+digits remain, the number read as an integer must belong to a published list of sixty-five
+historical low numbers. No check digit.
+
+**Senegal** — clean by removing spaces, hyphens, solidi and commas; uppercase. When more than nine
+characters, the last three form a tax-regime suffix and are removed for the length and checksum
+tests; the remainder must be seven or nine digits. A suffix, when present, must be: a first
+character among zero, one and two; a second character among the twenty-two capital letters
+excluding I, O, X and Y; and a third character that is a digit.
+
+```formula
+left-pad the number (without suffix) to nine digits with zeros
+weights = ( 1 , 2 , 1 , 2 , 1 , 2 , 1 , 2 , 1 )
+valid when weighted_sum mod 10 = 0
+```
+
+**El Salvador** — clean by removing spaces and hyphens; uppercase; drop a leading country code.
+Fourteen digits; the first must be zero, one or nine.
+
+```formula
+when the three characters at positions 11..13 are lexicographically at most "100" :
+    weights = ( 14 , 13 , 12 , 11 , 10 , 9 , 8 , 7 , 6 , 5 , 4 , 3 , 2 )
+    check_digit = ( weighted_sum mod 11 ) mod 10
+otherwise :
+    weights = ( 2 , 7 , 6 , 5 , 4 , 3 , 2 , 7 , 6 , 5 , 4 , 3 , 2 )
+    check_digit = ( ( − weighted_sum ) mod 11 ) mod 10
+valid when check_digit = d14
+```
+
+**Thailand** — example `1234545678781`.
+The check accepts either of two thirteen-digit forms, trying them in order:
+
+- *the taxpayer form*: thirteen digits, first digit zero;
+- *the personal form*: thirteen digits, first digit neither zero nor nine.
+
+Both use the same check digit:
+
+```formula
+s = ( sum over i = 1..12 of ( 2 − i + 1 ) × di ) mod 11
+    that is, weights 13, 12, 11, …, 2 applied to d1 … d12
+check_digit = ( 1 − s ) mod 10
+valid when check_digit = d13
+```
+
+**Tunisia** — clean by removing spaces, solidi, full stops and hyphens; uppercase; left-pad the
+leading run of digits to seven characters with zeros. Eight or thirteen characters. The first seven
+must be digits; the eighth must be one of the twenty-three permitted control letters (the Latin
+alphabet without I, O and U). For a thirteen-character number: the ninth character must be one of
+A, P, B, D, N; the tenth one of M, P, C, N, E; characters eleven to thirteen must be digits; and
+those three digits must be three zeros unless the tenth character is E. No check digit.
+
+**Turkey** — example: eleven digits for a natural person, or ten digits for a company.
+Valid when **either** check succeeds.
+
+*Natural person, eleven digits*, first digit not zero:
+
+```formula
+check1 = ( 10 − ( sum over i = 1..9 of ( 3 when i is odd , 1 when i is even ) × di ) ) mod 10
+check2 = ( check1 + sum over i = 1..9 of di ) mod 10
+valid when check1 check2 = d10 d11
+```
+
+*Company, ten digits*:
+
+```formula
+s = 0
+for i = 1 … 9 , where n is the i-th digit counted from the RIGHT of d1 … d9 :
+    c1 = ( n + i ) mod 10
+    when c1 is not zero :
+        c2 = ( c1 × 2^i ) mod 9 , replaced by 9 when that remainder is zero
+        s = s + c2
+check_digit = ( 10 − s ) mod 10
+valid when check_digit = d10
+```
+
+**Taiwan** — the application supplies its own check, updated for the current national rule: clean
+by removing spaces and hyphens. Exactly eight digits.
+
+```formula
+multipliers = ( 1 , 2 , 1 , 2 , 1 , 2 , 4 , 1 )
+products    = for each i , the decimal writing of multiplier_i × di
+digit_sum( S ) = the sum of the individual digits of every product in S
+
+when d7 ≠ 7 :
+    valid when digit_sum( all eight products ) mod 5 = 0
+when d7 = 7 :
+    base = digit_sum( the products of positions 1..6 and 8 )
+    valid when ( base + 1 ) mod 5 = 0  or  base mod 5 = 0
+```
+
+The divisor is five, not ten: the national authority relaxed the rule when the number space neared
+exhaustion, so numbers that were previously invalid are now valid.
+
+**Ukraine** — example: eight digits, eight digits with the country prefix, ten digits, or twelve
+digits.
+The application supplies its own check: drop a leading country code, then accept when the remaining
+length is eight, ten or twelve. No check digit.
+
+**Uruguay** — example `219999830019`.
+The application supplies its own check: clean by removing spaces and hyphens; uppercase; trim; drop
+a leading country code. Twelve digits. Characters one and two must lie between `01` and `22`
+inclusive; characters three to eight must not all be zero; characters nine to eleven must be `001`.
+
+```formula
+weights = ( 4 , 3 , 2 , 9 , 8 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to d1 … d11
+check_digit = ( − weighted_sum ) mod 11
+valid when check_digit = d12
+```
+
+**Uzbekistan** — example: nine digits for a company, fourteen for an individual.
+The application supplies its own check: the number must be all digits, and its length must be
+exactly nine when the partner is a company and exactly fourteen otherwise. No check digit.
+
+**Venezuela** — example `V-12345678-1`, `V123456781` or `V-12.345.678-1`.
+The application supplies its own check. The number must match, in full and ignoring letter case:
+one kind letter among V, E, C, J, P, G; then an eight-digit identifier written either plainly, or
+as two digits, three digits and three digits separated by full stops, the whole optionally wrapped
+in hyphens (the separators must be used consistently: a leading hyphen requires a trailing hyphen,
+and a first full stop requires a second); then one check digit.
+
+```formula
+kind_digit =  1 for V (citizen) , 2 for E (foreigner) , 3 for C or J (council or legal entity) ,
+              4 for P (passport) , 5 for G (government)
+multipliers = ( 3 , 2 , 7 , 6 , 5 , 4 , 3 , 2 )   applied to the eight identifier digits
+checksum    = kind_digit × 4 + weighted_sum
+check_digit = 11 − ( checksum mod 11 )
+if check_digit > 9 :  check_digit = 0
+valid when check_digit = the last digit
+```
+
+**Vietnam** — the application supplies its own check: trim, then accept a ten-digit number,
+optionally followed by a three-digit branch code with or without a hyphen, or a twelve-digit
+personal identity number. No check digit.
+
+(The library check the application replaces requires ten or thirteen digits, forbids seven zeros in
+positions three to nine and a three-zero branch code, and verifies
+`check_digit = 10 − ( weighted_sum with weights 31, 29, 23, 19, 17, 13, 7, 5, 3 over d1 … d9 ) mod 11`
+against the tenth digit.)
+
+**Northern Ireland** — example `XI123456782`. The United Kingdom rules apply; the prefix is
+retained so that the number is recognised as belonging to the union register.
+
+**Saudi Arabia** — example `310175397400003`.
+The application supplies its own check: the number must match exactly fifteen digits beginning and
+ending with a three. No check digit.
+
+### 15.5 The cross-border verification service
+
+*Server-only.* Beyond the syntactic check, a partner's number may be verified against the union's
+central register through a relay service.
+
+**Configuration.** A company-level switch turns it on. The relay endpoint is either a production
+address or a test address; which one is the default depends on whether the validation capability
+was installed with demonstration data; an administrator may override it through a system parameter
+but only with one of those two values, otherwise: *"Invalid IAP VIES endpoint"*.
+
+**Credentials.** The database identifies itself with a pair (identifier, token). If none is stored,
+a random universally unique identifier and a random token are generated and stored in their own
+transaction, so that an error later in the current transaction cannot lose them. When the periodic
+job does not exist, or the run is a test run, a fixed placeholder pair is used and the relay
+ignores it.
+
+**When the check runs.** A stored flag "intra-community valid" is recomputed whenever the number
+changes. If no company at all has the switch on, the flag is set to false without any call. A
+partner whose parent carries the same number inherits the parent's flag. Otherwise one request is
+sent.
+
+**The request.** A form-encoded request to the relay's validity endpoint carrying: the number, the
+database's unique identifier, the client identifier, the client token, a callback address formed as
+the base address of this installation followed by the path
+`/base_vat/1/webhook_update_vies`, and a signed callback token built from the fixed text
+`vies_check` and the number, valid for seven days. The request times out after twenty seconds. A
+transport failure, or a response without a status, yields the status *fault*.
+
+**The statuses and what they mean.**
+
+| Status | Flag | Message logged on the partner |
+|---|---|---|
+| `valid` | true | *"The Intra-Community validity has been updated to: valid."* |
+| `unassigned` | false | *"The Intra-Community validity has been updated to: unassigned."* |
+| `pending` | false | *"The VIES check is pending. The status will be updated soon."* |
+| `fault` | false | *"The VIES check failed. Please check the Tax ID manually."* |
+
+**The callback.** The relay may later call the callback address with the number and a status; the
+receiving route re-verifies the signed token before applying the status.
+
+**The periodic job.** A scheduled job asks the relay for updates on numbers previously reported as
+pending, receives a table of number to status, groups the partners by number and applies each
+status.
+
+**Suppression during import.** When records are created or written as part of a file import, the
+recomputation of the flag is cancelled, so that importing ten thousand partners does not issue ten
+thousand requests.
+
+**Effect on fiscal positions.** A fiscal position that requires a tax registration accepts a
+partner only when the partner has a number **and**, when cross-border verification applies to that
+partner for the acting company, the flag is true. Verification applies when the company has a
+country, the partner's number does not start with the company's fiscal country code, the company's
+switch is on, and either the company's country belongs to the union or the partner's country is one
+in which some company holds a foreign registration.

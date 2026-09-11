@@ -243,8 +243,8 @@ an inverse is noted). The routine is specified with worked examples in
 | Duplicates (`duplicated_ref_ids`) | many-to-many to Journal Entry | Computed, not stored. The documents detected as duplicates of this one. See [`business-rules.md`](business-rules.md), "Duplicate detection". |
 | Has draft duplicates (`is_draft_duplicated_ref_ids`) | boolean | Computed, not stored. True when at least one detected duplicate is draft. |
 | Is exact duplicate (`is_exact_move_duplicate`) | boolean | Computed with the previous one. Purchase-side only: true when a duplicate shares the reference, a compatible type, the partner, the document date and the total. |
-| Abnormal amount warning (`abnormal_amount_warning`) | text | Computed, not stored. Warns that the total is far from what this customer usually bills. |
-| Abnormal date warning (`abnormal_date_warning`) | text | Computed, not stored. Warns that the document date is far from the expected next date for this customer. |
+| Abnormal amount warning (`abnormal_amount_warning`) | text | Computed, not stored. Warns that the total is far from the historical distribution for this partner. It is produced **only** for a draft purchase document, so it is always empty on a receivable document; see [`../accounts-payable/business-rules.md`](../accounts-payable/business-rules.md). |
+| Abnormal date warning (`abnormal_date_warning`) | text | Computed, not stored. Warns that the document date is far from the expected next date for this partner. Same restriction: purchase documents only. |
 | Alerts (`alerts`) | structured data | Computed, not stored. The collected banner messages shown above the form, each with a level and a message. |
 | Taxes legal notes (`taxes_legal_notes`) | rich text | Computed, not stored. The concatenation of the distinct legal notes of the taxes used on the document. |
 | Reviewed (`checked`) | boolean | Computed and stored with manual override, tracked, not copied. Marks a posted document as reviewed. |

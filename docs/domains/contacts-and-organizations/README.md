@@ -130,7 +130,11 @@ Concretely the domain covers:
 | Party | `res.partner` | `res_partner` | Every person, organization and address the system knows; the universal counterparty. |
 | Party Tag | `res.partner.category` | `res_partner_category` | Free classification of parties, arranged as a tree. |
 | Industry | `res.partner.industry` | `res_partner_industry` | The line of business of an organization. |
-| Party Title | `res.partner.title` | `res_partner_title` | Courtesy title of a person, with a short form. |
+
+> The system has **no** separate courtesy-title entity. A person's professional role is the
+> free-text job position field on the Party, and no salutation record exists. A rebuild must not
+> invent one: printed documents and electronic-mail templates address a Party by its name, never
+> by a stored salutation.
 
 ### Geography
 

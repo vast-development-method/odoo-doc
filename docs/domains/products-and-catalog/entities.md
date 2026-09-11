@@ -830,9 +830,10 @@ the company — is reachable by delegation.
 ### 13.3 Rules
 
 - Ordered by sequence, then name.
-- Writing a web address that does not begin with `https://`, `http://` or `ftp://` raises "Please
-  enter a valid URL.\nExample: https://www.odoo.com\n\nInvalid URL: *the entered address*". (The
-  example address in the message is the literal text the system emits.)
+- Writing a web address that does not begin with `https://`, `http://` or `ftp://` raises the
+  three-line message given in [business-rules.md](business-rules.md), section 12.1, whose first
+  line asks for a valid uniform resource locator, whose second line shows a fixed example address,
+  and whose last line repeats the address that was entered.
 - Creating a document suppresses the automatic-document-creation hook described below, so that a
   document does not create a second document for its own attachment.
 - Duplicating a document duplicates the underlying attachment too, with document-creation and
@@ -903,7 +904,7 @@ repeatedly to peel pairs off the front, producing an ordered list of typed resul
 |---|---|---|
 | Barcode Nomenclature (`name`) | text | Required. |
 | Rules (`rule_ids`) | child set → Barcode Rule | Ordered by the rules' own ordering: sequence ascending, then identifier. |
-| Universal Product Code and European Article Number Conversion (`upc_ean_conv`) | choice | Required. Default `always`. Values: `none` "Never", `ean2upc` "EAN-13 to UPC-A", `upc2ean` "UPC-A to EAN-13", `always` "Always". Governs whether a scanned code may be re-encoded to satisfy a rule that demands the other encoding. |
+| Universal Product Code and European Article Number Conversion (`upc_ean_conv`) | choice | Required. Default `always`. Values: `none`, labelled `Never`; `ean2upc`, labelled `EAN-13 to UPC-A` (thirteen-digit European Article Number to twelve-digit Universal Product Code); `upc2ean`, labelled `UPC-A to EAN-13` (the reverse); `always`, labelled `Always`. Governs whether a scanned code may be re-encoded to satisfy a rule that demands the other encoding. |
 | Is Global Standards One Nomenclature (`is_gs1_nomenclature`) | flag | When true, only rules with the Global Standards One encoding are used, and the parse is the decomposition loop rather than the first-match loop. |
 | Function code one separator (`gs1_separator_fnc1`) | text | Default the literal string `(Alt029|#|\x1D)`. Whitespace is significant and is not trimmed. An alternative expression for the field separator. It must not match the beginning or the end of any related rule's pattern, or the decomposition will mis-split. |
 
@@ -912,14 +913,16 @@ repeatedly to peel pairs off the front, producing an ordered list of typed resul
 - Deleting the shipped default nomenclature raises "You cannot delete '*the nomenclature display
   name*' because it's the default barcode nomenclature."
 - The separator expression must compile as an optional group; if it does not, the validation raises
-  "The FNC1 Separator Alternative is not a valid Regex: *the compiler's message*".
+  the message reproduced in [business-rules.md](business-rules.md), section 13.2, which names the
+  function code one separator by its four-character abbreviation and appends the compiler's own
+  explanation.
 
 ### 15.4 Shipped nomenclatures
 
 | Name | Mode | Rules |
 |---|---|---|
 | Default Nomenclature | classic | One rule: "Product Barcodes", sequence ninety, any encoding, pattern `.*`, result type `product`. |
-| Default GS1 Nomenclature | Global Standards One | Twenty-six rules, catalogued in [configuration.md](configuration.md). |
+| `Default GS1 Nomenclature` (the shipped name; the three characters before the space stand for Global Standards One) | Global Standards One | Twenty-six rules, catalogued in [configuration.md](configuration.md). |
 
 Other domains add rules to the default nomenclature; the inventory domain in particular registers
 rules for lots, locations, packages and weights. Those additions are specified in
@@ -938,7 +941,7 @@ rules for lots, locations, packages and weights. Those additions are specified i
 | Rule Name (`name`) | text | Required. |
 | Barcode Nomenclature (`barcode_nomenclature_id`) | link → Barcode Nomenclature | Indexed on non-empty values only. |
 | Sequence (`sequence`) | number | The rules of a nomenclature are tried in ascending sequence; ties are broken by identifier. |
-| Encoding (`encoding`) | choice | Required. Default `any` (or `gs1-128` when the rule is created in a Global Standards One context). Values: `any` "Any", `ean13` "EAN-13" (thirteen digits), `ean8` "EAN-8" (eight digits), `upca` "UPC-A" (twelve digits), `gs1-128` "GS1-128". |
+| Encoding (`encoding`) | choice | Required. Default `any` (or `gs1-128` when the rule is created in a Global Standards One context). Values: `any`, labelled `Any`; `ean13`, labelled `EAN-13`, the thirteen-digit European Article Number; `ean8`, labelled `EAN-8`, the eight-digit European Article Number; `upca`, labelled `UPC-A`, the twelve-digit Universal Product Code; `gs1-128`, labelled `GS1-128`, the Global Standards One one-hundred-twenty-eight symbology. |
 | Type (`type`) | choice | Required. Default `product`. Base values: `alias` "Alias", `product` "Unit Product". The Global Standards One capability adds: `quantity` "Quantity", `location` "Location", `location_dest` "Destination location", `lot` "Lot number", `package` "Package", `use_date` "Best before Date", `expiration_date` "Expiration Date", `package_type` "Package Type", `pack_date` "Pack Date". Other domains add further values. |
 | Barcode Pattern (`pattern`) | text | Required. Default `.*`. |
 | Alias (`alias`) | text | Required. Default the string `0`. Only meaningful when the type is `alias`: the string the matched barcode is replaced with. |
@@ -1138,6 +1141,63 @@ reservation and validation are given in [workflows.md](workflows.md).
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
 | Barcodes (`product_uom_ids`) | child set → Packaging Barcode | The packaging barcodes that use this unit. When the caller names a product or a product list in the context, the set is restricted to those products. |
+
+### 22.7 Configuration Settings
+
+The transient settings record gains the fields listed in [configuration.md](configuration.md),
+section 1: the units group toggle, the variants group toggle, the loyalty capability toggle, the
+pricelists group toggle, the weight-unit choice, the volume-unit choice and the
+expiry-on-delivery-slip group toggle.
+
+### 22.8 Currency
+
+| Behaviour added | Rule |
+|---|---|
+| Multi-currency activation | Activating multiple currencies also grants the pricelist group to the internal-user group and runs the default-pricelist bootstrap. |
+| Archival cascade | Archiving a currency archives every pricelist that uses it. |
+
+### 22.9 Country Group
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Pricelists (`pricelist_ids`) | link set → Pricelist | Through the pairing table `res_country_group_pricelist_rel`. The pricelists offered to visitors from the countries of this group. Owned by `../pricing-and-pricelists/`. |
+
+### 22.10 Partner
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Pricelist (`property_product_pricelist`) | link → Pricelist | Computed, writable, not company-dependent in storage but behaving as though it were. The pricelist used when selling to this partner. |
+| Specific pricelist (`specific_property_product_pricelist`) | link → Pricelist | Company-dependent. The explicit override behind the computed field; when it is empty the computed field falls back to a country-derived or installation-wide default. It is one of the fields kept in step across a commercial hierarchy. |
+
+Both belong to `../pricing-and-pricelists/`; they are named here because the catalog's own company
+bootstrap creates the pricelists they point at.
+
+### 22.11 Attachment
+
+| Behaviour added | Rule |
+|---|---|
+| Automatic document creation | Creating an attachment whose owner model is a product template or a product variant, and which is not the storage behind a specific field, creates a Product Document for it as a privileged writer — unless the creation carries the suppression flag `disable_product_documents_creation` ("disable product documents creation"). |
+
+### 22.12 Removal Strategy
+
+The expiry capability ships one Removal Strategy record whose method is `fefo` (first expiry first
+out) and whose ordering is specified in [business-rules.md](business-rules.md), section 16.6. The
+Removal Strategy entity itself is owned by `../inventory-operations/`.
+
+### 22.13 Journal Entry and Message Template
+
+| Entity | Behaviour added |
+|---|---|
+| Journal Entry (`account.move`, table `account_move`) | After a successful posting, for every posted record whose kind is a customer invoice, a message rendered from each line's product message template is posted on the invoice. See [workflows.md](workflows.md), section 13. |
+| Message Template (`mail.template`, table `mail_template`) | Nothing is added to the entity itself; it becomes the target of the product's message-template link, and the product form offers a shortcut to open it. |
+
+### 22.14 The image placeholder
+
+Both the Product Template and the Product Variant override the picture shown when no image is
+stored. For any of the five image fields, the placeholder is a product-specific thumbnail shipped
+with the catalog capability rather than the framework's generic placeholder; a variant delegates
+the choice to its template, so a template and all its variants show the same placeholder. Any other
+binary field keeps the framework's generic placeholder.
 
 ---
 
