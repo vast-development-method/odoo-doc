@@ -1683,7 +1683,7 @@ first carrying 100 percent on analytic account "Alpha" and the second 100 percen
 ### V1 — Same customer reference
 
 **Given** two draft orders of the same company and the same customer, both with the customer
-reference "PO-778",
+reference "PO-778" (an arbitrary customer-supplied string),
 **Then** each lists the other as a duplicate.
 
 ### V2 — Source document matching a reference
