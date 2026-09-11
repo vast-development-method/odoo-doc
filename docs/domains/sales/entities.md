@@ -459,7 +459,7 @@ customer-selectable optional block).
 - **Company**: mirrored from the template, stored and indexed.
 - **Database check constraints**:
   - *Accountable lines*: either the display type is set, or both product and unit are present.
-    Message: "Missing required product and UoM on accountable sale quote line."
+    Message: "Missing required product and UoM on accountable sale quote line." (the emitted text abbreviates "unit of measure"; it is reproduced exactly).
   - *Non-accountable lines*: either the display type is absent, or product, quantity and unit are
     all empty or zero. Message: "Forbidden product, quantity and UoM on non-accountable sale quote
     line".

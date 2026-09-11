@@ -18,7 +18,7 @@ These are enforced by the database itself and cannot be bypassed by any operatio
 | Sales Order | A confirmed order must have a confirmation date: the status is `sale` **and** the order date is present, or the status is not `sale`. | "A confirmed sales order requires a confirmation date." |
 | Sales Order Line | An accountable line has its required fields: the display type is set, **or** the line is an advance-invoice line, **or** both the product and the unit are present. | "Missing required fields on accountable sale order line." |
 | Sales Order Line | A non-accountable line is empty: the display type is absent, **or** all of the product, the unit price, the ordered quantity, the unit and the lead time are empty or zero. | "Forbidden values on non-accountable sale order line" |
-| Quotation Template Line | An accountable template line: the display type is set, **or** both the product and the unit are present. | "Missing required product and UoM on accountable sale quote line." |
+| Quotation Template Line | An accountable template line: the display type is set, **or** both the product and the unit are present. | "Missing required product and UoM on accountable sale quote line." — the message text abbreviates "unit of measure"; it is reproduced here exactly as the system emits it. |
 | Quotation Template Line | A non-accountable template line: the display type is absent, **or** the product, the quantity and the unit are all empty or zero. | "Forbidden product, quantity and UoM on non-accountable sale quote line" |
 | Company | The default quotation validity may not be negative. | "You cannot set a negative number for the default quotation validity. Leave empty (or 0) to disable the automatic expiration of quotations." |
 | Sales Tag | The tag name is unique. | "Tag name already exists!" |
@@ -458,7 +458,7 @@ at the database level.
 
 | Condition | Message |
 |---|---|
-| A product that is not a service is flagged to create a purchase request on sale | "Product that is not a service can not create RFQ." |
+| A product that is not a service is flagged to create a purchase request on sale | "Product that is not a service can not create RFQ." — the message text abbreviates "request for quotation"; it is reproduced exactly as emitted. |
 | Such a product has no vendor | "Please define the vendor from whom you would like to purchase this service automatically." |
 
 ---
