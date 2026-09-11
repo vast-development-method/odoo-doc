@@ -100,8 +100,8 @@ Cancelling first resets every posted entry to draft, so the reset guards apply. 
 stateDiagram-v2
     [*] --> draft : create
     draft --> posted : post (all guards pass)
-    draft --> draft : post in soft mode, date in the future\n(schedules automatic posting)
-    posted --> draft : reset to draft\n(no hash, not exchange, not cash basis)
+    draft --> draft : post in soft mode, date in the future (schedules automatic posting)
+    posted --> draft : reset to draft (no hash, not exchange, not cash basis)
     posted --> cancel : cancel (resets to draft first)
     draft --> cancel : cancel
     cancel --> draft : reset to draft
@@ -391,7 +391,7 @@ stateDiagram-v2
     [*] --> active : create
     active --> expired : end moment reached
     active --> revoked : revoke (adviser only)
-    active --> revoked : the company lock date changes\n(a fresh exception is created)
+    active --> revoked : the company lock date changes (a fresh exception is created)
     expired --> revoked : revoke
 ```
 

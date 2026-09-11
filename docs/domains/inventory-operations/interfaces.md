@@ -364,7 +364,11 @@ Suffixes appended to the pull sentence:
 
 ## 8.1 Transfers
 
-Filters: to do (ready, waiting, waiting-another-operation), ready, waiting, late, backorders, planned this month, receipts, deliveries, internal, done, cancelled, starred, my transfers, and the six date categories. Groupings: Operation Type, status, contact, source document, scheduled date, company, product, batch. Text search matches the reference, the source document, the contact and the product.
+Filters, by reproduced name and label: `to_do_transfers` "To Do", `my_transfers` "My Transfers", `draft` "Draft", `waiting` "Waiting", `available` "Ready", `late` "Late", `backorder` "Backorders", `reception` "Receipts", `delivery` "Deliveries", `internal` "Internal", and the six date-category filters `before` "Before", `yesterday` "Yesterday", `today` "Today", `day_1` "Tomorrow", `day_2` "The day after tomorrow", `after` "After".
+
+Groupings, by reproduced name and label: `status` "Status" (on the status), `expected_date` "Scheduled Date" (on the scheduled date), `origin` "Source Document", `partner_country` "Destination Country" (on the contact's country), `picking_type` "Operation Type", `group_by_picking_properties` "Properties" (on the free properties).
+
+Text search matches the reference, the source document, the contact and the product.
 
 Two search fields are computed rather than stored and therefore need their own search contract:
 
@@ -374,7 +378,13 @@ Two search fields are computed rather than stored and therefore need their own s
 
 ## 8.2 Quantity records
 
-Filters: internal Locations, transit Locations, on hand (the Locations the product-quantity computation considers), negative, to count, my counts, conflicts (outdated), starred. Groupings: product, Location, lot, container, owner, product category, storage category, company.
+Filters, by reproduced name and label: `my_count` "My Counts" (the reader is the assignee), `to_count` "To Count" (the scheduled date is on or before today), `to_apply` "To Apply" (a counted quantity has been entered), `conflicts` "Conflicts" (the record is outdated), `negative` "Negative Stock" (the on-hand quantity is below zero), plus the usage filters offered by the Location panel.
+
+Groupings: product, Location, lot, container, owner, product category, storage category, company.
+
+Row actions, by reproduced name and label: `action_stock_quant_relocate` "Relocate", `action_view_stock_moves` "History", `action_view_orderpoints` "Replenishment". List action: `action_apply_all` "Apply All".
+
+Columns whose labels differ from the field names: `quantity` is labelled "On Hand", `available_quantity` is labelled "Available", `inventory_diff_quantity` is labelled "Difference", `user_id` is labelled "User".
 
 Two search fields need their own contract:
 
@@ -437,3 +447,90 @@ The aggregate barcode generator of `workflows.md`, section 28, is the export for
 | `../repair-and-maintenance/` | Equipment records point at a Location and match a serial number by name. |
 | `../fleet/` | Supplies vehicles, vehicle categories and drivers to dispatch management. |
 | `../automation-and-integration/` | Supplies the numbering sequences, the per-company defaults, the system parameters and the scheduled job runner. |
+
+## 8.7 Stock Moves (moves analysis)
+
+Filters, by reproduced name and label: `ready` "Ready", `future` "To Do", `done` "Done", `incoming` "Incoming", `outgoing` "Outgoing", `inventory` "Inventory", `today` "Date".
+
+Groupings, by reproduced name and label: `by_product` "Product" (on the product), `groupby_picking_type_id` "Operation Type", `groupby_picking_id` "Picking" (on the Transfer), `groupby_location_id` "Source Location", `groupby_dest_location_id` "Destination Location", `status` "Status", `groupby_create_date` "Creation Date", `groupby_date` "Scheduled Date".
+
+## 8.8 Stock Move Lines (moves history)
+
+Filters, by reproduced name and label: `todo` "To Do", `done` "Done", `incoming` "Incoming", `outgoing` "Outgoing", `internal` "Internal", `manufacturing` "Manufacturing", `inventory` "Inventory Adjustments", and three date windows: `filter_last_30_days` "Last 30 Days", `filter_last_3_months` "Last 3 Months", `filter_last_12_months` "Last 12 Months".
+
+Groupings, by reproduced name and label: `groupby_product_id` "Product", `by_state` "Status", `by_date` "Date", `by_picking` "Transfers", `by_location` "Location", `by_category` "Category" (on the product category's full name).
+
+## 8.9 Locations
+
+Filters, by reproduced name and label: `in_location` "Internal", `customer` "Customer", `inventory` "Inventory Loss", `prod_inv_location` "Production", `supplier` "Vendor", `view` "Virtual", `empty_location` "Empty Locations".
+
+Groupings: `warehouse_id` "Warehouse", `usage` "Location Type".
+
+## 8.10 Lots
+
+Filters and groupings, by reproduced name and label: `group_by_product` "Product", `group_by_location` "Location", `group_by_creation_date` "Creation date", `group_by_lot_properties` "Properties", plus a grouping by company.
+
+When the list is grouped by Location, the empty groups shown are deliberately widened: the customer and vendor Locations, plus the stock Location of every Warehouse, are always offered as groups even when no lot currently sits there.
+
+## 8.11 Containers
+
+Filters, by reproduced name and label: `internal` "In internal locations", `main_packages` "Main Packages" (containers with no parent container).
+
+## 8.12 Scraps
+
+Groupings, by reproduced name and label: `product` "Product", `location` "Location", `scrap_location` "Scrap Location", `transfer` "Transfer".
+
+---
+
+# 11. Screen-level indicators
+
+A number of fields exist only to drive a screen. They are listed here with the exact condition that turns them on, because a reader cannot infer them from the data model.
+
+| Indicator | Entity | True when |
+|---|---|---|
+| Show check availability | Transfer | The status is waiting, waiting-another-operation or ready; not every move is picked or already fully processed; and at least one move is waiting-another-move, waiting or partially available with a non-zero demand. |
+| Show allocation | Transfer, Batch Transfer | See `calculations.md`, section 24.4. |
+| Show next transfers | Transfer | The destination moves of this Transfer's moves belong to at least one Transfer that is not one of this Transfer's returns. |
+| Show lot text box | Transfer | The lot group is active, the Operation Type allows creating but not using existing lots, and the Transfer is not done. False outright when the Transfer has no detail line and the Operation Type does not allow creating lots. |
+| Has tracking | Transfer | At least one move carries a tracked product. |
+| Is signed | Transfer | A signature image is present. |
+| Is scheduled date editable | Transfer | Always, except for a done or cancelled Transfer, where it follows the lock flag being off. |
+| Has scrap move | Transfer | At least one move's destination Location has inventory-loss usage. |
+| Details visible | Stock Move | See `calculations.md`, section 24.3. |
+| Show quantity picker | Stock Move | The Operation Type kind is not receipt and the product is storable. |
+| Show lot selector | Stock Move | The quantity picker is off, the lot text box is off, the product is tracked, and either existing lots may be used, the move is done, or the move is a return. |
+| Show lot text box | Stock Move | The product is tracked, the Operation Type allows creating but not using existing lots, the move is not done, and the move is not a return. |
+| Show assign serial / import lot | Stock Move | The product is tracked, a product is set, the Operation Type allows creating lots, the move is not a return, and the status is neither done nor cancelled. |
+| Is initial demand editable | Stock Move | The Transfer is unlocked, or the move is in draft. |
+| Lines without destination container | Stock Move | At least one line has a destination container and at least one has none. |
+| Lot fields visible | Stock Move Line | With a Transfer that has an Operation Type and a tracked product: the type allows existing or new lots. Otherwise: the product is tracked. |
+| Duplicated serial number | Stock Quantity | The same serial number appears on more than one record with a positive quantity in an internal or transit Location. |
+| Outdated | Stock Quantity | A count has been entered and `counted − recorded difference` no longer equals the on-hand quantity. |
+| Is empty | Location | The sum of on-hand quantities of the records directly in it (restricted to internal and transit) is at most zero. |
+| Has contents | Package Type | At least one container of that type holds quantity records. |
+| Valid serial shipping container code | Package | The container's name passes the encoding check. |
+| Issues popover | Package | The container's open detail lines point at more than one destination Location. |
+| Hide reservation method | Operation Type | The kind is receipt. |
+| Show operation kind | Operation Type | The kind is receipt, delivery or internal transfer. |
+| Show check availability | Batch Transfer | At least one move of the batch is not ready, cancelled or done. |
+| Match serial | Equipment | At least one Lot exists whose name equals the equipment's serial number, and the reader may read Lots and is in the lot group. |
+
+---
+
+# 12. Onboarding and empty-state guidance
+
+Every Transfer list renders its empty-state guidance from one shared template, parameterised by the Operation Type kind currently in force — taken from the calling context when it restricts the list to one kind, otherwise from the Transfers being listed. The three kinds therefore produce three different pieces of guidance (receive goods, deliver goods, move goods internally).
+
+The quantity list produces its own: "Your stock is currently empty" followed by "Press the \"New\" button to define the quantity for a product in your stock or import quantities from a spreadsheet via the Actions menu".
+
+---
+
+# 13. Client-side actions returned by the domain
+
+Three of the operations return a client-side action rather than a window action; an implementation must reproduce the shape, because the screens dispatch on it.
+
+| Action | Returned by | Parameters |
+|---|---|---|
+| Multi-print | Validating a Transfer when the Operation Types ask for automatic printing | The list of report actions, and optionally one follow-up action (the Reception Report). |
+| Display notification | Merging batches; reverting an adjustment with nothing to revert; adding lines to a wave | A title, a message with one substitution slot, an optional list of links each with a label and an address, whether the notification is sticky, and optionally a follow-up action that closes the current screen. |
+| Soft reload | Adding lines to a wave from inside the wave screen | None. |
