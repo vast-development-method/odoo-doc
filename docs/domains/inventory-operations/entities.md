@@ -1148,3 +1148,540 @@ A transient holder with no meaningful stored fields; it renders the upstream and
 **Add to Wave** (`stock.add.to.wave`): Wave Transfer (`wave_id`), Add to (`mode`, same two values), Responsible (`user_id`), Description (`description`).
 
 Both create or extend the target grouping document and then open it.
+
+---
+
+# 25. Index of storage names
+
+Every field name this domain stores or exposes, in alphabetical order, with the entity that carries it, its kind, the entity it points at when it is a link, and the label a person sees. A name that appears on more than one entity has one row per entity, because the meaning may differ.
+
+This index is the contract for anything that reads or writes the domain from outside: the names below are stable and must be reproduced exactly.
+
+| Storage name | Entity | Type | Points at | Label |
+|---|---|---|---|---|
+| `action` | Stock Rule | selection |  | Action |
+| `active` | Location | boolean |  | Active |
+| `active` | Operation Type | boolean |  | Active |
+| `active` | Put-away Rule | boolean |  | Active |
+| `active` | Route | boolean |  | Active |
+| `active` | Stock Rule | boolean |  | Active |
+| `active` | Warehouse | boolean |  | Active |
+| `additional` | Stock Move | boolean |  | Whether the move was added after the picking's confirmation |
+| `all_children_package_ids` | Package | one-to-many | Package |  |
+| `allow_new_product` | Storage Category | selection |  |  |
+| `allowed_dock_ids` | Batch Transfer | many-to-many |  | Allowed Docks |
+| `allowed_picking_ids` | Batch Transfer | one-to-many | Transfer |  |
+| `allowed_uom_ids` | Stock Move | many-to-many | Unit of Measure |  |
+| `allowed_uom_ids` | Stock Move Line | many-to-many | Unit of Measure |  |
+| `allowed_uom_ids` | Scrap | many-to-many | Unit of Measure |  |
+| `auto` | Stock Rule | selection |  | Automatic Move |
+| `auto_batch` | Operation Type | boolean |  | Automatic Batches |
+| `auto_print_delivery_slip` | Operation Type | boolean |  | Auto Print Delivery Slip |
+| `auto_print_lot_labels` | Operation Type | boolean |  | Auto Print Lot/SN Labels |
+| `auto_print_package_label` | Operation Type | boolean |  | Auto Print Package Label |
+| `auto_print_packages` | Operation Type | boolean |  | Auto Print Packages |
+| `auto_print_product_labels` | Operation Type | boolean |  | Auto Print Product Labels |
+| `auto_print_reception_report` | Operation Type | boolean |  | Auto Print Reception Report |
+| `auto_print_reception_report_labels` | Operation Type | boolean |  | Auto Print Reception Report Labels |
+| `auto_print_return_slip` | Operation Type | boolean |  | Auto Print Return Slip |
+| `auto_show_reception_report` | Operation Type | boolean |  | Show Reception Report at Validation |
+| `availability` | Stock Move | decimal |  | Forecasted Quantity |
+| `available_quantity` | Stock Quantity | decimal |  | Available Quantity |
+| `backorder_id` | Transfer | link | Transfer | Back Order of |
+| `backorder_ids` | Transfer | one-to-many | Transfer | Back Orders |
+| `barcode` | Location | text |  | Barcode |
+| `barcode` | Package Type | text |  | Barcode |
+| `barcode` | Operation Type | text |  | Barcode |
+| `base_weight` | Package Type | decimal |  | Weight |
+| `batch_auto_confirm` | Operation Type | boolean |  | Auto-confirm |
+| `batch_group_by_dest_loc` | Operation Type | boolean |  | Group by Destination Location |
+| `batch_group_by_destination` | Operation Type | boolean |  | Destination Country |
+| `batch_group_by_partner` | Operation Type | boolean |  | Contact |
+| `batch_group_by_src_loc` | Operation Type | boolean |  | Group by Source Location |
+| `batch_id` | Stock Move Line | link |  |  |
+| `batch_id` | Transfer | link | Batch Transfer | Batch Transfer |
+| `batch_max_lines` | Operation Type | integer |  | Maximum lines |
+| `batch_max_pickings` | Operation Type | integer |  | Maximum transfers |
+| `batch_properties_definition` | Operation Type | properties definition |  | Batch Properties |
+| `batch_sequence` | Transfer | integer |  | Sequence |
+| `capacity_ids` | Storage Category | one-to-many | Storage Category Capacity |  |
+| `categ_ids` | Route | many-to-many | Product Category | Product Categories |
+| `category_id` | Put-away Rule | link | Product Category | Product Category |
+| `child_ids` | Location | one-to-many | Location | Contains |
+| `child_internal_location_ids` | Location | many-to-many | Location | Internal locations among descendants |
+| `child_package_dest_ids` | Package | one-to-many | Package | Assigned Contained Packages |
+| `child_package_ids` | Package | one-to-many | Package | Contained Packages |
+| `code` | Operation Type | selection |  | Type of Operation |
+| `code` | Warehouse | text |  | Short Name |
+| `color` | Operation Type | integer |  | Color |
+| `color` | Scrap Reason Tag | text |  | Color |
+| `company_id` | Daily quantity series | link | Company |  |
+| `company_id` | Location | link | Company | Company |
+| `company_id` | Lot | link | Company | Company |
+| `company_id` | Stock Move | link | Company | Company |
+| `company_id` | Stock Move Line | link | Company | Company |
+| `company_id` | Package | link | Company | Company |
+| `company_id` | Package History | link | Company | Company |
+| `company_id` | Package Type | link | Company | Company |
+| `company_id` | Transfer | link | Company | Company |
+| `company_id` | Batch Transfer | link | Company | Company |
+| `company_id` | Operation Type | link | Company | Company |
+| `company_id` | Put-away Rule | link | Company | Company |
+| `company_id` | Stock Quantity | link |  | Company |
+| `company_id` | Route | link | Company | Company |
+| `company_id` | Stock Rule | link | Company | Company |
+| `company_id` | Scrap | link | Company | Company |
+| `company_id` | Storage Category | link | Company | Company |
+| `company_id` | Storage Category Capacity | link | Company | Company |
+| `company_id` | Warehouse | link | Company | Company |
+| `complete_name` | Location | text |  | Full Location Name |
+| `complete_name` | Package | text |  | Full Package Name |
+| `consume_line_ids` | Stock Move Line | many-to-many | Stock Move Line |  |
+| `contained_quant_ids` | Package | one-to-many | Stock Quantity |  |
+| `content_description` | Package | text |  | Contents |
+| `count_move_ready` | Operation Type | integer |  |  |
+| `count_picking` | Operation Type | integer |  |  |
+| `count_picking_backorders` | Operation Type | integer |  |  |
+| `count_picking_batch` | Operation Type | integer |  |  |
+| `count_picking_draft` | Operation Type | integer |  |  |
+| `count_picking_late` | Operation Type | integer |  |  |
+| `count_picking_ready` | Operation Type | integer |  |  |
+| `count_picking_waiting` | Operation Type | integer |  |  |
+| `count_picking_wave` | Operation Type | integer |  |  |
+| `create_backorder` | Operation Type | selection |  | Create Backorder |
+| `cyclic_inventory_frequency` | Location | integer |  | Inventory Frequency |
+| `cyclic_inventory_frequency` | Stock Quantity | integer |  |  |
+| `date` | Daily quantity series | date |  | Date |
+| `date` | Stock Move | date and time |  | Date Scheduled |
+| `date` | Stock Move Line | date and time |  | Date |
+| `date_deadline` | Stock Move | date and time |  | Deadline |
+| `date_deadline` | Transfer | date and time |  | Deadline |
+| `date_done` | Transfer | date and time |  | Date of Transfer |
+| `date_done` | Scrap | date and time |  | Date |
+| `default_location_dest_id` | Operation Type | link | Location | Destination Location |
+| `default_location_src_id` | Operation Type | link | Location | Source Location |
+| `delay` | Stock Rule | integer |  | Lead Time |
+| `delay_alert_date` | Stock Move | date and time |  | Delay Alert Date |
+| `delay_alert_date` | Transfer | date and time |  | Delay Alert Date |
+| `delivery_count` | Lot | integer |  | Delivery order count |
+| `delivery_ids` | Lot | many-to-many | Transfer | Transfers |
+| `delivery_route_id` | Warehouse | link | Route | Delivery Route |
+| `delivery_steps` | Warehouse | selection |  | Outgoing Shipments |
+| `description` | Batch Transfer | text |  | Description |
+| `description_picking` | Stock Move | long text |  | Description Of Picking |
+| `description_picking` | Stock Move Line | long text |  |  |
+| `description_picking_manual` | Stock Move | long text |  |  |
+| `dest_complete_name` | Package | text |  | Package Name At Destination |
+| `dispatch_management` | Operation Type | boolean |  | Dispatch Management |
+| `display_assign_serial` | Stock Move | boolean |  |  |
+| `display_complete` | Lot | boolean |  |  |
+| `display_import_lot` | Stock Move | boolean |  |  |
+| `dock_id` | Batch Transfer | link | Location | Dock |
+| `dock_ids` | Operation Type | many-to-many | Location |  |
+| `driver_id` | Batch Transfer | link | Contact | Driver |
+| `end_date` | Batch Transfer | date and time |  | End Date |
+| `equipment_count` | Location | integer |  | Equipment Count |
+| `estimated_shipping_volume` | Batch Transfer | decimal |  | shipping_volume |
+| `estimated_shipping_weight` | Batch Transfer | decimal |  | shipping_weight |
+| `favorite_user_ids` | Operation Type | many-to-many | User |  |
+| `forecast_availability` | Stock Move | decimal |  | Forecast Availability |
+| `forecast_expected_date` | Stock Move | date and time |  | Forecasted Expected date |
+| `forecast_weight` | Location | decimal |  | Forecasted Weight |
+| `has_deadline_issue` | Transfer | boolean |  | Is late |
+| `has_dispatch_management` | Batch Transfer | boolean |  | Dispatch Management |
+| `has_lines_without_result_package` | Stock Move | boolean |  |  |
+| `has_quants` | Package Type | boolean |  | Has Contents |
+| `has_scrap_move` | Transfer | boolean |  | Has Scrap Moves |
+| `has_tracking` | Stock Move | selection |  | Product with Tracking |
+| `has_tracking` | Transfer | boolean |  |  |
+| `height` | Package Type | decimal |  | Height |
+| `hide_reservation_method` | Operation Type | boolean |  |  |
+| `in_date` | Stock Quantity | date and time |  | Incoming Date |
+| `in_type_id` | Warehouse | link | Operation Type | In Type |
+| `incoming_move_line_ids` | Location | one-to-many | Stock Move Line |  |
+| `int_type_id` | Warehouse | link | Operation Type | Internal Type |
+| `inventory_date` | Stock Quantity | date |  | Scheduled |
+| `inventory_diff_quantity` | Stock Quantity | decimal |  | Difference |
+| `inventory_name` | Stock Move | text |  |  |
+| `inventory_quantity` | Stock Quantity | decimal |  | Counted |
+| `inventory_quantity_auto_apply` | Stock Quantity | decimal |  | Inventoried Quantity |
+| `inventory_quantity_set` | Stock Quantity | boolean |  |  |
+| `is_date_editable` | Stock Move | boolean |  | Is Date Editable |
+| `is_date_editable` | Transfer | boolean |  | Is Scheduled Date Editable |
+| `is_empty` | Location | boolean |  | Is Empty |
+| `is_entire_pack` | Stock Move Line | boolean |  | Is added through entire package |
+| `is_favorite` | Operation Type | boolean |  | Show Operation in Overview |
+| `is_favorite` | Stock Quantity | boolean |  |  |
+| `is_initial_demand_editable` | Stock Move | boolean |  | Is initial demand editable |
+| `is_inventory` | Stock Move | boolean |  | Inventory |
+| `is_inventory` | Stock Move Line | boolean |  |  |
+| `is_locked` | Stock Move | boolean |  |  |
+| `is_locked` | Stock Move Line | boolean |  |  |
+| `is_locked` | Transfer | boolean |  |  |
+| `is_outdated` | Stock Quantity | boolean |  | Quantity has been moved since last count |
+| `is_quantity_done_editable` | Stock Move | boolean |  | Is quantity done editable |
+| `is_signed` | Transfer | boolean |  | Is Signed |
+| `is_storable` | Stock Move | boolean |  |  |
+| `is_wave` | Batch Transfer | boolean |  | This batch is a wave |
+| `json_popover` | Package | text |  | JSON data for popover widget |
+| `json_popover` | Transfer | text |  | JSON data for the popover widget |
+| `kanban_dashboard_graph` | Operation Type | long text |  |  |
+| `last_count_date` | Stock Quantity | date |  |  |
+| `last_inventory_date` | Location | date |  | Last Inventory |
+| `length_uom_name` | Package Type | text |  | Length unit of measure label |
+| `location_dest_from_rule` | Stock Rule | boolean |  | Destination location origin from rule |
+| `location_dest_id` | Stock Move | link | Location | Intermediate Location |
+| `location_dest_id` | Stock Move Line | link | Location | To |
+| `location_dest_id` | Package | link | Location | Destination location |
+| `location_dest_id` | Package History | link | Location | Destination Location |
+| `location_dest_id` | Transfer | link | Location | Destination Location |
+| `location_dest_id` | Stock Rule | link | Location | Destination Location |
+| `location_dest_usage` | Stock Move | selection |  | Destination Location Type |
+| `location_dest_usage` | Stock Move Line | selection |  | Destination Location Type |
+| `location_final_id` | Stock Move | link | Location | Final Location |
+| `location_id` | Location | link | Location | Parent Location |
+| `location_id` | Lot | link | Location | Location |
+| `location_id` | Stock Move | link | Location | Source Location |
+| `location_id` | Stock Move Line | link | Location | From |
+| `location_id` | Package | link | Location | Location |
+| `location_id` | Package History | link | Location | Origin Location |
+| `location_id` | Transfer | link | Location | Source Location |
+| `location_id` | Stock Quantity | link | Location | Location |
+| `location_id` | Scrap | link | Location | Source Location |
+| `location_ids` | Storage Category | one-to-many | Location |  |
+| `location_in_id` | Put-away Rule | link | Location | When product arrives in |
+| `location_out_id` | Put-away Rule | link | Location | Store to sublocation |
+| `location_src_id` | Stock Rule | link | Location | Source Location |
+| `location_usage` | Stock Move | selection |  | Source Location Type |
+| `location_usage` | Stock Move Line | selection |  | Source Location Type |
+| `lot_id` | Stock Move Line | link | Lot | Lot/Serial Number |
+| `lot_id` | Transfer | link | Lot | Lot/Serial Number |
+| `lot_id` | Stock Quantity | link | Lot | Lot/Serial Number |
+| `lot_id` | Scrap | link | Lot | Lot/Serial |
+| `lot_ids` | Stock Move | many-to-many | Lot | Serial Numbers |
+| `lot_label_format` | Operation Type | selection |  | Lot Label Format to auto-print |
+| `lot_name` | Stock Move Line | text |  | Lot/Serial Number Name |
+| `lot_properties` | Lot | properties |  | Properties |
+| `lot_properties` | Stock Quantity | properties |  |  |
+| `lot_stock_id` | Warehouse | link | Location | Location Stock |
+| `lots_visible` | Stock Move Line | boolean |  |  |
+| `max_weight` | Package Type | decimal |  | Max Weight |
+| `max_weight` | Storage Category | decimal |  | Max Weight |
+| `method` | Removal Strategy | text |  | Method |
+| `move_dest_ids` | Stock Move | many-to-many | Stock Move | Destination Moves |
+| `move_id` | Stock Move Line | link | Stock Move | Stock Operation |
+| `move_ids` | Transfer | one-to-many | Stock Move | Stock Moves |
+| `move_ids` | Batch Transfer | one-to-many | Stock Move | Stock moves |
+| `move_ids` | Document Reference | many-to-many | Stock Move | Stock Moves |
+| `move_ids` | Scrap | one-to-many | Stock Move |  |
+| `move_line_ids` | Stock Move | one-to-many | Stock Move Line |  |
+| `move_line_ids` | Package | one-to-many | Stock Move Line |  |
+| `move_line_ids` | Package History | one-to-many | Stock Move Line | Move Lines |
+| `move_line_ids` | Transfer | one-to-many | Stock Move Line | Operations |
+| `move_line_ids` | Batch Transfer | one-to-many | Stock Move Line | Stock move lines |
+| `move_lines_count` | Stock Move | integer |  |  |
+| `move_orig_ids` | Stock Move | many-to-many | Stock Move | Original Move |
+| `move_partner_id` | Stock Move Line | link |  |  |
+| `move_type` | Transfer | selection |  | Shipping Policy |
+| `move_type` | Operation Type | selection |  | Shipping Policy |
+| `mto_pull_id` | Warehouse | link | Stock Rule | MTO rule |
+| `name` | Removal Strategy | text |  | Name |
+| `name` | Location | text |  | Location Name |
+| `name` | Lot | text |  | Lot/Serial Number |
+| `name` | Package | text |  | Package Reference |
+| `name` | Package Type | text |  | Package Type |
+| `name` | Transfer | text |  | Reference |
+| `name` | Batch Transfer | text |  | Batch Transfer |
+| `name` | Operation Type | text |  | Operation Type |
+| `name` | Document Reference | text |  | Reference |
+| `name` | Route | text |  | Route |
+| `name` | Stock Rule | text |  | Name |
+| `name` | Scrap | text |  | Reference |
+| `name` | Scrap Reason Tag | text |  | Name |
+| `name` | Storage Category | text |  | Storage Category |
+| `name` | Warehouse | text |  | Warehouse |
+| `net_weight` | Location | decimal |  | Net Weight |
+| `never_product_template_attribute_value_ids` | Stock Move | many-to-many | Product Attribute Value | Never attribute Values |
+| `next_inventory_date` | Location | date |  | Next Expected |
+| `next_serial` | Stock Move | text |  | First SN/Lot |
+| `next_serial_count` | Stock Move | integer |  | Number of SN/Lots |
+| `note` | Lot | rich text |  | Description |
+| `note` | Transfer | rich text |  | Notes |
+| `on_hand` | Stock Quantity | boolean |  | On Hand |
+| `orderpoint_id` | Stock Move | link | Reordering Rule | Original Reordering Rule |
+| `origin` | Stock Move | text |  | Source Document |
+| `origin` | Stock Move Line | text |  | Source |
+| `origin` | Transfer | text |  | Source Document |
+| `origin` | Scrap | text |  | Source Document |
+| `origin_returned_move_id` | Stock Move | link | Stock Move | Origin return move |
+| `out_type_id` | Warehouse | link | Operation Type | Out Type |
+| `outermost_dest_id` | Package History | link | Package | Outermost Destination Container |
+| `outermost_package_id` | Package | link | Package | Outermost Destination Container |
+| `outgoing_move_line_ids` | Location | one-to-many | Stock Move Line |  |
+| `owner_id` | Stock Move Line | link | Contact | From Owner |
+| `owner_id` | Package | link | Contact | Owner |
+| `owner_id` | Transfer | link | Contact | Assign Owner |
+| `owner_id` | Stock Quantity | link | Contact | Owner |
+| `owner_id` | Scrap | link | Contact | Owner |
+| `pack_date` | Package | date |  | Pack Date |
+| `pack_type_id` | Warehouse | link | Operation Type | Pack Type |
+| `package_capacity_ids` | Storage Category | one-to-many | Storage Category Capacity |  |
+| `package_dest_id` | Package | link | Package | Destination Container |
+| `package_history_id` | Stock Move Line | link | Package History | Package History |
+| `package_history_ids` | Transfer | many-to-many | Package History | Transfered Packages |
+| `package_id` | Stock Move Line | link | Package | Source Package |
+| `package_id` | Package History | link | Package | Package |
+| `package_id` | Stock Quantity | link | Package | Package |
+| `package_id` | Scrap | link | Package | Package |
+| `package_ids` | Stock Move | one-to-many | Package | Packages |
+| `package_label_to_print` | Operation Type | selection |  | Package Label to Print |
+| `package_name` | Package History | text |  | Package Name |
+| `package_type_id` | Package | link | Package Type | Package Type |
+| `package_type_id` | Package History | link | Package Type |  |
+| `package_type_id` | Storage Category Capacity | link | Package Type | Package Type |
+| `package_type_ids` | Put-away Rule | many-to-many | Package Type | Package Type |
+| `package_type_selectable` | Route | boolean |  | Applicable on Package Type |
+| `package_use` | Package Type | selection |  | Package Use |
+| `packages_count` | Transfer | integer |  | Packages Count |
+| `packaging_length` | Package Type | decimal |  | Length |
+| `packaging_uom_id` | Stock Move | link | Unit of Measure | Packaging |
+| `packaging_uom_qty` | Stock Move | decimal |  | Packaging Quantity |
+| `parent_dest_id` | Package History | link | Package | Destination Container |
+| `parent_dest_name` | Package History | text |  | Destination Container Name |
+| `parent_orig_id` | Package History | link | Package | Origin Container |
+| `parent_orig_name` | Package History | text |  | Origin Container Name |
+| `parent_package_id` | Package | link | Package | Container |
+| `parent_path` | Location | text |  |  |
+| `parent_path` | Package | text |  |  |
+| `partner_address_id` | Stock Rule | link | Contact | Partner Address |
+| `partner_country_id` | Transfer | link | Country |  |
+| `partner_id` | Stock Move | link | Contact | Destination Address  |
+| `partner_id` | Transfer | link | Contact | Contact |
+| `partner_id` | Warehouse | link | Contact | Address |
+| `partner_ids` | Lot | many-to-many | Contact |  |
+| `pick_type_id` | Warehouse | link | Operation Type | Pick Type |
+| `picked` | Stock Move | boolean |  | Picked |
+| `picked` | Stock Move Line | boolean |  | Picked |
+| `picking_code` | Stock Move | selection |  |  |
+| `picking_code` | Stock Move Line | selection |  |  |
+| `picking_id` | Stock Move | link | Transfer | Transfer |
+| `picking_id` | Stock Move Line | link | Transfer | Transfer |
+| `picking_id` | Scrap | link | Transfer | Picking |
+| `picking_ids` | Package | many-to-many | Transfer | Transfers |
+| `picking_ids` | Package History | many-to-many | Transfer | Transfers |
+| `picking_ids` | Batch Transfer | one-to-many | Transfer | Transfers |
+| `picking_ids` | Document Reference | many-to-many | Transfer | Transfers |
+| `picking_location_dest_id` | Stock Move Line | link |  |  |
+| `picking_location_id` | Stock Move Line | link |  |  |
+| `picking_partner_id` | Stock Move Line | link |  |  |
+| `picking_properties` | Transfer | properties |  | Properties |
+| `picking_properties_definition` | Operation Type | properties definition |  | Picking Properties |
+| `picking_type_code` | Transfer | selection |  |  |
+| `picking_type_code` | Batch Transfer | selection |  |  |
+| `picking_type_code_domain` | Stock Rule | structured data |  |  |
+| `picking_type_entire_packs` | Transfer | boolean |  |  |
+| `picking_type_id` | Stock Move | link | Operation Type | Operation Type |
+| `picking_type_id` | Stock Move Line | link | Operation Type | Operation type |
+| `picking_type_id` | Transfer | link | Operation Type | Operation Type |
+| `picking_type_id` | Batch Transfer | link | Operation Type | Operation Type |
+| `picking_type_id` | Stock Rule | link | Operation Type | Operation Type |
+| `picking_type_use_create_lots` | Stock Move Line | boolean |  |  |
+| `picking_type_use_existing_lots` | Stock Move Line | boolean |  |  |
+| `picking_warning_text` | Transfer | long text |  | Picking Instructions |
+| `price_unit` | Stock Move | decimal |  | Unit Price |
+| `print_label` | Operation Type | boolean |  | Generate Shipping Labels |
+| `printed` | Transfer | boolean |  | Printed |
+| `priority` | Stock Move | selection |  | Priority |
+| `priority` | Transfer | selection |  | Priority |
+| `procure_method` | Stock Move | selection |  | Supply Method |
+| `procure_method` | Stock Rule | selection |  | Supply Method |
+| `procurement_values` | Stock Move | structured data |  |  |
+| `produce_line_ids` | Stock Move Line | many-to-many | Stock Move Line |  |
+| `product_capacity_ids` | Storage Category | one-to-many | Storage Category Capacity |  |
+| `product_categ_id` | Stock Quantity | link |  |  |
+| `product_categ_selectable` | Route | boolean |  | Applicable on Product Category |
+| `product_category_id` | Stock Move | link | Product Category | Product Category |
+| `product_category_name` | Stock Move Line | text |  | Product Category |
+| `product_id` | Daily quantity series | link | Product | Product |
+| `product_id` | Lot | link | Product | Product |
+| `product_id` | Stock Move | link | Product | Product |
+| `product_id` | Stock Move Line | link | Product | Product |
+| `product_id` | Transfer | link | Product | Product |
+| `product_id` | Put-away Rule | link | Product | Product |
+| `product_id` | Stock Quantity | link | Product | Product |
+| `product_id` | Scrap | link | Product | Product |
+| `product_id` | Storage Category Capacity | link | Product | Product |
+| `product_ids` | Route | many-to-many | Product Template | Products |
+| `product_label_format` | Operation Type | selection |  | Product Label Format to auto-print |
+| `product_qty` | Daily quantity series | decimal |  | Quantity |
+| `product_qty` | Lot | decimal |  | On Hand Quantity |
+| `product_qty` | Stock Move | decimal |  | Real Quantity |
+| `product_selectable` | Route | boolean |  | Applicable on Product |
+| `product_tmpl_id` | Daily quantity series | link | Product Template |  |
+| `product_tmpl_id` | Stock Move | link | Product Template | Product Template |
+| `product_tmpl_id` | Stock Quantity | link | Product Template | Product Template |
+| `product_uom` | Stock Move | link | Unit of Measure | Unit |
+| `product_uom_id` | Lot | link | Unit of Measure | Unit |
+| `product_uom_id` | Stock Move Line | link | Unit of Measure | Unit |
+| `product_uom_id` | Stock Quantity | link | Unit of Measure | Unit |
+| `product_uom_id` | Scrap | link | Unit of Measure | Unit |
+| `product_uom_id` | Storage Category Capacity | link |  |  |
+| `product_uom_qty` | Stock Move | decimal |  | Demand |
+| `products_availability` | Transfer | text |  | Product Availability |
+| `products_availability_state` | Transfer | selection |  |  |
+| `propagate_cancel` | Stock Move | boolean |  | Propagate cancel and split |
+| `propagate_cancel` | Stock Rule | boolean |  | Cancel Next Move |
+| `propagate_carrier` | Stock Rule | boolean |  | Propagation of carrier |
+| `properties` | Batch Transfer | properties |  | Properties |
+| `push_domain` | Stock Rule | text |  | Push Applicability |
+| `putaway_rule_ids` | Location | one-to-many | Put-away Rule | Putaway Rules |
+| `qc_type_id` | Warehouse | link | Operation Type | Quality Control Type |
+| `quant_id` | Stock Move Line | link | Stock Quantity | Pick From |
+| `quant_ids` | Location | one-to-many | Stock Quantity |  |
+| `quant_ids` | Lot | one-to-many | Stock Quantity | Quants |
+| `quant_ids` | Package | one-to-many | Stock Quantity | Bulk Content |
+| `quantity` | Stock Move | decimal |  | Quantity |
+| `quantity` | Stock Move Line | decimal |  | Quantity |
+| `quantity` | Stock Quantity | decimal |  | Quantity |
+| `quantity` | Storage Category Capacity | decimal |  | Quantity |
+| `quantity_product_uom` | Stock Move Line | decimal |  | Quantity in Product UoM |
+| `reception_route_id` | Warehouse | link | Route | Receipt Route |
+| `reception_steps` | Warehouse | selection |  | Incoming Shipments |
+| `ref` | Lot | text |  | Internal Reference |
+| `reference` | Stock Move | text |  | Reference |
+| `reference` | Stock Move Line | text |  |  |
+| `reference_ids` | Stock Move | many-to-many | Document Reference | References |
+| `reference_ids` | Transfer | many-to-many | Document Reference | References |
+| `removal_strategy_id` | Location | link | Removal Strategy | Removal Strategy |
+| `replenish_location` | Location | boolean |  | Replenishments |
+| `reservation_date` | Stock Move | date |  | Date to Reserve |
+| `reservation_days_before` | Operation Type | integer |  | Days |
+| `reservation_days_before_priority` | Operation Type | integer |  | Days when starred |
+| `reservation_method` | Operation Type | selection |  | Reservation Method |
+| `reserved_quantity` | Stock Quantity | decimal |  | Reserved Quantity |
+| `restrict_partner_id` | Stock Move | link | Contact | Owner  |
+| `result_package_dest_name` | Stock Move Line | text |  | Destination Package Name |
+| `result_package_id` | Stock Move Line | link | Package | Destination Package |
+| `resupply_route_ids` | Warehouse | one-to-many | Route | Resupply Routes |
+| `resupply_wh_ids` | Warehouse | many-to-many | Warehouse | Resupply From |
+| `return_count` | Transfer | integer |  | # Returns |
+| `return_id` | Transfer | link | Transfer | Return of |
+| `return_ids` | Transfer | one-to-many | Transfer | Returns |
+| `return_picking_type_id` | Operation Type | link | Operation Type | Operation Type for Returns |
+| `returned_move_ids` | Stock Move | one-to-many | Stock Move | All returned moves |
+| `route_company_id` | Stock Rule | link |  | Route Company |
+| `route_id` | Stock Rule | link | Route | Route |
+| `route_ids` | Stock Move | many-to-many | Route | Destination route |
+| `route_ids` | Package Type | many-to-many | Route | Routes |
+| `route_ids` | Warehouse | many-to-many | Route | Routes |
+| `route_sequence` | Stock Rule | integer |  | Route Sequence |
+| `rule_id` | Stock Move | link | Stock Rule | Stock Rule |
+| `rule_ids` | Route | one-to-many | Stock Rule | Rules |
+| `rule_message` | Stock Rule | rich text |  |  |
+| `scheduled_date` | Stock Move Line | date and time |  | Scheduled Date |
+| `scheduled_date` | Transfer | date and time |  | Scheduled Date |
+| `scheduled_date` | Batch Transfer | date and time |  | Scheduled Date |
+| `scrap_id` | Stock Move | link | Scrap | Scrap operation |
+| `scrap_id` | Stock Move Line | link |  |  |
+| `scrap_location_id` | Scrap | link | Location | Scrap Location |
+| `scrap_qty` | Scrap | decimal |  | Quantity |
+| `scrap_reason_tag_ids` | Scrap | many-to-many | Scrap Reason Tag | Scrap Reason |
+| `search_date_category` | Transfer | selection |  | Date Category |
+| `sequence` | Stock Move | integer |  | Sequence |
+| `sequence` | Package Type | integer |  | Sequence |
+| `sequence` | Operation Type | integer |  | Sequence |
+| `sequence` | Put-away Rule | integer |  | Priority |
+| `sequence` | Route | integer |  | Sequence |
+| `sequence` | Stock Rule | integer |  | Sequence |
+| `sequence` | Scrap Reason Tag | integer |  |  |
+| `sequence` | Warehouse | integer |  |  |
+| `sequence_code` | Package Type | text |  | Sequence Prefix |
+| `sequence_code` | Operation Type | text |  | Sequence Prefix |
+| `sequence_id` | Package Type | link | Numbering Sequence | Reference Sequence |
+| `sequence_id` | Operation Type | link | Numbering Sequence | Reference Sequence |
+| `set_package_type` | Operation Type | boolean |  | Set Package Type |
+| `shipping_volume` | Transfer | decimal |  | Volume for Shipping |
+| `shipping_weight` | Package | decimal |  | Shipping Weight |
+| `shipping_weight` | Transfer | decimal |  | Weight for Shipping |
+| `should_replenish` | Scrap | boolean |  | Replenish Quantities |
+| `show_allocation` | Transfer | boolean |  |  |
+| `show_allocation` | Batch Transfer | boolean |  | Show Allocation Button |
+| `show_check_availability` | Transfer | boolean |  |  |
+| `show_check_availability` | Batch Transfer | boolean |  | Show Check Availability |
+| `show_details_visible` | Stock Move | boolean |  | Details Visible |
+| `show_entire_packs` | Operation Type | boolean |  | Move Entire Packages |
+| `show_lots_m2o` | Stock Move | boolean |  | Show lot_id |
+| `show_lots_text` | Stock Move | boolean |  | Show lot_name |
+| `show_lots_text` | Transfer | boolean |  |  |
+| `show_lots_text` | Batch Transfer | boolean |  |  |
+| `show_next_pickings` | Transfer | boolean |  |  |
+| `show_operations` | Stock Move | boolean |  |  |
+| `show_operations` | Transfer | boolean |  |  |
+| `show_operations` | Operation Type | boolean |  | Show Detailed Operations |
+| `show_picking_type` | Operation Type | boolean |  |  |
+| `show_quant` | Stock Move | boolean |  | Show Quant |
+| `signature` | Transfer | image |  | Signature |
+| `sn_duplicated` | Stock Quantity | boolean |  | Duplicated Serial Number |
+| `state` | Daily quantity series | selection |  | State |
+| `state` | Stock Move | selection |  | Status |
+| `state` | Stock Move Line | selection |  |  |
+| `state` | Transfer | selection |  | Status |
+| `state` | Batch Transfer | selection |  |  |
+| `state` | Scrap | selection |  | Status |
+| `storage_category_capacity_ids` | Package Type | one-to-many | Storage Category Capacity | Storage Category Capacity |
+| `storage_category_id` | Location | link | Storage Category | Storage Category |
+| `storage_category_id` | Put-away Rule | link | Storage Category | Storage Category |
+| `storage_category_id` | Stock Quantity | link |  |  |
+| `storage_category_id` | Storage Category Capacity | link | Storage Category |  |
+| `store_type_id` | Warehouse | link | Operation Type | Storage Type |
+| `sublocation` | Put-away Rule | selection |  |  |
+| `supplied_wh_id` | Route | link | Warehouse | Supplied Warehouse |
+| `supplier_wh_id` | Route | link | Warehouse | Supplying Warehouse |
+| `tracking` | Stock Move Line | selection |  |  |
+| `tracking` | Stock Quantity | selection |  |  |
+| `tracking` | Scrap | selection |  | Product Tracking |
+| `usage` | Location | selection |  | Location Type |
+| `use_create_lots` | Transfer | boolean |  |  |
+| `use_create_lots` | Operation Type | boolean |  | Create New Lots/Serial Numbers |
+| `use_existing_lots` | Transfer | boolean |  |  |
+| `use_existing_lots` | Operation Type | boolean |  | Use Existing Lots/Serial Numbers |
+| `used_volume_percentage` | Batch Transfer | decimal |  | Volume % |
+| `used_weight_percentage` | Batch Transfer | decimal |  | Weight % |
+| `user_id` | Transfer | link | User | Responsible |
+| `user_id` | Batch Transfer | link | User | Responsible |
+| `user_id` | Stock Quantity | link | User | Assigned To |
+| `valid_sscc` | Package | boolean |  | Package name is valid SSCC |
+| `vehicle_category_id` | Batch Transfer | link | Vehicle Model Category | Vehicle Category |
+| `vehicle_id` | Batch Transfer | link | Vehicle | Vehicle |
+| `vehicle_volume_capacity` | Batch Transfer | decimal |  | Max Volume (m³) |
+| `vehicle_weight_capacity` | Batch Transfer | decimal |  | Vehcilce Payload Capacity |
+| `view_location_id` | Warehouse | link | Location | View Location |
+| `volume_uom_name` | Batch Transfer | text |  | Volume unit of measure label |
+| `warehouse_address_id` | Transfer | link | Contact |  |
+| `warehouse_domain_ids` | Route | one-to-many | Warehouse |  |
+| `warehouse_id` | Daily quantity series | link | Warehouse |  |
+| `warehouse_id` | Location | link | Warehouse |  |
+| `warehouse_id` | Stock Move | link | Warehouse | Warehouse |
+| `warehouse_id` | Batch Transfer | link | Warehouse |  |
+| `warehouse_id` | Operation Type | link | Warehouse | Warehouse |
+| `warehouse_id` | Stock Quantity | link | Warehouse |  |
+| `warehouse_id` | Stock Rule | link | Warehouse | Warehouse |
+| `warehouse_ids` | Route | many-to-many | Warehouse | Warehouses |
+| `warehouse_selectable` | Route | boolean |  | Applicable on Warehouse |
+| `warehouse_view_ids` | Location | one-to-many | Warehouse |  |
+| `wave_category_ids` | Operation Type | many-to-many | Product Category | Wave Product Categories |
+| `wave_group_by_category` | Operation Type | boolean |  | Product Category |
+| `wave_group_by_location` | Operation Type | boolean |  | Location |
+| `wave_group_by_product` | Operation Type | boolean |  | Product |
+| `wave_location_ids` | Operation Type | many-to-many | Location | Wave Locations |
+| `weight_bulk` | Transfer | decimal |  | Bulk Weight |
+| `weight_uom_name` | Package Type | text |  | Weight unit of measure label |
+| `weight_uom_name` | Batch Transfer | text |  | Weight unit of measure label |
+| `weight_uom_name` | Storage Category | text |  | Weight unit |
+| `wh_input_stock_loc_id` | Warehouse | link | Location | Input Location |
+| `wh_output_stock_loc_id` | Warehouse | link | Location | Output Location |
+| `wh_pack_stock_loc_id` | Warehouse | link | Location | Packing Location |
+| `wh_qc_stock_loc_id` | Warehouse | link | Location | Quality Control Location |
+| `width` | Package Type | decimal |  | Width |
+| `xdock_type_id` | Warehouse | link | Operation Type | Cross Dock Type |
+| `zip` | Transfer | text |  | Zip |

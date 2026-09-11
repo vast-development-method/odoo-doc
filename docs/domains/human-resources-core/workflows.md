@@ -263,6 +263,14 @@ the effective date is required.
    end). Let the new version's contract start date be the supplied value or, failing that,
    the period start; and the contract end date be the supplied value or, failing that, the
    period end.
+
+   **When the date falls outside every contract period**, the pair is (empty, empty), so the
+   new version is created **with no contract dates at all** — it does not inherit the
+   contract of the version it copies. This is the rule that lets a person be recorded in the
+   directory during a gap between two engagements. Supplying explicit contract dates in the
+   call overrides the empty pair. Conversely, when the date falls inside *any* contract
+   period of the employee — even one described by versions other than the one being copied —
+   that period's dates are taken.
 5. **Propagate an end-date-only change.** If the resulting contract start date equals the
    period start but the resulting contract end date differs from the period end, then every
    version of this employee whose contract start date equals the period start is written,
@@ -590,6 +598,93 @@ The scheduled job of
 activity for every employee whose job position expects a certification that the employee
 either lacks or holds with an expiry within three months, assigning it to the employee's own
 user, or their manager's user, or the job position's recruiter, in that order.
+
+---
+
+## 11bis. Resume lines created automatically
+
+Three capabilities write resume lines without anybody opening the employee form.
+
+### 11bis.1 Passing a certification survey
+
+**Trigger:** a survey participation is marked as finished.
+
+1. Keep the participations whose survey is flagged as a certification **and** whose score
+   passed the success threshold.
+2. Group them by the participant's contact.
+3. Find the employees whose user's contact is one of those contacts.
+4. Load the resume lines of those employees that already point at one of the surveys
+   concerned, and index them by the pair (employee, survey).
+5. For each employee and each of that person's qualifying participations, prepare a resume
+   line with:
+   - the employee;
+   - the title set to the survey's title;
+   - the start date set to **today**;
+   - the end date set to today plus the survey's validity in months, or empty when the
+     validity is zero;
+   - the description set to the survey's description rendered as plain text, or an empty text;
+   - the line type set to the shipped **Internal Certification** type;
+   - the survey link set.
+6. When a line already exists for that (employee, survey) pair, **rewrite** it with those
+   values; otherwise create it.
+
+The consequence is that re-passing a certification renews the existing line rather than piling
+up duplicates, and the line's Expiration Status recomputes accordingly.
+
+### 11bis.2 Completing a course
+
+**Trigger:** a course membership's completion state is updated to completed.
+
+1. Keep the memberships whose member status is completed.
+2. Find the employees whose user's contact is one of the completing contacts, with elevated
+   rights.
+3. For each employee, take the course they completed. If no resume line already exists for
+   that employee, that course and the **Training** line type, create one with:
+   - the employee;
+   - the title set to the course's name;
+   - the start date set to today;
+   - the description set to the course's description rendered as plain text;
+   - the line type set to the shipped Training type;
+   - the course kind set to `elearning`;
+   - the course link set.
+
+Three further thread messages are posted on the employee, all with elevated rights:
+
+| Event | Message |
+|---|---|
+| The person joins a course | "The employee subscribed to the course *the course name*", where the name links to the course's public address. |
+| The person leaves a course | "The employee left the course *the course name*", likewise linked. |
+| The completion notification is sent | "The employee has completed the course *the course name*", likewise linked. |
+
+The employee that receives the message is resolved from the contact: among that contact's
+users, the one whose employee's company matches the contact's company, or any of them when the
+contact has no company.
+
+### 11bis.3 Attending an onsite course
+
+**Trigger:** an event is created from the resume-line form.
+
+1. When the creating context carries the onsite-course marker, look up the employee named in
+   the context's default employee, requiring it to have a work contact.
+2. For each newly created event where that work contact is not already registered, create a
+   registration for it.
+
+The resume line itself is created by the user, with the course kind set to `onsite` and the
+event link filled in; an on-change fills the title from the event's name when the title is
+still empty.
+
+### 11bis.4 The employee's course counters
+
+Two derived values are added to the Employee by the course capability:
+
+| Field (storage name) | Meaning |
+|---|---|
+| Subscribed Courses (`subscribed_courses`) | Mirror of the user's contact's course memberships. |
+| Has Subscribed Courses (`has_subscribed_courses`) | True when that collection is not empty. |
+| Courses Completion Text (`courses_completion_text`) | The number of completed courses, a space, a solidus, a space, and the number of subscribed courses — for example "3 / 7". Empty when the employee has no user contact. Recomputed when the reading language changes. |
+
+An operation on the employee opens that person's public profile page at the address
+`/profile/user/` followed by the user identifier.
 
 ---
 

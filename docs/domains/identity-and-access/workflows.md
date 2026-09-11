@@ -4,6 +4,16 @@ This file specifies the end-to-end operational procedures of the domain. Each wo
 role that performs it, the preconditions, the numbered steps, what is created or updated at each
 step, and the failure points with their exact messages.
 
+> **Note on reproduced texts.** Message texts, button labels and screen titles are reproduced
+> **verbatim**, exactly as the system emits them, because external tests and user documentation
+> depend on them. Where such a reproduced text contains an abbreviation, the abbreviation belongs to
+> the text and is not this document's own prose. The abbreviations that occur are: *API* for
+> application programming interface; *2FA* for two-factor authentication; *LDAP* for the central
+> directory protocol; *DN* for distinguished name; *OAuth* and *UID* for the delegated sign-in
+> protocol and its subject identifier; *JSON* for the structured-literal notation; *HTTP* for the
+> transport protocol; *ID* for identifier. Outside such reproduced texts, every term is written in
+> full.
+
 Cross-references: the algorithms invoked here are specified in
 [business-rules.md](business-rules.md); the arithmetic in
 [calculations.md](calculations.md); the states in [state-machines.md](state-machines.md).

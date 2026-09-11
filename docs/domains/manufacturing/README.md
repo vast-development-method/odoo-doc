@@ -160,7 +160,7 @@ something, the text says "industry-standard default" and states the choice.
 | [sales](../sales/README.md) | Sales order lines whose delivered quantity is derived from kit component moves, and the make-to-order chain that creates orders from a sale. |
 | [analytic accounting](../analytic-accounting/README.md) | The analytic distribution applied to work centre costs and component consumption. |
 | [general ledger](../general-ledger/README.md) | Journal entries, journals and accounts used by production and unbuild postings. |
-| [messaging and activities](../messaging-and-activities/README.md) | The discussion thread, the tracked-field log, the activity scheduling and the exception activities logged on upstream documents. |
+| [messaging and activities](../messaging-and-activities/README.md) | The discussion thread, the tracked-field log, the activity scheduling and the exception activities logged on supplying documents. |
 | [attendances and working time](../attendances-and-working-time/README.md) | The working-time calendar, the resource, the leave interval and the interval arithmetic used by work centre planning. |
 
 ---

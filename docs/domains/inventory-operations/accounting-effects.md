@@ -112,3 +112,70 @@ For completeness, these are the non-financial consequences a completed move has 
 | `../replenishment-and-procurement/` | The forecast, the free quantity and the quantity to order of every reordering rule touching the products and Warehouses concerned are marked for recomputation whenever a move is created, written or deleted. |
 | `../delivery-and-shipping/` | The shipping weight and volume of a Transfer are read at validation to price the shipment. |
 | `../messaging-and-activities/` | The confirmation message, the confirmation text message, the change notes, the backorder note and the shortage activity are posted. |
+
+---
+
+# 5. The hand-over in numbers
+
+Three worked examples of exactly what the valuation domain receives.
+
+## 5.1 A receipt
+
+**Given** a receipt of 10 units of BOLT at a unit price of 3.00 in the company currency, validated on 11 September 2026 at 14:05.
+
+**The record handed over:** one Stock Move with
+
+| Field | Value |
+|---|---|
+| product | BOLT |
+| real quantity | 10 |
+| processed quantity and line unit | 10, Units |
+| unit price | 3.00 |
+| source Location and usage | `Vendors`, vendor |
+| destination Location and usage | `WH/Stock`, internal |
+| date | 11 September 2026 14:05 |
+| company | Acme |
+| adjustment flag, scrap link, original return move | all empty |
+| Operation Type kind | receipt |
+
+**Classification:** goods entering the company from outside. **Incoming** is true; **outgoing** is false; **counts for received quantity** is true.
+
+## 5.2 A delivery of the same goods
+
+**Given** 4 of those units are delivered on 12 September 2026 at 09:30. The delivery move carries no unit price, because nobody wrote one: the valuation domain computes the outgoing cost itself.
+
+**The record handed over:** one Stock Move with real quantity 4, source `WH/Stock` (internal), destination `Customers` (customer), date 12 September 2026 09:30.
+
+**Classification:** goods leaving the company. **Outgoing** is true.
+
+## 5.3 A count that removes one unit
+
+**Given** a count of `WH/Stock` finds 5 instead of 6 on 13 September 2026.
+
+**The record handed over:** one Stock Move with real quantity 1, source `WH/Stock` (internal), destination `Inventory adjustment` (inventory loss), the adjustment flag **set**, the picked flag set, the reference "Product Quantity Updated (*the counting user's display name*)", date 13 September 2026.
+
+**Classification:** a count correction downwards. The adjustment flag is what distinguishes it from a scrap, which has the same Location usages but carries a Scrap link instead.
+
+---
+
+# 6. Ordering guarantees the valuation domain can rely on
+
+| Guarantee | Why it holds |
+|---|---|
+| A move never reaches `done` before its quantities have moved on the Stock Quantity records. | The completion algorithm moves the quantities in step 7 and writes the status in step 10. |
+| The moves of one Transfer reach `done` together, in one operation. | They are written in one bulk write. |
+| A backorder move is created **before** the parent move is completed. | The backorder-move step is step 6, the status write is step 10. |
+| A push-created move is created **after** the pushing move is done. | The push step is step 11. |
+| A destination move is re-reserved **after** the originating move is done. | The propagation step is step 12. |
+| The container history exists **before** the containers move. | The snapshots are written in step 2 of the line completion, the quantities move in step 3. |
+| An edit of a completed line undoes the whole original movement before applying the new one. | The replay of section 7.2 of `calculations.md` is strictly undo-then-redo, never a delta. |
+
+---
+
+# 7. The one cross-domain field this domain owns
+
+The unit price on a Stock Move (`price_unit`) is written by whichever domain created the move — purchasing writes the purchase price, manufacturing writes the component cost, an inter-company resupply writes the sending company's cost. This domain **never computes it** but does guarantee three things about it:
+
+1. A split preserves it: the backorder move carries the same unit price as its parent.
+2. A merge that absorbs a negative move recomputes it as the weighted average of section 3.
+3. Two moves whose unit prices differ never merge, so a merge can never silently average two different costs except through the negative-absorption path.

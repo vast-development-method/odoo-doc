@@ -1193,6 +1193,81 @@ When a column is marked sortable and the user sorts on it:
 
 ---
 
+### 11.7 The account group hierarchy
+
+When the hierarchy filter is on, the account lines of a report are nested inside their **account
+groups** instead of being listed flat.
+
+An Account Group (`account.group`, table `account_group`) is defined by a code prefix **range**:
+a starting prefix and an ending prefix of equal length. It has a name, an optional parent group
+and a company. Its display name is the prefix range followed by the name — the starting prefix
+alone when the two prefixes are equal, otherwise the starting prefix, a hyphen and the ending
+prefix. Two derived rules keep the range coherent:
+
+```formula
+if ending_prefix is empty, or ( starting_prefix is set and ending_prefix < starting_prefix ):
+        ending_prefix = starting_prefix
+if starting_prefix is empty, or ( ending_prefix is set and starting_prefix > ending_prefix ):
+        starting_prefix = ending_prefix
+```
+
+and a stored check requires the two prefixes to have the same number of characters, with the
+message *The length of the starting and the ending code prefix must be the same*.
+
+**The nesting algorithm.**
+
+1. Collect the accounts the report produced lines for.
+2. For each account, find the group whose prefix range contains the account's code: the group
+   whose starting prefix is less than or equal to the first *n* characters of the code and whose
+   ending prefix is greater than or equal to them, where *n* is the length of the group's
+   prefixes. When several groups match, the one with the **longest** prefix wins — the most
+   specific group.
+3. Emit one line per matched group, ordered by starting prefix, with the group's display name.
+4. Nest each group under its parent group, recursively, so that a chart with several levels of
+   groups produces several levels of lines.
+5. Attach each account line under its matched group; accounts matching no group stay at the top
+   level, after the groups.
+6. Each group line's figures are recomputed over the accounts it contains, not added from the
+   rounded account figures.
+
+Groups are ordered by their starting prefix, so the hierarchy reads in chart order. Deleting a
+group deletes its child groups, because the parent link cascades; the accounts are untouched and
+simply fall back to the next matching group or to the top level.
+
+### 11.8 The search bar
+
+When the report's search-bar flag is set, a free-text box filters the rendered rows:
+
+1. The text is matched, case-insensitively and accent-insensitively, against each line's name.
+2. A line matches if its own name matches, **or** any of its descendants match.
+3. A matching line is shown with its whole ancestor chain, so the tree stays navigable.
+4. Figures are **not** recomputed: the search hides rows, it does not change any total. A total
+   line therefore keeps showing the total of everything, not of the visible rows.
+
+### 11.9 The analytic filter
+
+Two independent selections exist and both narrow the base restriction:
+
+| Selection | Condition added |
+|---|---|
+| Analytic accounts | The Journal Item's analytic distribution names at least one of the selected accounts, with any percentage. |
+| Analytic plans | The Journal Item's analytic distribution names at least one account belonging to one of the selected plans. |
+
+When both are set, an item must satisfy both. The filter selects **whole items**: an item whose
+distribution assigns thirty percent to a selected account contributes its **whole** balance, not
+thirty percent of it. A report that must apportion by percentage reads analytic lines instead of
+Journal Items, which is the Analytic Accounting domain's own reporting and not this one.
+
+### 11.10 Saved journal-item filters
+
+When the report's favourite-filters switch is on, the user may pick a saved search filter defined
+on Journal Items and have it added, as a further conjunction, to the base restriction. The saved
+filter is an ordinary stored search of the application; this domain only conjoins it. Two rules:
+
+1. A saved filter that references a field the report's engines do not otherwise read is still
+   applied; it narrows the item set for every engine at once.
+2. A saved filter is never applied to the External Value engine, which reads no Journal Item.
+
 ## 12. The carry-over mechanism
 
 ### 12.1 What it does
@@ -1277,28 +1352,41 @@ expression whose computed carry-out is non-zero:
 
 ### 12.5 Reading the carry-over back
 
-The carry-in expression uses the external engine with the formula `sum` and the date scope
-`strict_range`, so the next period's window picks up exactly the records dated in it. A period
-whose window contains no carry-over record reads zero.
+The carry-over record is dated at the **last day of the closed period**, which is inside that
+period and outside the next one. The carry-in expression therefore does **not** use the current
+period's own window. Every shipped carry-in expression is declared as:
 
-Because the records are dated at the **last day of the closed period**, and the next period starts
-the day after, a carry-over written on 31 March is read by the period starting 1 April only if
-that period's window includes 31 March — which it does not. The shipped definitions therefore
-date the carry-over record at the **first day of the next period** when the periodicity is known,
-or use a carry-in expression whose date scope is `from_beginning` so that every earlier record
-accumulates. A rebuild must pick one of the two and stay consistent; the specification below uses
-the accumulate-from-the-beginning form, which is self-correcting:
+| Property | Value |
+|---|---|
+| Engine | `external` |
+| Formula | `most_recent` |
+| Subformula | none |
+| Date scope | `previous_return_period` |
+
+The date scope is the mechanism that bridges the two periods: it widens the window to the whole
+of the tax return period immediately before the one containing the report's end date (§9.4), so
+the record written on the last day of the previous period falls inside it.
 
 ```formula
-carried_in = Σ over carry-over External Values v targeting this expression,
-               for the selected companies,
-               with date(v) ≤ date_to of the current period,
-               of value(v)
-           − Σ over the same values with date(v) < date_from of the current period, of value(v)
+carried_in = value of the last carry-over External Value v targeting this expression,
+             for the selected companies,
+             whose date falls in [ first day of the previous return period ,
+                                   last day of the previous return period ],
+             ordered by date then by identifier
+carried_in = 0   when no such value exists
 ```
 
-which is exactly the `strict_range` sum. When a period is skipped, the amount is not lost: it is
-still dated in the skipped period and will be read by any window that covers it.
+Consequences a rebuild must reproduce:
+
+1. **`most_recent`, not `sum`.** Re-closing a period overwrites the record, but if a second
+   record were ever written for the same period the most recent one wins rather than both being
+   added.
+2. **One period back, not all of history.** An amount carried out of a period that is never
+   followed by a closing is simply not picked up; it is not silently accumulated. When a period
+   is skipped, the chain is broken and the accountant must close the skipped period.
+3. **The periodicity is part of the contract.** Changing a company's tax return periodicity
+   changes what "the previous return period" means and can therefore orphan a carry-over record.
+   A rebuild should warn when the periodicity changes while unconsumed carry-over records exist.
 
 ### 12.6 Worked example
 
@@ -2060,7 +2148,291 @@ field is empty.
 | `l10n_za.tax_report` | Tax Report | za | generic_tax_report | 28 | 21 | 1 |
 | `l10n_zm_account.zm_tax_report` | value-added tax Return | zm | generic_tax_report | 42 | 49 | 2 |
 
-### 15.4 Reading a national definition
+### 15.4 A complete national definition — the Belgian value-added tax return
+
+`l10n_be.tax_report_vat`, name "VAT Return", country Belgium, root report the generic tax report.
+One column: *Balance*, bound to the expression label `balance`. Forty-one lines,
+fifty-six expressions. As everywhere in this section, line names and formulas are reproduced
+exactly as the data ships them and are stored values, not prose of this specification. This definition is reproduced in full because it exercises the tax tag
+engine, the aggregation engine, the external value engine and the carry-over mechanism together.
+
+**Section "Operations" → "II Outgoing"** — every line is a leaf with one expression labelled
+`balance`, engine `tax_tags`, date scope `strict_range`.
+
+| Line | Code | Engine | Formula |
+|---|---|---|---|
+| 00 - Operations subject to a special regulation | `c00` | `tax_tags` | `-00` |
+| 01 - Operations subject to 6% VAT | `c01` | `tax_tags` | `-01` |
+| 02 - Operations subject to 12% VAT | `c02` | `tax_tags` | `-02` |
+| 03 - Operations subject to 21% VAT | `c03` | `tax_tags` | `-03` |
+| 44 - Intra-Community services | `c44` | `tax_tags` | `-44` |
+| 45 - Operations subject to VAT due by the co-contractor | `c45` | `tax_tags` | `-45` |
+| 46 - Exempted intra-Community deliveries and ABC sales | `c46` | `aggregation` | `c46L.balance + c46T.balance` — foldable |
+| &nbsp;&nbsp;46L - Exempted intra-Community deliveries | `c46L` | `tax_tags` | `-46L` |
+| &nbsp;&nbsp;46T - ABC sales | `c46T` | `tax_tags` | `-46T` |
+| 47 - Other exempted operations and operations carried out abroad | `c47` | `tax_tags` | `-47` |
+| 48 - Credit notes for operations in grids [44] and [46] | `c48` | `aggregation` | `c48s44.balance + c48s46L.balance + c48s46T.balance` — foldable |
+| &nbsp;&nbsp;48s44 - Credit notes for operations in grid [44] | `c48s44` | `tax_tags` | `48s44` |
+| &nbsp;&nbsp;48s46L - Credit notes for operations in grid [46L] | `c48s46L` | `tax_tags` | `48s46L` |
+| &nbsp;&nbsp;48s46T - Credit notes for operations in grid [46T] | `c48s46T` | `tax_tags` | `48s46T` |
+| 49 - Credit notes for other operations in part II | `c49` | `tax_tags` | `49` |
+
+Note the sign discipline: the outgoing operation boxes carry a leading minus, because sales sit
+on the credit side of the ledger and the declaration wants a positive figure; the credit-note
+boxes carry **no** minus, because a credit note reverses the sign and the declaration wants the
+reversal to read positive too.
+
+**Section "Operations" → "III Incoming"** — the boxes that may go negative carry the full
+five-expression carry-over pattern.
+
+| Line | Code | Label | Engine | Formula | Subformula | Date scope |
+|---|---|---|---|---|---|---|
+| 81 - Trade goods, raw materials and consumables | `c81` | `tag` | `tax_tags` | `81` | — | `strict_range` |
+| | | `_applied_carryover_balance` | `external` | `most_recent` | — | `previous_return_period` |
+| | | `balance_unbound` | `aggregation` | `c81._applied_carryover_balance + c81.tag` | — | `strict_range` |
+| | | `_carryover_balance` | `aggregation` | `c81.balance_unbound` | `if_below(EUR(0))` | `strict_range` |
+| | | `balance` | `aggregation` | `c81.balance_unbound` | — | `strict_range` |
+| 82 - Services and miscellaneous goods | `c82` | the same five, with `82` | | | | |
+| 83 - Investment goods | `c83` | the same five, with `83` | | | | |
+| 84 - Credit notes for operations in grids [86] and [88] | `c84` | `balance` | `tax_tags` | `-84` | — | `strict_range` |
+| 85 - Credit notes received relating to other operations in part III | `c85` | `balance` | `tax_tags` | `-85` | — | `strict_range` |
+| 86 - Intra-Community acquisitions and ABC sales | `c86` | the same five, with `86` | | | | |
+| 87 - Other operations subject to VAT | `c87` | the same five, with `87` | | | | |
+| 88 - Intra-Community services with reverse charge | `c88` | the same five, with `88` | | | | |
+
+Six boxes — 81, 82, 83, 86, 87 and 88 — therefore each hold five expressions, of which only
+`balance` is displayed, because the single column binds to the label `balance`. The other four
+are intermediate quantities: the raw tag total, the amount carried in, their sum, and the amount
+to carry out. This is the **Variant B** flooring of §12.3: the displayed `balance` carries no
+bound clause, so a negative box is rendered as negative and the filing format writes zero.
+
+**Section "Taxes" → "IV Due"** — leaves, all with one `balance` expression, engine `tax_tags`,
+all with a leading minus.
+
+| Line | Code | Formula |
+|---|---|---|
+| 54 - VAT on operations in grids [01], [02] and [03] | `c54` | `-54` |
+| 55 - VAT on operations in grids [86] and [88] | `c55` | `-55` |
+| 56 - VAT on operations in grid [87], with the exception of imports with reverse charge | `c56` | `-56` |
+| 57 - VAT on import with reverse charge | `c57` | `-57` |
+| 61 - Various VAT regularizations in favor of the State | `c61` | `-61` |
+| 63 - VAT to be paid back on credit notes received | `c63` | `-63` |
+
+**Section "Taxes" → "V Deductible"** — leaves, all with one `balance` expression, engine
+`tax_tags`, none with a minus, because deductible tax sits on the debit side and is already
+positive.
+
+| Line | Code | Formula |
+|---|---|---|
+| 59 - Deductible VAT | `c59` | `59` |
+| 62 - Various VAT regularizations in favor of the declarant | `c62` | `62` |
+| 64 - VAT to be recovered on credit notes issued | `c64` | `64` |
+
+**Section "Taxes" → "VI Balance"** — the two complementary result lines.
+
+| Line | Engine | Formula | Subformula |
+|---|---|---|---|
+| 71 - Taxes due to the State | `aggregation` | `(c54.balance + c55.balance + c56.balance + c57.balance + c61.balance + c63.balance) - (c59.balance + c62.balance + c64.balance)` | `if_above(EUR(0))` |
+| 72 - Amount owed by the State | `aggregation` | `(c59.balance + c62.balance + c64.balance) - (c54.balance + c55.balance + c56.balance + c57.balance + c61.balance + c63.balance)` | `if_above(EUR(0))` |
+
+The two formulas are exact negations of each other and both are floored at zero, so exactly one
+of the two lines is non-zero in any period. This is the canonical "split the net position into a
+pay box and a reclaim box" pattern that almost every national definition uses.
+
+**Drill-down.** Every `tax_tags` line audits into the Journal Items carrying its tag. Lines 46,
+48, 71 and 72 are aggregations and audit into the union of their operands. The six carry-over
+boxes audit into their `tag` expression's items only: the carried-in amount is an External Value
+and is listed separately.
+
+**Worked figure.** In a quarter with `c54.balance` = 12 600.00, `c55.balance` = 800.00,
+`c56.balance` = 0.00, `c57.balance` = 0.00, `c61.balance` = 145.00, `c63.balance` = 62.00,
+`c59.balance` = 9 430.00, `c62.balance` = 0.00 and `c64.balance` = 310.00:
+
+```formula
+due_side        = 12 600.00 + 800.00 + 0.00 + 0.00 + 145.00 + 62.00 = 13 607.00
+deductible_side =  9 430.00 +   0.00 + 310.00                        =  9 740.00
+line_71 = 13 607.00 − 9 740.00 = 3 867.00, which is above zero, so it shows 3 867.00
+line_72 =  9 740.00 − 13 607.00 = −3 867.00, which is not above zero, so it shows 0.00
+```
+
+### 15.5 A complete national definition — the United Arab Emirates return
+
+`l10n_ae.tax_report`, name "VAT201 Form", country the United Arab Emirates, root report the
+generic tax report. Twenty-four lines, forty-five expressions, **three** columns:
+
+| Column | Expression label | Display type |
+|---|---|---|
+| Amount | `base` | monetary |
+| VAT Amount | `tax` | monetary |
+| Adjustment | `adj` | monetary |
+
+This definition is reproduced in full because it exercises the three-column contract, the
+editable external value on a per-box basis, and an aggregation that derives a tax from a base.
+Two of its line names refer to the country by its three-letter abbreviation in the shipped data;
+they are given below with that abbreviation expanded to the words "the country".
+
+**Section "VAT on Sales and all other Outputs".**
+
+| Line | Code | `base` | `tax` | `adj` |
+|---|---|---|---|---|
+| 1. Standard rated supplies in: | `uae_1` | — | — | — |
+| &nbsp;&nbsp;a. Abu Dhabi | `uae_1a` | `tax_tags` `-1(a)B` | `tax_tags` `-1(a)T` | `external` `sum`, `editable;rounding=2` |
+| &nbsp;&nbsp;b. Dubai | `uae_1b` | `tax_tags` `-1(b)B` | `tax_tags` `-1(b)T` | `external` `sum`, `editable;rounding=2` |
+| &nbsp;&nbsp;c. Sharjah | `uae_1c` | `tax_tags` `-1(c)B` | `tax_tags` `-1(c)T` | `external` `sum`, `editable;rounding=2` |
+| &nbsp;&nbsp;d. Ajman | `uae_1d` | `tax_tags` `-1(d)B` | `tax_tags` `-1(d)T` | `external` `sum`, `editable;rounding=2` |
+| &nbsp;&nbsp;e. Umm Al Quwain | `uae_1e` | `tax_tags` `-1(e)B` | `tax_tags` `-1(e)T` | `external` `sum`, `editable;rounding=2` |
+| &nbsp;&nbsp;f. Ras Al-Khaima | `uae_1f` | `tax_tags` `-1(f)B` | `tax_tags` `-1(f)T` | `external` `sum`, `editable;rounding=2` |
+| &nbsp;&nbsp;g. Fujairah | `uae_1g` | `tax_tags` `-1(g)B` | `tax_tags` `-1(g)T` | `external` `sum`, `editable;rounding=2` |
+| 2. Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme | `uae_2` | `tax_tags` `-2B` | `tax_tags` `-2T` | — |
+| 3. Supplies subject to reverse charge provisions | `uae_3` | `tax_tags` `3B` | `tax_tags` `-3T` | — |
+| 4. Zero-rated supplies | `uae_4` | `tax_tags` `-4B` | — | — |
+| 5. Exempt supplies | `uae_5` | `tax_tags` `-5B` | — | — |
+| 6. Goods imported into the country | `uae_6` | `tax_tags` `6B` | `tax_tags` `-6T` | — |
+| 7. Adjustments to goods imported into the country | `uae_7` | `external` `sum`, `editable;rounding=2` | `aggregation` `uae_7.base*0.05` | — |
+| 8. Totals | `uae_8` | `aggregation`, the sum of the thirteen `base` codes | `aggregation`, the sum of the eleven `tax` codes | `aggregation`, the sum of the seven `adj` codes |
+
+Line 8's three formulas in full:
+
+```formula
+uae_8.base = uae_1a.base + uae_1b.base + uae_1c.base + uae_1d.base + uae_1e.base
+           + uae_1f.base + uae_1g.base + uae_2.base + uae_3.base + uae_4.base
+           + uae_5.base + uae_6.base + uae_7.base
+
+uae_8.tax  = uae_1a.tax + uae_1b.tax + uae_1c.tax + uae_1d.tax + uae_1e.tax
+           + uae_1f.tax + uae_1g.tax + uae_2.tax + uae_3.tax + uae_6.tax + uae_7.tax
+
+uae_8.adj  = uae_1a.adj + uae_1b.adj + uae_1c.adj + uae_1d.adj + uae_1e.adj
+           + uae_1f.adj + uae_1g.adj
+```
+
+Boxes 4 and 5 contribute a base and no tax, because zero-rated and exempt supplies carry none.
+Box 7 is the only box whose **base** is typed by hand and whose **tax** is derived from it at the
+standard rate of five percent, which is the worked example of §5.9 B.
+
+**Section "VAT on Expenses and All Other Inputs".**
+
+| Line | Code | `base` | `tax` | `adj` |
+|---|---|---|---|---|
+| 9. Standard rated expenses | `uae_9` | `tax_tags` `9B` | `tax_tags` `9T` | `external` `sum`, `editable;rounding=2` |
+| 10. Supplies subject to the reverse charge provisions | `uae_10` | `tax_tags` `10B` | `tax_tags` `10T` | — |
+| 11. Totals | `uae_11` | `aggregation` `uae_9.base + uae_10.base` | `aggregation` `uae_9.tax + uae_10.tax` | `aggregation` `uae_9.adj` |
+
+The input boxes carry **no** leading minus, because input tax sits on the debit side.
+
+**Section "Net VAT Due".**
+
+| Line | Code | `tax` |
+|---|---|---|
+| 12. Total value of due tax for the period | `uae_12` | `aggregation` `uae_8.tax + uae_8.adj` |
+| 13. Total value of recoverable tax for the period | `uae_13` | `aggregation` `uae_11.tax + uae_11.adj` |
+| 14. Payable tax for the period | — | `aggregation` `uae_12.tax-uae_13.tax` |
+
+Line 14 is **not** floored: this definition declares a single net figure that may be negative,
+and a negative figure means a refund is due.
+
+**Drill-down.** The `base` and `tax` cells audit into their tags' Journal Items; the `adj` cells
+audit into the External Values a user typed; lines 8, 11, 12, 13 and 14 audit into the union of
+their operands.
+
+**Worked figure.** With `uae_1a.base` = 400 000.00 and `uae_1a.tax` = 20 000.00, every other
+emirate zero, `uae_7.base` typed as 64 000.00, `uae_9.base` = 180 000.00 and `uae_9.tax` =
+9 000.00, no adjustments typed:
+
+```formula
+uae_7.tax  = 64 000.00 × 0.05 = 3 200.00
+uae_8.tax  = 20 000.00 + 3 200.00 = 23 200.00
+uae_8.adj  = 0.00
+uae_12.tax = 23 200.00 + 0.00 = 23 200.00
+uae_11.tax = 9 000.00
+uae_13.tax = 9 000.00 + 0.00 = 9 000.00
+uae_14.tax = 23 200.00 − 9 000.00 = 14 200.00
+```
+
+### 15.6 A complete national definition — the Italian monthly return
+
+`l10n_it.tax_monthly_report_vat`, name "Monthly VAT Report", country Italy, root report the
+generic tax report. Two columns:
+
+| Column | Expression label |
+|---|---|
+| Debit | `debit` |
+| Credit | `credit` |
+
+This definition is reproduced because it is the only shipped definition that uses **explicit
+carry-over targets**, a **boolean** display type on an editable external value, and the
+`if_between` clamp.
+
+**Section VP1 — three boolean flags typed by the filer.**
+
+| Line | Code | Label | Engine | Formula | Subformula | Display type |
+|---|---|---|---|---|---|---|
+| VP1 - Subcontracting | `xml_subcontracting` | `credit` | `external` | `most_recent` | `editable` | `boolean` |
+| VP1 - Exceptional Events | `xml_exceptional_events` | `credit` | `external` | `most_recent` | `editable` | `boolean` |
+| VP1 - Extraordinary Operations | `xml_extraordinary_operations` | `credit` | `external` | `most_recent` | `editable` | `boolean` |
+
+These three cells are rendered as a tick or a cross and are written by the filer; they carry no
+amount at all. They demonstrate that the external value engine is not restricted to money.
+
+**Section "Taxable transactions" (`h1`) and "VAT" (`h2`).**
+
+| Line | Code | Label | Engine | Formula |
+|---|---|---|---|---|
+| VP2 - Total active transactions | `VP2` | `debit` | `tax_tags` | `-02` |
+| VP3 - Total passive transactions | `VP3` | `credit` | `tax_tags` | `03` |
+| VP4 - VAT due | `VP4` | `debit` | `tax_tags` | `-4v` |
+| VP5 - VAT Deductible | `VP5` | `credit` | `tax_tags` | `5v` |
+
+**Section "Balances, carryovers and interest" (`h3`).**
+
+| Line | Code | Label | Engine | Formula | Subformula | Date scope |
+|---|---|---|---|---|---|---|
+| VP6 - VAT due/deductible | `VP6` | `debit` | `aggregation` | `VP4.debit - VP5.credit` | `if_above(EUR(0))` | `strict_range` |
+| | | `credit` | `aggregation` | `VP5.credit - VP4.debit` | `if_above(EUR(0))` | `strict_range` |
+| VP7 - Previous period debt not to exceed 100,00 | `VP7` | `tag` | `tax_tags` | `-vp7` | — | `strict_range` |
+| | | `_applied_carryover_debit` | `external` | `most_recent` | — | `previous_return_period` |
+| | | `debit` | `aggregation` | `VP7._applied_carryover_debit + VP7.tag` | — | `strict_range` |
+| VP8 - Previous period credit | `VP8` | `tag` | `tax_tags` | `vp8` | — | `strict_range` |
+| | | `_applied_carryover_credit` | `external` | `most_recent` | — | `previous_return_period` |
+| | | `credit` | `aggregation` | `VP8._applied_carryover_credit + VP8.tag` | — | `strict_range` |
+| VP9 - Previous year credit | `VP9` | `tag` | `tax_tags` | `vp9` | — | `strict_range` |
+| | | `_applied_carryover_balance` | `external` | `most_recent` | — | `previous_return_period` |
+| | | `credit` | `aggregation` | `VP9._applied_carryover_balance + VP9.tag` | — | `strict_range` |
+| VP10 - Intra-community car payments | `VP10` | `credit` | `tax_tags` | `vp10` | — | `strict_range` |
+| VP11 - Tax Credit | `VP11` | `credit` | `tax_tags` | `vp11` | — | `strict_range` |
+| VP12 - Interest due for quarterly settlements | `VP12` | `debit` | `tax_tags` | `-vp12` | — | `strict_range` |
+| VP13 - Down payment due | `VP13` | `credit` | `tax_tags` | `vp13` | — | `strict_range` |
+
+**Section "VAT account" (`h4`) — the result line and the two carry-outs.**
+
+| Line | Code | Label | Engine | Formula | Subformula | Carry over to |
+|---|---|---|---|---|---|---|
+| VP14 - VAT payable | `VP14` | `debit` | `aggregation` | `(VP6.debit + VP7.debit + VP12.debit) - (VP6.credit + VP8.credit + VP9.credit + VP10.credit + VP11.credit + VP13.credit)` | `if_above(EUR(0))` | — |
+| | | `_carryover_debit` | `aggregation` | `VP14.debit` | `if_between(EUR(0), EUR(100))` | `VP7._applied_carryover_debit` |
+| | | `credit` | `aggregation` | `(VP6.credit + VP8.credit + VP9.credit + VP10.credit + VP11.credit + VP13.credit) - (VP6.debit + VP7.debit + VP12.debit)` | `if_above(EUR(0))` | — |
+| | | `_carryover_credit` | `aggregation` | `VP14.credit` | `if_above(EUR(0))` | `VP8._applied_carryover_credit` |
+
+Two carry-overs run in parallel: a debt below one hundred is carried into the next period's box
+VP7, and any credit is carried into the next period's box VP8. Both use the explicit carry-over
+target, because the carry-out expressions live on line VP14 while the carry-in expressions live
+on lines VP7 and VP8 — the automatic resolution of [`entities.md`](entities.md) §3.10, which
+looks on the same line, could not have found them.
+
+**Worked figure.** With `VP4.debit` = 8 400.00, `VP5.credit` = 8 355.00, nothing carried in and
+every other box zero:
+
+```formula
+VP6.debit  = 8 400.00 − 8 355.00 = 45.00, above zero, so 45.00
+VP6.credit = 8 355.00 − 8 400.00 = −45.00, not above zero, so 0.00
+VP14.debit = (45.00 + 0.00 + 0.00) − (0.00 + 0.00 + 0.00 + 0.00 + 0.00 + 0.00) = 45.00
+VP14._carryover_debit = 45.00, which lies strictly between 0.00 and 100.00, so 45.00
+VP14.credit = −45.00, not above zero, so 0.00
+VP14._carryover_credit = 0.00
+```
+
+The period declares a debt of 45.00 that it does not pay; one External Value of 45.00, dated the
+last day of the month, targets `VP7._applied_carryover_debit`, and next month's box VP7 reads it.
+
+### 15.7 Reading a national definition
 
 Every national definition is built from the same four ingredients, in the same order:
 

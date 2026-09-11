@@ -855,7 +855,7 @@ A way of being paid. Three kinds exist and the kind is derived, never chosen dir
 | Open sessions (`open_session_ids`) | Many to many → Point of Sale Session | Computed, not stored. Non-closed sessions of the tills that offer this method. |
 | Company (`company_id`) | Many to one → Company | Default the acting company. |
 | Default receivable account name (`default_pos_receivable_account_name`) | Character | Related to the display name of the company's default point-of-sale receivable account, read-only. |
-| Integration (`payment_method_type`) | Selection | Required, default `none`. Values: `none` "None required", `terminal` "Terminal", and `qr_code` "Bank App (QR Code)" — the last only offered when at least one quick response code payment format is available. |
+| Integration (`payment_method_type`) | Selection | Required, default `none`. Three values. `none` — no integration is required. `terminal` — the tender is taken on a payment terminal. `qr_code` — the customer is shown a scannable quick response code carrying the bank transfer details; this value is only offered when at least one quick response code payment format is available. |
 | Use a payment terminal (`use_payment_terminal`) | Selection | The terminal provider. The list of providers is contributed by the terminal packages; it is empty in the base capability. |
 | Hide the terminal selector (`hide_use_payment_terminal`) | Boolean | Computed, not stored. True when no provider is available at all, or the kind is cash or customer account, or the integration is not terminal. |
 | Quick response code format (`qr_code_method`) | Selection | Not copied. Which quick response code payment format to generate. |
@@ -1053,7 +1053,7 @@ A preparation printer: the kitchen or bar device that receives the items to prep
 | Field (storage name) | Type | Meaning and rules |
 | --- | --- | --- |
 | Printer name (`name`) | Character | Required, default the word "Printer". |
-| Printer type (`printer_type`) | Selection | Default `iot`. Values: `iot` "Use a printer connected to the IoT Box" (that is, a printer attached to an internet-of-things gateway), `epson_epos` "Use an Epson printer" (a printer addressed directly over the local network). |
+| Printer type (`printer_type`) | Selection | Default `iot`. Two values. `iot` — the printer is attached to an internet-of-things gateway and is reached through it. `epson_epos` — the printer is addressed directly over the local network at its own address. |
 | Proxy address (`proxy_ip`) | Character | The address or hostname of the gateway. |
 | Direct printer address (`epson_printer_ip`) | Character | Default the four zero-groups `0.0.0.0`. Required when the printer type is the direct one — otherwise *"Epson Printer IP Address cannot be empty."* A value with no dot is converted to a certificate-bearing hostname exactly as described for the configuration's receipt printer address. |
 | Printed product categories (`product_categories_ids`) | Many to many → Point of Sale Category, through `printer_category_rel` | Only lines whose product belongs to one of these categories are sent to this printer. |
@@ -1225,7 +1225,7 @@ for the same selection.
 | Company | Update quantities in stock (`point_of_sale_update_stock_quantities`) | Selection, default `real`. Values: `closing` "At the session closing", `real` "In real time". |
 | Company | Self-service invoicing (`point_of_sale_use_ticket_qr_code`) | Boolean, default true. Prints the portal link on the receipt. |
 | Company | Generate a code on the receipt (`point_of_sale_ticket_unique_code`) | Boolean. Adds a five-character code to the receipt so that the customer can claim an invoice. |
-| Company | Receipt portal link display (`point_of_sale_ticket_portal_url_display_mode`) | Selection, required, default `qr_code_and_url`. Values: `qr_code` "QR code", `url` "URL", `qr_code_and_url` "QR code + URL". |
+| Company | Receipt portal link display (`point_of_sale_ticket_portal_url_display_mode`) | Selection, required, default `qr_code_and_url`. Three values. `qr_code` — the link is printed only as a scannable quick response code. `url` — only as a printed uniform resource locator. `qr_code_and_url` — as both. |
 | Journal | Counter payment methods (`pos_payment_method_ids`) | One to many → Point of Sale Payment Method. |
 | Journal Entry | Counter orders (`pos_order_ids`) | One to many → Point of Sale Order, inverse `account_move`. |
 | Journal Entry | Counter payments (`pos_payment_ids`) | One to many → Point of Sale Payment, inverse `account_move_id`. |
@@ -1380,7 +1380,7 @@ labelled "Order Now" pointing at its own products page, unless such a link alrea
 
 | Field (storage name) | Type | Meaning and rules |
 | --- | --- | --- |
-| Self ordering mode (`self_ordering_mode`) | Selection | Required, default `nothing`. Values: `nothing` "Disable", `consultation` "QR menu" (browse only), `mobile` "QR menu + Ordering", `kiosk` "Kiosk". |
+| Self ordering mode (`self_ordering_mode`) | Selection | Required, default `nothing`. Four values. `nothing` — self-ordering is disabled. `consultation` — the customer may read the menu on their own device but not order. `mobile` — the customer may read the menu and order from their own device. `kiosk` — ordering happens on a shared device at the counter. |
 | Self ordering service mode (`self_ordering_service_mode`) | Selection | Required, default `counter`. Values `counter` "Pickup zone", `table` "Table". |
 | Pay after (`self_ordering_pay_after`) | Selection | Required, default `meal`. Values `meal` "Meal", `each` "Each Order". Forced to `each` for kiosk mode, and for mobile mode whenever the service mode is the pickup zone or the restaurant capability is off. Choosing `meal` in mobile mode forces the service mode to table. |
 | Status (`status`) | Selection | Computed, not stored. Values `inactive` "Inactive", `active` "Active". |

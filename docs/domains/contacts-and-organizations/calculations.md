@@ -462,14 +462,14 @@ write, not before). The input is the map of values that actually changed.
 **Steps.**
 
 1. Load the record's parent, address type and commercial entity.
-2. **Upstream, part one — inherit from the parent.** If the changed values contain a parent, or set
+2. **Upward, part one — inherit from the parent.** If the changed values contain a parent, or set
    the address type to `contact`:
    1. If the changed values contain a parent, synchronise the commercial fields *from* the
       commercial entity (see §3.4).
    2. If the record now has a parent **and** its address type is `contact`, take the parent's
       address values; if they are non-empty, write them onto the record with the direct address
       update.
-3. **Upstream, part two — push the address up.** Push the record's address to its parent when
+3. **Upward, part two — push the address up.** Push the record's address to its parent when
    **all three** of the following hold:
    - the record has a parent and its address type is `contact`;
    - the changed values touch at least one address field, **or** contain a parent;
@@ -478,7 +478,7 @@ write, not before). The input is the map of values that actually changed.
    When they hold, the record's address values are written onto the parent with an ordinary write —
    which re-enters this same algorithm for the parent and therefore pushes the address down to the
    parent's other `contact`-type children.
-4. **Upstream, part three — push the synchronised commercial fields up.** Push when **all three**
+4. **Upward, part three — push the synchronised commercial fields up.** Push when **all three**
    hold:
    - the record has a parent **and** the record is not itself the commercial entity;
    - the changed values touch at least one synchronised commercial field, **or** contain a parent;

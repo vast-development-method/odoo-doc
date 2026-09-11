@@ -292,3 +292,130 @@ general ledger's onboarding sequence; only the field it writes belongs here.
    per grid, so that the tags exist and can be attached to the distribution lines.
 8. For automatic tax substitution: fiscal positions with their criteria, replacement taxes attached
    to them, and each replacement declaring the domestic tax it replaces.
+
+---
+
+## 11. Choosing the rounding method
+
+The company-level rounding method is the single most consequential tax setting. This section
+states the difference operationally so that an implementer and an administrator can choose.
+
+| | Round per line | Round per tax |
+|---|---|---|
+| When is the raw base rounded | immediately, before any tax is computed | never |
+| When is a tax amount rounded | immediately, as it is computed | only at the document-wide pass |
+| Is the document total the correctly rounded value of the exact arithmetic | no; it is the sum of independently rounded line totals | yes |
+| Can a line's reported base differ from its own rounded untaxed total | no | yes, by the delta |
+| Is the forward and backward computation symmetric | not guaranteed | yes, for an unrounded input |
+| Typical jurisdiction | those that require each line of an invoice to be individually correct | those that require the invoice total to be correct |
+| Default | — | **this one** |
+
+**The observable difference.** On three lines of quantity twelve point one two at a unit price of
+twelve point one two with a twenty-three percent tax, the two methods give totals of five hundred
+forty-two point zero one and five hundred forty-two point zero four respectively. The full
+derivation is in `calculations.md` section 7.8.
+
+**A consequence for implementers.** Under "round per tax" the amounts an implementation stores per
+line are *not* simply the rounded arithmetic of that line. Any code that recomputes a line's
+subtotal from its own price and quantity and compares it with the stored balance will report a
+false mismatch whenever the delta is non-zero.
+
+---
+
+## 12. Choosing the default price inclusion
+
+| | Tax excluded (the default) | Tax included |
+|---|---|---|
+| What a stored product price means | the amount before taxes | the amount the customer pays |
+| What an invoice line's unit price means | the same | the same |
+| What the line's subtotal column prints | the untaxed subtotal | the total with taxes |
+| Effect of changing it | **every** tax that has no override changes meaning at once, and therefore every price does too | the same |
+
+A tax may override the company default in either direction. The override is what an implementer
+must consult; the company default is only the fallback.
+
+**A trap.** Changing the company default does not change any stored number; it changes what every
+stored number *means*. An installation that switches it after invoicing has begun will report
+different totals for identical documents raised before and after the switch. The specification
+offers no reconciliation for that; the setting is meant to be chosen once.
+
+---
+
+## 13. Three archetypal configurations
+
+### 13.1 A single-country business with one rate
+
+- One Tax Group for the country, with a payable and a receivable account.
+- One sales tax and one purchase tax at the statutory rate, price-excluded, each with a base
+  distribution line and one tax distribution line at one hundred percent.
+- One report definition for the country with four lines and four tax-tags expressions: the sales
+  base, the sales tax, the purchase base and the purchase tax. The four tags are attached to the
+  four distribution lines.
+- The rounding method as the jurisdiction requires.
+- No fiscal position, no cash basis, no withholding.
+
+### 13.2 A business trading inside an economic union
+
+Everything in 13.1, plus:
+
+- A **domestic** fiscal position with the company's country, "detect automatically" on, and the
+  domestic taxes attached to it.
+- An **intra-union** fiscal position with the union country group, "detect automatically" on and
+  "tax registration required" on.
+- One reverse-charge sales tax and one reverse-charge purchase tax attached to the intra-union
+  fiscal position, each declaring the domestic tax it replaces, each with a distribution of plus
+  one hundred and minus one hundred percent and two tax grids.
+- An **export** fiscal position with no country, "detect automatically" on, a higher sequence than
+  the intra-union one, and zero-rated taxes attached to it declaring the domestic taxes they
+  replace.
+- Cross-border verification switched on, so that the intra-union fiscal position only applies to a
+  counterpart whose registration is confirmed.
+
+The sequence matters: the domestic position must sort before the intra-union one, which must sort
+before the export one, because the first match wins.
+
+### 13.3 A business under a payment-based regime with withholding
+
+Everything in 13.1, plus:
+
+- The company's cash basis switch on, a cash basis journal and a base tax received account.
+- Every affected tax's exigibility set to "based on payment", each with its own reconcilable
+  transition account.
+- A withholding tax per statutory retention rate, each with a negative amount, the "withhold on
+  payment" flag, a sequence and a distribution posting to a tax-credit or tax-payable account.
+- The company's withholding tax base account set, so that the per-line account column disappears.
+- Every withholding tax attached to the products it applies to, so that the register-payment
+  wizard proposes the lines by itself.
+
+---
+
+## 14. Interaction with localization packages
+
+The packages covered here define the **mechanism**; a localization package supplies the **data**
+for one country. The division is:
+
+| Supplied here | Supplied by a localization |
+|---|---|
+| The Tax, Tax Group, Distribution Line, Fiscal Position and Account Tag entities | the actual taxes, groups, distributions and fiscal positions of a country |
+| The engine, the rounding, the accounting derivation | nothing |
+| The report skeleton and the tax-tags mechanism | the country's tax return definition, its lines and its expressions — and therefore its tags |
+| The per-country number checks and normalisers | occasionally an override of one of them |
+| The generic chart of accounts template | the country's chart template |
+| The cash basis mechanism | which taxes a country defers |
+| The withholding mechanism | the country's retention rates and certificate numbering |
+| The union-wide distance-selling action stub | the mapping itself |
+
+A localization must not redefine the engine. When a country needs arithmetic the engine does not
+offer, the intended extension point is a **custom formula tax**, which keeps the two engine copies
+in step because the formula is transported to the client.
+
+---
+
+## 15. What changes when a capability is removed
+
+| Capability removed | Effect |
+|---|---|
+| Custom Formula Taxes | every tax whose computation kind was "custom formula" becomes a percentage tax and is archived |
+| Withholding Tax on Payment | the flag, the sequence link and the lines disappear; existing payments keep their journal items, which are ordinary items by then |
+| Tax Number Validation | numbers stop being normalised and checked; stored numbers are untouched; the cross-border flag stops being recomputed |
+| Update Tax Grids | the maintenance operation disappears; existing tag links are untouched |

@@ -461,8 +461,8 @@ computation yields "no token", which makes every session of that account invalid
 An older construction exists and is accepted as a fallback during verification:
 
 ```formula
-legacy_key = the bytes of repr( the tuple of the values only, in the same order )
-legacy_token = keyed_hash_sha256( key = legacy_key , message = the session identifier )
+older_key = the bytes of repr( the tuple of the values only, in the same order )
+older_token = keyed_hash_sha256( key = older_key , message = the session identifier )
 ```
 
 It omits the column names and does not drop absent values. When a session's stored token matches the
@@ -655,6 +655,89 @@ a successful one both consumes and then purges.
 
 The five rows expire 3600 seconds after each was written, so the first slot frees one hour after
 attempt 1.
+
+### 7.8 The mailed one-time code
+
+The mailed second factor uses the same counter-based construction but a different key and a much
+longer step, because the code travels by electronic mail and must survive delivery latency.
+
+**The key.**
+
+```formula
+mail_key = keyed_hash_sha256(
+        key     = database_secret ,
+        message = repr( ( "auth_totp_mail-code" ,
+                          ( account_identifier , login , most_recent_sign_in_moment ) ) ) )
+```
+
+rendered as lower-case hexadecimal and then taken as bytes. Because the account's most recent
+sign-in moment is part of the message, every successful sign-in changes the key and therefore
+invalidates every code previously mailed.
+
+**The code.**
+
+```formula
+counter = floor( current_moment_seconds ÷ 3600 )
+code    = hotp( mail_key , counter ) , rendered as decimal and left-padded with zeros to 6 digits
+```
+
+where `hotp` is exactly the counter-based construction of section 7.2.
+
+**The match.** The supplied code is matched with a window of **3600 seconds** and a time step of
+**3600 seconds**, so the counters tried are
+
+```formula
+low  = floor( ( t − 3600 ) ÷ 3600 )
+high = floor( ( t + 3600 ) ÷ 3600 ) + 1
+```
+
+— normally three counters, covering the previous hour, the current hour and the next hour. There is
+**no replay check**: unlike the authenticator-application method, the mailed method does not record
+the matched counter, so the same mailed code may be used again inside its window.
+
+**The stated validity.** The message tells the recipient that the code is valid for a duration of
+3600 seconds, rendered as a human-readable duration in the recipient's language (for example
+*1 hour*).
+
+**The guard.** The code is produced only when the environment is privilege-elevated, **or** the
+current request has no established account and its pending account is exactly this account. In any
+other situation the produced code is the constant `000000`, which never matches a real key. This
+prevents a signed-in user from harvesting another account's codes.
+
+**Rate limiting.** Mailing consumes the mailing limiter (5 per 3600 seconds); verifying consumes the
+verification limiter. A successful verification purges **both** limiters for that account, not just
+the verification one.
+
+**Worked example.** Account 40's identifier is 40, its login is `sofia@alpha.test`, and its most
+recent sign-in moment is absent. The current moment is 1 788 000 041 seconds.
+
+1. The key is the hexadecimal keyed hash over the scoped triple, taken as 64 bytes of text.
+2. `counter = floor(1788000041 ÷ 3600) = 496666`.
+3. `code = hotp(mail_key, 496666)`; suppose the raw value is 4318, so the mailed code is `004318`
+   after zero-padding.
+4. Matching at any moment *t* with `floor((t − 3600) ÷ 3600) ≤ 496666 ≤ floor((t + 3600) ÷ 3600)`
+   accepts it — that is, for roughly two hours around the moment it was produced.
+5. After account 40 signs in successfully, the most recent sign-in moment changes, the key changes,
+   and `004318` no longer matches anything.
+
+### 7.9 The two second-factor methods compared
+
+| Property | Authenticator application | Mailed code |
+|---|---|---|
+| Secret | 160 random bits, stored on the account | derived from the account's identifier, login and last sign-in; nothing is stored |
+| Time step | 30 seconds | 3600 seconds |
+| Acceptance window | ±30 seconds | ±3600 seconds |
+| Digits | 6 | 6, zero-padded |
+| Replay refused | yes, through the last accepted counter | no |
+| Enabled by | the account enrolling | the enforcement policy `auth_totp.policy` |
+| Method name in the result | `totp` | `totp_mail` |
+| Purges on success | the verification limiter | both limiters |
+
+**When each applies.** The account's second-factor type is the authenticator-application type when
+the account has a secret. Otherwise it is the mailed type when the parameter `auth_totp.policy` (the
+second-factor enforcement parameter) is `all_required`, or is `employee_required` **and** the
+account is internal. Otherwise the account has no second factor. An account with the mailed type
+also requires application keys on non-interactive connections, exactly like an enrolled account.
 
 ---
 

@@ -546,3 +546,136 @@ nevertheless exchanged in structured form:
 Standard record import and export apply to the configuration, the categories, the
 denominations, the notes, the presets and the payment methods through the ordinary list
 views.
+
+---
+
+## 10. The loading contract, entity by entity
+
+At session opening the server answers two questions for every entity in the load list:
+**which fields** it exposes and **which records** it sends. This section reproduces both.
+
+### 10.1 How a field set is interpreted
+
+- A field set that is **empty** means *every readable field of the entity*. Three entities
+  use this: the configuration, the order and the tender. They are transmitted in full.
+- A field set that names fields means *exactly those fields*. Relations are transmitted as
+  bare identifiers, never as nested records; the selling application resolves them against
+  the other entities it received.
+- Alongside the field set, each entity's **relation descriptions** are transmitted: per
+  field, its name, the owning entity, whether it is computed, whether it is related, the
+  related entity, the field kind, and — for a single-valued relation — its on-delete
+  behavior, for a one-to-many relation its inverse field name, for a many-to-many relation
+  its relation table name. A field that is not a relation is described with its name, its
+  kind and the two computed and related flags only. When the field set is empty, every
+  non-manual field is described; when it is not, only the named fields are.
+- Records the acting user may not read are silently dropped from the answer.
+
+### 10.2 The field sets
+
+| Entity | Field set |
+| --- | --- |
+| Session | identifier, name, opening user, configuration, opening instant, closing instant, payment methods, state, deferred-stock flag, starting balance, access token |
+| Configuration | every field, plus the computed extras of section 10.3 |
+| Order | every field |
+| Order line | quantity, selected attributes, custom values, unit price, universally unique identifier, tax-excluded amount, tax-included amount, order, product note, price type, product, discount, taxes, lots, customer note, refunded quantity, price extra, full product name, refunded line, combo parent, combo children, combo item, refunding lines, extra tax data, last write instant |
+| Lot on a line | lot name, order line, last write instant |
+| Tender | every field |
+| Payment method | identifier, name, cash flag, terminal provider, identify-customer flag, kind, image, sequence, integration, default quick response code |
+| Printer | identifier, name, proxy address, printed categories, printer type, direct printer address |
+| Counter category | identifier, name, parent, children, last write instant, has-image flag, colour, sequence, availability until, availability after |
+| Denomination | identifier, name, value |
+| Preset | identifier, name, pricelist, fiscal position, return-mode flag, colour, has-image flag, last write instant, identification requirement, timing flag, capacity, interval length, attendances |
+| Working schedule attendance | the fields the preset needs to generate slots |
+| Company | identifier, currency, email, website, company registry, value-added tax identifier, name, telephone, partner, country, state, tax rounding scope, barcode nomenclature, self-service invoicing flag, receipt code flag, receipt link display mode, street, city, postal code, fiscal country |
+| User | identifier, name, partner, and the derived role (see section 10.3) |
+| Partner | identifier, name, street, second street line, city, state, country, value-added tax identifier, language, telephone, postal code, email, barcode, last write instant, pricelist, parent name, counter address, invoice emails, fiscal position, company flag, receivable account |
+| Product template | identifier, display name, standard price, product category, counter categories, taxes, barcode, name, list price, favourite flag, internal reference, to-be-weighed flag, unit, sales description, description, tracking, kind, service tracking, storable flag, last write instant, colour, counter display order, available-at-the-counter flag, attribute lines, active flag, small image, combos, variants, public description, suggested products, sequence, tags, currency, cost currency |
+| Product variant | identifier, list price, display name, template, variant values, currency, cost currency, template attribute values, barcode, tags, internal reference, standard price |
+| Product attribute | name, display kind, variant-creation mode |
+| Template attribute line | display name, attribute, values, active flag |
+| Template attribute value | attribute, attribute line, attribute value, price supplement, name, custom flag, colour, image, exclusions |
+| Template attribute exclusion | excluded values, template attribute value |
+| Custom attribute value | custom value, template attribute value, order line, last write instant |
+| Combo | identifier, name, items, base price, free quantity, maximum quantity, currency |
+| Combo item | identifier, combo, product, extra price, currency |
+| Tax | identifier, name, price-included behavior, base-inclusion flag, base-affected flag, negative-factor flag, computation kind, children, amount, company, sequence, tax group, fiscal positions |
+| Tax group | identifier, name, receipt label |
+| Product unit | identifier, barcode, product, unit |
+| Decimal precision | identifier, name, digits |
+| Unit of measure | identifier, name, factor, groupable flag, hierarchy path, rounding, plus whatever extra fields the loaded taxes need for their computation |
+| Country | identifier, name, code, value-added tax label |
+| Country state | identifier, name, code, country |
+| Language | identifier, name, code, flag image address, display name |
+| Product category | identifier, name, parent, removal strategy |
+| Pricelist | identifier, name, display name, currency, rules |
+| Pricelist rule | product template, product, pricelist, surcharge, discount, rounding step, minimum margin, maximum margin, company, currency, start date, end date, computation kind, fixed price, percentage, base pricelist, base, product category, minimum quantity |
+| Cash rounding | identifier, name, rounding step, rounding method, strategy |
+| Fiscal position | identifier, name, display name, tax map, taxes |
+| Operation type | identifier, uses-created-lots flag, uses-existing-lots flag, has-documents-to-print flag |
+| Currency | identifier, name, symbol, position, rounding step, rate, decimal places, numeric code |
+| Predefined note | name, colour |
+| Product tag | name, counter description, colour, has-image flag, last write instant |
+| Installed capability | identifier, name, state |
+| Accounting entry | identifier, name |
+| Account | identifier, non-trade flag |
+| Removal strategy | method |
+| Restaurant floor | name, background colour, tables, sequence, configurations, floor background image, active flag |
+| Restaurant table | table number, width, height, horizontal position, vertical position, parent, shape, floor, colour, seats, active flag |
+| Restaurant course | universally unique identifier, fired flag, order, lines, index, last write instant |
+
+### 10.3 Computed extras on the configuration
+
+The configuration record transmitted to the selling application carries, beyond its
+stored fields:
+
+| Extra | Value |
+| --- | --- |
+| Server version | The platform's version information. |
+| Base address | The configuration's base address. |
+| Server date | The instant the data was read, used as the basis for incremental loading. |
+| Cash movement permission | Whether the acting user may record a cash in or out. |
+| Cash deletion permission | Whether the acting user may delete a cash movement. |
+| Special products | The identifiers of the products the counter treats specially (the tip product). |
+| Product default values | The default values of the product fields the loaded taxes need for their computation. |
+| Pricelist | Blanked when the configuration does not use pricelists, so that the application falls back to list prices. |
+| Value-added tax regime flag | Whether the company's country is a member of the European economic area. |
+
+The user record carries one extra: a role of either `manager` or `cashier`, derived from
+whether the user belongs to the configuration's administrator group. The raw group list
+used to derive it is removed before transmission.
+
+### 10.4 The selection conditions that depend on already-loaded data
+
+Several conditions are expressed in terms of what has already been loaded, which is why
+the load order matters:
+
+| Entity | Depends on |
+| --- | --- |
+| Order line | The loaded orders |
+| Lot on a line | The loaded order lines |
+| Custom attribute value | The loaded order lines |
+| Tender | The loaded orders |
+| Counter category | The loaded printers (every category routed to a printer is loaded even under a restriction) |
+| Partner | The loaded orders (their customers are always included) |
+| Fiscal position | The loaded presets and the loaded partners |
+| Template attribute line | The loaded product templates |
+| Template attribute exclusion | The loaded product templates and the loaded template attribute values |
+| Product unit | The loaded product variants |
+| Currency | The loaded pricelists |
+| Account | The receivable accounts of the loaded partners |
+
+### 10.5 Currency conversion at load time
+
+Three loaded amounts are converted into the selling currency at load time, at today's
+rate, each from its own currency: a product template's list price and its standard price
+(the latter from the cost currency), a combo's base price and a combo item's extra price.
+A record already expressed in the selling currency is left untouched.
+
+### 10.6 On-demand loading
+
+| Trigger | What is fetched |
+| --- | --- |
+| A product is scanned or searched that was not loaded | The matching templates and, with them, their variants, their combos and combo items (including the templates of the components), their product categories and every ancestor, the applicable pricelist rules and pricelists, their attribute lines, values, attributes (archived ones included) and exclusions, and their product units. |
+| A customer is searched that was not loaded | The matching partners and their fiscal positions. |
+| A variant must be created from a chosen attribute combination | The created variant, read with the variant field set. |
+| The open orders of a trusted configuration must be refreshed | The matching records per entity, plus the identifiers to drop. |

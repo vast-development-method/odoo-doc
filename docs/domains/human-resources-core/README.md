@@ -213,3 +213,18 @@ Where a field is visible only to a security group, the table states it as
 "**Readable by:** Human Resources Officer" or "**Readable by:** Human Resources
 Administrator". A field with no such note is readable by every internal user who can read
 the record.
+
+## 8. A note on quoted text
+
+Prose in this repository spells every term out in full. **Text inside quotation marks is
+different**: error messages, on-screen labels, template names, scheduled-job names, shipped
+record names and generated file names are reproduced exactly as the system produces them,
+because external behaviour and user expectation depend on the exact characters. Where such a
+reproduced string contains an abbreviation — for example a job name that reads "HR Employee:
+Update Current Version", a message that reads "The Badge ID must be unique…", or a
+scheduled-job label that reads "HR Presence: cron" — the abbreviation is part of the string
+and is deliberately **not** expanded. A reimplementation must emit those strings character
+for character.
+
+Reproduced storage, transport and route names appear in code font for the same reason, and
+each is accompanied on first use in a document by its full name in words.

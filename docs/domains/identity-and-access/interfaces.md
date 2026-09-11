@@ -5,6 +5,16 @@ the screens and what each shows, the named remote operations and their inputs an
 addressable paths with their method and authentication mode, the messages the domain sends, and the
 external services it talks to.
 
+> **Note on reproduced texts.** Message texts, button labels and screen titles are reproduced
+> **verbatim**, exactly as the system emits them, because external tests and user documentation
+> depend on them. Where such a reproduced text contains an abbreviation, the abbreviation belongs to
+> the text and is not this document's own prose. The abbreviations that occur are: *API* for
+> application programming interface; *2FA* for two-factor authentication; *LDAP* for the central
+> directory protocol; *DN* for distinguished name; *OAuth* and *UID* for the delegated sign-in
+> protocol and its subject identifier; *JSON* for the structured-literal notation; *HTTP* for the
+> transport protocol; *ID* for identifier. Outside such reproduced texts, every term is written in
+> full.
+
 Reproduced identifiers (paths, transport names, storage names, parameter keys) are given in code
 font, each accompanied by its full name in words on first use.
 
@@ -302,7 +312,7 @@ The **mode** column is the authentication mode of section 9.10 of
 | Path | Method | Mode | Purpose |
 |---|---|---|---|
 | `/` | retrieve | none | Redirects a signed-in non-internal account to the customer landing page; otherwise to the back office. |
-| `/web`, `/odoo`, `/odoo/<any sub-path>`, `/scoped_app/<any sub-path>` | retrieve | none | The back office. Ensures a database, redirects to the sign-in page when there is no session, re-checks the session token, redirects a non-internal account to the customer landing page, refreshes the session lifetime, and renders the client. The response forbids framing entirely and forbids storage. On a permission failure it redirects to the sign-in page with the marker `error=access`. |
+| `/web`, the application alias path and its sub-paths, and `/scoped_app/<any sub-path>` | retrieve | none | The back office. Ensures a database, redirects to the sign-in page when there is no session, re-checks the session token, redirects a non-internal account to the customer landing page, refreshes the session lifetime, and renders the client. The response forbids framing entirely and forbids storage. On a permission failure it redirects to the sign-in page with the marker `error=access`. |
 | `/web/login` | retrieve, submit | none | The sign-in page (section 1 of [workflows.md](workflows.md)). |
 | `/web/login_successful` | retrieve | user | The landing page for external accounts. |
 | `/web/become` | retrieve | user | Replaces the session account with the account of identifier 1; only for holders of *Role / Administrator*. |

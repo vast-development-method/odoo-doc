@@ -1723,3 +1723,79 @@ Two menu-visibility adjustments are applied when the menu tree is loaded:
 - the ratings menu under Project is hidden from users who are not project administrators;
 - when the "Use stages on project" privilege is granted, the flat "Projects" menu and the
   corresponding configuration menu entry are hidden, because the staged variants replace them.
+
+---
+
+## 17. Extensions contributed by companion packages
+
+The entities of this domain are extended by a family of companion packages, each of which adds
+fields, counters, statistic buttons or profitability sections. They are listed here so that a
+re-implementation knows which surface belongs to which capability and can build it incrementally.
+
+### 17.1 Text-message templates on stages
+
+| Entity | Field (storage name) | Type | Meaning and rules |
+|---|---|---|---|
+| Project Stage | Text message template (`sms_template_id`) | link to Text Message Template | Restricted to templates whose model is the project. |
+| Task Stage | Text message template (`sms_template_id`) | link to Text Message Template | Restricted to templates whose model is the task. |
+
+Behaviour:
+
+- **On a Project** — after a project is created, and after any write that changes the stage, a
+  text message is sent, with elevated rights, for every project that has a customer, has a stage,
+  and whose stage carries a template. The recipient is the project's customer.
+- **On a Task** — after a task is created, and after any write that changes the stage, the same
+  happens, with the extra condition that the task must **not** be a template. On the write path
+  the sending runs with elevated rights because the template records are protected; on the
+  creation path it does not.
+
+Note the asymmetry with the electronic mail stage template, which is sent through the tracking
+mechanism and only on a stage **change**, never on creation.
+
+### 17.2 Skills on a task
+
+| Entity | Field (storage name) | Type | Meaning |
+|---|---|---|---|
+| Task | Assignee skills (`user_skill_ids`) | collection of Employee Skills | A mirror of the skills recorded on the assignees' employee records. Read-only. |
+
+### 17.3 Inventory counters and navigation
+
+The inventory-linked package adds three navigation operations on a Project — open the outgoing
+transfers ("From WH"), open the incoming transfers ("To WH") and open all transfers
+("Stock Moves") — each filtering the transfers on the project and, for the outgoing variant,
+pre-setting the project's customer as the destination contact. The presentations offered are list,
+board, form and calendar, plus activity for every variant except the outgoing one.
+
+### 17.4 Manufacturing counters
+
+| Entity | Field (storage name) | Type | Meaning |
+|---|---|---|---|
+| Project | Bill-of-materials count (`bom_count`) | whole number | Computed. The number of bills of materials pointing at the project. Restricted to the manufacturing privilege. |
+| Project | Production count (`production_count`) | whole number | Computed. The number of manufacturing orders pointing at the project. Restricted to the manufacturing privilege. |
+
+Two further statistic buttons appear on the project's side panel, each shown only to holders of
+the manufacturing privilege.
+
+### 17.5 Purchasing counter
+
+| Entity | Field (storage name) | Type | Meaning |
+|---|---|---|---|
+| Project | Purchase order count (`purchase_orders_count`) | whole number | Computed. Restricted to the purchasing privilege. It is the number of purchase orders that name the project and have at least one line, plus — for a project that has an analytic account — the number of purchase order lines carrying that analytic account whose order was not already counted. Projects with no analytic account count only the first term. |
+
+### 17.6 Expense navigation
+
+The expense-linked package adds one navigation operation on a Project, opening the expenses whose
+analytic distribution names the project's analytic account, with the list, form, board, graph and
+pivot presentations; when exactly one expense matches and the call does not come from an embedded
+tab, the form opens directly.
+
+### 17.7 Summary of the profitability sections each package contributes
+
+| Package capability | Sections added |
+|---|---|
+| analytic accounting on projects | `other_revenues_aal` (14), `other_costs_aal` (15), `other_purchase_costs` (11) |
+| sales-linked projects | `service_revenues` (6), `materials` (7), `other_invoice_revenues` (9), `downpayments` (20), `cost_of_goods_sold` (21) |
+| purchasing-linked projects | `purchase_order` (10); also suppresses the vendor-bill contribution of the analytic package and re-runs it with its own exclusion set |
+| expense-linked projects | `expenses` (13) |
+| inventory-valuation-linked projects | the inventory variant of `other_costs`, emitted with sequence 15 |
+| time-recording-linked projects | `billable_fixed` (1), `billable_time` (2), `billable_milestones` (3), `billable_manual` (4), `non_billable` (5), `timesheet_revenues` (6), the timesheet variant of `other_costs` (12); also remaps the service-policy classification of the sales-linked sections |

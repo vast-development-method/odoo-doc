@@ -801,3 +801,583 @@ The created Contact receives:
 2. Otherwise, if the lead has a normalised or raw electronic mail address, look up a Contact by
    that address **without creating one**, and return the result.
 3. Otherwise return nothing.
+
+---
+
+## 9. Sales Team
+
+**Sales Team** (`crm.team`, table `crm_team`).
+
+### 9.1 Purpose
+
+A Sales Team groups salespeople who share a pipeline, an electronic mail alias, a dashboard and a
+set of record-visibility rules. In the assignment machinery a team is both a *bucket* (leads are
+first allocated to teams) and a *capacity* (the sum of its members' capacities).
+
+### 9.2 Field table — core
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Sales Team (`name`) | single line text | **Required.** Translatable. |
+| Sequence (`sequence`) | integer | Default 10. First key of the default ordering. |
+| Active (`active`) | boolean | Default true. Archiving hides the team without deleting it. |
+| Company (`company_id`) | link to Company | Indexed. May be empty, which makes the team available to every company. |
+| Currency (`currency_id`) | link to Currency | Related to the company's currency; read-only. |
+| Team leader (`user_id`) | link to User | Restricted to non-shared users. Company-checked. |
+
+### 9.3 Field table — membership
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Multiple memberships allowed (`is_membership_multi`) | boolean | Not stored. Reads the configuration parameter `sales_team.membership_multi`. When false, a user may belong to at most one team at a time. |
+| Salespersons (`member_ids`) | many-sided link to User | Not stored; computed from the active memberships, with an inverse that creates and archives memberships, and a search that delegates to the membership table. Restricted to non-shared users whose companies include the team's company (or any company when the team has none). |
+| Member companies (`member_company_ids`) | many-sided link to Company | Not stored, interface only. The team's company if set, otherwise every company. |
+| Membership issue warning (`member_warning`) | long text | Not stored. In single-membership mode, lists the users being added who already belong to another team, as "*the user names* already in other teams (*the team names*)." |
+| Sales Team Members (`crm_team_member_ids`) | reverse link to Sales Team Member | The **active** memberships. |
+| Sales Team Members including inactive (`crm_team_member_all_ids`) | reverse link to Sales Team Member | All memberships, active and archived. |
+
+### 9.4 Field table — assignment
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Lead assign (`assignment_enabled`) | boolean | Not stored. True when the configuration parameter `crm.lead.auto.assignment` is set. |
+| Auto assignment (`assignment_auto_enabled`) | boolean | Not stored. True when rule-based assignment is enabled **and** the lead-assignment scheduled job is active. |
+| Skip auto assignment (`assignment_optout`) | boolean | When true the team is excluded from the scheduled allocation run. |
+| Lead average capacity (`assignment_max`) | integer | Not stored. The **sum** of the capacities of the team's active members. |
+| Assignment domain (`assignment_domain`) | single line text | A stored filter expression used to restrict which unassigned leads the team may take. Tracked. Empty means no restriction. |
+| Unassigned leads (`lead_unassigned_count`) | integer | Not stored. The number of leads belonging to this team that have no salesperson. |
+| Leads and opportunities assigned this month (`lead_all_assigned_month_count`) | integer | Not stored. The sum over active members of their thirty-day assigned counts. |
+| Exceeded monthly assignment (`lead_all_assigned_month_exceeded`) | boolean | Not stored. True when the previous figure is strictly greater than the team capacity. |
+| Lead properties definition (`lead_properties_definition`) | properties definition | The schema of the user-defined fields that leads of this team carry. |
+
+### 9.5 Field table — pipeline usage and alias
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Leads (`use_leads`) | boolean | When true, the team qualifies incoming requests as unqualified leads before converting them. |
+| Pipeline (`use_opportunities`) | boolean | Default true. When true the team manages a pre-sales pipeline of opportunities. |
+| Alias (`alias_id`) | link to Electronic Mail Alias | **Required**, created automatically. Incoming electronic mail to this address creates a lead attached to the team. On delete: restricted. Not copied. |
+| Alias name, domain, full address, contact policy, default values, status | various | All related to the alias record; see the Messaging domain. |
+
+Interaction rules:
+
+- Clearing **both** usage flags in the form clears the alias name.
+- On writing either usage flag, the alias creation values are recomputed and written back: the
+  aliased model is forced to the Lead model; if neither flag is set the alias name is cleared; the
+  alias defaults are merged with `type` set to `lead` when the acting user holds the group *Show
+  Lead Menu* and the team uses leads, otherwise `opportunity`, and with `team_id` set to the team.
+
+### 9.6 Field table — dashboard and favourites
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Colour index (`color`) | integer | Default: a pseudo-random integer between 1 and 11. |
+| Favourite members (`favorite_user_ids`) | many-sided link to User | Default: the creating user. Stored in association table `team_favorite_user_rel`. |
+| Show on dashboard (`is_favorite`) | boolean | Not stored; computed as "the acting user is among the favourite members", with an inverse that adds or removes the acting user. |
+| Dashboard button (`dashboard_button_name`) | single line text | Not stored. "Pipeline" when the team uses opportunities. When the team is viewed from inside the sales application, "Sales Analysis" instead. |
+
+### 9.7 Ordering, display, defaults
+
+- **Default ordering**: sequence ascending, then creation date descending, then identifier
+  descending.
+- **Display name**: the value of `name`.
+- Three teams are created on installation: "Sales" (sequence 0, no company, led by the
+  administrator, with a membership for the administrator), "Website" (archived by default) and
+  "Point of Sale" (archived by default).
+
+### 9.8 Constraints
+
+| Constraint | Condition | Message |
+|---|---|---|
+| Company of members | For a team that has a company, every active member must have that company among their allowed companies. | "The following team members are not allowed in company '*the company*' of the Sales Team '*the team*': *the user names*" |
+| Assignment domain | The stored filter expression must parse and must be usable as a search filter on leads. | "Assignment domain for team *the team* is incorrectly formatted" |
+| Default teams | The teams "Website" and "Point of Sale" may not be deleted. | "Cannot delete default team "*the team name*"" |
+
+### 9.9 Deletion behaviour — folding the frequency table
+
+Deleting a team must not silently destroy the statistical history it accumulated. Before the
+record is removed:
+
+1. Collect every Scoring Frequency cell belonging to the deleted teams.
+2. Collect the existing "no team" cells whose variable appears among those cells.
+3. For each cell of the deleted team:
+   - Skip it entirely when **both** its won count and its lost count are less than or equal to one
+     tenth when compared at two decimals — these are pure seeding artefacts with no information.
+   - Look for a "no team" cell with the same variable and the same value.
+     - **If found**: round the existing won count, the existing lost count, the incoming won count
+       and the incoming lost count each to the nearest whole number using half-up rounding; add
+       them; store the sums, replacing any sum that is not strictly greater than one tenth by one
+       tenth.
+     - **If not found**: create a new "no team" cell with the same variable and value, whose won
+       count is the incoming won count when that is strictly greater than one tenth and one tenth
+       otherwise, and likewise for the lost count.
+4. Delete the team. The remaining cells that still point at it are removed by the cascading
+   reference.
+
+### 9.10 Multi-company behaviour
+
+A record rule restricts teams to those whose company is among the reader's enabled companies or is
+empty. Writing a company on a team re-checks the membership company constraint for every member.
+
+---
+
+## 10. Sales Team Member
+
+**Sales Team Member** (`crm.team.member`, table `crm_team_member`).
+
+### 10.1 Purpose
+
+The membership of one user in one team. It is a first-class record because it carries the
+per-person assignment parameters: capacity, filter, preferred filter and pause switch.
+
+### 10.2 Field table
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Sales Team (`crm_team_id`) | link to Sales Team | **Required.** Indexed. On delete: **cascade**. Default: empty. Group expansion shows every team even when empty. Deliberately **not** company-checked, because the company check is done against the user instead. |
+| Salesperson (`user_id`) | link to User | **Required.** Indexed. Company-checked. On delete: **cascade**. Restricted to non-shared users who are not already in the team (in single-membership mode) and whose companies include the team's company. |
+| Active (`active`) | boolean | Default true. Archiving a membership is how a user leaves a team without losing the history. |
+| Multiple memberships allowed (`is_membership_multi`) | boolean | Not stored. Reads the configuration parameter. |
+| Member warning (`member_warning`) | long text | Not stored. In single-membership mode, "*the user name* already in other teams (*the team names*)." |
+| Users already in teams (`user_in_teams_ids`) | many-sided link to User | Not stored, interface only. In multi-membership mode always empty. Otherwise, the users already holding a membership, so that the selection list excludes them. |
+| User companies (`user_company_ids`) | many-sided link to Company | Not stored, interface only. The team's company if set, otherwise every company. |
+| Image, image small (`image_1920`, `image_128`) | image | Related to the user. |
+| Name (`name`) | single line text | Related to the user's display name; writable. |
+| Electronic mail address (`email`) | single line text | Related to the user; read-only. |
+| Telephone (`phone`) | single line text | Related to the user; read-only. |
+| Company (`company_id`) | link to Company | Related to the user's company; read-only. |
+| Lead assign (`assignment_enabled`) | boolean | Related to the team's flag; read-only. |
+| Assignment domain (`assignment_domain`) | single line text | Tracked. A stored filter expression restricting which of the team's leads this member may receive. Empty means no restriction. |
+| Preference assignment domain (`assignment_domain_preferred`) | single line text | Tracked. A second stored filter expression; leads matching **both** this and the ordinary domain are assigned to this member **before** any other lead is assigned. |
+| Pause assignment (`assignment_optout`) | boolean | When true the member receives nothing from the assignment run. |
+| Average leads capacity on thirty days (`assignment_max`) | integer | Default 30. The number of leads the member can absorb over thirty days. |
+| Leads in the last twenty-four hours (`lead_day_count`) | integer | Not stored. The number of leads whose assignment date falls within the last twenty-four hours and that belong to this pair of user and team. Archived leads are excluded from the count. |
+| Leads in the last thirty days (`lead_month_count`) | integer | Not stored. The same count over the last thirty days. |
+
+### 10.3 Constraints
+
+| Constraint | Condition | Message |
+|---|---|---|
+| Duplicate membership | In single-membership mode, the pair (team, user) must be unique **among active memberships**; archived duplicates are allowed, which is why this is a programmed check and not a stored uniqueness rule. | "You are trying to create duplicate membership(s). We found that *the user name (the team name)*, … already exist(s)." |
+| Company of membership | If the team has a company, that company must be among the user's allowed companies. | "User '*the user*' is not allowed in the company '*the company*' of the Sales Team '*the team*'." |
+| Assignment domain | Must parse and be usable as a lead filter. | "Member assignment domain for user *the user* and team *the team* is incorrectly formatted" |
+| Preferred assignment domain | Must parse and be usable as a lead filter. | "Member preferred assignment domain for user *the user* and team *the team* is incorrectly formatted" |
+
+### 10.4 Creation and write behaviour in single-membership mode
+
+On creation, and on any write that activates a membership, the system **archives** every other
+active membership of the same users. The procedure is:
+
+1. Search the active memberships of the affected users.
+2. Group them by user.
+3. For each incoming pair (user, team), select that user's active memberships whose team differs
+   from the incoming team.
+4. Archive the selected memberships.
+
+Creating a membership does not subscribe the member to the record's discussion thread; the thread
+exists only to record tracked changes.
+
+Manual re-pointing of an existing membership to another user or another team is explicitly
+unsupported: the intended operations are create, archive and activate.
+
+### 10.5 Ordering and display
+
+- **Default ordering**: creation date ascending, then identifier. This ordering is load-bearing:
+  the *main* team of a user is defined as the team of that user's **first-created** membership.
+- **Display name**: the user's display name.
+
+### 10.6 Effect on the User record
+
+| Field on User (storage name) | Meaning |
+|---|---|
+| Sales Teams (`crm_team_ids`) | Not stored; the teams of the user's active memberships. Searching on it is rewritten into an explicit list of user identifiers when the result set is smaller than ten thousand, because the field is used inside record rules and an inline list is far cheaper. |
+| Sales team memberships (`crm_team_member_ids`) | The reverse link to the membership records, ordered by creation date. |
+| User sales team (`sale_team_id`) | Stored and computed: the team of the user's **first** membership in creation order, or empty when the user has none. Used as the default team for the pipeline and for invoicing. |
+
+Archiving a user archives all of that user's memberships first.
+
+---
+
+## 11. Activity Analysis
+
+**Activity Analysis** (`crm.activity.report`, database view `crm_activity_report`).
+
+### 11.1 Purpose
+
+A read-only reporting entity. Each row is one **completed activity** logged on a lead: it joins
+the message that recorded the activity completion with the lead it belongs to.
+
+### 11.2 Row definition
+
+One row exists for every message whose model is the Lead model and whose activity type is set.
+Each row exposes:
+
+| Field (storage name) | Source |
+|---|---|
+| identifier | the message identifier |
+| Creation date (`lead_create_date`) | the lead's creation date |
+| Conversion date (`date_conversion`) | the lead's conversion date |
+| Expected closing (`date_deadline`) | the lead's expected closing date |
+| Closed date (`date_closed`) | the lead's closed date |
+| Subtype (`subtype_id`) | the message subtype |
+| Activity type (`mail_activity_type_id`) | the message's activity type |
+| Assigned to (`author_id`) | the message author |
+| Completion date (`date`) | the message date |
+| Activity description (`body`) | the message body |
+| Opportunity (`lead_id`) | the lead |
+| Salesperson (`user_id`), Sales Team (`team_id`), Country (`country_id`), Company (`company_id`), Stage (`stage_id`), Customer (`partner_id`), Type (`lead_type`), Active (`active`), Won or lost (`won_status`) | the corresponding lead fields |
+| Tags (`tag_ids`) | related to the lead's tags |
+
+### 11.3 Access and rules
+
+The view is readable by salespeople only. Two record rules apply: users in the group *User: All
+Documents* see every row; users in the group *User: Own Documents Only* see only rows whose
+salesperson is themselves or is empty. A third rule restricts rows to the reader's enabled
+companies or to rows with no company.
+
+---
+
+## 12. Transient entities (wizards)
+
+### 12.1 Convert to Opportunity Wizard
+
+**Convert to Opportunity Wizard** (`crm.lead2opportunity.partner`, transient).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Conversion action (`name`) | selection | `convert` "Convert to opportunity", `merge` "Merge with existing opportunities". Computed from the detected duplicates and writable: when empty it becomes `merge` if at least two duplicates were detected, otherwise `convert`. |
+| Related customer (`action`) | selection | **Required.** `create` "Create a new customer", `exist` "Link to an existing customer". Computed from the lead and writable: `exist` when a matching Contact is found by section 8.9, otherwise `create`. |
+| Associated lead (`lead_id`) | link to Lead | **Required.** Defaulted from the active record of the calling context when not supplied. |
+| Company name (`lead_partner_name`) | single line text | Related to the lead's company name. |
+| Contact name (`lead_contact_name`) | single line text | Related to the lead's contact name. |
+| Opportunities (`duplicated_lead_ids`) | many-sided link to Lead | Computed from the lead and the chosen Contact, writable, archived records included. The merge-oriented duplicate search of `calculations.md`, run with lost records **included**. |
+| Company (`commercial_partner_id`) | link to Contact | Restricted to Contacts flagged as companies. Computed from the chosen Contact, writable: when the current value is empty or is not an ancestor of itself, and the chosen Contact has a parent, take that parent. |
+| Customer (`partner_id`) | link to Contact | Computed from the action and the lead, writable: the matched Contact when the action is `exist`, nothing when it is `create`. |
+| Salesperson (`user_id`) | link to User | Computed from the lead, writable: the lead's salesperson. |
+| Sales Team (`team_id`) | link to Sales Team | Computed from the salesperson, writable, following the same rule as the lead's own team computation but with no extra filter. |
+| Force assignment (`force_assignment`) | boolean | Default true. When true the salesperson is overwritten even on records that already have one. |
+
+**Opening guard.** When the wizard is opened on a lead whose probability is exactly 100, it
+refuses to open with the message "Closed/Dead leads cannot be converted into opportunities."
+
+### 12.2 Mass Convert Wizard
+
+**Mass Convert Wizard** (`crm.lead2opportunity.partner.mass`, transient). It inherits every field
+of the single wizard and changes the following:
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Associated lead (`lead_id`) | link to Lead | No longer required. |
+| Active leads (`lead_tomerge_ids`) | many-sided link to Lead | Default: the active records of the calling context. Archived records included. Stored in association table `crm_convert_lead_mass_lead_rel`. |
+| Salespersons (`user_ids`) | many-sided link to User | The pool of salespeople to distribute the converted opportunities among, round-robin. |
+| Apply deduplication (`deduplicate`) | boolean | Default true. When true, before converting, each lead is merged with its detected duplicates. |
+| Related customer (`action`) | selection | Extended with `each_exist_or_create` "Use existing partner or create", which becomes the computed default. On removal of the extending capability the value falls back to `exist`. |
+| Force assignment (`force_assignment`) | boolean | Default **false** in mass mode. |
+| Conversion action (`name`) | selection | Always computed to `convert`. |
+| Customer (`partner_id`) | link to Contact | Always computed to empty: a single customer cannot apply to many leads. |
+| Company (`commercial_partner_id`) | link to Contact | Always empty: setting one company per lead is not supported in mass mode. |
+| Opportunities (`duplicated_lead_ids`) | many-sided link to Lead | Computed from the selected leads: those leads for which the merge-oriented duplicate search (lost records **excluded**) returns more than one record. |
+
+### 12.3 Merge Wizard
+
+**Merge Wizard** (`crm.merge.opportunity`, transient).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Leads and opportunities (`opportunity_ids`) | many-sided link to Lead | Default: the active records of the calling context, filtered to those whose outcome is **not** won. Archived records included. Stored in association table `merge_opportunity_rel`. |
+| Salesperson (`user_id`) | link to User | Restricted to non-shared users. Optional; when set it overrides the merged salesperson. |
+| Sales Team (`team_id`) | link to Sales Team | Computed from the salesperson, writable: when a salesperson is chosen and the current team does not have that salesperson as leader or member, take the first team that does. |
+
+### 12.4 Lost Reason Wizard
+
+**Lost Reason Wizard** (`crm.lead.lost`, transient).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Leads (`lead_ids`) | many-sided link to Lead | The records to mark lost. Archived records included. |
+| Lost reason (`lost_reason_id`) | link to Lost Reason | Optional. |
+| Closing note (`lost_feedback`) | rich text | Optional, sanitised. When non-empty it is posted as the log message accompanying the tracked change. |
+
+### 12.5 Probability Rebuild Wizard
+
+**Probability Rebuild Wizard** (`crm.lead.pls.update`, transient).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Scoring start date (`pls_start_date`) | date | **Required.** Default: the current value of the configuration parameter `crm.pls_start_date`. |
+| Scoring variables (`pls_fields`) | many-sided link to Scoring Frequency Field | Default: the catalogue entries matching the field names currently listed in the configuration parameter `crm.pls_fields`. |
+
+Applying the wizard is restricted to administrators; see `business-rules.md`.
+
+### 12.6 Quotation Contact Wizard
+
+**Quotation Contact Wizard** (`crm.quotation.partner`, transient). Present only when the sales
+capability is installed. It asks, before a quotation can be started from an opportunity that has
+no Contact, whether to create a new Contact from the lead information or to link an existing one,
+then performs the customer assignment and opens the new quotation.
+
+---
+
+## 13. Partner network entities
+
+These entities exist when the partner network capability is installed. They turn the Contact
+entity into a reselling partner directory and let an opportunity be forwarded to the nearest
+suitable partner.
+
+### 13.1 Partner Grade
+
+**Partner Grade** (`res.partner.grade`, table `res_partner_grade`).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Sequence (`sequence`) | integer | Default 10. Determines the ranking order; the lowest sequence is the entry level. |
+| Active (`active`) | boolean | Default true. |
+| Level name (`name`) | single line text | Translatable. |
+| Company (`company_id`) | link to Company | Default: the acting company. |
+| Default price list (`default_pricelist_id`) | link to Price List | When set, assigning this level to a Contact also assigns this price list to that Contact. |
+| Members count (`partners_count`) | integer | Not stored. The number of Contacts carrying this level. |
+| Members label (`partners_label`) | single line text | Related to the company's configurable label for affiliates. |
+| Level weight (`partner_weight`) | integer | Default 1. The relative chance of this partner being chosen by the geographic assignment. Zero means never assign. |
+| Published (`is_published`) | boolean | Default true; makes the level visible on the public partner directory. |
+| Public address (`website_url`) | single line text | Computed: the public directory path for this level. |
+
+- **Default ordering**: sequence.
+- **Default records**: three levels are supplied — see `configuration.md`.
+
+### 13.2 Partner Activation
+
+**Partner Activation** (`res.partner.activation`, table `res_partner_activation`).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Sequence (`sequence`) | integer | Ordering key. |
+| Name (`name`) | single line text | **Required.** |
+| Active (`active`) | boolean | Default true. |
+
+- **Default ordering**: sequence.
+
+### 13.3 Fields added to the Contact
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Partner level (`grade_id`) | link to Partner Grade | Tracked. Group expansion shows every level. Writing it also writes the level's default price list onto the Contact, and rejects the write when a different price list is written at the same time. |
+| Level weight (`partner_weight`) | integer | Computed from the level's weight, writable, stored, tracked. Zero means the Contact is never selected by geographic assignment. |
+| Level sequence (`grade_sequence`) | integer | Related to the level's sequence; stored; read-only. |
+| Activation (`activation`) | link to Partner Activation | Indexed, tracked. |
+| Partnership date (`date_partnership`) | date | When the partnership started. |
+| Latest review (`date_review`) | date | When the partnership was last reviewed. |
+| Next review (`date_review_next`) | date | When the next review is due. |
+| Implemented by (`assigned_partner_id`) | link to Contact | Indexed. The partner that implemented this customer. |
+| Implementation references (`implemented_partner_ids`) | reverse link to Contact | The customers this partner implemented. |
+| Implementation reference count (`implemented_partner_count`) | integer | Computed and stored: the number of **published** implementation references. |
+| Opportunities (`opportunity_ids`) | reverse link to Lead | Restricted to records of type `opportunity`. |
+| Opportunity count (`opportunity_count`) | integer | Not stored, visible only to salespeople. Counts opportunities of the Contact **and of every descendant Contact**, walking up the parent chain so that a parent accumulates its children's counts. With the partner network capability present the count also includes opportunities assigned to the Contact as a reselling partner, and a seen-set prevents double counting when the same Contact appears in both roles. |
+
+When a Contact is created on the fly from a many-to-one selection with the appropriate context
+flag, it receives the lowest-sequence level and the lowest-sequence activation by default, so that
+it remains visible in the same selection list afterwards.
+
+### 13.4 Partner Assignment Analysis
+
+**Partner Assignment Analysis** (`crm.partner.report.assign`, database view
+`crm_partner_report_assign`). A read-only aggregation of Contacts with, per Contact, the level,
+the activation, the country, the number of opportunities assigned to them and the date of the last
+assignment. Used to monitor how work is spread across the partner network.
+
+### 13.5 Forward to Partner Wizard
+
+**Forward to Partner Wizard** (`crm.lead.forward.to.partner`, transient). Sends one or more
+opportunities to one or more reselling partners by electronic mail, using a template, and records
+the forwarding on each opportunity.
+
+**Lead Assignation Line** (`crm.lead.assignation`, transient). One proposed pairing of an
+opportunity with a partner inside that wizard, carrying the lead, the proposed partner and the
+rendered message body.
+
+---
+
+## 14. Lead generation entities
+
+These entities exist when the lead generation capability is installed.
+
+### 14.1 Lead Generation Request
+
+**Lead Generation Request** (`crm.iap.lead.mining.request`, table `crm_iap_lead_mining_request`).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Request number (`name`) | single line text | **Required**, read-only, **not copied**. Default: the text "New"; replaced by the next value of the numbering series when the request is submitted. |
+| Status (`state`) | selection | **Required.** `draft` "Draft", `error` "Error", `done` "Done". Default `draft`. |
+| Number of leads (`lead_number`) | integer | **Required.** Default 3. Clamped in the form to the range one to two hundred inclusive. |
+| Target (`search_type`) | selection | **Required.** `companies` "Companies", `people` "Companies and their Contacts". Default `companies`. |
+| Error type (`error_type`) | selection | Read-only, **not copied**. `credits` "Insufficient Credits", `no_result` "No Result". |
+| Type (`lead_type`) | selection | **Required.** `lead` "Leads", `opportunity` "Opportunities". Default: `lead` when the acting user holds the group *Show Lead Menu*, otherwise `opportunity`. |
+| Sales Team (`team_id`) | link to Sales Team | Computed from the salesperson and the type, writable, stored. Restricted to teams that use opportunities. On delete: set to empty. |
+| Salesperson (`user_id`) | link to User | Default: the acting user. |
+| Tags (`tag_ids`) | many-sided link to Tag | Applied to every generated lead. |
+| Generated leads (`lead_ids`) | reverse link to Lead | The leads this request produced. |
+| Number of generated leads (`lead_count`) | integer | Not stored. |
+| Filter on size (`filter_on_size`) | boolean | Default false. |
+| Size minimum (`company_size_min`) | integer | Default 1. Clamped in the form to at least one and at most the maximum. |
+| Size maximum (`company_size_max`) | integer | Default 1000. Clamped in the form to at least the minimum. |
+| Countries (`country_ids`) | many-sided link to Country | Default: the country of the acting user's company. |
+| States (`state_ids`) | many-sided link to Country State | Cleared whenever the countries change. |
+| Available states (`available_state_ids`) | reverse link to Country State | Not stored. Only the states of the countries that appear on a whitelist of countries for which the data service actually carries state information; offering the others would silently shrink the result set. |
+| Industries (`industry_ids`) | many-sided link to Industry | Optional filter. |
+| Number of contacts (`contact_number`) | integer | Default 10. Clamped in the form to the range one to five inclusive. |
+| Filter on (`contact_filter_type`) | selection | `role` "Role", `seniority` "Seniority". Default `role`. |
+| Preferred role (`preferred_role_id`) | link to Role | Used when filtering on role. |
+| Other roles (`role_ids`) | many-sided link to Role | Used when filtering on role. |
+| Seniority (`seniority_id`) | link to Seniority | Used when filtering on seniority. |
+| Credit tooltips (`lead_credits`, `lead_contacts_credits`, `lead_total_credits`) | single line text | Not stored. Human-readable estimates of the service credits the request will consume. |
+
+### 14.2 Industry, Role, Seniority
+
+| Entity | Fields | Uniqueness |
+|---|---|---|
+| Industry (`crm.iap.lead.industry`) | Industry name (`name`, required, translatable), service identifiers (`reveal_ids`, required, a comma-separated list), colour (`color`), sequence (`sequence`); ordered by sequence then identifier. | Name unique — "Industry name already exists!" |
+| Role (`crm.iap.lead.role`) | Role name (`name`, required, translatable), service identifier (`reveal_id`, required), colour (`color`). Display name is the name with underscores replaced by spaces and title-cased. | Name unique — "Role name already exists!" |
+| Seniority (`crm.iap.lead.seniority`) | Name (`name`, required, translatable), service identifier (`reveal_id`, required). Display name is the name with underscores replaced by spaces and title-cased. | Name unique — "Name already exists!" |
+
+### 14.3 Fields added to the Lead
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Lead generation request (`lead_mining_request_id`) | link to Lead Generation Request | Indexed. |
+| Service company identifier (`reveal_id`) | single line text | Indexed. The identifier the data service assigned to the company; used to avoid asking for the same company twice. |
+
+---
+
+## 15. Campaign attribution entities
+
+### 15.1 Campaign
+
+**Campaign** (`utm.campaign`, table `utm_campaign`).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Active (`active`) | boolean | Default true. |
+| Campaign identifier (`name`) | single line text | **Required**, **unique**, not translatable. Computed from the title, writable, stored, precomputed. The uniqueness is achieved by appending a bracketed counter: see the unique-naming algorithm in `calculations.md`. |
+| Campaign name (`title`) | single line text | **Required**, translatable. This is the human label; the record's display name is the title. |
+| Responsible (`user_id`) | link to User | **Required.** Default: the acting user. |
+| Stage (`stage_id`) | link to Campaign Stage | **Required**, **not copied**. Default: the first stage in sequence order. On delete: restricted. Group expansion shows every stage. |
+| Tags (`tag_ids`) | many-sided link to Campaign Tag | Stored in association table `utm_tag_rel`. |
+| Automatically generated (`is_auto_campaign`) | boolean | Default false. Set when the campaign was created implicitly from a tracking parameter rather than by a person. |
+| Colour index (`color`) | integer | Presentation only. |
+| Use leads (`use_leads`) | boolean | Not stored. True when the acting user holds the group *Show Lead Menu*; decides which navigation target the campaign's lead button opens. |
+| Leads and opportunities count (`crm_lead_count`) | integer | Not stored, visible to salespeople. Counts leads attributed to this campaign, **including archived ones**. |
+
+On creation, a campaign supplied with an identifier but no title takes the identifier as its title;
+identifiers are then made unique.
+
+### 15.2 Source
+
+**Source** (`utm.source`, table `utm_source`). One field: Source name (`name`), required and
+**unique**, uniqueness enforced both by a stored rule ("The name must be unique") and by the
+automatic bracketed counter applied on creation. The record delivered as "Referral" may not be
+deleted: "You cannot delete the 'Referral' UTM source record."
+
+### 15.3 Medium
+
+**Medium** (`utm.medium`, table `utm_medium`). Fields: Medium name (`name`), required, **unique**,
+not translatable; Active (`active`), default true. Ordered by name. Six delivered records may not
+be deleted — Email, Direct, Website, X, Facebook and LinkedIn — with the message "Oops, you can't
+delete the Medium '*the name*'. Doing so would be like tearing down a load-bearing wall — not the
+best idea."
+
+### 15.4 Campaign Stage and Campaign Tag
+
+| Entity | Fields |
+|---|---|
+| Campaign Stage (`utm.stage`) | Name (`name`, required, translatable), Sequence (`sequence`, default 1). Ordered by sequence. |
+| Campaign Tag (`utm.tag`) | Name (`name`, required, translatable, **unique** — "Tag name already exists!"), Colour (`color`, default a pseudo-random integer between 1 and 11). Ordered by name. |
+
+### 15.5 The attribution mixin
+
+Every record that can be attributed carries three links — campaign, source and medium — each
+indexed with a partial index that skips empty values. On the Lead these three are additionally
+declared to clear themselves when the referenced record is deleted.
+
+The default values of the three fields are taken from the visitor's browser cookies, **except**
+when the acting user is a salesperson and is not acting with elevated rights: in that case no
+attribution default is applied at all, because a salesperson creating a record by hand should not
+inherit the attribution of their own browsing session.
+
+When the cookie holds a text value for a link field, the corresponding record is looked up by a
+case-insensitive exact name match among all records including archived ones, and is created if
+absent; a campaign created this way is flagged as automatically generated.
+
+---
+
+## 16. Extensions to entities owned by other domains
+
+### 16.1 Contact
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Opportunities (`opportunity_ids`) | reverse link to Lead | Leads of type `opportunity` whose Contact is this one. |
+| Opportunity count (`opportunity_count`) | integer | Not stored, visible only to salespeople; see section 13.3 for the full hierarchical rule. |
+
+A Contact also gains an application statistic entry showing the opportunity count with a star icon
+when that count is non-zero.
+
+### 16.2 Meeting
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Opportunity (`opportunity_id`) | link to Lead | Restricted to records of type `opportunity`. Indexed. On delete: set to empty. |
+
+Behaviour:
+
+- When a meeting is created with an opportunity and it has no linked activity, a note is posted on
+  the opportunity recording the scheduled time, the subject as a link and the duration; a missing
+  duration is rendered as the word "unknown".
+- When the calendar is opened from a lead, the generic document reference of the new meeting is
+  pre-filled with that lead, and the opportunity link is derived from it.
+- A meeting whose opportunity is the record currently being viewed is highlighted.
+
+### 16.3 Sales Order
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Opportunity (`opportunity_id`) | link to Lead | Restricted to records of type `opportunity` whose company is empty or equal to the order's company. Indexed with a partial index that skips empty values. Company-checked. |
+
+Behaviour: confirming an order feeds the expected revenue back to the opportunity — see
+`calculations.md`.
+
+### 16.4 Website
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Default sales team (`crm_default_team_id`) | link to Sales Team | The team applied to leads created through the public contact form. Restricted to teams that use leads when the acting user holds the group *Show Lead Menu*, otherwise to teams that use opportunities. |
+| Default salesperson (`crm_default_user_id`) | link to User | The salesperson applied to leads created through the public contact form. Restricted to non-shared users. |
+
+### 16.5 Website Visitor
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Leads (`lead_ids`) | many-sided link to Lead | Visible to salespeople. |
+| Leads count (`lead_count`) | integer | Not stored. |
+
+Behaviour: a visitor's electronic mail address and telephone fall back to those of its most
+recently created lead that has one; a visitor tied to at least one lead is never purged as
+inactive; merging two visitors moves the leads onto the surviving visitor.
+
+### 16.6 Discussion Channel
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Leads (`lead_ids`) | reverse link to Lead | Visible to salespeople. The leads created out of this live chat conversation. |
+| Has lead (`has_crm_lead`) | boolean | Computed and stored. Indexed with a partial index restricted to true values. It is the flag a record rule uses to grant salespeople read access to the conversations behind their leads. |
+
+### 16.7 Periodic Digest
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| New leads (`kpi_crm_lead_created`) | boolean | Whether the digest includes the count of leads created in the period. |
+| New leads value (`kpi_crm_lead_created_value`) | integer | The count, computed per company. |
+| Opportunities won (`kpi_crm_opportunities_won`) | boolean | Whether the digest includes the count of opportunities won in the period. |
+| Opportunities won value (`kpi_crm_opportunities_won_value`) | integer | The count of records of type `opportunity` with probability 100, dated by closed date, computed per company. |
+
+Both computations raise an access error for a user who is not a salesperson, which the digest
+machinery treats as "omit this figure for this recipient".

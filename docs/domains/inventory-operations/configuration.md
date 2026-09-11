@@ -369,3 +369,72 @@ The choices an inventory manager makes on an Operation Type, and what each one c
    - **Last Used**: use the Location where this product was last put away under the named sublocation.
    - **Closest Location**: search the descendants of the named sublocation that carry the rule's Storage Category, preferring one that already holds the same product or the same container type.
 4. Order the rules by priority; the specificity sort of `calculations.md`, section 9.1, then decides which one is tried first for a given arrival.
+
+---
+
+# 12. Precisions the domain depends on
+
+| Precision name | Used for | Where it matters |
+|---|---|---|
+| `Product Unit` | Every quantity on a move, a detail line and a quantity record | The rounding check when a processed quantity is written; the rounding check at completion; the backorder test; the split test; the reservation line-creation test; the deletion of empty records (at the greater of 6 digits and twice this setting's digits) |
+| `Product Price` | The unit price carried on a move | The recomputation of a unit price when a negative move is absorbed; the merge key, at the smaller of this and the company currency's decimal places |
+| `Stock Weight` | Weights | The shipping weight of a Transfer; the maximum weight of a Storage Category |
+| `Product Unit of Measure` | The whole-container test | The comparison of a container's contents against the lines that claim to move it |
+
+The rounding **step** of a unit of measure is a different thing from a precision: it is a multiple, not a digit count. Several algorithms deliberately use one rather than the other, and each such place is called out in `calculations.md`.
+
+---
+
+# 13. Configuring an installation from scratch
+
+The order matters, because each step depends on the previous one.
+
+1. **Decide the company set.** Each company will get its own transit Location, inventory-loss Location, production Location, scrap Location and scrap sequence automatically.
+2. **Turn on the groups you need.** Storage Locations first, then Multi-Step Routes if you need more than the generated Routes, then Lots & Serial Numbers, Packages and Consignment as required. Turning a group on afterwards is always possible; turning one off is refused once the data depends on it.
+3. **Create the Warehouses.** One per physical site. Give each a short name of at most five characters, because it becomes the prefix of eight sequences and of six barcodes.
+4. **Choose the step configuration per Warehouse.** Doing it at creation avoids the archive-and-recreate cycle that a later change performs on the rules.
+5. **Build the Location tree** under each Warehouse's stock Location: zones, aisles, shelves, bins. Give each a barcode if you scan.
+6. **Create the Storage Categories** and attach them to the Locations that share limits.
+7. **Create the Put-away Rules** on the arrival Locations, from the most general to the most specific; the specificity sort will order them correctly whatever priority you give.
+8. **Set the removal strategies**: on the product categories for product-driven policies, on the Locations for place-driven ones. Remember that the category always wins.
+9. **Create the Package Types** you use, with their dimensions, base weights, capacities and, when you number containers per type, their own sequence prefix.
+10. **Configure each Operation Type**: reservation method, backorder policy, lot switches, automatic printing, batching.
+11. **Set the counting policy**: the company's annual month and day, and a counting frequency on the Locations you count cyclically.
+12. **Set the resupply links** between Warehouses last, because they depend on the delivery step configuration of the supplying Warehouse.
+13. **Check the record rules** if you run several companies: decide which Locations, Routes and Lots are shared (company left empty) and which are not.
+
+---
+
+# 14. What a change to each setting rewrites
+
+| Change | Rewritten immediately |
+|---|---|
+| A Warehouse's name | The names of its Routes, of their rules, of its supply-on-order rule, and of its eight sequences |
+| A Warehouse's short name | The name of its stock Location's parent, and the prefixes of its eight sequences |
+| A Warehouse's receipt steps | Three Locations' active flags, up to five Operation Types, the receipt Route and all its rules |
+| A Warehouse's delivery steps | Three Locations' active flags, up to four Operation Types, the delivery Route and all its rules, the supply-on-order rule, and every resupply Route that this Warehouse supplies |
+| A Warehouse's resupply list | One Route per added or removed supplying Warehouse, archived rather than deleted on removal |
+| A Warehouse's active flag | Its Operation Types, its view Location subtree, its Stock Rules, and the Routes that apply only to it |
+| An Operation Type's sequence prefix | Its numbering sequence's name, prefix and padding |
+| An Operation Type's reservation method | The reservation date of every open move of that type |
+| A Route's active flag | The active flag of its rules whose destination Location is still active |
+| A Location's active flag | The active flag of the whole subtree |
+| A Location's company | Refused |
+| A Package Type's sequence prefix or company | Its numbering sequence's name, prefix and company, creating the sequence when it had none |
+| The multi-location group | The active flag of every Warehouse's internal-transfer Operation Type, and two simplified Location screens |
+| The replenish-on-order switch | The active flag of the shipped replenish-on-order Route |
+| A contact's stock Locations | Nothing automatically, but every future Transfer for that contact resolves its Locations differently |
+| A company's annual inventory month or day | Nothing immediately; the next recomputation of a quantity record's scheduled date uses the new value |
+
+---
+
+# 15. What the domain never configures
+
+To be explicit about the boundaries:
+
+- It never configures accounts, journals or taxes; see `../inventory-valuation-and-costing/`.
+- It never configures products, their tracking mode, their weights, their routes or their barcodes; see `../products-and-catalog/`.
+- It never configures units of measure, their factors or their rounding; see `../units-of-measure-and-packaging/`.
+- It never configures reordering rules, lead times or the forecast horizon; see `../replenishment-and-procurement/`.
+- It never configures carriers, shipping prices or label providers; see `../delivery-and-shipping/`.
+- It never configures the mail server, the text-message gateway or the activity types; see `../messaging-and-activities/`.

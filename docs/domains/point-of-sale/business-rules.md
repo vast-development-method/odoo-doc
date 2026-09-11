@@ -5,8 +5,9 @@ behavior of the domain, with the exact user-facing message the system produces.
 
 Placeholders in messages are written as words in angle brackets, for example
 *<session identifier>*. Where the system's own text contains an irregularity (a missing
-space, a double word), the irregularity is reproduced, because a reimplementation must
-produce the same text.
+space, a double word, an abbreviation), the irregularity is reproduced exactly, because a
+reimplementation must produce the same text: these strings are part of the observable
+behavior, not prose.
 
 ---
 

@@ -87,10 +87,13 @@ the Account (`account.account`, table `account_account`), which supplies codes, 
    security groups, the access rights matrix, record rules and scheduled jobs.
 8. [`interfaces.md`](interfaces.md) — menus, views, named remote operations, routes, printable
    documents, export formats and notifications.
-9. The shipped catalogue, inside [`calculations.md`](calculations.md) §14 and
-   [`interfaces.md`](interfaces.md) §9: the complete enumeration of the one hundred and sixty-five
-   shipped report definitions with their line and expression counts, and the full line-by-line
-   structure of the statement reports and of a representative set of national tax returns.
+9. The shipped catalogue: [`calculations.md`](calculations.md) §14 gives every statement report
+   with its columns, its line structure, the formula behind each line and the drill-down it
+   supports; §15 enumerates all one hundred and sixty-five shipped report definitions with their
+   line, expression and column counts, and tabulates three complete national tax returns line by
+   line and formula by formula (§15.4 the Belgian return, §15.5 the United Arab Emirates return,
+   §15.6 the Italian monthly return). [`interfaces.md`](interfaces.md) §9 gives the same
+   catalogue as a user sees it, with the menu each report sits under and its primary drill-down.
 10. [`acceptance-criteria.md`](acceptance-criteria.md) — numbered Given/When/Then scenarios with
     concrete amounts, including the five mandatory scenarios: a balance sheet that balances on a
     small chart of accounts, a comparison against the prior period, an aged receivable split

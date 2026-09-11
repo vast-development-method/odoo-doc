@@ -3735,3 +3735,204 @@ number, the sentence is reproduced.
 7. Normalise **before** checking, and store the normalised form.
 8. Return both the normalised number and the country code the number was validated for; the caller
    uses the second value to decide whether a fiscal position requiring a registration matches.
+
+---
+
+## 16. Reconstructing the base-to-tax mapping from posted journal items
+
+*Server-only.* Reports, audits and structured document formats need to know, for an already posted
+entry, **which base journal item contributed how much to which tax journal item**. The link is not
+stored: the entry only records, per base item, the taxes it carries, and per tax item, the
+distribution line that produced it. This section specifies the algorithm that rebuilds the mapping.
+
+The result is one row per triple (tax item, base item, source item), carrying a base amount and a
+tax amount in both currencies. The **source item** is either the base item itself, or — when the
+contribution comes from a tax that swelled the base — the tax item that produced that extra base.
+
+Throughout, the illustrating entry is:
+
+| Item | Originator tax | Base taxes | Debit | Credit |
+|---|---|---|---|---|
+| base 1 | — | *ten affecting base*, *twenty* | 1 000 | |
+| base 2 | — | *ten affecting base*, *five* | 2 000 | |
+| base 3 | — | *ten affecting base*, *five* | 3 000 | |
+| tax 1 | *ten affecting base* | *twenty* | | 100 |
+| tax 2 | *twenty* | — | | 220 |
+| tax 3 | *ten affecting base* | *five* | | 500 |
+| tax 4 | *five* | — | | 275 |
+
+### 16.1 Step one — the raw mapping
+
+Pair every tax item with every base item of the same entry that satisfies **all** of the following.
+Let *T* be the tax item, *B* a candidate base item, *X* the tax that produced *T* and *R* its
+distribution line.
+
+1. *B* is not itself a tax item (it has no distribution line).
+2. *B* belongs to the same entry as *T*.
+3. *B* carries, among its base taxes, the tax recorded as *T*'s originator group when there is one,
+   and otherwise *T*'s originator tax.
+4. Either the entry is not a miscellaneous entry; **or** *X* is exigible on payment and has a
+   transition account; **or** the sign of *T*'s balance equals the sign of
+   `B.balance × X.amount × R.factor_percent`. (On a miscellaneous entry the sign is the only
+   evidence of which side of the transaction a line belongs to.)
+5. *B*'s partner equals *T*'s partner, treating the absence of a partner as equal to the absence of
+   a partner.
+6. *B*'s currency equals *T*'s currency.
+7. Either the distribution line's account, falling back to *B*'s own account, equals *T*'s account;
+   **or** *X* is exigible on payment and has a transition account.
+8. Either (*X* is not analytic **and** the distribution line is used in the tax settlement); **or**
+   both *B* and *T* have no analytic distribution; **or** the two analytic distributions are equal.
+9. When *X* affects the base of subsequent taxes, a further test described in 16.2 must also hold.
+
+Each surviving pair contributes a row whose base amount is *B*'s own balance and whose base amount
+in document currency is *B*'s own amount in document currency.
+
+In the illustration this yields:
+
+| base item | tax item | base amount |
+|---|---|---|
+| base 1 | tax 1 | 1 000 |
+| base 1 | tax 2 | 1 000 |
+| base 2 | tax 3 | 2 000 |
+| base 2 | tax 4 | 2 000 |
+| base 3 | tax 3 | 3 000 |
+| base 3 | tax 4 | 3 000 |
+
+### 16.2 The tail test for a tax that affects the base
+
+Condition 9 exists because a tax item produced by a base-affecting tax must be paired only with
+the base items that carry **exactly the same downstream taxes** as that tax item does, not merely
+the same affecting tax.
+
+Build, for a journal item, its **affecting-tax list**: expand every Group of Taxes into its
+children, drop every tax that does not accept being affected by previous taxes, and sort what
+remains by (sequence, identifier).
+
+Then the test is:
+
+```formula
+let tail = the affecting-tax list of B , restricted to its last
+           ( 1 + length of the affecting-tax list of T ) entries
+the pair survives when
+    tail = [ T's originator tax ] followed by T's own affecting-tax list
+```
+
+In the illustration, *tax 1* is produced by the affecting tax and itself carries the tax *twenty*.
+Its affecting-tax list is therefore `[twenty]`, and the required tail is
+`[ten affecting base, twenty]`. Base item one's list is exactly that, so the pair survives; base
+items two and three have `[ten affecting base, five]`, so they do not.
+
+### 16.3 Step two — the extra base contributed by a base-affecting tax
+
+A tax item produced by a base-affecting tax is itself part of the base of the taxes that come
+after it. Those contributions must appear as their own rows, with the tax item as the **source**.
+
+For each tax item *S* whose originator tax affects the base of subsequent taxes, and for each tax
+item *T* that shares a base item with *S* and whose originator tax is one of *S*'s own base taxes:
+
+1. Enumerate the base items *B* that step one paired with *S*.
+2. Build a running total over those base items, ordered by (the originator tax of *T*, the base
+   item's identifier):
+   ```formula
+   contribution_of_B =  | B.quantity |, carrying the sign of B's balance      when the tax is fixed
+                        B.balance                                            otherwise
+   cumulated( B ) = the running sum of contribution over the ordering
+   total          = the sum over every B
+   ```
+3. Allocate *S*'s whole amount over those base items by the running-total difference, which
+   guarantees that the allocations add back exactly:
+   ```formula
+   allocated_up_to( B ) = round_to_company_currency(
+                              sign( cumulated(B) ) × S.balance × | cumulated(B) | ÷ total )
+   extra_base_for( B )  = allocated_up_to( B ) − allocated_up_to( the previous B in the ordering )
+   ```
+   with the previous value taken as zero for the first base item, and the whole expression taken
+   as zero when the total is zero. The same is computed independently in the document currency.
+4. Emit one row per base item, with that extra base amount, with *T* as the tax item, *B* as the
+   base item and *S* as the source item.
+
+In the illustration:
+
+| base item | tax item | source item | base amount |
+|---|---|---|---|
+| base 1 | tax 2 | tax 1 | 100 |
+| base 2 | tax 4 | tax 3 | 200 |
+| base 3 | tax 4 | tax 3 | 300 |
+
+The five hundred of *tax 3* is split two fifths and three fifths, because base items two and three
+contribute two thousand and three thousand.
+
+### 16.4 Step three — the fallback mapping
+
+When step one paired a tax item with **no** base item at all — which happens when the
+configuration changed after the entry was posted, or when the entry was imported — an approximate
+mapping is added. It pairs the orphan tax item with every base item of the same entry and the same
+currency that carries, among its base taxes, the tax item's originator group or originator tax. No
+other condition is applied. The rows carry the base item's whole balance.
+
+The fallback can be switched off by the caller, in which case an orphan tax item simply produces no
+row.
+
+### 16.5 Step four — allocating the tax amounts
+
+Every row so far carries a base amount. The tax amount is allocated by the same running-total
+technique, this time over all the rows of one tax item.
+
+1. Order the rows of a tax item by (its originator tax, the base item's identifier, the source
+   item's identifier).
+2. For each row:
+   ```formula
+   contribution =  | B.quantity |, carrying the sign of B's balance     when the tax is fixed
+                   the row's own base amount                            otherwise
+   cumulated    = the running sum of contribution over the ordering
+   total        = the sum over every row of the tax item
+   allocated_up_to = round_to_company_currency(
+                         sign( cumulated ) × T.balance × | cumulated | ÷ total )
+   tax_amount   = allocated_up_to − the previous row's allocated_up_to
+   ```
+   with the previous value taken as zero for the first row, the whole expression taken as zero when
+   the total is zero, and the same computed independently in the document currency.
+
+In the illustration:
+
+| base item | tax item | source item | base amount | tax amount |
+|---|---|---|---|---|
+| base 1 | tax 1 | base 1 | 1 000 | 100 |
+| base 1 | tax 2 | base 1 | 1 000 | 1 000 ÷ 1 100 × 220 = 200 |
+| base 1 | tax 2 | tax 1 | 100 | 100 ÷ 1 100 × 220 = 20 |
+| base 2 | tax 3 | base 2 | 2 000 | 2 000 ÷ 5 000 × 500 = 200 |
+| base 2 | tax 4 | base 2 | 2 000 | 2 000 ÷ 5 500 × 275 = 100 |
+| base 2 | tax 4 | tax 3 | 200 | 200 ÷ 5 500 × 275 = 10 |
+| base 3 | tax 3 | base 3 | 3 000 | 3 000 ÷ 5 000 × 500 = 300 |
+| base 3 | tax 4 | base 3 | 3 000 | 3 000 ÷ 5 500 × 275 = 150 |
+| base 3 | tax 4 | tax 3 | 300 | 300 ÷ 5 500 × 275 = 15 |
+
+Each tax item's allocations add back exactly: one hundred; two hundred plus twenty equals two
+hundred twenty; two hundred plus three hundred equals five hundred; one hundred plus ten plus one
+hundred fifty plus fifteen equals two hundred seventy-five.
+
+### 16.6 The other columns of a row
+
+| Column | Value |
+|---|---|
+| identifier | the three item identifiers joined by hyphens, in the order tax item, base item, source item |
+| base item, tax item, source item | as above |
+| display kind | the tax item's display kind |
+| tax | the tax item's originator tax |
+| originator group of taxes | the tax item's |
+| distribution line | the tax item's |
+| base account | the base item's account |
+| exigible | true when the tax is **not** exigible on payment, **or** the tax item's entry is itself a cash basis entry, **or** the entry is marked as always exigible |
+| company, company currency and its decimal places, currency and its decimal places | from the tax item |
+
+The *exigible* column is what a tax return filters on when it is configured to show only exigible
+lines.
+
+### 16.7 Why the running-total technique
+
+Allocating a total over several parts by multiplying each part's share and rounding each product
+independently loses or gains units of the last decimal place. The running-total technique rounds
+the **cumulative** allocation and takes differences, so the last row absorbs whatever the earlier
+roundings left over and the allocations always add back to the total exactly. It is the same idea
+as the smooth distribution of section 7.1, applied where an ordering rather than a weight list is
+the natural input.

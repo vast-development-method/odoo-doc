@@ -280,6 +280,9 @@ Resources **Administrator** group.
 | Badges (`badge_ids`) | reverse collection of Granted Recognition Badge | Computed, not stored. Every badge granted either directly to this employee or to its user without an employee being named. |
 | Has Badges (`has_badges`) | true/false | Computed, not stored. True when the above collection is not empty. |
 | Directly Granted Badges (`direct_badge_ids`) | reverse collection of Granted Recognition Badge | The badges whose Employee link is this employee. **Readable by:** Human Resources Officer. |
+| Subscribed Courses (`subscribed_courses`) | link to many Courses | Read-only mirror of the user's contact's course memberships. |
+| Has Subscribed Courses (`has_subscribed_courses`) | true/false | Computed, not stored. True when the above is not empty. |
+| Courses Completion Text (`courses_completion_text`) | text | Computed, not stored, language-dependent. The number of completed courses, a space, a solidus, a space, then the number of subscribed courses. Empty when the employee has no user contact. |
 
 ### 2.14 Field table — equipment and cost
 
@@ -1143,6 +1146,49 @@ certification earned through a survey, a course completed, or any free entry.
 |---|---|---|---|
 | Ordered dates | database check | The start date must not be later than the end date; an empty end date always passes. | "The start date must be anterior to the end date." |
 
+### 18.4 Fields added by the course, certification and event capabilities
+
+Each of the three capabilities that create resume lines automatically adds one value to the
+Course Kind selection and one link, plus a colour.
+
+| Capability | Field (storage name) | Type | Meaning and rules |
+|---|---|---|---|
+| Courses | Course Kind value `elearning` (eLearning) | selection value | Deleting the value cascades to the line. |
+| Courses | Course (`channel_id`) | link to one Course | Computed from the course kind and stored; read-only; indexed when not empty. Cleared whenever the course kind is not `elearning`. An on-change fills the title from the course's name when the title is still empty. |
+| Courses | Course Address (`course_url`) | text | Read-only mirror of the course's public address. |
+| Courses | Duration (`duration`) | whole number | Redeclared as computed from the course's total time and stored; writable. |
+| Courses | Colour | text | Set to the text `#00a5b7` for a course-kind line. |
+| Certifications | Course Kind stays `external`; the line type is the shipped "Internal Certification" type | — | — |
+| Certifications | Department (`department_id`) | link to one Department | Redeclared as **stored**, so certification reporting can group by department without joining. |
+| Certifications | Certification (`survey_id`) | link to one Survey | Read-only. The certification survey the line was awarded from. |
+| Certifications | Expiration Status (`expiration_status`) | selection | Computed from the end date and stored. Values: `expired` (Expired), `expiring` (Expiring), `valid` (Valid). See the formula below. |
+| Events | Course Kind value `onsite` (Onsite) | selection value | Deleting the value cascades to the line. |
+| Events | Onsite Course (`event_id`) | link to one Event | Computed from the course kind and stored; read-only; indexed when not empty. Restricted to events having at least one registration whose contact is flagged as an employee. Cleared whenever the course kind is not `onsite`. An on-change fills the title from the event's name when the title is still empty. |
+| Events | Colour | text | Set to the text `#714a66` for an onsite-kind line. |
+
+**Expiration status formula.**
+
+```formula
+expiration_status =
+    if end_date is empty:                                   valid
+    else if end_date ≤ today:                               expired
+    else if ( end_date − 3 months ) ≤ today:                expiring
+    else:                                                   valid
+```
+
+**Worked example.** Today is 11 September 2026.
+
+| End date | end date minus three months | Status |
+|---|---|---|
+| empty | — | valid |
+| 1 August 2026 | — | expired |
+| 11 September 2026 | — | expired (the comparison is "on or before today") |
+| 1 November 2026 | 1 August 2026, which is on or before today | **expiring** |
+| 1 February 2027 | 1 November 2026, which is after today | valid |
+
+**Duplication.** A certification-capability resume line duplicated gets " (copy)" appended to
+its title.
+
 ---
 
 ## 19. Resume Line Type (`hr.resume.line.type`, table `hr_resume_line_type`)
@@ -1153,6 +1199,9 @@ certification earned through a survey, a course completed, or any free entry.
 | Sequence (`sequence`) | whole number | Default 10. Determines the ordering and therefore the section order of the printed curriculum vitae. |
 | Course (`is_course`) | true/false | Default false. Marks the type as holding course entries, which changes how the line is rendered and which extra fields appear. |
 | Section Properties Definition (`resume_line_type_properties_definition`) | properties definition | Defines the free extra fields available on resume lines of this type. |
+
+A fourth type, **Internal Certification**, is shipped by the certification capability
+alongside the three base types.
 
 ---
 

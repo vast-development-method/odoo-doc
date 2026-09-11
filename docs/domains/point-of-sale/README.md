@@ -86,6 +86,7 @@ operation layer) and their storage table.
 | --- | --- | --- |
 | Restaurant Floor | `restaurant.floor` | Restaurant: a named seating area with a background and a set of tables |
 | Restaurant Table | `restaurant.table` | Restaurant: a table with a number, a shape, a position and a seat count |
+| Restaurant Order Course | `restaurant.order.course` | Restaurant: a group of order lines that must reach the kitchen together, with its fired flag and instant |
 | Point of Sale Self Order Custom Link | `pos_self_order.custom_link` | Self-ordering: an extra navigation button shown on the self-ordering landing page |
 
 Entities defined elsewhere but extended by this domain (their base definition belongs to
@@ -167,3 +168,54 @@ Rule, Language, Country and Country State, Decimal Precision, Digest.
   validation procedure and referenced by the session.
 - **Signed quantities**: a refund line carries a negative quantity. The sign conventions
   are stated explicitly wherever they matter.
+
+## 8. Key mechanisms at a glance
+
+Nine mechanisms carry most of the domain's complexity. Each is specified in full in the
+file named.
+
+| Mechanism | One-sentence summary | Specified in |
+| --- | --- | --- |
+| **The session closing entry** | Everything sold in one trading period that was not individually invoiced is posted as one balanced accounting document, with sales aggregated by account, sign, tax set and base tags; taxes aggregated by account, repartition line and tags; one receivable line per payment method (or per tender for methods that identify the customer); a counterweight credit that removes the invoiced orders; a rounding line; and a cost-of-goods-sold pair. | [`accounting-effects.md`](accounting-effects.md) section 3 |
+| **The invoiced-order counterweight** | An invoiced order's tenders still reach the bank or the drawer, so they are aggregated, and an equal credit named `From invoice payments` cancels them, leaving the order's net contribution to the closing entry at exactly zero. | [`accounting-effects.md`](accounting-effects.md) section 3.11 |
+| **The post-closing reversal** | Invoicing an order after its session closed would recognise its revenue twice, so a reversal entry writes the negation of the order's own accounting values and is reconciled against the invoice's payment entries. | [`accounting-effects.md`](accounting-effects.md) section 8 |
+| **Cash control** | A count at opening that only ever produces a thread message, and a count at closing that produces a real accounting difference against the theoretical balance. | [`calculations.md`](calculations.md) section 8 |
+| **Cash rounding** | The payable amount is rounded to a cash denomination, either for the whole document or only for the part settled in cash, and the difference is accumulated into one rounding line. | [`calculations.md`](calculations.md) section 7 |
+| **The client-server agreement** | The browser runs a faithful port of the pricing and tax engine, stamps its own figures on the order, and the server recomputes only the paid amount; a systematic divergence surfaces as an unbalanced closing entry. | [`calculations.md`](calculations.md) section 12 |
+| **Idempotent transmission** | Orders, lines and tenders carry client-generated universally unique identifiers; a replayed transmission updates rather than duplicates, and an order already paid is returned unchanged. | [`workflows.md`](workflows.md) section 7 |
+| **Deferred versus real-time stock** | A company-level choice, frozen per session, between one delivery document per order at sale time and one per destination for the whole session at closing — which also determines when line costs can be established. | [`workflows.md`](workflows.md) section 8 |
+| **Rescue sessions** | An order that reaches the server after its session closed is re-homed to another open session; when there is none, a recovery session exists to catch it and closes without a cash difference. | [`state-machines.md`](state-machines.md) section 1.6 |
+
+## 9. Where each required subject is specified
+
+| Subject | File and section |
+| --- | --- |
+| Configurations with every setting | [`entities.md`](entities.md) section 1; [`configuration.md`](configuration.md) sections 1 and 2 |
+| The session state machine | [`state-machines.md`](state-machines.md) section 1 |
+| Cash control | [`calculations.md`](calculations.md) section 8; [`workflows.md`](workflows.md) sections 2, 12 and 13 |
+| The closing algorithm | [`state-machines.md`](state-machines.md) sections 1.3 and 1.4; [`workflows.md`](workflows.md) section 13 |
+| The session journal entry, line by line | [`accounting-effects.md`](accounting-effects.md) section 3 |
+| Sales aggregation | [`accounting-effects.md`](accounting-effects.md) section 3.5 |
+| Tax grouping | [`accounting-effects.md`](accounting-effects.md) section 3.7 |
+| One line per payment method | [`accounting-effects.md`](accounting-effects.md) sections 3.8, 3.9 and 3.10 |
+| The cash difference | [`accounting-effects.md`](accounting-effects.md) section 4 |
+| Rounding lines | [`accounting-effects.md`](accounting-effects.md) section 3.13 |
+| Cost of goods sold lines | [`accounting-effects.md`](accounting-effects.md) section 3.12 |
+| Orders excluded because they were invoiced | [`accounting-effects.md`](accounting-effects.md) sections 3.2 and 3.11 |
+| What is reconciled against what | [`accounting-effects.md`](accounting-effects.md) section 3.14 |
+| The stock moves created | [`workflows.md`](workflows.md) section 8 |
+| Orders, lines, payments, refunds, invoicing, tips, delivery | [`entities.md`](entities.md) sections 3 to 6; [`workflows.md`](workflows.md) sections 4 to 11 |
+| Payment methods including pay-later and terminals | [`entities.md`](entities.md) section 7; [`workflows.md`](workflows.md) section 6 |
+| The client-side pricing and tax computation | [`calculations.md`](calculations.md) sections 3 to 7 and 12 |
+| Cash rounding and change | [`calculations.md`](calculations.md) section 7 |
+| The receipt content | [`interfaces.md`](interfaces.md) section 5.2 |
+| Offline operation and the synchronization contract | [`workflows.md`](workflows.md) sections 3, 7 and 22; [`interfaces.md`](interfaces.md) section 10 |
+| The data loaded at session opening | [`interfaces.md`](interfaces.md) section 10 |
+| Barcode behaviors | [`workflows.md`](workflows.md) section 23; [`configuration.md`](configuration.md) section 5.6 |
+| Restaurant floors, tables, bill splitting, kitchen printing, order-change tracking | [`entities.md`](entities.md) section 17; [`workflows.md`](workflows.md) section 15; [`state-machines.md`](state-machines.md) section 9 |
+| Self-ordering and kiosk flows | [`entities.md`](entities.md) section 18; [`workflows.md`](workflows.md) section 16; [`state-machines.md`](state-machines.md) section 8 |
+| Employee login | [`entities.md`](entities.md) section 19; [`workflows.md`](workflows.md) section 17 |
+| Settling sales orders | [`entities.md`](entities.md) section 20; [`workflows.md`](workflows.md) section 18 |
+| Loyalty at the counter | [`entities.md`](entities.md) section 21; [`workflows.md`](workflows.md) section 19; [`accounting-effects.md`](accounting-effects.md) section 15 |
+| The sales details report | [`calculations.md`](calculations.md) section 14; [`interfaces.md`](interfaces.md) section 5.1 |
+| Settings, sequences, groups, access, rules and routes | [`configuration.md`](configuration.md); [`interfaces.md`](interfaces.md) sections 1 and 4 |

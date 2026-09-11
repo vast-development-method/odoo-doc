@@ -1284,9 +1284,9 @@ to the last day of the month,
 
 | Label | Account | Debit | Credit |
 |---|---|---|---|
-| WIP - Component Value | Stock Valuation | | 370.00 |
-| WIP - Overhead | Production Work In Progress Overhead | | 90.00 |
-| Manufacturing WIP - *the order references* | Production Work In Progress | 460.00 | |
+| `WIP - Component Value` | Stock Valuation | | 370.00 |
+| `WIP - Overhead` | Production Work In Progress Overhead | | 90.00 |
+| `Manufacturing WIP - ` followed by *the order references* | Production Work In Progress | 460.00 | |
 
 **and** the reversal date defaults to the day after.
 
@@ -1406,9 +1406,9 @@ recipe lines,
 **and** the Stock Reference named `WH/MO/00007` is renamed to the new reference,
 **and** every component move is unreserved and re-reserved.
 
-### Scenario 16.5 — A tracked component capped by upstream supply
+### Scenario 16.5 — A tracked component capped by the supply behind it
 
-**Given** a component whose upstream chain has delivered only 6 of the 10 units demanded,
+**Given** a component whose supplying chain has delivered only 6 of the 10 units demanded,
 **and** no sibling move has consumed any,
 
 **When** the producing quantity is set so that the distribution would write 10,

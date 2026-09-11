@@ -106,6 +106,30 @@ Farrell (user)"; **and** employee "Nadia Farrell" of Northwind SA with no user.
 **Then** "Ghost Record"'s Work Contact is cleared, and Nadia Farrell's Work Contact becomes
 "Nadia Farrell (user)".
 
+### A6b. Removing the user keeps the work contact until the user is re-employed
+
+**Given** employee "Test User - employee" of Northwind SA linked to user Test User, whose
+Work Contact is that user's contact.
+
+**When** Olga clears the employee's User field.
+
+**Then** the employee's Work Contact is **still** the user's contact and its User is empty —
+the contact link survives the unlinking.
+
+**And when** the user then creates an employee for themselves, **then** the **old** employee's
+Work Contact is cleared and the new employee carries both the user and the contact.
+
+**And given** the same user is also linked to an employee of Southwind SA, **then** clearing
+the user on the Northwind employee leaves the Southwind link and the contact count untouched:
+the contact still reports two employees.
+
+### A6c. The time zone is mandatory in storage
+
+**When** an attempt is made to clear an employee's Time Zone, or a user's time zone, or the
+time zone of a company's default working schedule.
+
+**Then** the storage layer refuses, because all three columns are declared as never empty.
+
 ### A7. Creating a user from the employee
 
 **Given** the employee of A1 with no user and Work Email
@@ -250,6 +274,36 @@ Standard 40 Hours.
 
 **Then** no new version is created and the existing V2 is returned **unchanged**, still
 carrying Wage 3 800.00.
+
+### B3b. A version created outside every contract period carries no contract dates
+
+**Given** employee **Ola Vik** with one version dated 1 January 2020 carrying contract dates
+(1 January 2020, 31 December 2020).
+
+| Version created on | Contract dates of the new version |
+|---|---|
+| 1 January 2021 — after the contract | **empty, empty** |
+| 1 January 2019 — before the contract | **empty, empty** |
+| 1 July 2020 — inside the contract | (1 January 2020, 31 December 2020) |
+| 1 January 2021 with explicit contract dates (1 January 2021, 31 December 2021) supplied | (1 January 2021, 31 December 2021) — the explicit values override |
+
+**And given** Ola additionally has a version dated 1 January 2022 opening the contract period
+(1 January 2021, 31 December 2022) — a period whose versions do not include the one in force
+on 1 January 2021 — **then** creating a version dated 1 January 2021 takes **that** period's
+dates, (1 January 2021, 31 December 2022), because the lookup is over the employee's contract
+periods and not over the copied version.
+
+### B3c. Changing only the contract end date propagates before the new version joins
+
+**Given** Ola under the open-ended contract (1 January 2021, empty), described by versions
+dated 1 January 2021 and 1 June 2021.
+
+**When** a version is created dated 1 September 2021 supplying contract dates
+(1 January 2021, **31 December 2021**) — same start, different end.
+
+**Then**, before the new version is created, both existing versions of the period are
+rewritten to (1 January 2021, 31 December 2021); only then is the new version created with
+the same pair, so the overlap check sees three identical periods and passes.
 
 ### B4. Two active versions cannot share an effective date
 
@@ -1121,6 +1175,17 @@ exceptions member at all.
 and Research's Manager becomes Erin. If Erin herself were a member reporting to Alice, she
 would be excluded from the re-pointing and keep her own manager link.
 
+### I1b. Searching on direct subordinates excludes archived ones
+
+**Given** employee First with one direct subordinate Second.
+
+**When** the employee list is searched for records having at least one direct subordinate.
+
+**Then** First is found.
+
+**And when** Second is archived and the same search is repeated, **then** First is **not**
+found, because the direct-subordinate collection is restricted to active employees.
+
 ### I2. Department cycles are refused
 
 **When** Olga sets department A's Parent Department to department B while B's Parent Department
@@ -1525,6 +1590,25 @@ negative number, which is below the four-day threshold, so the cut never fires t
 
 **And given** an employee with no overlapping version at all, **then** every day of the window
 is marked unusual.
+
+### M7b. Unusual days under a flexible schedule
+
+**Given** employee **Sacha Renard** under contract from 1 January 2025, on the Standard 40
+Hours schedule, and the window 1 January 2025 to 31 December 2025.
+
+**Then** the entry for Saturday 4 January 2025 is present and **true** — that day is unusual.
+
+**And when** the employee is moved to a flexible-hours schedule and the same window is
+requested, **then** the entry for Saturday 4 January 2025 is present and **false** — a person
+with flexible hours has no unusual days.
+
+### M7c. Flexibility indicators
+
+| Working schedule of the version | Is Flexible | Is Fully Flexible |
+|---|---|---|
+| Standard 40 Hours, not marked flexible | false | false |
+| Standard 40 Hours, marked flexible-hours | **true** | false |
+| none at all | **true** | **true** |
 
 ### M8. Calendar periods split at a schedule change
 

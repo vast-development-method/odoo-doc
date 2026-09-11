@@ -591,7 +591,7 @@ quantities are set automatically before closing.
       new_quantity = round_at( move_unit , ( qty_producing − qty_produced ) × unit_factor )
       ```
 
-   4. If the move's product is tracked, cap the new quantity by what upstream has actually
+   4. If the move's product is tracked, cap the new quantity by what the supplying moves have actually
       delivered:
       - let *relevant origins* be the origin moves that are neither `draft` nor `cancel`;
       - let *available* be the sum, converted into the move's unit, of the done quantities of
@@ -606,10 +606,17 @@ quantities are set automatically before closing.
       it is either a component move or a move of a non-serial product, and either the move is
       not a manual-consumption move or the caller asked to pick manual-consumption moves.
 
-**Note on the caller flag.** The interactive path (changing the quantity producing on the
-form) calls the algorithm with "do not pick manual-consumption moves"; the explicit
-"set quantities" action and the automatic pre-close path call it with the same flag, so
-manual-consumption moves are picked separately, just before the consumption check.
+**Note on the caller flag.** The flag is set differently by the three callers:
+
+| Caller | Flag |
+|---|---|
+| Editing the quantity producing or the producing lots on the form | do **not** pick manual-consumption moves |
+| The explicit "set the producing quantity" operation, used by the serial-number assistant and by a Work Order | do **not** pick manual-consumption moves |
+| The automatic pre-close filling, which runs only when the producing quantity was still zero | **do** pick manual-consumption moves |
+
+Whatever the flag, the closing sequence marks every unpicked manual-consumption component
+move as picked immediately before the consumption check, so a manual quantity entered by
+hand is never lost.
 
 ### 7.3 Worked example — producing ten with a partial completion of six and a backorder
 
@@ -755,7 +762,7 @@ move is created per backorder, carrying:
 | `state` | `draft` when the source move was draft, otherwise `confirmed`. |
 | `reservation_date`, `date_deadline`, `procure_method` | Copied from the source move. |
 | `manual_consumption` | Recomputed from the recipe line. |
-| `move_orig_ids`, `move_dest_ids` | Linked to the same upstream and downstream moves as the source. |
+| `move_orig_ids`, `move_dest_ids` | Linked to the same origin and destination moves as the source. |
 | `raw_material_production_id` or `production_id` | The backorder. |
 
 Before the split, every move line that is not itself picked but belongs to a picked,

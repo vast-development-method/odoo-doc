@@ -478,3 +478,119 @@ These are not enforced by a message; an implementation that breaks one produces 
 | A fiscal position with no tax at all | Mapping keeps only the taxes that belong to **no** fiscal position; every tax bound to some fiscal position is dropped. |
 | A replaced tax that maps to several replacements | All of them are applied to the line. |
 | A postal code range written with different lengths | Both bounds are zero-padded to the longer length before comparison, but only when they are entirely numeric. |
+
+---
+
+## 13. Index of every user-facing message
+
+Every message the tax domain can produce, in one place, with the condition that triggers it and
+the kind of refusal. A *validation* refusal rolls the whole operation back; a *warning* is shown
+without blocking.
+
+| Message | Kind | Triggered by |
+|---|---|---|
+| Tax names must be unique!\n- &lt;name&gt; in &lt;company&gt; | validation | section 1.1 |
+| The tax group must have the same country_id as the tax using it. | validation | section 1.2 |
+| The cash basis transition account needs to allow reconciliation. | validation | section 1.3 |
+| Recursion found for tax “&lt;name&gt;”. | validation | section 1.4 |
+| The application scope of taxes in a group must be either the same as the group or left empty. | validation | section 1.4 |
+| Nested group of taxes are not allowed. | validation | section 1.4 |
+| You can't change the company of your tax since there are some journal items linked to it. | operation refused | section 1.5 |
+| You cannot delete taxes that are currently in use. Consider archiving them instead. | validation | section 1.6 |
+| Invoice and credit note distribution should each contain exactly one line for the base. | validation | section 2 rule 1 |
+| Invoice and credit note distribution should have the same number of lines. | validation | section 2 rule 2 |
+| Invoice and credit note repartition should have at least one tax repartition line. | validation | section 2 rule 3 |
+| Invoice and credit note distribution should match (same percentages, in the same order). | validation | section 2 rule 4 |
+| Invoice and credit note distribution should have a total factor (+) equals to 100. | validation | section 2 rule 5 |
+| Invoice and credit note distribution should have a total factor (-) equals to 100. | validation | section 2 rule 6 |
+| Invalid "Zip Range", You have to configure both "From" and "To" values for the zip range and "To" should be greater than "From". | validation | section 4.1 |
+| The country of the foreign VAT number could not be detected. Please assign a country to the fiscal position. | validation | section 4.2 rule 1 |
+| You cannot create a fiscal position with a foreign VAT within your fiscal country without assigning it a state. | validation | section 4.2 rule 2 |
+| You cannot create a fiscal position with a country outside of the selected country group. | validation | section 4.2 rule 3 |
+| A fiscal position with a foreign VAT already exists in this country. | validation | section 4.2 rule 4 |
+| An account fiscal position could be defined only one time on same accounts. | database constraint | section 4.4 |
+| A tag with the same name and applicability already exists in this country. | database constraint | `entities.md` section 6.2 |
+| You cannot delete this account tag (&lt;name&gt;), it is used on the chart of account definition. | operation refused | `configuration.md` section 4.1 |
+| This entry contains taxes that are not compatible with your fiscal position. Check the country set in fiscal position and in your tax configuration. | validation | section 5.1 |
+| This entry contains one or more taxes that are incompatible with your fiscal country. Check company fiscal country in the settings and tax country in taxes configuration. | validation | section 5.1 |
+| Taxes exigible on payment and on invoice cannot be mixed on the same journal item if they share some tag. | validation | section 5.2 |
+| Only vendor bills allow for deductibility of product/services. | validation | section 5.3 |
+| The deductibility must be a value between 0 and 100. | validation | section 5.3 |
+| An Off-Balance account can not have taxes | operation refused | section 5.4 |
+| The operation is refused as it would impact an already issued tax statement. Please change the journal entry date or the following lock dates to proceed: &lt;lock dates&gt;. | operation refused | section 6.1 |
+| You cannot reset to draft a tax cash basis journal entry. | operation refused | section 6.3 |
+| There is no tax cash basis journal defined for the '&lt;company&gt;' company.\nConfigure it in Accounting/Configuration/Settings | operation refused | section 8 rule 1 |
+| You cannot disable this setting because some of your taxes are cash basis. Modify your taxes first before disabling this setting. | warning | section 8 rule 6 |
+| Withholding On Payment taxes cannot use the 'Group of Taxes' or the 'Percentage Tax Included' computations. | operation refused | section 1.8 |
+| The base amount of a withholding tax line must be above 0. | operation refused | section 7 rule 1 |
+| The account "&lt;account&gt;" is not valid to use on withholding lines. | operation refused | section 7 rule 2 |
+| Please enter the withholding number for the tax &lt;tax&gt; | operation refused | section 7 rule 3 |
+| The withholding net amount cannot be negative. | operation refused | section 7 rule 4 |
+| All withholding lines in self must have the same payment. | internal assertion | section 7 rule 5 |
+| All withholding lines in self must have the same payment register. | internal assertion | section 7 rule 6 |
+| Invalid formula | validation | section 1.9 |
+| Field '&lt;field&gt;' is not accessible | validation | section 1.9 |
+| Invalid AST node: &lt;construct&gt; | validation | section 1.9 |
+| Only int, float or None are allowed as constant values | validation | section 1.9 |
+| Unknown identifier: &lt;name&gt; | validation | section 1.9 |
+| Only read access to identifiers is allowed | validation | section 1.9 |
+| Unknown function call | validation | section 1.9 |
+| Kwargs are not allowed | validation | section 1.9 |
+| Only product['string'] or uom['string'] read-access is allowed | validation | section 1.9 |
+| Only primitive types are allowed in python tax formula context. | validation | section 1.9 |
+| To explicitly indicate no (valid) VAT, use '/' instead. | validation | section 9.1 |
+| The &lt;label&gt; number [&lt;number&gt;] for &lt;record&gt; does not seem to be valid. \nNote: the expected format is &lt;example&gt; | validation | section 9.2 |
+| The &lt;label&gt; number [&lt;number&gt;] does not seem to be valid. \nNote: the expected format is &lt;example&gt; | validation | section 9.2 |
+| If you are trying to input a European number, this is the expected format: &lt;example&gt; | appended | section 9.2 |
+| Invalid IAP VIES endpoint | operation refused | section 9.6 |
+| You cannot set a partner as an invoicing address of another if they have a different &lt;label&gt;. | operation refused | section 9.5 |
+| Update with children taxes that are child of multiple parents is not supported. | operation refused | `workflows.md` section 9 |
+| The VIES check is pending. The status will be updated soon. | logged message | `state-machines.md` section 5.2 |
+| The VIES check failed. Please check the Tax ID manually. | logged message | `state-machines.md` section 5.2 |
+| The Intra-Community validity has been updated to: &lt;status&gt;. | logged message | `state-machines.md` section 5.2 |
+| Untaxed Amount | label | the default subtotal name in the totals block |
+| &lt;name&gt; (copy) | label | the name of a duplicated tax |
+| WH Tax: &lt;name&gt; | label | a withholding tax journal item |
+| WH Base: &lt;names&gt; | label | a withholding base journal item |
+| WH Base Counterpart: &lt;names&gt; | label | its counterpart |
+| private part (taxes) | label | the non-deductible tax journal item |
+| Reversal of: &lt;number&gt; | label | the reference of a reversed cash basis entry |
+| &lt;amount&gt; Incl. Taxes / &lt;amount&gt; Excl. Taxes / &lt;amount&gt; Tax Withheld | label | the product price hint |
+| &lt;name&gt; taxes | label | the title of the window opened by a fiscal position's Taxes button |
+
+---
+
+## 14. Order in which the validations run
+
+When several rules could refuse the same operation, the order matters for which message the user
+sees. The order is determined by when each check is evaluated.
+
+1. **Field-level restrictions** — the account kinds allowed on a distribution line, the tax types
+   allowed among a group's children, the tag applicability — are enforced by the field itself and
+   fail first.
+2. **Value normalisers** run next: the postal code padding, the tax identification number
+   normalisation, the wrapping of a plain description in a block element, the dispatch of the two
+   distribution lists into the single stored list.
+3. **Record constraints** run when the record is written: uniqueness, the structural distribution
+   rules, the group rules, the fiscal position rules.
+4. **Database constraints** run at the same moment: the tag uniqueness, the account mapping
+   uniqueness.
+5. **Cross-record constraints** run on the entry: the tax country consistency, the mixed
+   exigibility rule, the deductibility rules.
+6. **Locking** runs last, when the entry is posted or when a posted entry is changed.
+
+A consequence: an attempt to save a tax with both a duplicate name and a broken distribution
+reports the **name** problem, because the uniqueness constraint is declared before the
+distribution one.
+
+---
+
+## 15. Concurrency
+
+| Situation | Behaviour |
+|---|---|
+| Two users recompute the same draft entry at once | The second write recomputes from the state the first left; the redistribution is deterministic, so the result is the same whichever order they run in. |
+| A sequence value is drawn for a withholding certificate | The value is drawn inside the transaction that builds the payment entry; a rollback returns it only when the sequence is configured to be gapless. |
+| Two reconciliations of the same invoice are created at once | Each produces its own cash basis entry; the last-partial correction only fires on the partial that settles the document, so at most one of them applies it. |
+| The cross-border verification credentials are generated | They are written in their **own** transaction, so an error later in the current transaction cannot lose them; a concurrent generation is detected by re-reading inside that transaction. |
+| A tag is renamed while another user attaches it | The rename changes the tag's name, not its identity, so the attachment survives. |

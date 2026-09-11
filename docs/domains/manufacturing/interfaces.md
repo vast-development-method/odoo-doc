@@ -110,7 +110,7 @@ showing the Manufacturing Orders alongside the other operation types.
 | Produce All | `button_mark_done` | the order is running and the producing quantity is zero or the full quantity |
 | Produce | `button_mark_done` | the order is running and the producing quantity is a partial amount |
 | Cancel | `action_cancel` | the order is not `done` |
-| Update BoM | `action_update_bom` | the recipe is flagged outdated |
+| `Update BoM` (Update Bill of Materials) | `action_update_bom` | the recipe is flagged outdated |
 | Unbuild | `button_unbuild` | the order is `done` |
 | Generate Serial / Generate Lot | `action_generate_serial` | the product is tracked and no number is set |
 | Clear | `action_clear_lot_producing_ids` | producing lots are set |
@@ -159,8 +159,8 @@ delayed order shows the delay popover; a Work Order row shows its own popover.
 | Cancelled | state is cancel |
 | Unbuilt | an unbuild of the order is done |
 | Starred | priority is urgent |
-| MO Pending | readiness is waiting |
-| MO Ready | readiness is assigned |
+| `MO Pending` (Manufacturing Order Pending) | readiness is waiting |
+| `MO Ready` (Manufacturing Order Ready) | readiness is assigned |
 | Components Available | the component availability state is available |
 | Late Availability | the component availability state is late |
 | Late | the start date is before now and the state is confirmed |
@@ -357,7 +357,7 @@ described as code.
 | `button_unbuild` | one order | an unbuild form action | Opens a pre-filled Unbuild Order. |
 | `button_scrap` | one order | a scrap form action | Opens a pre-filled scrap. |
 | `action_view_reception_report` | the orders | the allocation report action | — |
-| `action_view_mrp_production_childs` / `_sources` / `_backorders` | one order | a navigation action | Shows the related orders. |
+| `action_view_mrp_production_childs`, `action_view_mrp_production_sources` and `action_view_mrp_production_backorders` | one order | a navigation action | Shows the generated orders, the source orders and the backorders. |
 | `action_view_mo_delivery` | one order | a navigation action | Shows the related transfers. |
 | `action_see_move_scrap` | one order | a navigation action | Shows the scraps. |
 | `action_view_mrp_production_unbuilds` | one order | a navigation action | Shows the unbuilds. |
@@ -411,8 +411,8 @@ described as code.
 | `action_show_operations` | one work centre | a navigation action | The operations that use it. |
 | `action_work_order` | the work centres | a navigation action | The Work Orders. |
 | `action_work_order_alternatives` | one work centre | a navigation action | The Work Orders of its alternatives and of the work centres that name it as an alternative. |
-| `_get_first_available_slot` | one work centre, a start instant, a duration in minutes, a direction, leaves to ignore, extra occupied intervals | a start and an end instant, or a failure and the text "No available slot 700 days after the planned start" | The scheduling primitive of [calculations.md](calculations.md) §12. |
-| `_get_unavailability_intervals` | the work centres, a start and an end instant | per work centre, the list of unavailable intervals | Used by the planning displays. |
+| The slot search *(internal)* | one work centre, a start instant, a duration in minutes, a direction, the calendar slots to ignore, extra occupied intervals | a start and an end instant, or a failure and the text "No available slot 700 days after the planned start" | The scheduling primitive of [calculations.md](calculations.md) §12. |
+| The unavailability query *(internal)* | the work centres, a start and an end instant | per work centre, the list of unavailable intervals | Used by the planning displays. |
 
 ### 4.6 On the report entities
 
@@ -475,8 +475,8 @@ visitor's commercial partner carrying a subcontract move.
 | Report | Entity | Format | File name | Available from |
 |---|---|---|---|---|
 | Production Order | Manufacturing Order | portable document format | "Production Order - *the order reference*" | The order's print menu |
-| BoM Overview | Bill of Materials | portable document format | "Bom Overview - *the recipe display name*" | The recipe's print menu |
-| MO Overview | Manufacturing Order | portable document format | "MO Overview - *the order display name*" | The order overview screen |
+| `BoM Overview` (Bill of Materials Overview) | Bill of Materials | portable document format | "Bom Overview - *the recipe display name*" | The recipe's print menu |
+| `MO Overview` (Manufacturing Order Overview) | Manufacturing Order | portable document format | "MO Overview - *the order display name*" | The order overview screen |
 | Work Order | Work Order | portable document format | "Work Order - *the work order name*" | The Work Order's print menu |
 | Finished Product Label (portable document format) | Manufacturing Order | portable document format | "Finished products - *the order reference*" | The order's print menu |
 | Finished Product Label (label printer) | Manufacturing Order | plain text for a label printer | — | The order's print menu |
@@ -544,9 +544,10 @@ being the corresponding total divided by the quantity (or by 1 when the quantity
 
 ### 7.1 Message subtypes
 
-Five subtypes on the Manufacturing Order, none subscribed to by default: MO Confirmed, MO
-Progress, MO To Close, MO Done, MO Cancelled. Each state transition posts under its own
-subtype, so a follower can subscribe to just the transitions of interest.
+Five subtypes on the Manufacturing Order, none subscribed to by default. Their stored
+names abbreviate "Manufacturing Order" and are reproduced here exactly: `MO Confirmed`,
+`MO Progress`, `MO To Close`, `MO Done` and `MO Cancelled`. Each state transition posts
+under its own subtype, so a follower can subscribe to just the transitions of interest.
 
 ### 7.2 Tracked fields
 
@@ -571,7 +572,7 @@ Rendered as a warning panel. Its content:
 > transfers exist)*
 > - *a link to each impacted transfer*
 
-It is posted as an activity on the upstream or downstream document, addressed to the
+It is posted as an activity on the supplying or receiving document, addressed to the
 document's responsible, or to the product's responsible where the grouping uses that.
 
 ### 7.4 The move-change template

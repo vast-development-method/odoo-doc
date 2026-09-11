@@ -36,7 +36,7 @@ extended-address behaviour with the same sequence as states, so the two sort tog
 
 | Menu path | Opens |
 |---|---|
-| Settings → Technical → **Phone / SMS** → **Phone Blacklist** | the blocked-numbers window action (added by the telephone behaviour, sequence three under a parent of sequence three) |
+| Settings → Technical → **Telephone and Text Messaging** (shipped label `Phone / SMS`) → **Phone Blacklist** | the blocked-numbers window action (added by the telephone behaviour, sequence three under a parent of sequence three) |
 | Settings → Translations → **Languages** | the languages window action |
 
 ## 1.3 Where else the directory appears
