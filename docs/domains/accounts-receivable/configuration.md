@@ -15,8 +15,8 @@ company itself.
 
 | Setting (storage name) | Type | Default | Effect |
 | --- | --- | --- | --- |
-| Display QR-code on invoices (`qr_code`) | boolean | false | Enables the payment quick response code on the printed document for customer invoices, sales receipts, vendor bills and purchase receipts. |
-| Display Link QR-code (`link_qr_code`) | boolean | false | Enables the second code, which encodes the portal payment address instead of bank payment data. |
+| Display the payment quick response code on invoices (`qr_code`) | boolean | false | Enables the payment quick response code on the printed document for customer invoices, sales receipts, vendor bills and purchase receipts. |
+| Display the link quick response code (`link_qr_code`) | boolean | false | Enables the second code, which encodes the portal payment address instead of bank payment data. |
 | Total amount of invoice in letters (`display_invoice_amount_total_words`) | boolean | false | Prints the gross total spelled out in words. |
 | Taxes in company currency (`display_invoice_tax_company_currency`) | boolean | false | Adds a second totals block expressed in the company currency on a foreign-currency document. |
 | Default Terms and Conditions (`invoice_terms`) | rich text, translatable | empty | The text copied into a new sale document's terms when the terms feature is on and the terms kind is the plain one. |
@@ -130,9 +130,9 @@ identifier, according to the journal's reference model and type. See
 
 | Record | Purpose |
 | --- | --- |
-| Printable layout **Invoice PDF** | The default customer document layout, including the payment history block. Marked as an invoice layout. Visible to the invoicing and read-only accounting groups. Bound to the journal entry entity as a printing action. |
-| Printable layout **PDF without Payment** | The same document without the payment history block. Bound the same way, limited to documents that are not plain entries. |
-| Printable layout **Original Bills** | Purchase side: returns the originally received file. |
+| Printable layout **Invoice with payments** (report `account.report_invoice_with_payments`) | The default customer document layout, including the payment history block. Marked as an invoice layout. Visible to the invoicing and read-only accounting groups. Bound to the journal entry entity as a printing action. |
+| Printable layout **Invoice without payments** (report `account.report_invoice`) | The same document without the payment history block. Bound the same way, limited to documents that are not plain entries. |
+| Printable layout **Original Bills** (report `account.report_original_vendor_bill`) | Purchase side: returns the originally received file. |
 | Mail template **Invoice: Sending** | Default template for a customer invoice. Subject: *the company name* ` Invoice (Ref ` *the document number or* `n/a` `)`. |
 | Mail template **Credit Note: Sending** | Used when every document being sent is a customer credit note. Subject: *the company name* ` Credit Note (Ref …)`. |
 | Mail template **Self-billing invoice: Sending** | Used when every document is a self-billed vendor bill. |

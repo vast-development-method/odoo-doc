@@ -167,7 +167,7 @@ the editing affordances:
 Two groups.
 
 **Invoice** (customer invoice and customer credit note only): Customer Reference, Salesperson,
-Source Document, Recipient Bank, Payment Reference, Payment QR-code method (only when codes are
+Source Document, Recipient Bank, Payment Reference, the payment quick response code generator (only when codes are
 enabled), Delivery Date.
 
 **Accounting**: Company (multi-company only), Incoterm and its location (not on receipts), Fiscal
@@ -293,8 +293,8 @@ the document identifier, plus an access token when the document is shared with a
 
 ## 6. The printable customer document, section by section
 
-The default layout is **Invoice PDF**; a variant without the payment history is **PDF without
-Payment**. Both wrap the document body in the company's external layout (letterhead, footer with the
+The default layout is the one with payments (report `account.report_invoice_with_payments`); a
+variant without the payment history exists (report `account.report_invoice`). Both wrap the document body in the company's external layout (letterhead, footer with the
 company's tax registration identifier — replaced by the fiscal position's foreign tax registration
 identifier when one is set).
 
@@ -383,11 +383,12 @@ In order:
    followed by the reference in bold, and, when a recipient bank account is set, a second line
    "on this account: " followed by the account.
 6. The payment quick response code, when codes are enabled and the residual is non-zero, with the
-   caption "Scan this QR Code with your banking application". The code is rendered silently: if it
+   caption "Scan this QR Code with\nyour banking application" — reproduced exactly as the layout
+   emits it. The code is rendered silently: if it
    cannot be produced, no code and no caption appear.
 7. The portal-link quick response code, when the link-code setting is on and the residual is
    non-zero, wrapped in a link to the portal payment address, with the captions "PAY IN A FLASH!" and
-   "Scan the QR code or click to pay online".
+   "Scan the QR code\nor click to pay online" — again the exact emitted text.
 8. The terms and conditions.
 
 ---
@@ -474,7 +475,7 @@ Without a bank account, no code is produced. A currency must always be supplied,
 
 > Currency must always be provided in order to generate a QR-code
 
-### 9.2 Generator "Single Euro Payments Area Credit Transfer QR" (priority 20)
+### 9.2 The Single Euro Payments Area credit transfer generator (stored value `sct_qr`, priority 20)
 
 **Eligibility.** Refused, with one message per failing condition joined by a line break, when:
 
@@ -512,7 +513,7 @@ Sanitising a structured reference removes every whitespace character, and additi
 plus signs, asterisks and slashes of the Belgian grouped form (three digits, slash, four digits,
 slash, five digits, optionally wrapped in three plus signs or three asterisks).
 
-### 9.3 Generator "Merchant-Presented QR-code" (priority 30)
+### 9.3 The merchant-presented generator (stored value `emv_qr`, priority 30)
 
 This is the merchant-presented standard used across Asia and elsewhere. The base platform supplies
 the framing; each country variant supplies the merchant account information, the additional data

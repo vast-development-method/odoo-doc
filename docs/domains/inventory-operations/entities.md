@@ -685,14 +685,20 @@ Ordering: by name, then identifier. The record is named by its full name; the di
 
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
-| Package (`package_id`) | link to Package | The container the record describes. |
-| Package name (`package_name`) | text | The container's full name at that instant. |
-| Source location (`location_id`) and Destination location (`location_dest_id`) | link to Location | Where the container came from and went to. |
-| Parent before (`parent_orig_id`) and its name (`parent_orig_name`) | link to Package, text | The container's parent container before the move. |
-| Parent after (`parent_dest_id`) and its name (`parent_dest_name`) | link to Package, text | The container's destination container before it was applied. |
-| Outermost destination (`outermost_dest_id`) | link to Package | The last container of the destination chain at that instant. |
-| Move lines (`move_line_ids`) | one-to-many of Stock Move Line | The lines whose destination container was this container. |
+| Company (`company_id`) | link to Company | Required, default: the active company. |
+| Package (`package_id`) | link to Package | Required. The container the record describes. Deleting the container deletes the history record. |
+| Package Name (`package_name`) | text | Required. The container's **full** name at that instant, that is the greater-than-joined path of its parent containers. |
+| Package Type (`package_type_id`) | link to Package Type, related to the container | Read-only. |
+| Origin Location (`location_id`) and Destination Location (`location_dest_id`) | link to Location | Where the container came from and went to. |
+| Origin Container (`parent_orig_id`) and its name (`parent_orig_name`) | link to Package, text | The container's parent container before the move, and that parent's full name. |
+| Destination Container (`parent_dest_id`) and its name (`parent_dest_name`) | link to Package, text | The container's destination container before it was applied, and that container's destination-path name. |
+| Outermost Destination Container (`outermost_dest_id`) | link to Package | The last container of the destination chain at that instant. |
+| Move Lines (`move_line_ids`) | one-to-many of Stock Move Line | Required. The lines whose destination container was this container. |
 | Transfers (`picking_ids`) | many-to-many to Transfer | The Transfers those lines belonged to. |
+
+Derived name used when printing: the container's own name when it has no destination container at all, or when its destination container **is** the outermost one; otherwise the full name with its first (outermost) segment removed. In other words, printing a nested container shows its path *inside* the outermost container, not the outermost container's own name again.
+
+Action: opening a history record opens the container it describes.
 
 ---
 
@@ -806,8 +812,31 @@ Deleting a completed Scrap is refused with "You cannot delete a scrap which is d
 
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
-| Name (`name`) | text | The human label of the originating need, usually the document number that created it. |
-| Moves (`move_ids`) | many-to-many to Stock Move | The moves that share the reference. |
+| Reference (`name`) | text | Required, read-only. The human label of the originating need, usually the document number that created it. |
+| Stock Moves (`move_ids`) | many-to-many to Stock Move | The moves that share the reference. |
+| Transfers (`picking_ids`) | many-to-many to Transfer, computed, not stored | The Transfers of those moves. |
+
+A Document Reference is what makes the grouping key of `calculations.md`, section 5, work across several steps of a chain: two moves are only ever grouped into the same Transfer when their reference sets are equal, and a move with no reference at all is never grouped into an existing Transfer.
+
+Two documents that are linked through the Reception Report **share** each other's references, which is how a receipt and the sales order it was allocated to end up naming each other.
+
+---
+
+# 18.1 Daily quantity series
+
+**Stock Quantity Report** (`report.stock.quantity`, database view `report_stock_quantity`) is a read-only, generated series with one row per (product, state, date, company, warehouse). It is not a table: it is recomputed from the Stock Moves and the Stock Quantity records every time it is read.
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Date (`date`) | date, read-only | One calendar day. |
+| Product Template (`product_tmpl_id`) | link to Product Template, read-only | |
+| Product (`product_id`) | link to Product, read-only | |
+| State (`state`) | selection, read-only | `forecast` "Forecasted Stock", `in` "Forecasted Receipts", `out` "Forecasted Deliveries". |
+| Quantity (`product_qty`) | decimal, read-only | Signed, in the product unit. |
+| Company (`company_id`) | link to Company, read-only | |
+| Warehouse (`warehouse_id`) | link to Warehouse, read-only | |
+
+The generation rule is specified in `calculations.md`, section 29. The horizon in months on each side of today comes from the system parameter `stock.report_stock_quantity_period`, whose default is 3.
 
 ---
 
@@ -1055,23 +1084,43 @@ Action *Open*: open the storable-product list — restricted to one product or o
 
 Actions: *Return* creates the return Transfer and opens it; *Return and Exchange* also re-issues the goods.
 
-## 24.9 Put in Pack (`stock.package.destination` and the put-in-pack action)
+## 24.9 Package Destination (`stock.package.destination`)
 
-**Package Destination** (`stock.package.destination`): Move lines (`move_line_ids`), Destination location (`location_dest_id`), Filtered destination locations (`filtered_location`, computed). Shown when the lines being packed point at more than one destination Location; choosing one rewrites all of them before the container is created.
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Products (`move_line_ids`) | many-to-many to Stock Move Line | Required. The lines being packed. |
+| Destination location (`location_dest_id`) | link to Location | Required. The single Location to force onto all of them. |
+| Filtered destination locations (`filtered_location`) | one-to-many of Location, computed | The distinct destination Locations currently found on those lines; the choice is offered among them. |
 
-The put-in-pack wizard proper offers: an existing container, a container type, or a free name. See `workflows.md`, section "Put in pack".
+Shown when the lines being packed point at more than one destination Location. Action *Done*: write the chosen Location on every line, then re-run the put-in-pack action.
 
-## 24.10 Insufficient Quantity Warning
+## 24.10 Put in Pack (`stock.put.in.pack`)
 
-**Abstract base** (`stock.warn.insufficient.qty`): Product (`product_id`), Location (`location_id`), Quantity (`quantity`), Unit name (`product_uom_name`), Quantity records (`quant_ids`, computed from the product and the Location).
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Destination (`location_dest_id`) | link to Location | The destination the lines already agree on. |
+| Move lines (`move_line_ids`) | many-to-many to Stock Move Line | The lines to pack, when the action came from lines. |
+| Packages (`package_ids`) | many-to-many to Package | The containers to nest, when the action came from containers. |
+| Package Type (`package_type_id`) | link to Package Type | The type to give a newly created container. |
+| Type sequence (`package_type_sequence_id`) | link to Numbering Sequence, related | Read-only; shows which numbering a new container of that type would draw from. |
+| Package (`result_package_id`) | link to Package | An existing container to use instead of creating one. Cleared automatically when a container type is chosen that does not match it. |
+| Origin containers (`origin_package_ids`) | many-to-many to Package, computed | The parent containers of the containers being nested and of the destination containers of the lines being packed; shown so the person can see what is being taken apart. |
 
-**Scrap variant** (`stock.warn.insufficient.qty.scrap`): adds Scrap (`scrap_id`). Its confirmation action performs the scrap regardless of the shortage.
+Action *Put in pack*: re-run the put-in-pack action on the containers when containers were given, otherwise on the lines, passing the chosen container and container type and marking the call as coming from the wizard so that the wizard is not offered a second time.
 
-## 24.11 Label wizards
+## 24.11 Insufficient Quantity Warning
 
-**Label Type Chooser** (`picking.label.type`): Transfers (`picking_ids`), Print (`label_type`, selection `products` "Products Labels" or `lots` "Lot/SN Labels").
+**Abstract base** (`stock.warn.insufficient.qty`): Product (`product_id`, required), Location (`location_id`, required, restricted to internal usage), Quantity (`quantity`, required), Unit (`product_uom_name`, required), Quantity records (`quant_ids`, computed) — the records of that product in internal Locations of the reference document's company, shown so that the person can see where the goods actually are.
 
-**Lot Label Layout** (`lot.label.layout`): Move lines (`move_line_ids`), Quantity to print (`label_quantity`, selection `lots` "One per lot/SN" or `units` "One per unit"), Format (`print_format`, selection `4x12` or `zpl`).
+**Scrap variant** (`stock.warn.insufficient.qty.scrap`): adds Scrap (`scrap_id`). Its reference company is the Scrap's company. Confirming performs the scrap regardless of the shortage; discarding **deletes** the Scrap record that had been created to open the screen, unless the calling context asks not to.
+
+## 24.12 Label wizards
+
+**Label Type Chooser** (`picking.label.type`): Transfers (`picking_ids`), Labels to print (`label_type`, required, default `products`; values `products` "Product Labels" and `lots` "Lot/SN Labels"). Choosing products opens the product-label wizard on the Transfers' products and moves; choosing lots opens the lot-label wizard on the Transfers' detail lines.
+
+**Lot Label Layout** (`lot.label.layout`): Move lines (`move_line_ids`), Quantity to print (`label_quantity`, required, default `lots`; values `lots` "One per lot/SN" and `units` "One per unit"), Format (`print_format`, required, default `4x12`; values `4x12` "4 x 12" and `zpl` "ZPL Labels").
+
+The number of labels is computed as follows. With "One per lot/SN", one label per distinct Lot found on the lines. With "One per unit", the lines are walked and, per Lot, the count is increased by the whole part of the line's quantity when the line's unit shares a reference with the plain unit, and by exactly one otherwise; each Lot is then repeated that many times. The chosen format decides which document is rendered, and the resulting action closes itself once the download starts.
 
 **Product Label Layout** (extended here): Moves (`move_ids`), Quantity to print (`move_quantity`, selection `move` "Operation Quantities" or `custom` "Custom", default `custom`), added print formats `zpl` "ZPL Labels" and `zplxprice` "ZPL Labels with price", template choice (`zpl_template`, selection `normal` "Normal (2.25\" x 1.25\")", `small` "Small (1.25\" x 1.00\")", `alternative` "Alternative (2.00\" x 1.00\")", `jewelry` "Jewelry (2.20\" x 0.50\")", default `normal`) and a preview image.
 

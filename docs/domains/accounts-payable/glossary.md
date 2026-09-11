@@ -193,3 +193,85 @@ Every term used in this folder, defined in full. Reproduced identifiers appear i
 **Vendor reference** (`ref`) — The number the supplier printed on their own document. The primary key of duplicate detection and, absent a payment reference, the label of the payable term line.
 
 **Void** — The operation that cancels an issued cheque: the payment is reset to draft and then cancelled; the number is kept for audit.
+
+---
+
+## Additional terms
+
+**Accounting date source** — The value from which the accounting date is derived: the bill date when set, otherwise the current accounting date.
+
+**Anti-pattern (numbering)** — An additional condition applied when searching for the highest number already used, so that a yearly series does not match a monthly one and vice versa.
+
+**Base line** — The structure handed to the tax engine for one line that bears taxes: its price, quantity, discount, sign, currency rate and special mode. On a purchase document the sign is the direction sign, +1.
+
+**Bounce** — The automatic reply sent when a message reaches a journal's address without any attachment. Its body is rendered from the mail-gateway failure template.
+
+**Cash discount tax reduction** — The setting that decides whether an early payment discount reduces the taxable base, and when. Its three values are *On early payment*, *Never* and *Always (upon invoice)*.
+
+**Chatter** — The message and activity log attached to a document. Every import, decoding failure, reversal and duplicate suppression writes there.
+
+**Conversion table** — The per-company rate table joined by the analysis report so that amounts of companies with different currencies can be summed. Trivial (all rates 1) when every company shares one currency.
+
+**Counterpart line** — On a payment, the journal item on the receivable or payable account; the one that reconciles against a document.
+
+**Dedicated debit note sequence** — A journal setting making debit notes take their own numbering series, prefixed with `D`.
+
+**Dedicated credit note sequence** — A journal setting making credit notes take their own numbering series, prefixed with `R`.
+
+**Draft label** — The display name of a document that has never been posted: *Draft Bill*, *Draft Vendor Credit Note*, *Draft Purchase Receipt*.
+
+**Dynamic line** — A journal item that the synchronizer creates, updates and deletes automatically: a tax line, a payable term line, a cash rounding line, an early payment discount line or a private-share line. A user never edits one directly.
+
+**Elected file** — The single file of a group that will actually be decoded: the one sorting first by *(has a decoder, priority)*.
+
+**Force hash** — The switch in the mass posting dialogue that also posts documents whose journal secures entries with a hash.
+
+**Force post** — The switch in the mass posting dialogue that posts future-dated documents immediately instead of scheduling them.
+
+**Format label** — The short identifier of a file's format, used by the mixed-types grouping to decide whether two files clash. The base implementation recognises only the Portable Document Format label.
+
+**Liquidity line** — On a payment, the journal item on the bank or outstanding account.
+
+**Manually modified** — A flag set when a user edits a document that a decoder had filled. The automatic-posting learning rule counts consecutive documents that do **not** carry it.
+
+**Mixed expense** — A purchase whose deductibility is below 100 %: partly business, partly private.
+
+**Needed terms** — The transient map from *(document, maturity date, discount date)* to instalment amounts that the payable term lines must match. Recomputed at every save.
+
+**Number reset period** — The grammar of a numbering series, deduced from the highest existing number: monthly, yearly, monthly within a year range, by year range, or never.
+
+**Origin attachment** — For an extracted file, the stored attachment it was extracted from; for a top-level file, itself.
+
+**Outbound payment method line** — The instantiation on a journal of a method that sends money. The cheque method is one.
+
+**Posted before** — A flag recording that the document has been posted at least once. It blocks switching the type and, under a restrictive audit trail, blocks deletion.
+
+**Purchase description** — The product text appended to a line's label on a purchase journal.
+
+**Quick encoding suggestion** — The single line the system proposes from a typed tax-inclusive total: an account, a tax set and a back-computed unit price.
+
+**Review predicate** — The test deciding whether the current user may set or clear the reviewed flag. It answers true in the base package; an accountant package narrows it to a group.
+
+**Roll-back guard** — See *Roll-back-able transaction*.
+
+**Sanitised payment reference** — The payment reference with every non-alphanumeric character removed; indexed so that a bank narration can be matched to a document.
+
+**Self-billing series** — The numbering series of a self-billing journal: one series per commercial partner, the partner's identifier padded to five characters being part of the pattern.
+
+**Soft posting** — Posting that schedules future-dated documents instead of posting them. The default of the mass dialogue.
+
+**Special mode (tax)** — A flag telling the tax engine how to read an amount: *total excluded* for the derived lines such as private-share and cash-rounding lines.
+
+**Stub header** — A line in a cheque stub carrying only a bucket name — *Bills* or *Refunds* — emitted when both buckets are non-empty.
+
+**Tax base amount** — On a tax line, the sum of the bases it taxes, in company currency.
+
+**Tax country** — The country whose taxes a document may carry: the fiscal position's country when it declares a foreign registration, and the company's fiscal country otherwise.
+
+**Term key** — The synchronization key of a payable term line: the document, the maturity date and the discount date.
+
+**Unwrapping** — Extracting the files embedded inside a Portable Document Format container, recursively.
+
+**Window action** — A named navigation target: an entity, a set of views, a domain and a default context. Listed in `interfaces.md` §1.1.
+
+**Year part** — The part of a numbering pattern representing the fiscal year: four digits for a calendar fiscal year, a two-digit range for a staggered one.

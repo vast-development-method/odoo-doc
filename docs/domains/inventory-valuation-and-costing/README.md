@@ -45,6 +45,7 @@ records and attaches value to them.
 | Inventory valuation closing | The periodic computation that compares the physical inventory value against the ledger balance and proposes the balancing entry, plus the scheduled job that posts it. |
 | Valuation at a date | Re-running any costing method as of a past instant, including the dated valuation-history records. |
 | Product value and quantity reporting fields | Total value, average cost, valuation currency, remaining quantity and remaining value on movements, and quant value. |
+| Cost used for sales margins | The cost figure a sales order line carries, derived from the value that actually left stock when the product does not use standard price, and the margin computed from it. |
 | Work in progress accounting for production | The wizard that posts a work-in-progress entry and its automatic reversal. |
 | Reporting | The inventory valuation closing report, the unit cost history report, the valuation movement list, and the inventory value shown on the forecast report. |
 
@@ -130,6 +131,37 @@ fields in [entities.md](entities.md): Manufacturing Order (`mrp.production`), Wo
   goods.
 - [Purchasing](../purchasing/README.md) reads the effect of a bill on the value of the
   goods already received.
+
+## Where the value lives: there is no separate valuation ledger record
+
+A reader who knows other inventory-accounting designs will look for a dedicated
+"valuation layer" record — one row per valued event, carrying a quantity, a value, a
+remaining quantity and a remaining value, forming an append-only ledger parallel to the
+goods movements. **This system has no such record.** Value is carried in exactly three
+places:
+
+1. **On the goods movement itself** — the `value` field (the value that entered or left
+   the company because of that movement). This is the only stored value of an event.
+2. **On the Product Value record** — a dated record of a *human's* decision: a new unit
+   cost for a product or a lot, or a new total value for one movement. There is one of
+   these per manual change, never one per movement.
+3. **On the product and the lot** — the unit cost, which is an input under standard
+   price and a derived figure otherwise.
+
+Everything else that other designs store — the remaining quantity, the remaining value,
+the running average, the first in first out consumption order, the total value of a
+product at any date — is **computed on demand** by replaying the goods movements. The
+consequences are pervasive and must be reproduced faithfully:
+
+- Correcting a past movement changes every derived figure from that point on, with no
+  ledger to reconcile.
+- Increasing the quantity of an old receipt adds the extra units at the **top** of the
+  first in first out queue, not at their original position, because the queue is rebuilt
+  from the current quantity on hand rather than read from a consumption ledger.
+- The correction of negative stock is not a separate pass over pending layers; it falls
+  out of the replay.
+- Valuation as of a past date is a re-run of the same algorithms with a cut-off, not a
+  query over stored snapshots.
 
 ## Two orthogonal choices that drive everything
 

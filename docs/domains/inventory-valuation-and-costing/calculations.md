@@ -1818,7 +1818,122 @@ on day three, and another on day six.
 
 ---
 
-## 16. Value shown on the forecast report
+## 16. Cost used for sales margins
+
+### 16.1 Statement
+
+A sales order line carries a **cost** figure and a **margin** figure. The cost figure is
+normally derived from the product's unit cost, but when the line has goods movements and
+the product's category uses a costing method other than standard price, it is derived
+from the value that actually left stock.
+
+### 16.2 The line's cost
+
+**Input.** One sales order line.
+
+1. If the line has **no** goods movement in a state other than cancelled or draft, fall
+   back to the generic rule (step 5 below).
+2. Otherwise, if the line has a product whose category carries a costing method other
+   than `standard`:
+
+   ```formula
+   delivered_quantity = qty_delivered
+
+   delivery_unit_price = the delivery unit price of the line's completed movements
+                              when delivered_quantity > 0
+   delivery_unit_price = 0    otherwise
+
+   when delivered_quantity ≤ 0:
+       cost = product_unit_cost
+
+   otherwise:
+       remaining_quantity = max( ordered_quantity − delivered_quantity , 0 )
+       cost = ( delivered_quantity × delivery_unit_price
+                + remaining_quantity × product_unit_cost )
+              ÷ ( delivered_quantity + remaining_quantity )
+   ```
+
+   Then convert the cost from the product reference unit into the line's unit of measure,
+   and convert it from the product's cost currency into the line's currency.
+3. Otherwise, if the line has no ordered quantity but does have a delivered quantity —
+   the case of a line created from a delivery under standard price — fall back to the
+   generic rule.
+4. Otherwise leave the existing cost untouched. This is what lets a human override the
+   cost on a line of a standard-price product without the engine overwriting it.
+5. **Generic rule.** Convert the product's unit cost from the product reference unit into
+   the line's unit of measure, then convert it from the product's cost currency into the
+   line's currency.
+
+### 16.3 The delivery unit price of a set of movements
+
+```formula
+dropship_moves     = the movements of the set that are drop shipments or returned drop shipments
+dropship_quantity  = Σ valued quantity over those movements
+dropship_price     = Σ value over those movements ÷ dropship_quantity
+                          ( 0 when dropship_quantity is 0 )
+
+regular_moves      = the remaining movements whose outgoing flag is set
+regular_quantity   = Σ valued quantity over those movements
+regular_price      = Σ value over those movements ÷ Σ valued quantity over them
+                          ( 0 when that sum is 0 )
+
+total_quantity     = dropship_quantity + regular_quantity
+
+delivery_unit_price = the plain unit price of the whole set      when total_quantity is 0
+delivery_unit_price = ( dropship_quantity × dropship_price
+                        + regular_quantity × regular_price )
+                      ÷ total_quantity                            otherwise
+```
+
+The **plain unit price** of a set of movements is:
+
+```formula
+plain_unit_price = Σ move value ÷ Σ move valued quantity
+plain_unit_price = 0    when the total valued quantity is 0
+plain_unit_price = 0    when the set covers more than one product
+```
+
+The **drop-shipment unit price** is the same shape, but the value of each movement is
+re-evaluated through the priority chain rather than read from the stored field:
+
+```formula
+dropship_unit_price = Σ evaluated value ÷ Σ valued quantity
+                      ( 0 when the total valued quantity is 0 )
+```
+
+### 16.4 The margin
+
+```formula
+when delivered_quantity ≠ 0 and ordered_quantity = 0:
+    calculated_subtotal = unit_price × delivered_quantity
+    margin              = calculated_subtotal − cost × delivered_quantity
+    margin_percentage   = margin ÷ calculated_subtotal
+                              ( 0 when the calculated subtotal is 0 )
+
+otherwise:
+    margin            = line_subtotal − cost × ordered_quantity
+    margin_percentage = margin ÷ line_subtotal
+                              ( 0 when the subtotal is 0 )
+```
+
+### 16.5 Worked example
+
+A sales order line orders 10 units at 20.00 each, subtotal 200.00. The product uses first
+in first out with a unit cost of 11.00. Six units have been delivered, and those
+deliveries are worth 60.00 in total.
+
+```formula
+delivered_quantity  = 6
+delivery_unit_price = 60.00 ÷ 6 = 10.00
+remaining_quantity  = max( 10 − 6 , 0 ) = 4
+cost                = ( 6 × 10.00 + 4 × 11.00 ) ÷ 10 = ( 60.00 + 44.00 ) ÷ 10 = 10.40
+margin              = 200.00 − 10.40 × 10 = 200.00 − 104.00 = 96.00
+margin_percentage   = 96.00 ÷ 200.00 = 0.48
+```
+
+---
+
+## 17. Value shown on the forecast report
 
 For a product and a set of warehouse locations, when the reader is an inventory manager:
 

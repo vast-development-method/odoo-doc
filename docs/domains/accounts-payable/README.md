@@ -102,6 +102,8 @@ The following capabilities that are commonly associated with accounts payable ar
 
 **Identifiers.** Storage names, transport names and selection values appear in code font because external contracts depend on them; each is accompanied on first use by its full name in words.
 
+**Abbreviations inside quoted messages.** Prose in this repository never abbreviates. A few of the **exact user-facing messages** reproduced here do, because they must be reproduced character for character. The abbreviations that occur inside such quoted texts are: *PDF*, meaning Portable Document Format, and *XML*, meaning extensible markup language. Wherever those letters appear in this folder they are inside a reproduced message or a reproduced help text, never in the specification's own prose.
+
 ## The shape of a purchase document
 
 A purchase document is a single record that carries **two layers at once**:
