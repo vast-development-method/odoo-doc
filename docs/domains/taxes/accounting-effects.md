@@ -443,3 +443,200 @@ the advance tax payment account; and set the tax lock date to the last day of th
 | That partial reconciliation is deleted | the cash basis journal | a reversal of each posted cash basis entry; draft ones are deleted | the reversal cancels the original |
 | A payment carrying withholding lines is created | the payment's journal | one tax item per withholding result plus two base items per aggregate | the liquidity item as usual |
 | Cash rounding with the "adjust the biggest tax" strategy | the host's | no new item; the largest tax item is adjusted | no |
+
+---
+
+## 10. Catalogue by document kind
+
+The engine is the same everywhere. What differs between document kinds is how the host builds its
+**base lines** — the sign, the special mode, the rate and the refund flag — and which extra lines
+it adds. This section catalogues that, so that an implementer can reproduce every consumer.
+
+### 10.1 Customer invoice
+
+| Aspect | Value |
+|---|---|
+| Base lines | one per product line |
+| Unit price, quantity, discount | the line's own |
+| Special mode | none |
+| Rate | the document's currency rate |
+| Sign | the document's direction sign, minus one, so that a revenue line is a credit |
+| Refund flag | false |
+| Extra base lines | early payment discount lines, cash rounding lines, non-deductible lines (never on a sales document) |
+| Tax items produced | one per grouping key, credits on the tax payable accounts |
+
+### 10.2 Customer credit note
+
+Identical to the customer invoice, except: the direction sign is plus one and the **refund flag is
+true**, so the refund distribution is used.
+
+### 10.3 Vendor bill
+
+| Aspect | Value |
+|---|---|
+| Sign | plus one, so that an expense line is a debit |
+| Refund flag | false |
+| Extra base lines | early payment discount lines, cash rounding lines, and — when at least one product line declares a deductibility below one hundred percent — the non-deductible pair plus the balancing line |
+| Tax items produced | one per grouping key, debits on the tax deductible accounts, plus at most one non-deductible tax item |
+
+### 10.4 Vendor refund
+
+Identical to the vendor bill, except: the direction sign is minus one and the **refund flag is
+true**.
+
+### 10.5 Miscellaneous entry
+
+| Aspect | Value |
+|---|---|
+| Base lines | one per item whose display kind is a product line |
+| Unit price | the item's **amount in document currency** |
+| Quantity | one |
+| Discount | zero |
+| Special mode | **total excluded** — the supplied amount is always the amount without tax |
+| Rate | the absolute ratio of the item's amount in document currency to its balance, or zero when the balance is zero |
+| Sign | plus one |
+| Refund flag | derived from the sign of the item and the kind of its taxes (`calculations.md` section 8.1), and inverted when the entry is itself a reversal |
+| Totals block | **not** produced, because such an entry may mix currencies |
+
+### 10.6 Expense
+
+| Aspect | Value |
+|---|---|
+| Base lines | one per expense |
+| Partner | the vendor of the expense |
+| Special mode | **total included** — the amount an employee types is the amount actually paid |
+| Rate | the expense's own currency rate |
+| Tax amount shown on the expense | the total with taxes minus the untaxed total, that is the extracted tax |
+| Default taxes | the product's **purchase** taxes restricted to the expense's company |
+
+Because the special mode is "total included", an employee who types one hundred twenty-one on an
+expense carrying a twenty-one percent tax sees a tax of twenty-one and an untaxed amount of one
+hundred, whichever way the tax's own price-inclusion flag is set.
+
+### 10.7 Sales order and purchase order
+
+An order carries no journal item, so the domain produces no accounting effect there. The order
+lines are nevertheless converted into base lines with the same rules as an invoice line, so that
+the order's totals block agrees to the cent with the invoice that will be raised from it.
+
+### 10.8 Point-of-sale order
+
+The client computes the taxes with the mirrored copy of the engine while offline, and the server
+recomputes them when the order is synchronised. The two must agree; the session's closing entry
+then aggregates the tax amounts per tax and per account. The session entry itself belongs to
+`../point-of-sale/`; the only obligation of this domain is that the two engine copies produce
+identical numbers for identical inputs.
+
+### 10.9 Bank statement line
+
+A reconciliation model line may carry taxes. When it is applied to a statement line, the amounts
+it proposes are run through the engine exactly as an invoice line would be, with the sign of the
+statement line, and the resulting tax items are added to the statement line's journal entry.
+
+### 10.10 Payment
+
+A payment carries no tax of its own. Two mechanisms add items to its entry: **withholding**
+(section 7) and, indirectly, **cash basis** (section 6), whose entries are separate but are
+triggered by the payment's reconciliation.
+
+---
+
+## 11. Worked end-to-end example
+
+A complete, self-consistent example an implementer can use as a fixture.
+
+**Configuration.**
+
+- Company currency: the same as the document currency, two decimal places.
+- Rounding method: round per tax.
+- Sales tax *S*: twenty-one percent, price-excluded, invoice distribution base tagged *base 21* and
+  one tax line of one hundred percent on "tax payable" tagged *tax 21*; refund distribution the
+  same names with the negating expressions.
+- Environmental levy *L*: fixed, five hundredths per unit, price-excluded, sequence zero, flagged
+  "affect base of subsequent taxes", distribution one hundred percent to "levy payable" tagged
+  *levy*.
+- *S* is at sequence one and accepts being affected.
+
+**The invoice.** Two lines:
+
+| Line | Quantity | Unit price | Discount | Taxes |
+|---|---|---|---|---|
+| 1 | 7 | 15.00 | 0 % | *L*, *S* |
+| 2 | 3 | 21.53 | 10 % | *S* |
+
+**Line 1.**
+
+```formula
+price after discount = 15.00
+raw base             = 7 × 15.00 = 105.00
+L  = +1 × 7 × 0.05 = 0.35                    base 105.00
+S  = ( 105.00 + 0.35 ) × 0.21 = 22.1235      base 105.35
+untaxed total = 105.00
+```
+
+**Line 2.**
+
+```formula
+price after discount = 21.53 × 0.90 = 19.377
+raw base             = 3 × 19.377 = 58.131
+S  = 58.131 × 0.21 = 12.20751                base 58.131
+untaxed total = 58.131
+```
+
+**Document-wide rounding.**
+
+```formula
+tax L : one contributor, raw 0.35 → rounded 0.35 ; target 0.35 ; no delta
+tax S : contributors 22.1235 and 12.20751 ; sum 34.33101 → rounded 34.33
+        independently rounded: 22.12 and 12.21 , sum 34.33 ; no delta
+base of S : raw 105.35 + 58.131 = 163.481 → rounded 163.48
+        independently rounded: 105.35 and 58.13 , sum 163.48 ; no delta
+untaxed totals : raw 105.00 + 58.131 = 163.131 → rounded 163.13
+        independently rounded: 105.00 and 58.13 , sum 163.13 ; no delta
+```
+
+**The posted entry.**
+
+| Item | Account | Debit | Credit | Base amount | Tags |
+|---|---|---|---|---|---|
+| Line 1 | revenue | | 105.00 | | *base 21*, and — because *L* affects the base of *S* — nothing extra on the base line itself |
+| Line 2 | revenue | | 58.13 | | *base 21* |
+| Levy | levy payable | | 0.35 | −105.00 | *levy*, plus the base tags of *S* because *L* affects *S*'s base |
+| Tax *S* | tax payable | | 34.33 | −163.48 | *tax 21* |
+| Receivable | receivable | 197.81 | | | |
+
+Check: one hundred five plus fifty-eight point one three plus zero point three five plus
+thirty-four point three three equals one hundred ninety-seven point eight one.
+
+**The totals block.**
+
+| Row | Base shown | Tax |
+|---|---|---|
+| Untaxed Amount | 163.13 | |
+| Tax group of the levy | no base (every contributing tax is fixed) | 0.35 |
+| Tax group of *S* | 163.48 | 34.33 |
+| Total | | **197.81** |
+
+The "same base" flag is false, because the set of displayed base amounts contains one hundred
+sixty-three point four eight and one hundred sixty-three point one three.
+
+**The credit note for the whole invoice.** Every amount is mirrored, the direction sign becomes
+plus one and the refund distribution is used, so the two tax items carry the refund tags and the
+period nets to zero on every grid.
+
+---
+
+## 12. What an implementer must not do
+
+| Mistake | Consequence |
+|---|---|
+| Using the rounded untaxed total as the base line's balance, without the delta | The document's untaxed amount is off by a cent whenever the redistribution allocated one. |
+| Rounding each distribution share and summing, without redistributing the residue | The sum of the tax items differs from the tax amount reported in the totals block. |
+| Computing the untaxed total as the raw base instead of the first result's base | Every price-included tax is reported twice. |
+| Applying the refund distribution by negating the invoice one | The refund's tags and accounts are wrong whenever they differ, which is the whole point of having two lists. |
+| Stamping report tags on a deferred tax at posting | The tax return reports the tax before it is due. |
+| Posting a deferred tax on its real tax account at posting | The cash basis entries then double the amount. |
+| Recomputing the tax items of a posted entry | The tax return changes retroactively; only the maintenance operation may touch the tags, and it never touches the amounts. |
+| Letting a computation key leak into another subset's rounding | A down payment deduction changes the final invoice's total by a cent. |
+| Treating a reverse-charge tax as price-included | The base is wrong by the tax amount. |
+| Forgetting that a fixed tax is evaluated before the extraction | A price-included percentage tax is extracted from the wrong price. |
