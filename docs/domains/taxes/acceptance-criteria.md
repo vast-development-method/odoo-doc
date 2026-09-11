@@ -461,13 +461,18 @@ Given two matching automatic fiscal positions of the same company with sequences
 Then the one with sequence ten wins.
 
 **G8 — Postal code range.**
-Given a fiscal position with a range from one hundred to nine thousand and a partner whose postal
-code is five hundred seventy-five.
-Then the bounds are stored as `0100` and `9000`, the partner's code compares as `575`, and the
-text comparison `0100 ≤ 575 ≤ 9000` fails because `575` is greater than `9000` as text.
-Then the implementer must note that the partner's own postal code is **not** padded, so a range
-whose bounds have more digits than the partner's code will not match; this is the behaviour to
-reproduce.
+Given a fiscal position written with a range from one hundred to nine thousand and a partner whose
+postal code is five hundred seventy-five.
+Then the bounds are stored as `0100` and `9000`, and the comparison is textual: `0100` is not
+greater than `575` and `575` is not greater than `9000`, so the fiscal position matches.
+
+**G8b — Postal code range, the padding matters.**
+Given a fiscal position whose bounds are written as `100` and `900` — both three characters, so
+the padding changes nothing — and a partner whose postal code is `1050`.
+Then the textual comparison gives `100` not greater than `1050` and `1050` not greater than `900`
+(because the first character `1` is less than `9`), so the fiscal position **matches** even though
+one thousand fifty is numerically outside the range. The partner's own postal code is never padded;
+this text-ordering behaviour is the one to reproduce.
 
 **G9 — Tax substitution.**
 Given a fiscal position carrying a replacement tax *R* that declares it replaces the domestic tax

@@ -21,6 +21,9 @@ Contents:
 15. [Company rules](#15-company-rules)
 16. [Wizard rules](#16-wizard-rules)
 17. [Edge cases](#17-edge-cases)
+18. [Field-level write protection](#18-field-level-write-protection)
+19. [Concurrency and transactional rules](#19-concurrency-and-transactional-rules)
+20. [Rules that other domains rely on](#20-rules-that-other-domains-rely-on)
 
 ---
 
@@ -598,3 +601,105 @@ The pairing loop still advances, because an item is dropped as soon as both of i
 ### Deleting an entry that is the only one of its chain
 
 Allowed: the chain-end test answers yes for a single entry with no previous number.
+
+---
+
+## 18. Field-level write protection
+
+This section consolidates, per field, what may be written in each state. It is the reference an implementation should test against.
+
+### On a Journal Entry
+
+| Field | Draft | Posted | Cancelled | Hashed (always posted) |
+|---|---|---|---|---|
+| Number | free, subject to the date-alignment check and the journal pattern | free, subject to the same checks plus the lock-date re-check | free | **refused** |
+| Reference | free | free | free | free |
+| Accounting date | free | **refused** as a readonly field, and additionally lock-checked | free | **refused** |
+| State | through the operations only | through the operations only | through the operations only | only the securing operation |
+| Document type | at creation only | at creation only | at creation only | at creation only |
+| Journal | free while never posted; refused while a number is kept | **refused** while a number is kept | same | **refused** |
+| Company | free | **refused** (it is recomputed from the journal) | free | **refused** |
+| Currency | free | **refused** as a readonly field | free | free |
+| Items | free | **refused** as a readonly field | free | **refused** |
+| Counterpart | free | **refused** as a readonly field | free | free |
+| Payment terms, fiscal position, cash rounding | free | **refused** as a readonly field | free | free |
+| Automatic posting mode and its end date | free | free | forced to "No" by the cancellation | free |
+| Reviewed flag | free | free for a user allowed to review | free | free |
+| Payment reference, narration, origin, salesperson, incoterm | free | free | free | free |
+| Payment status | computed; the blocked value is set and cleared manually | same | same | same |
+
+"Refused as a readonly field" means the write raises "You cannot modify the following readonly fields on the posted move *the identification*: *the field names*" unless the caller explicitly bypasses the check, which only internal routines do.
+
+### On a Journal Item
+
+| Field | Entry draft | Entry posted | Entry posted and matched | Entry hashed |
+|---|---|---|---|---|
+| Label | free | free | free | **refused** |
+| Account | free | lock-checked | breaks the match unless the whole group is written together | **refused** |
+| Balance, debit, credit | free | lock-checked (fiscal and tax) | breaks the match | **refused** |
+| Foreign amount | free | lock-checked (fiscal) | breaks the match | free unless it is a hashed field — it is not, so free |
+| Currency | free | lock-checked (fiscal) | breaks the match | free |
+| Counterpart | free | lock-checked (fiscal) | free | **refused** |
+| Taxes, originating tax | free | **refused** | **refused** | **refused** |
+| Tax grids | free | lock-checked (tax) | free | free |
+| Due date | free | free | free | free |
+| Analytic distribution | free; the analytic lines of a draft item are deleted | free; the analytic lines are deleted and recreated | free | free |
+| Journal (related) | follows the entry | follows the entry | follows the entry | follows the entry |
+| Date (related) | follows the entry | follows the entry | breaks the match when the entry date changes | follows the entry |
+| Matching number | written only by the reconciliation routine; an imported label is rewritten with the letter `I` in front | same | same | same |
+
+### The precedence of the checks on one write
+
+For one write on one item of a posted entry, the checks run in this order and the first failure stops the operation:
+
+```
+ 1. The archived-account check on the written account.
+ 2. The hashed-field check.
+ 3. For each item: the "will the value actually change" test; unchanged items are dropped
+    from the write entirely.
+ 4. The tax-modification refusal.
+ 5. The fiscal lock check, when a fiscal-protected field changes.
+ 6. The tax lock check is deferred: the identifiers are collected and checked after the loop.
+ 7. The reconciliation break: the matches are removed and the linked bank transactions are
+    unreconciled, except those whose unreconciliation would itself violate a lock date.
+ 8. The collected tax lock checks run.
+ 9. The balance invariant and the dynamic-line synchronisation are opened around the write.
+10. The write happens, the tracked values are logged, and the account-and-journal coherence
+    is re-checked when the account or the currency changed.
+11. The tax lock check runs a second time, to catch an item that did not affect the tax
+    report before the write but does after it.
+```
+
+---
+
+## 19. Concurrency and transactional rules
+
+| Rule | Statement |
+|---|---|
+| Numbering uniqueness | Guaranteed by a unique index over (number, journal) restricted to posted entries whose number is not the placeholder. The reservation is a direct write that takes an exclusive lock on the index entry. |
+| Numbering retries | A uniqueness violation on the reservation is recovered by rolling back to a savepoint and trying the next counter, indefinitely until a free value is found. |
+| Numbering cache | After the first reservation of a chain in a transaction, further numbers come from an in-transaction cache keyed by (the format filled with counter zero, the journal). The cache is cleared whenever the number field is written by an ordinary write. |
+| Cache invalidation on rollback | A savepoint rollback or a commit must clear the numbering cache, because the lock it relied on is released. |
+| Scheduled posting | The daily posting job locks each entry before posting it alone, and re-tests it against the search condition after the lock, so that a concurrently posted entry is skipped. |
+| Sending job | The sending job locks the entries it takes, so two runs never process the same document. |
+| Reconciliation | The whole plan is computed in memory against a snapshot of the residuals, and the matches are created in one operation, so a partially applied plan is never visible. |
+| Balance invariant | The check is deferred to the end of the enclosing operation, so intermediate unbalanced states inside one write are allowed. |
+| Lock date caching | The per-user lock dates are cached and explicitly invalidated when a company lock date is written and when an exception is created or revoked, for **every** company, because an exception of a parent company changes the value seen from a child. |
+
+---
+
+## 20. Rules that other domains rely on
+
+An implementation must keep these guarantees because other domains are built on them.
+
+| Guarantee | Relied on by |
+|---|---|
+| A posted entry never changes its accounting date except through an explicit, lock-checked write | every report, the tax return, the audit trail |
+| A posted entry keeps its number for ever, and the pair (number, journal) is unique among posted entries | every legal document, the electronic exchange, the audit |
+| A reconciliation never changes the balance of an item; it only creates matches | the reports, the aged balances |
+| The residual of an item is always the balance minus the matched amounts, in both currencies | the payment status, the aged balances, the outstanding widgets |
+| A matched group that nets to zero always carries a Full Reconciliation | the payment status, the exchange-difference reversal |
+| Undoing a match always reverses or deletes the entries it produced | the tax return, the exchange result |
+| An item on an account that does not allow matching always has zero residuals | the reports |
+| Deleting an entry is impossible once it is hashed, and impossible once it is posted when the company keeps a restrictive audit trail | the legal archive |
+| Every entry produced by any domain balances in the company currency | the whole ledger |

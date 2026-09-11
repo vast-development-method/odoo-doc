@@ -630,3 +630,31 @@ with the quiet zone enabled, and wrapped in a hyperlink to the same address.
 | Invoice payment / Invoice paid | The payment dialogue and the already-paid message. |
 | Journal e-mail notification settings | The unsubscribe confirmation page, with its error variants. |
 | My details | Extended with the customer's preferred invoice sending method and electronic invoice format. |
+
+---
+
+## 12. File names of the generated documents
+
+| File | Name |
+| --- | --- |
+| The printable document | The layout's print-name expression evaluated on the document; when the layout defines none, the document number. Every forward slash is replaced by an underscore, then the extension is appended. For the shipped layouts the print-name expression is the document's display name, so a posted customer invoice numbered `INV/2026/00001` gives `INV_2026_00001.pdf`. |
+| A dynamic report attached by the mail template | The same rule applied to that report's own print-name expression; when the report defines none, the report name in lower case, an underscore, the document number and the extension. |
+| The *pro forma* document | The document's display name with every space and every forward slash replaced by an underscore, then `_proforma.pdf`. |
+| A multi-document download | A compressed archive named after the first document with the archive extension. |
+| A detached file after a reset to draft | The original name, then a space, then a parenthetical reading "detached by *the user name* on *today's date*", then the original extension. For example `INV_2026_00001 (detached by Jane Doe on 03/20/2026).pdf`. |
+
+---
+
+## 13. Data the interface reads that is not a stored field
+
+Several structures exist only to feed the interface. An implementation must produce them with the
+same shape because the client and the printed document depend on them.
+
+| Structure | Shape | Consumer |
+| --- | --- | --- |
+| Totals structure (`tax_totals`) | the net subtotal, one entry per tax group with its base and its tax amount, the gross total, and optional rows for cash rounding and the early payment discount; it also carries a flag saying whether a second block in the company currency must be shown | the form's totals block and the printed document |
+| Outstanding credits or debits (`invoice_outstanding_credits_debits_widget`) | a title, a flag saying these are outstanding items, the document identifier, and a list of entries each with the counterpart's label, the amount expressed in the document currency, the currency, the line identifier, the document identifier, the date, the payment identifier and the reference | the one-click attach block |
+| Payments applied (`invoice_payments_widget`) | a title, a flag saying these are applied items, and a list of entries each with the label, the journal name, the company name when it differs, the reconciled amount, the currency, the date, the partial reconciliation identifier, the payment identifier and its method name, the document identifier, whether it is a refund, the reference, whether it is an exchange difference, and the formatted amounts in both currencies | the applied-payments block and the printed payment history |
+| Payment term details (`payment_term_details`) | a list, sorted by maturity date, of entries each with the formatted date and the customer-facing amount | the printed instalment table |
+| Alerts (`alerts`) | a map from a stable key to an entry with a level, a message and, optionally, an action label plus either an action descriptor or a direct operation to call | the banner area |
+| Next payment values | the payment status, the instalment state, the next amount to pay, the next reference, the amount paid, the amount due, the next due date, the document due date, the list of unreconciled instalments, whether only one remains, and, in the early-discount case, the discount amount in both currencies, the deadline, the days left, the discount line and the message | the portal page and the payment link wizard |

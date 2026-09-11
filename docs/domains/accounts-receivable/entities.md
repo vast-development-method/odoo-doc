@@ -262,11 +262,19 @@ an inverse is noted). The routine is specified with worked examples in
 
 - **Ordering**: accounting date descending, then number descending, then document date descending,
   then internal identifier descending.
-- **Display name**: built from the type label, the number, the partner and the date. When the number
-  is still `/` or empty the label reads, for a customer invoice, "Draft Invoice"; for a customer
-  credit note, "Draft Credit Note"; and so on per type, optionally followed by the partner name and
-  the formatted date in parentheses. When a reference exists and the caller asks for it, the
-  reference is appended in parentheses.
+- **Display name**: when the status is draft, it starts with a per-type prefix — "Draft Invoice",
+  "Draft Credit Note", "Draft Bill", "Draft Vendor Credit Note", "Draft Sales Receipt", "Draft
+  Purchase Receipt", "Draft Entry". When the number exists and is not `/`, it is appended after a
+  space. When the caller asks for the full form, the partner name and the formatted accounting date
+  are appended, each after a comma and a space. When the caller asks for the reference, it is
+  appended in parentheses, shortened to fifty characters. A posted customer invoice numbered
+  `INV/2026/00001` therefore displays as `INV/2026/00001`, and the same document while draft
+  displays as `Draft Invoice`.
+- **Display name in the amount form**: when the caller asks for it (used by the duplicate list), the
+  name becomes, for a posted sale document, *the number*, then the reference after " - " when there
+  is one, then " at " and the formatted total; for a purchase document the label is the reference or
+  the number; a draft adds " (Draft)" after the total; and a document with no label at all reads
+  "Draft (" followed by the formatted total and ")".
 - **Searchable by name**: the number, the partner name and the reference.
 - **Uniqueness**: a unique index over the pair (number, journal) restricted to posted documents whose
   number is not `/`. Violating it produces the message *"Another entry with the same name already
