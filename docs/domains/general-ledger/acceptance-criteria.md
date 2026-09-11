@@ -221,8 +221,8 @@ When its company is changed,
 Then the operation is refused with "You can't change the company of your journal since there are some journal entries linked to it."
 
 **3.9 — The display name carries a foreign currency.**
-Given a bank journal named `Bank USD` whose currency is the foreign currency and whose company currency is the euro,
-Then the display name is `Bank USD (*the foreign currency name*)`.
+Given a bank journal named `Bank Foreign` whose currency is the foreign currency and whose company currency is the euro,
+Then the display name is `Bank Foreign (*the foreign currency name*)`.
 
 **3.10 — The foreign currency propagates to the liquidity account.**
 Given a bank journal with a default account and no currency,
