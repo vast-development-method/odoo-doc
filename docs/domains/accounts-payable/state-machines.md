@@ -105,7 +105,7 @@ When a caller asks to remove a batch of documents, each is classified:
 
 ```mermaid
 stateDiagram-v2
-    [*] --> draft: create / upload / e-mail / decode
+    [*] --> draft: create / upload / mail in / decode
     draft --> draft: schedule for a future accounting date
     draft --> posted: post (manual, mass, automatic or scheduled)
     posted --> draft: reset to draft

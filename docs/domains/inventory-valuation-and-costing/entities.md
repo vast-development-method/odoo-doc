@@ -1076,7 +1076,7 @@ colliding on the same key.
 | Added Value (`added_value`) | Float | Not stored. Computed by the running replay. |
 | Total Quantity (`total_quantity`) | Float | Not stored. Computed by the running replay. |
 | Total Value (`total_value`) | Float | Not stored. Computed by the running replay. |
-| AVCO Value (`avco_value`) | Float | Not stored. Computed by the running replay. The running unit cost. |
+| Average Cost Value, emitted as the label "AVCO Value" (`avco_value`) | Float | Not stored. Computed by the running replay. The running unit cost. |
 | Justification (`justification`) | Text | Not stored. Computed. For a movement row, the value justification of that movement; empty otherwise. |
 
 ### The running replay
