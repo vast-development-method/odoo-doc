@@ -1,6 +1,6 @@
 # Glossary
 
-The terms of the Electronic Invoicing and Document Interchange domain, in full words. A term that belongs to another domain is defined here only in the sense this domain uses it, with a pointer to the domain that owns it.
+The terms of the Electronic Invoicing and Document Exchange domain, in full words. A term that belongs to another domain is defined here only in the sense this domain uses it, with a pointer to the domain that owns it.
 
 ---
 

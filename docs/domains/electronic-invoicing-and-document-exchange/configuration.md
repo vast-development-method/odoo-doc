@@ -1,6 +1,6 @@
 # Configuration
 
-Every setting, parameter, shipped record, scheduled action, access group, record rule and master data prerequisite of the Electronic Invoicing and Document Interchange domain, with its data type, its default and its effect. The records these settings act on are specified in [entities.md](entities.md); the procedures are in [workflows.md](workflows.md).
+Every setting, parameter, shipped record, scheduled action, access group, record rule and master data prerequisite of the Electronic Invoicing and Document Exchange domain, with its data type, its default and its effect. The records these settings act on are specified in [entities.md](entities.md); the procedures are in [workflows.md](workflows.md).
 
 ---
 

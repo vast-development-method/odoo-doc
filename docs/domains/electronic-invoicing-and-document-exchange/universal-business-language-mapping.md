@@ -704,19 +704,23 @@ The plain builder uses a single grouping key made of the tax category code, the 
 
 The monetary total is computed as follows.
 
-```
-for every base line:
-    line_total = total_excluded + delta_total_excluded + the fixed tax amounts of that line
-    if the line is an early payment line:
-        if line_total < 0: total_allowance = total_allowance + (-line_total)
-        else:              total_charge    = total_charge    + line_total
-    else:
-        total_lines = total_lines + line_total
+Take each base line in turn and compute its line total.
 
-tax_exclusive_amount = total_lines + total_charge - total_allowance
-total_tax_amount     = the aggregated tax amount of every tax that is not a fixed tax
-tax_inclusive_amount = tax_exclusive_amount + total_tax_amount
-cash_rounding_amount = the sum of the totals excluding tax of the cash rounding lines
+```formula
+line total of a base line = total excluding tax + rounding adjustment of the total excluding tax
+                            + sum of the fixed tax amounts of that line
+```
+
+A base line that is an early payment discount line contributes to the allowance total when its line total is negative, and to the charge total when its line total is not negative. A base line that is not an early payment discount line contributes to the total of the lines instead.
+
+```formula
+total allowance      = sum over early payment discount lines whose line total is negative of ( − line total )
+total charge         = sum over early payment discount lines whose line total is not negative of ( line total )
+total of the lines   = sum over the other base lines of ( line total )
+tax exclusive amount = total of the lines + total charge − total allowance
+total tax amount     = aggregated tax amount of every tax that is not a fixed tax
+tax inclusive amount = tax exclusive amount + total tax amount
+cash rounding amount = sum over cash rounding lines of ( total excluding tax of the line )
 ```
 
 | Path | Value written | Omitted when |

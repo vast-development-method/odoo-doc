@@ -1,6 +1,6 @@
 # Entities
 
-Complete field level specification of every entity owned by the Electronic Invoicing and Document Interchange domain, followed by every field this domain adds to entities owned by other domains.
+Complete field level specification of every entity owned by the Electronic Invoicing and Document Exchange domain, followed by every field this domain adds to entities owned by other domains.
 
 ## Conventions used in this file
 
@@ -21,11 +21,13 @@ Field names are full word snake_case. Where the reference field name is an abbre
 
 Relations are described with their deletion behaviour: `restrict` blocks deletion of the target, `cascade` deletes the dependent record, `set null` clears the link.
 
+Each entity section opens with its canonical full name, the identifier this folder uses, its kind, its transport name and its storage name. The transport name and the storage name are reproduced exactly, because a rebuild that has to import an existing database or answer an existing integration depends on them character for character; the transport name links to the generated reference page of that entity. The state fields declared in the tables below are specified in full, with every transition, every guard and every refusal, in [state-machines.md](state-machines.md).
+
 ---
 
 # 1. Electronic Document
 
-**Canonical name:** Electronic Document. **Identifier:** `electronic_document`. **Kind:** stored record.
+**Canonical name:** Electronic Document. **Identifier:** `electronic_document`. **Kind:** stored record. **Transport name:** [`account.edi.document`](../../references/entities/account.edi.document.md). **Storage name:** `account_edi_document`.
 
 One record per accounting document per registered format. It is the unit of work of the delivery framework: it carries the produced payload, its delivery state, the last error and the severity of that error.
 
@@ -54,19 +56,14 @@ One record per accounting document per registered format. It is the unit of work
 
 ## 1.3 Derivation of `electronic_document_content`
 
-```
-for each electronic_document:
-    result = empty
-    if state IN ("to_send", "to_cancel"):
-        configuration_errors = format.check_document_configuration(journal_entry)
-        if configuration_errors is not empty:
-            result = the configuration error messages joined with a line break, encoded as binary
-        else:
-            applicability = format.get_document_applicability(journal_entry)
-            if applicability exists and applicability has a "content_preview" operation:
-                result = applicability.content_preview(journal_entry)
-    electronic_document_content = result
-```
+For each Electronic Document record:
+
+1. Start from an empty result.
+2. When the state is neither `to_send` nor `to_cancel`, keep the empty result and stop.
+3. Ask the format for the configuration errors of the accounting document.
+4. When that check returned at least one error, the result is the configuration error messages joined with a line break and encoded as binary content. Stop.
+5. Otherwise ask the format for the applicability of the accounting document. When an applicability exists and declares a content preview operation, the result is the output of that operation for the accounting document.
+6. Write the result into the derived field.
 
 The preview is therefore empty for records in `sent` or `cancelled`, and it shows the blocking configuration errors instead of a payload when the accounting document cannot be exported.
 
@@ -115,22 +112,15 @@ For every record of the batch, the operation returns a per accounting document r
 
 ## 1.8 Job preparation and batching
 
-```
-to_process = empty map
-for (state, flow) in [("to_send", "post"), ("to_cancel", "cancel")]:
-    candidates = records where state = state AND blocking_level <> "error"
-    for document in candidates:
-        applicability = document.format.get_document_applicability(document.journal_entry) or empty
-        key = [document.format, state, document.journal_entry.company]
-        if applicability has an operation named flow + "_batching":
-            key = key + list(applicability[flow + "_batching"](document.journal_entry))
-        else:
-            key = key + [document.journal_entry.identifier]
-        batch = to_process.setdefault(tuple(key), {documents: empty set,
-                                                   operation: applicability[flow]})
-        batch.documents = batch.documents + document
-return the values of to_process
-```
+The preparation walks two passes over the set of records, the first for the state `to_send` with the posting flow, the second for the state `to_cancel` with the cancellation flow. It builds a map from a job key to a job, where a job holds a set of records and the operation to run.
+
+1. For the pass being run, keep the records whose state is the state of the pass and whose blocking level is not `error`.
+2. Take each kept record in turn and ask its format for the applicability of its accounting document, taking an empty applicability when the format returns none.
+3. Start the job key with three parts: the format of the record, the state of the pass and the company of the accounting document.
+4. When the applicability declares a batching operation for the flow of the pass, extend the job key with the values that operation returns for the accounting document. When it declares none, extend the job key with the identifier of the accounting document instead.
+5. Look the job key up in the map. When no job exists for that key, create one with an empty set of records and with the operation the applicability declares for the flow of the pass.
+6. Add the record to the set of records of that job.
+7. When both passes are done, the prepared jobs are the values of the map.
 
 Consequences a replacement must preserve:
 
@@ -149,28 +139,19 @@ Consequences a replacement must preserve:
 
 ## 1.10 The sending scheduled action
 
-```
-documents = all electronic documents where
-    state IN ("to_send", "to_cancel")
-    AND journal_entry.state = "posted"
-    AND blocking_level <> "error"
-remaining = documents.process_documents_with_remote_call(job_count)
-if remaining > 0:
-    schedule the sending scheduled action to run again as soon as possible
-```
+1. Collect every Electronic Document whose state is `to_send` or `to_cancel`, whose accounting document is posted, and whose blocking level is not `error`.
+2. Run the processing of records whose format needs a remote call over that collection, with the configured maximum job count, and read the number of jobs left unprocessed.
+3. When that number is greater than zero, schedule the sending scheduled action to run again as soon as possible.
 
 The scheduled action is shipped inactive and is switched on automatically the first time a format that needs a remote call is created. Its default job count is 20 and its default interval is one day; the self retrigger is what makes a large queue drain quickly.
 
 ## 1.11 Attachment handling for outgoing messages
 
-```
-attachment = the payload of this record, read with administrator rights
-if attachment is empty: return empty
-if attachment has no model name or no record identifier: return empty
-if more than one accounting document is active in the context:
-    return { attachments: [ (attachment.name, attachment.content) ] }
-return { attachment_identifiers: [ attachment.identifier ] }
-```
+1. Read the payload attachment of this record with administrator rights.
+2. When there is no attachment, produce nothing.
+3. When the attachment carries no model name or no record identifier, produce nothing: such an attachment is an orphan and must not travel with a message.
+4. When more than one accounting document is active in the calling context, produce a list of attachment contents, each entry made of the file name of the attachment and its binary content.
+5. Otherwise produce a list of attachment identifiers holding the identifier of that attachment.
 
 Returning the identifier links the existing attachment to the sending wizard; returning the content makes the wizard create a new attachment. In mass sending mode the identifier form is not usable because the wizard removes attachment identifiers from template values, so the content form is used.
 
@@ -178,7 +159,7 @@ Returning the identifier links the existing attachment to the sending wizard; re
 
 # 2. Electronic Document Format
 
-**Canonical name:** Electronic Document Format. **Identifier:** `electronic_document_format`. **Kind:** stored record.
+**Canonical name:** Electronic Document Format. **Identifier:** `electronic_document_format`. **Kind:** stored record. **Transport name:** [`account.edi.format`](../../references/entities/account.edi.format.md). **Storage name:** `account_edi_format`.
 
 A registered format. The record itself is little more than a name and a code; the behaviour is attached to the code by the implementation. A replacement may store the behaviour selector in the record or in a registry, provided every operation below can be resolved from the record.
 
@@ -227,7 +208,7 @@ Each operation is described by what a concrete format must return. Default resul
 
 # 3. Electronic Interchange Proxy User
 
-**Canonical name:** Electronic Interchange Proxy User. **Identifier:** `electronic_interchange_proxy_user`. **Kind:** stored record.
+**Canonical name:** Electronic Interchange Proxy User. **Identifier:** `electronic_interchange_proxy_user`. **Kind:** stored record. **Transport name:** [`account_edi_proxy_client.user`](../../references/entities/account_edi_proxy_client.user.md). **Storage name:** `account_edi_proxy_client_user`.
 
 The credential of one company on one proxy service in one operating mode. A proxy user has a unique participant identification on that service, which is how an inbound document addressed to the company is routed back. It also owns the private key with which inbound payloads are decrypted, because the proxy encrypts every stored payload with the matching public key.
 
@@ -301,7 +282,7 @@ These operations exist on the credential once the exchange network package is in
 
 # 4. Digital Certificate
 
-**Canonical name:** Digital Certificate. **Identifier:** `digital_certificate`. **Kind:** stored record.
+**Canonical name:** Digital Certificate. **Identifier:** `digital_certificate`. **Kind:** stored record. **Transport name:** [`certificate.certificate`](../../references/entities/certificate.certificate.md). **Storage name:** `certificate_certificate`.
 
 A loaded certificate. The record accepts three input encodings and normalises them to one text encoding, extracts the identifying attributes, discovers the issuing certificates in the same upload and stores them as archived records, and exposes signing operations.
 
@@ -340,26 +321,20 @@ A loaded certificate. The record accepts three input encodings and normalises th
 
 **`original_format`, `normalised_certificate`, `subject_common_name`, `serial_number`, `valid_from`, `valid_until`, `loading_error`** are produced by one parsing step:
 
-```
-if content is empty:
-    clear normalised_certificate, subject_common_name, original_format,
-          valid_from, valid_until, serial_number, loading_error
-    stop
-password = container_password encoded as text bytes, or none
-leaf, additional, original_format = parse(content, password)
-if leaf is empty:
-    clear the same fields
-    if container_password is set:
-        loading_error = "This certificate could not be loaded. Either the content or the password is erroneous."
-    stop
-certificate = load leaf
-loading_error = empty
-normalised_certificate = leaf
-serial_number = the serial number of certificate
-subject_common_name = common name of the subject of certificate, or the serial number when absent
-valid_from = the not-before instant of certificate, expressed in coordinated universal time
-valid_until = the not-after instant of certificate, expressed in coordinated universal time
-```
+1. When the uploaded content is empty, clear the normalised certificate, the subject common name, the original format, the start of validity, the end of validity, the serial number and the loading error, and stop.
+2. Encode the container password as text bytes when one is set, and take no password when none is set.
+3. Parse the uploaded content with that password. The parsing produces a leaf certificate, a list of additional certificates and the original format.
+4. When the parsing produced no leaf certificate, clear the same seven fields. When a container password was set, write into the loading error the message `This certificate could not be loaded. Either the content or the password is erroneous.` Then stop.
+5. Otherwise load the leaf certificate and write the derived values below.
+
+| Derived field | Value |
+|---|---|
+| Loading error | empty |
+| Normalised certificate | the leaf certificate |
+| Serial number | the serial number of the loaded certificate |
+| Subject common name | the common name of the subject of the loaded certificate, or its serial number when the subject carries no common name |
+| Start of validity | the not-before instant of the loaded certificate, expressed in coordinated universal time |
+| End of validity | the not-after instant of the loaded certificate, expressed in coordinated universal time |
 
 The parsing step tries the encodings in a fixed order, and the first that succeeds decides `original_format`:
 
@@ -372,20 +347,14 @@ Ordering a text bundle: every certificate block is extracted in file order; a pr
 
 **`private_key`** is derived from `normalised_certificate`:
 
-```
-for each certificate with a normalised certificate:
-    password = container_password encoded as text bytes, or none
-    key = none
-    if original_format = "pkcs12": key = the private key inside the container
-    if original_format = "pem":    key = the private key inside the bundle
-    if key exists:
-        text_key = key re-encoded in the text encoding, unencrypted, in the standard private key structure
-        existing = a Digital Key of the same company whose stored content equals text_key
-        if existing is empty:
-            existing = create a Digital Key named (subject_common_name or name) + ".key"
-                       with that content and that company
-        private_key = existing
-```
+Take each certificate that has a normalised certificate in turn.
+
+1. Encode the container password as text bytes when one is set, and take no password when none is set.
+2. Look for a private key inside the upload. When the original format is `pkcs12`, the private key is the one inside the container. When the original format is `pem`, the private key is the one inside the bundle. In every other case there is no private key and the step ends without a link.
+3. When a private key was found, re-encode it in the text encoding, unencrypted, in the standard private key structure.
+4. Look for a Digital Key of the same company whose stored content equals that re-encoded text.
+5. When no such key exists, create one, named with the subject common name of the certificate, falling back to the name of the certificate, followed by the suffix `.key`, carrying that content and that company.
+6. Link the certificate to the key found or created.
 
 **`is_valid`** is true when `valid_from` and `valid_until` are set, `loading_error` is empty and `valid_from <= now <= valid_until`. Searching on it is translated into the condition `normalised_certificate IS NOT NULL AND valid_from <= now AND valid_until >= now AND loading_error = ""`.
 
@@ -438,7 +407,7 @@ The three output shapes are: line wrapped base sixty four text in seventy six ch
 
 # 5. Digital Key
 
-**Canonical name:** Digital Key. **Identifier:** `digital_key`. **Kind:** stored record.
+**Canonical name:** Digital Key. **Identifier:** `digital_key`. **Kind:** stored record. **Transport name:** [`certificate.key`](../../references/entities/certificate.key.md). **Storage name:** `certificate_key`.
 
 A public or private key. The record normalises the upload to the text encoding, detects whether it is public or private, and exposes signing, verification and decryption.
 
@@ -485,7 +454,7 @@ Generated keys are stored in the text encoding with the standard private key str
 
 # 6. Peppol Business Response
 
-**Canonical name:** Peppol Business Response. **Identifier:** `peppol_business_response`. **Kind:** stored record.
+**Canonical name:** Peppol Business Response. **Identifier:** `peppol_business_response`. **Kind:** stored record. **Transport name:** [`account.peppol.response`](../../references/entities/account.peppol.response.md). **Storage name:** `account_peppol_response`.
 
 One business level response about one document: either a response this company sent about a received vendor bill, or a response a customer sent about an invoice this company issued.
 
@@ -522,7 +491,7 @@ The platform only produces the acknowledgement, approval and rejection codes. Al
 
 # 7. Peppol Clarification
 
-**Canonical name:** Peppol Clarification. **Identifier:** `peppol_clarification`. **Kind:** stored record.
+**Canonical name:** Peppol Clarification. **Identifier:** `peppol_clarification`. **Kind:** stored record. **Transport name:** [`account.peppol.clarification`](../../references/entities/account.peppol.clarification.md). **Storage name:** `account_peppol_clarification`.
 
 A shipped code that may be attached to a rejection: either a reason why the document was refused, or an action suggested to the sender so that a corrected document is accepted.
 
@@ -545,7 +514,7 @@ The shipped records are listed in [configuration.md](configuration.md).
 
 # 8. Peppol Rejection Wizard
 
-**Canonical name:** Peppol Rejection Wizard. **Identifier:** `peppol_rejection_wizard`. **Kind:** transient record.
+**Canonical name:** Peppol Rejection Wizard. **Identifier:** `peppol_rejection_wizard`. **Kind:** transient record. **Transport name:** [`account.peppol.rejection.wizard`](../../references/entities/account.peppol.rejection.wizard.md). **Storage name:** `account_peppol_rejection_wizard`.
 
 ## 8.1 Fields
 
@@ -568,7 +537,7 @@ The shipped records are listed in [configuration.md](configuration.md).
 
 # 9. Peppol Registration Wizard
 
-**Canonical name:** Peppol Registration Wizard. **Identifier:** `peppol_registration_wizard`. **Kind:** transient record.
+**Canonical name:** Peppol Registration Wizard. **Identifier:** `peppol_registration_wizard`. **Kind:** transient record. **Transport name:** [`peppol.registration`](../../references/entities/peppol.registration.md). **Storage name:** `peppol_registration`.
 
 ## 9.1 Fields
 
@@ -621,7 +590,7 @@ Full procedures are in [peppol-network.md](peppol-network.md). The surface is: `
 
 # 10. Peppol Configuration Wizard
 
-**Canonical name:** Peppol Configuration Wizard. **Identifier:** `peppol_configuration_wizard`. **Kind:** transient record.
+**Canonical name:** Peppol Configuration Wizard. **Identifier:** `peppol_configuration_wizard`. **Kind:** transient record. **Transport name:** [`peppol.config.wizard`](../../references/entities/peppol.config.wizard.md). **Storage name:** `peppol_config_wizard`.
 
 Advanced maintenance of an existing registration.
 
@@ -660,7 +629,7 @@ When the state is `receiver` and `service_data` is non empty, one Peppol Service
 
 # 11. Peppol Service
 
-**Canonical name:** Peppol Service. **Identifier:** `peppol_service`. **Kind:** transient record.
+**Canonical name:** Peppol Service. **Identifier:** `peppol_service`. **Kind:** transient record. **Transport name:** [`account_peppol.service`](../../references/entities/account_peppol.service.md). **Storage name:** `account_peppol_service`.
 
 | Field | Type | Required | Default | Meaning |
 |---|---|---|---|---|
@@ -693,31 +662,27 @@ The Journal Entry is owned by the [general ledger](../general-ledger/entities.md
 
 **Derivation of `electronic_document_state`:**
 
-```
-states = the distinct states of the delivery records whose format needs a remote call
-if states = {"sent"}:        electronic_document_state = "sent"
-else if states = {"cancelled"}: electronic_document_state = "cancelled"
-else if "to_send" in states:    electronic_document_state = "to_send"
-else if "to_cancel" in states:  electronic_document_state = "to_cancel"
-else:                           electronic_document_state = empty
-```
+Collect the distinct states of the delivery records whose format needs a remote call, then apply the first row of the table below whose condition holds.
+
+| Order | Condition on the collected states | Aggregated value |
+|---|---|---|
+| 1 | the only state collected is `sent` | `sent` |
+| 2 | the only state collected is `cancelled` | `cancelled` |
+| 3 | the collected states contain `to_send` | `to_send` |
+| 4 | the collected states contain `to_cancel` | `to_cancel` |
+| 5 | no state was collected, or none of the rows above applies | empty |
 
 **Derivation of `electronic_document_error_message` and `electronic_document_blocking_level`:**
 
-```
-if error_count = 0:
-    message = empty ; level = empty
-else if error_count = 1:
-    the single record in error supplies both its error text and its blocking level
-else:
-    levels = the blocking levels of all delivery records
-    if "error" in levels:
-        message = "<count> Electronic invoicing error(s)" ; level = "error"
-    else if "warning" in levels:
-        message = "<count> Electronic invoicing warning(s)" ; level = "warning"
-    else:
-        message = "<count> Electronic invoicing info(s)" ; level = "info"
-```
+Apply the first row of the table below whose condition holds. The placeholder written as a count is replaced by the number of delivery records in error.
+
+| Order | Condition | Aggregated message | Aggregated blocking level |
+|---|---|---|---|
+| 1 | the count of records in error is zero | empty | empty |
+| 2 | the count of records in error is one | the error text of that single record | the blocking level of that single record |
+| 3 | more than one record is in error and at least one delivery record carries the blocking level `error` | `<count> Electronic invoicing error(s)` | `error` |
+| 4 | more than one record is in error and at least one delivery record carries the blocking level `warning`, and none carries `error` | `<count> Electronic invoicing warning(s)` | `warning` |
+| 5 | more than one record is in error and no delivery record carries `error` or `warning` | `<count> Electronic invoicing info(s)` | `info` |
 
 **Derivation of `electronic_document_pending_remote_formats`:** the names, joined by a comma and a space, of the distinct formats that need a remote call among the delivery records whose state is `to_send` or `to_cancel` and whose blocking level is not `error`.
 
@@ -749,28 +714,22 @@ else:
 
 **Derivation of `network_document_state`:**
 
-```
-step 1 (base):
-    if company.participant_can_send
-       AND commercial_partner.participant_verification_state = "valid"
-       AND state = "posted"
-       AND the document is a sale document including receipts
-       AND network_document_state is empty:
-        network_document_state = "ready"
-    else if state = "draft"
-            AND the document is a sale document including receipts
-            AND NOT network_is_sent:
-        network_document_state = empty
-    else:
-        network_document_state keeps its stored value
+**Step 1, the base derivation.** Apply the first row of the table below whose condition holds.
 
-step 2 (only with the business response package):
-    completed = the response codes of the responses whose delivery_state = "done"
-    if completed is empty: keep the result of step 1
-    else if "RE" in completed:                    network_document_state = "RE"
-    else if "AP" in completed or "PD" in completed: network_document_state = "AP"   # the approval code identifier
-    else:                                          network_document_state = "AB"
-```
+| Order | Condition | Value written |
+|---|---|---|
+| 1 | the company may send on the network, the verification state of the commercial partner is `valid`, the accounting document is posted, the accounting document is a sale document including receipts, and the network state is currently empty | `ready` |
+| 2 | the accounting document is a draft, is a sale document including receipts, and has not left the platform | empty |
+| 3 | neither of the rows above applies | the stored value is kept unchanged |
+
+**Step 2, only when the business response package is installed.** Collect the response codes of the business responses whose delivery state is `done`, then apply the first row of the table below whose condition holds.
+
+| Order | Condition on the collected response codes | Value written |
+|---|---|---|
+| 1 | no code was collected | the result of step 1 is kept |
+| 2 | the collected codes contain `RE`, the rejection code | `RE` |
+| 3 | the collected codes contain `AP`, the approval code, or `PD`, the paid code | `AP` |
+| 4 | codes were collected but none of the rows above applies | `AB` |
 
 **Derivation of `network_can_send_response`:** true when `network_message_identifier` is set, the document type is a vendor bill or a vendor credit note, no existing response is in state `not_serviced` and no existing response that is not in state `error` carries the code `AP` or `RE`, and the partner supports the response service.
 
@@ -840,16 +799,9 @@ The extra print entry `Export markup file` is offered when at least one selected
 
 This operation lets a user of an imported document collapse the imported lines into one line per tax combination, and expand them again from the original file.
 
-```
-check that the document is in state "draft", otherwise raise
-    "You can only (un)group lines of a draft invoice"
-check (with the purchasing package installed) that no line is linked to a purchase order,
-    otherwise raise "You can only (un)group lines of an invoice not linked to a purchase order"
-if the lines look grouped:
-    ungroup
-else:
-    group
-```
+1. Refuse when the accounting document is not a draft, with the message `You can only (un)group lines of a draft invoice`.
+2. When the purchasing package is installed, refuse when any line is linked to a purchase order, with the message `You can only (un)group lines of an invoice not linked to a purchase order`.
+3. When the lines look grouped, ungroup them. Otherwise group them.
 
 **Detection of grouped lines:** a line looks grouped when its label matches the pattern made of the partner name (or `Unknown partner` when the partner has none), a space, a hyphen, a space, one or more digits, a space, a hyphen, a space, and any text.
 
@@ -983,35 +935,23 @@ The selectable exemption reason codes and the full sentence each expands to are 
 
 ## 15.1 Derivation of `peppol_electronic_address_scheme`
 
-```
-keep the current value
-country = the deduced country code of the contact
-if country is in the scheme map:
-    schemes = the schemes of that country, in declaration order
-    if the current value is not one of them:
-        candidates = the schemes of that country that are not retired,
-                     or all of them when every scheme of that country is retired
-        new_value = the first candidate
-        for each (scheme, source_field) in candidates:
-            if source_field exists on the contact:
-                value = endpoint_value(country, source_field, scheme)
-                if value is set and passes the endpoint validity rules of that scheme:
-                    new_value = scheme
-                    stop
-        peppol_electronic_address_scheme = new_value
-```
+1. Start by keeping the value the contact already carries.
+2. Deduce the country code of the contact.
+3. When that country is not in the scheme map, stop: the current value is kept.
+4. Read the schemes declared for that country, in declaration order.
+5. When the current value is already one of those schemes, stop: the current value is kept.
+6. Build the list of candidate schemes: the schemes of that country that are not retired, or, when every scheme of that country is retired, all of them.
+7. Provisionally choose the first candidate.
+8. Take each candidate in turn, together with the contact field that country maps to that scheme. When that field exists on the contact, read the endpoint value for the country, the field and the scheme. When that value is set and passes the endpoint validity rules of that scheme, choose that scheme and stop walking the candidates.
+9. Write the chosen scheme.
 
 ## 15.2 Derivation of `peppol_endpoint`
 
-```
-peppol_endpoint = sanitise(peppol_endpoint, peppol_electronic_address_scheme)
-country = the deduced country code of the contact
-if country is in the scheme map:
-    source_field = the field mapped to the current scheme for that country
-    value = endpoint_value(country, source_field, current scheme)
-    if source_field is set and value is set and value passes the endpoint validity rules:
-        peppol_endpoint = value
-```
+1. Sanitise the endpoint the contact already carries for the scheme it already carries, as described below.
+2. Deduce the country code of the contact.
+3. When that country is not in the scheme map, stop: the sanitised current value is kept.
+4. Read the contact field that country maps to the current scheme, and read the endpoint value for the country, that field and the current scheme.
+5. When the field is set, the value is set, and the value passes the endpoint validity rules, write that value as the endpoint. Otherwise keep the sanitised current value.
 
 `endpoint_value(country, field, scheme)` returns nothing when the field is the endpoint field itself, which exists as a hook for country specific logic; otherwise it reads that field from the contact; for a Belgian contact whose company registry is empty it falls back to the tax identification number with the country prefix removed when the value is alphanumeric; and it finally sanitises the value for the scheme.
 
@@ -1226,3 +1166,86 @@ The activity is of the "to do" kind, is assigned to the current user, and its no
 ## 18.8 Resequencing Wizard
 
 Before resequencing, the delivery records of the selected documents whose format needs a remote call and whose state is `sent` are collected. When the collection is non empty the operation is refused with `The following documents have already been sent and cannot be resequenced: %s` where the placeholder lists the distinct names of the affected accounting documents.
+
+---
+
+# 19. The eighteen behaviour definitions
+
+Eighteen of the twenty nine entities of this domain hold no field and store no record. They are named sets of node builders, import steps and checks, arranged in a single inheritance graph, and they exist so that a concrete country profile can be written by overriding one node builder rather than by copying a whole format. A replacement is free to implement them as classes, as strategy objects or as configuration data; what it may not do is flatten the graph, because every country profile of the fiscal localizations domain attaches itself to one of these layers and overrides exactly the builders it needs.
+
+Each of them is listed below with its canonical name, its transport name, its parent layers, what it adds, and the file of this folder that specifies its behaviour element by element.
+
+## 19.1 The graph
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    common: Electronic Document Common Base
+    ubl: Universal Business Language Base
+    cii: Cross Industry Invoice Base
+    ciip: Cross Industry Invoice Profile
+    en: European Norm 16931 Layer
+    pint: Peppol International Billing Layer
+    pinteu: Peppol International Billing European Union Layer
+    u20: Universal Business Language 2.0
+    u21: Universal Business Language 2.1
+    efff: Belgian Electronic Invoicing Profile
+    bis3: Peppol Billing 3.0
+    de: German Electronic Invoice Profile
+    nl: Netherlands Standard Invoice Profile
+    anz: Australia and New Zealand Billing Profile
+    sg: Singapore Billing Profile
+    sale: Sales Order Ordering Profile
+    purchase: Purchase Order Ordering Profile
+    pos: Point of Sale Receipt Profile
+    common --> ubl
+    common --> cii
+    cii --> ciip
+    ubl --> en
+    ubl --> pint
+    pint --> pinteu
+    en --> pinteu
+    ubl --> u20
+    u20 --> u21
+    u20 --> efff
+    u21 --> bis3
+    pinteu --> bis3
+    bis3 --> de
+    bis3 --> nl
+    bis3 --> anz
+    bis3 --> sg
+    bis3 --> sale
+    bis3 --> purchase
+    u21 --> pos
+```
+
+## 19.2 The definitions
+
+| Canonical name | Transport name | Inherits from | What it adds | Specified in |
+|---|---|---|---|---|
+| Electronic Document Common Base | [`account.edi.common`](../../references/entities/account.edi.common.md) | nothing | The helpers shared by both syntax families: turning a value tree into a markup tree and back into text, the document type marker, the number presentation of section 1 of [calculations.md](calculations.md), the unit of measure code mapping, the electronic address scheme catalogue, the tax category code prediction, the exemption reason prediction, the required field checks and their message shape, the shared import helpers for partners, bank accounts, currencies, descriptions, prepaid amounts, lines, rounding lines, products, units of measure, accounts and taxes, and the tax amount correction. | [calculations.md](calculations.md), [import-mapping.md](import-mapping.md), [business-rules.md](business-rules.md) |
+| Universal Business Language Base | [`account.edi.ubl`](../../references/entities/account.edi.ubl.md) | Electronic Document Common Base | Every generic node builder of the universal business language syntax and every generic import step of that syntax: the document node, the party nodes, the reference nodes, the date nodes, the payment means and payment terms nodes, the allowance and charge nodes, the tax total and tax subtotal nodes, the monetary total node and the document line nodes. | [universal-business-language-mapping.md](universal-business-language-mapping.md) |
+| European Norm 16931 Layer | [`account.edi.ubl_cen_en16931`](../../references/entities/account.edi.ubl_cen_en16931.md) | Universal Business Language Base | The semantic rules of the European invoice standard: the positive unit price rule, the exclusion of cash rounding lines and of recycling contribution and excise taxes from the tax reporting, the default exemption reason for the exempt category, and the constraint set of the standard. | [universal-business-language-mapping.md](universal-business-language-mapping.md), [business-rules.md](business-rules.md) |
+| Peppol International Billing Layer | [`account.edi.ubl_pint`](../../references/entities/account.edi.ubl_pint.md) | Universal Business Language Base | The restrictions of the international billing model: a single note, a single delivery, the suppression of the withholding tax total with the withholding amounts reported as a prepaid amount instead, the suppression of the second currency subtotal key, and the recomputation of the taxable amount from the presented line amounts described in section 8 of [calculations.md](calculations.md). | [universal-business-language-mapping.md](universal-business-language-mapping.md), [calculations.md](calculations.md) |
+| Peppol International Billing European Union Layer | [`account.edi.ubl_pint_eu`](../../references/entities/account.edi.ubl_pint_eu.md) | Peppol International Billing Layer **and** European Norm 16931 Layer | The combination of the two, plus the European customization identifier and the European profile identifier. The order of the two parents matters: where both define a builder, the international billing layer wins. | [universal-business-language-mapping.md](universal-business-language-mapping.md) |
+| Universal Business Language 2.0 | [`account.edi.xml.ubl_20`](../../references/entities/account.edi.xml.ubl_20.md) | Universal Business Language Base | The concrete 2.0 syntax: its namespaces, its element names, the line calculation of section 4 of [calculations.md](calculations.md) that predates the six digit rounding, and the plain import mapping used by the order import. | [universal-business-language-mapping.md](universal-business-language-mapping.md), [import-mapping.md](import-mapping.md) |
+| Universal Business Language 2.1 | [`account.edi.xml.ubl_21`](../../references/entities/account.edi.xml.ubl_21.md) | Universal Business Language 2.0 | The 2.1 namespaces and the elements the 2.1 syntax adds. | [universal-business-language-mapping.md](universal-business-language-mapping.md) |
+| Belgian Electronic Invoicing Profile | [`account.edi.xml.ubl_efff`](../../references/entities/account.edi.xml.ubl_efff.md) | Universal Business Language 2.0 | The Belgian file naming rule only. No node builder is overridden, so the produced file is a plain 2.0 file. It is offered for export and is never selected by the file type recognition on import. | [universal-business-language-mapping.md](universal-business-language-mapping.md) |
+| Peppol Billing 3.0 | [`account.edi.xml.ubl_bis3`](../../references/entities/account.edi.xml.ubl_bis3.md) | Universal Business Language 2.1 **and** Peppol International Billing European Union Layer | The concrete billing profile, version 3.0.12: its customization identifier, its profile identifier, the self billing customization identifier, the endpoint identifier nodes, the payment terms reading on import, and the constraint set of the profile. This is the profile every other country profile of this folder derives from and the default profile of the exchange network. | [universal-business-language-mapping.md](universal-business-language-mapping.md), [peppol-network.md](peppol-network.md) |
+| German Electronic Invoice Profile | [`account.edi.xml.ubl_de`](../../references/entities/account.edi.xml.ubl_de.md) | Peppol Billing 3.0 | The German public sector customization identifier, the routing identifier handling, the additional required fields of the German specification, including the payment instructions, the seller contact telephone number and the seller contact electronic mail address, and the German file naming rule. | [universal-business-language-mapping.md](universal-business-language-mapping.md), [business-rules.md](business-rules.md) |
+| Netherlands Standard Invoice Profile | [`account.edi.xml.ubl_nl`](../../references/entities/account.edi.xml.ubl_nl.md) | Peppol Billing 3.0 | The Netherlands customization identifier, the suppression of the exemption reason code from the tax category key, the suppression of the second tax total, the chamber of commerce and tax identification requirements, and the preceding invoice reference requirement on a credit note. | [universal-business-language-mapping.md](universal-business-language-mapping.md), [business-rules.md](business-rules.md) |
+| Australia and New Zealand Billing Profile | [`account.edi.xml.ubl_a_nz`](../../references/entities/account.edi.xml.ubl_a_nz.md) | Peppol Billing 3.0 | The Australia and New Zealand customization identifier, the goods and services tax scheme identifier, the suppression of the second tax total, and the business number requirements of the two countries. | [universal-business-language-mapping.md](universal-business-language-mapping.md) |
+| Singapore Billing Profile | [`account.edi.xml.ubl_sg`](../../references/entities/account.edi.xml.ubl_sg.md) | Peppol Billing 3.0 | The Singapore customization identifier, the replacement of the tax category by the zero-rated code or the standard-rated code, the clearing of the exemption reason and its code, and the suppression of the second tax total. | [universal-business-language-mapping.md](universal-business-language-mapping.md) |
+| Cross Industry Invoice Base | [`account.edi.cii`](../../references/entities/account.edi.cii.md) | Electronic Document Common Base | Every node builder and every import step of the cross industry invoice syntax: the exchanged document context and the exchanged document, the supply chain trade transaction with its line items, the trade agreement, the trade delivery and the trade settlement, the applicable trade taxes, the payment terms, the monetary summation, and the constraint set of the syntax. | [cross-industry-invoice-mapping.md](cross-industry-invoice-mapping.md) |
+| Cross Industry Invoice Profile | [`account.edi.xml.cii`](../../references/entities/account.edi.xml.cii.md) | Cross Industry Invoice Base | The concrete builder, version 2.2.0, its guideline identifier and its file naming rule. One builder serves both the French and the German hybrid invoice, which differ only by the identifier written into the document context. | [cross-industry-invoice-mapping.md](cross-industry-invoice-mapping.md) |
+| Sales Order Ordering Profile | [`sale.edi.xml.ubl_bis3`](../../references/entities/sale.edi.xml.ubl_bis3.md) | Peppol Billing 3.0 | The ordering customization identifier and profile identifier, the order document root, the order line nodes, the sales order export and the import of an incoming order into a sales order. | [universal-business-language-mapping.md](universal-business-language-mapping.md), [import-mapping.md](import-mapping.md) |
+| Purchase Order Ordering Profile | [`purchase.edi.xml.ubl_bis3`](../../references/entities/purchase.edi.xml.ubl_bis3.md) | Peppol Billing 3.0 | The same ordering identifiers seen from the buying side, the purchase order export, the import of an incoming order confirmation, and the seller and buyer swap. | [universal-business-language-mapping.md](universal-business-language-mapping.md), [import-mapping.md](import-mapping.md) |
+| Point of Sale Receipt Profile | [`pos.edi.xml.ubl_21`](../../references/entities/pos.edi.xml.ubl_21.md) | Universal Business Language 2.1 | The export of a point of sale receipt: the document type chosen from the sign of the receipt total, the receipt lines, and the prepaid and payable amounts of section 21 of [calculations.md](calculations.md). | [universal-business-language-mapping.md](universal-business-language-mapping.md), [calculations.md](calculations.md) |
+
+## 19.3 Rules that hold for every behaviour definition
+
+1. **No storage.** None of the eighteen has a table, a field, a record rule or an access right of its own. Access to what they produce is governed by the access rules of the accounting document that is being exported or imported.
+2. **Single dispatch per node.** A node of the produced file is built by exactly one builder, the most derived one that defines it. A profile that wants to change one element overrides the builder of that element alone; every other element keeps the behaviour of the layer above.
+3. **Constraint sets accumulate.** The constraint set of a profile is the union of the constraint sets of its layers. A profile never removes a constraint of a layer above it; when a constraint must not apply, the layer above is not inherited. The constraint numbers and their messages are in [business-rules.md](business-rules.md).
+4. **Two parents, one order.** Two definitions have two parents: the Peppol International Billing European Union Layer, and Peppol Billing 3.0. In both cases the first parent listed wins where the two define the same builder. A replacement that resolved the conflict the other way would produce different files.
+5. **Extension by other domains.** The fiscal localizations domain attaches country profiles to these layers by the same mechanism, and the approved platform package of the French market extends the Cross Industry Invoice Base and the Electronic Document Common Base. Those extensions are specified in [../fiscal-localizations/](../fiscal-localizations/), not here; what this folder guarantees is that the override points named in the table above exist and keep their meaning.

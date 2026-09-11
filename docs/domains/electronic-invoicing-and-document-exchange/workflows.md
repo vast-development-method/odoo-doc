@@ -1,6 +1,6 @@
 # Workflows
 
-Every operational procedure of the Electronic Invoicing and Document Interchange domain, with actors, preconditions, numbered steps, branches, the records written at each step, the notifications produced and the postconditions. The state machine tables of all five state fields of the domain are gathered in section 20.
+Every operational procedure of the Electronic Invoicing and Document Exchange domain, with actors, preconditions, numbered steps, branches, the records written at each step, the notifications produced and the postconditions. Section 20 gives a condensed transition table for the five state fields that these procedures write most often; the complete specification of all eleven state machines of the domain, with every state, every guard in evaluation order and every refusal message, is in [state-machines.md](state-machines.md).
 
 ---
 
@@ -629,7 +629,9 @@ The same procedure, with the supplier being the partner of the order and the cus
 
 ---
 
-# 20. State machines
+# 20. State machines, in summary
+
+The tables below summarise the transitions that the procedures of this file fire. They are a reading aid, not the specification: [state-machines.md](state-machines.md) carries the eleven complete machines, with every state and its stored value and label, every guard in the order in which it is evaluated, the exact refusal of each guard, the records each transition creates or changes, and a diagram per machine. Where the two files appear to differ, the complete document governs.
 
 ## 20.1 Electronic Document `state`
 
