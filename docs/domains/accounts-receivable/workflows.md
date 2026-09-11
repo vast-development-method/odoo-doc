@@ -156,8 +156,10 @@ to the total, and a payment status of "not paid".
    2. remembers the chosen layout as the partner's default when the partner had none;
    3. generates the documents (see 3.3);
    4. sends the mails (see 3.4);
-   5. when the "Manual" channel is among the choices, returns a download of the produced
-      attachments — a single file when there is one, a compressed archive otherwise.
+   5. when the chosen channels include the manual (download) channel, returns a download of the
+      produced attachments — a single file when there is one, a compressed archive otherwise;
+      otherwise the dialogue simply closes. Note that the wizard's checkbox list never offers the
+      manual channel, so this branch is reached only when a caller sets the channels itself.
 
 ### 3.2 Several documents
 

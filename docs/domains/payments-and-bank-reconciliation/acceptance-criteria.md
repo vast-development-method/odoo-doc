@@ -1061,3 +1061,616 @@ Unless a scenario says otherwise:
 **Given** the situation of J.19
 **When** the matching is deleted
 **Then** the draft exchange entry is deleted outright, not reversed.
+
+---
+
+## K. The payment state of a settled document
+
+### K.1 Not paid
+
+**Given** a posted customer invoice of 1 000.00 with nothing matched
+**Then** its payment state is `not_paid`.
+
+### K.2 Partial
+
+**Given** the same invoice matched for 400.00
+**Then** its payment state is `partial` and its residual is 600.00.
+
+### K.3 In payment
+
+**Given** the same invoice fully covered by a Payment whose matched flag is false
+**Then** its payment state is `in_payment`.
+
+### K.4 Paid
+
+**Given** the same invoice fully covered by a Payment whose matched flag is true
+**Then** its payment state is `paid`.
+
+### K.5 Paid because there is no accounting to confirm
+
+**Given** the base capability without the full accounting capability, so the in-payment hook returns `paid`
+**Then** the invoice of K.3 reports `paid` instead of `in_payment`.
+
+### K.6 Reversed
+
+**Given** a customer invoice of 1 000.00 fully covered by a credit note of 1 000.00 and nothing else
+**Then** its payment state is `reversed`, not `paid`, because the counterpart types are exactly {outgoing credit note}.
+
+### K.7 Reversed through a plain entry
+
+**Given** a customer invoice covered by an outgoing credit note and a plain entry
+**Then** its payment state is still `reversed`, because the counterpart types are {outgoing credit note, plain entry}.
+
+### K.8 Not reversed when money is involved
+
+**Given** a customer invoice covered by a credit note of 400.00 and a Payment of 600.00
+**Then** its payment state is `paid` or `in_payment`, not `reversed`, because at least one counterpart comes from a Payment.
+
+### K.9 Blocked
+
+**Given** an invoice whose payment state has been set to `blocked`
+**Then** no recomputation changes it, and the register-payment screen refuses to open on it.
+
+### K.10 A draft invoice with a non-zero total qualifies
+
+**Given** a draft customer invoice whose total is 1 000.00
+**Then** its payment state is computed (it qualifies) and reports `not_paid`
+**And** a draft invoice whose total is zero does not qualify and is forced to `not_paid`.
+
+### K.11 A payment with no accounting drives the state directly
+
+**Given** a posted invoice whose matched-payments relation contains a Payment with no Journal Entry and state `in_process`
+**Then** the invoice's payment state is the in-payment state, even though nothing is reconciled
+**And** when that Payment reaches `paid`, the invoice reports the in-payment state through the fifth rule of the computation.
+
+### K.12 The paid hook fires once
+
+**Given** an invoice moving from `not_paid` to `paid` in one reconciliation
+**Then** the paid hook runs once for it at the end of the operation
+**And** an invoice moving from `in_payment` to `paid` also runs it once.
+
+---
+
+## L. Internal transfers
+
+### L.1 Moving money between two journals
+
+**Given** the journals *Bank* and *Cash*, the company's own partner, and the inter-bank transfer account **Liquidity Transfer**, which is reconcilable and of type `asset_current`
+**When** the user creates and confirms an outbound Payment of 5 000.00 on *Bank* and an inbound Payment of 5 000.00 on *Cash*, both with the company partner and the destination account **Liquidity Transfer**
+**Then** the two entries are:
+
+| Journal | Account | Debit | Credit |
+|---|---|---|---|
+| Bank | Outstanding Payments of *Bank* | | 5 000.00 |
+| Bank | Liquidity Transfer | 5 000.00 | |
+| Cash | Outstanding Receipts of *Cash* | 5 000.00 | |
+| Cash | Liquidity Transfer | | 5 000.00 |
+
+**And** the two transfer-account lines reconcile with each other, bringing **Liquidity Transfer** back to zero.
+
+### L.2 The transfer account is recognised as a counterpart
+
+**Given** the outbound Payment of L.1
+**When** its entry is split into liquidity, counterpart and write-off
+**Then** the **Liquidity Transfer** line falls into the **counterpart** group, not the write-off group, because the splitting rule accepts the company's inter-bank transfer account alongside the receivable and payable types.
+
+### L.3 Each side is confirmed independently
+
+**Given** the two Payments of L.1
+**When** the bank reports the outgoing transfer and the cash count reports the incoming one
+**Then** each transaction is matched with its own liquidity line, and each Payment moves independently from `in_process` to `paid`.
+
+---
+
+## M. Bank accounts
+
+### M.1 Sanitisation
+
+**Given** a Bank Account created with the number `be62 5100-0754.7061`
+**Then** the sanitized number is `BE62510007547061`
+**And** because it validates as an international number, the stored number is rewritten as `BE62 5100 0754 7061`.
+
+### M.2 An invalid number is stored as typed
+
+**Given** a Bank Account created with the number `12345 67890`
+**Then** the validation fails, so the number is stored exactly as typed
+**And** the inferred type is `bank`, not the international type, so the international constraint does not fire.
+
+### M.3 Uniqueness
+
+**Given** an existing account `BE62 5100 0754 7061` for *Northwind*
+**When** another account with the same sanitized number is created for *Northwind*
+**Then** it is refused with "The combination Account Number/Partner must be unique."
+**And** the same number for *Azure* is accepted.
+
+### M.4 An archived duplicate
+
+**Given** an archived account `BE62 5100 0754 7061` for *Northwind*
+**When** a new one with the same number is created for *Northwind*
+**Then** it is refused with "A bank account with Account Number BE62 5100 0754 7061 already exists for Partner Northwind, but is archived. Please unarchive it instead."
+
+### M.5 Creation never trusts
+
+**Given** a user who is **not** a bank-account validator
+**When** that user creates an account with the trust flag requested on
+**Then** the account is created with the flag **off**.
+
+### M.6 Trusting requires the permission
+
+**Given** an untrusted account and a user who is not a bank-account validator
+**When** the user tries to set the trust flag
+**Then** it is refused with "You do not have the rights to trust or un-trust accounts."
+
+### M.7 A trusted account is locked
+
+**Given** a trusted account
+**When** a user tries to change its number
+**Then** it is refused with "You cannot modify the account number or partner of an account that has been trusted."
+**And** a write that sets the trust flag to false **and** changes the number in the same operation is accepted.
+
+### M.8 Deleting archives
+
+**Given** an account referenced by a Payment
+**When** the user deletes it
+**Then** the record is archived instead, and "Bank Account <a link> with number <the number> archived" is posted on the holder's thread.
+
+### M.9 The country warning
+
+**Given** an untrusted account `DE89 3704 0044 0532 0130 00` whose holder's country is Belgium
+**Then** the country-mismatch warning is raised, because the first two characters `DE` differ from `BE`.
+
+### M.10 The money-transfer warning
+
+**Given** an untrusted international account whose characters five to seven are `967`
+**Then** the money-transfer warning is raised and the named service is "Wise".
+
+### M.11 A trusted account raises no warning
+
+**Given** the same account with the trust flag on
+**Then** neither warning is raised, because both are suppressed for a trusted account.
+
+### M.12 One journal per account
+
+**Given** an account already used by the journal *Bank*
+**When** a second journal is pointed at it
+**Then** it is refused with "A bank account can belong to only one journal."
+
+### M.13 A bank journal's account must belong to the company
+
+**Given** a `bank` journal of company *Alpha*
+**When** its bank account is set to an account whose holder is *Northwind*
+**Then** it is refused with "The holder of a journal's bank account must be the company (Alpha)."
+
+### M.14 Duplicate detection across partners
+
+**Given** two active accounts with the number `BE62 5100 0754 7061`, one for *Northwind* and one for *Azure*, both with no company
+**Then** each one lists the other's holder in its duplicate list, and the form shows them under "Partners with same bank".
+
+---
+
+## N. International bank account number arithmetic
+
+### N.1 A valid number
+
+**Given** the number `BE62 5100 0754 7061`
+**When** the validation runs
+**Then** the sanitized number is `BE62510007547061`, of length 16, matching the Belgian template `BEkk BBBC CCCC CCKK`
+**And** the rotation gives `510007547061BE62`
+**And** the expansion gives `510007547061` followed by `11` for `B` and `14` for `E` and `62`, that is `510007547061111462`
+**And** the left-to-right fold modulo 97 gives 1
+**And** the validation passes.
+
+### N.2 A one-digit change
+
+**Given** the number `BE62 5100 0754 7062`
+**Then** the expansion gives `510007547062111462`, the fold gives 28, and the validation fails with "This IBAN does not pass the validation check, please verify it."
+
+### N.3 An unknown country
+
+**Given** the number `ZZ62 5100 0754 7061`
+**Then** the validation fails at step 2 with "The IBAN is invalid, it should begin with the country code".
+
+### N.4 A wrong length
+
+**Given** the number `BE62 5100 0754 706`
+**Then** the sanitized length is 15 while the Belgian template requires 16, so the validation fails with "The IBAN does not seem to be correct. You should have entered something like this BEkk BBBC CCCC CCKK\nWhere B = National bank code, S = Branch code, C = Account No, k = Check digit".
+
+### N.5 An empty number
+
+**Given** an empty number
+**Then** the validation fails with "There is no IBAN code."
+
+### N.6 A non-alphanumeric character survives sanitisation
+
+**Given** the number `BE62-5100-0754-7061`
+**Then** sanitisation removes the hyphens and the validation passes: sanitisation happens before the alphabet check.
+
+### N.7 The basic bank account number
+
+**Given** the valid account `BE62 5100 0754 7061`
+**Then** its basic bank account number is `510007547061`
+**And** asking the same of a non-international account fails with "Cannot compute the BBAN because the account number is not an IBAN."
+
+### N.8 The named parts
+
+**Given** the number `IT60X0542811101000000123456` with the template `ITkk KBBB BBSS SSSC CCCC CCCC CCC`
+**Then** the bank part is `05428` and the account part is `000000123456`.
+
+### N.9 The pretty form
+
+**Given** the number `BE62510007547061`
+**Then** the stored form is `BE62 5100 0754 7061`, four characters per group.
+
+### N.10 A number whose length is not a multiple of four
+
+**Given** a valid Norwegian number of 15 characters
+**Then** the pretty form is three groups of four followed by one group of three.
+
+---
+
+## O. Structured payment references
+
+### O.1 A Belgian reference
+
+**Given** the reference `+++020/3430/57642+++`
+**Then** sanitisation gives `020343057642`
+**And** `0203430576 mod 97 = 42` and `42 mod 97 = 42`, so the reference is valid.
+
+### O.2 An invalid Belgian reference
+
+**Given** the reference `+++020/3430/57643+++`
+**Then** the check digits 43 do not equal `0203430576 mod 97 = 42`, and the Belgian check fails.
+
+### O.3 A Finnish reference
+
+**Given** the reference `1232`
+**Then** the body is `123`, the check digit is 2; the weighted sum from the right is `3×7 + 2×3 + 1×1 = 28`; the expected check digit is `(10 − 8) mod 10 = 2`; the reference is valid.
+
+### O.4 An international creditor reference
+
+**Given** the base number `123456789`
+**Then** the generated reference is `RF18 1234 5678 9`, because the expansion of `123456789RF00` is `123456789271500`, whose remainder modulo 97 is 80, and `98 − 80 = 18`
+**And** validating `RF18123456789` gives `123456789` followed by `RF18` expanded, whose remainder modulo 97 is 1.
+
+### O.5 A Slovenian reference
+
+**Given** the reference `SI0112-34567-8`
+**Then** stripping `SI01` gives `12-34567-8`, whose three groups concatenate to `12345678`; the body is `1234567` and the check digit 8; the weighted sum from the right with weights 2, 3, 4, … is `7×2 + 6×3 + 5×4 + 4×5 + 3×6 + 2×7 + 1×8 = 112`; `112 mod 11 = 2`; the expected check digit is `11 − 2 = 9`; the reference is rejected because 9 ≠ 8.
+
+### O.6 A Dutch reference of seven digits
+
+**Given** the reference `1234567`
+**Then** it is valid by the short-form rule, without any check digit.
+
+### O.7 A Dutch reference of fifteen digits
+
+**Given** any reference of exactly fifteen digits
+**Then** it is invalid: the length 15 is explicitly excluded.
+
+### O.8 A Danish reference
+
+**Given** the reference `+71<022646321691221+88655702<`
+**Then** the shape matches; the check applies the trailing check-digit algorithm to the fifteen-digit block; the reference is valid only when that algorithm accepts the block.
+
+### O.9 The combined test
+
+**Given** the reference `RF18 1234 5678 9`
+**Then** the combined test returns true; it is the international scheme that accepts it, after the Belgian, Danish, Finnish, Norwegian-and-Swedish, Slovenian and Dutch schemes have rejected it.
+
+### O.10 The per-country test falls back to the international scheme
+
+**Given** the country code `DE` and the reference `RF18 1234 5678 9`
+**Then** the per-country test uses the international scheme, because Germany has no national entry, and accepts it
+**And** the country code `DK` also falls back to the international scheme, because Denmark has no per-country entry even though it has a national check.
+
+### O.11 An empty reference
+
+**Given** an empty reference
+**Then** the combined test returns false without running any scheme.
+
+---
+
+## P. Quick response codes
+
+### P.1 A payable code is offered on a draft outbound payment
+
+**Given** an outbound Payment in `draft`, method code `manual`, currency euro, amount 1 234.50, a trusted recipient account `BE62 5100 0754 7061` of the international type whose country prefix is in the Single Euro Payments Area
+**Then** the code is generated and the form shows the image with the caption "Scan me with your banking app."
+
+### P.2 The payload
+
+**Given** the situation of P.1, with the bank identifier code `GEBABEBB`, the holder name *Deco Addict* and the structured communication `+++020/3430/57642+++`
+**Then** the payload is twelve newline-separated fields: `BCD`, `002`, `1`, `SCT`, `GEBABEBB`, `Deco Addict`, `BE62510007547061`, `EUR1234.50`, an empty purpose, `020343057642`, an empty unstructured field and an empty final field.
+
+### P.3 The unstructured field is used when the reference is not structured
+
+**Given** the same setting with the communication `Invoice 2026/0007`
+**Then** the structured field is empty and the unstructured field carries `Invoice 2026/0007`, truncated to 141 characters.
+
+### P.4 A non-euro currency
+
+**Given** the same setting with the currency **C**, which is not the euro
+**Then** the credit-transfer generator is not eligible and the eligibility error is "Can't generate a SEPA QR Code with the C currency."
+
+### P.5 A non-international account
+
+**Given** the same setting with an account of the plain type
+**Then** the error is "Can't generate a SEPA QR code if the account type isn't IBAN."
+
+### P.6 A non-zone account
+
+**Given** the same setting with the account `AE07 0331 2345 6789 0123 456`
+**Then** the error is "Can't generate a SEPA QR code with a non SEPA iban."
+
+### P.7 A missing holder name
+
+**Given** an eligible account whose holder name and partner name are both empty
+**Then** the data check fails with "The account receiving the payment must have an account holder name or partner name set."
+
+### P.8 A trusted account is required
+
+**Given** an outbound Payment whose recipient account is **not** trusted
+**Then** no code is offered at all, because the condition on the trust flag fails before any generator is consulted.
+
+### P.9 An inbound payment offers no code
+
+**Given** an inbound Payment with every other condition satisfied
+**Then** no code is offered: the condition requires the direction to be outbound.
+
+### P.10 A non-manual method offers no code
+
+**Given** an outbound Payment whose method code is not `manual`
+**Then** no code is offered.
+
+### P.11 The merchant-presented generator is not eligible in the base capability
+
+**Given** an account for which the credit-transfer generator is not eligible
+**Then** the merchant-presented generator reports "No EMV QR Code is available for the country of the account <the account number>."
+**And** when there is no account at all, it reports "A bank account is required for EMV QR Code generation."
+
+### P.12 The merchant-presented encoding
+
+**Given** a country-specific scheme that supplies the merchant account information under tag 26 with the value `AAAABBBB`, a merchant named *Cafe Lumiere* in *Hanoi*, the country code `VN`, a currency whose numeric code is 704 and an amount of 50 000
+**Then** the fields encode as `000201`, `010212`, `2608AAAABBBB`, `52040000`, `5303704`, `540550000`, `5802VN`, `5912Cafe Lumiere`, `6005Hanoi`, followed by `6304` and the four upper-case hexadecimal digits of the sixteen-bit checksum of everything written so far.
+
+### P.13 A zero amount is omitted
+
+**Given** the same setting with an amount of zero
+**Then** the amount field is absent from the payload entirely.
+
+### P.14 A whole amount is written without decimals
+
+**Given** an amount of 50 000.00
+**Then** the amount is written `50000`, not `50000.0`.
+
+### P.15 Accents are removed
+
+**Given** a merchant named *Café Lumière*
+**Then** the merchant-name field carries `Cafe Lumiere`
+**And** the characters `đ` and `Đ` are additionally mapped to `d` and `D`.
+
+### P.16 The generator order
+
+**Given** both generators eligible for an account
+**Then** the credit-transfer generator wins, because its sequence is 20 and the merchant-presented generator's is 30.
+
+---
+
+## Q. The dashboard
+
+### Q.1 Number to reconcile
+
+**Given** a journal with five posted transactions, of which three are checked and not reconciled
+**Then** the *number to reconcile* figure is 3.
+
+### Q.2 Number to check
+
+**Given** the same journal where two posted transactions are unchecked, of −40.00 and +90.00
+**Then** the *number to check* figure is 2 and the *amount to check* figure is 50.00, formatted in the journal's currency.
+
+### Q.3 The running balance
+
+**Given** a journal whose most recent statement with a first-line index reports an ending balance of 1 150.00, followed by two transactions outside any statement of −100.00 and +50.00
+**Then** the journal's running balance is `1 150.00 − 100.00 + 50.00 = 1 100.00`.
+
+### Q.4 Direct bank payments are added to the shown balance
+
+**Given** the same journal plus one matched, posted Payment of +200.00 whose outstanding account **is** the journal's default account
+**Then** the account balance shown on the card is `1 100.00 + 200.00 = 1 300.00`.
+
+### Q.5 Outstanding payments
+
+**Given** the same journal with two unmatched posted Payments of +1 000.00 inbound and −300.00 outbound
+**Then** the outstanding payments figure is 700.00 and the card offers a link to those Payments, filtered on unmatched, this journal and posted.
+
+### Q.6 Miscellaneous operations
+
+**Given** a journal item of 300.00 posted on the journal's default account, belonging to no transaction and no Payment, dated after the last statement
+**Then** the *Misc. Operations* figure counts 1 and shows 300.00
+**And** when a second such item is in a different currency, the balance is hidden and the count is shown in a warning colour.
+
+### Q.7 The invalid-statement warning
+
+**Given** the situation of G.5
+**Then** the card shows the *Invalid Statement(s)* link in the danger colour, opening the bank-statement list.
+
+### Q.8 The bank-setup button
+
+**Given** a `bank` journal with no bank account, a bank-feed source of `undefined` and no entries
+**Then** the card shows the *Bank Setup* button, which opens the bank setup dialogue with this journal preselected.
+
+### Q.9 The graph with no data
+
+**Given** a journal with no transaction at all
+**Then** the graph shows six sample points, one every five days over the last thirty days, each with a random value between −5 and 15, keyed "Sample data", and the card is flagged as sample.
+
+### Q.10 The graph is built backwards
+
+**Given** a journal with a running balance of 1 100.00 today and daily totals of +50.00 today, −100.00 three days ago and +400.00 ten days ago
+**Then** the curve carries: a point ten days ago at `1 100.00 − 50.00 + 100.00 = 1 150.00` before subtracting that day's 400.00, a point three days ago at `1 100.00 − 50.00 = 1 050.00`, a point today at 1 100.00, and a point thirty days ago at the remaining amount after every daily total has been subtracted.
+
+---
+
+## R. Multi-company
+
+### R.1 The company follows the journal
+
+**Given** a Payment created while the active company is *Alpha*
+**When** the user chooses a journal of the branch *Alpha North*
+**Then** the Payment's company becomes *Alpha North*, narrowed to an accessible branch.
+
+### R.2 A payment of one company cannot use another's journal
+
+**Given** a Payment of *Alpha*
+**When** the user chooses a journal of the unrelated company *Beta*
+**Then** the save is refused by the company-consistency check.
+
+### R.3 Reconciling across sibling branches
+
+**Given** two journal items of the sibling branches *Alpha North* and *Alpha South*, both under the root *Alpha*, on the same account
+**When** the user reconciles them
+**Then** the operation succeeds, because the eligibility check compares **root** companies, which are equal.
+
+### R.4 Registering across sibling branches without access to the root
+
+**Given** open items of *Alpha North* and *Alpha South* and a user who may not act for *Alpha*
+**When** the user opens the register-payment screen on both
+**Then** it is refused with "You can't create payments for entries belonging to different branches without access to parent company."
+
+### R.5 Registering across sibling branches with access to the root
+
+**Given** the same items and a user who may act for *Alpha*
+**When** the user opens the register-payment screen
+**Then** the batch's company is the **root** company *Alpha*, and the Payment is created there.
+
+### R.6 The record rule on payments
+
+**Given** a Payment of *Beta*
+**When** a user whose active companies are only *Alpha* lists payments
+**Then** that Payment is not visible.
+
+### R.7 The record rule on reconciliation models
+
+**Given** a model of the root company *Alpha*
+**When** a user working in the branch *Alpha North* lists models
+**Then** the model is visible, because the rule accepts a model whose company is an **ancestor** of an active company.
+
+### R.8 A branch inherits the accounting accounts
+
+**Given** a root company *Alpha* whose chart template created the suspense, outstanding, transfer, cash-difference and cash-discount accounts
+**When** a branch *Alpha North* is created and its chart is loaded
+**Then** the branch reuses the parent's accounts rather than creating its own.
+
+---
+
+## S. Payment methods and journals
+
+### S.1 A method with the multiple mode is added everywhere
+
+**Given** three liquidity journals
+**When** a Payment Method with the code `manual` and mode `multi` is created
+**Then** one Payment Method Line is created on each of the three journals, named after the method.
+
+### S.2 A duplicate code and direction
+
+**Given** an existing method with the code `manual` and the direction `inbound`
+**When** another with the same pair is created
+**Then** it is refused with "The combination code/payment type already exists!"
+
+### S.3 Two lines of the same restricted method and name
+
+**Given** a method whose mode is `unique`
+**When** two inbound lines of that method with the same name are put on one journal
+**Then** it is refused with "You can't have two payment method lines of the same payment type (inbound) and with the same name (<the name>) on a single journal."
+
+### S.4 Two journals for a unique method
+
+**Given** a method whose mode is `unique`
+**When** it is attached to two journals of the same company
+**Then** it is refused with "Some payment methods supposed to be unique already exists somewhere else.\n(<the method display name>)"
+
+### S.5 Two lines of a multiple method are allowed
+
+**Given** a method whose mode is `multi`
+**When** two inbound lines of that method with different names are put on one journal
+**Then** both are accepted, and a Payment may choose either.
+
+### S.6 Deleting a used line detaches it
+
+**Given** a Payment Method Line used by at least one Payment
+**When** the user deletes it
+**Then** it is not deleted: its journal is cleared, so it no longer appears in the journal's methods while the Payments keep their reference.
+
+### S.7 Deleting an unused line
+
+**Given** a Payment Method Line used by no Payment
+**When** the user deletes it
+**Then** it is deleted outright.
+
+### S.8 Deleting a journal
+
+**Given** a liquidity journal with payment method lines and a bank account used by no other journal
+**When** the journal is deleted
+**Then** the method lines are deleted first (subject to S.6), then the journal, then the bank account is archived.
+
+### S.9 The eligibility domain restricts by currency
+
+**Given** a method whose registry entry names the euro
+**Then** it is available on a journal whose currency is the euro, and on a journal with no currency whose company currency is the euro, and on no other.
+
+### S.10 The eligibility domain restricts by country
+
+**Given** a method whose registry entry names a country
+**Then** it is available only on journals of companies whose fiscal country is that country.
+
+### S.11 The display name of a method line
+
+**Given** a line named "Manual Payment" on the journal *Bank*
+**Then** its display name is "Manual Payment (Bank)"
+**And** under the flag that hides the journal, it is "Manual Payment".
+
+### S.12 The default method of a counterparty drives the journal
+
+**Given** *Northwind* whose default inbound payment method line belongs to the journal *Cash*
+**When** a new inbound Payment is created for *Northwind*
+**Then** the journal defaults to *Cash* and the method line to that line.
+
+---
+
+## T. End-to-end
+
+### T.1 The complete chain for one invoice
+
+**Given** a customer invoice of 1 000.00 to *Northwind*, posted
+
+1. **Then** its payment state is `not_paid` and its receivable line has a residual of 1 000.00.
+2. **When** the user registers a payment of 1 000.00
+   **Then** a Payment in `in_process` exists; its entry debits **Outstanding Receipts** 1 000.00 and credits **Accounts Receivable** 1 000.00; the invoice's payment state is `in_payment`; the Payment's reconciled flag is true and its matched flag is false.
+3. **When** the bank reports a receipt of +1 000.00 and a Bank Transaction is created
+   **Then** its entry debits **Bank** 1 000.00 and credits **Bank Suspense** 1 000.00, and it is posted at once.
+4. **When** the transaction is reconciled against the Payment
+   **Then** the suspense line moves onto **Outstanding Receipts** and is matched with the Payment's liquidity line; **Outstanding Receipts** returns to zero; the Payment's matched flag becomes true and its state becomes `paid`; the invoice's payment state becomes `paid`; a Full Reconciliation is created over the invoice, the Payment and the transaction's counterpart line.
+5. **When** the transaction is grouped into a statement whose reported ending balance agrees with the computed one
+   **Then** the statement is complete and valid.
+
+### T.2 Undoing the chain
+
+**Given** the end state of T.1
+
+1. **When** the reconciliation of step 4 is undone
+   **Then** the Payment returns to `in_process`, the invoice to `in_payment`, and the transaction to unreconciled with a residual of −1 000.00.
+2. **When** the Payment is deleted
+   **Then** the invoice returns to `not_paid` with a residual of 1 000.00, and its entry is gone.
+3. **When** the transaction is deleted — it now belongs to a statement that is valid and complete
+   **Then** the deletion is refused; the statement must be removed first.
+
+### T.3 A grouped payment with a discount, a difference and a currency movement
+
+**Given** two customer invoices of *Northwind* in **F**: invoice A of 1 000.00 F booked at 1 250.00 C, invoice B of 500.00 F booked at 625.00 C, both with a 2 % discount within seven days, and a payment date inside the window when 1 C buys 0.82 F
+
+1. **When** the user selects both, switches grouping on and opens the register-payment screen
+   **Then** the currency is **F**, both documents are eligible, the default amount is `980.00 + 490.00 = 1 470.00 F`, the for-difference total is 1 500.00 F, the discount mode is on and the difference is 30.00 F.
+2. **When** the user confirms
+   **Then** one Payment of 1 470.00 F is created; its liquidity line is 1 470.00 F converted at the payment date; two discount counterpart lines of 20.00 F and 10.00 F are produced on the cash-discount loss account; the counterpart line totals 1 500.00 F; both invoices reach a zero residual in **F**.
+3. **And** because the rate moved between the invoice dates and the payment date, one exchange-difference line is produced per invoice for the company-currency drift, on the company's exchange gain or loss account according to the sign of each drift.
+4. **And** if, after the discount lines, a company-currency remainder is left, one further counterpart line labelled "Early Payment Discount (Exchange Difference)" is produced on the company's exchange account.

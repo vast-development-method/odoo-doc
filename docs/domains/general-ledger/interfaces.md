@@ -14,6 +14,8 @@ Contents:
 8. [Notifications and messages](#8-notifications-and-messages)
 9. [Import and export](#9-import-and-export)
 10. [External integrations](#10-external-integrations)
+11. [The dashboard data contract](#11-the-dashboard-data-contract)
+12. [Client-side widgets fed by this domain](#12-client-side-widgets-fed-by-this-domain)
 
 ---
 
@@ -325,7 +327,7 @@ These are the operations callable by name on a record or on the model. Each is l
 
 ### The hash integrity report
 
-A printable document produced for one company, named "Hash integrity result PDF".
+A printable document produced for one company. Its stored report name is "Hash integrity result" followed by the three-letter abbreviation of Portable Document Format.
 
 Header: the printing date.
 
@@ -433,3 +435,80 @@ This domain has no external service of its own. Three hooks exist for companion 
 | Requesting a cancellation | One computed flag on the entry, false in the core, and one operation that refuses in the core. A country package sets the flag for documents already declared to an authority and implements the request. |
 
 The incoming electronic-mail alias of a sale or purchase journal is an integration point of the messaging domain: the alias points at the journal entry model, and its default values force the company, the document type (a customer invoice for a sale journal, a vendor bill for a purchase journal, a plain entry otherwise) and the journal. The local part is derived from the first of the explicit alias name, the journal name, the journal code and the journal type that can be encoded and sanitised, and is suffixed with the company name (or identifier) when the company is not the main one, and further suffixed with the journal code when that local part already exists in the alias domain.
+
+---
+
+## 11. The dashboard data contract
+
+The accounting dashboard reads two things per journal: a set of **computed fields** on the journal itself, and one **structured payload** produced for every displayed journal in a single batch.
+
+### The computed fields read by the card
+
+| Field | Type | Meaning |
+|---|---|---|
+| `show_on_dashboard` | boolean | Whether the journal is displayed at all |
+| `color` | integer | The colour index of the card |
+| `kanban_dashboard` | text | The serialised payload described below |
+| `kanban_dashboard_graph` | text | The serialised series of the small graph |
+| `json_activity_data` | text | The serialised list of activities |
+| `entries_count` | integer | How many entries the journal holds in the active companies |
+| `has_entries` | boolean | At least one entry exists |
+| `has_posted_entries` | boolean | At least one posted entry exists |
+| `has_sequence_holes` | boolean | At least one entry of the journal carries the gap flag after the applicable fiscal lock date |
+| `has_unhashed_entries` | boolean | The journal secures posted entries and at least one posted entry is still unhashed after that date |
+| `has_invalid_statements` | boolean | At least one statement of the journal is not valid or not complete |
+| `current_statement_balance`, `has_statement_lines`, `last_statement_id` | various | Liquidity figures; specified in `../payments-and-bank-reconciliation/` |
+
+### The keys of the payload, for every journal
+
+| Key | Meaning |
+|---|---|
+| `currency_id` | The currency in which the figures are expressed: the journal currency, or the company currency |
+| `show_company` | True when more than one company is active, or when the journal belongs to a company other than the current one |
+| `company_name` | The name of the company of the journal |
+| `onboarding` | The checklist to show on the card, with the state of each step and the action that opens it; a sale journal gets the invoicing checklist and a miscellaneous journal gets the accounting checklist |
+
+### The keys added for a miscellaneous journal
+
+| Key | Meaning |
+|---|---|
+| `number_draft` | The number of draft entries of the journal, in the active companies, whose automatic posting mode is "No" |
+| `drag_drop_settings` | The drop zone: an image, the text "Drop to create journal entries with attachments." and the group allowed to use it, which is the full-accounting group |
+
+The keys added for a liquidity journal and for a sale or purchase journal are specified in `../payments-and-bank-reconciliation/`, `../accounts-receivable/` and `../accounts-payable/`.
+
+### The activity payload
+
+One list per journal, built from the activities attached to the entries of the journal **and** from the activities attached to the journal itself, restricted to the active companies and to non-archived activities. Each element carries:
+
+| Field | Meaning |
+|---|---|
+| the activity identifier | |
+| the record identifier and the record model | either an entry or the journal |
+| the summary | the free text of the activity |
+| the status | `late` when the deadline is strictly before today, `future` otherwise |
+| the activity type identifier, its name and its category | |
+| the deadline | |
+
+### The graph
+
+| Journal type | Graph |
+|---|---|
+| bank, cash, credit card | the projected balance day by day, built from the current balance and the future-dated transactions |
+| sale, purchase | the residual amount per period, with a caption and the legend "Residual amount" |
+| miscellaneous | no graph: the caption and the legend are empty |
+
+---
+
+## 12. Client-side widgets fed by this domain
+
+| Widget | Data field | Content |
+|---|---|---|
+| Outstanding payments to attach | `invoice_outstanding_credits_debits_widget` | The items available to be matched with the document, each with its identifier, its number, its amount in the document currency, its date and its currency; visible only to the Invoicing and Readonly groups |
+| Matched payments | `invoice_payments_widget` | The matches already made, each with the amount, the date, the counterpart entry and the identifier of the match so that it can be removed; same visibility |
+| Totals | `tax_totals` | The tax-and-total summary of an invoice-like document; specified in `../taxes/` |
+| Payment term details | `payment_term_details` | The instalments with their dates and amounts; specified in `../accounts-receivable/` |
+| Alerts | `alerts` | The warnings to show at the top of the form, each with a message, a severity and an optional action |
+| Quick-encoding values | `quick_encoding_vals` | The account, the unit price and the taxes to propose on the next line in the total-driven capture mode |
+
+All six are marked non-exportable: they exist only to render the form and are never part of an export.

@@ -1407,15 +1407,58 @@ Inputs: the demands to link, the quantity to link to each, and the incoming move
 
 # 26. Traceability tree
 
-The traceability report walks completed detail lines.
+The traceability report is a tree of completed Stock Move Lines, unfolded one level at a time.
 
-1. The root set is chosen by the caller: every completed line of a Lot, of a product, of a container, or of one specific line.
-2. **Upstream** from a line: the completed detail lines of the originating moves of the line's move, restricted to those that match the line's lot when the product is tracked; plus, when the line's move belongs to a production genealogy, the lines recorded as its consumed lines.
-3. **Downstream** from a line: the completed detail lines of the destination moves of the line's move, restricted in the same way; plus the lines recorded as its produced lines.
-4. Each visited line is rendered with: its reference, its date, its product, its lot, its quantity with unit, its source and destination Locations, and the document it belongs to.
-5. Cycles are prevented by remembering the lines already visited.
+## 26.1 The root set
 
-## 26.1 Delivery discovery for a lot
+The root set depends on what the report was opened from:
+
+| Opened from | Root set |
+|---|---|
+| A Lot | every completed detail line of that lot |
+| One detail line, with a lot name in the calling context | the lines recorded as *produced from* that line by the production genealogy, when there are any |
+| A Transfer | the completed detail lines of its moves that carry a lot |
+| A manufacturing order | the completed detail lines of its finished moves |
+
+## 26.2 Walking upstream from a line
+
+Given a starting line, the walk collects the lines that brought the same lot into the Location the starting line took it from. It is a breadth-first walk with a "seen" set that prevents cycles.
+
+1. Seed the "seen" set and the queue with the starting lines.
+2. Pop a line from the queue.
+3. **Chained case.** When the line's move has originating moves, the candidates are the completed detail lines of those originating moves whose lot equals this line's lot, minus the already-seen lines.
+4. **Unchained case.** Otherwise, when the line's source Location's usage is internal or transit, the candidates are the completed detail lines with the same product, the same lot, a destination Location exactly equal to this line's source Location, a date on or before this line's date, and an identifier not already seen.
+5. **Otherwise** (the goods came from outside), there are no candidates: stop for this line.
+6. When the walk is unfolding one specific line, only descend into the candidates when that line is among them.
+7. Add the candidates to the "seen" set and continue.
+8. The result is the "seen" set minus the starting lines.
+
+Note the asymmetry between steps 3 and 4: a chained move is followed by its explicit links, while an unchained one is matched heuristically by product, lot, Location and date. Both are restricted to completed lines.
+
+## 26.3 What each node shows
+
+| Column | Value |
+|---|---|
+| Reference | The Transfer's reference when the line has one; otherwise the literal text "Inventory Adjustment" when the move is an adjustment move; otherwise the Scrap's reference when the move's destination usage is inventory loss and it belongs to a Scrap; otherwise empty. The reference also carries the model and identifier it links to, so the node can be opened. |
+| Product | The product's display name. |
+| Date | The **move's** date, formatted for the reader without a time zone shift. |
+| Lot/Serial Number | The lot's name. |
+| From | For a receipt, the Transfer's contact name; otherwise the source Location's display name. |
+| To | For a delivery, the Transfer's contact name; otherwise the destination Location's display name. |
+| Quantity | The line's quantity converted into the **product** unit, rounding half away from zero, rendered at the `Product Unit` precision, followed by the product unit's name. |
+
+Each node also carries a *usage* marker used for colouring: `internal` when both Locations have internal usage, `in` when only the destination has, and `out` in every other case.
+
+## 26.4 Unfoldability
+
+A node can be unfolded when it has consumed lines recorded by the production genealogy, **or** when the report was not opened from a Lot, the line carries a lot, and the upstream walk of section 26.2 finds at least one line.
+
+## 26.5 Ordering and printing
+
+The nodes of one level are sorted by date **descending**. Printing renders exactly the nodes the person has currently unfolded, in landscape, with the reference of the record the report was opened from as the document title and that record's company when it has one.
+
+## 26.6 Delivery discovery for a lot
+
 
 Which outgoing Transfers finally carried a lot — possibly after the lot was consumed to produce another lot.
 
@@ -1639,3 +1682,93 @@ Several algorithms depend on an ordering. They are collected here because gettin
 | Detail lines at completion | destination container descending, then identifier ascending | Ensures that packed lines are completed before loose ones, so that the container snapshots are consistent. |
 | Transfers | priority descending, scheduled date ascending, identifier descending | Display only. |
 | Operation Types | favourite first, then sequence, then identifier | Display only. |
+
+---
+
+# 33. The location scope of the product quantity figures
+
+The five quantity figures shown on a product — on hand, free, incoming, outgoing and forecasted — are owned by `../replenishment-and-procurement/`, but the way the **set of Locations** they look at is resolved belongs here, because it is the same resolution that the "on hand" filter on Stock Quantity records uses and the same that the lot on-hand quantity uses.
+
+## 33.1 Resolving the location set from the reading context
+
+1. Read a Location value from the calling context under either of two names; when it is not a list, wrap it in one.
+2. Read a Warehouse value the same way.
+3. Each value may be an identifier or a piece of text. Text is resolved by searching the corresponding entity on each of its searchable name fields with a case-insensitive containment test, and taking the union of the matches.
+4. Then:
+   - **Warehouses given, Locations also given** — take the view Locations of the Warehouses; keep only the given Locations whose materialised path starts with one of those view Locations' paths.
+   - **Warehouses given, no Locations** — take the view Locations of the Warehouses.
+   - **No Warehouses, Locations given** — take the given Locations.
+   - **Neither given** — take the view Locations of every Warehouse of the reader's enabled companies.
+5. When the resulting set is empty, all three filters below are the always-false filter, so every figure is zero.
+
+## 33.2 Building the three filters
+
+Let *D* be the set of the chosen Locations **and all of their descendants**, computed recursively.
+
+**Strict mode** (asked for by the calling context): *D* is just the chosen Locations, with no descendants.
+
+Three filters are produced:
+
+| Filter | Applies to | Definition |
+|---|---|---|
+| Quantity filter | Stock Quantity records | the record's Location is in *D* |
+| Incoming filter | Stock Moves | the move *arrives* in *D* **and** does not *leave* from *D* |
+| Outgoing filter | Stock Moves | the move *leaves* from *D* **and** does not *arrive* in *D* |
+
+"Leaves from *D*" means the move's source Location is in *D*. "Arrives in *D*" is deliberately different for done and open moves:
+
+- a **done** move arrives in *D* when its intermediate destination Location is in *D*;
+- an **open** move arrives in *D* when its final Location is set and is in *D*, or its final Location is empty and its intermediate destination Location is in *D*.
+
+This is what makes a two-step receipt count as *incoming* for the warehouse as a whole from the moment the first step is planned, instead of only when the last step is created.
+
+A third mode, asked for by the calling context when the caller only wants what already physically happened, drops the open-move treatment entirely: the incoming filter becomes "the done destination is in *D* and the source is not", and the outgoing filter becomes "the source is in *D* and the done destination is not".
+
+## 33.3 The figures
+
+With the three filters, and with optional restrictions on lot, owner and container taken from the calling context:
+
+```formula
+qty_available     = Σ on_hand over the matching quantity records
+reserved          = Σ reserved over the matching quantity records
+incoming_qty      = Σ real_quantity over the open moves matching the incoming filter
+outgoing_qty      = Σ real_quantity over the open moves matching the outgoing filter
+free_qty          = round( qty_available − reserved − expired_unreserved )
+virtual_available = round( qty_available + incoming_qty − outgoing_qty − expired_unreserved )
+```
+
+where *open* means the status is waiting-another-move, waiting, assigned or partially available, every rounding is at the **product** unit's rounding step, and *expired unreserved* is zero unless the expiration context is active, in which case it is the available quantity of the records whose removal date is on or before the cut-off.
+
+## 33.4 Evaluating at a past instant
+
+When the calling context carries an as-of instant that is earlier than now:
+
+1. A date value with no time part is pushed to the very end of that day.
+2. The on-hand figure is corrected by replaying the completed moves that happened **after** the instant:
+   ```formula
+   qty_available_at(instant) = current_on_hand
+                             − Σ over completed moves matching the incoming filter, dated after the instant ( processed quantity in the product unit )
+                             + Σ over completed moves matching the outgoing filter, dated after the instant ( processed quantity in the product unit )
+   ```
+3. The incoming and outgoing figures keep their own date restrictions (from and to) applied to the move date.
+
+## 33.5 Setting the on-hand quantity directly on a product
+
+Writing the on-hand figure of a storable product creates, in counting mode, one Stock Quantity record for that product in the stock Location of the company's first Warehouse with the written value as its counted quantity, and applies it at once. The write is ignored when the recomputation itself triggered it, and when the value is negative. Writing it before the product is saved fails with "Save the product form before updating the Quantity On Hand."
+
+## 33.6 Movement counters on a product
+
+```formula
+nbr_moves_in  = number of completed detail lines of the product whose Operation Type kind is receipt and whose date is within the last year
+nbr_moves_out = number of completed detail lines of the product whose Operation Type kind is delivery and whose date is within the last year
+```
+
+## 33.7 Transfer descriptions
+
+A move's printed description is resolved in this order:
+
+1. the manual override written on the move, when there is one;
+2. otherwise the product's own per-kind transfer description — the receipt description for a receipt, the delivery description for a delivery, the internal description for an internal transfer, and nothing for any other kind — when it is not empty;
+3. otherwise the product's generic description: for a **delivery** always the product's display name; for any other kind the product's description rendered as plain text when it is not empty, and the display name otherwise.
+
+The reading is done in the language of the Transfer's contact, else the move's contact, else the reader.
