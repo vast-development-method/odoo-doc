@@ -21,6 +21,12 @@ Conventions used in every field table:
 Unless a field row says otherwise: the field is optional, writable, stored, copied when the
 record is duplicated, and not tracked.
 
+> **Reproduced text.** Selection labels, button labels and message bodies are reproduced
+> exactly as the system produces them, because a rebuilt implementation must produce the
+> same text. Some shipped labels contain the short form of *request for quotation*; that
+> short form appears only inside such reproduced strings and never in this specification's
+> own prose. See the conventions in [`README.md`](README.md).
+
 ---
 
 ## 1. Entity index
@@ -223,7 +229,7 @@ changes. The exact evaluation order, the per-line rounding and the global roundi
 - **Display name.** The order reference; if a vendor reference exists, followed by a space and
   the vendor reference in parentheses; and, only when the caller asks for the total amount,
   followed by `: ` and the total amount formatted in the order currency according to the
-  reader's language. Examples: `P00007`, `P00007 (SO-3391)`, `P00007 (SO-3391): $ 1,250.00`.
+  reader's language. Examples: `P00007`, `P00007 (SALE-3391)`, `P00007 (SALE-3391): $ 1,250.00`.
 - **Name search.** Matching a typed string against the order reference or the vendor
   reference.
 

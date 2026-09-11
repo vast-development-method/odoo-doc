@@ -464,3 +464,84 @@ re-implementation must preserve.
 | Decrease an ordered quantity below the delivered quantity | unchanged | refused when locked | — | — | refused with "The ordered quantity of a sale order line cannot be decreased below the amount already delivered. Instead, create a return in your inventory." |
 | Cancel | any → `cancel` | refused when locked | forced to `no` | forced to `no` | non-completed transfers cancelled |
 | Back to quotation | `cancel`/`sent` → `draft` | unchanged | forced to `no` | forced to `no` | unchanged |
+
+---
+
+## 10. Archive states
+
+Three entities of the domain use an active flag rather than a status field. An archive flag is a
+two-state machine whose only effect is visibility: archived records are hidden from ordinary
+searches but remain readable by reference and keep every relation intact.
+
+### 10.1 Quotation Template
+
+| Value | Meaning |
+|---|---|
+| active | The template is offered when creating a quotation and may be set as a company default. |
+| archived | The template is hidden. |
+
+| From | To | Trigger | Guard | Side effects |
+|---|---|---|---|---|
+| active | archived | archive | none | Every company whose default quotation template is this template has that field cleared, with elevated rights. |
+| archived | active | unarchive | none | none; the company default is **not** restored. |
+
+Orders that already reference an archived template keep the reference and keep behaving as before;
+the template only governs creation.
+
+### 10.2 Sales Team
+
+| Value | Meaning |
+|---|---|
+| active | The team is offered for assignment and appears on the dashboard. |
+| archived | The team is hidden; its orders keep pointing at it. |
+
+Archiving is the prescribed alternative to deletion, which is refused for the two shipped default
+teams and for any team with five or more non-cancelled orders.
+
+### 10.3 Sales Team Member
+
+| Value | Meaning |
+|---|---|
+| active | The membership counts: the user appears in the team's member list, the team may be assigned to that user's orders, and in single-membership mode the user may hold no other active membership. |
+| archived | The membership is remembered but inert. |
+
+| From | To | Trigger | Guard | Side effects |
+|---|---|---|---|---|
+| active | archived | archive; removing the user from the team's member list; archiving the user; creating or activating another membership of the same user in single-membership mode | none | The user leaves the team's member list. |
+| archived | active | activate | the uniqueness validation must pass | In single-membership mode, every other active membership of the same user is archived. |
+
+Archived duplicates are deliberately allowed, which is why uniqueness is a validation rule rather
+than a database constraint.
+
+---
+
+## 11. Trigger matrix
+
+Which actor can cause which transition, and through which surface.
+
+| Transition | Back office | Customer page | Payment post-processing | Scheduled job | Other domain |
+|---|---|---|---|---|---|
+| `draft` → `sent` | "Mark as Sent"; sending a message | — | a transaction reaches *pending* | — | — |
+| `draft` or `sent` → `sale` | "Confirm" | signature, when payment is not required | a transaction reaches *authorized* or *done* and the amount suffices | — | the storefront checkout; a marketplace connector |
+| `draft` or `sent` → `cancel` | "Cancel" | decline with a reason | — | — | — |
+| `sale` → `cancel` | "Cancel", after unlocking | — | — | — | — |
+| `cancel` or `sent` → `draft` | "Set to Quotation" | — | — | — | — |
+| unlocked → locked | "Lock"; automatic at confirmation | — | indirectly, because the payment confirms the order | — | a marketplace connector |
+| locked → unlocked | "Unlock" | — | — | — | — |
+| line invoice status changes | editing a quantity; invoicing | adding an optional product | automatic invoicing | — | validating a transfer; posting or cancelling an invoice; recording time; posting an expense |
+| delivery status changes | — | — | — | — | validating or cancelling a transfer |
+
+---
+
+## 12. Statuses that do not exist, and why
+
+A re-implementation should resist the temptation to add these.
+
+| Tempting status | Why it is absent |
+|---|---|
+| "Done" or "Closed" on an order | Completion is not a single fact. An order can be fully delivered and not invoiced, fully invoiced and not delivered, or both and still awaiting payment. The three orthogonal indicators — invoice status, delivery status and lock flag — carry that information without forcing an arbitrary ordering. |
+| "Expired" as a status | Expiration is a function of the current date and would require a job to maintain. It is derived instead, so it becomes true and false again merely by moving the expiration date. |
+| "Signed" as a status | Signing does not always confirm: when payment is also required, the order stays a quotation. The signature is therefore data, not a status. |
+| "Paid" as a status | Payment is tracked by the transactions and, after invoicing, by the invoice's own payment state. An order-level paid status would duplicate and eventually contradict them. |
+| "Invoiced" as a status | It exists, but as the separate invoice-status field, because it must also express "partly", "nothing" and "over-delivered". |
+| A status on a line | A line mirrors its order's status. Giving lines their own status would allow an order to be partly confirmed, which no downstream document could interpret. |

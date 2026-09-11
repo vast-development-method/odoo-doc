@@ -186,3 +186,56 @@ Every operational domain reads this one. The most tightly coupled are `../sales/
 combos, matrices, optional products), `../purchasing/` (matrices, vendor references),
 `../point-of-sale/` (barcode scanning, combos), `../inventory-operations/` (variants, barcodes,
 packaging barcodes, expiry) and `../manufacturing/` (attribute-restricted component lines).
+
+## Document map
+
+| File | What it settles |
+|---|---|
+| [glossary.md](glossary.md) | Every term of the domain, defined in full, with the transport and storage names of every entity |
+| [entities.md](entities.md) | The complete data model: twenty-one own entities plus fourteen extensions of entities owned elsewhere, each with a full field table, lifecycle, ordering, display rule, uniqueness rules and company behaviour |
+| [calculations.md](calculations.md) | Fifteen groups of algorithms and formulas: combinations, value materialisation, variant generation, the four possibility predicates, the pruned cartesian product, extra prices, combo proration, the matrix, the classic barcode parser, the Global Standards One decomposer, names and displays, expiry dates, vendor selection, and the rounding summary |
+| [state-machines.md](state-machines.md) | The ten state-like fields of the domain, each with a state table, a transition table and a diagram, plus the two interaction state machines (transfer completion with expired goods; the barcode parse outcome) |
+| [workflows.md](workflows.md) | Fourteen end-to-end operational sequences, from creating a product to importing a catalogue with attribute values from one file |
+| [business-rules.md](business-rules.md) | Every validation classified by when it fires and what it does, with the exact message; the complete possibility rule set; the permission model; the ordering invariants; fifteen explicitly stated edge cases |
+| [configuration.md](configuration.md) | Settings, four system parameters, four decimal precisions, every shipped default record including the twenty-six Global Standards One rules, five security groups, the full access matrix, six record rules, two installation hooks and the one scheduled task |
+| [interfaces.md](interfaces.md) | Window actions, views field by field, sixteen named remote operations, four web routes, the catalog data contract, seven printable documents, the message hook, the five client-side contracts, and the import and export formats |
+| [accounting-effects.md](accounting-effects.md) | Why this domain posts nothing, and the exact list of catalog values the financial domains consume |
+| [acceptance-criteria.md](acceptance-criteria.md) | Twenty-two groups of numbered Given/When/Then scenarios with concrete numbers, ending in seven cross-cutting invariants |
+
+## Worked examples index
+
+The numeric examples an implementer should reproduce first, and where they are:
+
+| Example | Where |
+|---|---|
+| A template with a size attribute and a colour attribute generating six variants with extra prices | [calculations.md](calculations.md) §1.2 and §3.2; [acceptance-criteria.md](acceptance-criteria.md) A-3, A-4 |
+| An excluded combination, and the inverse-completed exclusion map | [calculations.md](calculations.md) §3.3 and §4.3; [acceptance-criteria.md](acceptance-criteria.md) A-5, A-7, C-9 |
+| A dynamically created variant, including the archived case | [calculations.md](calculations.md) §5.3; [acceptance-criteria.md](acceptance-criteria.md) B-1 to B-8 |
+| Extra prices of values that never create a variant | [calculations.md](calculations.md) §7.2; [acceptance-criteria.md](acceptance-criteria.md) D-2, D-3 |
+| A combination product's price, with and without a rounding remainder | [calculations.md](calculations.md) §8.3; [acceptance-criteria.md](acceptance-criteria.md) E-3 to E-5 |
+| The closest possible combination when the requested one is excluded | [calculations.md](calculations.md) §6.3; [acceptance-criteria.md](acceptance-criteria.md) C-11 |
+| A matrix grid with an unavailable cell | [calculations.md](calculations.md) §9; [acceptance-criteria.md](acceptance-criteria.md) R-1, R-2 |
+| A check digit computed digit by digit | [calculations.md](calculations.md) §10.1; [acceptance-criteria.md](acceptance-criteria.md) F-1 |
+| Parsing a weight barcode, from the printed label to the stored zeroed base code | [calculations.md](calculations.md) §10.6; [acceptance-criteria.md](acceptance-criteria.md) F-3, F-4 |
+| Decoding the four uniform resource identifier shapes | [calculations.md](calculations.md) §10.7; [acceptance-criteria.md](acceptance-criteria.md) F-12 to F-15 |
+| Parsing a barcode carrying the product, batch and expiry application identifiers | [calculations.md](calculations.md) §11.7; [acceptance-criteria.md](acceptance-criteria.md) G-2 to G-4 |
+| The decimal-position digit of a weight application identifier | [calculations.md](calculations.md) §11.8; [acceptance-criteria.md](acceptance-criteria.md) G-7 |
+| The century-determination rule for a six-digit date | [calculations.md](calculations.md) §11.5; [acceptance-criteria.md](acceptance-criteria.md) G-10 |
+| Search unpadding under a Global Standards One nomenclature | [calculations.md](calculations.md) §11.9; [acceptance-criteria.md](acceptance-criteria.md) G-13 to G-18 |
+| An expiry date computation, including a postponement that preserves a manual adjustment | [calculations.md](calculations.md) §13.4; [acceptance-criteria.md](acceptance-criteria.md) O-1 to O-3 |
+| The label sheet page count | [calculations.md](calculations.md) §14.2; [acceptance-criteria.md](acceptance-criteria.md) N-4 |
+
+## Invariants at a glance
+
+1. Within one template, no two **active** variants share the same combination.
+2. Every active, non-dynamic template has at least one variant.
+3. A dynamic template may legitimately have none.
+4. Within one company, a barcode identifies at most one product, and never both a product and a
+   packaging binding; across the whole installation, a barcode identifies at most one packaging
+   binding.
+5. The sum of the prorated shares of a combination product's choice groups equals the combination
+   product's price exactly, and the combination product's own line carries a unit price of zero.
+6. A Global Standards One decomposition either consumes the whole scanned string or returns nothing.
+7. Postponing a lot's expiration date moves every non-empty derived date by the same amount, so the
+   offsets between the four dates are preserved.
+8. Nothing in this domain writes a journal entry.

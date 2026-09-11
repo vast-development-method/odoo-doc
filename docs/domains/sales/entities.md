@@ -883,3 +883,156 @@ These entities are owned by other domains; only the sales-specific fields are li
 | Customer to Reinvoice (`sale_order_id`) on an expense | Link to Sales Order | Chosen by the person recording the expense. |
 | Sales Order Item (`sale_line_id`) on an expense | Link to Sales Order Line | The line created or reused to carry the re-invoiced cost. |
 | Expense Count (`expense_count`) on an order | Integer | Computed, not stored. |
+
+---
+
+## 14. Remaining dialogue entities
+
+### 14.1 Payment Link dialogue
+
+**Transport name** `payment.link.wizard` — transient, owned by the payment-providers domain; the
+sales domain supplies its default values.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Currency (`currency_id`) | Link to Currency | Defaulted to the order currency. |
+| Customer (`partner_id`) | Link to Customer | Defaulted to the order's **invoice address**. |
+| Amount (`amount`) | Money | Defaulted to the suggested amount: the required prepayment amount while the order is a quotation requiring payment, otherwise the remaining balance. |
+| Maximum Amount (`amount_max`) | Money | Defaulted to the remaining balance, that is the total minus the amount already paid. |
+| Amount already paid (`amount_paid`) | Money | Defaulted to the order's paid amount. |
+| Prepayment amount (`prepayment_amount`) | Money | Defaulted to the required prepayment amount. |
+
+The dialogue produces an address pointing at the order's customer page, carrying the access token
+and the chosen amount, so that following it opens the payment form pre-loaded.
+
+### 14.2 Accrued Orders dialogue
+
+**Transport name** `account.accrued.orders.wizard` — transient, shared with the purchasing domain.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Company (`company_id`) | Link to Company | Defaulted from the first selected order. |
+| Journal (`journal_id`) | Link to Journal | Required, computed, stored, writable, precomputed, company-checked. Defaults to the first general journal of the company; the domain restricts it to general journals. |
+| Date (`date`) | Date | Required. Defaults to the last day of the previous month. |
+| Reversal date (`reversal_date`) | Date | Required, computed, stored, writable, precomputed. Defaults to the accrual date plus one day, and is pushed forward whenever the accrual date moves past it. |
+| Amount (`amount`) | Money | Optional. When given with exactly one order selected, it replaces the whole per-line computation with a single manual item. |
+| Company Currency (`currency_id`) | Link to Currency, mirrored from the company | Readonly, stored. |
+| Accrual Account (`account_id`) | Link to Account | Required, company-checked. For a sales accrual the domain restricts it to current-asset accounts. |
+| Preview (`preview_data`) | Long text | Computed, not stored. A rendering of the entry that would be produced, with the columns Account, Label, Debit and Credit. |
+| Display amount (`display_amount`) | Boolean | Computed, not stored. True when an amount was typed, or when exactly one order is selected and the preview contains no line. |
+
+---
+
+## 15. Fields contributed by the service and commercial couplings
+
+Only the fields that the sales domain reads or writes are listed. Each is on the Sales Order or the
+Sales Order Line unless stated.
+
+### 15.1 Project and task coupling
+
+On the Sales Order:
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Project (`project_id`) | Link to Project | Not copied, indexed (index skips empty values). Domain: billable projects that are not templates. A task is created in it on confirmation; its analytic distribution is the reference for newly created lines. Set automatically by the first service line that creates a project. |
+| Project analytic account (`project_account_id`) | Link to Analytic Account, mirrored from the project | Reused instead of creating a new analytic account when a project is generated. |
+| Projects (`project_ids`) | Set of Project | Computed, not stored, not copied. Every project reachable from the order: the products' global projects, the order's own project and the lines' projects, filtered to those the reader may read. |
+| Number of Projects (`project_count`) | Integer | Computed, not stored. Counts only the active ones. |
+| Tasks (`tasks_ids`) | Set of Task | Computed, not stored, searchable. Tasks that are not templates, belong to a project, and are linked either to one of the order's lines or to the order itself. |
+| Tasks (`tasks_count`) | Integer | Computed, not stored. |
+| Closed tasks (`closed_task_count`) | Integer | Computed, not stored. |
+| Completed task percentage (`completed_task_percentage`) | Decimal | Computed, not stored. |
+| Milestones (`milestone_count`) | Integer | Computed, not stored. The number of milestones attached to the order's lines. |
+| Is a milestone product (`is_product_milestone`) | Boolean | Computed, not stored. True when any line's product bills on delivered milestones. |
+| Display project (`visible_project`) | Boolean | Computed, not stored. Governs whether the project field is offered. |
+| Show project button / Show create-project button | Booleans | Computed, not stored. The create button is offered only to project managers, only for orders past the quotation stage, and only when the order has no project yet. |
+
+On the Sales Order Line: `project_id` (Generated Project) and `task_id` (Generated Task).
+
+When the order is created from a task, the source document defaults to
+"[Project] *task name*".
+
+### 15.2 Purchasing coupling
+
+On the Sales Order:
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Number of Purchase Order Generated (`purchase_order_count`) | Integer | Computed, not stored, visible only to the purchasing group. |
+
+On the Sales Order Line: `purchase_line_ids` (Generated Purchase Lines, readonly) and
+`purchase_line_count`.
+
+### 15.3 Expense coupling
+
+On the Sales Order: `expense_count`, computed and not stored. On the expense record:
+`sale_order_id` (Customer to Reinvoice) and `sale_line_id` (Sales Order Item).
+
+### 15.4 Customer-relationship coupling
+
+On the Sales Order: `opportunity_id` (Opportunity), company-checked, indexed with an index that
+skips empty values, restricted by its domain to opportunities of the order's company or
+company-neutral ones. Confirming the order refreshes the opportunity's revenue figures.
+
+### 15.5 Margin coupling
+
+On the Sales Order Line:
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Cost (`purchase_price`) | Decimal, minimum display precision `Product Price` | Computed from the product, the company, the currency and the unit; stored, writable, precomputed, not copied; visible to internal users only. The product's standard cost converted into the line's unit and then into the order currency from the product's cost currency. |
+| Margin (`margin`) | Decimal, minimum display precision `Product Price` | Computed and stored, precomputed, internal users only. |
+| Margin (%) (`margin_percent`) | Decimal | Computed and stored, precomputed, internal users only. |
+
+On the Sales Order: `margin` and `margin_percent`, both computed and stored, the percentage
+aggregated as an average.
+
+### 15.6 Analytic coupling
+
+On the Analytic Line: `so_line` (Sales Order Item), indexed with an index that skips empty values,
+restricted by its domain to order lines whose delivered-quantity method is the analytic one. This
+is the link through which an expense feeds a delivered quantity.
+
+The analytic applicability entity gains the business domain value `sale_order` labelled "Sale
+Order", removed together with the sales capability.
+
+### 15.7 Product document
+
+On the Product Document: `attached_on_sale` ("Sale : Visible at"), required, default `hidden`,
+visible to the salesperson group. Values: `hidden` "Hidden", `quotation` "On quote",
+`sale_order` "On confirmed order". Help text: "Allows you to share the document with your customers
+within a sale. On quote: the document will be sent to and accessible by customers at any time, for
+example to share product description files. On order confirmation: the document will be sent to and
+accessible by customers, for example to share a user manual or digital content bought online."
+
+### 15.8 Custom attribute value
+
+On the Custom Attribute Value: `sale_order_line_id` (Sales Order Line), indexed with an index that
+skips empty values; deleting the line deletes the custom value. A unique database constraint
+prevents two custom values for the same attribute value on the same line.
+
+---
+
+## 16. Entity relationship overview
+
+```mermaid
+erDiagram
+    SALES_ORDER ||--o{ SALES_ORDER_LINE : "has"
+    SALES_ORDER }o--|| CUSTOMER : "sold to"
+    SALES_ORDER }o--|| CUSTOMER_INVOICE_ADDRESS : "invoiced to"
+    SALES_ORDER }o--|| CUSTOMER_DELIVERY_ADDRESS : "delivered to"
+    SALES_ORDER }o--o| QUOTATION_TEMPLATE : "built from"
+    SALES_ORDER }o--o| SALES_TEAM : "assigned to"
+    SALES_ORDER }o--o| SALESPERSON : "owned by"
+    SALES_ORDER }o--o{ PAYMENT_TRANSACTION : "paid through"
+    SALES_ORDER }o--o{ SALES_TAG : "classified by"
+    SALES_ORDER_LINE }o--o| PRODUCT_VARIANT : "sells"
+    SALES_ORDER_LINE }o--o{ INVOICE_LINE : "invoiced by"
+    SALES_ORDER_LINE ||--o{ SALES_ORDER_LINE : "linked options and combo items"
+    SALES_ORDER_LINE ||--o{ STOCK_MOVE : "delivered by"
+    SALES_ORDER_LINE ||--o{ ANALYTIC_LINE : "consumed by"
+    SALES_ORDER_LINE ||--o{ PURCHASE_LINE : "bought by"
+    QUOTATION_TEMPLATE ||--o{ QUOTATION_TEMPLATE_LINE : "has"
+    SALES_TEAM ||--o{ SALES_TEAM_MEMBER : "has"
+    SALES_TEAM_MEMBER }o--|| SALESPERSON : "is"
+```

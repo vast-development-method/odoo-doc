@@ -5,6 +5,12 @@ labels and meanings, the transitions with their triggers, guards and side effect
 diagram for each machine. Error messages raised by guards are reproduced exactly; the full
 catalogue of messages is in [`business-rules.md`](business-rules.md).
 
+> **Reproduced text.** Status labels, button labels, subtype names and message bodies are
+> reproduced exactly as the system produces them, because a rebuilt implementation must
+> produce the same text. Some shipped strings contain the short form of *request for
+> quotation*; that short form appears only inside such reproduced strings and never in this
+> specification's own prose. See the conventions in [`README.md`](README.md).
+
 Three kinds of status field appear:
 
 - **Driven statuses** are written by explicit operations. The Purchase Order status
@@ -172,6 +178,7 @@ stateDiagram-v2
 |---|---|---|---|---|
 | false | true | The buyer presses the acknowledge action on the order | None | None. |
 | false | true | The vendor opens the acknowledgement link carried by the order email or by the portal page | The link must carry a valid access token for the order | The flag is set and the portal page re-renders acknowledging the confirmation. |
+| false | true | Any transfer of the order is validated (present when inventory is installed) | None. The flag is set with elevated rights as part of completing the transfer, so an operator without purchasing rights still sets it. | None beyond the flag. Receiving the goods is treated as proof that the vendor saw the order. |
 
 There is no transition back to false through any operation.
 

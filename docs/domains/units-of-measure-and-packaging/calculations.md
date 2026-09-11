@@ -178,7 +178,7 @@ twenty-five ten-thousandths, the result is exactly eight.
 
 | Value | Step | Method | Result | Why |
 |---|---|---|---|---|
-| 2.675 | one thousandth of a hundred, i.e. two digits | half away from zero | 2.68 | The binary value is slightly below the tie; the compensation term lifts it over. Without the term the answer would be 2.67. |
+| 2.675 | two digits, that is a step of one hundredth | half away from zero | 2.68 | The binary value is slightly below the tie; the compensation term lifts it over. Without the term the answer would be 2.67. |
 | 0.0833333… | two digits | away from zero | 0.09 | Any non-zero fraction of a step pushes away from zero. |
 | 0.0833333… | two digits | half away from zero | 0.08 | Eight and one third steps is nearer eight than nine. |
 | 0.0833333… | two digits | towards zero | 0.08 | The fractional part is discarded. |
@@ -373,6 +373,14 @@ The table below is the complete reference data as delivered, with the derived ab
 and the derived sequence. The rounding precision column is the value every unit reports at the
 shipped precision of two digits.
 
+The values in the name column are the delivered names, reproduced exactly because documents and
+exchanged files print them. Several are conventional short forms; their full names in words are:
+`mm` millimetre, `cm` centimetre, `m` metre, `km` kilometre, `in` inch, `ft` foot, `yd` yard,
+`mi` mile, `m²` square metre, `ft²` square foot, `ml` millilitre, `L` litre, `m³` cubic metre,
+`fl oz (US)` United States fluid ounce, `qt (US)` United States quart, `gal (US)` United States
+gallon, `in³` cubic inch, `ft³` cubic foot, `g` gram, `kg` kilogram, `Ton` metric tonne of one
+thousand kilograms, `oz` ounce, `lb` pound, `KWH` kilowatt hour.
+
 | External identifier | Name (`name`) | Tree | Reference unit (`relative_uom_id`) | Contains (`relative_factor`) | Absolute quantity (`factor`) | Sequence (`sequence`) | Active on delivery | Rounding precision (`rounding`) |
 |---|---|---|---|---|---|---|---|---|
 | `uom.product_uom_unit` | `Units` | Counting | — (root) | 1 | 1 | 100 | yes | 0.01 |
@@ -452,7 +460,7 @@ flowchart TD
     end
 ```
 
-Seven trees exist as delivered. Two of them hold a single unit (surface has two, energy has one).
+Seven trees exist as delivered. The smallest are surface, with two units, and energy, with one.
 No conversion is possible between trees; see section 9.
 
 ### 5.2 The configured packaging units used throughout this file
@@ -615,6 +623,9 @@ Each table gives, for one tree, every ordered pair of distinct units. The column
 
 To convert a quantity other than one, multiply the quantity by the exact ratio and then round;
 do **not** multiply the quantity by a rounded ratio. Section 8 works this through.
+
+The unit names in the source and destination columns are the delivered names, whose full names
+in words are listed at the head of section 5.
 
 #### Counting and packaging tree
 
@@ -1201,3 +1212,704 @@ the two records.
 | `kg` | root `g`, then `kg` | `L` | root `ml`, then `L` | none | do not share an ancestor |
 | `Hours` | root `Hours` | `Hours` | root `Hours` | the root | share an ancestor |
 | `in³` | root `ml`, `L`, `in³` | `in` | root `mm`, `cm`, `in` | none | do not share an ancestor |
+
+---
+
+## 10. Price conversion
+
+### 10.1 Why it differs from quantity conversion
+
+A quantity has the unit in the numerator: *thirty items*. A price has the unit in the
+denominator: *two currency units **per** item*. Converting the denominator therefore inverts the
+ratio. Converting a price per dozen into a price per unit **divides** by twelve, whereas
+converting a quantity in dozens into units **multiplies** by twelve.
+
+### 10.2 Statement
+
+```formula
+price_in_destination_unit = price_in_source_unit × absolute_quantity( destination_unit ) ÷ absolute_quantity( source_unit )
+```
+
+### 10.3 Algorithm
+
+1. Assert the source is exactly one unit.
+2. **Short-circuit.** If there is no source unit, or the price is zero (or otherwise falsy), or
+   there is no destination unit, or the source and destination units are the same record, return
+   the price unchanged.
+3. Multiply the price by the destination unit's absolute quantity.
+4. Divide by the source unit's absolute quantity.
+5. **Return without rounding.**
+
+### 10.4 Properties a rebuild must preserve
+
+- **No rounding, ever.** Neither to the `Product Unit` precision nor to any currency precision.
+  Rounding is the caller's business.
+- **No tree check.** As with quantity conversion, the operation will convert across trees and
+  produce nonsense; callers guard it.
+- **Exactly invertible in exact arithmetic**, and *almost* invertible in floating point:
+  converting a price from dozens to units and back yields the original price for every pair in
+  the counting tree, but not necessarily for pairs in the length tree whose absolute quantities
+  are not exactly representable.
+- **The multiplication comes first.** Multiplying by the destination absolute quantity and then
+  dividing by the source keeps more significant digits than computing the ratio first, in the
+  same way as quantity conversion.
+
+### 10.5 Worked examples
+
+| Price | Per source unit | To destination unit | Arithmetic | Result |
+|---|---|---|---|---|
+| 24 | `Dozens` | `Units` | 24 × 1 ÷ 12 | 2 |
+| 2 | `Units` | `Dozens` | 2 × 12 ÷ 1 | 24 |
+| 24 | `Box of 12 Dozens` | `Units` | 24 × 1 ÷ 144 | 0.16666666666666666 |
+| 24 | `Box of 12` | `Units` | 24 × 1 ÷ 12 | 2 |
+| 1.5 | `Units` | `Pack of 6` | 1.5 × 6 ÷ 1 | 9 |
+| 19.99 | `Units` | `Dozens` | 19.99 × 12 ÷ 1 | 239.88 |
+| 2 | `g` | `Ton` | 2 × 1000000 ÷ 1 | 2000000 |
+| 100 | `kg` | `g` | 100 × 1 ÷ 1000 | 0.1 |
+| 0 | anything | anything | short-circuit | 0 |
+| any | `Units` | `Units` | short-circuit | unchanged |
+
+### 10.6 Where price conversion is used
+
+| Caller | From | To | Purpose |
+|---|---|---|---|
+| Product price computation | The product's own unit | The unit asked for by the caller | Express the catalogue price, or the cost, per the unit the document uses. Applied **before** currency conversion. |
+| Price list rule, fixed price | The product's own unit | The document's unit | A fixed price entered on a rule is understood as a price per the product's own unit and is scaled to the document's unit. |
+| Price list rule, surcharge | The product's own unit | The document's unit | The surcharge added by a formula rule is scaled the same way. |
+| Price list rule, minimum margin | The product's own unit | The document's unit | Scaled before being used as a floor. |
+| Price list rule, maximum margin | The product's own unit | The document's unit | Scaled before being used as a ceiling. |
+| Vendor price list line, discounted price | The vendor's unit | The product's own unit | Convert the vendor's quoted price into a price per the product's own unit, then apply the discount. |
+| Purchase order line, price per product unit | The line's unit | The product's own unit | A read-only display of the line price in the product's own unit. |
+| Purchase order line, price from the standard cost | The product's own unit | The line's unit | When no vendor price applies, the cost is scaled to the line's unit before tax-inclusion correction and currency conversion. |
+| Purchase order line, price from a vendor | The vendor's unit | The line's unit | The vendor's price is scaled to whatever unit the buyer chose. |
+| Storefront list price | The product's own unit | The unit chosen by the visitor | The displayed price per the chosen packaging. |
+| Bill of materials cost report | The component's own unit | The bill line's unit | The component cost per bill-line unit, then multiplied by the line quantity. |
+| Production overview report | The product's own unit | The move's unit | The cost per move unit. |
+
+### 10.7 The price list rule formula with unit conversion in place
+
+The complete formula for a rule of the formula kind, with the unit scaling shown explicitly, is:
+
+```formula
+base_price   = price_of_the_chosen_base , expressed per destination_unit , converted to the target currency , unrounded
+price        = base_price − ( base_price × discount_percentage ÷ 100 )
+price        = round_to_step( price , price_rounding_step )                         if a rounding step is configured
+price        = price + convert_price( surcharge , product_unit → destination_unit ) if a surcharge is configured
+price        = max( price , base_price + convert_price( minimum_margin , product_unit → destination_unit ) )   if a minimum margin is configured
+price        = min( price , base_price + convert_price( maximum_margin , product_unit → destination_unit ) )   if a maximum margin is configured
+```
+
+with the discount replaced by the negated markup when the base is the cost.
+
+The **quantity** used to select the rule is converted the other way, into the product's own unit,
+because a rule's minimum quantity is always expressed in the product's own unit:
+
+```formula
+quantity_for_rule_matching = convert_quantity( quantity , document_unit → product_unit , tolerate_failure = yes )
+```
+
+and a rule applies when its minimum quantity is zero, or the converted quantity is not below it.
+
+**Worked example.** A product whose own unit is `Units`, catalogue price fifty. A rule says: for a
+minimum quantity of twenty-four, a ten per cent discount. A customer orders three `Dozens`.
+
+```formula
+quantity_for_rule_matching = convert_quantity( 3 , Dozens → Units , away from zero ) = 36
+36 ≥ 24 , so the rule applies
+base_price  = convert_price( 50 , Units → Dozens ) = 50 × 12 ÷ 1 = 600
+price       = 600 − ( 600 × 10 ÷ 100 ) = 540
+```
+
+The line shows five hundred forty per dozen, three dozens, one thousand six hundred twenty in
+total, which is thirty-six items at forty-five each.
+
+---
+
+## 11. Whole-packaging rounding
+
+### 11.1 Purpose
+
+Snap a quantity, expressed in a product's own unit, onto a whole multiple of a packaging
+quantity. Used when a business refuses to break a carton.
+
+### 11.2 Inputs
+
+| Input | Meaning |
+|---|---|
+| the packaging unit | The unit whose whole multiples the result must be. This is the unit the operation is invoked on. |
+| product quantity | The quantity to snap, expressed in the destination unit below. |
+| destination unit | The unit the quantity is expressed in — in practice always the product's own unit. |
+| rounding method | Away from zero, half away from zero (the default) or towards zero. |
+
+### 11.3 Algorithm
+
+1. Assert the packaging unit is exactly one unit.
+2. Compute the **packaging quantity**: convert a quantity of one from the packaging unit into the
+   destination unit, with the *default* conversion rounding, that is away from zero, at the
+   `Product Unit` precision.
+
+   ```formula
+   packaging_quantity = convert_quantity( 1 , packaging_unit → destination_unit )
+   ```
+
+3. **Identity short-circuit.** If the packaging unit and the destination unit are the same record,
+   return the product quantity **unchanged**. This test happens *after* the packaging quantity is
+   computed and before it is used.
+4. If both the product quantity and the packaging quantity are non-zero:
+
+   ```formula
+   result = round_to_step( product_quantity ÷ packaging_quantity , step = 1 , rounding_method ) × packaging_quantity
+   ```
+
+   Note the step of **one**: the division is rounded to a whole number of packagings, and the
+   whole number is then multiplied back.
+5. Otherwise return the product quantity unchanged.
+
+### 11.4 Why a remainder operation is forbidden
+
+The obvious implementation — test whether the remainder of the quantity divided by the packaging
+quantity is zero — is wrong in floating point and must not be used. Two counter-examples that the
+implementation notes explicitly:
+
+- eight remainder one and six tenths evaluates to one and five thousand nine hundred ninety-nine
+  ten-thousandths and change, not zero, although eight is exactly five packs of one and six
+  tenths;
+- five and four tenths remainder one and eight tenths evaluates to about two ten-thousandths of a
+  trillionth, not zero.
+
+The division-round-multiply form is immune because the rounding step absorbs the error.
+
+### 11.5 Worked examples
+
+All at the shipped precision of two digits. The destination unit is `Units` throughout unless
+stated.
+
+| Packaging unit | Packaging quantity | Product quantity | Method | Quotient before rounding | Rounded quotient | Result |
+|---|---|---|---|---|---|---|
+| `Box of 12 Dozens` | 144 | 1600 | towards zero | 11.111… | 11 | 1584 |
+| `Box of 12 Dozens` | 144 | 1600 | half away from zero | 11.111… | 11 | 1584 |
+| `Box of 12 Dozens` | 144 | 1600 | away from zero | 11.111… | 12 | 1728 |
+| `Pallet of 40 Boxes` | 5760 | 1600 | towards zero | 0.277… | 0 | 0 |
+| `Pallet of 40 Boxes` | 5760 | 1600 | half away from zero | 0.277… | 0 | 0 |
+| `Pallet of 40 Boxes` | 5760 | 1600 | away from zero | 0.277… | 1 | 5760 |
+| `Dozens` | 12 | 20 | towards zero | 1.666… | 1 | 12 |
+| `Dozens` | 12 | 20 | half away from zero | 1.666… | 2 | 24 |
+| `Dozens` | 12 | 20 | away from zero | 1.666… | 2 | 24 |
+| `Units` | 1 | 22.43 | towards zero | — | — | **22.43** (identity short-circuit) |
+| `Pack of 6` | 6 | 0 | any | — | — | 0 |
+
+The `Units` row is the reason the identity short-circuit exists. Without it, twenty-two and
+forty-three hundredths divided by one, rounded to a whole number towards zero, times one, would
+be twenty-two — the reservation would silently lose forty-three hundredths of an item every time
+the policy was set to full packagings on a product with no packagings at all.
+
+The `Pallet of 40 Boxes` rows with the away-from-zero method are why that method is never used by
+the reservation caller: rounding *up* to a whole packaging would reserve five thousand seven
+hundred sixty units when only one thousand six hundred exist.
+
+### 11.6 The only caller, and its conditions
+
+Whole-packaging rounding runs during reservation, and only when **both** of these hold:
+
+1. the reservation call carries a packaging unit in its context — which happens when the move
+   being reserved has a packaging unit, that is when it came from a sales or purchase document
+   line; and
+2. the product's category has its reservation policy set to `full`.
+
+When both hold, the quantity that may be reserved is recomputed as:
+
+```formula
+available = whole_packaging_round( min( wanted_quantity , available_quantity ) , packaging_unit , product_unit , towards zero )
+```
+
+with the **towards zero** method, so a partial packaging is never reserved.
+
+**Worked example.** A customer orders two `Pallet of 1000` — a pallet unit containing one thousand
+units. One thousand six hundred units are on hand.
+
+- Policy `partial`: one thousand six hundred are reserved.
+- Policy `full`: the wanted quantity is two thousand, the available is one thousand six hundred,
+  the smaller is one thousand six hundred; one thousand six hundred divided by one thousand is one
+  and six tenths, rounded towards zero is one, multiplied back is one thousand. **One thousand are
+  reserved** and six hundred stay free.
+
+---
+
+## 12. How a quantity crosses every document boundary
+
+This section is the complete inventory of conversions performed by the rest of the system. For
+each crossing it gives the source unit, the destination unit, the rounding method and whether the
+result is stored.
+
+### 12.1 The master table
+
+| # | Crossing | Source unit | Destination unit | Rounding method | Stored? |
+|---|---|---|---|---|---|
+| 1 | Product catalogue price to a document line | The product's own unit | The line's unit | none (price conversion) | no |
+| 2 | Product cost to a document line | The product's own unit | The line's unit | none (price conversion) | no |
+| 3 | Price list rule matching | The document's unit | The product's own unit | away from zero, failure tolerated | no |
+| 4 | Price list fixed price, surcharge, margins | The product's own unit | The document's unit | none (price conversion) | no |
+| 5 | Vendor price list line, discounted price | The vendor's unit | The product's own unit | none (price conversion) | no |
+| 6 | Vendor selection by minimum quantity | The document's unit | The vendor's unit | away from zero | no |
+| 7 | Sales order line to stock move | — | — | the unit is copied, not converted | yes |
+| 8 | Stock move demand to real quantity | The move's unit | The product's own unit | **half away from zero** | yes |
+| 9 | Stock move demand to packaging quantity | The move's unit | The packaging unit | away from zero | yes |
+| 10 | Stock move to move line (creation) | — | — | the unit is copied from the move | yes |
+| 11 | Move line quantity to quantity in the product's unit | The move line's unit | The product's own unit | **half away from zero** | yes |
+| 12 | Move lines summed into the move's picked quantity | Each move line's unit | The move's unit | **no rounding** | yes |
+| 13 | Reservation, first leg | The product's own unit | The move's unit | **towards zero** | no |
+| 14 | Reservation, second leg | The move's unit | The product's own unit | **half away from zero** | no |
+| 15 | Reservation, whole-packaging snap | The packaging unit | The product's own unit | away from zero for the packaging quantity, **towards zero** for the snap | no |
+| 16 | Move line quantity suggested from a quantity on hand | The product's own unit | The move line's unit | **half away from zero** | yes |
+| 17 | Move demand shown against a move line | The move's unit | The move line's unit | **half away from zero** | no |
+| 18 | Forecast availability | The move's unit | The product's own unit | **half away from zero** | no |
+| 19 | Procurement to purchase order line | The procurement's unit | The product's own unit | **half away from zero** | no |
+| 20 | Purchase order line quantity to total quantity | The line's unit | The product's own unit | away from zero | yes |
+| 21 | Purchase order line to stock move | The line's unit | The product's own unit, unless propagation is enabled | **half away from zero** | yes |
+| 22 | Received quantity reported onto a purchase order line | The move's unit | The line's unit | away from zero | yes |
+| 23 | Invoiced quantity reported onto a purchase order line | The invoice line's unit | The order line's unit | away from zero | yes |
+| 24 | Delivered quantity reported onto a sales order line | The move's unit | The line's unit | **half away from zero** | yes |
+| 25 | Invoiced quantity reported onto a sales order line | The invoice line's unit | The order line's unit | away from zero, and **unrounded** for the down-payment comparison | yes |
+| 26 | Recorded time reported onto a sales order line | The time record's unit | The line's unit | **half away from zero** | yes |
+| 27 | Sales order line to procurement | The line's unit | The product's own unit, unless propagation is enabled | **half away from zero** | no |
+| 28 | Bill of materials line to component quantity | The bill line's unit | The bill's unit | **no rounding** | no |
+| 29 | Bill of materials component quantity, final step | The bill line's unit | itself | **away from zero** | no |
+| 30 | Production order quantity to the bill's unit | The order's unit | The bill's unit | away from zero, and **unrounded** where a ratio is formed | no |
+| 31 | Production order produced quantity | The order's unit | The product's own unit | **half away from zero** | no |
+| 32 | Kit component quantity per kit | The bill line's unit | The component's own unit | **no rounding**, failure tolerated | no |
+| 33 | Reordering rule quantity to order | The product's own unit | The rule's unit | **no rounding** | no |
+| 34 | Picking weight from move lines | The move line's unit | The product's own unit | away from zero | no |
+| 35 | Picking volume from moves | The move's unit | The product's own unit | away from zero | no |
+| 36 | Package content weight | The move line's unit | The product's own unit | away from zero | no |
+| 37 | Delivery method weight check | The line's unit | The product's own unit | away from zero | no |
+| 38 | Counter sale to stock move | The move's unit | The product's own unit | **half away from zero**, and the transfer is refused if the result is zero | no |
+| 39 | Storefront cart availability check | The product's own unit | The cart line's unit | away from zero, and **unrounded** for the available quantity | no |
+| 40 | Catalogue quantity aggregation across lines | Each line's unit | The product's own unit | away from zero | no |
+
+### 12.2 Reading the table
+
+Three patterns account for nearly all of it.
+
+- **Half away from zero** is used whenever the result is a *physical* quantity that will be
+  compared with, or subtracted from, a quantity on hand. The reasoning is that a physical count
+  should be the nearest representable number, not a systematically inflated one.
+- **Away from zero** is used whenever the result is a *commercial* quantity that must not
+  under-serve the counterparty: a packaging count on a delivery note, a received quantity
+  reported back to a buyer, a rule-matching quantity.
+- **No rounding at all** is used whenever the result is an intermediate value that will itself be
+  converted or summed: the move's picked quantity, the component quantity inside a bill of
+  materials expansion, the quantity to order on a reordering rule.
+
+### 12.3 The unit propagation parameter
+
+Crossings 21 and 27 depend on a system parameter.
+
+| Parameter key | Value | Effect |
+|---|---|---|
+| `stock.propagate_uom` | `1` | The document line's unit is carried onto the stock move unchanged, and the quantity is converted from the line's unit into **the same line's unit** with half-away-from-zero rounding — that is, it is merely re-rounded onto the grid. |
+| `stock.propagate_uom` | anything else, or absent | The move is created in the **product's own unit**, and the quantity is converted from the line's unit into the product's own unit with half-away-from-zero rounding. |
+
+The default is therefore to *not* propagate: a purchase for five boxes becomes a receipt move for
+sixty units, unless the parameter is set.
+
+**Worked example, propagation off (the default).** A purchase line for five `Box of 12`:
+
+```formula
+move_quantity = round_half_away_from_zero( 5 × 12 ÷ 1 ) = 60
+move_unit     = Units
+```
+
+**Worked example, propagation on.** The same line:
+
+```formula
+move_quantity = round_half_away_from_zero( 5 × 12 ÷ 12 ) = 5
+move_unit     = Box of 12
+```
+
+### 12.4 The reservation double conversion, in full
+
+Crossings 13 and 14 form a single protective idiom that a rebuild must copy exactly.
+
+**Precondition.** The reservation is not in strict mode, a move unit was supplied, and that unit
+differs from the product's own unit.
+
+**Algorithm.**
+
+1. Let the wanted quantity be the smaller of the quantity asked for and the quantity available,
+   both in the product's own unit.
+2. Convert it into the move's unit **towards zero**.
+3. Convert the result back into the product's own unit **half away from zero**.
+4. Reserve that.
+
+**Why.** The move's unit may not be able to express the available quantity. If fifty-eight units
+are available and the move is in boxes of twelve, reserving fifty-eight units would leave the move
+holding four and eighty-three hundredths boxes, a quantity that cannot be picked as whole boxes
+and that will not survive its own round trip. Converting down first guarantees that whatever is
+reserved is exactly expressible in the move's unit.
+
+**Worked examples.**
+
+| Available in units | Move unit | Step 2, towards zero | Step 3, half away from zero | Reserved |
+|---|---|---|---|---|
+| 60 | `Box of 12` | 5 | 60 | 60 |
+| 58 | `Box of 12` | 4.83 | 57.96 | 57.96 |
+| 11 | `Box of 12` | 0.91 | 10.92 | 10.92 |
+| 5 | `Box of 12` | 0.41 | 4.92 | 4.92 |
+| 1600 | `Box of 12 Dozens` | 11.11 | 1599.84 | 1599.84 |
+
+A further rule applies to serial-tracked products: after the double conversion, if the quantity
+is not a whole number at the `Product Unit` precision, the reservation is reduced to zero.
+
+### 12.5 Crossing a unit change on the product
+
+If the product's own unit is changed while documents exist, **nothing is converted**. The unit
+reference is replaced on the impacted records and every stored number stays as it was. A move for
+sixty whose product changed from `Units` to `kg` becomes a move for sixty kilograms. This is
+stated to the user before the change as "a conversion of one old unit equals one new unit".
+
+The consequence for a rebuild: the unit change operation is a *relabelling*, not a conversion, and
+must not recompute the real quantity of existing moves, the quantity in the product's unit of
+existing move lines, or any quantity on hand.
+
+---
+
+## 13. Every other derived computation in the domain
+
+### 13.1 The sequence of a unit
+
+```formula
+sequence = minimum( 1000 , truncate_towards_zero( contained_quantity × 100 ) )
+```
+
+applied only when the record is new or its sequence is zero.
+
+Worked values: a contained quantity of one gives one hundred; six gives six hundred; twelve gives
+one thousand (capped from one thousand two hundred); two and fifty-four hundredths gives two
+hundred fifty-four; nine hundred twenty-nine ten-thousandths gives nine; one hundred sixty-six
+ten-thousandths gives one; twenty-eight and three thousand four hundred ninety-five ten-thousandths
+gives one thousand (capped from two thousand eight hundred thirty-four).
+
+### 13.2 The rounding precision of a unit
+
+```formula
+rounding_precision = 10 ^ ( − digits_of( "Product Unit" ) )
+```
+
+### 13.3 The discounted vendor price
+
+```formula
+discounted_price = convert_price( vendor_price , vendor_unit → product_own_unit ) × ( 1 − discount_percentage ÷ 100 )
+```
+
+Worked example. A vendor quotes one hundred twenty per `Box of 12 Dozens` with a five per cent
+discount, for a product whose own unit is `Units`:
+
+```formula
+converted = 120 × 1 ÷ 144 = 0.8333333333333334
+discounted = 0.8333333333333334 × ( 1 − 5 ÷ 100 ) = 0.7916666666666667
+```
+
+### 13.4 The purchase line total quantity
+
+```formula
+total_quantity = convert_quantity( ordered_quantity , line_unit → product_own_unit )   if the units differ
+total_quantity = ordered_quantity                                                       if they are the same
+```
+
+with the default away-from-zero rounding. Worked example: seven `Box of 12` gives eighty-four
+units.
+
+### 13.5 The purchase line gross unit price in the product's unit
+
+Used when an accrual must be valued.
+
+```formula
+price = price_unit
+price = price × ( 1 − discount_percentage ÷ 100 )                                  if a discount applies
+price = tax_exclusive_total( price , quantity ) ÷ quantity                          if taxes apply
+price = price × absolute_quantity( product_own_unit ) ÷ absolute_quantity( line_unit )   if the units differ
+```
+
+Note that the last step performs the price conversion **inline**, using the ratio of the two
+absolute quantities directly rather than calling the price conversion operation. The arithmetic is
+identical.
+
+### 13.6 The packaging quantity on a move
+
+```formula
+packaging_quantity = convert_quantity( demand , move_unit → packaging_unit )
+```
+
+with the default away-from-zero rounding, and only when a packaging unit is set.
+
+Worked examples, for a move whose unit is `Units`:
+
+| Demand in units | Packaging unit | Packaging quantity |
+|---|---|---|
+| 60 | `Box of 12` | 5 |
+| 58 | `Box of 12` | 4.84 |
+| 1600 | `Box of 12 Dozens` | 11.12 |
+| 1600 | `Pallet of 40 Boxes` | 0.28 |
+
+### 13.7 The bulk weight of a transfer
+
+```formula
+bulk_weight = Σ over groups of ( line_count × convert_quantity( grouped_quantity , move_line_unit → product_own_unit ) × product_weight )
+```
+
+The grouping is by transfer, product, move line unit and quantity; the count of lines in each
+group multiplies the converted quantity. Only move lines with no destination package contribute.
+
+Worked example. A transfer holds three move lines of five `Box of 12` each for a product weighing
+two (interpreted as kilograms or pounds by the system parameter). The group is (this transfer,
+this product, `Box of 12`, five) with a count of three:
+
+```formula
+converted   = convert_quantity( 5 , Box of 12 → Units ) = 60
+bulk_weight = 3 × 60 × 2 = 360
+```
+
+### 13.8 The shipping weight of a transfer
+
+```formula
+shipping_weight = bulk_weight + Σ over outermost destination packages of ( declared_shipping_weight or computed_package_weight )
+```
+
+with the computed package weight being the package type's tare plus the same content-weight sum
+restricted to the move lines whose destination package is that package.
+
+### 13.9 The shipping volume of a transfer
+
+```formula
+shipping_volume = Σ over moves of ( convert_quantity( picked_quantity , move_unit → product_own_unit ) × product_volume )
+```
+
+### 13.10 The content description of a package
+
+For display, the contents of a package are grouped by (unit, product) and each group is rendered
+as: the quantity — printed without a decimal part when it is a whole number — then, **only if the
+reader holds the multiple-units group**, a space and the unit's name, then a space and the
+product's name. A reader without the group sees only the quantity and the product name.
+
+### 13.11 Component quantity for one unit of a kit
+
+```formula
+quantity_per_kit = Σ over bill lines of convert_quantity( line_quantity ÷ bill_quantity , bill_line_unit → component_own_unit , no rounding , tolerate failure )
+```
+
+The division by the bill's produced quantity happens **before** the conversion, and the conversion
+is unrounded so that fractional components survive. Failure is tolerated so that a component whose
+unit is in a different tree from the bill line's unit contributes its raw number rather than
+aborting.
+
+### 13.12 Component quantity for a production order
+
+```formula
+factor           = convert_quantity( order_quantity , order_unit → bill_unit , no rounding ) ÷ bill_quantity
+line_quantity    = component_line_quantity × factor
+line_quantity    = round_away_from_zero( line_quantity )
+```
+
+The final rounding is **away from zero** at the `Product Unit` precision: a production run never
+plans to consume less of a component than the ratio demands.
+
+Worked example. A bill produces one `Box of 12 Dozens` from three `kg` of material. A production
+order asks for two and a half boxes.
+
+```formula
+factor        = 2.5 ÷ 1 = 2.5
+line_quantity = 3 × 2.5 = 7.5 kg
+rounded       = 7.5 kg
+```
+
+A second example where the rounding bites: the same bill consumes one `Units` of a fastener per
+box, and the order is for one third of a box.
+
+```formula
+factor        = 0.33 ÷ 1 = 0.33
+line_quantity = 1 × 0.33 = 0.33
+rounded away from zero at two digits = 0.33
+```
+
+and with a fastener quantity of seven per box:
+
+```formula
+line_quantity = 7 × 0.33 = 2.31
+rounded away from zero = 2.31
+```
+
+### 13.13 The unbuild ratio
+
+```formula
+ratio = unbuild_quantity ÷ convert_quantity( produced_quantity , production_unit → unbuild_unit )
+```
+
+when the unbuild is linked to a production order, and
+
+```formula
+ratio = convert_quantity( unbuild_quantity , unbuild_unit → bill_unit ) ÷ bill_quantity
+```
+
+when it is linked only to a bill of materials.
+
+### 13.14 The catalogue aggregated quantity
+
+When several lines of the same document hold the same product in different units, the catalogue
+panel shows a single figure:
+
+```formula
+aggregated_quantity = Σ over lines of convert_quantity( line_quantity , line_unit → product_own_unit )
+```
+
+with the default away-from-zero rounding, so the aggregate may exceed the true total by up to one
+hundredth per line.
+
+---
+
+## 14. Rounding edges and pathologies
+
+### 14.1 Conversions that round to zero
+
+A conversion rounds to zero when the exact value is smaller than half a step under half-away-from-
+zero rounding, or smaller than a full step under towards-zero rounding. Under the **default**
+away-from-zero rounding a non-zero quantity **never** rounds to zero: any positive value, however
+small, is lifted to one step.
+
+| Quantity | From | To | Exact | Away from zero | Half away from zero | Towards zero |
+|---|---|---|---|---|---|---|
+| 1 | `g` | `Ton` | 0.000001 | 0.01 | 0 | 0 |
+| 1 | `Units` | `Pallet of 40 Boxes` | 0.000173… | 0.01 | 0 | 0 |
+| 1 | `ml` | `m³` | 0.000001 | 0.01 | 0 | 0 |
+| 1 | `mm` | `mi` | 0.000000621… | 0.01 | 0 | 0 |
+| 1 | `Minutes` | `Days` | 0.00208… | 0.01 | 0 | 0 |
+
+The practical rule: **the default conversion is safe against silent loss and unsafe against silent
+inflation; the half-away-from-zero conversion is the reverse.** Both are used, deliberately, at
+different boundaries.
+
+### 14.2 The one place where rounding to zero is detected and refused
+
+When a counter sale is turned into a stock transfer, every move whose unit differs from the
+product's own unit has its demand converted half away from zero. If any such conversion yields
+zero, the whole transfer is refused before any quantity is written. The user sees a message that
+begins by stating that a conversion error occurred and that the following unit of measure
+conversions result in a zero quantity due to rounding; then one line per offending pair, each
+beginning with a space, a hyphen-minus, a space, then the word `From`, the source unit's name in
+double quotation marks, the word `to`, and the destination unit's name in double quotation marks;
+then a closing paragraph explaining that the issue occurs because the quantity becomes zero after
+rounding during the conversion, and that to fix it the conversion factors or the rounding method
+must be adjusted so that even the smallest quantity in the original unit does not round down to
+zero in the target unit. The exact text is reproduced in
+[`business-rules.md`](business-rules.md).
+
+### 14.3 Conversions that inflate
+
+| Quantity | From | To | Exact | Away from zero | Inflation |
+|---|---|---|---|---|---|
+| 1 | `Units` | `Dozens` | 0.08333… | 0.09 | eight per cent |
+| 1 | `g` | `kg` | 0.001 | 0.01 | nine hundred per cent |
+| 1 | `Units` | `Pallet of 40 Boxes` | 0.000173… | 0.01 | more than fifty-six fold |
+| 7 | `Units` | `Dozens` | 0.58333… | 0.59 | one per cent |
+| 1600 | `Units` | `Box of 12 Dozens` | 11.111… | 11.12 | eight hundredths of a per cent |
+
+Inflation is proportionally worst for small quantities of large units. A rebuild that reports a
+packaging quantity on a delivery note must expect that "nought point nought one pallets" is the
+system's honest answer for one item.
+
+### 14.4 Precision of zero digits
+
+Setting the `Product Unit` precision to zero digits makes the step one, so every quantity in every
+unit becomes a whole number.
+
+| Quantity | From | To | Exact | Away from zero | Half away from zero | Towards zero |
+|---|---|---|---|---|---|---|
+| 2 | `Units` | a unit containing 20 | 0.1 | **1** | 0 | 0 |
+| 7 | `Units` | `Dozens` | 0.583… | 1 | 1 | 0 |
+| 1 | `lb` | `kg` | 0.4536 | 1 | 0 | 0 |
+| 100 | `g` | `kg` | 0.1 | 1 | 0 | 0 |
+| 2.5 | `Dozens` | `Units` | 30 | 30 | 30 | 30 |
+
+The first row is the documented regression case: at zero digits, two units convert *up* to one
+score.
+
+### 14.5 Precision higher than the shipped value
+
+Raising the precision reduces every inflation but does not remove it, because the ratios are
+generally irrational in base ten.
+
+| Quantity | From | To | 2 digits | 3 digits | 4 digits | 6 digits |
+|---|---|---|---|---|---|---|
+| 7 `Units` | | `Dozens` | 0.59 | 0.584 | 0.5834 | 0.583334 |
+| 1 `lb` | | `kg` | 0.46 | 0.454 | 0.4536 | 0.453592 |
+| 1 `g` | | `kg` | 0.01 | 0.001 | 0.001 | 0.001 |
+
+### 14.6 The comparison-versus-difference trap
+
+Two quantities that differ by less than one step may still compare as different, and two
+quantities that compare as equal may have a non-zero difference. Every rule in this domain that
+says "equal" means *compares as zero*, and every rule that says "is zero" means *the zero test
+returns true*. A rebuild must not interchange them. The canonical counter-example, at two digits:
+six thousandths and two thousandths compare as different (one hundredth against zero) while their
+difference of four thousandths tests as zero.
+
+### 14.7 Negative quantities
+
+Every rounding method is defined symmetrically about zero: away from zero moves a negative value
+further negative, towards zero moves it towards zero, and half away from zero sends a negative tie
+to the more negative value. Negative quantities occur legitimately — a return move, an unreserve
+operation, a negative quantity on hand — and convert by the same formulas with no special case.
+
+| Quantity | From | To | Exact | Away from zero | Half away from zero | Towards zero |
+|---|---|---|---|---|---|---|
+| −7 | `Units` | `Dozens` | −0.58333… | −0.59 | −0.58 | −0.58 |
+| −1 | `lb` | `kg` | −0.453592 | −0.46 | −0.45 | −0.45 |
+
+### 14.8 A contained quantity that is not exactly one on a root unit
+
+Forbidden by validation; see [`business-rules.md`](business-rules.md). Were it allowed, the
+absolute quantity of the root would not be one and every conversion in the tree would be scaled by
+a constant that cancels out — the arithmetic would still be self-consistent, which is why the rule
+is a validation rather than an arithmetic necessity. The rule exists so that "absolute quantity"
+always means "quantity of the root unit".
+
+### 14.9 A contained quantity of zero
+
+Forbidden by a stored check. Were it allowed, the absolute quantity would be zero and every
+conversion *into* that unit would divide by zero.
+
+### 14.10 A negative contained quantity
+
+Not rejected by the stored check, which only forbids zero. A unit containing minus two would have
+a negative absolute quantity and would convert quantities into negative numbers. **Industry-
+standard default**: a rebuild should reject a contained quantity that is not strictly positive at
+the user interface, while keeping the stored check exactly as specified so that existing data
+loads unchanged.
+
+---
+
+## 15. Effects of changing the global precision
+
+| Change | Immediate effect | Effect on stored data | Risk |
+|---|---|---|---|
+| Increase digits | Every unit's rounding precision shrinks; new conversions keep more digits. | None; stored quantities remain valid and are already on the coarser grid, which is a subset of the finer one. | Low. |
+| Decrease digits | Every unit's rounding precision grows; new conversions keep fewer digits. | None; stored quantities are **not** rewritten and may now be off-grid. | High: an off-grid picked quantity is refused at completion time with the rounding message in [`business-rules.md`](business-rules.md), blocking the transfer until the quantity is edited or the precision restored. |
+| Delete the `Product Unit` record | The lookup falls back to two digits. | None. | Moderate: silently restores the shipped behaviour. |
+
+The lookup is cached, and the cache is cleared whenever any decimal precision record is created,
+updated or deleted. A rebuild must clear its own cache on the same three events, or conversions
+will keep using the old precision until the process restarts.
+
+### 15.1 The off-grid refusal, in full
+
+Before a move's picked quantity is applied, it is re-rounded at the `Product Unit` precision with
+half-away-from-zero rounding and compared with itself:
+
+```formula
+rounded = round_half_away_from_zero( picked_quantity , precision_digits )
+if compare( rounded , picked_quantity , precision_digits ) ≠ 0 then refuse
+```
+
+Every offending move contributes one paragraph to the error; the paragraphs are joined by newline
+characters and raised together. The paragraph states that the quantity done for the named product
+does not respect the rounding precision defined on the system, and asks the user to change the
+quantity done or the rounding precision in the settings.
