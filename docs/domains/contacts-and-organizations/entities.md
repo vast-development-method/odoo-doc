@@ -501,8 +501,11 @@ The list of valid keys used by the validation is: the address field set of the P
 ## 4.5 Flag image path
 
 ```formula
-flag_path = "/base/static/img/country_flags/" + flag_code + ".png"
+flag_path = flag_directory + flag_code + ".png"
 ```
+
+where *flag directory* is the served path of the shipped flag images inside the foundation
+package's static assets, ending in a solidus.
 
 where
 

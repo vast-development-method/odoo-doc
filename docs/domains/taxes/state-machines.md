@@ -197,8 +197,8 @@ The messages logged are:
 |---|---|
 | valid | The Intra-Community validity has been updated to: valid. |
 | unassigned | The Intra-Community validity has been updated to: unassigned. |
-| pending | The the cross-border registration checking service check is pending. The status will be updated soon. |
-| fault | The the cross-border registration checking service check failed. Please check the Tax ID manually. |
+| pending | `The VIES check is pending. The status will be updated soon.` |
+| fault | `The VIES check failed. Please check the Tax ID manually.` |
 
 ```mermaid
 stateDiagram-v2

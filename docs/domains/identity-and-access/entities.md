@@ -1447,6 +1447,78 @@ target is the acting account, and shows a warning notice:
 
 > Two-factor authentication disabled for the following user(s): *the comma-separated list of names*
 
+### 20.6 The mailed second factor
+
+A second package adds a second-factor method that needs no enrolment at all: the code is mailed.
+
+**Selection.** The account's second-factor type is determined by asking each installed
+implementation in turn and taking the first non-empty answer:
+
+1. the authenticator-application type, when the account has a secret;
+2. the mailed type, when the parameter `auth_totp.policy` (the second-factor enforcement parameter)
+   is `all_required`, or is `employee_required` **and** the account is internal;
+3. otherwise the account has no second factor.
+
+Both types answer the same second-factor address, so the same page serves both.
+
+**No stored state.** The mailed method stores nothing on the account: the key is derived from the
+account's identifier, its login and its most recent sign-in moment (section 7.8 of
+[calculations.md](calculations.md)). Signing in therefore invalidates every previously mailed code.
+
+**Consequences.** An account whose type is the mailed one also requires application keys on
+non-interactive connections, exactly like an enrolled account.
+
+**Sending.** Mailing a code consumes the mailing rate limiter and then:
+
+1. refuses when the account has no electronic mail address:
+   *Cannot send email: user the user name has no email address.*;
+2. composes the context — when a request exists — with the platform and the browser each
+   capitalised, the remote network address, and, when the address resolves to a city, the text
+   *city, country*;
+3. sends the code message forcibly and synchronously, addressed to the account's address, with
+   copies suppressed, marked for automatic deletion, not scheduled, with the light notification
+   layout, raising on a delivery failure.
+
+**Verifying.** Consumes the verification limiter; matches with a step and window of 3600 seconds;
+on failure raises *Verification failed, please double-check the 6-digit code*; on success purges
+**both** limiters and reports the method `totp_mail` with the policy `default`. There is no replay
+check.
+
+**Guard on production.** The code is produced only for an elevated environment, or for a request
+that has no established account and whose pending account is exactly this account. Otherwise the
+produced code is the constant `000000`.
+
+### 20.7 Security notifications
+
+The same package turns four events into messages to the account concerned. Each is rendered from a
+shared template that optionally ends with a suggestion to enable the second factor; the suggestion
+is suppressed when the account already has it and when the message is itself about the second
+factor.
+
+| Event | Subject | Body |
+|---|---|---|
+| The secret is set | Security Update: 2FA Activated | Two-factor authentication has been activated on your account |
+| The secret is cleared | Security Update: 2FA Deactivated | Two-factor authentication has been deactivated on your account |
+| A trusted browser is deleted | Security Update: Device Removed | A trusted device has just been removed from your account: *the comma-separated device labels* |
+| A sign-in succeeds on an account with a second factor, from a browser whose trusted cookie does not verify | New Connection to your Account | A new device was used to sign in to your account. |
+
+The new-connection notice is produced only when a request exists (so that the network address, the
+browser and the cookie can be read), the account has an address, and the account has a second-factor
+type.
+
+### 20.8 The enrolment invitation
+
+An administrator may invite accounts to enrol. The operation selects, with elevation, the accounts
+that have **no** secret, mails each of them the invitation template — forcibly, from the inviting
+user's own address and authorship, with the light notification layout — and returns an
+informational notice:
+
+> Invitation to use two-factor authentication sent for the following user(s): *the comma-separated
+> list of names*
+
+A companion operation returns the path of the enrolment screen so that the invitation can link to
+it.
+
 ---
 
 ## 21. Passkey
