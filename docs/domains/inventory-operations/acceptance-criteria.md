@@ -763,23 +763,35 @@ Every assertion about a quantity is an assertion about the value **after** round
 
 **When** the user chooses "Keep counted quantity"
 
-**Then** the count is applied as typed: the difference is recomputed as 17 − 10 = **+7.00** and the resulting move has a demand of 7, bringing the on-hand quantity to 17.00.
+**Then** the count is applied as typed: the difference is recomputed as 17 − 10 = **+7.00** and the resulting move has a demand of 7, bringing the on-hand quantity to **17.00**.
 
-**When** the user instead chooses "Discard"
+**When** the user instead chooses "Keep difference"
 
-**Then** the counted quantity of the conflicting record is cleared and nothing is applied.
+**Then** the counted quantity is recomputed as 10 + 5 = **15.00**, the difference stays **+5.00**, and the resulting move has a demand of 5, bringing the on-hand quantity to **15.00**.
 
 ## Scenario 46 — Requesting a count
 
-**Given** an inventory manager selects three records
+**Given** an inventory manager selects three records, one of which carries the lot-tracked product PAINT under lot `L1` in `WH/Stock`
+**And** `WH/Stock` also holds PAINT under lot `L2` and PAINT with no lot
 
-**When** they request a count for **1 October 2026**, assigned to user "Alice", with "Set Current Value"
+**When** they request a count for **1 October 2026** assigned to user "Alice"
 
-**Then** each record's scheduled date becomes 1 October 2026, its assignee becomes Alice, and its counted quantity becomes its current on-hand quantity with the counted flag on.
+**Then** the set is extended with every other record of (PAINT, `WH/Stock`), so the two sibling records are included
+**And** each record of the extended set has its scheduled date set to 1 October 2026 and its assignee set to Alice
+**And** **no** counted quantity is written and no counted flag is turned on.
 
-**When** they request it with "Leave Empty" instead
+**Given** instead the lot group is not active, or no selected record carries a tracked product
 
-**Then** the counted quantity is cleared and the counted flag is turned off.
+**Then** the set is not extended and only the three selected records are scheduled.
+
+## Scenario 46 bis — Applying with a reference label and a counting date
+
+**Given** three records carry counted quantities
+
+**When** the manager uses "apply all" with the reference "Yearly count" and the counting date **30 September 2026**
+
+**Then** only the records whose counted flag is set are applied
+**And** every adjustment move created carries the reference "Yearly count" and the date 30 September 2026.
 
 ## Scenario 47 — Cyclic and annual count dates
 

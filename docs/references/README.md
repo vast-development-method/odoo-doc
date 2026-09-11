@@ -28,6 +28,7 @@ An entity page is the fastest way to answer "what does this record hold and what
 | Page | Content |
 |---|---|
 | [Scheduled jobs](scheduled-jobs.md) | Every job with its interval and the operation it runs |
+| [Acceptance scenarios](acceptance-scenarios.md) | Every numbered scenario across every domain, with the documents whose behaviour it exercises |
 | [Operation index](operation-index.md) | Every operation on every entity, classified by what it is for, with the ones a person invokes and the ones that run unattended listed in full |
 | [Sequences](sequences.md) | Every numbering sequence with its format |
 | [Groups and access](groups-and-access.md) | Every group, every access right and every record rule, listed by entity |

@@ -418,17 +418,20 @@ The same mechanism is used when a person writes a new Location directly on a con
 
 ## 20.2 Applying a count
 
-1. The user presses Apply on a selection, or "apply all" which first asks for a free reference label.
-2. When any selected record is outdated, the conflict screen opens listing them. Keeping the counted quantities applies them unchanged; discarding clears them.
-3. Applying runs the algorithm of `calculations.md`, section 23.2: one adjustment move per record, from or to the inventory-loss Location, completed immediately with destination containers ignored, followed by the re-reservation search, the stamping of the last-count date on the Locations, the recomputation of the next-count dates, and the clearing of the counted fields.
+1. The user presses Apply on a selection, or "apply all" which first asks for a free reference label (default "Physical Inventory") and a counting date (default the current instant); "apply all" then restricts itself to the records whose counted flag is set.
+2. When any selected record is outdated, the conflict screen opens listing the whole set and, separately, the outdated subset. The person chooses between two readings of their own count:
+   - **Keep counted quantity** — the number they wrote is the truth: each record's difference is rewritten as `counted − on hand` and the counts are applied.
+   - **Keep difference** — the *correction* they intended is the truth: each record's counted quantity is rewritten as `on hand + recorded difference` and the counts are applied on top of whatever moved meanwhile.
+3. Applying runs the algorithm of `calculations.md`, section 23.2: one adjustment move per record, from or to the inventory-loss Location, completed immediately with destination containers ignored, followed by the re-reservation search, the stamping of the last-count date on the Locations, the recomputation of the next-count dates, and the clearing of the counted fields. When a counting date was given, it is written as the date of every created move.
 
 ## 20.3 Requesting a count
 
 **Performed by:** an inventory manager.
 
 1. The manager selects records and opens the count-request screen.
-2. The screen asks for a date, a person, and whether to pre-fill the counted quantity with the current on-hand quantity or leave it empty.
-3. On confirmation the date and the person are written on every selected record, and the counted quantity is either set to the on-hand quantity or cleared together with its flag.
+2. The screen asks for a scheduled date (required, defaulting to the current instant) and optionally a person to assign it to. It also exposes a switch that reads and writes the system parameter deciding whether the counting screen shows the theoretical quantity beside the counted one.
+3. On confirmation the set of records is **extended**: when the lot group is active and at least one selected record carries a tracked product, every sibling record sharing the same (product, Location) pair is added, so that counting one lot forces the whole product at that Location to be counted.
+4. The scheduled date, and the assignee when one was chosen, are written on every record of the extended set, in counting mode. The counted quantity is not touched.
 
 ## 20.4 Reverting a count
 

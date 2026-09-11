@@ -14,7 +14,7 @@ A Journal Entry is the single entity that represents both an accounting entry an
 
 ### 1.2 Lifecycle
 
-1. **Created** in `draft`, either manually, by copying, by uploading a file, by electronic mail, by a decoder, or by an upstream purchasing document.
+1. **Created** in `draft`, either manually, by copying, by uploading a file, by electronic mail, by a decoder, or by a purchasing document.
 2. **Enriched**: partner, reference, dates, lines. Dynamic lines (tax lines, payable term lines, rounding lines, non-deductible lines) are recomputed at every save.
 3. **Posted**: the document receives a number from the journal sequence, the lines become immutable in the accounting sense, and the balance invariant is enforced.
 4. **Paid** in whole or in part by reconciling the payable term lines against outgoing payments or against a vendor credit note.
@@ -784,19 +784,16 @@ The journal exposes a boolean saying whether the alias fields should be shown at
 ### 21.1 Diagram
 
 ```mermaid
-stateDiagram-v2
-    direction LR
-    state "Journal (purchase)" as J
-    state "Journal Entry (bill)" as M
-    state "Journal Item" as L
-    state "Payment Term" as T
-    state "Payment (cheque)" as P
-    state "Invoice Analysis row" as R
-    J --> M: numbers
-    M --> L: owns
-    T --> M: distributes the total
-    M --> P: reconciled by
-    L --> R: one row per product line
+flowchart LR
+    J["Journal — purchase"] -->|numbers| M["Journal Entry — vendor bill"]
+    T["Payment Term"] -->|distributes the total into instalments| M
+    M -->|owns| L["Journal Item"]
+    L -->|one row per product line| R["Invoice Analysis row"]
+    M -->|payable term lines reconciled by| P["Payment — cheque"]
+    BJ["Journal — bank"] -->|issues and numbers| P
+    PT["Partner — vendor"] -->|payable account, payment term, policy| M
+    BA["Partner Bank Account"] -->|recipient of the payment| M
+    A["Account — expense, tax, payable"] -->|carried by| L
 ```
 
 ---

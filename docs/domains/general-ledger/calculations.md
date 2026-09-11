@@ -30,6 +30,14 @@ Contents:
 24. [Account code generation](#24-account-code-generation)
 25. [Journal dashboard figures](#25-journal-dashboard-figures)
 26. [The automatic transfer amounts](#26-the-automatic-transfer-amounts)
+27. [The order in which numbers are assigned](#27-the-order-in-which-numbers-are-assigned)
+28. [The proposed number shown before posting](#28-the-proposed-number-shown-before-posting)
+29. [Numbering holes per journal](#29-numbering-holes-per-journal)
+30. [The display name of an entry](#30-the-display-name-of-an-entry)
+31. [Which items are reportable for tax](#31-which-items-are-reportable-for-tax)
+32. [Whether a journal item affects the tax report](#32-whether-a-journal-item-affects-the-tax-report)
+33. [The dashboard figures of a liquidity journal](#33-the-dashboard-figures-of-a-liquidity-journal)
+34. [Worked end-to-end example](#34-worked-end-to-end-example)
 
 ---
 
@@ -1568,3 +1576,293 @@ The selected items are regrouped and mirrored on the destination account.
 - Counterpart item: debit 1 000.00 on the doubtful-debt account, labelled "Transfer from *the receivable account*".
 - Mirror item: credit 1 000.00 on the receivable account, labelled "Transfer to *the doubtful-debt account*".
 - After posting, the two original items and the mirror item are reconciled together on the receivable account.
+
+---
+
+## 27. The order in which numbers are assigned
+
+When several entries are posted in one operation, the order in which they consume numbers is **not** the order in which they were selected or created. The numbering computation first sorts the set:
+
+```formula
+sort key = ( accounting date , reference or the empty string , original identifier )
+```
+
+ascending on all three components. Then, walking the sorted list:
+
+```
+ 1. Skip every cancelled entry.
+ 2. Let HAS_NAME mean that the number exists and is not the placeholder.
+ 3. If the entry was never posted and its number does not match its accounting date
+    (see the date-alignment test below), clear the number and continue with the next entry.
+ 4. If the entry has an accounting date, has no number, and is not draft, assign the next
+    number of its chain.
+ 5. After the walk, run the inverse of the number field: recompute the payment reference of
+    every entry that now has a real number, and refresh the gap flags.
+```
+
+The date-alignment test used in step 3 is:
+
+```
+ 1. If the entry has no number or no accounting date, it matches.
+ 2. Read the number with the shape of its deduced periodicity to obtain the year, the end
+    year and the month values.
+ 3. Compute the period boundaries for that periodicity from the accounting date.
+ 4. The year matches when the number carries no year, or when the year value equals the start
+    year of the period truncated to the number of characters the year occupies in the number.
+ 5. The end year matches under the same rule against the end year of the period.
+ 6. The month matches when the number carries no month, or when the month value equals the
+    month of the accounting date.
+ 7. The number matches the date when the year, the end year and the month all match.
+```
+
+**Worked example.** The highest number of the chain is `XMISC/2016/00001`. Six draft entries are created in this order, with these accounting dates:
+
+| Creation order | Accounting date |
+|---|---|
+| 1 | 5 March 2019 |
+| 2 | 6 March 2019 |
+| 3 | 7 March 2019 |
+| 4 | 4 March 2019 |
+| 5 | 5 March 2019 |
+| 6 | 5 March 2019 |
+
+The first entry already carries a number (it was the first of the period) and that number is cleared by hand. All six are posted in one operation. The sort key orders them 4 March, then the three 5 March entries in creation order, then 6 March, then 7 March, and the numbers assigned are:
+
+| Creation order | Number |
+|---|---|
+| 1 | `XMISC/2019/00002` |
+| 2 | `XMISC/2019/00005` |
+| 3 | `XMISC/2019/00006` |
+| 4 | `XMISC/2019/00001` |
+| 5 | `XMISC/2019/00003` |
+| 6 | `XMISC/2019/00004` |
+
+---
+
+## 28. The proposed number shown before posting
+
+A draft entry shows the number it *would* take, without consuming it.
+
+```
+ 1. The placeholder is shown only when the number is empty or is the placeholder value, the
+    accounting date is known, and the chain has **no** previous number under the strict
+    search (that is, the entry would be the first of its period).
+ 2. The next sequence format and its values are computed as at posting.
+ 3. The counter value is increased by one and the format is filled.
+ 4. Otherwise no placeholder is shown.
+```
+
+The restriction to the first entry of a period is deliberate: for any later entry the proposed value would be wrong as soon as another user posts first.
+
+---
+
+## 29. Numbering holes per journal
+
+The dashboard indicator is computed per journal and per numbering prefix:
+
+```
+ 1. Group the journals by the fiscal lock date that applies to the acting user **with the
+    exceptions ignored**, for that journal.
+ 2. For each group, collect the companies that are the journal company or a descendant of it.
+ 3. Select the distinct pairs (journal, numbering prefix) among the entries of those journals
+    and companies that carry the gap flag and whose accounting date is strictly after that
+    lock date.
+ 4. A journal reports a hole when at least one such pair exists.
+```
+
+Entries inside a locked period are deliberately excluded: their holes can no longer be corrected, so reporting them would be noise.
+
+The list opened by the indicator shows every entry of the journals and prefixes concerned, so that the user sees the hole in context rather than the single flagged entry.
+
+---
+
+## 30. The display name of an entry
+
+```
+ 1. Let PARTS be an empty list.
+ 2. When the entry is draft:
+      a. Append the label of the document type, prefixed by the word "Draft" and a space
+         (for a plain entry the label is "Journal Entry").
+      b. Append, in parentheses, the reference when there is one, otherwise the word
+         "Unknown" — this is what identifies a draft document that has no number yet.
+ 3. When the entry is cancelled, append the number and then the word "(Cancelled)".
+ 4. When the entry is posted, append the number.
+ 5. When the full display mode is requested, append the counterpart name and the accounting
+    date.
+ 6. Join the parts with spaces.
+```
+
+The labels of the document types used here are: Journal Entry, **Invoice** (not "Customer Invoice"), **Credit Note** (not "Customer Credit Note"), Vendor Bill, Vendor Credit Note, Sales Receipt and Purchase Receipt. The two overrides exist so that the name printed to a customer says simply "Invoice".
+
+---
+
+## 31. Which items are reportable for tax
+
+A Journal Item is *tax exigible* — that is, reportable in the tax report now rather than at payment time — when at least one of these holds:
+
+1. the entry it belongs to is marked "always tax exigible" (which is the case for every entry that is not an invoice-like document and that collects no cash-basis values);
+2. the item carries neither an originating tax nor any tax (it only has grids);
+3. the entry is itself a cash-basis entry;
+4. the originating tax of the item is not exigible on payment;
+5. at least one of the taxes of the item is not exigible on payment.
+
+The last two are deliberately "at least one": an item carrying a mixture of cash-basis and ordinary taxes is reportable, which is why mixing the two on one item while they share a grid is forbidden.
+
+---
+
+## 32. Whether a journal item affects the tax report
+
+Used by the tax lock check and by the accounting-date rule:
+
+```formula
+affects_tax_report( item ) = ( the item carries at least one tax )
+                          or ( the item is a tax line )
+                          or ( the item carries at least one grid whose applicability is taxes )
+
+affects_tax_report( entry ) = at least one of its items affects the tax report
+```
+
+---
+
+## 33. The dashboard figures of a liquidity journal
+
+Only the figures that are aggregations of journal items are specified here; the statement-driven figures belong to `../payments-and-bank-reconciliation/`.
+
+### The account-driven balance
+
+```formula
+journal_balance = sum over the items on the default account of the journal, whose entry is
+                  not cancelled and whose display type is not a section, a subsection or a
+                  note, of:
+                      amount_currency   when the journal has a foreign currency different
+                                        from the company currency
+                      balance           otherwise
+```
+
+together with the number of such items. The aggregation deliberately ignores the journal of the item: an amount booked on the bank account from another journal is part of the bank balance.
+
+### The running balance of the last statement
+
+```formula
+running_balance = closing balance of the most recent statement of the journal that has a
+                  first-line index, taken in descending date then descending identifier order
+                + the sum of the amounts of the transactions of the journal that belong to no
+                  statement, whose entry is not cancelled, and whose internal index is greater
+                  than or equal to the first-line index of that statement
+```
+
+with the closing balance read as zero when no such statement exists. The pair (whether anything at all was found, the resulting amount) is what the card shows.
+
+### The outstanding accounts
+
+```formula
+inbound_outstanding_accounts  = the set of outstanding accounts of the money-in method lines
+outbound_outstanding_accounts = the set of outstanding accounts of the money-out method lines
+```
+
+---
+
+## 34. Worked end-to-end example
+
+This example ties the whole domain together. Company currency: euro, rounding 0.01. Fiscal year ends 31 December. Today is 10 March 2026.
+
+### Step 1 — the chart
+
+A generic chart is loaded. Among the accounts created: `400000` Suppliers (Payable, reconcilable), `411000` Customers (Receivable, reconcilable), `550000` Bank (Bank and Cash), `600000` Purchases (Expenses), `700000` Sales (Income), `999999` Profit or Loss Appropriation (Current Year Earnings), `550001` Bank Suspense Account (Current Assets), `550002` Outstanding Receipts (Current Assets, reconcilable), `550003` Outstanding Payments (Current Assets, reconcilable), `999997` Cash Discount Gain, `999998` Cash Discount Loss, `999001` Cash Difference Gain, `999002` Cash Difference Loss, `580000` Liquidity Transfer.
+
+Journals created: `INV` Sales, `BILL` Purchases, `MISC` Miscellaneous Operations, `EXCH` Exchange Difference, `CABA` Cash Basis Taxes, `BNK1` Bank.
+
+### Step 2 — the opening entry
+
+The opening date is 1 January 2026, so the entry is dated 31 December 2025 in the journal `MISC`. Amounts recorded: Bank 12 000.00 debit, Customers 5 000.00 debit, Suppliers 3 000.00 credit.
+
+| Account | Debit | Credit | Label |
+|---|---|---|---|
+| 550000 Bank | 12 000.00 | | Opening balance |
+| 411000 Customers | 5 000.00 | | Opening balance |
+| 400000 Suppliers | | 3 000.00 | Opening balance |
+| 999999 Profit or Loss Appropriation | | 14 000.00 | Automatic Balancing Line |
+
+Running open balance: 12 000.00 + 5 000.00 − 3 000.00 = 14 000.00, so the balancing item is a credit of 14 000.00. The entry is posted and takes the number `MISC/2025/12/0001`.
+
+### Step 3 — a miscellaneous accrual
+
+On 5 March 2026 the accountant books an accrued expense of 1 200.00 in the journal `MISC`:
+
+| Account | Debit | Credit |
+|---|---|---|
+| 600000 Purchases | 1 200.00 | |
+| 400000 Suppliers | | 1 200.00 |
+
+Posting assigns `MISC/2026/03/0001` (the March chain is new; the chain of December 2025 is a different period). The entry is balanced, no lock date is violated, and no hash is taken because `MISC` does not secure.
+
+### Step 4 — a second entry the same month
+
+On 7 March another entry of 800.00 is posted: it takes `MISC/2026/03/0002`.
+
+### Step 5 — a mistake and its reversal
+
+The 1 200.00 entry was wrong. On 31 March it is reversed with the reference "Reversal of: MISC/2026/03/0001":
+
+| Account | Debit | Credit |
+|---|---|---|
+| 600000 Purchases | | 1 200.00 |
+| 400000 Suppliers | 1 200.00 | |
+
+The reversal takes `MISC/2026/03/0003`. Because the original is a plain entry and the reversal date is not in the future, the reversal is a cancelling one: it is posted immediately and the two items on `400000` are reconciled. The credit of 1 200.00 and the debit of 1 200.00 net to zero, so a Full Reconciliation is created and both items take its identifier as their matching number.
+
+### Step 6 — a foreign-currency receivable
+
+On 1 April 2026 a customer invoice is posted in the journal `INV` for 1 000.00 foreign units at a rate of 1.05 foreign units per euro:
+
+| Account | Debit | Credit | Foreign amount |
+|---|---|---|---|
+| 411000 Customers | 952.38 | | 1 000.00 |
+| 700000 Sales | | 952.38 | −1 000.00 |
+
+The number is `INV/2026/00001` (a sale journal numbers yearly). The total in the document currency is 1 000.00, the signed company total is 952.38.
+
+### Step 7 — the payment and the exchange difference
+
+On 20 May the customer pays 1 000.00 foreign units; the rate that day is 1.10, so the bank receives 909.09 euros. The bank entry in the journal `BNK1`:
+
+| Account | Debit | Credit | Foreign amount |
+|---|---|---|---|
+| 550000 Bank | 909.09 | | 1 000.00 |
+| 411000 Customers | | 909.09 | −1 000.00 |
+
+Matching the two receivable items: both publish the foreign currency, so the match is made in it for 1 000.00 units. Converting back, the invoice side gives 952.38 euros and the payment side 909.09 euros; they lie outside each other's tolerance ranges, so the matched amount in euros is the smaller, 909.09.
+
+| Match | Amount (euros) | Amount on the debit side | Amount on the credit side |
+|---|---|---|---|
+| invoice ↔ payment | 909.09 | 1 000.00 foreign units | 1 000.00 foreign units |
+
+The invoice item keeps 43.29 euros with nothing left in foreign units, so an exchange difference of +43.29 is produced in the journal `EXCH`, dated 20 May:
+
+| Account | Debit | Credit | Foreign amount |
+|---|---|---|---|
+| 411000 Customers | | 43.29 | 0.00 |
+| Exchange loss | 43.29 | | 0.00 |
+
+The first of the two is matched with the invoice item, which then reaches zero in both currencies. A Full Reconciliation now covers the three receivable items; their matching number is its identifier.
+
+### Step 8 — closing the quarter
+
+On 5 July the accountant sets the Global Lock Date to 30 June 2026. The validation checks that no unreconciled bank transaction exists on or before that date. Afterwards:
+
+- posting a new entry dated 15 June moves its accounting date out of the locked period;
+- modifying the posted entry `MISC/2026/03/0001` is refused with "You cannot add/modify entries prior to and inclusive of: Global Lock Date (06/30/2026).";
+- a lock exception granted to one accountant until the tenth of July, relaxing the Global Lock Date to 31 May 2026, lets that accountant modify a June entry while nobody else can.
+
+### Step 9 — securing the half-year
+
+On 15 July the administrator switches on the hash on the journal `MISC` and runs the secure-entries wizard up to 30 June 2026. The chains of `MISC` are examined:
+
+- the chain with the prefix `MISC/2025/12/` holds `MISC/2025/12/0001`;
+- the chain with the prefix `MISC/2026/03/` holds `MISC/2026/03/0001`, `0002` and `0003`.
+
+Both are contiguous, neither holds an unreconciled bank transaction, so four entries are hashed in ascending counter order per chain. Each receives the message "This journal entry has been secured." From then on none of them can be reset to draft, renumbered, edited in a hashed field, or have an item deleted.
+
+### Step 10 — the year end
+
+On 31 December 2026 the accountant posts the profit-or-loss appropriation entry by hand, moving the balance of the income and expense accounts to the retained-earnings account, then sets the Global Lock Date to 31 December 2026. Once the audit is over, the administrator sets the Hard Lock Date to the same day; from that moment no exception can reopen the year and the Hard Lock Date can never be lowered.

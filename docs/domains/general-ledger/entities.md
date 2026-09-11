@@ -22,6 +22,9 @@ Contents:
 14. [Company — ledger fields](#14-company--ledger-fields)
 15. [Partner — ledger fields](#15-partner--ledger-fields)
 16. [Wizard entities](#16-wizard-entities)
+17. [Relations and deletion behavior](#17-relations-and-deletion-behavior)
+18. [Ordering rules](#18-ordering-rules)
+19. [Fields that are tracked in the audit trail](#19-fields-that-are-tracked-in-the-audit-trail)
 
 ---
 
