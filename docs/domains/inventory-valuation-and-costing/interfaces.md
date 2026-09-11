@@ -36,7 +36,7 @@ printable documents, notifications, and import and export considerations.
 | **Post WIP Accounting Entry** (contextual action on manufacturing orders) | the contextual actions of the manufacturing order list, for the accounting user group | Opens the work-in-progress wizard as a dialog. |
 | **WIP** (statistics button on a manufacturing order) | the order's button box, for the accounting user group, hidden when the count is zero | Opens the work-in-progress entries of that order. |
 | **Manufacturing** (statistics button on a journal entry) | the entry's button box, for the manufacturing user group, hidden when the count is zero | Opens the manufacturing orders a work-in-progress entry was based on. |
-| **Compute Price from BoM** (button and contextual action on products) | the unit-cost area of the product form, and the contextual actions of the product list and card views, for the manufacturing manager group | Recomputes the unit cost from the bill of materials. Hidden when the product has no bill of materials, and when the combination is perpetual valuation with first in first out costing. |
+| **"Compute Price from BoM"**, that is, compute the price from the bill of materials (button and contextual action on products) | the unit-cost area of the product form, and the contextual actions of the product list and card views, for the manufacturing manager group | Recomputes the unit cost from the bill of materials. Hidden when the product has no bill of materials, and when the combination is perpetual valuation with first in first out costing. |
 
 ### 1.3 Client-side paths
 
@@ -78,7 +78,7 @@ Two blocks are added.
 | Valuation by Lot/Serial (`lot_valuated`) | before the serial-number prefix format label | rendered with a confirmation widget; hidden while the tracking mode is `none` |
 | Is a Landed Cost (`landed_cost_ok`) | inside the billing group | hidden unless the product type is service |
 | Default Split Method (`split_method_landed_cost`) | inside the billing group | hidden unless the landed-cost flag is on and the type is service |
-| Compute Price from BoM button | inside the unit-cost area | manufacturing manager group; hidden when there is no bill of materials, or when the valuation mode is `real_time` and the costing method is `fifo` |
+| The **"Compute Price from BoM"** button, that is, compute the price from the bill of materials | inside the unit-cost area | manufacturing manager group; hidden when there is no bill of materials, or when the valuation mode is `real_time` and the costing method is `fifo` |
 
 ### 2.3 Product template list
 
