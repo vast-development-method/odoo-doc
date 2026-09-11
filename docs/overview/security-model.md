@@ -1,32 +1,47 @@
 # The security model
 
-Every read, write, creation and deletion in the system passes through the same four gates, in the same order, with the same messages. This document specifies them exactly: who the actors are, how groups and privilege families are organised, how access rights are checked, how record rules combine, how fields are restricted, what elevating privileges does and does not change, how company scope works, and how a record can be reached from outside with a signed token.
+Every read, write, creation and deletion in the system passes through the same gates, in the same order, with the same messages. This document specifies them exactly: how the acting identity of a request is established, who the actors are, how groups and privilege families are organised, how access rights are checked, how record rules combine, how fields are restricted, what each generic operation checks and when, what elevating privileges does and does not change, which operations are reachable from outside at all, how a session is protected, and how a record can be reached from outside with a signed token.
 
-Read [the architecture](architecture.md) and [the entity and field system](entity-and-field-system.md) first. The presentation side of security — which menus and buttons a user sees — is in [views and actions](views-and-actions.md); it is guidance, not enforcement, and is never a substitute for the gates specified here.
+Read [the architecture](architecture.md) and [the entity and field system](entity-and-field-system.md) first. The presentation side of security — which menus and buttons a user sees — is covered in [section 18](#18-view-loading-and-menu-visibility) and in [views and actions](views-and-actions.md); it is guidance, not enforcement, and is never a substitute for the gates specified here.
+
+Company scoping and company consistency have their own document, [multi-company](multi-company.md); [section 12](#12-company-scoping-and-company-consistency) states only what the gates need to know about them. The entity-by-entity field catalogues of User, Group, Privilege Family, Access Right and Record Rule, and the shipped groups, rules and settings, are in [identity and access](../domains/identity-and-access/README.md). The generic operations whose checks are listed here are specified in full in [record operations and query notation](record-operations-and-query-notation.md).
 
 ---
 
 ## Table of contents
 
-1. [The four gates](#1-the-four-gates)
-2. [Users](#2-users)
-3. [Groups](#3-groups)
-4. [Access rights](#4-access-rights)
-5. [Record rules](#5-record-rules)
-6. [Field-level restrictions](#6-field-level-restrictions)
-7. [The unrestricted actor and the elevate-privileges contract](#7-the-unrestricted-actor-and-the-elevate-privileges-contract)
-8. [Company scoping](#8-company-scoping)
-9. [Company consistency](#9-company-consistency)
-10. [External access with signed tokens](#10-external-access-with-signed-tokens)
-11. [Caching and invalidation of security decisions](#11-caching-and-invalidation-of-security-decisions)
-12. [What is not enforcement](#12-what-is-not-enforcement)
-13. [The shipped catalogue](#13-the-shipped-catalogue)
-14. [Invariants a rebuild must preserve](#14-invariants-a-rebuild-must-preserve)
-15. [Acceptance criteria](#15-acceptance-criteria)
+1. [The layers at a glance](#1-the-layers-at-a-glance)
+2. [The environment and the acting identity](#2-the-environment-and-the-acting-identity)
+3. [Users](#3-users)
+4. [Groups](#4-groups)
+5. [Access rights](#5-access-rights)
+6. [Record rules](#6-record-rules)
+7. [Field-level restrictions](#7-field-level-restrictions)
+8. [The checks performed by each generic operation](#8-the-checks-performed-by-each-generic-operation)
+9. [Relational safeguards](#9-relational-safeguards)
+10. [The unrestricted actor and the elevate-privileges contract](#10-the-unrestricted-actor-and-the-elevate-privileges-contract)
+11. [Which operations are reachable from outside](#11-which-operations-are-reachable-from-outside)
+12. [Company scoping and company consistency](#12-company-scoping-and-company-consistency)
+13. [The authentication level of a request endpoint](#13-the-authentication-level-of-a-request-endpoint)
+14. [Session security](#14-session-security)
+15. [Establishing an identity](#15-establishing-an-identity)
+16. [External access with signed tokens](#16-external-access-with-signed-tokens)
+17. [External identities in practice](#17-external-identities-in-practice)
+18. [View loading and menu visibility](#18-view-loading-and-menu-visibility)
+19. [Caching and invalidation of security decisions](#19-caching-and-invalidation-of-security-decisions)
+20. [What is not enforcement](#20-what-is-not-enforcement)
+21. [Trust boundaries and construction rules](#21-trust-boundaries-and-construction-rules)
+22. [The shipped catalogue](#22-the-shipped-catalogue)
+23. [Message catalogue](#23-message-catalogue)
+24. [Invariants a rebuild must preserve](#24-invariants-a-rebuild-must-preserve)
+25. [Acceptance criteria](#25-acceptance-criteria)
+26. [Reconciliation notes](#26-reconciliation-notes)
 
 ---
 
-## 1. The four gates
+## 1. The layers at a glance
+
+### 1.1 The four data gates
 
 ```mermaid
 flowchart TD
@@ -52,11 +67,90 @@ flowchart TD
 
 The asymmetry between gate one and gate two is deliberate and must be reproduced: **adding an access right grants, adding a record rule restricts**. A package cannot take away what another package granted at gate one; a package can always narrow at gate two.
 
+### 1.2 The six layers of the whole mechanism
+
+The four data gates sit inside a larger stack. A request must pass every layer.
+
+| Layer | Granularity | Data that defines it | Default when nothing is declared | Composition | Specified in |
+|---|---|---|---|---|---|
+| 1. Authentication | The request | Credentials, session, application key | The request is anonymous and acts as the public user, or is refused | Not applicable | [Sections 14](#14-session-security) and [15](#15-establishing-an-identity) |
+| 2. Endpoint authentication level | The request endpoint | The level declared on the endpoint | The endpoint declares one explicitly; there is no implicit default | Not applicable | [Section 13](#13-the-authentication-level-of-a-request-endpoint) |
+| 3. Access rights | One entity, one operation | Access Right records | **Refuse**: an operation with no granting record is forbidden to everyone except an unrestricted environment | **Additive union** across the acting user's groups | [Section 5](#5-access-rights) |
+| 4. Record rules | One record, one operation | Record Rule records | **Allow**: an operation with no applicable rule is permitted on every record | Global rules conjoin, group rules disjoin, the two sets conjoin | [Section 6](#6-record-rules) |
+| 5. Field restrictions | One field, read or write | The group requirement declared on the field | **Allow**: a field with no requirement is accessible to everyone | A group expression evaluated against the acting user's groups | [Section 7](#7-field-level-restrictions) |
+| 6. Operation exposure | One named operation | The naming convention and the private marker | A name beginning with an underscore, or carrying the private marker, is not callable from outside | Not applicable | [Section 11](#11-which-operations-are-reachable-from-outside) |
+
+A seventh mechanism sits beside the six: a **token** ([section 16](#16-external-access-with-signed-tokens)) authorises one document for a holder who passes none of layers 3 to 5. It never widens an entity-wide permission.
+
+Layers 3, 4 and 5 are the data-driven authorisation core. Layers 1, 2 and 6 gate the entry points. Two orthogonal switches modify the evaluation of layers 3, 4 and 5:
+
+- **Unrestricted mode**, also called elevated rights: layers 3, 4 and 5 are skipped entirely for reading and writing. The acting user identity is unchanged.
+- **The root identity**, the user whose identifier is `1`: an environment acting as that identity is *always* unrestricted and can never leave that state.
+
 ---
 
-## 2. Users
+## 2. The environment and the acting identity
 
-### 2.1 The entity
+### 2.1 The four components
+
+Every operation is evaluated inside an **environment** made of four components:
+
+| Component | Meaning |
+|---|---|
+| The transaction | The unit of work and its database connection, shared by every environment of the request |
+| The acting user identifier | The identifier of the User record on whose behalf the operation runs. It is the value written into the created-by and last-modified-by fields, and the value the record-rule evaluation context exposes as the acting user |
+| The unrestricted flag | A boolean; when true, layers 3, 4 and 5 are not evaluated |
+| The context | An immutable map of metadata: the selected companies, the language, the time zone, the default values to preload, and any package-specific key |
+
+Two environments with the same four components are the same object. The platform reuses an existing environment rather than creating a duplicate, which is what makes the record cache shared between them.
+
+### 2.2 Deriving the components
+
+| Derivation | Rule |
+|---|---|
+| The acting **User record** | Read unrestricted, so that a user who cannot read the User entity can still be identified; the record is always readable to the platform itself |
+| The **unrestricted flag** when the acting identity is the root identity | Forced true at construction; it can never be cleared |
+| The **context** when entering unrestricted mode without an explicit context | Every key whose name marks a preloaded default value is dropped, so that the caller's preloaded defaults do not leak into the privileged operation; every other key survives, including the language, the time zone and the company selection |
+| The **context** when switching the acting identity | Unchanged |
+| The **transaction's default identity** | The first environment created in the transaction with a real numeric acting identifier becomes the transaction's default identity. It is used when a deferred flush has to run without an explicit environment, and it is the identity restored by the command protection of [section 9.3](#93-command-protection-on-sensitive-entities) |
+
+### 2.3 The two transitions
+
+Switching the acting identity and setting the unrestricted flag are the only two transitions. Their combined effect:
+
+| Starting state | Transition | Resulting acting identifier | Resulting unrestricted flag |
+|---|---|---|---|
+| Any | Switch to a user that is not the root identity | That user | **False** |
+| Any | Switch to the root identity | The root identity | **True** |
+| Any | Switch to an empty user | Unchanged | Unchanged |
+| Restricted, user *u* | Set unrestricted | *u* | True |
+| Unrestricted, user *u* | Set unrestricted | *u* | True, and the same environment object is returned |
+| Unrestricted, user *u* | Clear unrestricted | *u* | False |
+| Unrestricted, root identity | Clear unrestricted | The root identity | **True** — the root identity can never leave unrestricted mode |
+| Unrestricted, user *u* | Switch to user *v* | *v* | **False** — switching identity always clears the flag |
+
+Worked example, starting from an ordinary request acting as a user named in the table as the first user:
+
+| Step | Resulting acting identity | Resulting flag |
+|---|---|---|
+| Start | first user | restricted |
+| Switch to the second user | second user | restricted |
+| Switch to the root identity | root identity | unrestricted |
+| Set unrestricted while acting as the first user | first user | unrestricted |
+| Set unrestricted again | first user | unrestricted, same environment object |
+| Clear unrestricted | first user | restricted |
+| Clear unrestricted while acting as the root identity | root identity | unrestricted |
+| Switch from an unrestricted first user to the second user | second user | restricted |
+
+### 2.4 Consequences for authorship and audit
+
+An operation running unrestricted still writes the **acting** user into the created-by and last-modified-by fields. Entering unrestricted mode therefore never hides who performed a change. Only switching the acting identity changes authorship. The two notions are never conflated: "runs unrestricted" means the checks are skipped; "runs as the platform identity" means the identity itself changes.
+
+---
+
+## 3. Users
+
+### 3.1 The entity
 
 A user is a record of the User entity (`res.users`, table `res_users`). It embeds a Party record (`res.partner`, table `res_partner`) ([inheritance and extension, section 4](inheritance-and-extension.md#4-embedding-a-parent-record)), so a user has a name, an electronic mail address, an address, a language, a time zone and an image without duplicating them.
 
@@ -66,13 +160,13 @@ A user is a record of the User entity (`res.users`, table `res_users`). It embed
 | Password (`password`) | Text | Stored only as a verifier derived by a deliberately slow one-way function; never readable. |
 | Set password (`new_password`) | Text, not stored | The write-only channel for changing the password. |
 | Active (`active`) | Boolean, default true | An inactive user cannot sign in and is excluded from ordinary searches. |
-| Shared (`share`) | Boolean, computed, stored | True when the user is **not** an internal user. Derived from group membership. |
+| Shared (`share`) | Boolean, computed, stored | True when the user is **not** an internal user. Derived from group membership: false exactly when the user belongs to the internal-user group directly or by implication, true otherwise, which also marks a user who belongs to none of the three kind groups. |
 | Main company (`company_id`) | Many-to-one to Company, required, default the environment's current company | The user's home company; the default company of records they create. |
 | Allowed companies (`company_ids`) | Many-to-many to Company, association table `res_company_users_rel` | The companies the user may switch on. |
 | Explicit groups (`group_ids`) | Many-to-many to Group, association table `res_groups_users_rel` | The groups assigned directly. |
-| All groups (`all_group_ids`) | Many-to-many to Group, computed, elevated | The transitive closure of the explicit groups under implication. See [section 3.3](#33-the-implied-group-closure). |
+| All groups (`all_group_ids`) | Many-to-many to Group, computed, elevated | The transitive closure of the explicit groups under implication. See [section 4.3](#43-the-implied-group-closure). |
 
-### 2.2 The kinds of user
+### 3.2 The kinds of user
 
 A user's kind is determined by which of three **mutually exclusive** groups they belong to, transitively.
 
@@ -82,60 +176,83 @@ A user's kind is determined by which of three **mutually exclusive** groups they
 | Portal | `base.group_portal` (portal user) | Yes | Only the portal | A customer or supplier given access to their own documents |
 | Public | `base.group_public` (public user) | No — it is assumed, not signed into | Only public pages | Every anonymous visitor |
 
-Two further identities exist that are not kinds:
+### 3.3 The four special identities
 
-| Identity | Meaning |
-|---|---|
-| The **root identity** | A fixed user identifier reserved for the platform. An environment whose acting user is the root identity is **always** unrestricted ([section 7](#7-the-unrestricted-actor-and-the-elevate-privileges-contract)). Used for the registry build, for package installation and for scheduled work that must not be restricted. |
-| The **administrator** | An ordinary internal user who belongs to the settings group. Not privileged at the platform level; privileged only by group membership. |
+| Identity | Identifier | Role | Protections |
+|---|---|---|---|
+| The **root identity** | `1` | Executes the registry build, package installation, data loading and scheduled work that must not be restricted | Permanently archived; an environment acting as it is always unrestricted; activating it is refused with "You cannot activate the superuser."; deleting it is refused with "You can not remove the admin user as it is used internally for resources created by the platform (updates, module installation, ...)" |
+| The **administrator** | Defined in data | The first interactive settings administrator. An ordinary internal user, privileged only by group membership and not at the platform level | Deleting it is refused with "You cannot delete the admin user because it is utilized in various places (such as security configurations,...). Instead, archive it." |
+| The **portal template user** | Defined in data, archived | The source of groups and preferences for a newly signed-up external account | Deleting it is refused with "Deleting the template users is not allowed. Deleting this profile will compromise critical functionalities." |
+| The **public user** | Defined in data | The identity a request at the public endpoint level runs as when no session exists | Deleting it is refused with "Deleting the public user is not allowed. Deleting this profile will compromise critical functionalities." |
 
-### 2.3 Exclusivity of the kinds
+The public user is not privileged: it is an ordinary User record belonging only to the public-user group, and every layer applies to it exactly as to any other user. One public user exists per site, and one per company when a company needs its own ([section 17.1](#171-what-the-public-identity-is-and-is-not), and [multi-company, section 12.3](multi-company.md#123-the-public-identity-of-a-company)).
 
-The three kind groups are **disjoint**: no user may belong to more than one, transitively. The rule is enforced by a validation on group membership, on both the user and the group:
+### 3.4 Exclusivity of the kinds
+
+The three kind groups are **disjoint**: no user may belong to more than one, transitively. The disjointness is itself transitive: every group that implies the portal-user group is disjoint from every group that implies the internal-user group. The rule is enforced by a validation on group membership, on both the user and the group:
 
 - On the user: the intersection of the user's transitive groups with the three kind groups must have at most one member; otherwise the write is refused with **"User "** the name **" cannot be at the same time in exclusive groups "** followed by the group names.
 - On a group: changing a group's implications must not make any user violate the rule. Because checking every member of a large group would not scale, the check instead searches for a single active user who now belongs to two kind groups, and refuses if one is found.
 
 Exclusivity matters because record rules and access rights are written on the assumption that a portal user is *not* an internal user.
 
-### 2.4 Derived predicates
+### 3.5 Derived predicates
 
 | Predicate | True when |
 |---|---|
-| Is internal | The user belongs to the internal-user group |
-| Is portal | The user belongs to the portal-user group |
-| Is public | The user belongs to the public-user group |
-| Is system | The user belongs to the settings group (`base.group_system`) |
+| Is internal | The user belongs to the internal-user group, evaluated unrestricted |
+| Is portal | The user belongs to the portal-user group, evaluated unrestricted |
+| Is public | The user belongs to the public-user group, evaluated unrestricted |
+| Is system | The user belongs to the settings group (`base.group_system`), evaluated unrestricted |
 | Is administrator | The user is the root identity, **or** belongs to the access-rights group (`base.group_erp_manager`) |
-| Is the root identity | The user's identifier equals the reserved one |
+| Is the root identity | The user's identifier equals `1` |
 
-The environment exposes three of these directly: *unrestricted*, *administrator* (unrestricted, or the user is an administrator) and *system* (unrestricted, or the user is a system user).
+The environment exposes three of these directly: *unrestricted* (the flag), *administrator* (unrestricted, or the acting user is an administrator) and *system* (unrestricted, or the acting user is a system user).
 
-### 2.5 At least one administrator
+### 3.6 At least one administrator
 
 A validation refuses any change to group membership that would leave the tenant with **no** member of the settings group: **"You must have at least an administrator user."** The check is skipped while the foundation package is being installed, because during that window no user exists yet.
 
-### 2.6 Asking about another user's groups
+Two further guards protect the user record: deactivating oneself is refused with **"You cannot deactivate the user you're currently logged in as."**, and activating the root identity is refused with the message of [section 3.3](#33-the-four-special-identities).
 
-Asking whether a user belongs to a group is refused unless the asker is unrestricted, is asking about themselves, or is an internal user: **"You can ony call user.has_group() with your current user."** This prevents a portal user from enumerating other users' privileges.
+### 3.7 Asking about another user's groups
 
-### 2.7 The debug-only group
+Asking whether a user belongs to a group is itself a gate, callable from outside. It is refused unless the asker is unrestricted, is asking about themselves, or is an internal user: **"You can ony call user.has_group() with your current user."** The message reproduces the spelling the system emits. This prevents a portal user from enumerating other users' privileges.
 
-One group, `base.group_no_one` (technical features), is **only effective when the current request is in debug mode**. Membership alone is not enough. It is used to reveal technical detail — the list of failing record rules in a refusal message, technical menu entries — without exposing it in normal use.
+### 3.8 Reading and writing one's own user record
+
+A user normally holds no access right on the User entity. Two exceptions make the preferences screen work without granting one:
+
+1. **Self-readable fields.** When the record set is exactly the acting user and every requested field name is in the self-readable list, or names a context preference, the read is performed unrestricted. The field restriction of layer 5 is also relaxed: a field is readable when the ordinary check passes **or** the record is the acting user and the field is in the self-readable list.
+2. **Self-writable fields.** When the record set is exactly the acting user and every key of the supplied values is in the self-writable list, the write is performed unrestricted. Before elevating, a company key whose value is not one of the user's allowed companies is silently **removed** from the values.
+
+The two lists are fixed per installation and are extended by capability packages; they are catalogued in [identity and access](../domains/identity-and-access/entities.md). The relaxation applies to **reading** only; it never relaxes the write restriction for a field outside the self-writable list.
+
+### 3.9 The debug-only group
+
+One group, `base.group_no_one` (technical features), is **only effective when the current request is in debug mode**. Membership alone is not enough; it is implied by the internal-user group and by the settings group, so almost every internal user is a member.
+
+| Test | Result |
+|---|---|
+| The user belongs to the technical-features group and the request is in debug mode | Satisfied |
+| The user belongs to it and the request is not in debug mode | Not satisfied |
+| The user does not belong to it | Not satisfied |
+
+Everything keyed on this group is a display feature: the extended refusal messages of [sections 6.7](#67-the-refusal-message) and [7.5](#75-the-refusal-message), technical menu entries, technical view elements. A group requirement naming the technical-features group together with other groups is interpreted as a **conjunction**, not a disjunction: the element is shown when the user satisfies the other groups **and** the request is in debug mode. The platform implements this by removing the technical-features group from the requirement, remembering the flag separately, and marking the element invisible when the flag does not match the request mode.
 
 ---
 
-## 3. Groups
+## 4. Groups
 
-### 3.1 The entity
+### 4.1 The entity
 
-A group is a record of the Group entity (`res.groups`, table `res_groups`).
+A group is a record of the Group entity (`res.groups`, table `res_groups`). It is a named set of users, and it is the only thing permissions attach to.
 
 | Field (storage name) | Type | Meaning |
 |---|---|---|
 | Name (`name`) | Text, required, translatable | The group's own name. |
 | Full name (`full_name`) | Text, computed, not stored | The privilege family's name, a slash, and the group's name, when the group belongs to a family; otherwise the group's name. This is the group's display name. |
-| Privilege family (`privilege_id`) | Many-to-one to Privilege Family, indexed | See [section 3.5](#35-privilege-families). |
+| Privilege family (`privilege_id`) | Many-to-one to Privilege Family, indexed | See [section 4.6](#46-privilege-families). |
 | Sequence (`sequence`) | Integer | The order of the group within its family, which is also the order of the options a user-access screen offers. |
 | Explicit members (`user_ids`) | Many-to-many to User, association table `res_groups_users_rel` | Users assigned to this group directly. |
 | All members (`all_user_ids`) | Many-to-many to User, computed | Users in this group directly or through implication. |
@@ -155,11 +272,13 @@ A group is a record of the Group entity (`res.groups`, table `res_groups`).
 
 Default display name: the full name. Searching on the full name splits the search text on a slash and matches the family's name against the part before and the group's name against the part after.
 
-### 3.2 Membership
+### 4.2 Membership
 
-A user is a member of a group if the group is among the user's explicit groups, **or** is implied, transitively, by one of them. Nothing else confers membership: there is no rule-based membership, no membership by attribute, and no negative membership.
+A user is a member of a group if the group is among the user's **explicit groups**, or is implied, transitively, by one of them. The result is the user's **effective groups**. Nothing else confers membership: there is no rule-based membership, no membership by attribute, and no negative membership.
 
-### 3.3 The implied-group closure
+Adding an implication grants the implied permissions **immediately** to every current member, with no new sign-in. A user cannot be removed from a group they hold by implication; attempting it is refused with **"It is not possible to remove implied group "** the group name **" from users "** followed by the user names.
+
+### 4.3 The implied-group closure
 
 **Definition.**
 
@@ -168,51 +287,28 @@ closure( G )      = { G } ∪ ⋃ over H implied directly by G of closure( H )
 groups_of( user ) = ⋃ over G in explicit_groups( user ) of closure( G )
 ```
 
-Implication means "a member of this group also has the privileges of that group". A manager group implies the corresponding user group; a specialised role implies the general one.
+Implication means "a member of this group also has the privileges of that group". A manager group implies the corresponding user group; a specialised role implies the general one. The two directions of the relation are both editable and produce the same graph: "this group implies that one" and "that one is implied by this group" are the same edge.
 
 **Rules.**
 
 1. The closure includes the group itself.
-2. The closure is computed elevated, so that computing it never fails for lack of access to a group record.
+2. The closure is computed unrestricted, so that computing it never fails for lack of access to a group record.
 3. The closure is recursive and must be declared as such, so that changing an implication anywhere in the chain invalidates every group above it.
 4. A cycle in the implication graph would make the closure infinite. The platform does not itself forbid cycles; the recursion terminates because the closure is a set and already-seen groups are not revisited, so a cycle simply means the whole cycle is one closure.
 5. The closure is what every gate consults. A user's *explicit* groups are only an input.
+6. The closure is computed once per installation state and cached; per user it is cached under the user identifier and invalidated whenever the user's groups change, whenever an implication changes, and whenever any group is created or deleted.
 
 **Worked example.** Groups: `sales_manager` implies `sales_user`; `sales_user` implies `internal`; `accounting_manager` implies `accounting_user`; `accounting_user` implies `internal`. A user explicitly in `sales_manager` and `accounting_user` has the closure `{sales_manager, sales_user, internal, accounting_user}` — four groups from two.
 
-### 3.4 Searching by group
+### 4.4 Searching by group
 
 Searching for users in a group must find users who are in it **through implication**. The search on the transitive-group field therefore rewrites a condition naming group *G* into a condition naming *G* together with every group whose closure contains *G* — that is, every group that implies *G*, transitively.
 
-### 3.5 Privilege families
+### 4.5 Declaring group requirements
 
-A **privilege family** is a record of the Privilege Family entity (`res.groups.privilege`, table `res_groups_privilege`) that groups mutually-exclusive-in-practice groups into one choice on the user-access screen.
+Several places name groups as a comma-separated list of external identifiers, optionally with a negation marker before a name: a field's restriction, a view node's condition, a menu entry's condition.
 
-| Field (storage name) | Type | Meaning |
-|---|---|---|
-| Name (`name`) | Text, required, translatable | Shown as the label of the choice. |
-| Description (`description`) | Long text | |
-| Placeholder (`placeholder`) | Text, default the word for no | The label of the "none of these" option. |
-| Sequence (`sequence`) | Integer, default 100 | Order of the families on the screen. |
-| Category (`category_id`) | Many-to-one to Package Category, indexed | Which section of the screen the family appears in. |
-| Groups (`group_ids`) | One-to-many to Group | The members of the family. |
-
-Default ordering: sequence, then name, then identifier.
-
-Rules:
-
-1. A family is a **presentation** device. It carries no enforcement: nothing prevents a user from being in two groups of the same family, and the platform never checks.
-2. The screen renders a family as a single selection whose options are the family's groups in sequence order, plus the placeholder. Choosing one option sets that group and clears the family's other groups.
-3. Because the groups of a family are typically chained by implication — the manager implies the user — choosing the highest option confers the lower ones automatically, which is why the single-selection presentation is faithful.
-4. A group with no family appears as an independent switch.
-
-### 3.6 Group definitions as a compact set
-
-For the sake of the many membership tests a single request performs, the platform maintains a compact representation of the group graph: a mapping from external identifier to identifier, the closure of each group, and the ability to express "the users who have access" as a set expression over groups — the empty set, the universe, or a union of closures. This representation is cached on the registry under a dedicated name and cleared whenever a group, an access right, a record rule or a group's external identifier changes.
-
-### 3.7 Declaring group requirements
-
-Several places name groups as a comma-separated list of external identifiers, optionally with a negation marker before a name. The evaluation:
+The grammar is a list of entries separated by commas, each entry being an external identifier optionally preceded by the negation marker. The evaluation:
 
 1. A list consisting of a single full stop means **never**: no user satisfies it, not even an administrator — only an unrestricted environment bypasses it.
 2. Otherwise split into positive names and negated names.
@@ -228,26 +324,117 @@ satisfied( user , spec ) =
     ( spec has no positive group )                otherwise
 ```
 
+As a set expression, the list denotes the union over each positive entry of the intersection of that entry with every negated entry; when there is no positive entry it denotes the intersection of the negated entries alone.
+
+Worked examples:
+
+| Requirement | Meaning | Internal user | Portal user | Settings administrator |
+|---|---|---|---|---|
+| The internal-user group | Internal users only | Satisfied | Not satisfied | Satisfied, because the settings group implies the internal-user group |
+| The internal-user group and the portal-user group | Internal or portal | Satisfied | Satisfied | Satisfied |
+| The internal-user group and the negated settings group | Internal users who are not settings administrators | Satisfied | Not satisfied | **Not satisfied** |
+| The negated portal-user group alone | Everyone who is not a portal user | Satisfied | Not satisfied | Satisfied |
+| A single full stop | Nobody | Not satisfied | Not satisfied | Not satisfied |
+
+### 4.6 Privilege families
+
+A **privilege family** is a record of the Privilege Family entity (`res.groups.privilege`, table `res_groups_privilege`) that groups mutually-comparable groups of one functional area into one choice on the user-access screen.
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Name (`name`) | Text, required, translatable | Shown as the label of the choice. |
+| Description (`description`) | Long text | |
+| Placeholder (`placeholder`) | Text, default the word for no | The label of the "none of these" option. |
+| Sequence (`sequence`) | Integer, default 100 | Order of the families on the screen. |
+| Category (`category_id`) | Many-to-one to Package Category, indexed | Which section of the screen the family appears in. |
+| Groups (`group_ids`) | One-to-many to Group | The members of the family. |
+
+Default ordering: sequence, then name, then identifier.
+
+Rules:
+
+1. A family is a **presentation** device. It carries no enforcement: nothing prevents a user from being in two groups of the same family, and the platform never checks. Every authorisation decision reads groups, never families.
+2. The screen renders a family as a single selection whose options are the family's groups, plus the placeholder. Choosing one option sets that group and clears the family's other groups.
+3. The options are ordered from weakest to strongest: by the number of the group's implied groups that also belong to the same family, then by the group's sequence, then by identifier. A group without a family sorts as if that count were zero.
+4. Because the groups of a family are typically chained by implication — the manager implies the user — choosing the highest option confers the lower ones automatically, which is why the single-selection presentation is faithful.
+5. A group with no family appears as an independent switch.
+6. Group names are unique inside a family; a duplicate is refused with **"The name of the group must be unique within a group privilege!"**
+
+### 4.7 The group expression algebra
+
+Several mechanisms need to reason about "the set of users that satisfies a condition on groups" without enumerating users: the field restriction of layer 5, the group condition on a view node, the set of users allowed to perform an operation on an entity. They all use one algebra of **group expressions**.
+
+**Atoms.** Every group is an atom. Two derived atoms exist: the **universe**, meaning all users, and the **empty set**, meaning no user. An atom may be negated.
+
+**Facts the algebra knows** about atoms, derived from the group records:
+
+| Fact | Source |
+|---|---|
+| One atom is a subset of another | The reflexive transitive closure of implication |
+| Two atoms are disjoint | The transitive closure of the declared disjointness; the only declared disjointness is between the three kind groups |
+
+**Normal form.** An expression is a union of intersections of possibly negated atoms. Construction normalises eagerly:
+
+1. Inside one intersection, an atom that is a subset of another replaces it; two disjoint atoms collapse the whole intersection to the empty set; the universe atom is dropped.
+2. Inside one union, an intersection contained in another is dropped; two intersections that differ only by the sign of one atom merge by dropping that atom; the universe absorbs the union; the empty set is dropped.
+3. Intersection distributes over union.
+4. Complement applies the two dualisation laws: the complement of an intersection is the union of the complements, and the complement of a union is the intersection of the complements.
+
+**Membership test.** For a concrete user, given the identifier set of their effective groups:
+
+1. If the expression is the empty set, the answer is false.
+2. If the user's effective group set is empty, the answer is false.
+3. If the expression is the universe, the answer is true.
+4. Otherwise the answer is true when some intersection of the expression has every non-negated atom among the user's effective groups and no negated atom among them.
+
+Step 2 is not redundant: a user with **no** effective group at all matches nothing, not even a purely negative expression.
+
+**Worked examples.** Take the group graph in which `A1` is a subset of `A`, `A11` a subset of `A1`, and `B1`, `B2` and `BX` are subsets of `B` with `BX` disjoint from `B1` and from `B2`, plus unrelated groups `C` and `D`, `D` disjoint from `A` and from `B`.
+
+| Expression | Normal form | Effective groups `A`, `C` | Effective groups `A`, `A1`, `C` | Effective groups `A`, `A1`, `A11`, `C` | Effective groups `C` alone |
+|---|---|---|---|---|---|
+| `A` | `A` | Matches | Matches | Matches | No |
+| `A1` | `A1` | No | Matches | Matches | No |
+| `A` or `B` | `A` or `B` | Matches | Matches | Matches | No |
+| `B` or `C` | `B` or `C` | Matches | Matches | Matches | No |
+| `A` and not `A11` | `A` and not `A11` | Matches | Matches | **No** | No |
+| (`A11` or `B`) and not `D` | (`A11` and not `D`) or (`B` and not `D`) | No | No | Matches | No |
+| (`A11` or `B`) and not `C` | (`A11` and not `C`) or (`B` and not `C`) | No | No | **No** | No |
+| `A` and `B` | `A` and `B` | No | No | No | No |
+| `B` and `BX` | `BX` | Not applicable | Not applicable | Not applicable | Not applicable |
+| `B1` and `BX` | The empty set | Never matches | Never matches | Never matches | Never matches |
+| `A1` and not `A` | The empty set | Never matches | Never matches | Never matches | Never matches |
+
+**Ordering.** One expression is contained in another when every intersection of the first is contained in some intersection of the second. The universe is the greatest element and the empty set the least.
+
+**Unknown atoms.** A requirement may name a group that does not exist in this installation, because the package that declares it is not installed. Such an atom is kept as an opaque atom that is a subset of nothing and a superset of nothing, sorts after every known atom, and never matches any user. The expression therefore behaves as if that alternative were unreachable, without failing.
+
+### 4.8 Group definitions as a compact set
+
+For the sake of the many membership tests a single request performs, the platform maintains a compact representation of the group graph: a mapping from external identifier to identifier, the closure of each group, and the ability to express "the users who have access" as a set expression over groups — the empty set, the universe, or a union of closures. This representation is cached on the registry under a dedicated name and cleared whenever a group, an access right, a record rule or a group's external identifier changes.
+
 ---
 
-## 4. Access rights
+## 5. Access rights
 
-### 4.1 The entity
+### 5.1 The entity
 
 An access right is a record of the Access Right entity (`ir.model.access`, table `ir_model_access`).
 
 | Field (storage name) | Type | Meaning |
 |---|---|---|
 | Name (`name`) | Text | A label, conventionally the entity's transport name. |
-| Entity (`model_id`) | Many-to-one to Entity Catalogue, required | The entity the right applies to. |
-| Group (`group_id`) | Many-to-one to Group | The group granted. **Empty means every user**, which is a discouraged form: creating a right with no group and any permission set records a warning stating that every access-granting rule should specify a group. |
+| Entity (`model_id`) | Many-to-one to Entity Catalogue, required, deletion behaviour cascade | The entity the right applies to. |
+| Group (`group_id`) | Many-to-one to Group, deletion refused while a right references it | The group granted. **Empty means every user**, including portal and public users. |
 | Active (`active`) | Boolean, default true | An inactive right grants nothing. |
-| Read (`perm_read`) | Boolean | |
-| Write (`perm_write`) | Boolean | |
-| Create (`perm_create`) | Boolean | |
-| Delete (`perm_unlink`) | Boolean | |
+| Read (`perm_read`) | Boolean, default false | |
+| Write (`perm_write`) | Boolean, default false | |
+| Create (`perm_create`) | Boolean, default false | |
+| Delete (`perm_unlink`) | Boolean, default false | |
 
-### 4.2 The four operations
+A right grants only the operations whose flag it sets. Creating a right with no group and any permission set is accepted but records the warning **"Rule "** the name **" has no group, this is a deprecated feature. Every access-granting rule should specify a group."**
+
+### 5.2 The four operations
 
 | Operation | Covers |
 |---|---|
@@ -256,28 +443,41 @@ An access right is a record of the Access Right entity (`ir.model.access`, table
 | `create` | Creating a record, including through a relational create command |
 | `unlink` | Deleting a record |
 
-There is no separate "execute" permission: invoking a named business operation requires whatever the operation itself does, which is almost always write on the record.
+In prose the four are "read", "modify", "create" and "delete". There is no separate "execute" permission: invoking a named business operation requires whatever the operation itself does, which is almost always write on the record.
 
-### 4.3 The checking algorithm
+### 5.3 The checking algorithm
 
 **Preconditions.** An entity transport name, an operation, and the environment.
 
 1. If the environment is unrestricted, allow.
-2. Determine the acting user's transitive groups.
-3. Compute the set of entities on which the user has that operation:
-   - every entity for which an **active** access right exists whose operation flag is set and whose group is either empty or among the user's groups.
+2. Determine the acting user's effective groups.
+3. Compute the set of entities on which the user has that operation: every entity for which an **active** access right exists whose operation flag is set and whose group is either empty or among the user's effective groups.
 4. If the entity is in that set, allow.
-5. Otherwise refuse, building the message of [4.4](#44-the-refusal-message).
+5. Otherwise refuse, building the message of [5.5](#55-the-refusal-message).
 
-The set in step 3 is computed once per (acting user, operation) and cached.
+The set in step 3 is computed with one statement selecting the distinct entities of the matching rights, and is cached under the pair of acting user and operation. Pending writes on the Access Right entity are flushed before the statement runs, so that a right created in the same transaction is visible.
 
-An entity that appears in **no** access right at all is therefore accessible to nobody except an unrestricted environment. The package build records a warning naming every persistent entity a package introduced with no access right, and suggests a line granting read to the internal-user group, so that the omission is noticed at installation time.
+Two properties follow:
 
-### 4.4 The refusal message
+- **Additive.** A user's permissions are the union over all their effective groups. A group granting read and create plus a group granting write yields read, create and write.
+- **Refuse by default.** An entity that appears in **no** access right at all is accessible to nobody except an unrestricted environment. The package build records a warning naming every persistent entity a package introduced with no access right, and suggests a line granting read to the internal-user group, so that the omission is noticed at installation time.
+
+### 5.4 The permitted-users expression
+
+The same data answers the question "which users may perform this operation on this entity", used by the refusal message and by the view machinery of [section 18.1](#181-the-two-phase-view-pipeline):
+
+1. Take every active access right for that entity whose flag for the operation is set.
+2. If there are none, the answer is the empty set of users.
+3. If any of them has an empty group, the answer is the universe.
+4. Otherwise the answer is the union of the atoms of those rights' groups.
+
+The result is cached per entity and operation and is independent of the acting user.
+
+### 5.5 The refusal message
 
 The refusal is composed of three paragraphs separated by blank lines.
 
-**Paragraph one**, depending on the operation, with the entity's description and its transport name substituted:
+**Paragraph one**, depending on the operation, with the entity's description and its transport name substituted. The description is the translated description of the entity, falling back to the transport name when the entity has none.
 
 | Operation | Text |
 |---|---|
@@ -286,7 +486,7 @@ The refusal is composed of three paragraphs separated by blank lines.
 | `create` | "You are not allowed to create '\<entity description\>' (\<transport name\>) records." |
 | `unlink` | "You are not allowed to delete '\<entity description\>' (\<transport name\>) records." |
 
-**Paragraph two.** The groups that *would* allow it are listed, each on its own line prefixed by a tab and a hyphen and a space, in the form family name, slash, group name — or just the group name when the group has no family — ordered by family name then group name with unfamilied groups last:
+**Paragraph two.** The groups that *would* allow it are listed, each on its own line prefixed by a tab character, a hyphen and a space, in the form family name, slash, group name — or just the group name when the group has no family — ordered by family name then group name with unfamilied groups last. Names are taken in the language of the acting user, falling back to the source language:
 
 > "This operation is allowed for the following groups:" followed by the list
 
@@ -300,17 +500,19 @@ If no group allows it:
 
 Listing the allowing groups is deliberate: it turns an opaque refusal into an actionable request. It leaks the existence of group names, which is judged acceptable.
 
-### 4.5 Ordering of the checks
+An informational line is written to the technical log naming the operation, the acting identifier and the entity's transport name.
 
-Access rights are checked **before** record rules. A user with no read right on an entity is told so at the entity level and never learns whether a particular record exists. A user with the right but excluded by a rule receives the record-level refusal of [section 5.6](#56-the-refusal-message).
+### 5.6 Ordering of the checks
 
-### 4.6 When rights are checked
+Access rights are checked **before** record rules. A user with no read right on an entity is told so at the entity level and never learns whether a particular record exists. A user with the right but excluded by a rule receives the record-level refusal of [section 6.7](#67-the-refusal-message).
+
+### 5.7 When rights are checked
 
 | Situation | Check |
 |---|---|
 | A search | Read on the entity, before the query is built |
 | Reading fields | Read on the entity; plus field restrictions |
-| A write | Write on the entity, then the rules on the affected records **before** the write; and again on the result where the write moves a record out of the rules' reach |
+| A write | Write on the entity, then the rules on the affected records **before** the write |
 | A creation | Create on the entity, then the rules on the created records **after** creation |
 | A deletion | Delete on the entity, then the rules on the records before deletion |
 | Reading through a relation | Read on the target entity, unless the relational field declares that access is bypassed on traversal |
@@ -319,11 +521,30 @@ Access rights are checked **before** record rules. A user with no read right on 
 
 Checking with an **empty** record set checks only the entity level, which is how a caller asks "may this user create records of this entity at all?".
 
+### 5.8 Worked example
+
+An entity carries exactly two access rights:
+
+| Right | Group | Read | Write | Create | Delete |
+|---|---|---|---|---|---|
+| First | `group_one` | Yes | No | No | No |
+| Second | `group_zero` | Yes | No | Yes | No |
+
+The acting user belongs to `group_two` and the internal-user group; their effective groups contain neither `group_zero` nor `group_one`.
+
+| Attempt | Outcome |
+|---|---|
+| Write a record | Refused. Paragraph one is the write header; paragraph two is "No group currently allows this operation."; paragraph three is the resolution line |
+| Create a record | Refused. Paragraph one is the create header; paragraph two lists one line, `group_zero` |
+| Read a field of a record | Refused. Paragraph one is the read header; paragraph two lists two lines, `group_zero` then `group_one` |
+
+Adding the user to `group_one` makes reading succeed; creating still fails and still names `group_zero` alone.
+
 ---
 
-## 5. Record rules
+## 6. Record rules
 
-### 5.1 The entity
+### 6.1 The entity
 
 A record rule is a record of the Record Rule entity (`ir.rule`, table `ir_rule`).
 
@@ -333,8 +554,8 @@ A record rule is a record of the Record Rule entity (`ir.rule`, table `ir_rule`)
 | Active (`active`) | Boolean, default true | An inactive rule restricts nothing. It exists so that a shipped rule can be switched off without deleting it, since deleting it would let the package recreate it on the next update. |
 | Entity (`model_id`) | Many-to-one to Entity Catalogue, required, indexed, deletion behaviour cascade | |
 | Groups (`groups`) | Many-to-many to Group, association table `rule_group_rel`, deletion behaviour restrict | The groups the rule is attached to. **Empty means the rule is global.** |
-| Global (`global`) | Boolean, computed from the groups, stored | True when the rule has no group. |
-| Filter (`domain_force`) | Long text | An expression producing the filter that defines which records the rule admits. |
+| Global (`global`) | Boolean, computed from the groups, stored | True exactly when the group list is empty. |
+| Filter (`domain_force`) | Long text | An expression producing the filter that defines which records the rule admits. An empty expression means "always true". |
 | Read (`perm_read`) | Boolean, default true | |
 | Write (`perm_write`) | Boolean, default true | |
 | Create (`perm_create`) | Boolean, default true | |
@@ -342,14 +563,16 @@ A record rule is a record of the Record Rule entity (`ir.rule`, table `ir_rule`)
 
 Default ordering: entity descending, then identifier.
 
+Unlike an access right, the four flags select the operations the rule is **checked for**. An operation whose flag is cleared behaves as if the rule did not exist for that operation.
+
 Constraints:
 
-- At least one operation flag must be set: **"Rule must have at least one checked access right!"**
+- At least one operation flag must be set. The database constraint requires the disjunction of the four flags, with the message **"Rule must have at least one checked access right!"**
 - A rule may not be created on the Record Rule entity itself: **"Rules can not be applied on the Record Rules model."**
-- An active rule's filter must evaluate and must be a valid filter for its entity; otherwise **"Invalid domain: "** followed by the failure.
-- Privileged relational commands on this entity are forbidden, so a privileged operation cannot be tricked into rewriting rules through a relation.
+- An active rule's filter must evaluate and must be a valid filter for its entity; otherwise **"Invalid domain: "** followed by the failure. The expression is revalidated whenever the active flag, the filter or the entity changes. A malformed expression, a condition naming a field that does not exist, and an expression that is statically false in a form the validator rejects are all refused; an empty expression, an expression that is always true, and a condition on an existing field are accepted.
+- Privileged relational commands on this entity are forbidden, so a privileged operation cannot be tricked into rewriting rules through a relation ([section 9.3](#93-command-protection-on-sensitive-entities)).
 
-### 5.2 The evaluation context
+### 6.2 The evaluation context
 
 The filter is an expression evaluated in a restricted context providing exactly:
 
@@ -359,11 +582,20 @@ The filter is an expression evaluated in a restricted context providing exactly:
 | The allowed company identifiers | The identifiers of the environment's allowed companies, in order |
 | The current company identifier | The environment's current company |
 
-Nothing else is available: no arbitrary operations, no other entities, no clock beyond what the expression language offers.
+In addition the expression language's own date and time helpers are available. Nothing else is: no arbitrary operations, no other entities.
 
 The user record is deliberately stripped of its context so that two requests by the same user in different languages or with different instructions produce the same rule, which is what makes the result cacheable.
 
-### 5.3 The combination rule
+**Worked confirmation.** A rule on an entity reads "the record's category is one of the categories the acting user can see", where the inner selection is itself performed through the acting user. A caller that sets a context key which a category-level override would use to hide some categories does **not** change the rule's outcome, because the user record was rebuilt with an empty context.
+
+### 6.3 Selecting the applicable rules
+
+1. If the environment is unrestricted, there are none.
+2. Otherwise take every Record Rule record, ordered by identifier, whose entity is this one, which is active, whose flag for this operation is set, and which is either global or attached to at least one of the acting user's effective groups.
+
+An operation name that is not one of the four is a programming error and is refused with **"Invalid mode: "** the value.
+
+### 6.4 The combination rule
 
 **Preconditions.** An entity, an operation, and the environment.
 
@@ -372,13 +604,13 @@ The user record is deliberately stripped of its context so that two requests by 
 **Algorithm.**
 
 1. If the environment is unrestricted, the result is "everything" — no rule applies.
-2. **Embedded parents first.** For each entity this one embeds through a **stored** link field, compute that parent entity's rule filter for the same operation, recursively. If it is not "everything", add the condition that the link traverses to a record matching it. This is why a rule on the party entity also restricts users, which embed a party.
-3. Collect the applicable rules: every active rule on this entity whose operation flag is set, and which is either global or attached to at least one of the user's transitive groups. Order them by identifier.
-4. Partition them:
-   - a rule with no group is **global**;
-   - a rule with groups, at least one of which the user belongs to, is a **group rule**. A rule whose groups the user does not belong to is skipped entirely.
-5. Evaluate each rule's filter in the context of [5.2](#52-the-evaluation-context). A rule with an empty filter expression yields "everything".
-6. Combine:
+2. **Embedded parents first.** For each entity this one embeds through a **stored** link field, in declaration order, compute that parent entity's rule filter for the same operation, recursively. If it is not "everything", add the condition that the link traverses to a record matching it.
+3. Collect the applicable rules of [6.3](#63-selecting-the-applicable-rules).
+4. If there are none, the result is the conjunction of the conditions collected in step 2, which may be "everything".
+5. Otherwise evaluate each rule's filter in the context of [6.2](#62-the-evaluation-context), reading the rules unrestricted, and re-check defensively that a rule with groups still intersects the user's effective groups, skipping it if not. A rule with an empty filter expression yields "everything".
+6. Partition the evaluated conditions: those of rules with no group go to the global list, those of rules with groups go to the group list.
+7. If the group list is not empty, append its **disjunction** to the global list.
+8. The result is the conjunction of the global list, normalised against the entity.
 
 ```formula
 effective_filter = ( conjunction of every global rule's filter )
@@ -386,19 +618,21 @@ effective_filter = ( conjunction of every global rule's filter )
                    AND ( conjunction of every embedded parent's effective filter, traversed )
 ```
 
-7. If there are no applicable group rules, the disjunction term is omitted entirely — it does **not** become "nothing".
-8. Normalise the result against the entity.
+If there are no applicable group rules, the disjunction term is omitted entirely — it does **not** become "nothing".
 
-### 5.4 Why the combination is asymmetric
+### 6.5 Why the combination is asymmetric
 
-- **Global rules restrict everybody and are conjoined.** A global rule is an invariant of the tenant: "a record belongs to a company you are allowed in". Adding another global rule can only narrow.
-- **Group rules are disjoined.** A group rule is a grant of visibility to a role: "a salesperson sees their own leads", "a sales manager sees the whole team's". Adding a group to a user can only widen. If group rules were conjoined, giving a user the manager role would *narrow* what they see, which is the opposite of the intent.
+- **Global rules restrict everybody and are conjoined.** A global rule is an invariant of the tenant: "a record belongs to a company you are allowed in". Adding another global rule can only narrow. Two global rules whose conditions do not overlap remove all access.
+- **Group rules are disjoined.** A group rule is a grant of visibility to a role: "a salesperson sees their own leads", "a sales manager sees the whole team's". Adding a group to a user can only widen the group part. If group rules were conjoined, giving a user the manager role would *narrow* what they see, which is the opposite of the intent.
+- **The two sets conjoin.** The first group rule added to an entity that already has global rules narrows access for the members of that group, because the group part is conjoined with the global part. An entity with only group rules, none applicable to this user, falls back to "everything" at step 4, so adding a group rule for a *different* group narrows nothing for this user.
 
-The consequence a rebuild must reproduce: **a user with no group rule on an entity is restricted only by the global rules**, and a user with one group rule is restricted to that rule's filter *in addition to* the global ones.
+The consequence a rebuild must reproduce: **a user with no applicable group rule on an entity is restricted only by the global rules**, and a user with one group rule is restricted to that rule's filter *in addition to* the global ones.
 
-### 5.5 Worked example
+**Embedded parents.** Step 2 is what makes an embedding entity inherit the record visibility of its embedded parent. When an entity embeds a parent through a stored link field and a rule on the parent restricts the parent's records, a child record whose parent is hidden is invisible, is not returned by a search, and is refused by the permission check. The recursion is depth-first over the embedding map and applies at every level. This is why a rule on the party entity also restricts users, which embed a party.
 
-Entity: Sales Order. Rules:
+### 6.6 Worked examples
+
+**Example one: a mixed rule set.** Entity Sales Order. Rules:
 
 | Rule | Groups | Filter |
 |---|---|---|
@@ -414,9 +648,25 @@ Entity: Sales Order. Rules:
 | D | neither | company allowed |
 | The root identity | — | everything |
 
-Note user D: with no group rule at all, only the global rule applies, so D sees every order of the allowed companies. A rebuild that treats "no group rule" as "nothing visible" would produce a very different system.
+Note user D: with no group rule at all, only the global rule applies, so D sees every order of the allowed companies. A rebuild that treats "no applicable group rule" as "nothing visible" would produce a very different system.
 
-### 5.6 The refusal message
+**Example two: composition and blame.** An entity carries a whole-number field and a company field. The acting user belongs to one group. Every rule below sets only the write flag. The record under test holds the value 0.
+
+| Case | Rules | Composed filter for write | Blamed rules |
+|---|---|---|---|
+| One group rule | Rule 0, group rule: value equals 42 | value equals 42 | Rule 0 |
+| Two group rules | Rule 0: value equals 42; rule 1: value equals 78 | value equals 42 **or** value equals 78 | Rule 0 and rule 1, as a block |
+| Two global rules, both failing | Rule 0 global: value equals 42; rule 1 global: value equals 78 | value equals 42 **and** value equals 78 | Rule 0 and rule 1 |
+| Two global rules, one failing | Rule 0 global: value equals 42; rule 1 global: always true | value equals 42 | Rule 0 only |
+| Combination | Rule 0 global: value equals 42; rule 1 global: always true; rule 2 group: always false; rule 3 group: value equals 55 | value equals 42 **and** always true **and** ( always false **or** value equals 55 ) | Rule 0, rule 2 and rule 3 |
+
+The last line shows the two reporting styles side by side: the global rule 1 is not blamed because it holds on its own, while both group rules are blamed because the block failed.
+
+**Example three: archived records.** Rules: rule 0, global, for read, admitting records whose company is among the allowed companies or empty; rule 1, a group rule for read, admitting records whose value is 1. The record has the value 0, belongs to an allowed company, and is **archived**. Reading a field of it is refused, and the blamed set is rule 1 alone. Had the verification kept the archive filter on, the record would have been filtered out before rule 0 was evaluated and rule 0 would have been blamed as well.
+
+**Example four: group rules never widen past a global rule.** On the party entity the global rule admits a party that is not a shared party, or whose company is an ancestor of an allowed company, or whose company is empty; the group rule for portal and public users admits parties that are descendants of the acting user's commercial party. For an internal user the group rule is not applicable, so the composed filter is the global condition alone. For a portal user the composed filter is the global condition **and** the descendant condition. Adding a second group rule for portal users, admitting the user's own party, changes only the second factor, which becomes "descendant of the commercial party **or** equal to the own party". The first factor is unchanged, so a portal user can never be granted a party the global rule hides.
+
+### 6.7 The refusal message
 
 When a record rule excludes at least one record of the set, the refusal is composed as follows.
 
@@ -444,55 +694,98 @@ Followed by a blank line and:
 
 > "Blame the following rules:" and one line per failing rule, each "- \<rule name\>"
 
+Because portal and public users never belong to the technical-features group, they never see record display names or rule names.
+
 **Paragraph three, always.**
 
 > "If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies."
 
-**The multi-company addendum.** When any failing rule's filter mentions the company field, the resolution paragraph is extended:
+**The multi-company addendum.** When any failing rule's filter text mentions the company field, a suggested company is computed for the listed records ([multi-company, section 5.5](multi-company.md#55-the-multi-company-hint-on-a-refusal)) and the resolution paragraph is extended:
 
 | Situation | Added text |
 |---|---|
-| Several companies would give access, or none could be determined | A note stating that this might be a multi-company issue and that switching company may help |
-| Exactly one company would give access and the user belongs to it | "\n\nThis seems to be a multi-company issue, you might be able to access the record by switching to the company: \<company display name\>." and the refusal carries that company as structured context so the client can offer a one-click switch |
+| The listed records suggest more than one distinct company | A note stating that this might be a multi-company issue and that switching company may help, followed by a short informal aside that a rebuild replaces with its own wording |
+| Exactly one company would give access and the user belongs to it | "\n\nThis seems to be a multi-company issue, you might be able to access the record by switching to the company: \<company display name\>." and the refusal carries that company's identifier and display name as structured context so the client can offer a one-click switch |
 | Exactly one company would give access and the user does not belong to it | "\n\nThis seems to be a multi-company issue, but you do not have access to the proper company to access the record anyhow." |
+| No company can be suggested, because the entity has no company field | Nothing is added |
 
-**Note on wording.** The first and third paragraphs are deliberately informal, and the multi-company note of the first case above carries a light aside. A rebuild must reproduce the *structure* — the operation and the user named, the offending entity or records listed, the failing rules listed in debug mode, the multi-company hint with its three cases and its structured company suggestion — and may supply its own wording for the informal sentences.
+**The embedding wrapper.** When the refusal happened while reaching an embedded parent through a child record, the parent's message is wrapped with a further paragraph:
 
-### 5.7 Determining which rules failed
+> "Implicitly accessed through '\<child entity description\>' (\<child transport name\>)."
+
+The same wrapper is applied when a related field's path could not be traversed because an intermediate record was unreadable, naming the entity that owns the related field.
+
+**Note on wording.** The first and third paragraphs are deliberately informal. A rebuild must reproduce the *structure* — the operation and the user named, the offending entity or records listed, the failing rules listed in debug mode, the multi-company hint with its three cases and its structured company suggestion, the embedding wrapper — and may supply its own wording for the informal sentences.
+
+**Logging and cache hygiene.** An informational line naming the operation, up to six offending identifiers, the acting identifier and the entity's transport name is written to the technical log. Building the message reads the display names of the rejected records unrestricted; the cache entries of those records are therefore **invalidated** after the message is built, so that the elevated reads leave no readable values behind for the refused caller. This is observable: after a refusal, a second attempt to read a field of the same record must refuse again rather than return a cached value.
+
+### 6.8 Determining which rules failed
 
 To name the failing rules, the system does not evaluate rules one record at a time. It:
 
-1. Takes all applicable rules for the operation, elevated and with the archive filter switched off so that archived records are considered.
-2. Computes the disjunction of the **group** rules' filters and counts how many of the offending records it admits. If it admits all of them, the group rules are not at fault and none is reported.
-3. For each **global** rule, counts how many of the offending records its filter admits; a rule admitting fewer than all of them is reported as failing.
-4. Reports the selected group rules, if any, together with every failing global rule.
+1. Takes all applicable rules for the operation, reading them unrestricted and with the archive filter switched off so that archived records are considered.
+2. Takes the rules with groups intersecting the acting user's effective groups, computes the disjunction of their conditions, and counts how many of the offending records it admits. If it admits all of them, the group block is not at fault and none of its rules is reported.
+3. For each **global** rule, counts how many of the offending records its condition admits on its own; a rule admitting fewer than all of them is reported as failing.
+4. Reports the selected group rules, if any, together with every failing global rule, presented in the acting user's environment.
 
-### 5.8 When rules are evaluated
+Group rules are reported **as a block** because they are disjoined: either the block succeeds or it fails, and blaming one of them individually would mislead. Global rules are reported **individually**, because each must hold on its own.
+
+### 6.9 The two application modes
+
+Two modes exist and both must be implemented, because they differ observably.
+
+| Mode | Where | Effect |
+|---|---|---|
+| **Query restriction** | Any search, count, grouped read, relation traversal or sub-condition evaluation | The composed filter is added to the query as an extra condition. Records that fail are simply absent; no refusal is raised. |
+| **Record verification** | The permission check on a known set of records: the explicit check, its non-raising twin, the filtering variant, and the checks performed by write, delete and the post-creation check of create | The composed filter is evaluated against the given records, unrestricted and with the archive filter switched off. The records that fail form the forbidden set. |
+
+Record verification switches the archive filter off deliberately: a rule that would otherwise be reported as failing merely because the record is archived must not be blamed. Verification is skipped entirely when the record set contains only in-memory records that have no database identifier yet.
+
+The difference between *search* and *read specific records* is the most important practical consequence: a search silently hides, a direct read refuses.
 
 | Situation | Evaluation |
 |---|---|
-| A search | The rule filter is conjoined into the generated query, so excluded records are simply absent — **no refusal is raised**. A search never tells a user that records were hidden. |
-| Reading specific records | The rules are evaluated against those records; a refusal names them. |
-| A write | Before the write, on the records being written; and, where the write could move a record outside the rules, again afterwards. |
-| A creation | After creation, on the created records. |
-| A deletion | Before deletion. |
-| Traversal in a filter | The target entity's read rules are conjoined into the sub-query, unless the relational field declares that access is bypassed on traversal or the environment is unrestricted. |
+| A search | Query restriction; excluded records are absent, no refusal |
+| Reading specific records | Record verification; a refusal names them |
+| A write | Record verification before the write, on the records as they are before it |
+| A creation | Record verification after creation, on the created records |
+| A deletion | Record verification before deletion |
+| Traversal in a filter | The target entity's read rules are conjoined into the sub-query, unless the relational field declares that access is bypassed on traversal or the environment is unrestricted |
 
-The difference between *search* and *read specific records* is the most important practical consequence: a filter silently hides, a direct read refuses.
+### 6.10 The empty record set convention
 
-### 5.9 Rules and the archive flag
+The explicit check invoked on an **empty** record set checks the access rights only: there is no record to verify. This is the canonical way to ask "may this user perform this operation on this entity at all", and it is what every search does before building its query.
 
-Rule evaluation always switches the archive filter **off**, so that an archived record excluded by a rule is still correctly reported as excluded by the rule rather than silently absent.
+The non-raising twin returns false instead of refusing and is consistent with the raising form on the same inputs. The filtering variant returns the subset of the given records that passes both layers; it never refuses, and on an entity the user cannot touch at all it returns the empty set.
 
 ---
 
-## 6. Field-level restrictions
+## 7. Field-level restrictions
 
-### 6.1 The declaration
+### 7.1 The declaration
 
-A field may declare a group requirement as a comma-separated list of group external identifiers, with optional negation, evaluated by the rule of [section 3.7](#37-declaring-group-requirements). A requirement consisting of a single full stop means the field is never accessible outside an unrestricted environment.
+A field may declare a group requirement, written in the comma-separated notation of [section 4.5](#45-declaring-group-requirements). Three states exist:
 
-### 6.2 The check
+| Declared value | Meaning |
+|---|---|
+| Absent | The field is accessible to everyone |
+| A single full stop | The field is **never** accessible, and it is removed from the field descriptions and the resolved views even for an unrestricted environment |
+| A requirement | The field is accessible to the users matching the expression |
+
+The requirement is a property of the **field definition**, not of a record. It is therefore identical for every record of the entity.
+
+### 7.2 Propagation to derived fields
+
+- A **related field** copies the requirement of the field it points at, unless it declares its own.
+- An **exposed field** of an embedding entity likewise copies the requirement of the parent's field unless it declares its own.
+- A **computed field** inherits nothing; it must declare its own requirement if the values it exposes are sensitive.
+
+### 7.3 The check
+
+1. If the field declares no requirement, allow.
+2. If the environment is unrestricted, allow.
+3. If the requirement is a single full stop, refuse.
+4. Otherwise evaluate the requirement against the acting user's effective groups.
 
 ```formula
 may_access( user , field , direction ) =
@@ -502,22 +795,37 @@ may_access( user , field , direction ) =
     satisfied( user , requirement )          otherwise
 ```
 
+Step 2 sits after step 1 and **before** step 3, with one observable consequence: an unrestricted environment can read and write a field marked never accessible, yet that field is still removed from the field descriptions and from the resolved views ([7.6](#76-effects-on-what-a-client-receives)), because those are built from the requirement text without consulting the unrestricted flag.
+
 The same requirement governs **both** reading and writing; there is no separate read requirement and write requirement on a field. Finer control is achieved by making the field read-only for most users through the presentation layer and restricting writes with a record rule or a validation.
 
-### 6.3 Where it is enforced
+One entity overrides the rule: on the User entity, reading is additionally allowed when the record is the acting user and the field is self-readable ([section 3.8](#38-reading-and-writing-ones-own-user-record)).
 
-| Situation | Effect |
-|---|---|
-| Describing the fields of an entity | A field the user may not read is **omitted entirely** from the description, so a client never renders it. |
-| Reading | Reading a restricted field refuses. |
-| Writing | Writing a restricted field refuses. |
-| A view | A node naming a restricted field is removed from the resolved view for that user. |
-| Ordering, grouping, filtering | A condition or ordering term naming a restricted field refuses. |
-| Export | A restricted field is not offered. |
+### 7.4 Where it is enforced
 
-Additionally, when the field description is produced, the read-only flag of a field the user may read but not write is forced true, so that a client shows it without offering to edit it.
+| Entry point | Operation checked | Behaviour on failure |
+|---|---|---|
+| Reading one field of one record | Read | Refuses |
+| Reading a field of a multi-record set | Read | Refuses before any value is produced |
+| Fetching an explicit list of field names | Read | Refuses, for every named field, before any statement is issued |
+| The implicit fetch of every prefetchable field | Read | The inaccessible fields are **silently removed** from the list; no refusal |
+| Following the stored dependencies of a non-stored field during a fetch | Read | An inaccessible stored dependency is **silently skipped**; no refusal |
+| Building the field descriptions | Read | The field is omitted from the result entirely |
+| A write with supplied values | Write | Refuses, for every key of the values, before anything is written |
+| A creation with supplied values | Write | Refuses, for every key of the values **and for every preloaded default key of the context**, before anything is written |
+| Translating a field's stored text | Write | Refuses |
+| A condition on the field inside a search filter | Read | Refuses when the condition is converted for the query |
+| A condition on the field inside a sub-condition on a relation | Read | Refuses, evaluated on the related entity |
+| An ordering term naming the field | Read | Refuses when the ordering is converted for the query |
+| A grouping key naming the field | Read | Refuses |
+| An aggregate naming the field | Read | Refuses |
+| A view | Read | A node naming the field is removed from the resolved view, together with its label node |
+| Export | Read | The field is not offered |
+| The default values returned for a form | Write | An exposed field is routed to the parent's default computation only when its write permission holds |
 
-### 6.4 The refusal message
+The asymmetry between the fourth and fifth rows and the rest is deliberate: an implicit "read everything that is cheap to read" must not fail because one field is restricted, while an explicit request for a named field must fail.
+
+### 7.5 The refusal message
 
 > "You do not have enough rights to access the field "\<field name\>" on \<entity description\> (\<transport name\>). Please contact your system administrator."
 >
@@ -525,7 +833,7 @@ Additionally, when the field description is produced, the read-only flag of a fi
 >
 > "Operation: \<read or write\>"
 
-When the acting user belongs to the technical-features group, two further lines are appended:
+When the acting user belongs to the technical-features group in a request in debug mode, two further lines are appended:
 
 > "User: \<acting user identifier\>"
 > "Groups: \<explanation\>"
@@ -535,10 +843,38 @@ where the explanation is:
 | Requirement | Explanation |
 |---|---|
 | A single full stop | "always forbidden" |
-| Absent (which means the refusal came from an entity-specific override) | "custom field access rules" |
+| Absent, which means the refusal came from an entity-specific override | "custom field access rules" |
 | A list of groups | "allowed for groups " followed by the groups' display names, quoted and comma-separated, ordered by identifier |
 
-### 6.5 Restricting a field against restricting an entity
+A technical log line is written naming the operation, the acting identifier, the entity's transport name and the field name.
+
+### 7.6 Effects on what a client receives
+
+1. **Field descriptions.** A field the acting user may not read is absent from the description map. A field the user may read but not write is returned with its read-only flag forced true, so that a client shows it without offering to edit it.
+2. **View definitions.** Every node of a view bound to a field the acting user may not read is removed from the served definition, together with its label node. The removal happens after the view has been assembled and cached, so the cached assembly is user-independent and only the final filtering is per user ([section 18.1](#181-the-two-phase-view-pipeline)).
+3. **Entity-level read-only.** When the acting user may neither write nor create records of the entity, every field in the description map is returned with its read-only flag forced true.
+
+**Worked example.** A field holding the number of decimal places on the Currency entity carries no requirement. A form view shows a separate label node for it plus the field node. With no requirement, the description map contains the field and the served view contains both nodes. A requirement naming one group is then declared on the field and the acting user is not a member: the description map no longer contains the field and the served view contains neither node. The user is then added to the group: all three reappear.
+
+### 7.7 Worked example of the two refusals
+
+An entity declares one field with a requirement naming the portal-user group and a test group, and another field with the never-accessible marker. The acting user belongs to the internal-user group only.
+
+| Attempt | Message |
+|---|---|
+| Read the restricted field | The three lines of [7.5](#75-the-refusal-message) naming that field, with "Operation: read"; in debug mode, additionally the user identifier and "Groups: allowed for groups 'Role / Portal', 'Test Group'" |
+| Read the never-accessible field | The same three lines naming that field, and in debug mode "Groups: always forbidden" |
+| Write values naming the restricted field and another field | Refused on the **first** offending key in the order the values are given, with "Operation: write" |
+| Search with a condition on the never-accessible field | Refused |
+| Search with a condition on that field reached through a relation | Refused, evaluated on the related entity |
+| Search with a sub-condition on a relation naming that field | Refused |
+| Search on an entity that embeds this one, with a condition on that field | Refused |
+| Order by that field, ascending or descending, alone or after another term | Refused |
+| Group by that field | Refused |
+| Aggregate that field | Refused |
+| Group by an unrestricted field with no restricted field named | Allowed |
+
+### 7.8 Restricting a field against restricting an entity
 
 | Requirement | Mechanism |
 |---|---|
@@ -546,529 +882,3 @@ where the explanation is:
 | Only accountants may see journal entries at all | Access rights on the entity |
 | Only accountants may see journal entries of their own company | A record rule |
 | Only accountants may change the cost price, everyone may see it | A group requirement is **not** enough, since it governs both directions: use presentation-level read-only plus a validation or a rule |
-
----
-
-## 7. The unrestricted actor and the elevate-privileges contract
-
-### 7.1 What "unrestricted" means
-
-An environment carries a boolean flag. When it is set, **every gate is bypassed**:
-
-- access rights are not consulted;
-- record rules yield "everything";
-- field restrictions are satisfied;
-- the company authorisation check on the allowed-company list is skipped;
-- entities that forbid privileged relational commands refuse them (this is the one thing that becomes *more* restrictive).
-
-### 7.2 What it does not change
-
-| Unchanged | Consequence |
-|---|---|
-| The acting user identifier | The audit fields record the real actor. A record created by an elevated operation on behalf of user A records A as its creator. |
-| The context | Language, time zone and company selection are carried over, except for the cleaning rule below. |
-| The transaction and the unit of work | An elevated operation's writes are in the same transaction and visible to the surrounding restricted operation. |
-| Declared validations | They still run — indeed they always run elevated anyway. |
-| Database constraints | They still apply. |
-| Company consistency | It still applies where declared. |
-
-### 7.3 The root identity
-
-The reserved root identifier is special in one way only: **any environment whose acting user is the root identity is unrestricted**, whether or not the flag was requested. There is no way to construct a restricted environment for the root identity.
-
-### 7.4 The elevate-privileges contract
-
-> An operation that elevates privileges takes responsibility for every access decision the gates would have made.
-
-The obligations:
-
-1. **Elevate the narrowest possible scope.** Elevate around the one read or write that needs it, not around a whole operation.
-2. **Re-impose the intended restriction explicitly.** If the reason for elevating is "the user may not read the tax record but the invoice needs it", read the tax record elevated and do not expose it further.
-3. **Never elevate on data the caller supplied.** Elevating and then writing a record whose identifier came from the request is how a caller performs an operation they could not perform directly. Where an elevated write must act on caller-supplied identifiers, check access on them **before** elevating.
-4. **Never elevate to search.** An elevated search returns records the user cannot see; passing them back is a disclosure. Where an elevated search is genuinely needed — to compute an aggregate, to check existence — return only the derived answer.
-5. **Do not elevate to work around a refusal.** A refusal that keeps recurring is a missing access right or an over-tight rule, not a case for elevation.
-
-### 7.5 Context cleaning on elevation
-
-When a **restricted** environment derives an **unrestricted** one and does not supply a context, the context is cleaned: keys that instruct the system to apply default values and keys that bind a specific active record are removed. Keys carrying language, time zone and company selection survive.
-
-The reason: those keys were supplied by a less-privileged caller and would otherwise silently influence a privileged operation — a supplied default could set a field the caller may not write, and a supplied active record could redirect an operation.
-
-When the caller supplies a context explicitly, no cleaning happens: the caller has taken responsibility.
-
-### 7.6 Switching the acting user
-
-Switching the acting user to another user produces a **restricted** environment for that user, unless the new user is the root identity, in which case it is unrestricted by [7.3](#73-the-root-identity).
-
-This is different from elevating: it evaluates every gate as that other user. It is used when an operation must act genuinely on someone's behalf — rendering a notification as its recipient would see it, previewing a portal page, running a scheduled job as a configured user.
-
-Switching to an empty user is a no-operation and returns the same environment.
-
-### 7.7 Where elevation is unavoidable
-
-| Case | Why |
-|---|---|
-| Computing a stored field | A stored value is shared by every reader, so it must not depend on who triggered it. Stored computations are elevated by default. |
-| Declared validations | A validation may need to read records the user cannot, to check a global invariant. |
-| Reading the acting user record | Otherwise establishing the user's own groups would require reading the user, which requires knowing the groups. |
-| Resolving the implied-group closure | Same reason. |
-| Package installation and the registry build | No user exists yet, and the schema must be changed. |
-| Walking a hierarchy for the hierarchy operators | The whole tree must be walked; the filtering of forbidden records is left to the rules applied to the search as a whole. |
-| Recomputation traversal | An archived or forbidden record's computed fields must still be maintained. |
-
----
-
-## 8. Company scoping
-
-### 8.1 The model
-
-A tenant holds many legal **companies**. Companies form a tree: a company may have a parent, and the root of each tree is a *root company*. Most reference data is shared; most transactional data belongs to exactly one company.
-
-Three things express company scope:
-
-| Mechanism | What it does |
-|---|---|
-| A company field on the record | Says which company owns it. Empty means shared by all. |
-| A global record rule per entity | Restricts visibility to records whose company is among the user's allowed companies |
-| The company consistency check | Prevents records of incompatible companies from being linked |
-
-### 8.2 The user's companies
-
-| Field | Meaning |
-|---|---|
-| Main company | The user's home company; the default value of the company field on records they create. |
-| Allowed companies | Every company the user may switch on. The main company must be among them. |
-
-The set of a user's companies is computed by searching for **active** companies linked to the user, and is cached per user.
-
-### 8.3 The selection
-
-The environment's context may carry an ordered list of selected company identifiers. From it derive:
-
-- the **current company**: the first identifier in the list, or the user's main company when the list is empty;
-- the **allowed companies**: the listed companies, or *all* the user's companies when the list is empty.
-
-**Authorisation.** In a restricted environment, every identifier in the list must be among the user's companies; otherwise the operation is refused with **"Access to unauthorized or invalid companies."** In an unrestricted environment the check is skipped, which is how an inter-company operation acts in a company the underlying user does not belong to.
-
-**The empty-list default is all the user's companies, not the main one.** This matters for every operation performed outside an interactive session — printing a batch of documents from several companies, rendering a notification, serving an image — where dropping to the main company would silently hide records the user is entitled to see.
-
-### 8.4 Switching company on a record set
-
-Switching a record set to a company inserts that company at the **front** of the allowed-company list, keeping every other entry in order and removing any duplicate. It therefore changes the current company without narrowing the allowed set. Switching to the company that is already first is a no-operation.
-
-Switching to an empty company is a no-operation.
-
-### 8.5 The standard global rule
-
-Entities with a company field carry a global record rule of the shape "the record's company is empty **or** among the allowed companies". Because it is global, it is conjoined with everything else, and because it reads the allowed companies from the evaluation context, switching companies changes what the user sees within one session without changing any group.
-
-The rule's cache key therefore includes the allowed-company list, which is why the rule cache is keyed on the acting user, the unrestricted flag, the entity, the operation **and** the ordered company list.
-
-### 8.6 Company-dependent values
-
-A field may hold a different value per company on a shared record ([entity and field system, section 11](entity-and-field-system.md#11-company-dependent-values)). This is orthogonal to scoping: the record is shared, only the value differs. The value read is the one for the environment's **current** company, falling back to the per-entity default for that company.
-
----
-
-## 9. Company consistency
-
-### 9.1 What it prevents
-
-Nothing in the gates above stops a user allowed in companies 1 and 2 from putting a company-1 account on a company-2 invoice: both records are visible to them. The consistency check exists for exactly that.
-
-### 9.2 The declaration
-
-A relational field declares that it participates. An entity declares whether the check runs automatically on every creation and write, or only where a capability invokes it.
-
-### 9.3 The algorithm
-
-**Preconditions.** A record set, and optionally the names of the fields to check.
-
-1. Determine the fields to check. If no names are given, or the company field or the allowed-companies field is among them, check every field of the entity; otherwise only the named ones.
-2. Keep the relational fields that declare participation, and split them into **ordinary** and **company-dependent**.
-3. If neither list has a member, stop.
-4. For each record:
-   - **Ordinary fields.** Determine the record's companies:
-     - if the entity *is* the company entity, the record itself;
-     - else its company field, if it has one;
-     - else its allowed-companies field, if it has one;
-     - else skip this record with a warning naming the entity and the fields and stating that the entity has neither.
-     For each participating field, read its value elevated; for each linked record, check the compatibility rule below.
-   - **Company-dependent fields.** Check against the environment's **current company** instead, because a per-company value belongs to the company it was written for.
-5. Collect at most the inconsistencies found and, if any, refuse with the message of [9.5](#95-the-refusal-message).
-
-### 9.4 The compatibility rule
-
-```formula
-compatible( linked_record , owning_companies ) =
-    ( company_of( linked_record ) is empty )  OR
-    ( company_of( linked_record ) ∈ owning_companies )
-```
-
-An empty company on the linked record means "shared by all companies", which is why shared reference data may be linked from any company's documents.
-
-An entity may override the rule. The user entity, for example, checks membership of the user's **allowed companies** rather than equality of the main company, so that a user allowed in two companies may be assigned to documents of either.
-
-### 9.5 The refusal message
-
-First line:
-
-> "Uh-oh! You’ve got some company inconsistencies here:"
-
-Then up to five lines, one per inconsistency, in one of three shapes:
-
-| Situation | Line |
-|---|---|
-| The record is itself a company | "- Record is company “\<company name\>” while “\<field label\>” (\<field name\>: \<linked record names\>) belongs to another company." |
-| The record is linked to itself through its own company field | "- Only a root company can be set on “\<record name\>”. Currently set to “\<company name\>”" |
-| Otherwise | "- “\<record name\>” belongs to company “\<companies\>” while “\<field label\>” (\<field name\>: \<linked record names\>) belongs to another company." |
-
-Last line:
-
-> "To avoid a mess, no company crossover is allowed!"
-
-### 9.6 Where the check runs
-
-The check switches the archive filter off, so an archived linked record of the wrong company is still caught. It reads the linked records elevated, so that a user who cannot see the linked record still gets a correct answer rather than a spurious pass.
-
----
-
-## 10. External access with signed tokens
-
-### 10.1 The problem
-
-A customer must be able to open their own quotation from a link in an electronic mail message without signing in, and without being able to open anyone else's. Neither access rights nor record rules can express this, because there is no identity to attach them to.
-
-### 10.2 The record access token
-
-An entity that participates in external access adopts a behaviour that adds two fields:
-
-| Field (storage name) | Type | Meaning |
-|---|---|---|
-| Portal address (`access_url`) | Text, computed | The path at which the record is served externally. |
-| Security token (`access_token`) | Text, not copied | An opaque random token. |
-| Access warning (`access_warning`) | Long text, computed | A message shown above the externally served page, empty by default. |
-
-Rules:
-
-1. The token is created **on demand**, the first time a link is produced, as a version-four universally unique identifier written elevated. It is not created at record creation, so records never shared carry no token.
-2. The token is **not copied** when a record is duplicated; a copy gets its own on demand.
-3. The token is searchable only by the membership operators, so it cannot be probed with pattern matching.
-4. Producing a share link first checks that the **producer** may read the record, so a user cannot mint a link to a record they cannot see.
-
-### 10.3 The check
-
-**Preconditions.** An entity name, a record identifier, and optionally a token supplied by the caller.
-
-1. Browse the record elevated and check that it exists. If not, refuse with **"This document does not exist."**
-2. Check read access **as the caller** — which may be the public user.
-3. If the check passes, return the record elevated. The caller has ordinary access; the token is irrelevant.
-4. If the check fails:
-   - if no token was supplied, re-raise the refusal;
-   - if the record carries no token, re-raise the refusal;
-   - compare the supplied token with the stored one using a **constant-time** comparison; if they differ, re-raise the refusal.
-5. Otherwise return the record **elevated**.
-
-Three properties a rebuild must preserve:
-
-1. **The comparison is constant-time.** A comparison that returns early on the first differing character leaks the token one character at a time.
-2. **A valid token yields an elevated record**, not a restricted one. The token *is* the authorisation; once it matches, the gates are bypassed for that record.
-3. **The token authorises one record**, not the entity. Nothing derived from the record inherits the authorisation automatically; each further record must be authorised on its own.
-
-### 10.4 The correspondent signature
-
-A second, different token identifies *who* is using a link, so that a comment posted from an external page can be attributed. It is a keyed digest, not a stored value:
-
-```formula
-signature = keyed_digest( key = tenant_secret ,
-                          message = ( tenant_name , record_access_token , correspondent_identifier ) ,
-                          function = a 256-bit secure hash )
-```
-
-Rules:
-
-1. The key is the tenant's secret parameter. It is per tenant, so a signature from one tenant is worthless in another.
-2. The message includes the tenant name, so the same record identifier in two tenants signs differently.
-3. The message includes the record's own access token, so revoking the token invalidates every correspondent signature for that record.
-4. The message includes the correspondent's identifier, so a signature identifies one correspondent for one record.
-5. The entity must declare which of its fields is the record token used in the message; an entity that does not is refused with **"Model "** the transport name **" does not support token signature, as it does not have "** the field name **" field."**
-
-### 10.5 The general signing helper
-
-The same construction is used wherever the system must hand out a value it will later have to trust: unsubscribe links, one-time sign-up links, confirmation links, webhook callbacks.
-
-```formula
-signature = keyed_digest( key = secret , message = representation_of( ( scope , payload ) ) , function = a 256-bit secure hash )
-```
-
-| Element | Rule |
-|---|---|
-| Secret | The tenant's secret parameter unless an explicit secret is supplied. An empty secret is refused. |
-| Scope | A non-empty string naming the purpose. An empty scope is refused with **"Non-empty scope required"**. Including the scope means the same payload signed for two purposes yields two different signatures, so a signature cannot be replayed in another context. |
-| Payload | Any value with a stable textual representation. |
-| Comparison | Constant-time. |
-
-### 10.6 Neutralising a copy of a tenant
-
-When a tenant is copied for testing, the copy must not be able to act on the outside world with the original's credentials. A neutralisation pass disables outgoing message servers, scheduled jobs and external service credentials. It does **not** rotate the tenant secret, so signatures minted by the original still verify in the copy; a rebuild that wants stronger isolation must rotate the secret and accept that every outstanding link breaks.
-
----
-
-## 11. Caching and invalidation of security decisions
-
-Security decisions are consulted many times per request and are therefore cached. Every cache must be invalidated exactly when the data it derives from changes.
-
-| Cached answer | Key | Invalidated when |
-|---|---|---|
-| A user's transitive group identifiers | The user | The user's groups, active flag, language, time zone, main company or allowed companies change |
-| The set of entities a user may operate on, per operation | The acting user and the operation | Any access right is created, written or deleted |
-| The group expression for an entity and an operation | The entity and the operation | Any access right changes; any group changes |
-| The compact group definitions | none | Any group, any group external identifier, any access right or any record rule changes |
-| A user's companies | The user | Company membership or a company's active flag changes |
-| An entity's effective rule filter | The acting user, the unrestricted flag, the entity, the operation and the ordered allowed-company list | Any record rule is created, written or deleted |
-| The resolution of an external identifier | The identifier | The external identifier is written or deleted |
-
-Three rules:
-
-1. Every one of these invalidations also **signals other workers** through the counters of [the architecture, section 12](architecture.md#12-cross-process-coherence). A group changed by one worker must take effect in all of them.
-2. Creating, writing or deleting an access right additionally invalidates the whole record cache, because a decision already made in this transaction may now be wrong.
-3. Creating, writing or deleting a record rule flushes the unit of work before clearing the caches, so that the new rule is visible to everything that follows in the same transaction.
-
-In development mode the rule cache is switched off entirely, so that editing a rule takes effect immediately.
-
----
-
-## 12. What is not enforcement
-
-Several mechanisms look like security and are not. Confusing them produces a rebuild with holes.
-
-| Mechanism | What it actually does |
-|---|---|
-| A field marked read-only | Instructs the client not to offer editing. The transport can still write the field. |
-| A view node carrying a group condition | Removes the node from the resolved view for users outside the group. The field is still readable over the transport unless the **field** is restricted. |
-| A menu restricted to groups | Hides the menu. The action and the entity behind it are still reachable by anyone with the access rights. |
-| A button restricted to groups | Hides the button. The operation is still callable. |
-| A relational field's candidate restriction | Narrows the list a client offers. The transport can still write any identifier; a real constraint needs a validation. |
-| An on-change reaction rule that refuses | Guides the user. A transport write with the same value succeeds. |
-| Naming an operation with a leading underscore | Makes it unreachable from the transport. This **is** enforcement, and it is the only naming convention that is. |
-| Marking an operation not remotely callable | Also enforcement. |
-
-The rule: **if it can be observed only through a client, it is not enforcement.** Every real restriction is one of the four gates, the private-name rule, or a declared validation.
-
----
-
-## 13. The shipped catalogue
-
-The shipped system defines **140 groups**, organised into **29 privilege families**, granting **1,933 access rights** and restricted by **576 record rules**.
-
-### 13.1 The foundational groups
-
-| External identifier | Name | Role |
-|---|---|---|
-| `base.group_user` | Internal User | Every employee. The base of the back office. |
-| `base.group_portal` | Portal | External correspondents with their own sign-in. |
-| `base.group_public` | Public | Anonymous visitors. |
-| `base.group_system` | Settings | Full configuration of the tenant. |
-| `base.group_erp_manager` | Access Rights | May administer users, groups and access. Implied by the settings group. |
-| `base.group_no_one` | Technical Features | Reveals technical detail; only effective in debug mode. |
-| `base.group_multi_company` | Multi Company | Reveals the company switcher and the company field. |
-| `base.group_multi_currency` | Multi Currency | Reveals currency fields and rates. |
-| `base.group_partner_manager` | Contact Creation | May create parties. |
-| `base.group_allow_export` | Allowed to Export | May export data. Absence of this group blocks every export. |
-
-### 13.2 The shape of a capability's groups
-
-A capability that is presented as an application almost always defines a privilege family with two or three graded groups:
-
-| Grade | Typical name | Implies |
-|---|---|---|
-| Read-only | "Show \<capability\> — Readonly" | The internal-user group |
-| User | "\<capability\> User" or the capability's own name | The read-only group |
-| Manager | "\<capability\> Administrator" | The user group |
-
-The grading is expressed by implication, which is what makes the single-selection presentation of a privilege family faithful ([section 3.5](#35-privilege-families)).
-
-### 13.3 The shape of a record rule set
-
-A capability that stores company-scoped documents almost always ships:
-
-1. one **global** multi-company rule per entity;
-2. one **group** rule per graded group, widening as the grade rises — often the highest grade's rule is simply "everything", expressed as a filter that is always true, whose purpose is to *widen* the disjunction and thereby neutralise the lower grades' narrow rules;
-3. one or more **portal** rules restricting external users to records where they are the correspondent.
-
-Point 2 is the idiom that makes the disjunctive combination of group rules work, and a rebuild must support it: a rule whose filter is always true is not a no-operation, it is a grant.
-
-### 13.4 Complete catalogues
-
-The complete lists — every group with its family, implications and members; every access right with its entity, group and four flags; every record rule with its entity, groups, filter and four flags — are in [the machine-readable operational catalogues](../../schemas/operational/README.md) and are rendered in [groups and access](../references/groups-and-access.md).
-
----
-
-## 14. Invariants a rebuild must preserve
-
-1. Access rights are permissive and combine by disjunction; an entity with no access right is reachable by nobody.
-2. Record rules are restrictive; global rules conjoin, group rules disjoin, and a user with no applicable group rule is restricted only by the global ones.
-3. Record rules of an embedded parent apply to the embedding entity, traversed through the link.
-4. Access rights are checked before record rules, so a user without the entity-level right never learns whether a record exists.
-5. A search silently hides records excluded by rules; a direct read refuses and names them.
-6. A field's group requirement governs both reading and writing, and a field the user may not read is omitted from the field description entirely.
-7. Elevating privileges changes what is allowed, never who is acting; audit fields record the real user.
-8. Elevating from a restricted environment without an explicit context strips the default-value and active-record keys.
-9. Any environment whose acting user is the root identity is unrestricted.
-10. The three user kinds are mutually exclusive, transitively.
-11. The implied-group closure includes the group itself and is computed elevated.
-12. A group requirement of a single full stop is satisfied by nobody.
-13. An empty allowed-company list means all the user's companies, not the main one.
-14. A restricted environment may not select a company the user does not belong to; an unrestricted one may.
-15. An empty company on a linked record is compatible with every owning company.
-16. A record access token is compared in constant time and, when it matches, yields an elevated record for that record only.
-17. Every signed value includes a non-empty scope and the tenant's secret.
-18. Every security cache is invalidated and signalled to other workers when its source changes.
-
----
-
-## 15. Acceptance criteria
-
-### Users and groups
-
-**AC-SEC-1.** *Given* group `manager` implying `user` implying `internal`, and a user explicitly in `manager` only, *when* the user's groups are resolved, *then* the result is exactly `manager`, `user` and `internal`.
-
-**AC-SEC-2.** *Given* a user in the internal-user group, *when* a write adds them to the portal-user group, *then* the write is refused with "User" the name "cannot be at the same time in exclusive groups" naming both.
-
-**AC-SEC-3.** *Given* a group whose implications are changed so that some active user would then be both internal and portal, *when* the change is written, *then* it is refused.
-
-**AC-SEC-4.** *Given* a tenant with exactly one member of the settings group, *when* that user is removed from it, *then* the write is refused with "You must have at least an administrator user."
-
-**AC-SEC-5.** *Given* a portal user, *when* they ask whether another user belongs to a group, *then* the call is refused with "You can ony call user.has_group() with your current user."
-
-**AC-SEC-6.** *Given* a user who belongs to the technical-features group and a request not in debug mode, *when* membership of that group is tested, *then* the answer is false.
-
-**AC-SEC-7.** *Given* the group requirement naming one positive group and one negated group, *when* a user in both is tested, *then* the requirement is not satisfied, because negatives are evaluated first.
-
-**AC-SEC-8.** *Given* a group requirement consisting only of negated groups, *when* a user in none of them is tested, *then* the requirement is satisfied.
-
-**AC-SEC-9.** *Given* a group requirement of a single full stop, *when* any user including an administrator is tested, *then* the requirement is not satisfied.
-
-### Access rights
-
-**AC-SEC-10.** *Given* an entity with no access right at all, *when* a restricted user reads it, *then* the read is refused; *when* an unrestricted environment reads it, *then* it succeeds.
-
-**AC-SEC-11.** *Given* two access rights on one entity, one granting read to group A and one granting write to group B, *when* a user in A writes, *then* the write is refused; *when* a user in both writes, *then* it succeeds.
-
-**AC-SEC-12.** *Given* a refused read on an entity whose description is "Journal Entry" and whose transport name is `account.move`, *when* the refusal is produced, *then* its first paragraph is "You are not allowed to access 'Journal Entry' (account.move) records.", its second lists the allowing groups as family-slash-group lines, and its third is "Contact your administrator to request access if necessary."
-
-**AC-SEC-13.** *Given* the same entity where no group at all grants read, *when* the refusal is produced, *then* the second paragraph is "No group currently allows this operation."
-
-**AC-SEC-14.** *Given* an access right whose active flag is false, *when* the check runs, *then* it grants nothing.
-
-**AC-SEC-15.** *Given* an access right with no group and the read flag set, *when* it is created, *then* a warning is recorded stating that every access-granting rule should specify a group, and the right still grants read to everyone.
-
-**AC-SEC-16.** *Given* a package introducing a persistent entity with no access right, *when* it is installed, *then* a warning lists the entity and suggests a granting line.
-
-### Record rules
-
-**AC-SEC-17.** *Given* a global rule and no group rule on an entity, *when* a user reads, *then* only the global rule restricts.
-
-**AC-SEC-18.** *Given* one global rule and two group rules, the user belonging to both groups, *when* the effective filter is computed, *then* it is the global rule conjoined with the **disjunction** of the two group rules.
-
-**AC-SEC-19.** *Given* one global rule and two group rules, the user belonging to neither group, *when* the effective filter is computed, *then* it is the global rule alone, and the group term is omitted rather than becoming "nothing".
-
-**AC-SEC-20.** *Given* an entity embedding a parent that carries a record rule, *when* the effective filter is computed, *then* it includes a traversal condition on the link requiring the parent to satisfy the parent's own rule.
-
-**AC-SEC-21.** *Given* a rule excluding some records and a **search**, *when* the search runs, *then* the excluded records are absent and no refusal is raised.
-
-**AC-SEC-22.** *Given* the same rule and a **direct read** of an excluded record, *when* it runs, *then* it is refused and the message names the operation and the acting user.
-
-**AC-SEC-23.** *Given* the same refusal for a user in the technical-features group in debug mode, *when* it is produced, *then* it lists up to six offending records with their display names and identifiers, and the names of the failing rules.
-
-**AC-SEC-24.** *Given* a failing rule whose filter mentions the company field, and exactly one company that would give access which the user belongs to, *when* the refusal is produced, *then* the resolution paragraph names that company and the refusal carries it as structured context.
-
-**AC-SEC-25.** *Given* a rule with no operation flag set, *when* it is created, *then* it is refused with "Rule must have at least one checked access right!"
-
-**AC-SEC-26.** *Given* a rule whose filter expression does not evaluate, *when* it is created active, *then* it is refused with "Invalid domain: " followed by the failure.
-
-**AC-SEC-27.** *Given* a rule on an archived record excluded by that rule, *when* the failing rules are determined, *then* the archive filter is off so the record is considered.
-
-### Fields
-
-**AC-SEC-28.** *Given* a field restricted to group A, *when* a user outside A requests the entity's field description, *then* the field is absent from the result.
-
-**AC-SEC-29.** *Given* the same, *when* the user reads the field directly, *then* the read is refused with "You do not have enough rights to access the field" naming the field, the entity description and the transport name, and ending with the operation.
-
-**AC-SEC-30.** *Given* a user in group A who may read but, by an entity-specific override, not write the field, *when* the field description is produced, *then* the read-only flag is true.
-
-**AC-SEC-31.** *Given* a field restricted to a single full stop, *when* any user reads it, *then* the read is refused, and in debug mode the explanation is "always forbidden".
-
-**AC-SEC-32.** *Given* a view naming a field restricted to group A, *when* a user outside A resolves the view, *then* the node is absent.
-
-### Elevation
-
-**AC-SEC-33.** *Given* a restricted user and an operation that elevates and creates a record, *when* the record is created, *then* its created-by field records the restricted user, not the root identity.
-
-**AC-SEC-34.** *Given* a restricted environment whose context sets a default for a field and names an active record, *when* an elevated environment is derived with no explicit context, *then* those keys are absent and the language, time zone and company selection remain.
-
-**AC-SEC-35.** *Given* the same, *when* the elevated environment is derived **with** an explicit context, *then* no cleaning happens.
-
-**AC-SEC-36.** *Given* an environment for the root identity with the flag explicitly cleared, *when* an access check runs, *then* it is still bypassed.
-
-**AC-SEC-37.** *Given* an elevated environment and an entity that forbids privileged relational commands, *when* a command targeting it is applied through a relation, *then* it is refused.
-
-**AC-SEC-38.** *Given* an operation that switches the acting user to another user, *when* it runs, *then* every gate is evaluated as that other user and the environment is restricted.
-
-### Companies
-
-**AC-SEC-39.** *Given* a user allowed in companies 1 and 2 and a context selecting company 3, *when* the current company is resolved in a restricted environment, *then* the operation is refused with "Access to unauthorized or invalid companies."
-
-**AC-SEC-40.** *Given* the same in an unrestricted environment, *when* the current company is resolved, *then* it is company 3.
-
-**AC-SEC-41.** *Given* a user allowed in companies 1 and 2 and an empty selection, *when* the allowed companies are resolved, *then* both companies are returned, not only the main one.
-
-**AC-SEC-42.** *Given* a record set with the selection [1, 2], *when* it is switched to company 2, *then* the selection becomes [2, 1] and the current company is 2.
-
-**AC-SEC-43.** *Given* an entity with a company field and the standard global rule, *when* a user with selection [1] searches, *then* only records whose company is 1 or empty are returned.
-
-**AC-SEC-44.** *Given* an invoice of company 1 and an account of company 2, both visible to the user, *when* the account is set on the invoice and the entity checks company consistency, *then* the write is refused with the message beginning "Uh-oh! You’ve got some company inconsistencies here:" and ending "To avoid a mess, no company crossover is allowed!".
-
-**AC-SEC-45.** *Given* the same account with an empty company, *when* it is set on the invoice, *then* the write succeeds.
-
-**AC-SEC-46.** *Given* a company-dependent participating field whose value points at a record of company 2 while the current company is 1, *when* the check runs, *then* it is refused, because company-dependent fields are checked against the current company.
-
-### External access
-
-**AC-SEC-47.** *Given* a record with no token and a share link being produced by a user who may read it, *when* the link is produced, *then* a token is created and stored elevated.
-
-**AC-SEC-48.** *Given* a user who may not read the record, *when* they request a share link, *then* the request is refused before any token is created.
-
-**AC-SEC-49.** *Given* a public caller and a correct token, *when* the record is requested, *then* the record is returned elevated.
-
-**AC-SEC-50.** *Given* a public caller and a token differing in the last character, *when* the record is requested, *then* it is refused, and the comparison takes the same time as a correct one.
-
-**AC-SEC-51.** *Given* a record that does not exist, *when* it is requested with any token, *then* the refusal is "This document does not exist."
-
-**AC-SEC-52.** *Given* a record duplicated, *when* the copy is examined, *then* it carries no token.
-
-**AC-SEC-53.** *Given* a correspondent signature for record R and correspondent P, *when* R's token is regenerated, *then* the old signature no longer verifies.
-
-**AC-SEC-54.** *Given* the same payload signed with two different scopes, *when* the two signatures are compared, *then* they differ.
-
-**AC-SEC-55.** *Given* a signing request with an empty scope, *when* it runs, *then* it is refused with "Non-empty scope required".
-
-### Caching
-
-**AC-SEC-56.** *Given* a cached decision that a user may read an entity, *when* the access right granting it is deleted, *then* the next check in any worker refuses.
-
-**AC-SEC-57.** *Given* a cached rule filter for a user with selection [1], *when* the selection changes to [2], *then* a different cache entry is used and the filter reflects company 2.
-
-**AC-SEC-58.** *Given* a record rule created inside a transaction, *when* a search runs later in the same transaction, *then* the new rule applies.
-
----
-
-## Related documents
-
-- [Architecture](architecture.md) — the environment that carries the acting user, the company selection and the unrestricted flag.
-- [The entity and field system](entity-and-field-system.md) — field restrictions, company-dependent values, company consistency and the filter grammar the rules are written in.
-- [Inheritance and extension](inheritance-and-extension.md) — how a package adds groups, rights and rules without touching another's.
-- [Views and actions](views-and-actions.md) — the presentation-level group conditions that are guidance, not enforcement.
-- [The package system](package-system.md) — the categories that name privilege families.
-- [Identity and access](../domains/identity-and-access/README.md) — sign-in, passwords, second factors, application keys, delegated sign-in and sign-up.
-- [Groups and access reference](../references/groups-and-access.md) — the complete catalogues.

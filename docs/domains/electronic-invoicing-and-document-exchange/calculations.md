@@ -1,6 +1,6 @@
 # Calculations
 
-Every formula and algorithm of the Electronic Invoicing and Document Interchange domain: the amounts written into an exported file, the grouping and aggregation of taxes, the presentation rounding, the reconstruction of quantity, unit price and discount when a file is imported, the correction of tax and untaxed totals, the prediction of tax category and exemption reason codes, and the code mappings. Each section states its inputs, its outputs, its precision and its order of operations, and closes with a worked example using real numbers.
+Every formula and algorithm of the Electronic Invoicing and Document Exchange domain: the amounts written into an exported file, the grouping and aggregation of taxes, the presentation rounding, the reconstruction of quantity, unit price and discount when a file is imported, the correction of tax and untaxed totals, the prediction of tax category and exemption reason codes, and the code mappings. Each section states its inputs, its outputs, its precision and its order of operations, and closes with a worked example using real numbers.
 
 Every monetary amount is produced by the tax engine of the [taxes](../taxes/calculations.md) domain. This domain supplies the grouping keys, the sign conventions and the presentation precision. The terms used for the amounts produced by that engine are:
 
@@ -702,8 +702,8 @@ where the rebate is the item price discount written inside the price node, and t
 
 This platform stores a quantity, a unit price, a discount percentage and a subtotal related by:
 
-```
-subtotal = quantity × unit_price × (1 - discount ÷ 100)
+```formula
+subtotal = quantity × unit price × ( 1 − discount percentage ÷ 100 )
 ```
 
 ## 12.1 The current import path
@@ -722,52 +722,66 @@ subtotal = quantity × unit_price × (1 - discount ÷ 100)
 
 **Step 1: the price level.** This describes what one purchase of `base_quantity` units costs and how much is discounted on it.
 
-```
-if price_amount is present:
-    price_quantity = base_quantity or 1
-    if price_allowance_base_amount is present:
-        price_discount = price_allowance_base_amount - price_amount
-        price_subtotal = price_allowance_base_amount
-    else if price_allowance_amount is present:
-        price_discount = - price_allowance_amount
-        price_subtotal = price_amount - price_allowance_amount
-    else:
-        price_discount = 0 ; price_subtotal = price_amount
-else if price_allowance_base_amount is present:
-    price_subtotal = price_allowance_base_amount
-    price_quantity = base_quantity or 1
-    price_discount = - (price_allowance_amount or 0)
-else:
-    price_subtotal = 0 ; price_quantity = 0 ; price_discount = 0
-```
+Four mutually exclusive cases produce the price quantity, the price discount and the price subtotal. The first case whose condition holds is the one applied.
+
+| Case | Condition | Price quantity | Price discount | Price subtotal |
+|---|---|---|---|---|
+| 1 | a price amount is present and a price allowance base amount is present | the base quantity, or 1 when the base quantity is absent or zero | price allowance base amount − price amount | price allowance base amount |
+| 2 | a price amount is present, no price allowance base amount, a price allowance amount is present | the base quantity, or 1 when the base quantity is absent or zero | − price allowance amount | price amount − price allowance amount |
+| 3 | a price amount is present and neither allowance element is present | the base quantity, or 1 when the base quantity is absent or zero | 0 | price amount |
+| 4 | no price amount but a price allowance base amount is present | the base quantity, or 1 when the base quantity is absent or zero | − price allowance amount, or 0 when that element is absent | price allowance base amount |
+| 5 | neither a price amount nor a price allowance base amount is present | 0 | 0 | 0 |
 
 **Step 2: the line level.** `subtotal = line_net_amount + total_allowances - total_charges`.
 
+Three cases are distinguished. Within each case, a first set of values is computed and is then replaced when the price subtotal of step 1 is not zero.
+
+**Case A: a line net amount is present and the invoiced quantity is absent or zero.**
+
+```formula
+quantity        = 1
+unit price      = subtotal
+discount amount = total of the line level allowances
 ```
-case A: a line net amount is present and the quantity is absent or zero
-    quantity        = 1
-    unit_price      = subtotal
-    discount_amount = total_allowances
-    if price_subtotal is not zero:
-        quantity        = subtotal × price_quantity ÷ (price_subtotal - price_discount)
-        unit_price      = subtotal ÷ quantity + price_discount ÷ price_quantity
-                          when the quantity is not zero, otherwise price_amount
-        discount_amount = discount_amount + price_discount × quantity ÷ price_quantity
 
-case B: a line net amount is present and the quantity is non zero
-    quantity        = invoiced_quantity
-    unit_price      = subtotal ÷ quantity
-    discount_amount = total_allowances
-    if price_subtotal is not zero:
-        unit_price      = price_subtotal ÷ price_quantity
-        discount_amount = discount_amount + price_discount × quantity ÷ price_quantity
+When the price subtotal is not zero, those three values are replaced by:
 
-case C: no line net amount
-    quantity = 0 ; unit_price = 0 ; discount_amount = total_allowances
-    if price_subtotal is not zero:
-        unit_price      = price_subtotal ÷ price_quantity
-        quantity        = price_quantity
-        discount_amount = discount_amount + price_discount
+```formula
+quantity        = subtotal × price quantity ÷ ( price subtotal − price discount )
+unit price      = subtotal ÷ quantity + price discount ÷ price quantity        (when the quantity is not zero)
+unit price      = price amount                                                 (when the quantity is zero)
+discount amount = total of the line level allowances + price discount × quantity ÷ price quantity
+```
+
+**Case B: a line net amount is present and the invoiced quantity is not zero.**
+
+```formula
+quantity        = invoiced quantity
+unit price      = subtotal ÷ quantity
+discount amount = total of the line level allowances
+```
+
+When the price subtotal is not zero, the unit price and the discount amount are replaced by:
+
+```formula
+unit price      = price subtotal ÷ price quantity
+discount amount = total of the line level allowances + price discount × quantity ÷ price quantity
+```
+
+**Case C: no line net amount is present.**
+
+```formula
+quantity        = 0
+unit price      = 0
+discount amount = total of the line level allowances
+```
+
+When the price subtotal is not zero, the three values are replaced by:
+
+```formula
+unit price      = price subtotal ÷ price quantity
+quantity        = price quantity
+discount amount = total of the line level allowances + price discount
 ```
 
 **Step 3: the charges.** `unit_price = unit_price + total_charges ÷ (quantity or 1)`.
@@ -782,48 +796,54 @@ discount = discount_amount × 100 ÷ gross_subtotal   when gross_subtotal is not
 
 **Worked example A.** A line with a line net amount of 1000.00, a price amount of 250.00, a base quantity of 5, a price allowance base amount of 1250.00, and no line level allowance or charge.
 
-```
-price_quantity = 5
-price_discount = 1250.00 - 250.00 = 1000.00     ← the price node says 1250 becomes 250 for 5 units
-price_subtotal = 1250.00
-subtotal       = 1000.00
-case A (no invoiced quantity):
-    quantity        = 1000.00 × 5 ÷ (1250.00 - 1000.00) = 5000 ÷ 250 = 20
-    unit_price      = 1000.00 ÷ 20 + 1000.00 ÷ 5 = 50.00 + 200.00 = 250.00
-    discount_amount = 0 + 1000.00 × 20 ÷ 5 = 4000.00
-gross_subtotal = 250.00 × 20 = 5000.00
-discount       = 4000.00 × 100 ÷ 5000.00 = 80 percent
-check: 20 × 250.00 × (1 - 0.80) = 1000.00 ✔
+The price node states that 1250.00 becomes 250.00 for five units, so case A applies.
+
+```formula
+price quantity  = 5
+price discount  = 1250.00 − 250.00 = 1000.00
+price subtotal  = 1250.00
+subtotal        = 1000.00
+quantity        = 1000.00 × 5 ÷ ( 1250.00 − 1000.00 ) = 5000.00 ÷ 250.00 = 20
+unit price      = 1000.00 ÷ 20 + 1000.00 ÷ 5 = 50.00 + 200.00 = 250.00
+discount amount = 0.00 + 1000.00 × 20 ÷ 5 = 4000.00
+gross subtotal  = 250.00 × 20 = 5000.00
+discount        = 4000.00 × 100 ÷ 5000.00 = 80 percent
+verification    = 20 × 250.00 × ( 1 − 0.80 ) = 1000.00, which equals the stated line net amount
 ```
 
 **Worked example B.** A line with an invoiced quantity of 6, a line net amount of 1200.00, a price amount of 250.00, a base quantity of 5, a price allowance base amount of 1250.00 and a price allowance amount of 50.00.
 
-```
-price_quantity = 5
-price_discount = 1250.00 - 250.00 = 1000.00
-price_subtotal = 1250.00
-subtotal       = 1200.00
-case B:
-    quantity        = 6
-    unit_price      = 1250.00 ÷ 5 = 250.00
-    discount_amount = 0 + 1000.00 × 6 ÷ 5 = 1200.00
-gross_subtotal = 250.00 × 6 = 1500.00
-discount       = 1200.00 × 100 ÷ 1500.00 = 80 percent
-check: 6 × 250.00 × (1 - 0.80) = 300.00
+Case B applies, because a line net amount is present and the invoiced quantity is not zero.
+
+```formula
+price quantity  = 5
+price discount  = 1250.00 − 250.00 = 1000.00
+price subtotal  = 1250.00
+subtotal        = 1200.00
+quantity        = 6
+unit price      = 1250.00 ÷ 5 = 250.00
+discount amount = 0.00 + 1000.00 × 6 ÷ 5 = 1200.00
+gross subtotal  = 250.00 × 6 = 1500.00
+discount        = 1200.00 × 100 ÷ 1500.00 = 80 percent
+verification    = 6 × 250.00 × ( 1 − 0.80 ) = 300.00
 ```
 
 The check does not reproduce the stated line net amount, because the price node and the line net amount of this file contradict each other. The platform believes the price node. That is a deliberate choice: the price node is the semantic description of the item, and the tax correction of section 14 repairs the totals afterwards.
 
 **Worked example C.** A line with an invoiced quantity of zero, a line net amount of 0.00 and a price amount of 100.00.
 
-```
-price_quantity = 1 ; price_discount = 0 ; price_subtotal = 100.00
-subtotal = 0.00
-case A (the quantity is zero):
-    quantity        = 0.00 × 1 ÷ (100.00 - 0) = 0
-    the quantity is zero, so unit_price = price_amount = 100.00
-    discount_amount = 0
-gross_subtotal = 0 ; discount = 0
+Case A applies, because the invoiced quantity is zero.
+
+```formula
+price quantity  = 1
+price discount  = 0.00
+price subtotal  = 100.00
+subtotal        = 0.00
+quantity        = 0.00 × 1 ÷ ( 100.00 − 0.00 ) = 0
+unit price      = 100.00      (the quantity is zero, so the price amount is used)
+discount amount = 0.00
+gross subtotal  = 0.00
+discount        = 0 percent
 ```
 
 This branch exists because a line with a zero quantity, a zero net amount and a non zero price used to produce a division by zero.
@@ -832,52 +852,63 @@ This branch exists because a line with a zero quantity, a zero net amount and a 
 
 Used by the order import and by the import of the plain 2.0 and 2.1 syntaxes.
 
+**Step 1: read the elements.**
+
+| Quantity | Source |
+|---|---|
+| base quantity | the base quantity element, taken as 1 when the element is absent and as 1 again when it reads as zero |
+| gross unit price | the gross price element, when present |
+| net unit price | the net price element, when present |
+| delivered quantity | the delivered quantity element, taken as 1 when the element is absent |
+| line net amount | the line total element, when present |
+| quantity | delivered quantity × document sign |
+
+**Step 2: the rebate.** The rebate is the rebate element when it is present; otherwise the gross unit price minus the net unit price when both of those are present; otherwise zero.
+
+**Step 3: the line level allowances and charges.**
+
+```formula
+allowance and charge amount = total of the line level allowances − total of the line level charges
 ```
-base_quantity      = the base quantity element, or 1, and 1 again when it reads as zero
-gross_unit_price   = the gross price element when present
-net_unit_price     = the net price element when present
-delivered_quantity = the delivered quantity element, or 1
-line_net_amount    = the line total element when present
-quantity           = delivered_quantity × document_sign
 
-rebate = the rebate element when present,
-         else gross_unit_price - net_unit_price when both are present,
-         else 0
+**Step 4: the unit price.** The four cases are tried in order and the first one whose condition holds is applied.
 
-discount_amount, charges = the line level allowances summed, and the line level charges collected
-charge_amount            = the sum of the collected charge amounts
-allowance_charge_amount  = discount_amount - charge_amount
+| Case | Condition | Unit price |
+|---|---|---|
+| 1 | a gross price element exists | gross unit price ÷ base quantity |
+| 2 | no gross price element, a net price element exists | ( net unit price + rebate ) ÷ base quantity |
+| 3 | neither price element exists, a line net amount exists | ( line net amount + allowance and charge amount ) ÷ delivered quantity, taking the delivered quantity as 1 when it is zero |
+| 4 | none of the above | 0 |
 
-unit_price = gross_unit_price ÷ base_quantity                            when a gross price exists
-           = (net_unit_price + rebate) ÷ base_quantity                   else when a net price exists
-           = (line_net_amount + allowance_charge_amount) ÷ (delivered_quantity or 1)
-                                                                         else when a net amount exists
-           = 0                                                           otherwise
+**Step 5: the discount percentage.** The discount is zero unless the product of the delivered quantity and the unit price is not zero in the company currency **and** a line net amount exists. In that case the inferred discount is computed as below and is kept unless it is itself zero in the company currency.
 
-discount = 0
-if delivered_quantity × unit_price is not zero in the company currency and a net amount exists:
-    inferred = 100 × (1 - (line_net_amount - charge_amount)
-                          ÷ round(delivered_quantity × unit_price, company currency))
-    discount = inferred unless it is zero in the company currency
-
-# repair of contradictory files
-if a net price and a net amount both exist and
-   line_net_amount ≠ net_unit_price × (delivered_quantity ÷ base_quantity) - allowance_charge_amount:
-       net price zero and delivered quantity zero: quantity = 1 ; unit_price = line_net_amount
-       net price zero:                             unit_price = line_net_amount ÷ delivered_quantity
-       delivered quantity zero:                    quantity   = line_net_amount ÷ unit_price
+```formula
+inferred discount percentage = 100 × ( 1 − ( line net amount − total of the line level charges )
+                                           ÷ round( delivered quantity × unit price , decimal places of the company currency ) )
 ```
+
+**Step 6: repair of contradictory files.** When a net price element and a line net amount element are both present and the line net amount does not agree with the net price, three repairs apply.
+
+```formula
+agreement test: line net amount = net unit price × ( delivered quantity ÷ base quantity ) − allowance and charge amount
+```
+
+| Condition, when the agreement test fails | Repair |
+|---|---|
+| the net price is zero and the delivered quantity is zero | quantity becomes 1 and the unit price becomes the line net amount |
+| the net price is zero and the delivered quantity is not zero | the unit price becomes the line net amount ÷ delivered quantity |
+| the net price is not zero and the delivered quantity is zero | the quantity becomes the line net amount ÷ unit price |
 
 A line whose reconstructed subtotal is missing is dropped entirely.
 
 **Worked example.** A line with a gross price of 30.00, a base quantity of 3, a delivered quantity of 3, a rebate of 2.00 and a line net amount of 28.00.
 
-```
-unit_price = 30.00 ÷ 3 = 10.00
-quantity   = 3
-inferred   = 100 × (1 - 28.00 ÷ round(3 × 10.00)) = 100 × (1 - 28 ÷ 30) = 6.666666...
-discount   = 6.666666... percent
-check: 3 × 10.00 × (1 - 0.0666666) = 28.00 ✔
+```formula
+unit price                   = 30.00 ÷ 3 = 10.00
+quantity                     = 3
+inferred discount percentage = 100 × ( 1 − 28.00 ÷ round( 3 × 10.00 ) ) = 100 × ( 1 − 28.00 ÷ 30.00 ) = 6.666666666666667
+discount percentage          = 6.666666666666667 percent
+verification                 = 3 × 10.00 × ( 1 − 0.06666666666666667 ) = 28.00, which equals the stated line net amount
 ```
 
 ---
@@ -923,44 +954,40 @@ discount        = (1 - subtotal_after ÷ (unit_price × line_quantity)) × 100
 **Inputs:** the tax totals stated in the file, grouped by the pair of category code and percentage; the taxes that were matched for each of those groups; the accounting document after its lines have been written.
 **Output:** adjusted tax lines.
 
+1. The tolerance is 0.03 expressed in the document currency. The stated total is the sum of the tax amounts of every tax group stated in the file. The correction is called complete when every stated group resolved every one of its related taxes during the tax matching of section 17.
+2. When the correction is not complete, or when the test below is greater than zero, nothing is corrected and the procedure stops.
+
+```formula
+tolerance test = | tax total computed by the platform − stated total of the file | − 0.03
 ```
-tolerance     = 0.03 in the document currency
-stated_total  = the sum of the tax amounts of every stated group
-complete      = every stated group resolved every one of its related taxes
 
-if not complete or |document tax total - stated_total| - tolerance > 0:
-    stop, correct nothing
-
-build the map from each matched tax to the set of taxes of its group
-build the map from each set of taxes to the tax amount stated for that group
-
-read the rounded base and tax lines of the document
-aggregate the tax details under the grouping function "the set of taxes of this tax"
-for each set of taxes and its aggregated values:
-    target  = the stated tax amount of that set
-    factors = one entry per tax detail of that set, weighted by its raw tax amount
-    distribute target over those factors, smoothing the rounding difference
-    write the distributed amount back into each tax detail
-recompute the accounting data of the base lines and rebuild the tax lines
-update the amount and the balance of every tax line that changed
-```
+3. Build the map from each matched tax to the set of taxes of its group, and the map from each set of taxes to the tax amount stated for that group.
+4. Read the rounded base lines and tax lines of the document.
+5. Aggregate the tax details under a grouping that puts together every tax detail belonging to the same set of taxes.
+6. Take each set of taxes and its aggregated values in turn. The target is the tax amount stated for that set. The factors are one entry per tax detail of that set, each weighted by its raw tax amount. Distribute the target over those factors with the smooth distribution described below, and write the distributed amount back into each tax detail.
+7. Recompute the accounting data of the base lines and rebuild the tax lines.
+8. Update the amount and the balance of every tax line whose value changed.
 
 The distribution is the smooth distribution helper of the taxes domain: it gives each factor its proportional share rounded to the currency, then spreads the remaining cents one by one over the factors with the largest remainders, so that the sum of the parts equals the target exactly.
 
 **Worked example.** A file states one tax group, standard rate at 21 percent, with a tax amount of 210.01. The platform computed 210.00 from two lines whose raw tax amounts are 199.50 and 10.50.
 
-```
-complete  = true
-|210.00 - 210.01| - 0.03 = -0.02, which is not greater than zero → correct
-target    = 210.01
-factors   = [199.50, 10.50] ; total 210.00
-shares    = [210.01 × 199.50 ÷ 210.00, 210.01 × 10.50 ÷ 210.00] = [199.5095, 10.5005]
-rounded   = [199.51, 10.50] ; sum 210.01 ✔
+```formula
+tolerance test        = | 210.00 − 210.01 | − 0.03 = 0.01 − 0.03 = −0.02, which is not greater than zero, so the correction runs
+target                = 210.01
+first factor          = 199.50
+second factor         = 10.50
+total of the factors  = 210.00
+first share           = 210.01 × 199.50 ÷ 210.00 = 199.509500
+second share          = 210.01 × 10.50 ÷ 210.00 = 10.500500
+first share rounded   = 199.51
+second share rounded  = 10.50
+sum of the two shares = 210.01, which equals the target
 ```
 
 The two tax details receive 199.51 and 10.50, and the tax line of the document is written with 210.01.
 
-**Counter example.** The same file states 213.00 instead. Then `|210.00 - 213.00| - 0.03 = 2.97 > 0`, and nothing is corrected: the discrepancy is too large to be a rounding artefact, so the platform keeps its own computation and leaves the difference visible.
+**Counter example.** The same file states 213.00 instead. The tolerance test then gives | 210.00 − 213.00 | − 0.03 = 3.00 − 0.03 = 2.97, which is greater than zero, and nothing is corrected: the discrepancy is too large to be a rounding artefact, so the platform keeps its own computation and leaves the difference visible.
 
 ---
 
@@ -968,26 +995,27 @@ The two tax details receive 199.51 and 10.50, and the tax line of the document i
 
 **Runs only when every stated tax group resolved every one of its taxes.**
 
+```formula
+stated tax exclusive amount = tax exclusive amount stated in the file × document sign
+stated rounding amount      = payable rounding amount stated in the file × document sign
+expected untaxed total      = stated tax exclusive amount + stated rounding amount
+difference                  = round( expected untaxed total − untaxed total of the document ,
+                                     decimal places of the document currency )
+                              − sum over line charges matched to a fixed tax of ( amount of the charge )
 ```
-stated_exclusive = the tax exclusive amount of the file × document sign
-stated_rounding  = the payable rounding amount of the file × document sign
-expected         = stated_exclusive + stated_rounding
-difference       = round(expected - the untaxed total of the document, currency)
-for every line charge that was matched to a fixed tax:
-    difference = difference - the charge amount
-if difference is zero in the currency: stop
-add one line: label "Rounding", quantity 1, unit price = difference, no tax
-```
+
+When the difference is zero in the document currency nothing is added. Otherwise one extra line is added to the document, carrying the reproduced label "Rounding", a quantity of 1, a unit price equal to the difference and no tax.
 
 The fixed tax charges are subtracted because their amounts are already carried by the taxes, not by the untaxed total.
 
 **Worked example.** A file states a tax exclusive amount of 1500.00 and a payable rounding amount of 0.03. The lines that were written total 1500.00 excluding tax, and no line charge matched a fixed tax.
 
+```formula
+expected untaxed total = 1500.00 + 0.03 = 1500.03
+difference             = 1500.03 − 1500.00 = 0.03
 ```
-expected   = 1500.00 + 0.03 = 1500.03
-difference = 1500.03 - 1500.00 = 0.03
-a line "Rounding" with quantity 1, unit price 0.03 and no tax is added
-```
+
+One extra line carrying the reproduced label "Rounding", a quantity of 1, a unit price of 0.03 and no tax is added.
 
 ---
 
@@ -1014,11 +1042,11 @@ The strategies are tried in the order of their rank. The shipped ranks come from
 
 **Worked example: matching by internal reference.** The file line carries:
 
-```
-item name                 : "Office Chair"
-seller item identifier    : "FURN_7777"
-standard item identifier  : absent
-```
+| Element read | Value |
+|---|---|
+| item name | "Office Chair" |
+| seller item identifier | `FURN_7777` |
+| standard item identifier | absent |
 
 The collected values are `default_code = "FURN_7777"`, `sellers_item_id = "FURN_7777"`, `name = "Office Chair"`, `barcode` empty.
 
@@ -1038,19 +1066,19 @@ The line is written with that product. Its unit of measure is then resolved from
 
 The tax values of a line are built from the classified tax category nodes:
 
-```
-percentage    = the percentage element of the category
-category_code = the identifier element of the category
-if either is missing: the category produces no tax value
-key = (category_code, percentage)
-if the document has no stated tax total for that key: the category produces no tax value
-tax value = { amount type: percentage,
-              usage:       "sale" for a sale journal, "purchase" for a purchase journal,
-              rate:        the stated rate of that group,
-              category code: the stated category code of that group,
-              key:         key,
-              prediction:  the document, the line label and the partner, when both are known }
-```
+1. Read the percentage element and the identifier element of the classified tax category. When either of the two is missing, the category produces no tax value and the procedure stops for that category.
+2. Form the matching key from the pair made of the category code and the percentage.
+3. When the document states no tax total for that key, the category produces no tax value and the procedure stops for that category.
+4. Otherwise produce one tax value with the parts below.
+
+| Part of the tax value | Value |
+|---|---|
+| Amount type | percentage |
+| Usage | sale for a sale journal, purchase for a purchase journal |
+| Rate | the rate stated for that group in the file |
+| Category code | the category code stated for that group in the file |
+| Key | the pair of the category code and the percentage |
+| Prediction context | the document, the label of the line and the partner, used only when both the label and the partner are known |
 
 The strategies are tried in this order and the first that resolves a tax wins:
 
@@ -1068,22 +1096,24 @@ Document level allowances and charges produce their own tax value from the tax c
 
 Used by the order import and the plain 2.0 and 2.1 syntaxes.
 
-```
-for every tax node collected on the line:
-    rate   = the value of the node
-    domain = same company family, percentage amount type, the usage of the journal,
-             the rate, and the tax country of the document
-    tax    = the specific prediction for the line label, filtered by that domain, when available
-    when a tax exigibility is requested, four searches are tried in order, each adding the
-    fiscal position filter first and then dropping it:
-        price excluded and the requested exigibility
-        price included and the requested exigibility
-        price excluded and the requested exigibility, without the fiscal position filter
-        price included and the requested exigibility, without the fiscal position filter
-    and, when none matched, the message of rule 193 is added for the exigibility
-    four more searches are then tried in the same shape without the exigibility filter
-    when a tax is found and its price is included:
-        unit_price = unit_price × (1 + rate ÷ 100)
+Take each tax node collected on the line in turn.
+
+1. The rate is the value carried by the node.
+2. The search filter keeps the taxes of the same company family, of the percentage amount type, with the usage of the journal, with that rate, and with the tax country of the document.
+3. When a specific prediction exists for the label of the line, it is used first, still filtered by the search filter of step 2.
+4. When a tax exigibility is requested, four searches are tried in this order, and the first that returns a tax wins.
+
+   1. taxes whose price is excluded, with the requested exigibility, restricted by the fiscal position filter;
+   2. taxes whose price is included, with the requested exigibility, restricted by the fiscal position filter;
+   3. taxes whose price is excluded, with the requested exigibility, without the fiscal position filter;
+   4. taxes whose price is included, with the requested exigibility, without the fiscal position filter.
+
+5. When none of the four searches of step 4 returned a tax, the message of rule 193 is added for that exigibility.
+6. Four further searches are then tried in the same order and the same shape, this time without the exigibility filter, and the first that returns a tax wins.
+7. When a tax is found and its price is included, the unit price of the line is grossed up.
+
+```formula
+unit price = unit price × ( 1 + rate ÷ 100 )
 ```
 
 The fiscal position filter keeps only taxes attached to the fiscal position of the document, plus, for a domestic fiscal position, the taxes attached to no fiscal position.
@@ -1092,31 +1122,35 @@ The fiscal position filter keeps only taxes attached to the fiscal position of t
 
 # 19. Plain import: document level allowances and charges
 
+Take each document level allowance or charge node in turn.
+
+1. The label of the extra line is the reason of the node, or an empty text when the node carries none.
+2. The indicator is −1 when the charge indicator of the node carries the reproduced value `false`, and +1 in every other case.
+3. The amount is the amount of the node, or zero when the node carries none. The base is the base amount of the node, or zero when the node carries none.
+4. When the base is not zero, the unit price and the quantity are computed from the base and from the multiplier factor, taking that factor as 100 when the node carries none.
+
+```formula
+unit price = base amount × indicator × document sign
+quantity   = multiplier factor ÷ 100
 ```
-for every document level allowance or charge node:
-    name      = its reason, or an empty text
-    indicator = -1 when its charge indicator reads "false", otherwise +1
-    amount    = its amount, or 0
-    base      = its base amount, or 0
-    if base is not zero:
-        unit_price = base × indicator × document_sign
-        percentage = its multiplier factor, or 100
-        quantity   = percentage ÷ 100
-    else:
-        unit_price = amount × indicator × document_sign
-        quantity   = 1
-    taxes = every tax of the company whose rate equals the percentage of the tax category of
-            the node, whose amount type is a percentage and whose usage matches the journal
-    produce one extra line with that name, quantity, unit price and taxes, at sequence 0
+
+5. When the base is zero, the unit price and the quantity are computed from the amount instead.
+
+```formula
+unit price = amount of the node × indicator × document sign
+quantity   = 1
 ```
+
+6. The taxes of the extra line are every tax of the company whose rate equals the percentage of the tax category written inside the node, whose amount type is a percentage and whose usage matches the journal of the document.
+7. One extra line is produced with that label, that quantity, that unit price and those taxes, at sequence zero, so that it sorts before the imported document lines.
 
 **Worked example.** A document level allowance with a base amount of 1000.00, a multiplier factor of 10 and a tax category at 21 percent, on a purchase document with a document sign of one.
 
-```
-indicator  = -1
-unit_price = 1000.00 × -1 × 1 = -1000.00
+```formula
+indicator  = −1
+unit price = 1000.00 × ( −1 ) × 1 = −1000.00
 quantity   = 10 ÷ 100 = 0.1
-subtotal   = -100.00
+subtotal   = −1000.00 × 0.1 = −100.00
 ```
 
 The resulting line is a discount of one hundred, taxed at 21 percent.
@@ -1125,17 +1159,14 @@ The resulting line is a discount of one hundred, taxed at 21 percent.
 
 # 20. Import of a document level allowance or charge in the current path
 
-```
-charge_indicator_sign = +1 when the charge indicator reads "true", otherwise -1
-if a base amount is present:
-    unit_price = base_amount × charge_indicator_sign × document_sign
-    quantity   = multiplier_factor ÷ 100
-else:
-    unit_price = amount × charge_indicator_sign × document_sign
-    quantity   = 1
-the line label is the reason of the node
-the taxes are the ones resolved from the tax category of the node
-```
+The charge indicator sign is +1 when the charge indicator of the node carries the reproduced value `true`, and −1 otherwise.
+
+| Condition | Unit price | Quantity |
+|---|---|---|
+| a base amount is present on the node | base amount × charge indicator sign × document sign | multiplier factor ÷ 100 |
+| no base amount is present on the node | amount of the node × charge indicator sign × document sign | 1 |
+
+The label of the line is the reason of the node, and the taxes of the line are the ones resolved from the tax category written inside the node.
 
 An allowance or charge node that carries no tax category percentage is skipped entirely, because it cannot be attached to a tax and would unbalance the document.
 
@@ -1143,18 +1174,18 @@ An allowance or charge node that carries no tax category percentage is skipped e
 
 # 21. Point of sale receipt totals
 
-```
-document type      = an invoice when the receipt total is not negative, a credit note otherwise
-the line, allowance, charge and tax totals follow the plain 2.0 rules of sections 4 and 6.3
-prepaid amount = tax exclusive amount - the amount paid on the receipt
-payable amount = the amount paid on the receipt
+The document type written is an invoice when the total of the receipt is not negative, and a credit note otherwise. The line, allowance, charge and tax totals follow the plain 2.0 rules of sections 4 and 6.3. The two payment totals are:
+
+```formula
+prepaid amount = tax exclusive amount − amount paid on the receipt
+payable amount = amount paid on the receipt
 ```
 
 **Worked example.** A receipt of 121.00 including a tax of 21.00, fully paid in cash.
 
-```
+```formula
 tax exclusive amount = 100.00
-prepaid amount       = 100.00 - 121.00 = -21.00
+prepaid amount       = 100.00 − 121.00 = −21.00
 payable amount       = 121.00
 ```
 
@@ -1164,13 +1195,13 @@ The prepaid amount is negative because the profile subtracts the paid amount fro
 
 # 22. The sending batch size and the retrigger
 
+```formula
+maximum job count = the parameter of the sending scheduled action, 20 by default
+jobs taken        = the first ( maximum job count ) jobs of the jobs prepared from the pending documents
+jobs remaining    = count of the prepared jobs − count of the jobs taken
 ```
-job_count  = the parameter of the sending scheduled action, 20 by default
-all_jobs   = the jobs prepared from the pending documents
-taken      = the first job_count jobs
-remaining  = count(all_jobs) - count(taken)
-if remaining > 0: schedule the same scheduled action to run again as soon as possible
-```
+
+When the number of jobs remaining is greater than zero, the same scheduled action is scheduled to run again as soon as possible, so the queue drains over successive runs instead of in one long transaction.
 
 The network polling scheduled actions use a different rule: they collect the batch size plus one record, process the first batch size, and, when the collection exceeded the batch size, schedule themselves again in five minutes. The default batch size is fifty.
 

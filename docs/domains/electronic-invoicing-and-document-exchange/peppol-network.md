@@ -175,16 +175,15 @@ The lookup answers two questions about a trading partner: is it published on the
 
 **Deciding the verification state:**
 
-```
-if the scheme or the endpoint is missing, or the chosen format is not a format the network accepts:
-    state = not_verified
-else:
-    answer = lookup(scheme + ":" + endpoint)
-    if answer is empty:                       state = not_valid
-    else if the participant does not exist:   state = not_valid
-    else if the document type is published:   state = valid
-    else:                                     state = not_valid_format
-```
+Apply the first row of the table below whose condition holds. The lookup is performed on the participant identification formed by the scheme, a colon and the endpoint.
+
+| Order | Condition | Verification state written |
+|---|---|---|
+| 1 | the scheme is missing, or the endpoint is missing, or the chosen format is not a format the network accepts | `not_verified` |
+| 2 | the lookup produced no answer | `not_valid` |
+| 3 | the lookup answered but the participant does not exist, as decided below | `not_valid` |
+| 4 | the participant exists and the document type is published, as decided below | `valid` |
+| 5 | the participant exists but the document type is not published | `not_valid_format` |
 
 **Deciding whether the participant exists.** The published identification of the answer must equal the identification asked for, compared without regard to letter case, and the address of the first published service must not belong to the national pre-registration register of Belgium. Every Belgian company is pre-registered there, so a match on that register does not mean the company is a real participant.
 
@@ -589,15 +588,15 @@ A capability package adds seven further text fields to an accounting document, e
 
 An error answered by the proxy carries a code, an optional set of arguments, an optional subject and an optional message. Two code spaces exist: the standard codes and the codes of the message exchange standard. The rule for turning an error into a message is:
 
-```
-if the error carries a message exchange code that is not 4:
-    text = the message of that code, from section 15.2
-else if the error carries a standard code that is not 105 and not 106:
-    text = the message of that code, from section 15.1
-else:
-    text = the message that came with the error, or "Not able to retrieve error message"
-message = "Peppol Error [code=" + the standard code + "]: " + the subject + newline + text
-```
+Apply the first row of the table below whose condition holds, to obtain the explanatory text.
+
+| Order | Condition | Explanatory text |
+|---|---|---|
+| 1 | the error carries a code of the message exchange standard and that code is not `4` | the message of that code, from section 15.2 |
+| 2 | the error carries a standard code and that code is neither `105` nor `106` | the message of that code, from section 15.1 |
+| 3 | neither of the rows above applies | the message that came with the error, or, when the error carries none, the reproduced text `Not able to retrieve error message` |
+
+The final message shown is then assembled as the reproduced prefix `Peppol Error [code=`, the standard code, the reproduced separator `]: `, the subject of the error, a line break, and the explanatory text.
 
 The two standard codes `105` and `106` are excluded because their own detail text is far more useful than the generic sentence. A code that is in neither table produces `Unknown Peppol Error: <the whole error structure>`. When a message of the table expects arguments and the error supplies a different number of them, the placeholders are filled with the text `<unknown>`.
 

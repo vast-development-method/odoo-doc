@@ -501,3 +501,59 @@ Unless a scenario says otherwise, the fixture is: a company established in Belgi
 **EIDI-AC-355.** Given a customer using the customer portal, When the participant endpoint and the electronic address scheme are submitted, Then they are accepted; When any other participant field is submitted, Then it is ignored. *(EIDI-RULE-339)*
 
 **EIDI-AC-356.** Given a customer using the customer portal who selects the network sending method with an endpoint that fails the validity rule of its scheme, When the address is submitted, Then the submission is refused with the message of that rule.
+
+---
+
+# 20. State machines: aggregation, edge cases and the two compatibility findings
+
+These scenarios exercise the derivations and the edge cases specified in [state-machines.md](state-machines.md). They are stated separately from the lifecycle scenarios of sections 2 and 3 because they concern the values a replacement computes rather than the operations a user invokes.
+
+**EIDI-AC-360.** Given a posted invoice carrying two delivery records of formats that both need a remote call, one in state `sent` and one in state `to_send`, When the aggregated delivery state of the accounting document is read, Then it is `to_send`, because the rule that requires every collected state to be `sent` did not hold and the rule that looks for `to_send` is evaluated before the one that looks for `to_cancel`.
+
+**EIDI-AC-361.** Given a posted invoice carrying two delivery records of formats that both need a remote call, one in state `sent` and one in state `cancelled`, When the aggregated delivery state is read, Then it is **empty**, not `sent` and not `cancelled`, because both of the first two rules demand that the collected set hold exactly one value and no later rule matches.
+
+**EIDI-AC-362.** Given a posted invoice carrying two delivery records of formats that both need a remote call, one in state `to_send` and one in state `to_cancel`, When the aggregated delivery state is read, Then it is `to_send`.
+
+**EIDI-AC-363.** Given a posted invoice carrying only delivery records of formats that need no remote call, all in state `sent`, When the aggregated delivery state is read, Then it is empty, because only records of formats that need a remote call are collected.
+
+**EIDI-AC-364.** Given a posted invoice with exactly one delivery record in error, carrying the error text `turlututu` at the warning blocking level, When the aggregated error message and the aggregated blocking level are read, Then the message is `turlututu` and the level is `warning`.
+
+**EIDI-AC-365.** Given a posted invoice with three delivery records carrying an error text, of which one is at the error level and two are at the warning level, When the aggregated error message is read, Then it is `3 Electronic invoicing error(s)` and the aggregated level is `error`.
+
+**EIDI-AC-366.** Given a posted invoice with two delivery records carrying an error text, both at the informational level, and a third record that carries no error text but is left at the warning level, When the aggregated error message is read, Then the message is `2 Electronic invoicing warning(s)` and the level is `warning`, even though neither record that carries a text is at the warning level. This is the **compatibility finding** recorded in section 4.2 of [state-machines.md](state-machines.md); a corrected behaviour would produce `2 Electronic invoicing info(s)` at the informational level.
+
+**EIDI-AC-367.** Given a posted customer invoice of a company whose registration state is `receiver`, addressed to a commercial partner whose verification state for that company is `valid`, and whose network state is empty, When the network state is recomputed, Then it becomes `ready`.
+
+**EIDI-AC-368.** Given the same invoice once it is in network state `processing`, When it is reset to draft, Then the network state is **not** cleared, because the document already counts as having left the platform; and When the reset is attempted from the interface, Then the reset button is not offered at all.
+
+**EIDI-AC-369.** Given a customer invoice in network state `to_send` whose structured file would be seventy million bytes, When the sending service builds the payload, Then the sending result records `Invoice <the document number> exceeds the size limit of 64 MB to be sent via Peppol.` and the network state stays `to_send`. This is the **compatibility finding** recorded in section 5.7 of [state-machines.md](state-machines.md); a corrected behaviour would write `error` into the network state so that the document leaves the queue.
+
+**EIDI-AC-370.** Given a customer invoice in network state `processing`, When the delivery state poll answers with an error object whose code is `702`, Then nothing is written, no log entry is created, and the message is not acknowledged, so the same message is polled again on the next run.
+
+**EIDI-AC-371.** Given a customer invoice in network state `processing`, When the delivery state poll answers with an error object whose code is `500`, Then the network state becomes `error`, a log entry carrying the message built from the proxy error catalogue is written, and the message is acknowledged.
+
+**EIDI-AC-372.** Given a sent customer invoice in network state `done`, When a business response carrying the code `AB` reaches delivery state `done`, Then the network state becomes `AB`; When a later business response carrying the code `AP` reaches delivery state `done`, Then the network state becomes `AP`; and When a later business response carrying the code `RE` reaches delivery state `done`, Then the network state becomes `RE`.
+
+**EIDI-AC-373.** Given a sent customer invoice about which two business responses exist, one carrying `RE` in delivery state `done` and one carrying `AP` in delivery state `processing`, When the network state is recomputed, Then it is `RE`, because only responses in delivery state `done` are collected and the rejection code wins.
+
+**EIDI-AC-374.** Given a received vendor bill that has been acknowledged and whose acknowledgement response is in delivery state `processing`, When the delivery state poll answers with an error object whose code is `207`, Then that response moves to `not_serviced`, no log entry is written, and the vendor bill can no longer be answered at all, so posting it sends no approval response.
+
+**EIDI-AC-375.** Given a received vendor bill whose approval response is in delivery state `error`, When the bill is cancelled, Then the rejection form is still offered, because a response in the error state does not close the door.
+
+**EIDI-AC-376.** Given a contact in Belgium whose electronic address scheme is `0208` and whose endpoint is `0477472701`, and whose lookup under that pair answers that the participant does not exist, When the verification runs, Then the alternative pair, scheme `9925` with endpoint `BE0477472701`, is tried; and when that pair answers `valid`, Then the scheme and the endpoint of the contact are rewritten to the alternative pair and the verification state becomes `valid`.
+
+**EIDI-AC-377.** Given a contact whose verification state for the active company is `valid` and whose chosen profile is then changed to one the participant does not publish, When the verification runs again, Then the verification state becomes `not_valid_format` and a log entry is written in the discussion thread of the contact showing the old label, the new label, the label of the field and the display name of the company.
+
+**EIDI-AC-378.** Given a certificate whose start of validity is tomorrow and whose end of validity is next year, When the validity flag is read today, Then it is false; When a signature is requested today, Then the request is refused; and When the flag is read tomorrow, Then it is true.
+
+**EIDI-AC-379.** Given a certificate whose content is set and whose normalised certificate is empty because the upload could not be parsed, and that carries no loading error, When it is saved, Then the save is refused with `This certificate could not be loaded. Please provide the certificate password.`
+
+**EIDI-AC-380.** Given a company in registration state `receiver`, When the downgrade to sender only is requested, Then the pending delivery states and the pending inbox are drained first, the proxy is then asked to remove the publication, and the registration state becomes `sender`; and When the inbox polling scheduled action next runs, Then that company is no longer among the companies polled.
+
+**EIDI-AC-381.** Given a company in registration state `smp_registration`, When the upgrade to receiver is requested again, Then the request is refused with `Cannot register a user with a Can send, pending registration to receive application`, the placeholder carrying the translated label of the current state.
+
+**EIDI-AC-382.** Given a company in registration state `receiver`, When the participant state poll answers with the draft state, Then the participant configuration is reset in its full form, the credential is archived rather than deleted, and the registration state becomes `not_registered`.
+
+**EIDI-AC-383.** Given the same company, When the participant state poll instead fails with a transport error that is not the client-gone code, Then nothing is written and the failure is only logged, so that a transient failure of the proxy cannot deregister a working participant.
+
+**EIDI-AC-384.** Given a company whose credential was archived by the client-gone handling and that holds no other credential of the same kind, When a further call is made on that archived credential and the proxy answers that no such user exists, Then the registration state becomes `not_registered`, the migration key is cleared, the change is committed and the refusal `We could not find a user with this information on our server. Please check your information.` is raised.

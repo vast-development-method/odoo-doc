@@ -1,6 +1,6 @@
 # Business rules
 
-The complete rule catalogue of the Electronic Invoicing and Document Interchange domain. Each rule has a stable number so that other documents can cite it. Messages are reproduced exactly, with product names removed and acronyms expanded where the surrounding text made them ambiguous; where an acronym is part of the literal message the expansion is stated next to it.
+The complete rule catalogue of the Electronic Invoicing and Document Exchange domain. Each rule has a stable number so that other documents can cite it. Messages are reproduced exactly, with product names removed and acronyms expanded where the surrounding text made them ambiguous; where an acronym is part of the literal message the expansion is stated next to it.
 
 Rule groups:
 

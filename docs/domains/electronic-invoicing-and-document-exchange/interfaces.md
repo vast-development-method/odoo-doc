@@ -1,6 +1,6 @@
 # Interfaces
 
-The interface surface of the Electronic Invoicing and Document Interchange domain: the service operations a client or an integration invokes, the request endpoints the outside world calls, the outbound calls this domain makes, the reports and printed documents, the exported files, the notifications, the scheduled jobs, and the screens described as workflows on views. The records are specified in [entities.md](entities.md), the procedures in [workflows.md](workflows.md), the settings in [configuration.md](configuration.md), and the call contract with the exchange network proxy in [peppol-network.md](peppol-network.md).
+The interface surface of the Electronic Invoicing and Document Exchange domain: the service operations a client or an integration invokes, the request endpoints the outside world calls, the outbound calls this domain makes, the reports and printed documents, the exported files, the notifications, the scheduled jobs, and the screens described as workflows on views. The records are specified in [entities.md](entities.md), the procedures in [workflows.md](workflows.md), the settings in [configuration.md](configuration.md), and the call contract with the exchange network proxy in [peppol-network.md](peppol-network.md).
 
 ---
 

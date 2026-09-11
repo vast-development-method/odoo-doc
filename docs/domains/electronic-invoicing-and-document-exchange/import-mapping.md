@@ -268,16 +268,17 @@ Two separate collections are made.
 
 ## 5.2 Label
 
-```
-item_reference = ./Item/SellersItemIdentification/Identifier
-name           = ./Item/Name
-if item_reference and name and "[" + item_reference + "]" is not already inside name:
-    name = "[" + item_reference + "] " + name
-description = the texts of every ./Item/Description, each followed by a line break, trimmed
-if name and description:  label = name + line break + description
-elif name:                label = name
-elif description:         label = description
-```
+1. Read the item reference from the path `./Item/SellersItemIdentification/Identifier` and the name from the path `./Item/Name`.
+2. When both an item reference and a name were read, and the name does not already contain the item reference enclosed in square brackets, prefix the name with the item reference enclosed in square brackets followed by one space.
+3. Read the description as the texts of every `./Item/Description` element, each followed by a line break, with surrounding whitespace trimmed from the result.
+4. Assemble the label with the first row of the table below whose condition holds.
+
+| Order | Condition | Label |
+|---|---|---|
+| 1 | a name and a description were read | the name, a line break, then the description |
+| 2 | only a name was read | the name |
+| 3 | only a description was read | the description |
+| 4 | neither was read | empty |
 
 The bracketed reference is prefixed so that the label of the imported line has the same shape as a label produced from a product, which makes the later prediction strategies match.
 
@@ -320,17 +321,14 @@ The lines are assembled in this order: first one base line per document level ch
 
 ## 6.1 A document level allowance or charge line
 
-```
-sign = +1 when it is a charge, -1 when it is an allowance
-if a base amount was read:
-    unit price = base amount × sign × file document sign
-    quantity   = the multiplier factor ÷ 100
-else:
-    unit price = amount × sign × file document sign
-    quantity   = 1
-label          = the reason of the allowance or charge
-tax            = the tax resolved for it, when one was resolved
-```
+The sign is +1 for a charge and −1 for an allowance.
+
+| Condition | Unit price | Quantity |
+|---|---|---|
+| a base amount was read on the node | base amount × sign × document sign of the file | multiplier factor ÷ 100 |
+| no base amount was read on the node | amount of the node × sign × document sign of the file | 1 |
+
+The label of the produced base line is the reason of the allowance or charge, and its tax is the one resolved for the node, when one was resolved.
 
 Expressing a percentage based allowance as a base amount with a quantity equal to the percentage reproduces the amount exactly and keeps the percentage visible on the produced line.
 
@@ -346,17 +344,22 @@ Before the base line is built, every line level charge whose fixed tax was actua
 
 After the tax details have been computed and rounded, the unit price of every base line is corrected when at least one of its taxes is a tax whose price is included, because the file states amounts excluding tax while such a tax expects a unit price that includes it.
 
+**When the discount of the line is not exactly 100 percent**, take each tax of the line whose price is included in turn and raise the unit price.
+
+```formula
+grossed raw tax amount = raw tax amount of the tax (document currency) ÷ ( 1 − discount percentage ÷ 100 )
+unit price             = unit price + grossed raw tax amount ÷ quantity
 ```
-if the discount of the line is not exactly 100 percent:
-    for every tax of the line whose price is included:
-        raw = its raw tax amount in the document currency ÷ (1 - discount ÷ 100)
-        unit price = unit price + raw ÷ (quantity, or 1 when the quantity is zero)
-otherwise:
-    recompute the tax details of the same line with a discount of zero
-    for every tax of that recomputation whose price is included:
-        unit price = unit price + its raw tax amount in the document currency
-                     ÷ (quantity, or 1 when the quantity is zero)
+
+The quantity used in that division is taken as 1 when the quantity of the line is zero.
+
+**When the discount of the line is exactly 100 percent**, recompute the tax details of the same line with a discount of zero, then take each tax of that recomputation whose price is included in turn.
+
+```formula
+unit price = unit price + raw tax amount of the tax (document currency) ÷ quantity
 ```
+
+The quantity used in that division is again taken as 1 when the quantity of the line is zero.
 
 The special treatment of a full discount exists because dividing by one minus one is impossible; recomputing without the discount gives the amount the tax would have had.
 
