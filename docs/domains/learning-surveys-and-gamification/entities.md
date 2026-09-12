@@ -484,7 +484,7 @@ whole string is shortened to ninety characters. The shortening marker is three d
 | `value` | Suggested value | text (translatable) | no | none | stored | yes | The visible text. May be empty when the option is a picture. |
 | `value_image` | Image | image (at most 1024 by 1024) | no | none | stored | yes | A picture shown instead of, or beside, the text. |
 | `value_image_filename` | Image Filename | text | no | none | stored | yes | The original file name of the picture. |
-| `value_label` | Value Label | text | — | — | derived | no | The text when it is non-empty; otherwise the capital letter at the option's position among the question's options — position zero gives `A`, position one gives `B`, and so on through position twenty-six; an empty string beyond that. Help text: "Answer label as either the value itself if not empty or a letter representing the index of the answer otherwise." |
+| `value_label` | Value Label | text | — | — | derived | no | The text when it is non-empty; otherwise the capital letter at the option's position among the question's options, taken from the twenty-six letters `A` to `Z` in order, so position zero gives `A`, position one gives `B`, position twenty-five gives `Z` and position twenty-six gives the character that follows `Z` in the character ordering, which is not a letter (**compatibility finding**: the twenty-seventh option is labelled with a punctuation character; a corrected behaviour would fall back to an empty label at position twenty-six, or continue with two-letter labels); an empty string at every position from twenty-seven onwards. Help text: "Answer label as either the value itself if not empty or a letter representing the index of the answer otherwise." |
 | `is_correct` | Correct | boolean | no | false | stored | yes | Whether choosing this option is a correct answer. |
 | `answer_score` | Score | decimal | no | 0.0 | stored | yes | Points added to the participation when this option is chosen. Help text: "A positive score indicates a correct choice; a negative or null score indicates a wrong answer". Negative values are allowed here, unlike the per-question score. |
 | `question_type` | Question Type | selection | — | — | derived from `question_id.question_type` | no | Mirror. |
@@ -943,7 +943,7 @@ duplicated or a sequence is supplied, so a duplicate lands first and uncategoris
 | Field | Full name | Type | Required | Default | Stored | Copied | Meaning and rules |
 |---|---|---|---|---|---|---|---|
 | `slide_category` | Category | selection | yes | `document` | stored | yes | `infographic` (Image), `article` (Article), `document` (Document), `video` (Video), `quiz` (Quiz), and `certification` (Certification) added by the course-certification package. When that package is removed, records holding `certification` fall back to the default `document`. |
-| `slide_type` | Slide Type | selection | no | see derivation | derived, stored, editable | yes | `image` (Image), `article` (Article), `quiz` (Quiz), `pdf` (PDF), `sheet` (Sheet), `doc` (Document), `slides` (Slides), `youtube_video` (video-sharing service video), `google_drive_video` (external document storage video), `vimeo_video` (video-hosting platform video), `certification` (Certification). Help text: "Subtype of the slide category, allows more precision on the actual file type / source type." When the certification package is removed, records holding `certification` are cleared. |
+| `slide_type` | Slide Type | selection | no | see derivation | derived, stored, editable | yes | `image` (Image), `article` (Article), `quiz` (Quiz), `pdf` (labelled "PDF"), `sheet` (Sheet), `doc` (Document), `slides` (Slides), `youtube_video` (video-sharing service video), `google_drive_video` (external document storage video), `vimeo_video` (video-hosting platform video), `certification` (Certification). Help text: "Subtype of the slide category, allows more precision on the actual file type / source type." When the certification package is removed, records holding `certification` are cleared. |
 | `source_type` | Source Type | selection | yes | `local_file` | stored | yes | `local_file` (Upload from Device) or `external` (Retrieve from the external document storage service). |
 | `url` | External uniform resource locator | text | no | none | stored | yes | The external address of the video or the external document. |
 | `binary_content` | File | binary | no | none | stored | yes | The uploaded payload, kept as an attachment. |
@@ -2299,7 +2299,7 @@ Duplicating a résumé line names the copy `<name> (copy)`.
 
 # 48. Mailing
 
-Owned by [Marketing and mass mailing](../marketing-and-mass-mailing/). The course form offers an
+Owned by [Marketing and mass mailing](../marketing-and-mass-mailing/README.md). The course form offers an
 action that opens a new mailing whose recipient entity is Contact and whose stored filter selects
 the contacts enrolled in the selected courses. The action is titled `Mass Mail Course Members`.
 

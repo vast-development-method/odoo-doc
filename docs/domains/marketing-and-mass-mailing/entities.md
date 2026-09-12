@@ -158,7 +158,8 @@ One designed message with its audience, schedule, delivery state and measured re
 
 ```
 notification_address = default sender address of the system
-user_address         = formatted address of created_by_user, or of the current user when absent
+user_address         = formatted address of the creating user (`create_uid`),
+                       or of the current user when that field is empty
 ```
 
 The five cases are evaluated in this order and the first one that applies decides the value.
@@ -183,11 +184,11 @@ The five cases are evaluated in this order and the first one that applies decide
 
 **`mailing_domain`.**
 
-```
-if mailing_model is empty:            mailing_domain = ""
-else if mailing_filter is set:        mailing_domain = mailing_filter.mailing_domain
-else:                                 mailing_domain = default condition of the recipient entity
-```
+| Order | Case | Resulting `mailing_domain` |
+|---|---|---|
+| 1 | `mailing_model_id` is empty | the empty condition |
+| 2 | `mailing_filter_id` is set | the condition of that saved filter |
+| 3 | neither of the above | the default condition of the recipient entity |
 
 The default condition of an entity is the condition that entity publishes for mailings, or the always-true condition when it publishes none. Known default conditions: Mailing List gives `list_ids IN contact_lists`; Sales Order gives `state != "cancel"`; Event Registration gives `state NOT IN ("cancel", "draft")` unless a prepared condition was supplied by the calling screen; Event Track gives `stage.is_cancel = false`.
 
@@ -457,6 +458,8 @@ Note the two deliberately confusing labels: the stored value `pending` is displa
 
 ### 6.4 Failure types
 
+The Label column reproduces the label verbatim, exactly as the screen displays it.
+
 | Value | Label | Channel |
 |---|---|---|
 | `unknown` | Unknown error | both |
@@ -486,7 +489,7 @@ Note the two deliberately confusing labels: the stored value `pending` is displa
 | `sms_not_delivered` | Not Delivered | text message, delivery report |
 | `sms_rejected` | Rejected | text message, delivery report |
 | `twilio_authentication` | Authentication Error" | text message, Twilio telephony provider |
-| `twilio_callback` | Incorrect callback URL | text message, Twilio telephony provider |
+| `twilio_callback` | *"Incorrect callback URL"* | text message, Twilio telephony provider |
 | `twilio_from_missing` | Missing From Number | text message, Twilio telephony provider |
 | `twilio_from_to` | From / To identic | text message, Twilio telephony provider |
 
@@ -1275,16 +1278,16 @@ Added by the Social Media capability package:
 
 ### 28.13 Configuration Settings (Platform Foundation)
 
-| Setting | Type | Storage | Effect |
-|---|---|---|---|
-| `group_mass_mailing_campaign` | boolean | grants the campaign-management group | Shows campaigns, campaign stages and campaign tags; enables and disables the comparison-test job. |
-| `mass_mailing_outgoing_mail_server` | boolean | system parameter `mass_mailing.outgoing_mail_server` | Reveals the dedicated-server choice on every mailing. |
-| `mass_mailing_mail_server_id` | many_to_one to Outgoing Mail Server | system parameter `mass_mailing.mail_server_id` | The dedicated server, used as the default of every new mailing. Cleared when the boolean above is turned off. |
-| `show_blacklist_buttons` | boolean | system parameter `mass_mailing.show_blacklist_buttons` | Shows the self-exclusion and re-inclusion buttons on the public subscription page. |
-| `mass_mailing_reports` | boolean | system parameter `mass_mailing.mass_mailing_reports` | Enables the statistics message sent one day after each mailing. |
-| `mass_mailing_split_contact_name` | boolean | activates two alternative Mailing Contact screens | Splits the contact name into a first name and a last name. |
-| `newsletter_id` | many_to_one to Mailing List | field on the Website record | The list offered at online-shop checkout. Added by the Checkout Newsletter package. |
-| `is_newsletter_enabled` | boolean | activates the checkout block of the current website | Derived from whether that block is active on the selected website. |
+| Setting | Full name | Type | Storage | Effect |
+|---|---|---|---|---|
+| `group_mass_mailing_campaign` | Mailing campaigns | boolean | grants the campaign-management group | Shows campaigns, campaign stages and campaign tags; enables and disables the comparison-test job. |
+| `mass_mailing_outgoing_mail_server` | Dedicated outgoing mail server | boolean | system parameter `mass_mailing.outgoing_mail_server` | Reveals the dedicated-server choice on every mailing. |
+| `mass_mailing_mail_server_id` | Dedicated mail server | many_to_one to Outgoing Mail Server | system parameter `mass_mailing.mail_server_id` | The dedicated server, used as the default of every new mailing. Cleared when the boolean above is turned off. |
+| `show_blacklist_buttons` | Show the exclusion buttons | boolean | system parameter `mass_mailing.show_blacklist_buttons` | Shows the self-exclusion and re-inclusion buttons on the public subscription page. |
+| `mass_mailing_reports` | Statistics messages | boolean | system parameter `mass_mailing.mass_mailing_reports` | Enables the statistics message sent one day after each mailing. |
+| `mass_mailing_split_contact_name` | Split first and last name | boolean | activates two alternative Mailing Contact screens | Splits the contact name into a first name and a last name. |
+| `newsletter_id` | Newsletter list | many_to_one to Mailing List | field on the Website record | The list offered at online-shop checkout. Added by the Checkout Newsletter package. |
+| `is_newsletter_enabled` | Newsletter enabled | boolean | activates the checkout block of the current website | Derived from whether that block is active on the selected website. |
 
 **Saving behavior.** Saving the settings also enables or disables the comparison-test scheduled job so that it matches the campaign setting, and activates or deactivates the two split-name screens so that they match the split-name setting. Reading the settings reports the split-name value by inspecting whether the alternative list screen is active.
 
