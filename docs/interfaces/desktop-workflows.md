@@ -1610,7 +1610,9 @@ actually declares. Each point was settled against the source of the system and a
    the test fixtures plus those twelve; the six entries that make 627 up to 633 receive their action from the separate
    record that also carries their label, which is why counting attributes gives a different number from counting
    entries. The tables now list 630, which is 633 less the three application entries whose own action is repeated by a
-   listed child entry, and the introduction names those three and the twelve fixture entries.
+   listed child entry, and the introduction names those three and the twelve fixture entries. A reader counting rows in
+   the catalogue rather than entries finds 260 records with no action instead of 243: each of the seventeen duplicated
+   identifiers contributes one extra record that carries no action, and 243 plus 17 is 260.
 5. **Mis-expanded abbreviations.** One draft expanded the abbreviation in the Egyptian electronic invoicing
    configuration branch as "Estimated Time of Arrival"; it stands for the Egyptian Tax Authority, and the branch is now
    named after it.
