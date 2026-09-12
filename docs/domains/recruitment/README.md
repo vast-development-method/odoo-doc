@@ -80,7 +80,84 @@ Two further design decisions dominate the domain and are documented exhaustively
 | Every validation, error message and permission check | [business-rules.md](business-rules.md) |
 | Numbered end-to-end acceptance scenarios with concrete numbers | [acceptance-criteria.md](acceptance-criteria.md) |
 
-## 3. Entities of this domain
+## 3. What is in scope and what is not
+
+**In scope.**
+
+- The Application record in full: contact details, attribution, recruiter and interviewers,
+  stage, readiness colour, evaluation, salaries, degree, availability, tags, private notes,
+  custom properties, attachments, the derived status, the duplicate counter, and the complete
+  lifecycle from creation through stage progression, refusal, archival, restoration and
+  hiring to deletion.
+- Recruitment Stages: ordering, folding, the hired flag, the per-stage message template, the
+  per-stage requirements note, the four readiness labels, the staleness threshold, and the
+  rule that a stage is either shared by every position or restricted to named ones.
+- Refusal Reasons and the refusal operation, including the optional message, the per-reason
+  template, scheduled delivery, attachments and the bulk refusal of duplicates.
+- Application Tags, Degrees with their score, Job Boards with their extraction pattern, and
+  Recruitment Sources with their tracking address and their dedicated inbound address.
+- The talent pool: pools, talents, the two-way propagation between a pooled Application and
+  its talent, and the creation of new Applications out of a talent.
+- Skills on Applications and on positions, the match score in both directions, and the
+  transfer of skills at hire.
+- Written interviews attached to a position: invitation, answering, the completion note and
+  the printable answers.
+- Text messages sent in bulk to candidates.
+- The public job list, the public detail page, the public application form with its file
+  upload and its live duplicate warning, the thank-you page, the publication state of a
+  position, and the guided chat script that helps a visitor find an opening.
+- Recruitment reporting: the analysis screens, the stage funnel, the groupings by source,
+  medium, campaign, recruiter, department and position, the time spent per stage, and the
+  new-employee indicator of the periodic digest.
+- The three privileges, the record rules that narrow an interviewer to the Applications they
+  interview, and the automatic granting and revocation of the Interviewer privilege.
+
+**Out of scope, and owned by the domain named against each entry.**
+
+| Not owned here | Owner |
+|---|---|
+| The Employee, the Employee Version, the Department, the Work Location, the Employment Type and the skills catalogue | [Human Resources Core](../human-resources-core/README.md) |
+| The Job Position record itself — its name, description, remaining target, department and company. This domain adds fields to it | [Human Resources Core](../human-resources-core/README.md) |
+| Threads, followers, message subtypes, activities, activity plans, message templates, inbound aliases and the inbound message gateway | [Messaging and Activities](../messaging-and-activities/README.md) |
+| Contacts, and the normalisation of electronic mail addresses and telephone numbers | [Contacts and Organizations](../contacts-and-organizations/README.md) |
+| Users, privileges, record rules and the evaluation of access rights | [Identity and Access](../identity-and-access/README.md) |
+| Meetings and calendars | [Calendar and Scheduling](../calendar-and-scheduling/README.md) |
+| Questionnaires, their questions, their answers, their scoring and their answer sets | [Learning, Surveys and Gamification](../learning-surveys-and-gamification/README.md) |
+| Campaigns, tracking sources and tracking media | [Marketing and Mass Mailing](../marketing-and-mass-mailing/README.md) |
+| Web pages, page publication, the public form endpoint, site search and the visual editor | [Website and Storefront](../website-and-storefront/README.md) |
+| The periodic digest message itself | [Spreadsheets and Dashboards](../spreadsheets-and-dashboards/README.md) |
+| Attachment storage and the indexing of attachment content | [Platform Foundation](../platform-foundation/README.md) |
+| Everything a ledger entry needs. This domain posts none; see [accounting-effects.md](accounting-effects.md) | [General Ledger](../general-ledger/README.md) |
+
+## 4. The people who use this domain
+
+| Role | Privilege held | What the role may do here |
+|---|---|---|
+| Candidate | none: a public visitor, or the sender of a message | Submit the public application form; answer a written interview; reply to messages; be counted by the live duplicate warning |
+| Portal user | the portal privilege | Read the published Job Positions, exactly as a public visitor does |
+| Internal user | none of the recruitment privileges | Read Job Positions and Recruitment Sources; create, read and update Application Tags; see the preview panel of the curriculum vitae on an application form. Sees no Application |
+| Interviewer | Interviewer | Read and update **only** the Applications of the positions they are attached to and the Applications they are individually attached to; refuse them; schedule meetings for them; send and read their written interviews. Never create or delete an Application, never see a salary field, never create an Employee |
+| Officer | Officer: Manage all applicants | Create, read, update and delete every Application, Job Position and Talent Pool; see and edit the salary fields; refuse; record a hire; manage pools, sources, reasons, degrees and tags |
+| Administrator | Administrator | Everything an Officer may do, plus configure the stages, the job boards, the recruitment activity plans and the written interview questionnaires |
+| Human Resources Officer | Officer: Manage all employees, of [Human Resources Core](../human-resources-core/README.md) | Read Job Positions and perform the create-employee operation on an Application that carries a hire date |
+| Platform administrator | the platform administration privilege | Open the settings screen and install or remove the companions |
+| The system | the inbound gateway, the derived-value engine and the notification engine | Turn inbound messages into Applications, recompute derived values, post automatic messages, deliver templated messages |
+
+## 5. The packages the domain is delivered in
+
+| Package | What it adds |
+|---|---|
+| Recruitment | The core: every owned entity, the three privileges, the pipeline, the refusal, the hiring hand-over and the analysis screens |
+| Recruitment — Skills Management | Application Skills, the required skills on a position, the match score in both directions, the transfer at hire and the two matching searches |
+| Recruitment — Text Message | The bulk text-message action on Applications |
+| Recruitment Interview Forms | The written interview: the questionnaire on a position, the invitation, the answer set link and the printable answers |
+| Online Jobs | The public job list, detail page, application form and thank-you page, the publication fields, the tracking address, and the public read rules |
+| Recruitment Live Chat | The guided chat script on the public job list |
+
+Details, including what each package requires, are in
+[configuration.md](configuration.md#1-capability-packages).
+
+## 6. Entities of this domain
 
 Entities owned by this domain (created here, and not meaningful outside it):
 
@@ -116,7 +193,7 @@ only for the parts this domain adds:
 | Periodic Digest | `digest.digest` | The new-colleagues indicator. |
 | Tracking Campaign / Tracking Source | `utm.campaign` / `utm.source` | Deletion protection for the records the recruitment flow depends on. |
 
-## 4. Reading order
+## 7. Reading order, and every file in this folder
 
 1. **[entities.md](entities.md)** — every entity with its complete field table, relations,
    defaults, computed rules, ordering, display rule, uniqueness and archival behaviour.
@@ -143,7 +220,23 @@ only for the parts this domain adds:
    numbers that a rebuild must satisfy.
 10. **[glossary.md](glossary.md)** — every term used in this folder, defined in full.
 
-## 5. Dependencies on other domains
+The folder holds exactly these eleven files and no others:
+
+| File | What it contains |
+|---|---|
+| [README.md](README.md) | This file: the scope, the capabilities, the entities owned and extended, the roles, the packages, the reading order, the dependencies and the boundaries |
+| [entities.md](entities.md) | Every entity in full: purpose, identity, ordering, display rule, complete field table with identifier, full name, type, target, requiredness, default, derivation and meaning, relations, uniqueness, indexes, archival, company behaviour, the extensions other packages contribute, and the lifecycle of every configuration entity |
+| [state-machines.md](state-machines.md) | The five state-bearing fields and the talent condition: every state with its stored value, label and meaning; every transition with origin, destination, trigger, guards and side effects; the guards of each transition in order with their exact refusal message; a diagram per machine |
+| [workflows.md](workflows.md) | Twenty-seven end-to-end procedures, step by step, with the records each step creates or changes, the operations invoked and the failure conditions |
+| [business-rules.md](business-rules.md) | Two hundred and twenty-two numbered rules with their exact messages, the rule index, and the mapping of the identifiers used by the two earlier drafts |
+| [calculations.md](calculations.md) | Every counter, duration, duplicate condition, match score, staleness rule, filter counter and rounding rule, each with a worked numeric example |
+| [accounting-effects.md](accounting-effects.md) | The reasoned statement that this domain posts nothing to the ledger, the per-event boundary table, and what a rebuild must guarantee |
+| [configuration.md](configuration.md) | The packages, the settings, the privileges, the access rights matrix, the record rules, every shipped record, the message templates and subtypes, the constants, the menus and the master data a new installation needs |
+| [interfaces.md](interfaces.md) | The screens, the named operations, the public routes, the addresses the domain builds, the reports, the message subtypes, the notifications, the external integrations, the import and export surfaces, the control matrix and the reporting measures |
+| [acceptance-criteria.md](acceptance-criteria.md) | Two hundred and forty-three numbered Given / When / Then scenarios with concrete records, inputs, amounts, states and messages |
+| [glossary.md](glossary.md) | Every term of the domain, defined, plus the terms that mean something narrower here than elsewhere |
+
+## 8. Dependencies on other domains
 
 | Domain | What this domain needs from it |
 |---|---|
@@ -157,7 +250,7 @@ only for the parts this domain adds:
 | [Marketing and Mass Mailing](../marketing-and-mass-mailing/README.md) | The tracking campaign, medium and source entities used for sourcing attribution, and the text-message composer used to reach applicants. |
 | [Spreadsheets and Dashboards](../spreadsheets-and-dashboards/README.md) | The periodic digest that carries the new-colleagues indicator. |
 
-## 6. What this domain does not do
+## 9. What this domain does not do
 
 - It does not create or maintain employment terms. Creating an employee from an application
   produces an Employee record with an initial set of values; everything about wages,
@@ -171,3 +264,28 @@ only for the parts this domain adds:
 - It does not define the public website rendering engine, the form builder, or the search
   engine; it registers a model, a set of writable fields, a few routes and a few page
   templates with them.
+
+## 10. Reconciliation notes
+
+Two independently written descriptions of this domain were merged into this folder. The
+differences that mattered are recorded at the end of the file they affect: see the last
+chapter of [entities.md](entities.md), [state-machines.md](state-machines.md),
+[workflows.md](workflows.md), [business-rules.md](business-rules.md),
+[calculations.md](calculations.md), [configuration.md](configuration.md),
+[interfaces.md](interfaces.md), [accounting-effects.md](accounting-effects.md),
+[acceptance-criteria.md](acceptance-criteria.md) and [glossary.md](glossary.md).
+
+Three decisions were taken once and applied to every file:
+
+1. **Identifiers are the stored ones.** Where the two drafts disagreed on a name, this folder
+   reproduces the identifier the system stores — `kanban_state` rather than a descriptive
+   name, `stage_id` rather than `stage`, `job_id` rather than `job_position` — because those
+   strings are contractual. The descriptive wording of the other draft survives as the
+   meaning column of the field tables and as entries in the glossary.
+2. **Rule identifiers are one sequence per file.** The rules are numbered `REC-001` upward in
+   [business-rules.md](business-rules.md), and the scenarios `REC-AC-001` upward in
+   [acceptance-criteria.md](acceptance-criteria.md). Chapter 20 of the rules file maps every
+   identifier the two drafts used onto the present scheme.
+3. **Where the drafts contradicted each other, the system decided.** Each such point is
+   recorded in the reconciliation chapter of the affected file, with the resolution and the
+   reason.

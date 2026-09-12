@@ -1,11 +1,15 @@
 # Data
 
-The persistent data model of the whole system.
+The persistent data model of the whole system: what records exist, what each value means, how the records become tables, how records enter and leave the system as data, and what a fresh installation already contains.
 
 | Document | Content |
 |---|---|
-| `domain-model.md` | The domain model across all domains: aggregates, entity clusters, the master data backbone (partners, companies, products, units, currencies, accounts, journals), the transactional backbone (orders, transfers, moves, journal entries, payments), and the cross-domain relations |
-| `persistence-identity-and-values.md` | Identity (numeric identifiers, external identifiers, universally unique identifiers, references), value semantics (precision, rounding, currency, dates and times, time zones, binary, structured documents, properties), audit fields, soft deletion, sequences and numbering, uniqueness |
-| `physical-data-catalog.md` | Every table with its columns, types, nullability, defaults, indexes, foreign keys, association tables and check constraints; generated from the live schema |
-| `data-loading-and-exchange.md` | Loading of reference data with external identifiers, import and export formats, field path notation, relational import, update semantics, and the exchange contracts used by integrations |
-| `reference-data.md` | The reference data sets shipped with the system: countries, states, currencies, languages, units of measure, decimal precisions, tax tags, payment methods, and the country chart templates |
+| [`domain-model.md`](domain-model.md) | The map of all 983 entities, grouped by the domain that specifies them: the kind, transport name, table, purpose and defining package of each, every relation with its cardinality, deletion behaviour and storage, the reference traffic between domains, the delegations, the shared behaviours and the self-referencing relations |
+| [`persistence-identity-and-values.md`](persistence-identity-and-values.md) | What a stored value is: surrogate and external identifiers, business references and document numbering, monetary and decimal rounding, dates, times and periods, names and display names, text and rich text, translations, structured and user-defined fields, binary content, archiving, audit fields, hierarchy paths, company-dependent values, uniqueness and check rules, deletion and duplication |
+| [`physical-data-catalog.md`](physical-data-catalog.md) | Every table with its columns, types, nullability, defaults, indexes, foreign keys, association tables, constraints and number generators; the schema derivation procedure; the naming rules; and the per-entity catalogue of the 1,240 tables observed on a full installation |
+| [`data-loading-and-exchange.md`](data-loading-and-exchange.md) | How records enter and leave as data: external identifiers and update semantics, the data files a package ships, the field path notation, the generic import operation, the interactive import session with its matching, batching and error reporting, and the export with its field selection, formats and grouped totals |
+| [`reference-data.md`](reference-data.md) | The records a fresh installation must contain, set by set with counts and governing rules: countries, subdivisions, cities and country groups, currencies, languages, units of measure, decimal precisions, industries, payment terms and methods, delivery terms, tax tags and financial report structures, country accounting templates, activity types, message subtypes, numbering sequences, privileges and access groups |
+
+Reading order: the model first ([`domain-model.md`](domain-model.md)), then the meaning of a value ([`persistence-identity-and-values.md`](persistence-identity-and-values.md)), then its storage ([`physical-data-catalog.md`](physical-data-catalog.md)), then how it arrives ([`data-loading-and-exchange.md`](data-loading-and-exchange.md)) and what arrives first ([`reference-data.md`](reference-data.md)).
+
+The machine-readable catalogues behind these documents are in [`../../schemas/data/`](../../schemas/data/) and [`../../schemas/operational/`](../../schemas/operational/); the generated per-entity reference pages are in [`../references/entities/`](../references/entities/).

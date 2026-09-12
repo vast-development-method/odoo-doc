@@ -171,7 +171,16 @@ outcome before and after and rejects a record that is simultaneously won and los
 - **Archiving a pending record does not lose it.** The record only becomes `lost` if its
   probability is also zero. An archived record with probability 20 is `pending`.
 
-### 3.6 Diagram
+### 3.6 Transitions that are refused
+
+| From | Operation | Outcome |
+|---|---|---|
+| `won` | Mark lost | Refused. The stage is still a won stage, so forcing the probability to zero breaks the stage constraint: "A lead in a Won stage cannot be lost. Move it to another stage first." The record stays `won`. |
+| `won` | Write a probability below one hundred while the record is still in a won stage | Refused with the same message. |
+| `won` | Archive | Allowed, and the record stays `won`: being lost also requires a probability of zero. No frequency counter moves. |
+| `won` | Move to a stage that is not flagged as won | Allowed. The won counters are decremented. The probability is **not** forced back to a computed value by the move itself; it stays at one hundred until something recomputes it, so the record is merely "not won" because its stage is no longer a won stage. |
+
+### 3.7 Diagram
 
 ```mermaid
 stateDiagram-v2
@@ -407,3 +416,137 @@ the values the caller supplied. It is the authoritative reference for implementi
 
 Step 6 is the one place where the wall clock is read rather than the transaction clock; steps 2
 and 5 use the transaction clock. In practice the two differ by microseconds.
+
+---
+
+## 10. Telephone quality — the `phone_state` field
+
+### 10.1 States
+
+| Value | Label | Meaning |
+|---|---|---|
+| *(empty)* | *(no label)* | The record carries no telephone number, so there is nothing to judge. The empty value is itself an observation for the predictive probability and is recorded in the frequency table as the text `False`. |
+| `correct` | Correct | The number could be parsed, using the record's country code as the hint when the record has a country and with no hint otherwise. |
+| `incorrect` | Incorrect | Parsing the number raised an error. |
+
+The field is computed and stored from `phone` (telephone) and from the country code of `country_id`
+(country). It is never written by hand.
+
+### 10.2 Transitions
+
+| From | To | Trigger | Guards | Side effects |
+|---|---|---|---|---|
+| *(none)* | *(empty)* | Creation with no telephone. | — | None. |
+| *(none)* | `correct` | Creation with a telephone that parses. | — | The value is stored at creation. |
+| *(none)* | `incorrect` | Creation with a telephone that does not parse. | — | The value is stored at creation. |
+| *(empty)* | `correct` | A telephone that parses is written. | — | The probability is recomputed when the telephone quality is one of the configured scoring variables. The number is also rewritten in international notation by the form rule. |
+| *(empty)* | `incorrect` | A telephone that does not parse is written. | — | The probability is recomputed when the variable is configured. The number is kept exactly as typed. |
+| `correct` or `incorrect` | *(empty)* | The telephone is cleared. | — | The probability is recomputed when the variable is configured. The sanitised number becomes empty, which in turn refreshes the potential duplicate count. |
+| `correct` | `incorrect` | A country is written whose code makes the stored number unparsable. | The telephone is not empty. | Recomputed with no user action on the telephone itself. |
+| `incorrect` | `correct` | A country is written whose code makes the stored number parsable. | The telephone is not empty. | Recomputed with no user action on the telephone itself. |
+| any | recomputed from the copied value | A Contact is linked whose telephone is copied onto the lead by the synchronisation rule. | The lead had no telephone. | The quality follows the copied value inside the same write. |
+| any | unchanged on the survivor | A merge. | — | The surviving record keeps its own telephone and therefore its own quality; the merged-away records are deleted and their contribution to the frequency table is not undone. |
+
+### 10.3 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> NoTelephone: created without a telephone
+    [*] --> Correct: created with a telephone that parses
+    [*] --> Incorrect: created with a telephone that does not parse
+    NoTelephone --> Correct: a telephone that parses is written
+    NoTelephone --> Incorrect: a telephone that does not parse is written
+    Correct --> NoTelephone: telephone cleared
+    Incorrect --> NoTelephone: telephone cleared
+    Correct --> Incorrect: the country changes and the number no longer parses
+    Incorrect --> Correct: the country changes and the number now parses
+```
+
+---
+
+## 11. Electronic mail quality — the `email_state` field
+
+### 11.1 States
+
+| Value | Label | Meaning |
+|---|---|---|
+| *(empty)* | *(no label)* | The record carries no electronic mail address. The empty value is an observation for the predictive probability and is recorded as the text `False`. |
+| `correct` | Correct | At least one of the addresses contained in the field passes format validation. |
+| `incorrect` | Incorrect | The field holds one or more addresses and none of them passes format validation. |
+
+Computed and stored from `email_from` (electronic mail address); never written by hand.
+
+### 11.2 Transitions
+
+| From | To | Trigger | Guards | Side effects |
+|---|---|---|---|---|
+| *(none)* | *(empty)* | Creation with no address. | — | None. |
+| *(none)* | `correct` | Creation with at least one valid address. | — | The value is stored at creation. |
+| *(none)* | `incorrect` | Creation with addresses of which none is valid. | — | The value is stored at creation. The record is then not offered the manual enrichment control. |
+| *(empty)* | `correct` | An address with at least one valid form is written. | — | The normalised address and the electronic mail domain criterion are recomputed, which refreshes the potential duplicate count. |
+| *(empty)* | `incorrect` | An address is written whose forms are all invalid. | — | The same recomputations; the criterion may become empty. |
+| `correct` or `incorrect` | *(empty)* | The address is cleared. | — | The probability is recomputed when the electronic mail quality is one of the configured scoring variables. |
+| `incorrect` | `correct` | A field holding several addresses is written of which one is valid. | — | One valid address is enough; the remaining invalid ones do not matter. |
+| `correct` | `incorrect` | A field holding several addresses is written of which none is valid. | — | The whole field is judged, not only its first address. |
+| any | recomputed from the copied value | A Contact is linked whose address is copied onto the lead. | The lead had no address. | The quality follows the copied value inside the same write. |
+
+### 11.3 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> NoAddress: created without an address
+    [*] --> Correct: created with at least one valid address
+    [*] --> Incorrect: created with no valid address
+    NoAddress --> Correct: a valid address is written
+    NoAddress --> Incorrect: an invalid address is written
+    Correct --> NoAddress: address cleared
+    Incorrect --> NoAddress: address cleared
+    Incorrect --> Correct: one of the addresses becomes valid
+    Correct --> Incorrect: no address is valid any more
+```
+
+---
+
+## 12. Reveal View status — the `reveal_state` field
+
+A Reveal View (`crm.reveal.view`, table `crm_reveal_view`) records one visit of one network address
+to a page matched by a Lead Generation Rule, waiting to be resolved into a company.
+
+### 12.1 States
+
+| Value | Label | Meaning |
+|---|---|---|
+| `to_process` | To Process | The visit has been recorded and the identification service has not answered for it yet. This is the default. |
+| `not_found` | Not Found | The service answered and could not resolve the address into a company. |
+
+### 12.2 Transitions
+
+| From | To | Trigger | Guards | Side effects |
+|---|---|---|---|---|
+| *(none)* | `to_process` | A page is served, an active rule matches the website, the path pattern, the visitor's country and the visitor's state, and no row yet exists for that pair of rule and address. | The unique index on the pair of rule and address is what enforces "no row yet exists". | One row is created. |
+| `to_process` | *(deleted)* | The scheduled job resolves the address into a company. | — | One Lead is created with the values of the rule and of the company, carrying the network address, the credits consumed and the rule. The row is then deleted. |
+| `to_process` | `not_found` | The scheduled job runs and the service cannot resolve the address. | — | No Lead is created. |
+| `to_process` or `not_found` | *(deleted)* | The scheduled job runs and a Lead already exists for the same address inside the retention window. | — | The row is deleted before it is processed, so the same visitor is not bought twice. |
+| `to_process` or `not_found` | *(deleted)* | The cleanup. | The row is older than one month. | The row is deleted. |
+
+### 12.3 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> ToProcess: a matching page is served
+    ToProcess --> [*]: resolved into a company, a lead is created, the row is deleted
+    ToProcess --> NotFound: the service cannot resolve the address
+    ToProcess --> [*]: a lead already exists for the address within the retention window
+    NotFound --> [*]: cleaned up after one month
+```
+
+---
+
+## 13. Reconciliation notes
+
+| Subject | The two statements | Resolution |
+|---|---|---|
+| Where the state machines live | One version gathered them in this file; the other placed them at the head of the workflow document. | They are gathered here. `workflows.md` refers to this file and does not repeat the tables. |
+| Refused transitions of the outcome machine | One version listed only the transitions that happen; the other listed the refusals as rows of the same table. | The refusals are kept, in their own section 3.6, so that the transition table stays a table of things that happen. |
+| The quality fields | One version treated them as ordinary computed fields; the other specified them as state machines. | They are specified as state machines here, in sections 10 and 11, because their values are a contractual enumeration, they are observed by the predictive probability, and one of them gates the manual enrichment control. |
+| The stored value of an absent quality | Both versions agreed that the absence is itself an observation. | Recorded once: an empty quality is written into the frequency table as the text `False`. |

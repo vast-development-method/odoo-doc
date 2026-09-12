@@ -80,6 +80,18 @@ round_to(9 000.00, 2) = 9 000.00
 round_to(333.33, 2) = 333.33
 ```
 
+**Worked example where the rounding actually bites.** An expected revenue of 12 345.67 and a
+probability of 37.5:
+
+```
+12 345.67 × 37.5 = 462 962.625
+462 962.625 ÷ 100 = 4 629.62625
+round_to(4 629.62625, 2) = 4 629.63
+```
+
+The third decimal is a 6, so the second decimal is raised: the stored prorated revenue is
+**4 629.63**, not 4 629.62.
+
 ### 2.2 Expected monthly recurring revenue
 
 ```formula
@@ -126,6 +138,17 @@ months_divisor = 1   (zero is replaced by one)
 recurring_revenue_monthly = 1 200.00
 ```
 
+**Worked example over three years.** A recurring revenue of 36 000.00 with the plan "Over 3 years"
+(thirty-six months):
+
+```
+months_divisor = 36
+recurring_revenue_monthly = 36 000.00 ÷ 36 = 1 000.00
+```
+
+With the plan "Yearly" the same amount gives 36 000.00 ÷ 12 = 3 000.00; with no plan at all it gives
+36 000.00 ÷ 1 = 36 000.00.
+
 ### 2.3 Prorated monthly recurring revenue
 
 ```formula
@@ -153,6 +176,15 @@ No rounding. Empty values count as zero.
 the **whole term**, not of one month; the two prorated recurring figures differ by exactly the
 months divisor.
 
+**Worked example over three years.** A recurring revenue of 36 000.00, the plan "Over 3 years" and a
+probability of 42:
+
+```
+recurring_revenue_monthly          = 36 000.00 ÷ 36       = 1 000.00
+recurring_revenue_prorated         = 36 000.00 × 42 ÷ 100 = 15 120.00
+recurring_revenue_monthly_prorated =  1 000.00 × 42 ÷ 100 =    420.00
+```
+
 ### 2.5 Sum of confirmed orders on an opportunity
 
 Present when the sales capability is installed.
@@ -174,6 +206,19 @@ Two counters accompany it:
 ```formula
 quotation_count   = number of linked orders whose state is draft or sent
 sale_order_count  = number of linked orders whose state is not draft, not sent and not cancelled
+```
+
+**Worked example with a currency conversion.** An opportunity belongs to a company whose currency is
+the first currency. Three orders are linked to it: a draft quotation of 1 000.00 in the first
+currency; a confirmed order of 2 500.00 in the first currency dated the tenth of March; a confirmed
+order of 3 000.00 in a second currency dated the twelfth of March, a day on which one unit of the
+second currency is worth 0.92 units of the first.
+
+```
+quotation_count   = 1                      (the draft quotation)
+sale_order_count  = 2                      (the two confirmed orders)
+converted amount  = round_to(3 000.00 × 0.92, 2) = 2 760.00
+sale_amount_total = 2 500.00 + 2 760.00 = 5 260.00
 ```
 
 ### 2.6 Feedback of a confirmed order into the expected revenue
@@ -235,6 +280,10 @@ eighteenth of January at 09:12:43. The creation instant truncated to the second 
 seconds. The number of complete days is 2, so `day_open` is 2.0 — one hour short of three days is
 still two days.
 
+**Second worked example.** Created on the third of March at 09:30 and assigned on the fifth of March
+at 08:00. The difference is one day, twenty-two hours and thirty minutes; the number of complete
+days is 1, so `day_open` is 1.0.
+
 ### 3.2 Days to close
 
 ```formula
@@ -243,6 +292,10 @@ day_close = absolute_value( whole_days_between( closed_date , creation_date ) )
 
 Identical in shape, except that the creation instant is **not** truncated. The value is empty when
 either instant is missing.
+
+**Worked example.** The same record, closed on the fourteenth of March at 17:45. The difference from
+the creation instant is eleven days, eight hours and fifteen minutes; the number of complete days is
+11, so `day_close` is 11.0.
 
 ### 3.3 Rotting
 
@@ -258,8 +311,40 @@ rotting_days = whole_days_between( now , last_update_instant )
 is_rotting   = ( outcome = pending ) and ( type = opportunity ) and ( stage_rotting_threshold_days > 0 ) and ( rotting_days > stage_rotting_threshold_days )
 ```
 
-Changing a stage's threshold does not retroactively re-evaluate records that were last updated
-before the change.
+The reference instant for the count is the last stage update; when the record never changed stage it
+is the creation instant. A record that may not rot reports zero rotting days.
+
+**Worked example.** An opportunity sits in a stage whose threshold is seven days and whose last
+stage change was eight days and three hours ago. The number of complete days is 8, and 8 is strictly
+greater than 7, so the record is rotting. The same record one day earlier had 7 complete days, which
+is not strictly greater than 7, so it was not yet rotting.
+
+### 3.4 Choosing the won stage
+
+The "mark won" action does not simply move the record to *the* won stage: a pipeline may interleave
+won stages with ordinary ones. For each record:
+
+**Inputs**: the current stage and its sequence; the set of stages available to the record — those
+with no team restriction plus those of the record's team — that carry the won flag, ordered by
+sequence and then by identifier.
+
+1. The target is the **first** candidate whose sequence is strictly greater than the sequence of the
+   current stage.
+2. When there is no such candidate, the target is the **last** candidate whose sequence is less than
+   or equal to the sequence of the current stage.
+3. When there is still no such candidate, the whole candidate set is handed to the write, which
+   resolves it to its first element.
+
+**Worked example.** A team has the stages "New" (sequence 1), "Won small" (sequence 2, won),
+"Negotiation" (sequence 3), "Won large" (sequence 4, won), "Escalation" (sequence 5) and "Won
+strategic" (sequence 6, won).
+
+| Current stage | Sequence | First won stage above | Target |
+|---|---|---|---|
+| Negotiation | 3 | Won large (4) | Won large |
+| Escalation | 5 | Won strategic (6) | Won strategic |
+| Won strategic | 6 | none | Won strategic — the last won stage at or below 6, so the record does not move and its closed date is not rewritten |
+| New | 1 | Won small (2) | Won small |
 
 ---
 
@@ -827,15 +912,26 @@ Algorithm, for one lead:
 6. The stored set of potential duplicates is the union found above **plus the record itself**; the
    stored count is the size of the union **without** the record itself.
 
-Note that the electronic mail domain criterion is empty for addresses at free public providers, so
-two leads from two different individuals at the same public provider are not proposed as
-duplicates.
+The behaviour of the criterion at a free public provider deserves a sentence of its own: the
+criterion is **not** empty there, it is the whole address. Two different individuals at the same
+public provider therefore carry two different criteria and are not proposed as duplicates, while two
+Leads carrying the *same* public address are.
+
+| Normalised address | Domain | Free public provider | Criterion |
+|---|---|---|---|
+| `robert@northwind-parts.example` | `northwind-parts.example` | no | `@northwind-parts.example` |
+| `accounting@northwind-parts.example` | `northwind-parts.example` | no | `@northwind-parts.example` |
+| `robert@freemail.example` | `freemail.example` | yes | `robert@freemail.example` |
+| `bruno@freemail.example` | `freemail.example` | yes | `bruno@freemail.example` |
+| `not-an-address` | none | not applicable | `not-an-address` |
+
+The first two rows are potential duplicates of each other; the third and the fourth are not.
 
 **Worked example.** Two leads carry the addresses `anna@northwind-parts.example` and
-`bruno@northwind-parts.example`. Both criteria resolve to `northwind-parts.example`, the search
+`bruno@northwind-parts.example`. Both criteria resolve to `@northwind-parts.example`, the search
 returns two records (fewer than twenty-one), so each lead reports one potential duplicate. A third
-lead carries `anna@freemail.example`; its criterion is empty, so it contributes nothing and is not
-proposed.
+lead carries `anna@freemail.example`; its criterion is that whole address, which no other lead
+carries, so it reports no duplicate.
 
 ### 5.2 Detector B — the merge detector
 
@@ -1153,13 +1249,43 @@ followers moved.
 
 ## 8. Assignment arithmetic
 
-### 8.1 Team capacity
+### 8.1 Team capacity and saturation
 
 ```formula
 team_capacity = Σ over the team's active members of  member_capacity
 ```
 
 where `member_capacity` is the member's average leads capacity over thirty days, default 30.
+
+**Worked example.** A team with three active members of capacities 45, 15 and 15 has a capacity of
+75. Archiving the member of capacity 45 brings the team capacity to 30, because an archived
+membership does not contribute.
+
+Two derived team figures follow from the members' trailing counters:
+
+```formula
+leads assigned this month  = Σ over the team's memberships of  leads assigned in the last 30 days
+monthly assignment exceeded = ( leads assigned this month > team_capacity )
+```
+
+**Worked example.** A team of capacity 75 whose three members received 40, 20 and 16 leads over the
+last thirty days reports 76 leads assigned this month; 76 is strictly greater than 75, so the
+saturation flag is true.
+
+### 8.1.1 The member trailing counters
+
+```formula
+leads in the last 24 hours = number of Leads whose assignment date is at or after ( now − 24 hours )
+                             and whose salesperson and team are this membership's pair
+leads in the last 30 days  = the same count over ( now − 30 days )
+```
+
+Both counters include archived Leads, because a record that was later lost still consumed a slot
+when it was assigned.
+
+**Worked example.** A member received two leads yesterday at 14:00, one this morning at 08:00 and
+twenty-seven more spread over the previous four weeks. Read at 10:00 today, the twenty-four hour
+counter is 3 — its window opens yesterday at 10:00 — and the thirty-day counter is 30.
 
 ### 8.2 Member daily quota
 
@@ -1187,6 +1313,10 @@ effective_quota = raw_quota − leads_last_24_hours , otherwise
 | 10 | round_half_up_to_integer(0.3333…) = 0 | 0 | 0 |
 | 5 | round_half_up_to_integer(0.1666…) = 0 | 0 | 0 |
 | 150 | round_half_up_to_integer(5.0) = 5 | 2 | 3 |
+| 45 | round_half_up_to_integer(1.5) = 2 | 0 | 2 |
+| 45 | 2 | 30 | 2 − 30 = −28, which excludes the member |
+| 14 | round_half_up_to_integer(0.4666…) = 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 |
 
 The half-up rule matters: a capacity of 15 gives exactly 0.5 per day, which rounds **up** to one
 lead a day, not down to zero.
@@ -1288,6 +1418,49 @@ The procedure, per team:
    descending and repeat the same find-assign-rotate procedure over the general member order.
 8. Invalidate the in-memory caches at the end of each team so that memory does not grow with the
    number of teams.
+
+**Fairness of the tie-break.** The random second sort key is required. Without it the membership
+created first would always come first in the order and would take the single daily lead of every
+run: over thirty daily runs with one lead each, the first member would hold thirty leads and the
+second none. With it, two members of equal quota each receive about half. A rebuild is equivalent
+only when it breaks quota ties at random and independently at each run; breaking them by creation
+order, by identifier or by any other deterministic key is **not** equivalent.
+
+**Worked example — ten leads, three members with capacities ninety, sixty and thirty.**
+
+Quotas: round_half_up_to_integer(90 ÷ 30) = 3, round_half_up_to_integer(60 ÷ 30) = 2 and
+round_half_up_to_integer(30 ÷ 30) = 1. The order by quota descending is member A (3), member B (2),
+member C (1). No member has a restricting domain. The ten leads are walked by probability
+descending: 82, 75, 70, 64, 58, 51, 45, 30, 22 and 9.
+
+| Step | Order before | Lead | Member chosen | Quota after | Order after |
+|---|---|---|---|---|---|
+| 1 | A(3), B(2), C(1) | 82 | A | A = 2 | B(2), C(1), A(2) |
+| 2 | B(2), C(1), A(2) | 75 | B | B = 1 | C(1), A(2), B(1) |
+| 3 | C(1), A(2), B(1) | 70 | C | C = 0 | A(2), B(1) |
+| 4 | A(2), B(1) | 64 | A | A = 1 | B(1), A(1) |
+| 5 | B(1), A(1) | 58 | B | B = 0 | A(1) |
+| 6 | A(1) | 51 | A | A = 0 | *(empty)* |
+| 7 to 10 | *(empty)* | 45, 30, 22, 9 | none | — | *(empty)* |
+
+Member A receives the leads of probability 82, 64 and 51; member B those of 75 and 58; member C the
+one of 70; the four remaining leads stay in the team and wait for the next run. Six leads are
+distributed in one run, which is the sum of the daily quotas; over thirty runs the three members
+receive ninety, sixty and thirty leads, exactly their monthly capacities.
+
+**The same example with a restricting domain.** Member C accepts only leads whose probability is at
+least seventy-five. At step 3 the list is C(1), A(2), B(1): C refuses the lead of probability 70, so
+the first accepting member is A, which takes it, and C stays at the head of the list with its quota
+intact. The final outcome is A with 82, 70 and 58; B with 75 and 64; C with nothing, because no
+remaining lead reaches seventy-five. Five leads are distributed.
+
+**The same example with a preference domain.** Member C has no restricting domain but prefers the
+leads carrying a given tag, which the leads of probability 30 and 22 carry. The preference pass runs
+first over those two, ordered by probability descending: the lead of probability 30 goes to member C
+and exhausts its quota, so the lead of probability 22 finds nobody and stays unassigned. The main
+pass then distributes over A(3) and B(2): A takes 82, 70 and 58, B takes 75 and 64. Six leads are
+distributed, and the preferred lead reached member C even though five leads of higher probability
+were available — which is exactly what a preference domain is for.
 
 **Worked example (mandated) — thirty leads, three members with capacities ten, fifteen and five.**
 
@@ -1408,9 +1581,30 @@ proportional to the level weight:
 probability_of_choosing_partner_p = weight(p) ÷ Σ over returned partners of weight
 ```
 
+The distance used by pass 5 is the plane distance between the two coordinate pairs, the longitude
+being the first coordinate and the latitude the second:
+
+```formula
+distance = square_root( ( partner_longitude − lead_longitude )² + ( partner_latitude − lead_latitude )² )
+```
+
 **Worked example.** Pass 1 returns three partners with weights 10 (Gold), 6 (Silver) and 4
 (Bronze). The probabilities are 0.5, 0.3 and 0.2. A partner with weight zero would never have been
 returned at all.
+
+**Worked example with explicit coordinates.** A lead in Belgium is geolocated at latitude 50.47 and
+longitude 4.87. Pass 1 therefore covers latitudes strictly between 48.47 and 52.47 and longitudes
+strictly between 3.37 and 6.37. Three Belgian partners fall inside it: one of weight 10, one of
+weight 5 and one of weight 1. The total weight is 16, so the draw probabilities are
+10 ÷ 16 = 0.625, 5 ÷ 16 = 0.3125 and 1 ÷ 16 = 0.0625. If the partner of weight 1 had already
+declined this lead it would be excluded, the total weight would be 15 and the two remaining
+probabilities would become 10 ÷ 15 = 0.6667 and 5 ÷ 15 = 0.3333.
+
+**Worked example where the window widens.** The same lead, but the only Belgian partner with a
+strictly positive weight sits at latitude 51.20 and longitude 3.22. Pass 1 excludes it, because 3.22
+is below the lower bound 3.37. Pass 2 covers latitudes strictly between 46.47 and 54.47 and
+longitudes strictly between 1.87 and 7.87, so the partner is found there and, being the only
+candidate, is chosen with certainty.
 
 ### 9.4 What assignment does
 
@@ -1538,3 +1732,117 @@ The count is zero for a user who is not a salesperson.
 **Worked example.** Contact "Northwind Parts" has two child contacts, "Anna" and "Bruno". Anna is
 the customer of three opportunities, Bruno of two, and Northwind Parts itself of one. The count
 shown on Anna is 3, on Bruno 2, and on Northwind Parts 6.
+
+---
+
+## 13. Lead generation credit estimate
+
+The lead generation request displays, as the user edits it, how many service credits the submission
+will consume.
+
+```formula
+company_credits = number_of_leads
+contact_credits = number_of_contacts_per_company × number_of_leads , when the target is companies and their contacts
+contact_credits = 0                                                , when the target is companies alone
+total_credits   = company_credits + contact_credits
+```
+
+The three figures are text, not numbers: they are shown as tooltips beside the fields they depend
+on. The bounds applied by the form are: the number of leads between one and two hundred inclusive;
+the number of contacts per company between one and five inclusive; the minimum company size at least
+one and never above the maximum; the maximum never below the minimum.
+
+**Worked example.** A request for twenty-five leads targeting companies **and** their contacts, with
+three contacts per company:
+
+```
+company_credits = 25
+contact_credits = 3 × 25 = 75
+total_credits   = 25 + 75 = 100
+```
+
+The same request targeting companies alone consumes 25 credits.
+
+---
+
+## 14. Statistics folding when a Sales Team is deleted
+
+The procedure is specified in [entities.md](entities.md), section 9.9. Its arithmetic is:
+
+```formula
+new_won  = round_half_up_to_integer( existing_won )  + round_half_up_to_integer( incoming_won )
+new_lost = round_half_up_to_integer( existing_lost ) + round_half_up_to_integer( incoming_lost )
+
+stored_won  = new_won  , when new_won  > 0.1 ; otherwise 0.1
+stored_lost = new_lost , when new_lost > 0.1 ; otherwise 0.1
+```
+
+A cell of the deleted team whose won count **and** lost count are both at or below one tenth is
+skipped entirely: it carries no information, only the seeding artefact.
+
+**Worked example.** The existing "no team" cells are: stage `1` won 20 lost 10; stage `2` won 0.1
+lost 0.1; stage `3` won 10 lost 0; country `1` won 10 lost 0.1. The team being deleted holds: stage
+`1` won 20 lost 10; country `1` won 0.1 lost 10; country `2` won 0.1 lost 0; country `3` won 30
+lost 30.
+
+| Cell of the deleted team | Skipped | Matching "no team" cell | Arithmetic | Result |
+|---|---|---|---|---|
+| stage `1` won 20 lost 10 | no | yes, won 20 lost 10 | 20 + 20 = 40 and 10 + 10 = 20 | won 40, lost 20 |
+| country `1` won 0.1 lost 10 | no | yes, won 10 lost 0.1 | round_half_up_to_integer(10) + round_half_up_to_integer(0.1) = 10 + 0 = 10, and round_half_up_to_integer(0.1) + round_half_up_to_integer(10) = 0 + 10 = 10 | won 10, lost 10 |
+| country `2` won 0.1 lost 0 | **yes** — both counts are at or below one tenth | — | — | the cell is dropped |
+| country `3` won 30 lost 30 | no | no | a new "no team" cell is created | won 30, lost 30 |
+
+The final "no team" cells are: stage `1` won 40 lost 20; stage `2` won 0.1 lost 0.1; stage `3` won
+10 lost 0; country `1` won 10 lost 10; country `3` won 30 lost 30. No cell exists for country `2`.
+
+---
+
+## 15. The two periodic digest figures
+
+| Figure | Definition |
+|---|---|
+| New leads | the number of Leads created during the period, counted per company |
+| Opportunities won | the number of records of type `opportunity` whose probability is exactly one hundred and whose closed date falls in the period, counted per company |
+
+**Worked example.** Over one week a company created thirty-four Leads and closed six opportunities
+at a probability of one hundred: the digest shows 34 and 6.
+
+Reading either figure without the salesperson group raises the access error "Do not have access,
+skip this data for user's digest email", which the digest machinery treats as "omit this figure for
+this recipient".
+
+---
+
+## 16. The stage-search helper
+
+Several operations need "the stages this record may use". The helper is specified as a routine in
+[entities.md](entities.md), section 8.1; its selection rule is:
+
+1. The team set is the explicitly supplied team, when there is one, together with the team of every
+   record in scope.
+2. When the team set is not empty, the condition is "the stage has no team restriction **or** its
+   teams intersect the team set". When the team set is empty, the condition is "the stage has no
+   team restriction".
+3. The caller's extra condition, if any, is added.
+4. The result is ordered by sequence and then by identifier, and the requested number of stages is
+   returned — one by default.
+
+**Worked example.** A Lead of the team "Europe" looks for its first non-folded stage. The database
+holds "New" (no team, sequence 1, not folded), "Europe qualified" (team Europe, sequence 2, not
+folded), "Asia qualified" (team Asia, sequence 2, not folded) and "Archived" (no team, sequence 90,
+folded). The team condition keeps New, Europe qualified and Archived; the extra condition "not
+folded" removes Archived; the ordering puts New first, so the answer is **New**. A Lead with no team
+at all sees only New and Archived, because the condition then restricts to stages with no team.
+
+---
+
+## 17. Reconciliation notes
+
+| Subject | The two statements | Resolution |
+|---|---|---|
+| The electronic mail domain criterion at a free public provider | One version said the criterion is empty; the other said it is the whole address. | The whole address is correct; section 5.1 was rewritten and a table of worked criteria added. The consequence for duplicate detection is stated there. |
+| Rounding of the prorated revenue | Both agreed on rounding to two decimals; only one carried an example where the rounding changes the result. | Both examples are kept: 24 000.00 at 37.5 per cent, which needs no rounding, and 12 345.67 at 37.5 per cent, which rounds 4 629.62625 up to 4 629.63. |
+| The daily quota of a member with a small capacity | One version stopped at a capacity of 10; the other showed a capacity of 14. | Both rows are in the table of section 8.2. Any capacity of fourteen or less yields a daily quota of zero, so such a member only ever receives work through a manual salesperson assignment. |
+| Distribution of leads to members | One version worked the example with capacities 10, 15 and 5, which produce daily quotas of 0, 1 and 0; the other with capacities 90, 60 and 30, which produce 3, 2 and 1. | Both examples are kept in section 8.5, because together they show why a capacity is a **monthly** figure and what the round robin does once the quotas are non-zero. |
+| The tie-break between members of equal quota | One version mentioned it in passing; the other explained why it must be random. | The explanation is kept: a deterministic tie-break gives every daily lead to the same member. |
+| Choosing the won stage | One version specified it inside the winning workflow; the other inside the arithmetic. | It is specified once, in section 3.4, and referred to from `workflows.md`. |

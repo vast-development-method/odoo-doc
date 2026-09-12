@@ -1,6 +1,6 @@
 # The service layer
 
-Every entity of the system exposes the same set of generic operations, and every capability package adds business operations on top of them following a small number of naming conventions. Together they form the service layer: the complete surface that a client, a script or an integration invokes, whatever the transport it uses to reach the server ([`remote-transport-contracts.md`](remote-transport-contracts.md)). This document specifies that surface: the contract of every generic operation, the conventions and patterns of business operations, the read specification grammar that shapes what a read returns, the on-change protocol, the export contract, and the discovery operations that let a caller learn which entities, fields and operations exist in a given deployment.
+Every entity of the system exposes the same set of generic operations, and every capability package adds business operations on top of them following a small number of naming conventions. Together they form the service layer: the complete surface that a client, a script or an integration invokes, whatever the transport it uses to reach the server ([`remote-transport-contracts.md`](remote-transport-contracts.md)). This document specifies that surface: the contract of every generic operation, the conventions and patterns of business operations, the read specification grammar that shapes what a read returns, the on-change protocol, the export contract, the discovery operations that let a caller learn which entities, fields and operations exist in a given deployment, and the complete enumeration of the named business operations that the screens of the shipped installation bind to a control, grouped by the part of the system that owns the entity.
 
 ## 1. Model of an operation
 
@@ -701,7 +701,1321 @@ The two documentation endpoints ([`remote-transport-contracts.md`](remote-transp
 
 This is the contract an integration should read first: it is generated from the running registry, therefore it always matches the deployment, including the fields and operations that capability packages added.
 
-## 10. Transactions, isolation and concurrency
+## 10. Named business operations by domain
+
+Beyond the generic contract of section 2, every capability package adds **named business operations** to the entities it
+owns. They follow the conventions of section 5 and they are the operations a screen binds to a control, an automation
+invokes and an integration calls through the generic dispatch
+([`remote-transport-contracts.md`](remote-transport-contracts.md), section 8).
+
+The tables below enumerate every named operation that a screen of the shipped installation binds to a control: 1,016
+operations on 285 entities, grouped into thirty-eight areas by the part of the system that owns the entity. For each one
+the table gives the entity, the entity's transport name, the operation's identifier, and the label the control shows.
+Control labels are **reproduced** verbatim from the shipped installation and are therefore given in quotation marks; a
+label written as a field identifier in code font is a counter that the control displays instead of a fixed word, which is
+how a statistic button is labelled, and the field is described on the entity's reference page. Three labels name the
+product in the shipped installation (a video-meeting location, a document-exchange registration and a
+document-exchange sender registration); they are shown here with the product's name replaced by "the platform", because
+a replacement substitutes its own name and no observable behaviour depends on the word.
+
+**What is true of all of them, and therefore stated once here rather than in every row:**
+
+| Aspect | Rule |
+|---|---|
+| Inputs | The record set the control was pressed on, plus the request context. An operation that needs more input does not take arguments: it returns a window action that opens a transient entity, and the transient record carries the input (section 6.1). |
+| Output | Nothing, which means "done, refresh"; or one action to run next, of one of the six kinds of section 6.3; or a notification action (section 6.4). |
+| Preconditions | Re-checked inside the operation, never assumed from the fact that the control was visible. A control that is hidden by its own condition can still be reached through the generic dispatch, therefore the guard is in the operation. The exact guards and their refusal messages are specified in the `business-rules.md` and `state-machines.md` files of the owning folder. |
+| Side effects | The records the operation creates, changes or deletes, the ledger entries it produces and the messages it posts are specified in the `workflows.md` and `accounting-effects.md` files of the owning folder. |
+| Record set | An operation meaningful on one record only says so and refuses a larger set; every other operation iterates over the set (section 6.2). |
+| Transaction | One call, one transaction; an operation therefore performs the whole unit of work, because two calls can never be made atomic ([`remote-transport-contracts.md`](remote-transport-contracts.md), section 8.9). |
+| Access | The operation runs with the caller's rights. A control may additionally be restricted to an access group, which hides it; the access rules of the entity are enforced regardless. |
+
+The complete catalogue of every operation of every entity, including the ones no screen binds to a control, is
+[`../references/operation-index.md`](../references/operation-index.md).
+
+### 10.1 Analytic accounting
+
+10 operations on 3 entities. Preconditions, guards, refusal messages and side effects: [`../domains/analytic-accounting/`](../domains/analytic-accounting/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Analytic Account | `account.analytic.account` | `action_view_invoice` | `invoice_count` |
+| Analytic Account | `account.analytic.account` | `action_view_mrp_bom` | `bom_count` |
+| Analytic Account | `account.analytic.account` | `action_view_mrp_production` | `production_count` |
+| Analytic Account | `account.analytic.account` | `action_view_projects` | `project_count` |
+| Analytic Account | `account.analytic.account` | `action_view_purchase_orders` | `purchase_order_count` |
+| Analytic Account | `account.analytic.account` | `action_view_vendor_bill` | `vendor_bill_count` |
+| Analytic Line | `account.analytic.line` | `action_invoice_from_timesheet` | "Invoice" |
+| Analytic Line | `account.analytic.line` | `action_sale_order_from_timesheet` | "Sales Order" |
+| Analytic Plans | `account.analytic.plan` | `action_view_analytical_accounts` | "`all_account_count` Analytic Accounts" |
+| Analytic Plans | `account.analytic.plan` | `action_view_children_plans` | `children_count` |
+
+### 10.2 Attendance recording
+
+7 operations on 2 entities. Preconditions, guards, refusal messages and side effects: [`../domains/attendances-and-working-time/`](../domains/attendances-and-working-time/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Attendance | `hr.attendance` | `action_approve` | "Approve" |
+| Attendance | `hr.attendance` | `action_approve_overtime` | "Approve Extra Hours" / " " / "Approve" / "1" |
+| Attendance | `hr.attendance` | `action_in_attendance_maps` | "View on Maps" |
+| Attendance | `hr.attendance` | `action_out_attendance_maps` | "View on Maps" |
+| Attendance | `hr.attendance` | `action_refuse` | "Refuse" |
+| Attendance | `hr.attendance` | `action_refuse_overtime` | "Refuse Extra Hours" / " " / "Refuse" / "1" |
+| Overtime Ruleset | `hr.attendance.overtime.ruleset` | `action_regenerate_overtimes` | "Regenerate overtimes" |
+
+### 10.3 Automation and integration
+
+4 operations on 2 entities. Preconditions, guards, refusal messages and side effects: [`../domains/automation-and-integration/`](../domains/automation-and-integration/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Recycling Model | `data_recycle.model` | `action_recycle_records` | "Run Now" |
+| Recycling Model | `data_recycle.model` | `open_records` | `records_to_recycle_count` |
+| Recycling Record | `data_recycle.record` | `action_discard` | "Discard" |
+| Recycling Record | `data_recycle.record` | `action_validate` | "Validate" |
+
+### 10.4 Calendar and scheduling
+
+11 operations on 2 entities. Preconditions, guards, refusal messages and side effects: [`../domains/calendar-and-scheduling/`](../domains/calendar-and-scheduling/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Calendar Event | `calendar.event` | `action_join_video_call` | a control with no text of its own |
+| Calendar Event | `calendar.event` | `action_open_calendar_event` | `res_model_name` |
+| Calendar Event | `calendar.event` | `action_open_composer` | "Send Mail" / "Send email" / " EMAIL" |
+| Calendar Event | `calendar.event` | `action_send_sms` | "Send SMS" / "SMS" |
+| Calendar Event | `calendar.event` | `action_sendmail` | "Send Invitations" |
+| Calendar Event | `calendar.event` | `do_accept` | "Accept" |
+| Calendar Event | `calendar.event` | `do_decline` | "Decline" |
+| Calendar Event | `calendar.event` | `do_tentative` | "Uncertain" |
+| Calendar Event | `calendar.event` | `set_discuss_videocall_location` | "the platform meeting" / "Video" |
+| Calendar Popover Delete Wizard | `calendar.popover.delete.wizard` | `action_delete` | "Delete" |
+| Calendar Popover Delete Wizard | `calendar.popover.delete.wizard` | `action_send_mail_and_delete` | "Send and delete" |
+
+### 10.5 Contacts and organizations
+
+22 operations on 4 entities. Preconditions, guards, refusal messages and side effects: [`../domains/contacts-and-organizations/`](../domains/contacts-and-organizations/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Portal Sharing | `portal.share` | `action_send_mail` | "Send" |
+| Grant Portal Access | `portal.wizard` | `action_grant_access` | "Grant Access" |
+| Grant Portal Access | `portal.wizard` | `action_invite_again` | "Re-Invite" |
+| Grant Portal Access | `portal.wizard` | `action_refresh_modal` | "Valid Email Address" / "Invalid Email Address" / "Email Address already taken by another user" |
+| Grant Portal Access | `portal.wizard` | `action_revoke_access` | "Revoke Access" |
+| Contact | `res.partner` | `action_event_view` | `event_count` |
+| Contact | `res.partner` | `action_l10n_in_verify_gstin_status` | "Reverify GSTIN status" / "Check Status" |
+| Contact | `res.partner` | `action_open_employees` | "`employees_count` Employee" |
+| Contact | `res.partner` | `action_validate_tin` | "Validate" |
+| Contact | `res.partner` | `action_view_certifications` | "`certifications_count` Certifications Certification" / "`certifications_company_count` Certifications Certification" |
+| Contact | `res.partner` | `action_view_courses` | "`slide_channel_count` Courses" / "`slide_channel_company_count` Courses" |
+| Contact | `res.partner` | `action_view_livechat_sessions` | `livechat_channel_count` |
+| Contact | `res.partner` | `action_view_loyalty_cards` | `loyalty_card_count` |
+| Contact | `res.partner` | `action_view_opportunity` | `opportunity_count` |
+| Contact | `res.partner` | `action_view_partner_invoices` | "`currency_id` `total_invoiced` Invoiced" |
+| Contact | `res.partner` | `action_view_pos_order` | `pos_order_count` |
+| Contact | `res.partner` | `action_view_stock_serial` | "Lots/Serial Numbers" |
+| Contact | `res.partner` | `action_view_tasks` | `task_count` |
+| Contact | `res.partner` | `button_account_peppol_check_partner_endpoint` | "Verify" |
+| Contact | `res.partner` | `button_nemhandel_check_partner_endpoint` | "Verify" |
+| Contact | `res.partner` | `open_commercial_entity` | "the parent company" |
+| Bank Accounts | `res.partner.bank` | `action_archive_bank` | "Archive" |
+
+### 10.6 Customer relationship management
+
+27 operations on 12 entities. Preconditions, guards, refusal messages and side effects: [`../domains/customer-relationship-management/`](../domains/customer-relationship-management/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| customer relationship management Lead Mining Request | `crm.iap.lead.mining.request` | `action_buy_credits` | "Buy credits." |
+| customer relationship management Lead Mining Request | `crm.iap.lead.mining.request` | `action_get_lead_action` | "`lead_count` Leads" |
+| customer relationship management Lead Mining Request | `crm.iap.lead.mining.request` | `action_get_opportunity_action` | "`lead_count` Opportunities" |
+| customer relationship management Lead Mining Request | `crm.iap.lead.mining.request` | `action_submit` | "Submit" / "Retry" / "Generate Leads" |
+| Lead | `crm.lead` | `action_assign_partner` | "Automatic Assignment" |
+| Lead | `crm.lead` | `action_generate_leads` | "Generate Leads" |
+| Lead | `crm.lead` | `action_open_livechat` | "View chat" |
+| Lead | `crm.lead` | `action_redirect_to_livechat_sessions` | `visitor_sessions_count` |
+| Lead | `crm.lead` | `action_redirect_to_page_views` | `visitor_page_count` |
+| Lead | `crm.lead` | `action_restore` | "Restore" |
+| Lead | `crm.lead` | `action_sale_quotations_new` | "New Quotation" |
+| Lead | `crm.lead` | `action_schedule_meeting` | "`quotation_count` `sale_amount_total` Orders `sale_order_count`" / "`meeting_display_label` `meeting_display_date`" |
+| Lead | `crm.lead` | `action_set_won_rainbowman` | "Won" |
+| Lead | `crm.lead` | `action_show_potential_duplicates` | "`duplicate_lead_count` Similar Leads Similar Lead" |
+| Lead | `crm.lead` | `action_view_sale_order` | "`sale_amount_total` Orders `sale_order_count`" |
+| Lead | `crm.lead` | `action_view_sale_quotation` | `quotation_count` |
+| Lead forward to partner | `crm.lead.forward.to.partner` | `action_forward` | "Send" |
+| Get Lost Reason | `crm.lead.lost` | `action_lost_reason_apply` | "Mark as Lost" |
+| Update the probabilities | `crm.lead.pls.update` | `action_update_crm_lead_probabilities` | "Update" |
+| Convert Lead to Opportunity (not in mass) | `crm.lead2opportunity.partner` | `action_apply` | "Create Opportunity" |
+| Convert Lead to Opportunity (in mass) | `crm.lead2opportunity.partner.mass` | `action_mass_convert` | "Convert to Opportunities" |
+| Opp. Lost Reason | `crm.lost.reason` | `action_lost_leads` | "`leads_count` Leads" |
+| Merge Opportunities | `crm.merge.opportunity` | `action_merge` | "Merge" |
+| Create new or use existing Customer on new Quotation | `crm.quotation.partner` | `action_apply` | "Confirm" |
+| customer relationship management Lead Generation Rules | `crm.reveal.rule` | `action_get_lead_tree_view` | "`lead_count` Leads" |
+| customer relationship management Lead Generation Rules | `crm.reveal.rule` | `action_get_opportunity_tree_view` | "`opportunity_count` Opportunities" |
+| Sales Team | `crm.team` | `action_assign_leads` | "Assign Leads" |
+
+### 10.7 Delivery and shipping
+
+3 operations on 2 entities. Preconditions, guards, refusal messages and side effects: [`../domains/delivery-and-shipping/`](../domains/delivery-and-shipping/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Delivery Carrier Selection Wizard | `choose.delivery.carrier` | `button_confirm` | "Update" / "Add" |
+| Shipping Methods | `delivery.carrier` | `toggle_debug` | "No debug" / "Debug requests" |
+| Shipping Methods | `delivery.carrier` | `toggle_prod_environment` | "Production Environment" / "Test Environment" / `is_published` |
+
+### 10.8 Electronic invoicing and document exchange
+
+27 operations on 10 entities. Preconditions, guards, refusal messages and side effects: [`../domains/electronic-invoicing-and-document-exchange/`](../domains/electronic-invoicing-and-document-exchange/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Consolidate Invoice Wizard | `myinvois.consolidate.invoice.wizard` | `button_consolidate` | "Create Consolidated Invoices" |
+| MyInvois Document | `myinvois.document` | `action_cancel_submission` | "Cancel Submission" |
+| MyInvois Document | `myinvois.document` | `action_open_consolidate_invoice_wizard` | "Consolidate Orders" |
+| MyInvois Document | `myinvois.document` | `action_submit_to_myinvois` | "Submit To MyInvois" |
+| MyInvois Document | `myinvois.document` | `action_update_submission_status` | "Update Submission Status" / "Fetch Status From MyInvois" |
+| MyInvois Document | `myinvois.document` | `action_view_linked_orders` | `linked_order_count` |
+| Document Status Update Wizard | `myinvois.document.status.update.wizard` | `button_request_update` | "Update Document" |
+| Nemhandel Registration | `nemhandel.registration` | `button_check_nemhandel_verification_code` | "Activate Nemhandel (Demo)" / "Confirm" |
+| Nemhandel Registration | `nemhandel.registration` | `button_deregister_nemhandel_participant` | "Cancel Registration" |
+| Nemhandel Registration | `nemhandel.registration` | `button_nemhandel_registration_sms` | "Activate Nemhandel" / "Activate Nemhandel (Test)" |
+| Nemhandel Registration | `nemhandel.registration` | `send_nemhandel_verification_code` | "Send again" |
+| Nemhandel Rejection wizard | `nemhandel.rejection.wizard` | `button_send` | "Send Rejection" |
+| Peppol Configuration Wizard | `pdp.config.wizard` | `button_peppol_unregister` | "Disconnect French electronic invoicing" |
+| Peppol Configuration Wizard | `pdp.config.wizard` | `button_sync_form_with_peppol_proxy` | "Save" |
+| PDP Registration | `pdp.registration` | `button_cancel_authentication` | "Cancel" |
+| PDP Registration | `pdp.registration` | `button_deregister_pdp_participant` | "Cancel Registration" |
+| PDP Registration | `pdp.registration` | `button_open_authentication_link` | "Open link" |
+| PDP Registration | `pdp.registration` | `button_refresh_authentication` | "Refresh" |
+| PDP Registration | `pdp.registration` | `button_register_pdp_participant` | "Validate Registration Migrate to the platform Validate Registration (Test) Migrate to the platform (Test) Validate Registration (Demo) Migrate to the platform (Demo)" |
+| PDP Registration | `pdp.registration` | `button_trigger_authentication` | "Authenticate" |
+| PDP Response wizard | `pdp.response.wizard` | `button_send` | "Send" |
+| Peppol Configuration Wizard | `peppol.config.wizard` | `button_peppol_register_sender_as_receiver` | "Enable reception" |
+| Peppol Configuration Wizard | `peppol.config.wizard` | `button_peppol_reset_to_sender` | "Disable the reception." |
+| Peppol Configuration Wizard | `peppol.config.wizard` | `button_peppol_unregister` | "Remove from Peppol" |
+| Peppol Configuration Wizard | `peppol.config.wizard` | `button_sync_form_with_peppol_proxy` | "Save" |
+| Peppol Registration | `peppol.registration` | `button_register_peppol_participant` | "Activate Peppol" / "Activate Peppol (Test)" / "Activate Peppol (Demo)" |
+| Peppol Registration | `peppol.registration` | `button_register_with_itsme` | "Authenticate" |
+
+### 10.9 Events
+
+21 operations on 7 entities. Preconditions, guards, refusal messages and side effects: [`../domains/events/`](../domains/events/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Event Booth | `event.booth` | `action_view_sale_order` | "Sale Order" |
+| Event Booth | `event.booth` | `action_view_sponsor` | "Sponsor" |
+| Event | `event.event` | `action_invite_contacts` | "Invite" |
+| Event | `event.event` | `action_mass_mailing_attendees` | "Contact Attendees" |
+| Event | `event.event` | `action_mass_mailing_track_speakers` | "Contact Speakers" |
+| Event | `event.event` | `action_open_slot_calendar` | "`event_slot_count` Slot(s)" |
+| Event | `event.event` | `action_view_linked_orders` | "`sale_price_total` Sales" |
+| Event | `event.event` | `action_view_question_answers` | "Stats" |
+| Event Lead Rules | `event.lead.rule` | `action_execute_rule` | "Execute Rule" |
+| Event Question | `event.question` | `action_add_rule_button` | "Add a rule" |
+| Event Question | `event.question` | `action_event_view` | "`event_count` events" |
+| Event Question | `event.question` | `action_view_question_answers` | "Attendee answers" / "Stats" |
+| Event Registration | `event.registration` | `action_cancel` | "Cancel" / "Cancel Registration" |
+| Event Registration | `event.registration` | `action_confirm` | "Registered" |
+| Event Registration | `event.registration` | `action_send_badge_email` | "Send by Email" |
+| Event Registration | `event.registration` | `action_set_done` | "Mark as Attending" / "Attended" |
+| Event Registration | `event.registration` | `action_view_pos_order` | "PoS Order" |
+| Event Registration | `event.registration` | `action_view_sale_order` | "Sale Order" |
+| Event Track | `event.track` | `action_add_quiz` | "Add Quiz" |
+| Event Track | `event.track` | `action_view_quiz` | "Go to Quiz" |
+| Edit Attendee Details on Sales Confirmation | `registration.editor` | `action_make_registration` | "Create/Update registrations" |
+
+### 10.10 Expenses
+
+14 operations on 5 entities. Preconditions, guards, refusal messages and side effects: [`../domains/expenses/`](../domains/expenses/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Expense | `hr.expense` | `action_approve` | "Approve" |
+| Expense | `hr.expense` | `action_open_account_move` | `sale_order_id` / "Journal Entry" |
+| Expense | `hr.expense` | `action_open_sale_order` | `sale_order_id` |
+| Expense | `hr.expense` | `action_open_split_expense` | "Split" |
+| Expense | `hr.expense` | `action_post` | "Post Journal Entries" |
+| Expense | `hr.expense` | `action_refuse` | "Refuse" |
+| Expense | `hr.expense` | `action_reset` | "Reset" |
+| Expense | `hr.expense` | `action_split_wizard` | "Split Expense" |
+| Expense | `hr.expense` | `action_submit` | "Submit" |
+| Expense Approve Duplicate | `hr.expense.approve.duplicate` | `action_approve` | "Approve" |
+| Expense Approve Duplicate | `hr.expense.approve.duplicate` | `action_refuse` | "Refuse" |
+| Expense Posting Wizard | `hr.expense.post.wizard` | `action_post_entry` | "Post Expenses" |
+| Expense Refuse Reason Wizard | `hr.expense.refuse.wizard` | `action_refuse` | "Refuse" |
+| Expense Split Wizard | `hr.expense.split.wizard` | `action_split_expense` | "Split Expense" |
+
+### 10.11 Fiscal localizations
+
+40 operations on 18 entities. Preconditions, guards, refusal messages and side effects: [`../domains/fiscal-localizations/`](../domains/fiscal-localizations/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| French PDP Flow | `l10n.fr.pdp.reports.flow` | `action_build_payload_manual` | "Build Payload" |
+| French PDP Flow | `l10n.fr.pdp.reports.flow` | `action_open_send_wizard` | "Send" |
+| French PDP Flow | `l10n.fr.pdp.reports.flow` | `action_view_error_moves` | "View invoices" |
+| French PDP Flow | `l10n.fr.pdp.reports.flow` | `action_view_initial` | "Initial" |
+| French PDP Flow | `l10n.fr.pdp.reports.flow` | `action_view_moves` | "`move_ids` `move_ids`" |
+| Send PDP Flow Wizard | `l10n.fr.pdp.reports.send.wizard` | `action_send_anyway` | "Send anyway" |
+| Send PDP Flow Wizard | `l10n.fr.pdp.reports.send.wizard` | `action_view_errors` | "View invoices" |
+| e-Waybill | `l10n.in.ewaybill` | `action_cancel_ewaybill` | "Cancel e-Waybill" |
+| e-Waybill | `l10n.in.ewaybill` | `action_export_content_json` | "Download Content JSON" |
+| e-Waybill | `l10n.in.ewaybill` | `action_generate_ewaybill` | "Generate e-Waybill" |
+| e-Waybill | `l10n.in.ewaybill` | `action_print` | "Print" |
+| e-Waybill | `l10n.in.ewaybill` | `action_reset_to_pending` | "Reset to Pending" |
+| e-Waybill | `l10n.in.ewaybill` | `action_set_to_challan` | "Use as Challan" |
+| Handles problems occurring while creating multiple quick response-invoices at once | `l10n_ch.qr_invoice.wizard` | `action_view_faulty_invoices` | "Check invalid invoices" |
+| Handles problems occurring while creating multiple quick response-invoices at once | `l10n_ch.qr_invoice.wizard` | `print_all_invoices` | "Print All" |
+| Thumb drive used to sign invoices in Egypt | `l10n_eg_edi.thumb.drive` | `action_set_certificate_from_usb` | "Get certificate" |
+| MojEracun Reject Invoice Wizard | `l10n_hr_edi.mojeracun_reject_wizard` | `button_reject_invoice` | "Reject invoice" |
+| Technical Annulment Wizard | `l10n_hu_edi.cancellation` | `button_request_cancel` | "Request Annulment" |
+| Tax audit export - Adóhatósági Ellenőrzési Adatszolgáltatás | `l10n_hu_edi.tax_audit_export` | `action_export` | "Export" |
+| Receive Bills Wizard | `l10n_hu_edi_receive.bills.wizard` | `action_receive_bills` | "Fetch Bills" |
+| E-Faktur Document | `l10n_id_efaktur_coretax.document` | `action_download` | "Download" |
+| E-Faktur Document | `l10n_id_efaktur_coretax.document` | `action_regenerate` | "Regenerate File" |
+| Withhold Wizard | `l10n_in.withhold.wizard` | `action_create_and_post_withhold` | "Apply TDS" |
+| Declaration of Intent | `l10n_it_edi_doi.declaration_of_intent` | `action_open_invoice_ids` | "Invoices" |
+| Declaration of Intent | `l10n_it_edi_doi.declaration_of_intent` | `action_open_sale_order_ids` | "Sale Orders" |
+| Declaration of Intent | `l10n_it_edi_doi.declaration_of_intent` | `action_reactivate` | "Reactivate" |
+| Declaration of Intent | `l10n_it_edi_doi.declaration_of_intent` | `action_reset_to_draft` | "Reset to Draft" |
+| Declaration of Intent | `l10n_it_edi_doi.declaration_of_intent` | `action_revoke` | "Revoke" |
+| Declaration of Intent | `l10n_it_edi_doi.declaration_of_intent` | `action_terminate` | "Terminate" |
+| Declaration of Intent | `l10n_it_edi_doi.declaration_of_intent` | `action_validate` | "Validate" |
+| Account payment check | `l10n_latam.check` | `action_show_journal_entry` | "Journal Entry" |
+| Account payment check | `l10n_latam.check` | `action_show_reconciled_move` | "Reconciled move" |
+| Account payment check | `l10n_latam.check` | `action_void` | "Void Check" |
+| Account payment check | `l10n_latam.check` | `button_open_check_operations` | "Operations" |
+| Account payment check | `l10n_latam.check` | `button_open_payment` | "Payment" |
+| Checks Mass Transfers | `l10n_latam.payment.mass.transfer` | `action_create_payments` | "Create Transfers" |
+| Exports 2307 data to a XLS file. | `l10n_ph_2307.wizard` | `action_generate` | "Generate" |
+| Implements cancelling an ecpay invoice. | `l10n_tw_edi.invoice.cancel` | `button_request_cancel` | "Cancel Invoice" |
+| Implements printingan ecpay invoice. | `l10n_tw_edi.invoice.print` | `button_print` | "Print Invoice" |
+| E-invoice cancellation wizard | `l10n_vn_edi_viettel.cancellation` | `button_request_cancel` | "Request Cancellation" |
+
+### 10.12 Fleet
+
+12 operations on 7 entities. Preconditions, guards, refusal messages and side effects: [`../domains/fleet/`](../domains/fleet/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Vehicle | `fleet.vehicle` | `action_accept_driver_change` | "Apply New Driver" |
+| Vehicle | `fleet.vehicle` | `action_open_employee` | "1 Employee" |
+| Vehicle | `fleet.vehicle` | `action_open_odometer_report` | "Odometer Report" |
+| Vehicle | `fleet.vehicle` | `action_view_bills` | `bill_count` |
+| Vehicle | `fleet.vehicle` | `open_assignation_logs` | "1 Employee" / `history_count` |
+| Drivers history on a vehicle | `fleet.vehicle.assignation.log` | `action_get_attachment_view` | "Attachments" |
+| Vehicle Contract | `fleet.vehicle.log.contract` | `action_open_employee` | "Employee `purchaser_employee_id`" |
+| Services for vehicles | `fleet.vehicle.log.services` | `action_open_account_move` | "Service's Bill Service's Bill" |
+| Model of a vehicle | `fleet.vehicle.model` | `action_model_vehicle` | "`vehicle_count` New Vehicle" |
+| Brand of the vehicle | `fleet.vehicle.model.brand` | `action_brand_model` | `model_count` |
+| Send mails to Drivers | `fleet.vehicle.send.mail` | `action_save_as_template` | "Save as new template" |
+| Send mails to Drivers | `fleet.vehicle.send.mail` | `action_send` | "Send" |
+
+### 10.13 General ledger and invoicing
+
+87 operations on 15 entities. Preconditions, guards, refusal messages and side effects: [`../domains/general-ledger/`](../domains/general-ledger/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Account | `account.account` | `action_open_related_taxes` | "`related_taxes_amount` Taxes" |
+| Create Automatic Entries | `account.automatic.entry.wizard` | `do_action` | "Create Journal Entries" |
+| Autopost Bills Wizard | `account.autopost.bills.wizard` | `action_ask_later` | "Ask me later" |
+| Autopost Bills Wizard | `account.autopost.bills.wizard` | `action_automate_partner` | "Activate auto-validation" |
+| Autopost Bills Wizard | `account.autopost.bills.wizard` | `action_never_automate_partner` | "Never for this vendor" |
+| Opening Balance of Financial Year | `account.financial.year.op` | `action_save_onboarding_fiscal_year` | "Apply" |
+| Journal | `account.journal` | `action_configure_bank_journal` | "Bank Setup" |
+| Journal | `account.journal` | `action_create_new` | "New" |
+| Journal | `account.journal` | `action_open_provider_form` | "SETUP" |
+| Journal | `account.journal` | `open_action` | "Transactions" |
+| Account Lock Exception | `account.lock_exception` | `action_revoke` | "Revoke" |
+| Account Lock Exception | `account.lock_exception` | `action_show_audit_trail_during_exception` | "Audit" |
+| Account merge wizard | `account.merge.wizard` | `action_merge` | "Merge" |
+| Journal Entry | `account.move` | `action_activate_currency` | "activate the currency of the bill" / "activate the currency of the invoice" |
+| Journal Entry | `account.move` | `action_add_from_catalog` | "Catalog" |
+| Journal Entry | `account.move` | `action_automatic_entry` | "Cut-Off" |
+| Journal Entry | `account.move` | `action_cancel_nemhandel_documents` | "Cancel Nemhandel" |
+| Journal Entry | `account.move` | `action_cancel_peppol_documents` | "Cancel PEPPOL" |
+| Journal Entry | `account.move` | `action_check_l10n_it_edi` | "Check Sending" |
+| Journal Entry | `account.move` | `action_debit_note` | "Debit Note" |
+| Journal Entry | `account.move` | `action_delete_duplicates` | "Delete all duplicates Delete duplicate" |
+| Journal Entry | `account.move` | `action_download` | "Download" |
+| Journal Entry | `account.move` | `action_export_l10n_in_edi_content_json` | "Download EDI JSON" |
+| Journal Entry | `account.move` | `action_export_xml` | "Download" |
+| Journal Entry | `account.move` | `action_force_register_payment` | "Pay" |
+| Journal Entry | `account.move` | `action_get_eta_invoice_pdf` | "Get ETA Invoice PDF" |
+| Journal Entry | `account.move` | `action_invoice_sent` | "Send" |
+| Journal Entry | `account.move` | `action_l10n_in_apply_higher_tax` | "Apply Higher TCS" |
+| Journal Entry | `account.move` | `action_l10n_in_edi_force_cancel` | "Force Cancel" |
+| Journal Entry | `account.move` | `action_l10n_in_ewaybill_create` | "Create e-Waybill" |
+| Journal Entry | `account.move` | `action_l10n_in_withholding_entries` | "TDS `l10n_in_total_withholding_amount`" |
+| Journal Entry | `account.move` | `action_l10n_it_edi_send` | "Send to SDI" |
+| Journal Entry | `account.move` | `action_l10n_my_edi_send_invoice` | "Send To MyInvois" |
+| Journal Entry | `account.move` | `action_l10n_my_edi_update_status` | "Update MyInvois Status" |
+| Journal Entry | `account.move` | `action_l10n_pl_edi_get_invoice_UPO` | "Download UPO" |
+| Journal Entry | `account.move` | `action_l10n_pl_edi_update_invoice_status` | "Check Sending" |
+| Journal Entry | `account.move` | `action_l10n_ro_edi_download_attachment` | "Download the document sent" / "Download the signature" |
+| Journal Entry | `account.move` | `action_l10n_ro_edi_fetch_status` | "Fetch status" |
+| Journal Entry | `account.move` | `action_l10n_vn_edi_update_payment_status` | "Send Payment Status" |
+| Journal Entry | `account.move` | `action_open_business_doc` | "1 Payment" |
+| Journal Entry | `account.move` | `action_open_declaration_of_intent` | "Declaration of Intent" |
+| Journal Entry | `account.move` | `action_open_expense` | `nb_expenses` |
+| Journal Entry | `account.move` | `action_open_l10n_in_ewaybill` | "e-Waybill" |
+| Journal Entry | `account.move` | `action_post` | "Post" / "Confirm" |
+| Journal Entry | `account.move` | `action_post_sign_invoices` | "Sign Invoice" |
+| Journal Entry | `account.move` | `action_print_pdf` | "Print" |
+| Journal Entry | `account.move` | `action_purchase_matching` | "Purchase Matching" |
+| Journal Entry | `account.move` | `action_register_payment` | "Pay" |
+| Journal Entry | `account.move` | `action_retry_edi_documents_error` | "Retry" |
+| Journal Entry | `account.move` | `action_reverse` | "Credit Note" |
+| Journal Entry | `account.move` | `action_send_and_print` | "Send" |
+| Journal Entry | `account.move` | `action_show_chain_head` | "Blocking Invoice" |
+| Journal Entry | `account.move` | `action_show_myinvois_documents` | "MyInvois Documents" |
+| Journal Entry | `account.move` | `action_update_fpos_values` | "Update Taxes and Accounts" |
+| Journal Entry | `account.move` | `action_view_debit_notes` | "`debit_note_count` Debit Notes" |
+| Journal Entry | `account.move` | `action_view_landed_costs` | "Landed Costs" |
+| Journal Entry | `account.move` | `action_view_payment_transactions` | `transaction_count` |
+| Journal Entry | `account.move` | `action_view_source_pos_orders` | `pos_order_count` |
+| Journal Entry | `account.move` | `action_view_source_purchase_orders` | "`purchase_order_name` `purchase_order_count`" |
+| Journal Entry | `account.move` | `action_view_source_sale_orders` | `sale_order_count` |
+| Journal Entry | `account.move` | `action_view_wip_production` | "`wip_production_count` Manufacturing" |
+| Journal Entry | `account.move` | `button_abandon_cancel_posted_posted_moves` | "Call off EDI Cancellation" |
+| Journal Entry | `account.move` | `button_cancel` | "Cancel Entry" / "Cancel" |
+| Journal Entry | `account.move` | `button_cancel_posted_moves` | "Request EDI Cancellation" |
+| Journal Entry | `account.move` | `button_create_landed_costs` | "Create Landed Costs" |
+| Journal Entry | `account.move` | `button_draft` | "Reset to Draft" |
+| Journal Entry | `account.move` | `button_force_cancel` | "Force Cancel" |
+| Journal Entry | `account.move` | `button_hash` | "Lock" |
+| Journal Entry | `account.move` | `button_process_edi_web_services` | "Process now" |
+| Journal Entry | `account.move` | `button_request_cancel` | "Request Cancel" |
+| Journal Entry | `account.move` | `button_set_checked` | "Reviewed" |
+| Journal Entry | `account.move` | `open_adjusting_entries` | `adjusting_entries_count` |
+| Journal Entry | `account.move` | `open_adjusting_entry_origin_moves` | "`adjusting_entry_origin_label` `adjusting_entry_origin_moves_count`" |
+| Journal Entry | `account.move` | `open_created_caba_entries` | "Cash Basis Entries" |
+| Journal Entry | `account.move` | `open_payments` | `payment_count` |
+| Journal Entry | `account.move` | `open_reconcile_view` | "Reconciled Items" |
+| Journal Item | `account.move.line` | `action_payment_items_register_payment` | "Pay" |
+| Journal Item | `account.move.line` | `action_post` | "Post" |
+| Journal Item | `account.move.line` | `open_reconcile_view` | "-> View partially reconciled entries" |
+| Journal Item | `account.move.line` | `set_moves_checked` | "Review" |
+| Account Move Send Batch Wizard | `account.move.send.batch.wizard` | `action_send_and_print` | "Send" |
+| Account Move Send Wizard | `account.move.send.wizard` | `action_send_and_print` | "Send" / "Generate" |
+| Peppol Rejection wizard | `account.peppol.rejection.wizard` | `button_send` | "Send Rejection" |
+| Secure Journal Entries | `account.secure.entries.wizard` | `action_secure_entries` | "Secure Entries" |
+| Bill to Purchase Order | `bill.to.po.wizard` | `action_add_downpayment` | "Add Down Payment" |
+| Bill to Purchase Order | `bill.to.po.wizard` | `action_add_to_po` | "Add Products" |
+| Validate Account Move | `validate.account.move` | `validate_move` | "Confirm" |
+
+### 10.14 Human resources
+
+45 operations on 18 entities. Preconditions, guards, refusal messages and side effects: [`../domains/human-resources-core/`](../domains/human-resources-core/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Digest | `digest.digest` | `action_activate` | "Activate" |
+| Digest | `digest.digest` | `action_deactivate` | "Deactivate" |
+| Digest | `digest.digest` | `action_send_manual` | "Send Now" |
+| Gamification User Badge Wizard | `gamification.badge.user.wizard` | `action_grant_badge` | "Grant Badge" / "Grant a badge" |
+| Gamification Challenge | `gamification.challenge` | `action_check` | "Refresh Challenge" |
+| Gamification Challenge | `gamification.challenge` | `action_report_progress` | "Send Report" |
+| Gamification Challenge | `gamification.challenge` | `action_start` | "Start Challenge" |
+| Gamification Challenge | `gamification.challenge` | `action_view_users` | `user_count` |
+| Gamification Goal | `gamification.goal` | `action_cancel` | "Reset Completion" |
+| Gamification Goal | `gamification.goal` | `action_fail` | "Goal Failed" |
+| Gamification Goal | `gamification.goal` | `action_reach` | "Goal Reached" |
+| Gamification Goal | `gamification.goal` | `action_start` | "Start goal" |
+| Gamification Goal Wizard | `gamification.goal.wizard` | `action_update_current` | "Update" |
+| Set Homework Location Wizard | `homework.location.wizard` | `set_employee_location` | "Set Location" |
+| Bank Account Allocation Wizard | `hr.bank.account.allocation.wizard` | `action_save` | "Save" |
+| Department | `hr.department` | `action_employee_from_department` | "Employees" / `total_employee` / "`total_employee` Employees" |
+| Department | `hr.department` | `action_plan_from_department` | `plans_count` |
+| Departure Wizard | `hr.departure.wizard` | `action_register_departure` | "Apply" |
+| Employee | `hr.employee` | `action_create_user` | "Create User" |
+| Employee | `hr.employee` | `action_open_allocation_wizard` | "Salary Allocation" |
+| Employee | `hr.employee` | `action_open_courses` | `courses_completion_text` |
+| Employee | `hr.employee` | `action_open_employee_cars` | `employee_cars_count` |
+| Employee | `hr.employee` | `action_open_last_month_attendances` | "`hours_last_month` (+ `hours_last_month_overtime` ) ( `hours_last_month_overtime` ) Monthly Hours" |
+| Employee | `hr.employee` | `action_open_versions` | "`show_leaves` `is_absent` `hr_icon_display` `allocation_remaining_display` / `allocation_display` Days Time Off" / "History `versions_count`" / "`related_partners_count` Contacts" / `employee_cars_count` / "`has_subscribed_courses` `courses_completion_text`" / "`attendance_state` `hours_last_month` `display_attendances` `hours_last_month` (+ `hours_last_month_overtime` ) ( `hours_last_month_overtime` ) Monthly Hours `hours_last_month` (+ `hours_last_month_overtime` ) ( `hours_last_month_overtime` ) Monthly Hours" / "`has_work_entries` Work Entries" / "`has_timesheet` Timesheets" / `equipment_count` |
+| Employee | `hr.employee` | `action_open_work_entries` | "Work Entries" |
+| Employee | `hr.employee` | `action_related_contacts` | "`related_partners_count` Contacts" |
+| Employee | `hr.employee` | `action_time_off_dashboard` | "`allocation_remaining_display` / `allocation_display` Days Time Off" |
+| Employee | `hr.employee` | `action_timesheet_from_employee` | "Timesheets" |
+| Employee | `hr.employee` | `action_toggle_primary_bank_account_trust` | "Trust Bank Account" / "Untrust Bank Account" |
+| Employee | `hr.employee` | `open_barcode_scanner` | "Read a badge" |
+| Print Resume | `hr.employee.cv.wizard` | `action_validate` | "Print" |
+| Employee Delete Wizard | `hr.employee.delete.wizard` | `action_archive` | "Archive Employees" |
+| Employee Delete Wizard | `hr.employee.delete.wizard` | `action_confirm_delete` | "Ok" |
+| Employee Delete Wizard | `hr.employee.delete.wizard` | `action_open_timesheets` | "See Timesheets" |
+| Public Employee | `hr.employee.public` | `action_open_courses` | `courses_completion_text` |
+| Public Employee | `hr.employee.public` | `action_open_last_month_attendances` | "`hours_last_month` (+ `hours_last_month_overtime` ) ( `hours_last_month_overtime` ) Monthly Hours" |
+| Public Employee | `hr.employee.public` | `action_open_time_off_calendar` | "Time Off" |
+| Public Employee | `hr.employee.public` | `action_timesheet_from_employee` | "Timesheets" |
+| Skill level for employee | `hr.employee.skill` | `open_hr_employee_skill_modal` | "New" |
+| Job Position | `hr.job` | `action_open_activities` | `activity_count` |
+| Job Position | `hr.job` | `action_open_attachments` | `documents_count` |
+| Job Position | `hr.job` | `action_open_employees` | `employee_count` |
+| Talent Pool | `hr.talent.pool` | `action_talent_pool_add_talents` | "New Talent" |
+| Version | `hr.version` | `action_open_version_form_view` | "View" |
+| Contract Template Wizard | `hr.version.wizard` | `action_load_template` | "Load" |
+
+### 10.15 Identity and access
+
+16 operations on 3 entities. Preconditions, guards, refusal messages and side effects: [`../domains/identity-and-access/`](../domains/identity-and-access/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Access Groups | `res.groups` | `action_show_all_users` | `all_users_count` |
+| User | `res.users` | `action_change_password_wizard` | "Change password" |
+| User | `res.users` | `action_create_employee` | "Create employee" |
+| User | `res.users` | `action_create_passkey` | "Add Passkey" |
+| User | `res.users` | `action_karma_report` | `karma` |
+| User | `res.users` | `action_open_employees` | `employee_count` |
+| User | `res.users` | `action_related_contact` | "Contact" |
+| User | `res.users` | `action_reset_password` | "Send an Invitation Email" / "Send Password Reset" |
+| User | `res.users` | `action_revoke_all_devices` | "Log out from all devices" |
+| User | `res.users` | `action_show_accesses` | `accesses_count` |
+| User | `res.users` | `action_show_groups` | `groups_count` |
+| User | `res.users` | `action_show_rules` | `rules_count` |
+| User | `res.users` | `action_totp_disable` | "Disable" |
+| User | `res.users` | `action_totp_enable_wizard` | "Enable 2FA" |
+| User | `res.users` | `action_totp_invite` | "Invite to use 2FA" |
+| Password Check Wizard | `res.users.identitycheck` | `action_use_password` | "Use password" |
+
+### 10.16 Inventory operations
+
+87 operations on 26 entities. Preconditions, guards, refusal messages and side effects: [`../domains/inventory-operations/`](../domains/inventory-operations/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Confirm Expiry | `expiry.picking.confirmation` | `confirm_produce` | "Confirm" |
+| Confirm Expiry | `expiry.picking.confirmation` | `confirm_workorder` | "Confirm" |
+| Inventory Adjustment Reference / Reason | `stock.inventory.adjustment.name` | `action_apply` | "Update Quantities" |
+| Conflict in Inventory | `stock.inventory.conflict` | `action_keep_counted_quantity` | "Keep Counted Quantity" |
+| Conflict in Inventory | `stock.inventory.conflict` | `action_keep_difference` | "Keep Difference" |
+| Inventory Adjustment Warning | `stock.inventory.warning` | `action_reset` | "Continue" |
+| Inventory Adjustment Warning | `stock.inventory.warning` | `action_set` | "Continue" |
+| Inventory Locations | `stock.location` | `action_view_equipments_records` | "`equipment_count` Equipments" |
+| Lot/Serial | `stock.lot` | `action_lot_open_quants` | "Location" |
+| Lot/Serial | `stock.lot` | `action_lot_open_repairs` | "To Do: `in_repair_count` Done: `repaired_count`" |
+| Lot/Serial | `stock.lot` | `action_lot_open_transfers` | `delivery_count` |
+| Lot/Serial | `stock.lot` | `action_view_po` | "`purchase_order_count` Purchases" |
+| Lot/Serial | `stock.lot` | `action_view_ro` | "Repair Parts: `repair_part_count`" |
+| Lot/Serial | `stock.lot` | `action_view_so` | "`sale_order_count` Sales" |
+| Stock Move | `stock.move` | `action_show_details` | "Details" |
+| Product Moves (Stock Move Line) | `stock.move.line` | `action_open_add_to_wave` | "Add to Wave" |
+| Product Moves (Stock Move Line) | `stock.move.line` | `action_put_in_pack` | "Put in Pack" |
+| Snooze Orderpoint | `stock.orderpoint.snooze` | `action_snooze` | "Snooze" |
+| Package | `stock.package` | `action_put_in_pack` | "Put in Pack" |
+| Package | `stock.package` | `action_remove_package` | "Remove" |
+| Package | `stock.package` | `action_view_picking` | "Package Transfers" |
+| Stock Package Destination | `stock.package.destination` | `action_done` | "Confirm" |
+| Stock Package History | `stock.package.history` | `action_show_package` | "View" |
+| Transfer | `stock.picking` | `action_assign` | "Check Availability" |
+| Transfer | `stock.picking` | `action_cancel` | "Cancel" |
+| Transfer | `stock.picking` | `action_confirm` | "Mark as Todo" |
+| Transfer | `stock.picking` | `action_detailed_operations` | "Moves" |
+| Transfer | `stock.picking` | `action_generate_l10n_tr_edispatch_xml` | "Generate GİB e-Dispatch (XML)" |
+| Transfer | `stock.picking` | `action_l10n_in_ewaybill_create` | "Create e-Waybill / Challan" |
+| Transfer | `stock.picking` | `action_l10n_ro_edi_stock_fetch_status` | "Fetch Status" |
+| Transfer | `stock.picking` | `action_l10n_ro_edi_stock_send_etransport` | "Send eTransport" / "Amend eTransport" |
+| Transfer | `stock.picking` | `action_next_transfer` | "Next Transfer" |
+| Transfer | `stock.picking` | `action_open_l10n_in_ewaybill` | "e-Waybill / Challan" |
+| Transfer | `stock.picking` | `action_picking_move_tree` | "Operations" |
+| Transfer | `stock.picking` | `action_put_in_pack` | "Put in Pack" |
+| Transfer | `stock.picking` | `action_see_move_scrap` | "Scraps" |
+| Transfer | `stock.picking` | `action_see_package_histories` | "Packages" |
+| Transfer | `stock.picking` | `action_see_packages` | "Packages" |
+| Transfer | `stock.picking` | `action_see_returns` | `return_count` |
+| Transfer | `stock.picking` | `action_show_details` | "Details" |
+| Transfer | `stock.picking` | `action_show_subcontract_details` | "Subcontracting Productions" / "Register components for subcontracted product" |
+| Transfer | `stock.picking` | `action_view_batch` | "Batch" |
+| Transfer | `stock.picking` | `action_view_mrp_production` | "`production_count` Manufacturing" |
+| Transfer | `stock.picking` | `action_view_reception_report` | "Allocation" |
+| Transfer | `stock.picking` | `action_view_repairs` | `nbr_repairs` |
+| Transfer | `stock.picking` | `action_view_subcontracting_source_purchase` | "`subcontracting_source_purchase_count` Source PO" |
+| Transfer | `stock.picking` | `button_validate` | "Validate" |
+| Transfer | `stock.picking` | `do_print_picking` | "Print" |
+| Transfer | `stock.picking` | `do_unreserve` | "Unreserve" |
+| Transfer | `stock.picking` | `open_website_url` | "Tracking" |
+| Transfer | `stock.picking` | `print_return_label` | "Print Return Label" |
+| Transfer | `stock.picking` | `send_to_shipper` | "Send to Shipper" |
+| Batch Transfer | `stock.picking.batch` | `action_assign` | "Check Availability" |
+| Batch Transfer | `stock.picking.batch` | `action_batch_detailed_operations` | "Moves" |
+| Batch Transfer | `stock.picking.batch` | `action_cancel` | "Cancel" |
+| Batch Transfer | `stock.picking.batch` | `action_confirm` | "Confirm" |
+| Batch Transfer | `stock.picking.batch` | `action_done` | "Validate" |
+| Batch Transfer | `stock.picking.batch` | `action_l10n_ro_edi_stock_fetch_status` | "Fetch Status" |
+| Batch Transfer | `stock.picking.batch` | `action_l10n_ro_edi_stock_send_etransport` | "Send eTransport" / "Amend eTransport" |
+| Batch Transfer | `stock.picking.batch` | `action_open_label_layout` | "Print Labels" |
+| Batch Transfer | `stock.picking.batch` | `action_print` | "Print" |
+| Batch Transfer | `stock.picking.batch` | `action_put_in_pack` | "Put in Pack" |
+| Batch Transfer | `stock.picking.batch` | `action_see_packages` | "Packages" |
+| Batch Transfer | `stock.picking.batch` | `action_view_reception_report` | "Allocation" |
+| Picking Type | `stock.picking.type` | `action_batch` | "`count_picking_batch` Batches" |
+| Put In Pack Wizard | `stock.put.in.pack` | `action_put_in_pack` | "Put in Pack" |
+| Quants | `stock.quant` | `action_apply_all` | "Apply All" |
+| Quants | `stock.quant` | `action_apply_inventory` | "Apply" |
+| Quants | `stock.quant` | `action_clear_inventory_quantity` | "Clear" |
+| Quants | `stock.quant` | `action_inventory_history` | "History" |
+| Quants | `stock.quant` | `action_reset` | "Clear" |
+| Quants | `stock.quant` | `action_stock_quant_relocate` | "Relocate" |
+| Quants | `stock.quant` | `action_view_orderpoints` | "Replenishment" |
+| Quants | `stock.quant` | `action_view_stock_moves` | "History" |
+| Stock Quantity Relocation | `stock.quant.relocate` | `action_relocate_quants` | "Confirm" |
+| Stock Quantity History | `stock.quantity.history` | `open_at_date` | "Confirm" |
+| Stock Request an Inventory Count | `stock.request.count` | `action_request_count` | "Confirm" |
+| Return Picking | `stock.return.picking` | `action_create_exchanges` | "Return for Exchange" |
+| Return Picking | `stock.return.picking` | `action_create_returns` | "Return" |
+| Return Picking | `stock.return.picking` | `action_create_returns_all` | "Return All" |
+| Stock Rules report | `stock.rules.report` | `print_report` | "Overview" |
+| Scrap | `stock.scrap` | `action_get_stock_move_lines` | "Product Moves" |
+| Scrap | `stock.scrap` | `action_get_stock_picking` | "Stock Operation" |
+| Scrap | `stock.scrap` | `action_validate` | "Validate" / "Scrap Products" |
+| Warehouse | `stock.warehouse` | `action_view_all_routes` | "Routes" |
+| Warn Insufficient Quantity | `stock.warn.insufficient.qty` | `action_done` | "Confirm" |
+| Warn Insufficient Scrap Quantity | `stock.warn.insufficient.qty.scrap` | `action_cancel` | "Discard" |
+
+### 10.17 Inventory valuation and costing
+
+2 operations on 1 entities. Preconditions, guards, refusal messages and side effects: [`../domains/inventory-valuation-and-costing/`](../domains/inventory-valuation-and-costing/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Stock Landed Cost | `stock.landed.cost` | `button_cancel` | "Cancel" |
+| Stock Landed Cost | `stock.landed.cost` | `button_validate` | "Validate" |
+
+### 10.18 Learning, surveys and community
+
+34 operations on 7 entities. Preconditions, guards, refusal messages and side effects: [`../domains/learning-surveys-and-gamification/`](../domains/learning-surveys-and-gamification/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Course | `slide.channel` | `action_channel_enroll` | "Add Attendees" / `members_count` |
+| Course | `slide.channel` | `action_channel_invite` | "Invite" |
+| Course | `slide.channel` | `action_mass_mailing_attendees` | "Contact Attendees" |
+| Course | `slide.channel` | `action_redirect_to_certified_members` | "`members_certified_count` Certified" |
+| Course | `slide.channel` | `action_redirect_to_completed_members` | "`members_completed_count` Finished" |
+| Course | `slide.channel` | `action_redirect_to_forum` | `forum_total_posts` |
+| Course | `slide.channel` | `action_redirect_to_members` | "`members_all_count` Attendees" |
+| Course | `slide.channel` | `action_view_ratings` | "`rating_avg_stars` /5 `rating_count` Reviews" |
+| Course | `slide.channel` | `action_view_sales` | `product_sale_revenues` |
+| Course | `slide.channel` | `action_view_slides` | `total_slides` |
+| Course | `slide.channel` | `open_website_url` | "View course" |
+| Channel Invitation Wizard | `slide.channel.invite` | `action_invite` | "Send" |
+| Channel / Partners (Members) | `slide.channel.partner` | `action_archive` | "Archive" |
+| Channel / Partners (Members) | `slide.channel.partner` | `action_unarchive` | "Unarchive" |
+| Slides | `slide.slide` | `action_view_embeds` | "`embed_count` Embed Views" |
+| Survey Invitation Wizard | `survey.invite` | `action_invite` | "Send" |
+| Survey | `survey.survey` | `action_archive` | "True" / "Close" |
+| Survey | `survey.survey` | `action_end_session` | "Close Live Session" / "End Live Session" |
+| Survey | `survey.survey` | `action_open_session_manager` | "Open Session Manager" |
+| Survey | `survey.survey` | `action_result_survey` | "See results" |
+| Survey | `survey.survey` | `action_send_survey` | "True" / "Share" |
+| Survey | `survey.survey` | `action_start_session` | "True" / "Create Live Session" / "Start Live Session" |
+| Survey | `survey.survey` | `action_survey_preview_certification_template` | "Preview" |
+| Survey | `survey.survey` | `action_survey_see_leads` | `lead_count` |
+| Survey | `survey.survey` | `action_survey_user_input` | `answer_count` |
+| Survey | `survey.survey` | `action_survey_user_input_certified` | `success_count` |
+| Survey | `survey.survey` | `action_survey_user_input_completed` | `answer_done_count` |
+| Survey | `survey.survey` | `action_survey_view_slide_channels` | `slide_channel_count` |
+| Survey | `survey.survey` | `action_test_survey` | "Test" |
+| Survey | `survey.survey` | `action_unarchive` | "Reopen" |
+| Survey User Input | `survey.user_input` | `action_print_answers` | "Print" |
+| Survey User Input | `survey.user_input` | `action_redirect_lead` | "Lead" |
+| Survey User Input | `survey.user_input` | `action_redirect_to_attempts` | `attempts_count` |
+| Survey User Input | `survey.user_input` | `action_resend` | "Resend Invitation" |
+
+### 10.19 Loyalty and promotions
+
+7 operations on 4 entities. Preconditions, guards, refusal messages and side effects: [`../domains/loyalty-and-promotions/`](../domains/loyalty-and-promotions/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Create links that apply a coupon and redirect to a specific page | `coupon.share` | `action_generate_short_link` | "Generate Short Link" |
+| Loyalty Coupon | `loyalty.card` | `action_coupon_send` | "Send" |
+| Loyalty Coupon | `loyalty.card` | `action_coupon_share` | "Share" |
+| Loyalty Coupon | `loyalty.card` | `action_loyalty_update_balance` | `points_display` |
+| Update Loyalty Card Points | `loyalty.card.update.balance` | `action_update_card_point` | "Confirm" |
+| Loyalty Program | `loyalty.program` | `action_open_loyalty_cards` | "`coupon_count` Coupons Loyalty Cards Promos Discount Gift Cards eWallets" |
+| Loyalty Program | `loyalty.program` | `action_program_share` | "Share" |
+
+### 10.20 Manufacturing
+
+58 operations on 12 entities. Preconditions, guards, refusal messages and side effects: [`../domains/manufacturing/`](../domains/manufacturing/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Bill of Material | `mrp.bom` | `action_add_from_catalog` | "Catalog" |
+| Bill of Material | `mrp.bom` | `action_compute_bom_days` | "Compute" |
+| Bill of Material | `mrp.bom` | `action_copy_existing_operations` | "Copy Existing Operations" |
+| Bill of Material | `mrp.bom` | `action_open_operation_form` | "Add Operation" |
+| Bill of Material | `mrp.bom` | `action_see_attachments` | "Product Attachments" |
+| Bill of Material | `mrp.bom` | `action_set_bom_on_orderpoint` | "Set as Bill of Materials" |
+| Wizard in case of consumption in warning/strict and more component has been used for a manufacturing order (related to the bom) | `mrp.consumption.warning` | `action_cancel` | "Discard" |
+| Wizard in case of consumption in warning/strict and more component has been used for a manufacturing order (related to the bom) | `mrp.consumption.warning` | `action_confirm` | "Force" / "Confirm" |
+| Wizard in case of consumption in warning/strict and more component has been used for a manufacturing order (related to the bom) | `mrp.consumption.warning` | `action_set_qty` | "Set Quantities & Validate" |
+| Manufacturing Order | `mrp.production` | `action_add_from_catalog_byproduct` | "Catalog" |
+| Manufacturing Order | `mrp.production` | `action_add_from_catalog_raw` | "Catalog" |
+| Manufacturing Order | `mrp.production` | `action_assign` | "Check availability" |
+| Manufacturing Order | `mrp.production` | `action_cancel` | "Cancel" |
+| Manufacturing Order | `mrp.production` | `action_clear_lot_producing_ids` | "Clear" |
+| Manufacturing Order | `mrp.production` | `action_confirm` | "Confirm" |
+| Manufacturing Order | `mrp.production` | `action_generate_bom` | "Generate BOM" |
+| Manufacturing Order | `mrp.production` | `action_generate_serial` | "Generate Serial" / "Generate Lot" |
+| Manufacturing Order | `mrp.production` | `action_open_project` | "Project" |
+| Manufacturing Order | `mrp.production` | `action_product_forecast_report` | "Forecast Report" |
+| Manufacturing Order | `mrp.production` | `action_see_move_scrap` | "`scrap_count` Scraps" |
+| Manufacturing Order | `mrp.production` | `action_show_details` | "Details" / "Show Details" |
+| Manufacturing Order | `mrp.production` | `action_start` | "Start" |
+| Manufacturing Order | `mrp.production` | `action_update_bom` | "Update BoM" |
+| Manufacturing Order | `mrp.production` | `action_view_mo_delivery` | `delivery_count` |
+| Manufacturing Order | `mrp.production` | `action_view_move_wip` | "`wip_move_count` WIP" |
+| Manufacturing Order | `mrp.production` | `action_view_mrp_production_backorders` | "`mrp_production_backorder_count` Backorders" |
+| Manufacturing Order | `mrp.production` | `action_view_mrp_production_childs` | "`mrp_production_child_count` Child MO" |
+| Manufacturing Order | `mrp.production` | `action_view_mrp_production_sources` | "`mrp_production_source_count` Source MO" |
+| Manufacturing Order | `mrp.production` | `action_view_mrp_production_unbuilds` | "`unbuild_count` Unbuilds" |
+| Manufacturing Order | `mrp.production` | `action_view_purchase_orders` | "`purchase_order_count` Purchases" |
+| Manufacturing Order | `mrp.production` | `action_view_reception_report` | "Allocation" |
+| Manufacturing Order | `mrp.production` | `action_view_repair_orders` | `repair_count` |
+| Manufacturing Order | `mrp.production` | `action_view_sale_orders` | "`sale_order_count` Sale" |
+| Manufacturing Order | `mrp.production` | `action_view_serial_numbers` | "`serial_numbers_count` Serial Numbers" |
+| Manufacturing Order | `mrp.production` | `button_mark_done` | "Produce" / "Produce All" |
+| Manufacturing Order | `mrp.production` | `button_plan` | "Plan" |
+| Manufacturing Order | `mrp.production` | `button_unbuild` | "Unbuild" |
+| Manufacturing Order | `mrp.production` | `button_unplan` | "Unplan" |
+| Manufacturing Order | `mrp.production` | `do_unreserve` | "Unreserve" |
+| Wizard to mark as done or create back order | `mrp.production.backorder` | `action_backorder` | "Create backorder" / "Validate" |
+| Wizard to mark as done or create back order | `mrp.production.backorder` | `action_close_mo` | "No Backorder" |
+| Assign serial numbers to production order | `mrp.production.serials` | `action_apply` | "Apply" |
+| Assign serial numbers to production order | `mrp.production.serials` | `action_generate_serial_numbers` | "Generate" |
+| Assign serial numbers to production order | `mrp.production.serials` | `action_split_and_assign_serials` | "Prepare MO" |
+| Wizard to Split a Production | `mrp.production.split` | `action_return_to_list` | "Discard" |
+| Wizard to Split a Production | `mrp.production.split` | `action_split` | "Split" |
+| Wizard to Split Multiple Productions | `mrp.production.split.multi` | `action_prepare_split` | "Split Production" |
+| Work Center Usage | `mrp.routing.workcenter` | `action_open_operation_form` | "Add a line" |
+| Unbuild Order | `mrp.unbuild` | `action_validate` | "Unbuild" |
+| Work Center | `mrp.workcenter` | `action_show_operations` | "Operations" |
+| Work Center | `mrp.workcenter` | `action_work_order` | "WORK ORDERS" |
+| Work Center | `mrp.workcenter` | `action_work_order_alternatives` | "PLAN ORDERS" |
+| Workcenter Productivity Log | `mrp.workcenter.productivity` | `button_block` | "Block" |
+| Work Order | `mrp.workorder` | `action_open_wizard` | "View WorkOrder" |
+| Work Order | `mrp.workorder` | `action_see_move_scrap` | "`scrap_count` Scraps" |
+| Work Order | `mrp.workorder` | `button_finish` | "Done" |
+| Work Order | `mrp.workorder` | `button_pending` | "Pause" |
+| Work Order | `mrp.workorder` | `button_start` | "Start" |
+
+### 10.21 Marketing and mass mailing
+
+79 operations on 21 entities. Preconditions, guards, refusal messages and side effects: [`../domains/marketing-and-mass-mailing/`](../domains/marketing-and-mass-mailing/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Marketing Card Campaign | `card.campaign` | `action_preview` | "Preview" |
+| Marketing Card Campaign | `card.campaign` | `action_share` | "Send" |
+| Marketing Card Campaign | `card.campaign` | `action_view_cards` | "Cards `card_count`" |
+| Marketing Card Campaign | `card.campaign` | `action_view_cards_clicked` | "Opened `card_click_count`" |
+| Marketing Card Campaign | `card.campaign` | `action_view_cards_shared` | "Shared `card_share_count`" |
+| Marketing Card Campaign | `card.campaign` | `action_view_mailings` | "Mailings `mailing_count`" |
+| Confirm Stock text message | `confirm.stock.sms` | `send_sms` | "Confirm" |
+| Link Tracker | `link.tracker` | `action_view_statistics` | `count` |
+| Link Tracker | `link.tracker` | `action_visit_page` | "Visit Page" |
+| Link Tracker | `link.tracker` | `action_visit_page_statistics` | "Statistics" |
+| Mailing Contact | `mailing.contact` | `action_add_to_mailing_list` | "Add to List" |
+| Mailing Contact | `mailing.contact` | `action_import` | "Import" |
+| Mailing Contact Import | `mailing.contact.import` | `action_import` | "Import" |
+| Mailing Contact Import | `mailing.contact.import` | `action_open_base_import` | "Upload a file" |
+| Add Contacts to Mailing List | `mailing.contact.to.list` | `action_add_contacts` | "Add" |
+| Add Contacts to Mailing List | `mailing.contact.to.list` | `action_add_contacts_and_send_mailing` | "Add and Send Mailing" |
+| Mailing List | `mailing.list` | `action_open_import` | "Import Contacts" |
+| Mailing List | `mailing.list` | `action_send_mailing` | "Send Mailing" |
+| Mailing List | `mailing.list` | `action_send_mailing_sms` | "Send SMS" |
+| Mailing List | `mailing.list` | `action_view_contacts` | `contact_count` / "Total Contacts" |
+| Mailing List | `mailing.list` | `action_view_contacts_blacklisted` | `contact_pct_blacklisted` |
+| Mailing List | `mailing.list` | `action_view_contacts_bouncing` | `contact_pct_bounce` |
+| Mailing List | `mailing.list` | `action_view_contacts_opt_out` | `contact_pct_opt_out` |
+| Mailing List | `mailing.list` | `action_view_mailings` | `mailing_count` |
+| Merge Mass Mailing List | `mailing.list.merge` | `action_mailing_lists_merge` | "Merge" |
+| Mass Mailing | `mailing.mailing` | `action_buy_sms_credits` | "It appears you don't have enough IAP credits. Click here to buy credits." / "It appears your SMS account is not registered. Click here to set up your account." |
+| Mass Mailing | `mailing.mailing` | `action_cancel` | "Cancel" |
+| Mass Mailing | `mailing.mailing` | `action_compare_versions` | "Compare Version" |
+| Mass Mailing | `mailing.mailing` | `action_duplicate` | "Duplicate" / "Create an Alternative" / "Create an Alternative Version" |
+| Mass Mailing | `mailing.mailing` | `action_launch` | "Send" |
+| Mass Mailing | `mailing.mailing` | `action_put_in_queue` | "Send" |
+| Mass Mailing | `mailing.mailing` | `action_redirect_to_invoiced` | `sale_invoiced_amount` |
+| Mass Mailing | `mailing.mailing` | `action_redirect_to_leads_and_opportunities` | "`use_leads` `crm_lead_count` Leads Opportunities" |
+| Mass Mailing | `mailing.mailing` | `action_redirect_to_quotations` | `sale_quotation_count` |
+| Mass Mailing | `mailing.mailing` | `action_reload` | "Refresh" |
+| Mass Mailing | `mailing.mailing` | `action_remove_favorite` | "Remove from Templates" |
+| Mass Mailing | `mailing.mailing` | `action_retry_failed` | "Retry" |
+| Mass Mailing | `mailing.mailing` | `action_schedule` | "Schedule" |
+| Mass Mailing | `mailing.mailing` | `action_select_as_winner` | "Send this as winner" |
+| Mass Mailing | `mailing.mailing` | `action_send_mail` | "Send Now" |
+| Mass Mailing | `mailing.mailing` | `action_send_winner_mailing` | "Send Winner Now" |
+| Mass Mailing | `mailing.mailing` | `action_set_favorite` | "Add to Templates" |
+| Mass Mailing | `mailing.mailing` | `action_test` | "Test" |
+| Mass Mailing | `mailing.mailing` | `action_update_cards` | "Update `card_requires_sync_count` Cards" |
+| Mass Mailing | `mailing.mailing` | `action_view_bounced` | `bounced_ratio` |
+| Mass Mailing | `mailing.mailing` | `action_view_clicked` | `clicks_ratio` |
+| Mass Mailing | `mailing.mailing` | `action_view_delivered` | `received_ratio` |
+| Mass Mailing | `mailing.mailing` | `action_view_link_trackers` | `link_trackers_count` |
+| Mass Mailing | `mailing.mailing` | `action_view_mailing_contacts` | "Add Mailing Contacts" |
+| Mass Mailing | `mailing.mailing` | `action_view_opened` | `opened_ratio` |
+| Mass Mailing | `mailing.mailing` | `action_view_replied` | `replied_ratio` |
+| Mass Mailing | `mailing.mailing` | `action_view_traces_canceled` | "`canceled` emails have been cancelled and will not be sent." |
+| Mass Mailing | `mailing.mailing` | `action_view_traces_failed` | "`failed` emails could not be sent." |
+| Mass Mailing | `mailing.mailing` | `action_view_traces_process` | "`process` emails are being processed." |
+| Mass Mailing | `mailing.mailing` | `action_view_traces_scheduled` | "`scheduled` emails are in queue and will be sent soon." |
+| Mass Mailing | `mailing.mailing` | `action_view_traces_sent` | "`sent` emails have been sent." |
+| schedule a mailing | `mailing.mailing.schedule.date` | `action_schedule_date` | "Schedule" |
+| Sample Mail Wizard | `mailing.mailing.test` | `send_mail_test` | "Send test" |
+| Test text message Mailing | `mailing.sms.test` | `action_send_sms` | "Send Test" |
+| Mailing Statistics | `mailing.trace` | `action_view_contact` | "Open Recipient" |
+| text message Account Verification Code Wizard | `sms.account.code` | `action_register` | "Register" |
+| text message Account Registration Phone Number Wizard | `sms.account.phone` | `action_send_verification_code` | "Send verification code" |
+| text message Account Sender Name Wizard | `sms.account.sender` | `action_set_sender_name` | "Set sender name" |
+| Send text message Wizard | `sms.composer` | `action_send_sms` | "Send" / "Put in queue" |
+| Send text message Wizard | `sms.composer` | `action_send_sms_mass_now` | "Send now" |
+| Outgoing text message | `sms.sms` | `action_set_canceled` | "Cancel" |
+| Outgoing text message | `sms.sms` | `action_set_outgoing` | "Retry" |
+| text message Templates | `sms.template` | `action_create_sidebar_action` | "Add Context Action" |
+| text message Templates | `sms.template` | `action_unlink_sidebar_action` | "Remove Context Action" |
+| text message Twilio Connection Wizard | `sms.twilio.account.manage` | `action_reload_numbers` | "Reload Numbers from Twilio" |
+| text message Twilio Connection Wizard | `sms.twilio.account.manage` | `action_save` | "Update Account" |
+| text message Twilio Connection Wizard | `sms.twilio.account.manage` | `action_send_test` | "Send test SMS" |
+| text message Twilio Connection Wizard | `sms.twilio.account.manage` | `action_unlink` | "Delete" |
+| campaign tracking parameter Campaign | `utm.campaign` | `action_create_mass_sms` | "Send SMS" |
+| campaign tracking parameter Campaign | `utm.campaign` | `action_duplicate` | "Duplicate" |
+| campaign tracking parameter Campaign | `utm.campaign` | `action_redirect_to_invoiced` | `invoiced_amount` |
+| campaign tracking parameter Campaign | `utm.campaign` | `action_redirect_to_leads_opportunities` | "`use_leads` `crm_lead_count` Leads Opportunities" |
+| campaign tracking parameter Campaign | `utm.campaign` | `action_redirect_to_mailing_sms` | `mailing_sms_count` |
+| campaign tracking parameter Campaign | `utm.campaign` | `action_redirect_to_quotations` | `quotation_count` |
+
+### 10.22 Meal ordering
+
+7 operations on 1 entities. Preconditions, guards, refusal messages and side effects: [`../domains/lunch-ordering/`](../domains/lunch-ordering/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Lunch Order | `lunch.order` | `action_cancel` | "Cancel" |
+| Lunch Order | `lunch.order` | `action_confirm` | "Receive" / "Confirm" |
+| Lunch Order | `lunch.order` | `action_confirm_orders` | "Confirm Orders" |
+| Lunch Order | `lunch.order` | `action_notify` | "Send Notification" |
+| Lunch Order | `lunch.order` | `action_reorder` | "Re-order" |
+| Lunch Order | `lunch.order` | `action_reset` | "Reset" |
+| Lunch Order | `lunch.order` | `action_send_orders` | "Send Orders" |
+
+### 10.23 Messaging and activities
+
+44 operations on 19 entities. Preconditions, guards, refusal messages and side effects: [`../domains/messaging-and-activities/`](../domains/messaging-and-activities/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Chatbot Script | `chatbot.script` | `action_test_script` | "Test" |
+| Chatbot Script | `chatbot.script` | `action_view_leads` | `lead_count` |
+| Chatbot Script | `chatbot.script` | `action_view_livechat_channels` | `livechat_channel_count` |
+| Discussion Channel | `discuss.channel` | `action_unfollow` | "Leave" |
+| Mail RTC session | `discuss.channel.rtc.session` | `action_disconnect` | "Disconnect" |
+| Incoming Mail Server | `fetchmail.server` | `button_confirm_login` | "Test & Confirm" |
+| Incoming Mail Server | `fetchmail.server` | `open_google_gmail_uri` | "Connect your Gmail account" |
+| Incoming Mail Server | `fetchmail.server` | `open_microsoft_outlook_uri` | "Connect your Outlook account" |
+| Incoming Mail Server | `fetchmail.server` | `set_draft` | "Reset Confirmation" |
+| Livechat Channel | `im_livechat.channel` | `action_join` | "Join" / "Join Channel" |
+| Livechat Channel | `im_livechat.channel` | `action_quit` | "Leave" / "Leave Channel" |
+| Livechat Channel | `im_livechat.channel` | `action_view_chatbot_scripts` | `chatbot_script_count` |
+| Activity | `mail.activity` | `action_cancel` | "Cancel" |
+| Activity | `mail.activity` | `action_close_dialog` | "Schedule" / "Save" |
+| Activity | `mail.activity` | `action_create_calendar_event` | "Schedule" |
+| Activity | `mail.activity` | `action_done` | "Mark Done" / "Done" |
+| Activity | `mail.activity` | `action_done_redirect_to_other` | "Mark Done" |
+| Activity | `mail.activity` | `action_open_document` | "Open Document" |
+| Activity | `mail.activity` | `action_reschedule_nextweek` | "Next Week" |
+| Activity | `mail.activity` | `action_reschedule_today` | "Today" |
+| Activity | `mail.activity` | `action_reschedule_tomorrow` | "Tomorrow" |
+| Activity schedule plan Wizard | `mail.activity.schedule` | `action_create_calendar_event` | "Schedule" |
+| Activity schedule plan Wizard | `mail.activity.schedule` | `action_schedule_activities` | "Save" |
+| Activity schedule plan Wizard | `mail.activity.schedule` | `action_schedule_activities_done` | "Mark Done" |
+| Activity schedule plan Wizard | `mail.activity.schedule` | `action_schedule_plan` | "Schedule" |
+| Email Aliases | `mail.alias` | `open_document` | "Open Document" |
+| Email Aliases | `mail.alias` | `open_parent_document` | "Open Parent Document" / "Open Owner" |
+| Mail Blacklist | `mail.blacklist` | `action_add` | "Blacklist" |
+| Remove email from blacklist wizard | `mail.blacklist.remove` | `action_unblacklist_apply` | "Remove address from blacklist" |
+| Email composition wizard | `mail.compose.message` | `action_schedule_message` | "Schedule" |
+| Email composition wizard | `mail.compose.message` | `action_send_mail` | "Send" / "Log" / "Send Mass Mailing" |
+| Mail Group | `mail.group` | `action_go_to_website` | "Go to Website" |
+| Mail Group | `mail.group` | `action_join` | "Join" |
+| Mail Group | `mail.group` | `action_leave` | "Leave" |
+| Mailing List Message | `mail.group.message` | `action_moderate_accept` | "Accept" / "Send" |
+| Mailing List Message | `mail.group.message` | `action_moderate_allow` | "Whitelist" |
+| Reject Group Message | `mail.group.message.reject` | `action_send_mail` | "Reject Silently" / "Send & Reject" / "Ban" / "Send & Ban" |
+| Outgoing Mails | `mail.mail` | `action_open_document` | "Open Document" |
+| Outgoing Mails | `mail.mail` | `action_retry` | "Retry" |
+| Outgoing Mails | `mail.mail` | `action_send_and_close` | "Send & Close" |
+| Message | `mail.message` | `action_open_document` | "Open Document" |
+| Email Templates | `mail.template` | `action_open_mail_preview` | "Preview" |
+| Phone Blacklist | `phone.blacklist` | `action_add` | "Blacklist" |
+| Remove phone from blacklist | `phone.blacklist.remove` | `action_unblacklist_apply` | "Remove phone from blacklist" |
+
+### 10.24 Payment providers
+
+23 operations on 4 entities. Preconditions, guards, refusal messages and side effects: [`../domains/payment-providers/`](../domains/payment-providers/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Payment Capture Wizard | `payment.capture.wizard` | `action_capture` | "Capture" |
+| Payment Provider | `payment.provider` | `action_paypal_create_webhook` | "Generate your webhook" |
+| Payment Provider | `payment.provider` | `action_razorpay_create_webhook` | "Generate your webhook" |
+| Payment Provider | `payment.provider` | `action_recompute_pending_msg` | " Reload Pending Message" |
+| Payment Provider | `payment.provider` | `action_reset_credentials` | "Reset Your Razorpay Account" / "Disconnect" / "Disconnect Your Mercado Pago Account" |
+| Payment Provider | `payment.provider` | `action_start_onboarding` | "Connect" / "Connect Stripe" |
+| Payment Provider | `payment.provider` | `action_stripe_create_webhook` | "Generate your webhook" |
+| Payment Provider | `payment.provider` | `action_stripe_verify_apple_pay_domain` | "Enable Apple Pay" |
+| Payment Provider | `payment.provider` | `action_sync_paymob_payment_methods` | "Synchronize With Paymob" |
+| Payment Provider | `payment.provider` | `action_toggle_is_published` | "Published" / "Unpublished" |
+| Payment Provider | `payment.provider` | `action_update_merchant_details` | "Generate Client Key" / "Set Account Currency" |
+| Payment Provider | `payment.provider` | `button_immediate_install` | "Install" |
+| Payment Refund Wizard | `payment.refund.wizard` | `action_refund` | "Refund" |
+| Payment Transaction | `payment.transaction` | `action_capture` | "Capture Transaction" |
+| Payment Transaction | `payment.transaction` | `action_demo_set_canceled` | "Cancel" |
+| Payment Transaction | `payment.transaction` | `action_demo_set_done` | "Authorize" / "Confirm" |
+| Payment Transaction | `payment.transaction` | `action_demo_set_error` | "Set to Error" |
+| Payment Transaction | `payment.transaction` | `action_post_process` | "Post-process" |
+| Payment Transaction | `payment.transaction` | `action_view_invoices` | `invoices_count` |
+| Payment Transaction | `payment.transaction` | `action_view_pos_order` | `pos_order_id` |
+| Payment Transaction | `payment.transaction` | `action_view_refunds` | `invoices_count` / "`pos_order_id` `pos_order_id`" / `refunds_count` |
+| Payment Transaction | `payment.transaction` | `action_view_sales_orders` | `sale_order_ids_nbr` |
+| Payment Transaction | `payment.transaction` | `action_void` | "Void Transaction" |
+
+### 10.25 Payments and bank reconciliation
+
+24 operations on 4 entities. Preconditions, guards, refusal messages and side effects: [`../domains/payments-and-bank-reconciliation/`](../domains/payments-and-bank-reconciliation/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Payments | `account.payment` | `action_cancel` | "Cancel" |
+| Payments | `account.payment` | `action_draft` | "Reset to Draft" |
+| Payments | `account.payment` | `action_l10n_in_withholding_entries` | "TDS `l10n_in_total_withholding_amount`" |
+| Payments | `account.payment` | `action_open_expense` | "Expense" |
+| Payments | `account.payment` | `action_post` | "Confirm" |
+| Payments | `account.payment` | `action_refund_wizard` | "Refund" |
+| Payments | `account.payment` | `action_reject` | "Reject" |
+| Payments | `account.payment` | `action_validate` | "Validate" |
+| Payments | `account.payment` | `action_view_pos_order` | `pos_order_id` |
+| Payments | `account.payment` | `action_view_refunds` | `refunds_count` |
+| Payments | `account.payment` | `action_void_check` | "Void Check" |
+| Payments | `account.payment` | `button_open_bills` | "`reconciled_bills_count` Bill" |
+| Payments | `account.payment` | `button_open_invoices` | "`reconciled_invoices_count` Invoice Credit Note" |
+| Payments | `account.payment` | `button_open_journal_entry` | "Journal Entry" |
+| Payments | `account.payment` | `button_open_statement_lines` | "`reconciled_statement_lines_count` Transaction" |
+| Payments | `account.payment` | `button_request_cancel` | "Request Cancel" |
+| Payments | `account.payment` | `print_checks` | "Print Check" |
+| Pay | `account.payment.register` | `action_create_payments` | "Create Payments" / "Create Payment" |
+| Pay | `account.payment.register` | `action_open_missing_account_partners` | "View Partner(s)" |
+| Pay | `account.payment.register` | `action_open_untrusted_bank_accounts` | "untrusted bank accounts" |
+| Preset to create journal entries during a invoices and payments matching | `account.reconcile.model` | `action_reconcile_stat` | "Journal Entries" |
+| Preset to create journal entries during a invoices and payments matching | `account.reconcile.model` | `action_set_auto_reconcile` | "Automate" |
+| Preset to create journal entries during a invoices and payments matching | `account.reconcile.model` | `action_set_manual` | "Set Manual" |
+| Print Pre-numbered Checks | `print.prenumbered.checks` | `print_checks` | "Print" |
+
+### 10.26 Platform foundation
+
+84 operations on 19 entities. Preconditions, guards, refusal messages and side effects: [`../overview/architecture.md`](../overview/architecture.md) and [`../runtime/README.md`](../runtime/README.md).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Automation Rule | `base.automation` | `action_open_scheduled_action` | "Scheduled action" |
+| Automation Rule | `base.automation` | `action_rotate_webhook_uuid` | "Renew" |
+| Automation Rule | `base.automation` | `action_view_webhook_logs` | "Logs" |
+| Module Activation Request | `base.module.install.request` | `action_send_request` | "Request Activation" |
+| Module Activation Review | `base.module.install.review` | `action_install_module` | "Install App" |
+| Module Uninstall | `base.module.uninstall` | `action_uninstall` | "Uninstall" |
+| Update Module | `base.module.update` | `action_module_open` | "Open Apps" |
+| Merge Partner Wizard | `base.partner.merge.automatic.wizard` | `action_merge` | "Merge Contacts" |
+| Merge Partner Wizard | `base.partner.merge.automatic.wizard` | `action_skip` | "Skip these contacts" |
+| Merge Partner Wizard | `base.partner.merge.automatic.wizard` | `action_start_automatic_process` | "Merge Automatically" |
+| Merge Partner Wizard | `base.partner.merge.automatic.wizard` | `action_start_manual_process` | "Merge with Manual Check" |
+| Merge Partner Wizard | `base.partner.merge.automatic.wizard` | `action_update_all_process` | "Merge Automatically all process" |
+| in-app purchase Account | `iap.account` | `action_buy_credits` | "Buy Credit" |
+| in-app purchase Account | `iap.account` | `action_open_registration_wizard` | "Register" |
+| in-app purchase Account | `iap.account` | `action_open_sender_name_wizard` | "Set Sender Name" |
+| Server Actions | `ir.actions.server` | `action_open_automation` | "Automation" |
+| Server Actions | `ir.actions.server` | `action_open_parent_action` | "Parent Action" |
+| Server Actions | `ir.actions.server` | `action_open_scheduled_action` | "Scheduled Action" |
+| Configuration Wizards | `ir.actions.todo` | `action_launch` | "Launch" |
+| Configuration Wizards | `ir.actions.todo` | `action_open` | "Todo" / "Set as Todo" |
+| Mail Server | `ir.mail_server` | `action_retrieve_max_email_size` | "Detect Max Limit" |
+| Mail Server | `ir.mail_server` | `open_google_gmail_uri` | "Connect your Gmail account" |
+| Mail Server | `ir.mail_server` | `open_microsoft_outlook_uri` | "Connect your Outlook account" |
+| Module | `ir.module.module` | `action_open_install_request` | "Request Access" |
+| Module | `ir.module.module` | `action_view_delivery_methods` | "Delivery Methods" |
+| Module | `ir.module.module` | `button_choose_theme` | "Use this theme" |
+| Module | `ir.module.module` | `button_immediate_install` | "Request Access" / "Activate" |
+| Module | `ir.module.module` | `button_immediate_install_app` | "Activate" / "Upgrade" |
+| Module | `ir.module.module` | `button_immediate_upgrade` | "Upgrade" |
+| Module | `ir.module.module` | `button_refresh_theme` | "Update theme" |
+| Module | `ir.module.module` | `button_remove_theme` | "Remove theme" |
+| Module | `ir.module.module` | `button_uninstall_wizard` | "Uninstall" |
+| Profiling results | `ir.profile` | `action_view_speedscope` | "View in speedscope" |
+| Onboarding | `onboarding.onboarding` | `action_toggle_visibility` | "Toggle visibility" |
+| Privacy Lookup Wizard | `privacy.lookup.wizard` | `action_lookup` | "Lookup" |
+| Privacy Lookup Wizard | `privacy.lookup.wizard` | `action_open_lines` | `line_count` |
+| Privacy Lookup Wizard Line | `privacy.lookup.wizard.line` | `action_open_record` | "Open Record" |
+| Privacy Lookup Wizard Line | `privacy.lookup.wizard.line` | `action_unlink` | "Delete" |
+| Companies | `res.company` | `action_all_company_branches` | "Branches" |
+| Companies | `res.company` | `action_save_onboarding_company_data` | "Save" |
+| Companies | `res.company` | `action_save_onboarding_sale_tax` | "Apply" |
+| Config | `res.config` | `action_next` | "Apply" |
+| Config | `res.config` | `action_skip` | "Cancel" |
+| Config Settings | `res.config.settings` | `action_crm_assign_leads` | a control with no text of its own |
+| Config Settings | `res.config.settings` | `action_eu_oss_tax_mapping` | "OSS Tax mapping" |
+| Config Settings | `res.config.settings` | `action_l10n_my_edi_allow_processing` | "Register" |
+| Config Settings | `res.config.settings` | `action_l10n_my_edi_unregister` | "Unregister" |
+| Config Settings | `res.config.settings` | `action_open_abandoned_cart_mail_template` | "Customize Abandoned Email Template" |
+| Config Settings | `res.config.settings` | `action_open_blocked_third_party_domains` | "Add domains to the block list" |
+| Config Settings | `res.config.settings` | `action_open_cloud_storage_migration_configurations` | "Parameters" |
+| Config Settings | `res.config.settings` | `action_open_nemhandel_form` | "Start sending via Nemhandel" |
+| Config Settings | `res.config.settings` | `action_open_peppol_form` | "Activate Electronic Invoicing" / "Activate Peppol" |
+| Config Settings | `res.config.settings` | `action_open_product_feeds` | "Manage feeds" |
+| Config Settings | `res.config.settings` | `action_open_robots` | "Edit robots.txt" |
+| Config Settings | `res.config.settings` | `action_open_sms_twilio_account_manage` | "Configure Twilio Account" |
+| Config Settings | `res.config.settings` | `action_open_template_user` | "Default Access Rights" |
+| Config Settings | `res.config.settings` | `action_pos_config_create_new` | "+ New Shop" |
+| Config Settings | `res.config.settings` | `action_pos_printer_dialog` | "Add Printer" |
+| Config Settings | `res.config.settings` | `action_sale_start_payment_onboarding` | "Activate `onboarding_payment_module`" |
+| Config Settings | `res.config.settings` | `action_update_terms` | "Update Terms" |
+| Config Settings | `res.config.settings` | `action_view_active_provider` | "Configure `active_provider_id`" |
+| Config Settings | `res.config.settings` | `action_view_delivery_provider_modules` | "Find a Delivery Provider" |
+| Config Settings | `res.config.settings` | `action_view_in_store_delivery_methods` | "Configure Pickup Locations" |
+| Config Settings | `res.config.settings` | `action_w_payment_start_payment_onboarding` | "Activate `onboarding_payment_module`" |
+| Config Settings | `res.config.settings` | `action_website_create_new` | "+ New Website" |
+| Config Settings | `res.config.settings` | `button_deregister_nemhandel_participant` | "Deregister" |
+| Config Settings | `res.config.settings` | `button_disconnect_this_database` | "Disconnect this database" |
+| Config Settings | `res.config.settings` | `button_l10n_hr_activate_mojeracun` | "Activate" |
+| Config Settings | `res.config.settings` | `button_l10n_hr_deactivate_mojeracun` | "Deactivate" |
+| Config Settings | `res.config.settings` | `button_l10n_ro_edi_generate_token` | "Generate Token" |
+| Config Settings | `res.config.settings` | `button_open_peppol_config_wizard` | "Advanced Configuration" |
+| Config Settings | `res.config.settings` | `button_peppol_deregister` | "Disconnect French electronic invoicing" / "Disconnect" / "Disconnect Peppol" |
+| Config Settings | `res.config.settings` | `button_peppol_disconnect_branch_from_parent` | "Disconnect" |
+| Config Settings | `res.config.settings` | `button_peppol_register_sender_as_receiver` | "Register with the platform" |
+| Config Settings | `res.config.settings` | `button_peppol_reregister` | "Complete Registration" |
+| Config Settings | `res.config.settings` | `button_reconnect_this_database` | "Reconnect this database" |
+| Config Settings | `res.config.settings` | `button_update_nemhandel_user_data` | "Update contact details" |
+| Config Settings | `res.config.settings` | `open_company` | "Update Info" |
+| Config Settings | `res.config.settings` | `open_email_layout` | "Update Mail Layout" |
+| Config Settings | `res.config.settings` | `open_mail_templates` | "Review All Templates" |
+| Config Settings | `res.config.settings` | `open_new_user_default_groups` | "Default Access Rights" |
+| Config Settings | `res.config.settings` | `open_payment_method_form` | "Payment method" |
+| Languages | `res.lang` | `action_activate_langs` | "Activate" |
+| Languages | `res.lang` | `action_archive` | "Disable" |
+
+### 10.27 Point of sale
+
+27 operations on 7 entities. Preconditions, guards, refusal messages and side effects: [`../domains/point-of-sale/`](../domains/point-of-sale/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Point of Sale Configuration | `pos.config` | `action_close_kiosk_session` | "Close Session" |
+| Point of Sale Configuration | `pos.config` | `action_open_wizard` | "Start Kiosk" / "Open Kiosk" |
+| Point of Sale Configuration | `pos.config` | `open_existing_session_cb` | "Close" |
+| Point of Sale Configuration | `pos.config` | `open_ui` | "Continue Selling Open Register" |
+| Confirmation Wizard | `pos.confirmation.wizard` | `action_confirm` | "Confirm" |
+| Multiple order invoice creation | `pos.make.invoice` | `action_create_invoices` | "Create" |
+| Point of Sale Orders | `pos.order` | `action_create_invoices` | "Create Invoices" |
+| Point of Sale Orders | `pos.order` | `action_pos_order_invoice` | "Invoice" |
+| Point of Sale Orders | `pos.order` | `action_send_mail` | "email" |
+| Point of Sale Orders | `pos.order` | `action_show_myinvois_documents` | "Consolidated Invoice" |
+| Point of Sale Orders | `pos.order` | `action_stock_picking` | "`picking_count` `picking_count`" |
+| Point of Sale Orders | `pos.order` | `action_view_attendee_list` | `attendee_count` |
+| Point of Sale Orders | `pos.order` | `action_view_invoice` | "Invoice" |
+| Point of Sale Orders | `pos.order` | `action_view_refund_orders` | `refund_orders_count` |
+| Point of Sale Orders | `pos.order` | `action_view_refunded_order` | `refunded_order_id` |
+| Point of Sale Orders | `pos.order` | `action_view_sale_order` | "`sale_order_count` Transferred from Sale" |
+| Point of Sale Orders | `pos.order` | `button_l10n_jo_edi_pos` | "JoFotara (Jordan)" |
+| Point of Sale Orders | `pos.order` | `print_event_badges` | "Print Event Badges" |
+| Point of Sale Orders | `pos.order` | `print_event_tickets` | "Print Event Tickets" |
+| Point of Sale Payment Methods | `pos.payment.method` | `action_stripe_key` | "Don't forget to complete Stripe connect before using this payment method." |
+| Easily load a set of configuration options | `pos.preset` | `action_open_linked_config` | `count_linked_config` |
+| Easily load a set of configuration options | `pos.preset` | `action_open_linked_orders` | `count_linked_orders` |
+| Point of Sale Session | `pos.session` | `action_pos_session_closing_control` | "Close Session & Post Entries" |
+| Point of Sale Session | `pos.session` | `action_show_payments_list` | `total_payments_amount` |
+| Point of Sale Session | `pos.session` | `action_stock_picking` | "`picking_count` `picking_count`" |
+| Point of Sale Session | `pos.session` | `action_view_order` | `order_count` |
+| Point of Sale Session | `pos.session` | `open_frontend_cb` | "Continue Selling" |
+
+### 10.28 Products and catalogue
+
+34 operations on 7 entities. Preconditions, guards, refusal messages and side effects: [`../domains/products-and-catalog/`](../domains/products-and-catalog/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Product Attribute | `product.attribute` | `action_add_to_products` | "Add to products" |
+| Product Attribute | `product.attribute` | `action_open_product_template_attribute_lines` | "`number_related_products` Products" |
+| Product Attribute | `product.attribute` | `action_update_prices` | "Update extra prices" |
+| Product Document | `product.document` | `action_open_pdf_form_fields` | "Configure dynamic fields" |
+| Product Margin | `product.margin` | `action_open_window` | "Open Margins" |
+| Pricelist | `product.pricelist` | `action_open_pricelist_report` | "Print" |
+| Product Variant | `product.product` | `action_open_product_lot` | "Lot/Serial Numbers" |
+| Product Variant | `product.product` | `action_product_forecast_report` | "`qty_available` `virtual_available` `virtual_available` `virtual_available` `uom_name` On Hand Forecasted" / "Forecast" |
+| Product Variant | `product.product` | `action_used_in_bom` | `used_in_bom_count` |
+| Product Variant | `product.product` | `action_view_bom` | `bom_count` |
+| Product Variant | `product.product` | `action_view_mos` | "`mrp_product_qty` `uom_name` Manufactured" |
+| Product Variant | `product.product` | `action_view_orderpoints` | "Min: `reordering_min_qty` Max: `reordering_max_qty`" / `nbr_reordering_rules` / "Replenishment" |
+| Product Variant | `product.product` | `action_view_po` | "`purchased_product_qty` `uom_name` Purchased" |
+| Product Variant | `product.product` | `action_view_related_putaway_rules` | "Putaway Rules" |
+| Product Variant | `product.product` | `action_view_sales` | "`sales_count` `uom_name` Sold" |
+| Product Variant | `product.product` | `action_view_stock_move_lines` | "In: `nbr_moves_in` Out: `nbr_moves_out`" |
+| Product Variant | `product.product` | `action_view_storage_category_capacity` | "Storage Capacities" |
+| Product Variant | `product.product` | `button_bom_cost` | "Compute Price from BoM" |
+| Product Variant | `product.product` | `open_product_template` | "the product template." |
+| Supplier Pricelist | `product.supplierinfo` | `action_set_supplier` | "Set as Supplier" |
+| Product | `product.template` | `action_open_attribute_values` | "Configure" |
+| Product | `product.template` | `action_open_documents` | `bom_count` / "`used_in_bom_count` `mrp_product_qty` `uom_name` Manufactured" / "`purchased_product_qty` `uom_name` Purchased" / `product_variant_count` / `product_document_count` / "`tracking` `show_on_hand_qty_status_button` `show_forecasted_qty_status_button` `qty_available` `virtual_available` `virtual_available` `virtual_available` `uom_name` On Hand Forecasted" / "Min: `reordering_min_qty` Max: `reordering_max_qty` `nbr_reordering_rules` In: `nbr_moves_in` Out: `nbr_moves_out` Lot/Serial Numbers Putaway Rules Storage Capacities" / "`sales_count` `uom_name` Sold" |
+| Product | `product.template` | `action_open_product_lot` | "Lot/Serial Numbers" |
+| Product | `product.template` | `action_product_tmpl_forecast_report` | "`qty_available` `virtual_available` `virtual_available` `virtual_available` `uom_name` On Hand Forecasted" |
+| Product | `product.template` | `action_sync_gelato_template_info` | "Synchronize" |
+| Product | `product.template` | `action_used_in_bom` | `used_in_bom_count` |
+| Product | `product.template` | `action_view_mos` | "`mrp_product_qty` `uom_name` Manufactured" |
+| Product | `product.template` | `action_view_orderpoints` | "Min: `reordering_min_qty` Max: `reordering_max_qty`" / `nbr_reordering_rules` |
+| Product | `product.template` | `action_view_po` | "`purchased_product_qty` `uom_name` Purchased" |
+| Product | `product.template` | `action_view_related_putaway_rules` | "Putaway Rules" |
+| Product | `product.template` | `action_view_sales` | "`sales_count` `uom_name` Sold" |
+| Product | `product.template` | `action_view_stock_move_lines` | "In: `nbr_moves_in` Out: `nbr_moves_out`" |
+| Product | `product.template` | `action_view_storage_category_capacity` | "Storage Capacities" |
+| Product | `product.template` | `button_bom_cost` | "Compute Price from BoM" |
+
+### 10.29 Projects and tasks
+
+29 operations on 6 entities. Preconditions, guards, refusal messages and side effects: [`../domains/projects-and-tasks/`](../domains/projects-and-tasks/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Project Milestone | `project.milestone` | `action_view_sale_order` | "Sales Order" / "View Sales Order" |
+| Project Milestone | `project.milestone` | `action_view_tasks` | "View Tasks" |
+| Project | `project.project` | `action_customer_preview` | "Preview" |
+| Project | `project.project` | `action_open_share_project_wizard` | "Share Project" |
+| Project | `project.project` | `action_view_sos` | "`sale_order_count` Sales Orders" / "0 Sales Order Make Billable" |
+| Project | `project.project` | `action_view_tasks` | "`label_tasks` `closed_task_count` / `task_count` ( `task_completion_percentage` )" / "View Tasks" / "Create project" |
+| Project Stage Delete Wizard | `project.project.stage.delete.wizard` | `action_archive` | "Archive Stages" |
+| Project Stage Delete Wizard | `project.project.stage.delete.wizard` | `action_unarchive_project` | "Confirm" |
+| Project Stage Delete Wizard | `project.project.stage.delete.wizard` | `action_unlink` | "Delete" |
+| Project Sharing | `project.share.wizard` | `action_send_mail` | "Grant Portal Access" |
+| Project Sharing | `project.share.wizard` | `action_share_record` | "Share Project" |
+| Task | `project.task` | `action_convert_to_task` | "Convert to Task" |
+| Task | `project.task` | `action_dependent_tasks` | `dependent_tasks_count` |
+| Task | `project.task` | `action_open_parent_task` | "Parent Task" |
+| Task | `project.task` | `action_open_ratings` | "`rating_avg_text` Last Rating" |
+| Task | `project.task` | `action_open_subtasks` | "Sub-tasks `closed_subtask_count` / `subtask_count` ( `subtask_completion_percentage` )" |
+| Task | `project.task` | `action_open_task` | "View Task" |
+| Task | `project.task` | `action_project_sharing_open_blocking` | "Blocked Tasks `dependent_tasks_count`" |
+| Task | `project.task` | `action_project_sharing_open_subtasks` | "`subtask_count` `display_in_project`" |
+| Task | `project.task` | `action_project_sharing_recurring_tasks` | `recurring_count` |
+| Task | `project.task` | `action_project_sharing_view_parent_task` | "Parent Task" |
+| Task | `project.task` | `action_project_sharing_view_so` | "Sales Order" |
+| Task | `project.task` | `action_recurring_tasks` | `recurring_count` |
+| Task | `project.task` | `action_view_so` | "Sales Order" |
+| Task | `project.task` | `action_view_subtask_timesheet` | "Time Spent on Sub-tasks:" |
+| Project Task Stage Delete Wizard | `project.task.type.delete.wizard` | `action_archive` | "Archive Stages" |
+| Project Task Stage Delete Wizard | `project.task.type.delete.wizard` | `action_confirm` | "Confirm" |
+| Project Task Stage Delete Wizard | `project.task.type.delete.wizard` | `action_unarchive_task` | "Confirm" |
+| Project Task Stage Delete Wizard | `project.task.type.delete.wizard` | `action_unlink` | "Delete" |
+
+### 10.30 Purchasing
+
+34 operations on 6 entities. Preconditions, guards, refusal messages and side effects: [`../domains/purchasing/`](../domains/purchasing/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Purchase Line and Vendor Bill line matching view | `purchase.bill.line.match` | `action_add_to_po` | "Add to PO" |
+| Purchase Line and Vendor Bill line matching view | `purchase.bill.line.match` | `action_match_lines` | "Match" |
+| Purchase Order | `purchase.order` | `action_acknowledge` | "Acknowledge" |
+| Purchase Order | `purchase.order` | `action_add_from_catalog` | "Catalog" |
+| Purchase Order | `purchase.order` | `action_bill_matching` | "Bill Matching" |
+| Purchase Order | `purchase.order` | `action_compare_alternative_lines` | "Compare Product Lines" |
+| Purchase Order | `purchase.order` | `action_create_alternative` | "Create Alternative" |
+| Purchase Order | `purchase.order` | `action_create_invoice` | "Create Bills" |
+| Purchase Order | `purchase.order` | `action_product_forecast_report` | "Forecast Report" |
+| Purchase Order | `purchase.order` | `action_purchase_comparison` | "Price Comparison `show_comparison`" |
+| Purchase Order | `purchase.order` | `action_rfq_send` | "Send RFQ" / "Send PO" |
+| Purchase Order | `purchase.order` | `action_view_dropship` | `dropship_picking_count` |
+| Purchase Order | `purchase.order` | `action_view_invoice` | "`invoice_count` `invoice_ids`" |
+| Purchase Order | `purchase.order` | `action_view_mrp_productions` | "`mrp_production_count` Manufacturing" |
+| Purchase Order | `purchase.order` | `action_view_picking` | "Receive" / `incoming_picking_count` |
+| Purchase Order | `purchase.order` | `action_view_repair_orders` | `repair_count` |
+| Purchase Order | `purchase.order` | `action_view_sale_orders` | "`sale_order_count` Sale" |
+| Purchase Order | `purchase.order` | `action_view_subcontracting_resupply` | "`subcontracting_resupply_picking_count` Resupply" |
+| Purchase Order | `purchase.order` | `button_approve` | "Approve Order" |
+| Purchase Order | `purchase.order` | `button_cancel` | "Cancel" |
+| Purchase Order | `purchase.order` | `button_confirm` | "Confirm Order" |
+| Purchase Order | `purchase.order` | `button_draft` | "Set to Draft" |
+| Purchase Order | `purchase.order` | `button_lock` | "Lock" |
+| Purchase Order | `purchase.order` | `button_unlock` | "Unlock" |
+| Purchase Order | `purchase.order` | `print_quotation` | "Print" |
+| Purchase Order Line | `purchase.order.line` | `action_choose` | "Choose" |
+| Purchase Order Line | `purchase.order.line` | `action_clear_quantities` | "Clear Selected" / "Clear" |
+| Purchase Requisition | `purchase.requisition` | `action_cancel` | "Cancel" |
+| Purchase Requisition | `purchase.requisition` | `action_confirm` | "Confirm" |
+| Purchase Requisition | `purchase.requisition` | `action_done` | "Close" |
+| Purchase Requisition | `purchase.requisition` | `action_draft` | "Reset to Draft" |
+| Wizard in case purchase order still has open alternative requests for quotation | `purchase.requisition.alternative.warning` | `action_cancel_alternatives` | "Cancel Alternatives" |
+| Wizard in case purchase order still has open alternative requests for quotation | `purchase.requisition.alternative.warning` | `action_keep_alternatives` | "Keep Alternatives" |
+| Wizard to preset values for alternative purchase order | `purchase.requisition.create.alternative` | `action_create_alternative` | "Create Alternative" |
+
+### 10.31 Recruitment
+
+14 operations on 5 entities. Preconditions, guards, refusal messages and side effects: [`../domains/recruitment/`](../domains/recruitment/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Get Refuse Reason | `applicant.get.refuse.reason` | `action_refuse_reason_apply` | "Refuse" |
+| Send mails to applicants | `applicant.send.mail` | `action_send` | "Send" |
+| Applicant | `hr.applicant` | `action_add_to_job` | "Move to this Job Position" |
+| Applicant | `hr.applicant` | `action_create_meeting` | "`meeting_display_text` `meeting_display_date`" |
+| Applicant | `hr.applicant` | `action_job_add_applicants` | "Create Applications" |
+| Applicant | `hr.applicant` | `action_open_applications` | `application_count` |
+| Applicant | `hr.applicant` | `action_open_employee` | "`employee_name` Employee" |
+| Applicant | `hr.applicant` | `action_print_survey` | "Consult Interview" |
+| Applicant | `hr.applicant` | `action_send_survey` | "Send Interview" |
+| Applicant | `hr.applicant` | `action_talent_pool_add_applicants` | "Add Applicants " / "Add to Pool" |
+| Applicant | `hr.applicant` | `action_talent_pool_stat_button` | `talent_pool_count` |
+| Applicant | `hr.applicant` | `action_unarchive` | "Restore" |
+| Add applicants to a job | `job.add.applicants` | `action_add_applicants_to_job` | "Create Applications" |
+| Add applicants to talent pool | `talent.pool.add.applicants` | `action_add_applicants_to_pool` | "Add to Pool" |
+
+### 10.32 Repair and maintenance
+
+15 operations on 2 entities. Preconditions, guards, refusal messages and side effects: [`../domains/repair-and-maintenance/`](../domains/repair-and-maintenance/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Maintenance Equipment | `maintenance.equipment` | `action_open_matched_serial` | `serial_no` |
+| Repair Order | `repair.order` | `action_add_from_catalog_repair` | "Catalog" |
+| Repair Order | `repair.order` | `action_assign` | "Check availability" |
+| Repair Order | `repair.order` | `action_create_sale_order` | "Create Quotation" |
+| Repair Order | `repair.order` | `action_generate_serial` | "Creates a new serial/lot number" |
+| Repair Order | `repair.order` | `action_repair_cancel` | "Cancel Repair" |
+| Repair Order | `repair.order` | `action_repair_cancel_draft` | "Set to Draft" |
+| Repair Order | `repair.order` | `action_repair_end` | "End Repair" |
+| Repair Order | `repair.order` | `action_repair_start` | "Start Repair" |
+| Repair Order | `repair.order` | `action_show_details` | "Details" |
+| Repair Order | `repair.order` | `action_unreserve` | "Unreserve" |
+| Repair Order | `repair.order` | `action_validate` | "Confirm Repair" |
+| Repair Order | `repair.order` | `action_view_mrp_productions` | `production_count` |
+| Repair Order | `repair.order` | `action_view_purchase_orders` | `purchase_count` |
+| Repair Order | `repair.order` | `action_view_sale_order` | "Sale Order" |
+
+### 10.33 Replenishment and procurement
+
+5 operations on 1 entities. Preconditions, guards, refusal messages and side effects: [`../domains/replenishment-and-procurement/`](../domains/replenishment-and-procurement/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Minimum Inventory Rule | `stock.warehouse.orderpoint` | `action_product_forecast_report` | "Forecast Report" / "Due to receipts scheduled in the future, you might end up with excessive stock . Check the Forecasted Report  before reordering" |
+| Minimum Inventory Rule | `stock.warehouse.orderpoint` | `action_remove_manual_qty_to_order` | "Remove manually entered value and replace by the quantity to order based on the forecasted quantities" / "-" |
+| Minimum Inventory Rule | `stock.warehouse.orderpoint` | `action_replenish` | "Order" |
+| Minimum Inventory Rule | `stock.warehouse.orderpoint` | `action_replenish_auto` | "Automate" |
+| Minimum Inventory Rule | `stock.warehouse.orderpoint` | `action_stock_replenishment_info` | "Replenishment Information" / "Your product is missing a way to be replenished (Route, Vendor, Bill of Materials)." |
+
+### 10.34 Sales
+
+35 operations on 7 entities. Preconditions, guards, refusal messages and side effects: [`../domains/sales/`](../domains/sales/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Quotation's Headers & Footers | `quotation.document` | `action_open_pdf_form_fields` | "Configure dynamic fields" |
+| Sale Loyalty - Apply Coupon Wizard | `sale.loyalty.coupon.wizard` | `action_apply` | "Apply" |
+| Sale Loyalty - Reward Selection Wizard | `sale.loyalty.reward.wizard` | `action_apply` | "Apply" |
+| Sale Loyalty - Reward Selection Wizard | `sale.loyalty.reward.wizard` | `action_cancel` | "Discard" |
+| Cancel multiple quotations | `sale.mass.cancel.orders` | `action_mass_cancel` | "Cancel" |
+| Sales Order | `sale.order` | `action_add_from_catalog` | "Catalog" |
+| Sales Order | `sale.order` | `action_cancel` | "Cancel" |
+| Sales Order | `sale.order` | `action_confirm` | "Confirm" |
+| Sales Order | `sale.order` | `action_draft` | "Set to Quotation" |
+| Sales Order | `sale.order` | `action_lock` | "Lock" |
+| Sales Order | `sale.order` | `action_open_declaration_of_intent` | "Declaration of Intent" |
+| Sales Order | `sale.order` | `action_open_delivery_wizard` | "Add shipping" / "Update shipping cost" |
+| Sales Order | `sale.order` | `action_open_discount_wizard` | "Discount" / "Discounts" |
+| Sales Order | `sale.order` | `action_open_reward_wizard` | "Reward" |
+| Sales Order | `sale.order` | `action_preview_sale_order` | "Preview" |
+| Sales Order | `sale.order` | `action_quotation_send` | "Send by Email" / "Send" / "Send PRO-FORMA Invoice" |
+| Sales Order | `sale.order` | `action_recovery_email_send` | "Send a Recovery Email" |
+| Sales Order | `sale.order` | `action_show_repair` | `repair_count` |
+| Sales Order | `sale.order` | `action_unlock` | "Unlock" |
+| Sales Order | `sale.order` | `action_update_prices` | "Update Prices" |
+| Sales Order | `sale.order` | `action_update_taxes` | "Update Taxes" |
+| Sales Order | `sale.order` | `action_view_attendee_list` | `event_booth_count` / `attendee_count` |
+| Sales Order | `sale.order` | `action_view_booth_list` | `event_booth_count` |
+| Sales Order | `sale.order` | `action_view_delivery` | `dropship_picking_count` / `delivery_count` |
+| Sales Order | `sale.order` | `action_view_dropship` | `dropship_picking_count` |
+| Sales Order | `sale.order` | `action_view_gift_cards` | `gift_card_count` |
+| Sales Order | `sale.order` | `action_view_invoice` | `repair_count` / `expense_count` / "`project_count` Projects `tasks_count` Tasks `milestone_count`" / "`pos_order_count` Transferred to POS" / `invoice_count` / `delivery_count` |
+| Sales Order | `sale.order` | `action_view_milestone` | "`timesheet_total_duration` `timesheet_encode_uom_id` Recorded" / `milestone_count` |
+| Sales Order | `sale.order` | `action_view_mrp_production` | `mrp_production_count` |
+| Sales Order | `sale.order` | `action_view_pos_order` | "`pos_order_count` Transferred to POS" |
+| Sales Order | `sale.order` | `action_view_project_ids` | "`project_count` Projects `tasks_count` Tasks" |
+| Sales Order | `sale.order` | `action_view_purchase_orders` | `purchase_order_count` |
+| Sales Order | `sale.order` | `action_view_timesheet` | "`timesheet_total_duration` `timesheet_encode_uom_id` Recorded" |
+| Discount Wizard | `sale.order.discount` | `action_apply_discount` | "Apply" |
+| Update product attribute value | `update.product.attribute.value` | `action_confirm` | "Confirm" |
+
+### 10.35 Site and storefront
+
+6 operations on 4 entities. Preconditions, guards, refusal messages and side effects: [`../domains/website-and-storefront/`](../domains/website-and-storefront/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| User list of blocked 3rd-party domains | `website.custom_blocked_third_party_domains` | `action_save` | "Save" |
+| Page | `website.page` | `action_page_debug_view` | "Settings" |
+| Robots.txt Editor | `website.robots` | `action_save` | "Save" |
+| Website Visitor | `website.visitor` | `action_send_chat_request` | "Chat" / "Send chat request" |
+| Website Visitor | `website.visitor` | `action_send_mail` | "Email" / "Send Email" |
+| Website Visitor | `website.visitor` | `action_send_sms` | "Send SMS" / "SMS" |
+
+### 10.36 Taxes
+
+2 operations on 1 entities. Preconditions, guards, refusal messages and side effects: [`../domains/taxes/`](../domains/taxes/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Fiscal Position | `account.fiscal.position` | `action_create_foreign_taxes` | "here" |
+| Fiscal Position | `account.fiscal.position` | `action_open_related_taxes` | "Taxes" |
+
+### 10.37 Time off
+
+19 operations on 10 entities. Preconditions, guards, refusal messages and side effects: [`../domains/time-off/`](../domains/time-off/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Cancel Time Off Wizard | `hr.holidays.cancel.leave` | `action_cancel_leave` | "Cancel Time Off" |
+| human resources Time Off Summary Report By Employee | `hr.holidays.summary.employee` | `print_report` | "Print" |
+| Time Off | `hr.leave` | `action_approve` | "Approve" / "Validate" |
+| Time Off | `hr.leave` | `action_back_to_approval` | "Back to Approval" |
+| Time Off | `hr.leave` | `action_cancel` | "Cancel" |
+| Time Off | `hr.leave` | `action_documents` | `supported_attachment_ids_count` |
+| Time Off | `hr.leave` | `action_refuse` | "Refuse" |
+| Accrual Plan Level | `hr.leave.accrual.level` | `action_save_new` | "Save & New" |
+| Accrual Plan | `hr.leave.accrual.plan` | `action_create_accrual_plan_level` | "Create a milestone" |
+| Accrual Plan | `hr.leave.accrual.plan` | `action_open_accrual_plan_employees` | `employees_count` |
+| Time Off Allocation | `hr.leave.allocation` | `action_approve` | "Approve" / "Validate" |
+| Time Off Allocation | `hr.leave.allocation` | `action_refuse` | "Refuse" |
+| Generate time off allocations for multiple employees | `hr.leave.allocation.generate.multi.wizard` | `action_generate_allocations` | "Allocate Time Off" |
+| Generate time off for multiple employees | `hr.leave.generate.multi.wizard` | `action_generate_time_off` | "Generate Time Off" |
+| Time Off Calendar | `hr.leave.report.calendar` | `action_approve` | "Approve" |
+| Time Off Calendar | `hr.leave.report.calendar` | `action_refuse` | "Refuse" |
+| Time Off Type | `hr.leave.type` | `action_see_accrual_plans` | "`accrual_count` Accruals" |
+| Time Off Type | `hr.leave.type` | `action_see_days_allocated` | "`allocation_count` Allocations" |
+| Time Off Type | `hr.leave.type` | `action_see_group_leaves` | "`group_days_leave` Time Off" |
+
+### 10.38 Units of measure and packaging
+
+1 operations on 1 entities. Preconditions, guards, refusal messages and side effects: [`../domains/units-of-measure-and-packaging/`](../domains/units-of-measure-and-packaging/).
+
+| Entity | Entity identifier | Operation | Control label |
+|---|---|---|---|
+| Product Unit of Measure | `uom.uom` | `action_open_packaging_barcodes` | "Packaging Barcodes" |
+
+## 11. Transactions, isolation and concurrency
 
 1. **One call, one transaction.** Every remote call runs in its own transaction, committed on success, discarded on failure. Two calls are never in the same transaction.
 2. **Repeatable reads.** Within a call, a record read twice yields the same values unless the call itself changed them.
@@ -711,7 +2025,7 @@ This is the contract an integration should read first: it is generated from the 
 6. **Locks.** An operation that must serialize itself takes an explicit row lock; a lock that cannot be taken fails with status `409` and the operation's own message.
 7. **Work after the commit.** Notifications pushed to clients, and any other side effect that must not happen if the transaction is discarded, are registered as post-commit work and executed after the commit succeeds. A failure there does not roll the transaction back; it is logged.
 
-## 11. Acceptance criteria
+## 12. Acceptance criteria
 
 **AC-SERVICE-001 — Search and read are one transaction.** Given a record that another transaction deletes between two calls, when a caller uses the combined search and read operation, then the answer never reports a missing record; when a caller instead searches and then reads, then the read simply omits the deleted record.
 
@@ -812,3 +2126,28 @@ This is the contract an integration should read first: it is generated from the 
 **AC-SERVICE-049 — Wizard round trip.** Given a wizard opened from a list of two records, when the client calls the on-change protocol with an empty record set, then it receives the wizard's defaults including the values derived from the context keys naming the selected records; when it then saves and presses the confirmation button, then the work is performed and the returned action is the one the wizard declares.
 
 **AC-SERVICE-050 — Button returning a notification.** Given a business operation that returns a notification action, when it is invoked through the button endpoint, then the result is a client action with the tag `display_notification`, carrying the severity, the message and the follow-up close action.
+
+## 13. Reconciliation notes
+
+Where the drafts merged into this document differed from each other or from the behaviour of the system, the point was
+settled against the source of the system and against the generated catalogues
+[`../references/operation-index.md`](../references/operation-index.md) and
+[`../references/views.md`](../references/views.md). The resolutions:
+
+1. **The named business operations were missing.** The plan for this document promises the named business operations
+   exposed on entities, grouped by domain, with their inputs, outputs, preconditions and side effects. One draft
+   specified only the generic contract and the conventions. Section 10 now enumerates all 1,016 named operations that
+   the screens of the shipped installation bind to a control, on 285 entities, grouped into 38 areas, and states once —
+   rather than 1,016 times — what is true of every one of them: the inputs, the shape of the output, that the
+   preconditions are re-checked inside the operation, and where the guards, refusal messages and side effects of each
+   one are specified.
+2. **The superseded grouped read.** A generic operation named `read_group` exists on every entity and is marked as
+   superseded; it is therefore not described. The grouped read a rebuild must expose is `formatted_read_group`, with
+   `formatted_read_grouping_sets` for several groupings in one pass and `web_read_group` for a screen; all three are in
+   section 2.1 and section 7.6.
+3. **Section numbering.** Adding section 10 moved the transaction rules to section 11 and the acceptance criteria to
+   section 12. No cross-reference from another document pointed at either, and the acceptance criteria keep their
+   identifiers.
+4. **Reproduced control labels.** Three control labels contain the product's own name in the shipped installation.
+   Section 10 reproduces every label in quotation marks, and those three with the product's name replaced by "the
+   platform", because a replacement substitutes its own name and no observable behaviour depends on the word.
