@@ -328,10 +328,12 @@ digest, no escalation and no reminder to the employee.
 
 | External identifier | Sequence | Audience | Text |
 |---|---|---|---|
-| `digest_tip_hr_expense_0` | 1100 | every internal user | Title *"Tip: Snap pictures of your receipts with the remote app"*; body *"Do not keep your expense tickets in your pockets any longer. Just snap a picture of your receipt and let Odoo digitalizes it for you. The OCR and Artificial Intelligence will fill the data automatically."* with an illustration |
+| `digest_tip_hr_expense_0` | 1100 | every internal user | Title *"Tip: Snap pictures of your receipts with the remote app"*; a body of two sentences telling the reader to stop keeping paper tickets and instead photograph each receipt, and that the optical-character-recognition and machine-learning digitisation capability then fills the expense fields automatically; and an illustration |
 
-The body is reproduced verbatim, including its grammatical slip and the vendor's name, because it
-is a shipped user-visible string. Digest tips themselves belong to
+The title is reproduced verbatim because it is a shipped user-visible string. The body is
+described rather than reproduced: the shipped wording names the vendor's own application and its
+own digitisation service, and a rebuild must substitute its own names, so reproducing the sentence
+would be misleading. Digest tips themselves belong to
 [`../human-resources-core/`](../human-resources-core/).
 
 ---

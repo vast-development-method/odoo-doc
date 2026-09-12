@@ -573,13 +573,16 @@ membership of the analytic accounting permission group. No other group of this d
 no other group grants any right on these entities.
 
 **AA-110.** The analytic accounting permission group is granted and revoked through the accounting
-setting "Track costs and revenues by project, department, and other axes", which grants it to every
-user of the internal user group. Switching that setting on also switches the full accounting
-capability setting on.
+setting whose text is "Track costs & revenues by project, department, etc", reproduced as the
+system displays it, which grants it to every user of the internal user group. Switching that
+setting on also switches the full accounting capability setting on.
 
-**AA-111.** The derived totals debit and credit of an analytic account are shown only to readers
-who additionally hold the read-only accounting group or a stronger accounting group; the balance is
-shown to every member of the analytic accounting permission group.
+**AA-111.** In the analytic account list, the derived totals debit and credit are hidden columns
+when the accounting capability is not installed, and, when it is, all three totals — debit, credit
+and balance — are columns restricted to a reader who additionally holds the read-only accounting
+group or the invoicing group. The balance is shown without any such restriction on the *Gross
+Margin* button of the account's form, therefore to every member of the analytic accounting
+permission group.
 
 **AA-112.** The distribution editor and the analytic columns of a document are shown only to
 members of the analytic accounting permission group; readers outside it see the document without
@@ -862,3 +865,14 @@ table below maps the single scheme of this file to both.
 4. **The prefix cell.** `AA-022` no longer states which business domains show the prefix cell; that
    presentation rule lives with the field, in [entities.md](entities.md) section 4.1, because two
    capabilities contribute to it.
+5. **The label of the analytic accounting setting.** Both drafts paraphrased it as "Track costs and
+   revenues by project, department, and other axes". The emitted text is "Track costs & revenues by
+   project, department, etc", and a label is reproduced rather than authored, so `AA-110` now quotes
+   it as displayed. [configuration.md](configuration.md) section 1.1 carries the same text together
+   with the hover text.
+6. **The visibility of the three derived totals.** One draft restricted the debit and the credit to
+   the accounting groups and left the balance open to every member of the analytic accounting group.
+   The account list hides the debit and the credit outright without the accounting capability and,
+   with it, restricts all three columns to the read-only accounting group or the invoicing group;
+   only the *Gross Margin* button of the form is unrestricted. `AA-111` now states both halves, and
+   [configuration.md](configuration.md) section 8 repeats them per field.

@@ -25,7 +25,7 @@ One **transaction object** exists per database session. Every record set whose e
 | Execution contexts | a weak ordered set | every execution context created on this session |
 | Default execution context | one execution context, or none | the context used when the transaction must flush on its own behalf, chosen as the first context created with a valid acting user |
 | Field data | map from field to a per-field structure | the record cache (section 3) |
-| Dirty identifiers | map from field to an ordered set of identifiers | values changed in the cache but not yet written to the database (section 6) |
+| Dirty identifiers | map from field to an ordered set of identifiers | values changed in the cache but still owed to the database (section 6) |
 | Pending link patches | map from field to a map from record identifier to a list of identifiers | identifiers to add to a relation-to-many value the first time that value enters the cache (section 3.5) |
 | Protection | a stack of maps from field to a set of identifiers | fields and records that must not be invalidated or recomputed (section 5) |
 | Pending computations | map from field to an ordered set of identifiers | the recomputation schedule (section 8) |

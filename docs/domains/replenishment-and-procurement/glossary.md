@@ -12,7 +12,7 @@ Terms used in the Replenishment and Procurement domain, written in full words. A
 
 **Buy rule.** A Stock Rule whose action is `buy`. When a need appears at its destination location, it creates or extends a draft purchase order line instead of a stock move. It has no source location; the source of the eventual receipt is the vendor location of the vendor chosen at run time.
 
-**Chain (of moves).** A sequence of stock moves linked through the downstream and upstream relations, each step of which brings the goods closer to the location where they are needed. A chain is built backwards by make-to-order supply methods, and forwards by push rules.
+**Chain (of moves).** A sequence of stock moves linked through the destination and origin relations, each step of which brings the goods closer to the location where they are needed. A chain is built backwards by make-to-order supply methods, and forwards by push rules.
 
 **Cumulative lead time.** See "Lead days".
 
@@ -20,7 +20,7 @@ Terms used in the Replenishment and Procurement domain, written in full words. A
 
 **Deadline date (of a reordering rule).** The last date on which an order must be placed to avoid the stock falling below the minimum quantity. Empty when no dip is foreseen inside the replenishment horizon. Formula in `calculations.md`, section 11.
 
-**Delay alert date.** The greatest scheduled date among a move's not-yet-completed upstream moves, when that date is later than the move's own scheduled date. A move with a non-empty delay alert date is shown as late.
+**Delay alert date.** The greatest scheduled date among a move's not-yet-completed origin moves, when that date is later than the move's own scheduled date. A move with a non-empty delay alert date is shown as late.
 
 **Demand graph.** The saw-tooth picture shown in the Replenishment Information wizard, which projects how often the rule would order at the historic rate of demand. Formulas in `calculations.md`, section 20.
 
@@ -60,7 +60,7 @@ Terms used in the Replenishment and Procurement domain, written in full words. A
 
 **Make to order.** The supply method `make_to_order`, labelled "Trigger Another Rule". The stock available at the source location is ignored; a new need is created there and rule selection runs again for it. The created document is bound to the move that asked for it.
 
-**Make to stock.** The supply method `make_to_stock`, labelled "Take From Stock". The goods are taken from the stock available at the source location; no upstream need is created.
+**Make to stock.** The supply method `make_to_stock`, labelled "Take From Stock". The goods are taken from the stock available at the source location; no supply need is created.
 
 **Manual trigger.** The value `manual` of a Reordering Rule's trigger. A manually triggered rule appears on the replenishment report and is executed only when a user presses Order. Only a manual rule may be snoozed.
 

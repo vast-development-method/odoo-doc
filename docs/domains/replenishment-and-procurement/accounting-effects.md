@@ -26,7 +26,7 @@ The Replenishment and Procurement domain creates no journal entry, no journal it
 | Field written here | Entity | Why the accounting domains read it |
 |---|---|---|
 | `rule` | Stock Move | Identifies the route step, which tells the valuation domain whether the move is an internal step of a chain (not valued) or the first or last step (valued). |
-| `procure_method` | Stock Move | A `make_to_order` move is bound to an upstream move; the valuation domain uses that link to trace the cost from the receipt to the delivery in a chained flow. |
+| `procure_method` | Stock Move | A `make_to_order` move is bound to an origin move; the valuation domain uses that link to trace the cost from the receipt to the delivery in a chained flow. |
 | `move_destinations` and `move_origins` | Stock Move | The chain links that let the valuation domain walk from a delivery back to the receipt that supplied it, and from a receipt forward to the vendor bill that prices it. |
 | `location_final` | Stock Move | Distinguishes an intermediate destination from the ultimate one; a move whose destination is intermediate is an internal step. |
 | `purchase_line` | Stock Move | The link from a receipt move to the purchase order line, which carries the purchase price and the vendor bill lines. It is the single most important input of the purchase valuation: the value of a received unit comes from that line, and, once billed, from the bill lines of that line. |
