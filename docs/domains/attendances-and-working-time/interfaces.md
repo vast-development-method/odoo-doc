@@ -392,3 +392,228 @@ than* and *greater than* with whole-number values
   coloured dot for the attendance state. Creation is disabled on that board.
 - The public employee profile gains the same monthly-hours action, which returns nothing at
   all when the reader may not see that employee's attendances.
+
+---
+
+## 4. Named operations
+
+These are the operations a client, a scheduled job or another domain invokes. Each states its
+inputs, its result, its side effects and the messages it can raise.
+
+### 4.1 On Attendance
+
+| Operation | Inputs | Result | Side effects | Refusals |
+|---|---|---|---|---|
+| Create | one or more value sets | the created records | The validations `AWT-041` to `AWT-044`; the regeneration of the affected window | the messages of those rules |
+| Write | a value set | acknowledgement | The reassignment guard `AWT-046`; the same validations; regeneration over the union of the window before and the window after | "Do not have access, user cannot edit the attendances that are not their own or if they are not the attendance manager of the employee." and the validation messages |
+| Delete | none | acknowledgement | Regeneration over the window the deleted records covered | none of its own |
+| Duplicate | a value set | never returns a record | none | "You cannot duplicate an attendance." |
+| Approve extra hours | none | none | Sets every linked extra-hours line to `approved` | none |
+| Refuse extra hours | none | none | Sets every linked extra-hours line to `refused` | none |
+| Regenerate extra hours | an optional attendance filter | none | The whole procedure of [workflows.md, chapter 9](workflows.md#9-regenerating-extra-hours) | none |
+| Linked extra-hours lines | none | the lines whose employee and start instant match the records | none | none |
+| Open the check-in place / the check-out place | none | a redirection to an external map service centred on the recorded coordinates, opened in a new window | none | none |
+| Terminal address | none | the terminal address of the acting company | none | none |
+| Open the terminal trial | none | a redirection to the terminal address with the trial flag set | none | For a caller without the officer-for-all group, an informational notification carrying "You don't have the rights to execute that action." is returned instead |
+| Has demonstration data | none | a boolean | none | Answers true for a caller without the officer-for-all group, which suppresses the offer |
+| Load demonstration data | none | an instruction to reload the screen | Loads the scenario of [configuration.md, chapter 6.4](configuration.md#64-the-demonstration-scenario); does nothing when it already exists | none |
+| Localised instants | none | the two instants read in the zone of the version covering the check-in, with the zone dropped | none | none |
+| Dates spanned | none | per record, the list of local dates from the localised check-in date to the localised check-out date | none | none |
+| Attendance intervals by period and by employee | none | the day and week buckets used by the generator, as specified in [entities.md, chapter 8.9](entities.md#89-attendance-derived-day-and-week-intervals) | none | none |
+
+### 4.2 On Attendance Overtime Line
+
+| Operation | Inputs | Result | Side effects |
+|---|---|---|---|
+| Approve | none | none | The status becomes `approved`; the linked attendances' validated hours and extra-hours status are recomputed |
+| Refuse | none | none | The status becomes `refused`; the same recomputation |
+| Linked attendances | none | the attendances of the same employees whose check-in is among the lines' start instants | none |
+| Write | a value set | acknowledgement | Writing the status or the encoded amount marks the linked attendances' extra-hours status and validated hours; writing the computed amount marks their extra hours and regular hours |
+
+### 4.3 On Overtime Ruleset
+
+| Operation | Inputs | Result | Side effects |
+|---|---|---|---|
+| Attendances to regenerate | none | every attendance of the employees whose versions name this rule set, from the earliest of those versions' dates onwards | none |
+| Regenerate extra hours | none | none | Deletes and rebuilds every extra-hours line of those attendances. Offered as an action labelled "Regenerate overtimes" with the help text "Regenerate overtimes for this ruleset" |
+
+### 4.4 On Working Schedule
+
+| Operation | Inputs | Result |
+|---|---|---|
+| Count work hours | two instants, a switch for subtracting exclusions, an optional exclusion filter | decimal hours |
+| Work duration data | the same | a pair of days and hours |
+| Plan hours | a signed quantity of hours, a reference instant, the same two options, an optional resource | an instant, or no result |
+| Plan days | a signed number of days, a reference instant, the same two options | an instant, or no result |
+| Attendance intervals | two zoned instants, the resources, an optional exclusion filter, an optional zone, a switch for break periods | for each resource, an interval set |
+| Leave intervals | two zoned instants, the resources, an optional filter, an optional zone | for each resource, an interval set |
+| Work intervals | two instants, the resources, an optional filter, a switch for subtracting exclusions | for each resource, an interval set |
+| Unavailable intervals | two instants, the resources, an optional filter, an optional zone | for each resource, a list of instant pairs |
+| Closest working moment | a zoned reference instant, a switch to match ends instead of starts, an optional resource, a search range, a switch for exclusions | an instant, or no result |
+| Unusual days | two instants and an optional company | for each date, a boolean |
+| Works on a date | a date | a boolean |
+| Hours for a date | a date and an optional half-day | a pair of decimal hours |
+| Switch the week layout | none | none; the period collection is rewritten |
+| Switch the encoding | none | none; the period collection is rewritten |
+| Transfer exclusions to another schedule | a target schedule, an optional list of resources, an optional date | Moves this schedule's exclusions — restricted to those resources when given, and starting after that date, today when it is not given — onto the other schedule. Contributed by [Human Resources Core](../human-resources-core/) |
+
+Every algorithm behind these operations is specified in
+[working-schedule-algorithms.md](working-schedule-algorithms.md). The interval operations
+refuse bounds that carry no zone, with the message of `AWT-130`.
+
+### 4.5 On Resource and on the resource mixin
+
+| Operation | Inputs | Result |
+|---|---|---|
+| Snap a span to the schedule | two instants and a switch for exclusions | for each resource, or each host record, a pair of instants or empty values |
+| Unavailable intervals | two instants | for each resource, a list of instant pairs, grouped internally by schedule |
+| Schedule validity within a period | two instants and a default company | for each resource, a mapping from schedule to the interval set during which it applies |
+| Valid work intervals | two instants, optional extra schedules, a switch for exclusions | work intervals per resource and per schedule |
+| Is flexible / is fully flexible | none | a boolean |
+| Flexible valid work intervals | two instants | the intervals, the daily caps and the weekly caps |
+| Flexible work hours | the previous three results and a switch for a per-day answer | decimal hours, or hours per day |
+| Worked days and hours | two dates, a switch for exclusions, an optional schedule, an optional filter | for each host record, a pair of days and hours |
+| Absence days and hours | the same | for each host record, a pair of days and hours |
+| List work time per day | the same | for each host record, a sorted list of date and hours pairs |
+| List absences | the same | a list of date, hours and exclusion triples |
+| Schedule at an instant | an instant and a zone | for each resource, the schedule in force |
+| Hover-card data | a list of field names | the requested values of the resource |
+
+### 4.6 On Employee, contributed by this domain
+
+| Operation | Inputs | Result | Refusals |
+|---|---|---|---|
+| Change the attendance state | an evidence block | the created or updated attendance | "Cannot perform check out on *employee name*, could not find corresponding check in. Your attendances have probably been modified manually by human resources." |
+| Extra-hours data for a selection | an attendance filter and an optional employee | a structure with two keys: `validated_overtime`, holding the sum of validated extra hours per employee identifier for the matching attendances, and `overtime_adjustments`, which is **always empty** and must nevertheless be returned so that clients written against the contract keep working | none |
+| Open this month's attendances | none | an action opening the simple attendance list of that employee, named "Attendances This Month", with the period filter pre-selected and creation disabled | none |
+| Open the badge scanner | none | an action opening the badge-reading screen, named "Badge Scanner" | none |
+| Schedule intervals by employee and by work type | two instants and the version validity periods | the four interval families of [calculations.md, chapter 6.2](calculations.md#62-assembling-the-schedule-picture) | none |
+| Expected attendances | two instants | the work intervals the employee is expected to deliver, walking the versions whose contract overlaps the span | none |
+
+### 4.7 On Company and on the settings page
+
+| Operation | Inputs | Result | Side effects |
+|---|---|---|---|
+| Regenerate the terminal key | none | none | Replaces the key with a fresh value, invalidating every distributed address (`AWT-112`). Executes only for a caller holding the officer-for-all group |
+| Open the terminal page | none | a redirection to the terminal entry point of the acting company | Signs the session out first when it has a password |
+| Write either legacy tolerance | the two amounts | none | Collects the companies whose value actually changes and regenerates every extra-hours line of their employees (`AWT-119`) |
+
+---
+
+## 5. Message templates, notifications and thread messages
+
+The domain ships **no message template**: every text below is a literal, and each is
+reproduced exactly.
+
+| Text | Channel | When |
+|---|---|---|
+| "This attendance was automatically checked out because the employee exceeded the allowed time for their scheduled work hours." | the attendance's discussion thread | the automatic check-out job closes a record |
+| "This attendance was automatically created to cover an unjustified absence on that day." | the attendance's discussion thread | the absence-detection job keeps a technical attendance |
+| tracked-field messages for the check-in, the check-out, the extra-hours status and the validated extra hours | the attendance's discussion thread | whenever one of those four fields changes |
+| "Connection lost. Check in/out could not be recorded." under the title "Attendance Error" | a client notification of the danger kind | the menu-bar control loses the connection while checking in or out |
+| "Unable to get a valid location. Do you want to proceed with your check-in/out anyway?" with the confirm label "Proceed Anyway" | a client confirmation | device tracking is on and the browser cannot produce coordinates |
+| "No employee corresponding to Badge Identifier '*scanned value*.'" | a terminal notification of the danger kind | a scanned badge matches no employee of the company; the scanned value is echoed exactly as read |
+| "Wrong Personal Identification Number" | a terminal notification of the danger kind | the entered number does not match |
+| "You don't have the rights to execute that action." | a client notification of the informational kind | a caller without the officer-for-all group triggers the terminal trial action |
+| "Currently Working" | the placeholder of the check-out field | the record is open |
+| "Fully Flexible" | the placeholder of a resource's schedule field | the resource has no schedule |
+| "Visible to all" | the placeholder of the company field on a resource and on a schedule | the record has no company |
+| "Select a ruleset to manage overtime." | the placeholder of the rule-set field on an employee | no rule set is named |
+
+The refusal messages of the validations are not listed here; they are in
+[business-rules.md](business-rules.md), each beside the condition that raises it.
+
+The last check-in and last check-out mirrors on the Employee have tracking **explicitly
+suppressed**, so that a check-in does not post a message in the employee's own thread; only
+the attendance's thread records it.
+
+---
+
+## 6. Import and export
+
+The domain defines no import or export format of its own. Four consequences follow, and a
+rebuild must reproduce them:
+
+1. **Attendances import through the generic tabular import** of the platform. The two instants
+   are read as universal time; the stored date, the worked hours and the extra hours are
+   derived after the import, and the validations of `AWT-041` to `AWT-044` run for every row.
+   A batch that contains one overlapping row imports nothing (`AWT-045`).
+2. **Extra-hours lines should not be imported.** They are wholly derived, and the next
+   regeneration of the affected day deletes whatever was imported. An installation that must
+   carry historic amounts across should import the attendances and let the generator produce
+   the lines, or import the lines and never regenerate those days.
+3. **Working schedules and their periods import normally**, but the two averages are
+   recomputed from the periods on the first change, so importing an average that disagrees with
+   the periods is not durable on a fixed schedule. On a flexible schedule the averages are
+   exactly what is imported.
+4. **Export.** Every list of the domain exports through the platform's generic tabular export.
+   The derived analyses of [chapter 8](#8-reports) export their rows the same way. No printable
+   document is defined: the domain has no report layout, no letterhead and nothing to send by
+   electronic mail.
+
+---
+
+## 7. External integrations
+
+| Service | Used for | Contract |
+|---|---|---|
+| A place-name lookup service | Turning a pair of coordinates into a human-readable place name at each check-in and check-out, when the company enables device and location tracking | The request carries the latitude and the longitude. On success the place name is stored; on failure, on refusal or on a network error the literal `Unknown` is stored instead, and the operation continues (`AWT-051`). |
+| A network-address location database | Supplying the coordinates and the place when the client provides none | Consulted through the platform's request handling; the values it yields are used only when the client supplied nothing. |
+| An external map service | The "View on Maps" actions on the attendance form | The action opens a new window pointing at the service, centred on the stored latitude and longitude of that side of the record. Nothing is sent to the service beyond the two coordinates in the address. |
+| A badge reader or a device camera | Reading a badge identifier at a shared terminal | Chosen by the company's badge-source setting. The reader hands the client a value and the client sends it verbatim to the badge route; the value is matched against the employee's badge identifier for an exact equality. |
+
+No other external service is contacted. In particular the domain sends nothing to payroll,
+nothing to an accounting service and nothing to a time-recording appliance: every consumer
+reads the records through the platform.
+
+---
+
+## 8. Reports
+
+The domain produces no printable document. It produces three read-only analyses, two of which
+it owns.
+
+| Analysis | Shape | Content | Access |
+|---|---|---|---|
+| Attendance analysis | a pivot and a graph over Attendance | Worked hours, regular hours, extra hours and validated extra hours, by employee and by period; every measure is a plain sum. Described in [chapter 3.7](#37-the-attendance-analysis) | the officer group and above |
+| Timesheet and attendance comparison | a derived, read-only list and pivot | One row per employee, per day and per company: timesheet time, presence time, their difference, the timesheet cost, the presence cost and the cost difference. Rows are built by uniting the attendance records — keyed on the check-in read in the zone of the schedule of the employee's current version — with the timesheet lines that name a project, both limited to today and earlier, and then grouping. Any grouping on a date is ordered descending by default. Specified in [entities.md, chapter 12](entities.md#12-timesheet-and-attendance-comparison) and [calculations.md, chapter 11](calculations.md#11-the-amounts-of-the-timesheet-comparison) | the timesheet user group, narrowed by the record rules of [configuration.md, chapter 9](configuration.md#9-record-rules) |
+| Absence ledger | a derived, read-only table | One row per employee and per working day of the last year: the expected hours, the worked hours, the approved absence hours and the difference. Owned by [Time Off](../time-off/) and specified in [entities.md, chapter 13](entities.md#13-absence-ledger-shared-with-the-time-off-domain) | the attendance administrator group only; its navigation entry is hidden unless the reader is also an absence officer |
+
+Neither analysis writes any record, and neither has a printed form. Both export through the
+platform's generic tabular export.
+
+---
+
+## 9. Reconciliation notes
+
+One source version carried a complete interface file with the routes written under a neutral
+prefix; the other specified the same contracts inside its entity chapters, with the reproduced
+storage names. Both were merged and the following points were resolved against the source.
+
+1. **The route paths are contractual and are reproduced.** One version wrote them under a
+   neutral `/attendance/...` prefix and called the exact spelling an implementation choice. A
+   client already written against the real paths would break, so the paths are reproduced
+   exactly, beginning with `/hr_attendance/`, as rule three of the documentation rules allows
+   for route paths.
+2. **The badge route's name.** One version called it a badge-scanned route spelled with the
+   word "badge". The reproduced path is `/hr_attendance/attendance_barcode_scanned` and its
+   request key is `barcode`.
+3. **The payload keys.** One version renamed them into business words — an employee identifier,
+   a last attendance, a requirement for a personal identification number. The reproduced keys
+   are `id`, `attendance` and `use_pin`, and the full list is in
+   [chapter 2.1](#21-data-structures). The renamed forms would break every existing client.
+4. **The response of the employee page route** is an empty **list** when the token matches no
+   company, while every other public route answers with an empty **structure**. Only one
+   version recorded the difference; it is reproduced here because a client that tests the type
+   of the answer depends on it.
+5. **The confirmation delay** is stored in seconds and delivered in milliseconds. Both versions
+   stated one of the two; both are stated here, with the multiplication named.
+6. **The menu entries** were listed in the configuration file of one version. They belong here
+   under the charter of this repository and are in [chapter 1](#1-navigation); the settings they
+   lead to stay in [configuration.md](configuration.md).
+7. **Import and export** were not covered by either version. The domain defines no format of
+   its own; the four consequences of that are stated in [chapter 6](#6-import-and-export)
+   rather than the topic being omitted.
+8. **The evidence block** was written in one version as a small program. It is a numbered
+   procedure here, with the six stored fields it feeds named by their storage names, in
+   [chapter 2.2](#22-the-evidence-block-built-on-the-server).
