@@ -1485,3 +1485,35 @@ Two rules apply everywhere and must not be weakened:
 **AC-TRANSPORT-049 — Creation result adaptation.** Given the generic dispatch, when `create` is called with a single values mapping, then the result is an integer; when it is called with a list of two mappings, then the result is an array of two integers in the same order.
 
 **AC-TRANSPORT-050 — Extra parameters are ignored.** Given a page endpoint that accepts one parameter, when the client sends that parameter plus two unknown ones, then the endpoint runs normally and the unknown parameters are dropped.
+
+## 16. Reconciliation notes
+
+Where the two drafts merged into this document differed from each other or from the behaviour of the system, the point
+was settled against the source of the system and against the generated catalogue
+[`../references/routes.md`](../references/routes.md). The resolutions:
+
+1. **The desktop client entry path.** This document writes it `/app`, with `/app/<path>` and `/app/offline`. The other
+   draft of the interface documents wrote it `/system`. `/app` is the spelling the generated catalogue of routes
+   carries, and [`endpoint-catalog.md`](endpoint-catalog.md) has been aligned on it. Section 1.1 already states that this
+   path and the database-selection header are deployment-chosen spellings.
+2. **The cross-site token exemption.** One draft referred the reader to "section 9" for the markup remote call
+   endpoints; they are specified in section 10.1, and the reference has been corrected. The number of page-transport
+   endpoints that switch the check off is sixty-five, and they are characterised in
+   [`endpoint-catalog.md`](endpoint-catalog.md).
+3. **The alternative remote call protocols.** One draft introduced section 10 as existing "for integrations written
+   against the older conventions". That is a statement about history, not about behaviour. The section now states what
+   is true of the system now: the two entry points are fully supported, they authenticate with a password on every call
+   and create no session, and an integration that is free to choose uses the direct remote call transport of section
+   3.3 because it authenticates with an application key.
+4. **The grouped read.** A generic operation named `read_group` exists on every entity but is marked as superseded and
+   is therefore not described anywhere in this repository. The operations a rebuild must expose are
+   `formatted_read_group`, `formatted_read_grouping_sets` and the screen-level `web_read_group`, all specified in
+   [`service-layer.md`](service-layer.md).
+5. **The plain entity operations over the transport.** One draft gave the transport form of the four screen composites
+   only. Section 9.6 now also gives the positional and named argument placement of the plain entity operations
+   (creation, reading, writing, deletion, copying, searching, counting, combined search and read, name search, field
+   description, default values, grouped read, access probe, metadata, export and import), because how the record keys
+   are placed in the argument list is a transport fact that an integration cannot guess.
+6. **Algorithms written as code.** The login cooldown, the cross-site token computation, the token validation and the
+   retry loop were written as pseudo-code blocks. They are now numbered procedures with a labelled formula and a worked
+   example where arithmetic is involved, as the documentation rules require.

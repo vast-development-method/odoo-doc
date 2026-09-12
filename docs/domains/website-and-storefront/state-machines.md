@@ -140,10 +140,10 @@ stateDiagram-v2
 
 | From | To | Trigger | Guards | Side effects |
 |---|---|---|---|---|
-| No theme | Theme applied | Choose a theme | Editor and Designer | The default style configuration is reset; the pointer is set **before** the installation; the upstream chain is upgraded or installed; templates are copied for this site in the fixed order; the post-copy hook runs; the designer is redirected to the site. |
+| No theme | Theme applied | Choose a theme | Editor and Designer | The default style configuration is reset; the pointer is set **before** the installation; the chain of packages the theme depends on is upgraded or installed; templates are copied for this site in the fixed order; the post-copy hook runs; the designer is redirected to the site. |
 | Theme A | Theme B | Choose another theme | Editor and Designer | Theme A's stream is unloaded in reverse installation order and its copies deleted; then the flow above runs for B. |
 | Theme A | No theme | Remove the theme | Editor and Designer | The default style configuration is reset; A's stream is unloaded; the pointer is cleared. |
-| Theme A | Theme A | Refresh the theme | Editor and Designer | A's upstream chain is upgraded, which reloads the templates on the installation write. |
+| Theme A | Theme A | Refresh the theme | Editor and Designer | the chain of packages theme A depends on is upgraded, which reloads the templates on the installation write. |
 | Theme A | Theme A plus extension | A package extending A is installed | automatic | The extension is loaded for every site whose theme is in the same stream; when the installation was started from the interface, a configuration parameter narrows the scope to the current site. |
 
 ```mermaid

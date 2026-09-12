@@ -89,6 +89,9 @@ label output.
 
 ### Paper formats
 
+The installation ships eighteen named paper formats besides the one a company may define for itself. Page shrinking is
+disabled on the label and ticket formats, in order that a label prints at its exact size.
+
 | Paper format | Page | Orientation | Margins top / bottom / left / right (millimetres) | Header spacing | Header rule | Resolution (dots per inch) |
 |---|---|---|---|---|---|---|
 | A4 (default) | A4 | portrait | 52 / 32 / 0 / 0 | 52 | no | 90 |
@@ -109,9 +112,13 @@ label output.
 | A4 label sheet | A4 | portrait | 0 / 0 / 0 / 0 | none | none | 96 |
 | Small label roll | custom, 32 by 57 millimetres | landscape | 0 / 0 / 0 / 0 | none | none | 96 |
 | Certification | A4 | landscape | 0 / 0 / 0 / 0 | 0 | no | 96 |
-| Exhibitor page | default page | default | bottom 29 | none | none | default |
 
-A company may define its own paper format; it then applies to every document that does not name one.
+One format is amended rather than added when a further capability package is installed: the bottom margin of the event
+full page ticket format becomes 29 millimetres instead of 8 when the exhibitor capability is installed, in order to
+leave room for the sponsor images printed at the foot of the ticket.
+
+A company may define its own paper format; it then applies to every document that does not name one. When neither the
+report nor the company names one, the default A4 format is used.
 
 ### Reading the catalog
 
@@ -590,14 +597,14 @@ are printed under their template when the report is asked for templates.
 Entity: Event Registration. Output: portable document. Paper format: event full page ticket. File name: "Full Page
 Ticket - &lt;event&gt; - &lt;attendee&gt;". Print menu: registrations. Prints the event name, its dates and place, the
 attendee name and electronic mail address, the ticket type, the registration reference as a two-dimensional code for
-scanning at the door, and the event description block authored by the organizer. A second definition prints the same
+scanning at the door, and the event description block authored by the organizer. A second definition, catalogued as **Full Page Ticket Example**, prints the same
 ticket for an event rather than a registration, filled with sample values, to preview the layout.
 
 #### Badge
 
 Entity: Event Registration. Output: portable document. Paper format: event badge. File name: "Badge - &lt;event&gt; -
 &lt;attendee&gt;". Prints the attendee name, the company, the ticket type and the registration barcode, in the badge
-format chosen on the event: one badge per page, four badges per sheet, or the folded format. A second definition prints
+format chosen on the event: one badge per page, four badges per sheet, or the folded format. A second definition, catalogued as **Badge Example**, prints
 the same badge for an event with sample values.
 
 #### Responsive ticket
@@ -711,8 +718,8 @@ offered. When the mode is off, the column headers are the translated labels.
 **Grouped export.** When the list is grouped and the format supports it, the export keeps the grouping: each group
 becomes a header row carrying the group label, the record count and the aggregated values of the numeric columns
 (sum, or average for fields declared as averages), and the records of the group follow indented under it. Nested groups
-produce nested headers. The comma-separated format refuses a grouped export with the message "Exporting grouped data to
-comma-separated values is not supported."
+produce nested headers. The comma-separated format refuses a grouped export with the message, reproduced verbatim,
+`"Exporting grouped data to csv is not supported."`
 
 **Row production.** Records are read in the order of the list. Values are converted with the export conversion of each
 field type: a date as its stored date, a date and time as the stored moment converted to the time zone of the user, a
@@ -988,45 +995,86 @@ that would collide are suffixed with a counter in order that every member keeps 
 
 ### Acceptance criteria
 
-```
-Given a posted customer invoice with two lines, one of which carries a discount
-When the invoice document is printed
-Then the line table shows the Discount column
-And the totals show the untaxed amount, one row per tax group, and the total
-And the rendered file is stored on the invoice under the invoice reference
-And printing it again returns the stored file byte for byte
-```
+**AC-REPORT-001 — Invoice document content and storage.** Given a posted customer invoice with two lines, one of which
+carries a discount, when the invoice document is printed, then the line table shows the Discount column, the totals show
+the untaxed amount, one row per tax group and the total, the rendered file is stored on the invoice under the invoice
+reference, and printing it again returns the stored file byte for byte.
 
-```
-Given an invoice addressed to a customer whose language is French
-When the invoice document is printed by a user whose language is English
-Then the document is rendered in French, including the field labels, the payment term note and the terms and conditions
-```
+**AC-REPORT-002 — Language of a printed document.** Given an invoice addressed to a customer whose language is French,
+when the invoice document is printed by a user whose language is English, then the document is rendered in French,
+including the field labels, the payment term note and the terms and conditions.
 
-```
-Given a list of two hundred contacts grouped by country
-When the user exports the list to a spreadsheet workbook with the fields Name and City
-Then the file contains one header row per country carrying the country label and the record count
-And the contacts of each country follow under their header
-```
+**AC-REPORT-003 — Grouped export to a workbook.** Given a list of two hundred contacts grouped by country, when the user
+exports the list to a spreadsheet workbook with the fields Name and City, then the file contains one header row per
+country carrying the country label and the record count, and the contacts of each country follow under their header.
 
-```
-Given the same list
-When the user exports it to a comma-separated values file
-Then the export is refused with the message "Exporting grouped data to comma-separated values is not supported."
-```
+**AC-REPORT-004 — Grouped export to the flat format.** Given the same list, when the user exports it to a
+comma-separated values file, then the export is refused with the message `"Exporting grouped data to csv is not
+supported."`.
 
-```
-Given an import file whose first column is headed "Customer" and whose values are customer names
-And a previous import of the same entity mapped the header "Customer" to the partner field
-When the user opens the mapping step
-Then the column is proposed as the partner field without any user action
-```
+**AC-REPORT-005 — Remembered column mapping.** Given an import file whose first column is headed "Customer" and whose
+values are customer names, and a previous import of the same entity that mapped the header "Customer" to the partner
+field, when the user opens the mapping step, then the column is proposed as the partner field without any user action.
 
-```
-Given an import file of ten rows where row seven carries a date that does not parse
-When the user runs a test import
-Then no record is written
-And the result carries one error message naming row seven, the field and the unparseable value
-And the other nine rows are reported as importable
-```
+**AC-REPORT-006 — Test run of an import.** Given an import file of ten rows where row seven carries a date that does not
+parse, when the user runs a test import, then no record is written, the result carries one error message naming row
+seven, the field and the unparseable value, and the other nine rows are reported as importable.
+
+**AC-REPORT-007 — Access is enforced by the renderer.** Given a user who may not read one of three selected invoices,
+when the invoice document is printed for the three of them, then the whole request fails with the access refusal and no
+file is produced for the two readable ones.
+
+**AC-REPORT-008 — A report restricted to a group.** Given a report definition restricted to an access group and a user
+outside it, when the user opens the print menu of the entity, then the report is not listed, and invoking it directly
+fails with the access refusal.
+
+**AC-REPORT-009 — Paper format selection.** Given a report definition that names its own paper format and a company that
+declares a different default, when the report is rendered, then the report's own paper format decides the page size, the
+orientation and the margins, and the company default is ignored.
+
+**AC-REPORT-010 — Layout selection.** Given a company whose document layout is the second of the shipped layouts, when
+any report that uses the external layout is rendered, then the header, the footer, the colours and the font of that
+layout are applied, and the preview action renders the same sample with the same layout.
+
+**AC-REPORT-011 — Page numbering.** Given a document that spans three pages, when it is rendered in the portable form,
+then each page carries its number over the page count; when the same document is rendered as markup, then no page
+numbering appears.
+
+**AC-REPORT-012 — Re-importable export round trip.** Given twenty contacts exported in the re-importable mode with the
+external identifier column, when the produced file is imported into the same installation without any change, then the
+same twenty records are updated, none is created, and the answer reports twenty identifiers.
+
+**AC-REPORT-013 — Formula protection in the flat form.** Given a contact whose name begins with an equals sign, when the
+list is exported to the comma-separated form, then the cell is prefixed with an apostrophe.
+
+**AC-REPORT-014 — Empty cells on import.** Given an import file with a column declared as one whose empty cells
+overwrite and a row whose cell in that column is empty, when the file is imported, then the stored value of that field
+is cleared; given the same file with the column not so declared, then the stored value is left untouched.
+
+**AC-REPORT-015 — Structured invoice download.** Given a posted customer invoice, when the structured form is requested
+for it alone, then one file is returned; when it is requested for three invoices, then a compressed archive of three
+files is returned; when it is requested for an invoice whose data cannot produce the structured form, then the request
+fails and the answer names the reasons.
+
+## Reconciliation notes
+
+The drafts merged into this document were checked against the source of the system and against the generated catalogue
+[`../references/reports.md`](../references/reports.md), which lists the ninety-four report definitions with their
+entity, output kind, template, file-name rule and attachment rule. The points that had to be settled:
+
+1. **The refusal message of a grouped flat export.** One draft paraphrased it as "Exporting grouped data to
+   comma-separated values is not supported." The message the system shows, reproduced verbatim, is `"Exporting grouped
+   data to csv is not supported."`; the abbreviation is part of the string and is therefore kept. The other interface
+   documents already quoted it correctly.
+2. **The paper format table.** One draft listed nineteen rows, of which one, an "exhibitor page" format, is not a
+   format of its own: it is an amendment that a further capability package makes to the event full page ticket format,
+   raising its bottom margin from 8 to 29 millimetres to leave room for the sponsor images. The table now lists the
+   eighteen formats the installation ships and states the amendment underneath.
+3. **Two document variants were described but not findable by their catalogued name.** The sample ticket and the sample
+   badge printed from an event rather than from a registration are described inside the ticket and badge entries; their
+   catalogued names are now given there, so that every one of the ninety-four rows of the catalogue can be traced to the
+   paragraph that describes it.
+4. **Acceptance criteria.** One draft ended with six unnumbered scenarios in plain blocks. They are now numbered
+   scenarios with stable identifiers, and nine further scenarios were added to cover access enforcement, group-restricted
+   reports, paper format selection, layout selection, page numbering, the re-importable round trip, formula protection,
+   the two kinds of empty cell on import, and the structured invoice download.

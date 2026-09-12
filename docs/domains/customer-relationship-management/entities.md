@@ -132,7 +132,7 @@ All monetary fields in this block are expressed in `company_currency` (company c
 | Job position (`function`) | single line text | Computed from `partner_id`, writable, stored. |
 | Electronic mail address (`email_from`) | single line text | Trigram-indexed. Tracked with tracking order 40. Computed from `partner_id.email`, writable, stored, with an inverse that writes back to the Contact. |
 | Normalised electronic mail address (`email_normalized`) | single line text | Trigram-indexed. Maintained by the blacklist machinery from `email_from`: the address stripped of its display name and lower-cased. |
-| Electronic mail domain criterion (`email_domain_criterion`) | single line text | Computed and stored from `email_normalized`, read-only, indexed with a partial index that skips empty values. Holds the organisational domain of the address, and is empty for addresses whose domain is a free public provider. Used for duplicate detection by company. |
+| Electronic mail domain criterion (`email_domain_criterion`) | single line text | Computed and stored from `email_normalized`, read-only, indexed with a partial index that skips empty values. Holds an at sign followed by the organisational domain of the address; for an address whose domain is a well-known free public provider, and for a value that contains no at sign at all, it holds the whole normalised address instead. Used for duplicate detection by company. See section 1.4.13. |
 | Telephone (`phone`) | single line text | Tracked with tracking order 50. Computed from `partner_id.phone`, writable, stored, with an inverse that writes back to the Contact. Reformatted to international notation when the telephone, the country or the company changes in the form. |
 | Sanitised telephone (`phone_sanitized`) | single line text | Maintained by the telephone mixin: the number in international notation with no separators, or empty when it cannot be parsed. Indexed with a partial index that skips empty values. |
 | Telephone quality (`phone_state`) | selection | Computed and stored from `phone` and `country_id.code`. Values `correct`, `incorrect`, or empty when there is no telephone number. |
@@ -206,10 +206,10 @@ Contact or none is. See `calculations.md` for the exact rule.
 | Sessions (`visitor_sessions_count`) | integer | Website form | Not stored. The number of visit sessions of all associated visitors. |
 | Originating live chat channel (`origin_channel_id`) | link to Discussion Channel | Live chat | Read-only, indexed with a partial index that skips empty values. Set when the lead is produced by a chat script step or by the operator command. |
 | Enrichment done (`iap_enrich_done`) | boolean | Enrichment | True once the enrichment service has been called for this lead, whether or not it returned data. |
-| Allow manual enrichment (`show_enrich_button`) | boolean | Enrichment | Not stored. True when the lead is active, has an electronic mail address, is not yet enriched, and the enrichment setting is on demand. |
+| Allow manual enrichment (`show_enrich_button`) | boolean | Enrichment | Not stored; depends on `email_from`, `probability`, `iap_enrich_done` and `reveal_id`. False when the record is archived, **or** has no electronic mail address, **or** its electronic mail quality is `incorrect`, **or** it has already been enriched, **or** it carries a service company identifier (it came from the identification service), **or** its probability is exactly one hundred. True otherwise. The manual enrichment control on the form is shown when this flag is true; the enrichment mode setting does not take part in the flag. |
 | Lead generation request (`lead_mining_request_id`) | link to Lead Generation Request | Lead generation | Indexed. The request that produced this lead. On delete: set to empty. |
 | Assigned partner (`partner_assigned_id`) | link to Contact | Partner network | Tracked. Indexed. The reselling partner the opportunity has been forwarded to. On delete: set to empty. |
-| Partner assignment date (`date_partner_assign`) | date | Partner network | The date the opportunity was last forwarded to a partner. |
+| Partner assignment date (`date_partner_assign`) | date | Partner network | Computed from `partner_assigned_id`, writable, stored, **copied** on duplication. Set to today's date in the reader's time zone whenever an assigned partner is present, and cleared when the assigned partner is cleared. |
 | Partners not interested (`partner_declined_ids`) | many-sided link to Contact | Partner network | Partners that explicitly declined the opportunity. |
 | Geographic latitude (`partner_latitude`) | decimal | Partner network | The latitude used for the nearest-partner search. |
 | Geographic longitude (`partner_longitude`) | decimal | Partner network | The longitude used for the nearest-partner search. |
@@ -218,6 +218,10 @@ Contact or none is. See `calculations.md` for the exact rule.
 | Source registrations (`registration_ids`) | many-sided link to Event Registration | Events coupling | The registrations that triggered the rule. |
 | Registration count (`registration_count`) | integer | Events coupling | Not stored. The number of those registrations. |
 | Originating survey (`origin_survey_id`) | link to Survey | Survey coupling | The survey whose completion produced this lead. |
+| Service company identifier (`reveal_id`) | single line text | Lead generation and website identification | Indexed with a partial index that skips empty values. The identifier the company data service assigned to the company. It is used to avoid buying the same company twice and it suppresses the manual enrichment control. |
+| Originating network address (`reveal_ip`) | single line text | Website identification | The address of the visit that produced the lead. |
+| Identification credits consumed (`reveal_iap_credits`) | integer | Website identification | The number of service credits the identification consumed for this lead. Available as a measure in the pivot and graph presentations. |
+| Lead generation rule (`reveal_rule_id`) | link to Lead Generation Rule | Website identification | Indexed with a partial index that skips empty values. The rule that produced this lead. |
 
 #### 1.3.12 Fields contributed by the discussion, activity and blacklist machinery
 
@@ -335,9 +339,23 @@ Identical in shape to the electronic mail address, using the telephone update te
 
 #### 1.4.13 Electronic mail domain criterion (`email_domain_criterion`)
 
-Depends on `email_normalized`. Empty when there is no normalised address. Otherwise the result of
-the domain-preparation routine, which returns the domain part of the address unless that domain is
-a well-known free public provider, in which case it returns nothing.
+Depends on `email_normalized`. The rule is the domain-preparation routine:
+
+1. When `email_normalized` is empty, the criterion is empty.
+2. Otherwise take the normalised address; when the value cannot be normalised, take the raw address
+   folded to lower case.
+3. If that text contains no at sign, the criterion is the whole text.
+4. Otherwise the domain is the part after the **last** at sign. When that domain is **not** one of
+   the well-known free public provider domains, the criterion is an at sign followed by the domain,
+   for example `@northwind-parts.example`.
+5. When the domain **is** a free public provider domain, the criterion is the whole address, so that
+   two different individuals at the same public provider are never grouped, while two Leads carrying
+   the *same* public address still are.
+
+Worked examples: `robert.poilvert@mycompany.example` yields `@mycompany.example`;
+`accounting@mycompany.example` yields `@mycompany.example` as well, so the two Leads are potential
+duplicates of each other; `robert.poilvert@gmail.example` yields `robert.poilvert@gmail.example` in
+full; a value with no at sign, such as `not-an-address`, yields `not-an-address`.
 
 #### 1.4.14 Telephone quality (`phone_state`)
 
@@ -445,6 +463,38 @@ longer exists. Only then is the record removed.
 
 Deletion is restricted by access rights: salespeople may create and modify leads but may not delete
 them; only the sales administrator group may.
+
+### 1.11 Behaviour of the form as the user types
+
+These reactions happen in the form before anything is saved.
+
+| Trigger | Effect |
+|---|---|
+| The user sets `commercial_partner_id` (customer company) while a Contact is already linked and the chosen company is **not** the commercial entity of that Contact | `partner_id`, `email_from` and `phone` are cleared, and the chosen company is written back into `commercial_partner_id`, so that the user can pick a fresh contact under that company. |
+| The user sets `commercial_partner_id` while `name` is still empty | `name` becomes "*the company name*'s opportunity". |
+| The user edits `phone`, `country_id` or `company_id` | `phone` is rewritten in international notation when it can be parsed with the record's country; when it cannot be parsed it is left exactly as typed. |
+| The user types a recurring revenue different from zero | `recurring_plan` becomes required and the record cannot be saved until a plan is chosen. |
+
+### 1.12 Life cycle summary of a write
+
+| Step | What happens |
+|---|---|
+| Create | The website text is cleaned. The derived fields are computed in this order: team, company, stage, the contact block taken from the Contact, then the probability. When the record lands directly in a stage flagged as won and carries no closed date, the closed date is stamped. When the calling context imposed no Contact and only a customer company was supplied, the rule of section 1.12.1 decides whether that company becomes the Contact or only fills the company name. The outcome bookkeeping then runs with an empty previous state, so a record created won or created lost adjusts the frequency table immediately. A creation message is posted. |
+| Write | The date rules of `state-machines.md` section 9 apply, then the won-stage forcing, then the outcome bookkeeping and the frequency adjustments. |
+| Duplicate | See section 1.9. |
+| Archive | Only sets `active` to false. Combined with a probability of zero this means lost. |
+| Unarchive | Clears `lost_reason_id` and recomputes `automated_probability` for every record that was actually inactive. |
+| Delete | Every Meeting that points at the record through the generic document reference is detached first. |
+
+#### 1.12.1 Creating with a customer company but no Contact
+
+When a Lead is created with a value in `commercial_partner_id` and no `partner_id`, and the calling
+context did not impose a default Contact:
+
+1. If the lead has neither a telephone nor an electronic mail address, **or** both of them match the
+   company's telephone and address, the company itself becomes `partner_id`.
+2. Otherwise only `partner_name` is filled from the company's name and the record stays without a
+   Contact.
 
 ---
 
@@ -788,19 +838,19 @@ The created Contact receives:
      name using the values of section 8.7;
    - otherwise, if the lead already has a Contact, that Contact;
    - otherwise nothing.
-3. If an individual's name was determined, **create** a Contact with that name, not flagged as a
-   company, whose parent is the organisation Contact determined above (possibly empty), and return
-   it.
-4. Otherwise, if an organisation Contact exists, return it.
-5. Otherwise, **create** a Contact named after the lead's title, not flagged as a company, and
-   return it.
+3. If an individual's name was determined, the answer is a newly **created** Contact with that name,
+   not flagged as a company, whose parent is the organisation Contact determined above (possibly
+   empty).
+4. Otherwise, if an organisation Contact exists, that organisation Contact is the answer.
+5. Otherwise the answer is a newly **created** Contact named after the lead's title and not flagged
+   as a company.
 
 ### 8.9 Matching an existing Contact
 
-1. If the lead already has a Contact, return it.
+1. If the lead already has a Contact, that Contact is the answer.
 2. Otherwise, if the lead has a normalised or raw electronic mail address, look up a Contact by
-   that address **without creating one**, and return the result.
-3. Otherwise return nothing.
+   that address **without creating one**; the outcome of that lookup is the answer.
+3. Otherwise the answer is empty.
 
 ---
 
@@ -892,6 +942,7 @@ Interaction rules:
 | Company of members | For a team that has a company, every active member must have that company among their allowed companies. | "The following team members are not allowed in company '*the company*' of the Sales Team '*the team*': *the user names*" |
 | Assignment domain | The stored filter expression must parse and must be usable as a search filter on leads. | "Assignment domain for team *the team* is incorrectly formatted" |
 | Default teams | The teams "Website" and "Point of Sale" may not be deleted. | "Cannot delete default team "*the team name*"" |
+| Team in active use by sales | Where the sales capability is installed, a team whose count of active sales orders is **five or more** may not be deleted. | "Team *the team name* has *the count* active sale orders. Consider cancelling them or archiving the team instead." |
 
 ### 9.9 Deletion behaviour — folding the frequency table
 
@@ -1180,9 +1231,24 @@ it remains visible in the same selection list afterwards.
 ### 13.4 Partner Assignment Analysis
 
 **Partner Assignment Analysis** (`crm.partner.report.assign`, database view
-`crm_partner_report_assign`). A read-only aggregation of Contacts with, per Contact, the level,
-the activation, the country, the number of opportunities assigned to them and the date of the last
-assignment. Used to monitor how work is spread across the partner network.
+`crm_partner_report_assign`). A read-only aggregation built from the Contacts that carry a level or
+an activation, joined with the opportunities forwarded to them and with the customer invoice
+analysis. One row is one partner. Every column is read-only.
+
+| Column (storage name) | Full name | Source |
+|---|---|---|
+| `partner_id` | Partner | the Contact |
+| `grade_id` | Level | its partner level |
+| `activation` | Activation | its activation, indexed |
+| `user_id` | Salesperson | the salesperson of the Contact |
+| `date_review` | Latest partner review | the latest review date |
+| `date_partnership` | Partnership date | the date the partnership started |
+| `country_id` | Country | the country of the Contact |
+| `nbr_opportunities` | Number of opportunities | the number of opportunities forwarded to the partner |
+| `turnover` | Turnover | the invoiced amount attached to the partner, read from the customer invoice analysis |
+| `date` | Invoice accounting date | the accounting date of the invoice rows |
+
+The delivered navigation restricts the view to rows whose level is set and presents it as a graph.
 
 ### 13.5 Forward to Partner Wizard
 
@@ -1190,9 +1256,24 @@ assignment. Used to monitor how work is spread across the partner network.
 opportunities to one or more reselling partners by electronic mail, using a template, and records
 the forwarding on each opportunity.
 
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Forward selected leads to (`forward_type`) | selection | Values `single` labelled "a single partner: manual selection of partner" and `assigned` labelled "several partners: automatic assignment, using GPS coordinates and partner's grades". Default: the value imposed by the calling context, otherwise `single`. The two labels are reproduced verbatim because they are what the screen shows. |
+| Forward leads to (`partner_id`) | link to Contact | The single recipient in `single` mode. Defaulted from the assigned partner of the first selected opportunity. |
+| Partner assignment (`assignation_lines`) | reverse link to Lead Assignation Line | One line per selected opportunity. |
+| Contents (`body`) | rich text | The message body, sanitised. Defaulted from the body of the forwarding message template. |
+
 **Lead Assignation Line** (`crm.lead.assignation`, transient). One proposed pairing of an
-opportunity with a partner inside that wizard, carrying the lead, the proposed partner and the
-rendered message body.
+opportunity with a partner inside that wizard.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Partner assignment (`forward_id`) | link to Forward to Partner Wizard | The parent wizard record. |
+| Lead (`lead_id`) | link to Lead | The opportunity being forwarded. |
+| Lead location (`lead_location`) | single line text | Computed at creation and refreshed when the lead changes: the country name and the city of the opportunity, separated by a comma. |
+| Assigned partner (`partner_assigned_id`) | link to Contact | The proposed partner. In `assigned` mode it comes from the geographic search; in `single` mode it is the partner already carried by the opportunity. |
+| Partner location (`partner_location`) | single line text | Refreshed when the proposed partner changes: the country name and the city of the partner, separated by a comma. |
+| Link to lead (`lead_link`) | single line text | Computed at creation: the public address of the opportunity in the partner portal, built as the base web address followed by `/my/lead/` or `/my/opportunity/` and the record identifier. |
 
 ---
 
@@ -1285,14 +1366,30 @@ be deleted — Email, Direct, Website, X, Facebook and LinkedIn — with the mes
 delete the Medium '*the name*'. Doing so would be like tearing down a load-bearing wall — not the
 best idea."
 
-### 15.4 Campaign Stage and Campaign Tag
+### 15.4 Campaign Stage, Campaign Tag and the source mixin
 
 | Entity | Fields |
 |---|---|
 | Campaign Stage (`utm.stage`) | Name (`name`, required, translatable), Sequence (`sequence`, default 1). Ordered by sequence. |
 | Campaign Tag (`utm.tag`) | Name (`name`, required, translatable, **unique** — "Tag name already exists!"), Colour (`color`, default a pseudo-random integer between 1 and 11). Ordered by name. |
 
-### 15.5 The attribution mixin
+**Source mixin** (`utm.source.mixin`) is an abstract entity reused by records that are themselves a
+traffic source, such as a mass mailing. It carries `source_id` (source), which is **required**, is
+**not copied** on duplication and is restrictive on delete, and `name` (name), related to the name
+of that Source. Creating such a record creates the Source when it is missing and names it after the
+record's own content; duplicating one increments the bracketed counter of the source name using the
+unique-name counter of `calculations.md`.
+
+### 15.5 The attribution mixin (`utm.mixin`)
+
+The campaign attribution mixin (`utm.mixin`) is an abstract entity: it has no table of its own and
+contributes its three fields to every entity that reuses it, the Lead among them.
+
+| Field (storage name) | Full name | Type | Meaning |
+|---|---|---|---|
+| `campaign_id` | Campaign | link to Campaign | The named effort that produced the record. |
+| `source_id` | Source | link to Source | The origin of the link that produced the visit. |
+| `medium_id` | Medium | link to Medium | The delivery method of that link. |
 
 Every record that can be attributed carries three links — campaign, source and medium — each
 indexed with a partial index that skips empty values. On the Lead these three are additionally
@@ -1381,3 +1478,354 @@ inactive; merging two visitors moves the leads onto the surviving visitor.
 
 Both computations raise an access error for a user who is not a salesperson, which the digest
 machinery treats as "omit this figure for this recipient".
+
+### 16.8 Company
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Partnership label (`partnership_label`) | single line text | Translatable. Default "Members". The word a deployment uses to name its affiliates — for example "Partners", "Members" or "Alumni". It is shown in the affiliate menu, on the level screens and on the price list screen. |
+
+### 16.9 Product Template and Price List
+
+| Entity | Field (storage name) | Type | Meaning |
+|---|---|---|---|
+| Product Template | Create on order (`service_tracking`) | selection | Extended with the value `partnership`, labelled "Membership / Partnership". Selling such a product grants a partner level to the customer. When the membership capability is removed the value falls back to the default. |
+| Product Template | Assigned level (`grade_id`) | link to Partner Grade | The level the product grants. |
+| Price List | Partners count (`partners_count`) | integer | Not stored. The number of Contacts using this price list as their own. |
+| Price List | Partners label (`partners_label`) | single line text | Related to the company's partnership label. |
+
+### 16.10 Sales Order — the level granted by an order
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Assigned level (`assigned_grade_id`) | link to Partner Grade | Not stored. Computed from the order lines: the single level carried by the lines whose service tracking is `partnership`. Confirming the order writes that level onto the commercial entity of the customer. |
+
+A validation on the order lines refuses an order that would grant two different levels: "You cannot
+confirm Sale Order *the order reference* because there are products assigning different grades."
+
+### 16.11 Discussion Channel, Chatbot Script and Chatbot Script Step
+
+| Entity | Field (storage name) | Type | Meaning |
+|---|---|---|---|
+| Chatbot Script | Leads (`lead_count`) | integer | Not stored. The number of Leads whose source is the source of the script. A navigation control opens them. |
+| Chatbot Script Step | Step type (`step_type`) | selection | Extended with `create_lead` labelled "Create Lead" and `create_lead_and_forward` labelled "Create Lead & Forward". Deleting the referenced record cascades for both values. |
+| Chatbot Script Step | Sales Team (`crm_team_id`) | link to Sales Team | Indexed with a partial index that skips empty values. On delete: set to empty. The team written on the Lead the step creates. |
+
+The step type `create_lead_and_forward` also counts as an operator-forwarding step, so the
+conversation is handed to a human afterwards.
+
+### 16.12 Survey, Survey Question, Survey Answer Option and Survey Participation
+
+| Entity | Field (storage name) | Type | Meaning |
+|---|---|---|---|
+| Survey | Lead generating (`generate_lead`) | boolean | Computed and stored. True when at least one answer option of the survey generates a Lead. |
+| Survey | Leads (`lead_ids`) | reverse link to Lead | The Leads produced by the survey. |
+| Survey | Leads (`lead_count`) | integer | Not stored. Their number. |
+| Survey | Sales Team (`team_id`) | link to Sales Team | The team written on the Leads produced by the survey. |
+| Survey Question | Survey type (`survey_type`) | selection | Related to the survey. |
+| Survey Question | Lead generating (`generate_lead`) | boolean | Not stored. True when at least one answer option of the question generates a Lead. |
+| Survey Answer Option | Lead creation (`generate_lead`) | boolean | Choosing this answer creates a Lead. |
+| Survey Participation | Lead (`lead_id`) | link to Lead | On delete: set to empty. The Lead the completed participation produced. |
+
+### 16.13 Event, Event Registration and Event Question Answer
+
+| Entity | Field (storage name) | Type | Meaning |
+|---|---|---|---|
+| Event | Leads (`lead_ids`) | reverse link to Lead | The Leads produced by the registrations of the event. |
+| Event | Leads count (`lead_count`) | integer | Not stored. Their number. |
+| Event Registration | Leads (`lead_ids`) | many-sided link to Lead | Read-only. The Leads produced from this registration. |
+| Event Registration | Leads count (`lead_count`) | integer | Not stored. |
+
+Behaviour: creating, confirming and marking attended a registration runs the matching Event Lead
+Rules; changing the contact data or the description of a registration updates the Leads already
+produced; the rules do **not** run while registrations are created by an import. An event manager
+may regenerate the Leads of an event; any other user is refused with "Only Event Managers are
+allowed to re-generate all leads."
+
+An Event Question Answer offers an **Add rules** control that opens the creation dialogue of an
+Event Lead Rule, pre-filled with the label of the answer option as the rule name, the acting user as
+the salesperson written on the created records, and a registration condition selecting the
+registrations that chose that answer option to that question. Nothing is written until the user
+saves the dialogue.
+
+### 16.14 Campaign and Mass Mailing
+
+| Entity | Field (storage name) | Type | Meaning |
+|---|---|---|---|
+| Campaign | Use leads (`use_leads`) | boolean | Not stored. True when the reader holds the group *Show Lead Menu*; decides which navigation target the lead control opens. |
+| Campaign | Leads and opportunities count (`crm_lead_count`) | integer | Not stored, visible to salespeople. Counts the Leads attributed to the campaign, archived ones included. |
+| Campaign | Winner selection (`ab_testing_winner_selection`) | selection | Extended with a value that picks the variant whose source produced the most Leads. The same extra value is added to the split-test criterion of the electronic mail variants and to the split-test criterion of the text message variants. |
+| Mass Mailing | Use leads (`use_leads`) | boolean | Not stored. |
+| Mass Mailing | Leads count (`crm_lead_count`) | integer | Not stored. Counts, with elevated rights and archived records included, the Leads whose source is the source of the mailing. |
+
+### 16.15 Live chat channel report
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| Leads created (`leads_created`) | integer | Read-only, aggregated as a sum. The number of Leads created from the conversations of the channel. |
+
+### 16.16 Activity
+
+An Activity gains no field. When a Meeting is created from an Activity whose meeting already points
+at an opportunity, the meeting defaults of that opportunity are merged into the creation context:
+the opportunity itself, the Contact of the opportunity as the default customer, the acting user's
+Contact plus that customer as the default attendees, the team of the opportunity and the title of
+the opportunity as the default title. The initial date offered is the start of the meeting that
+already exists, and the relevant-period heuristic of `interfaces.md` is deliberately not applied,
+because the period is already known.
+
+---
+
+## 17. Event lead generation entities
+
+These entities exist when the events coupling is installed.
+
+### 17.1 Event Lead Rule
+
+**Event Lead Rule** (`event.lead.rule`, table `event_lead_rule`). A rule that turns event
+registrations into Leads.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Rule name (`name`) | single line text | **Required.** Translatable. |
+| Active (`active`) | boolean | Default true. |
+| Created leads (`lead_ids`) | reverse link to Lead | Visible to salespeople. The Leads the rule produced. |
+| Create (`lead_creation_basis`) | selection | **Required.** Default `attendee`. Values `attendee` labelled "Per Attendee" — one Lead per registration — and `order` labelled "Per Order" — one Lead per batch of registrations. |
+| When (`lead_creation_trigger`) | selection | **Required.** Default `create`. Values `create` labelled "Attendees are created", `confirm` labelled "Attendees are registered", `done` labelled "Attendees attended". |
+| Event templates (`event_type_ids`) | many-sided link to Event Template | Restricts the rule to events of these categories. Empty means no category restriction. |
+| Event (`event_id`) | link to Event | Restricts the rule to one event. Restricted to events of the rule's company or of no company. |
+| Company (`company_id`) | link to Company | Restricts the rule to events of one company. Empty means no company restriction. |
+| Registrations condition (`event_registration_filter`) | long text | An extra stored filter expression applied to the registrations. |
+| Lead type (`lead_type`) | selection | **Required.** Values `lead` and `opportunity`. Default: `lead` when the acting user holds the group *Show Lead Menu*, otherwise `opportunity`. |
+| Sales Team (`lead_sales_team_id`) | link to Sales Team | On delete: set to empty. Written on the created Leads. |
+| Salesperson (`lead_user_id`) | link to User | Written on the created Leads. |
+| Tags (`lead_tag_ids`) | many-sided link to Tag | Added to the created Leads. |
+
+- **Ordering**: identifier. **Display name**: the rule name.
+- **On change**: choosing a Sales Team whose leader is set proposes that leader as the salesperson
+  written on the created records.
+- **Company scoping**: a record rule restricts a multi-company reader to rules whose company is
+  among the reader's enabled companies or is empty.
+
+**Which registrations one rule keeps.** A registration is kept when all three hold:
+
+1. the registrations condition is empty, is the empty filter, or the registration matches it;
+2. the rule has no company, or the registration's company is that company;
+3. the rule has neither an event nor an event template, **or** the registration's event is the
+   rule's event, **or** the category of the registration's event is one of the rule's event
+   templates.
+
+### 17.2 Event Lead Request
+
+**Event Lead Request** (`event.lead.request`, table `event_lead_request`). The bookkeeping record of
+a resumable batch run that regenerates the Leads of one event. It has no audit fields.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Event (`event_id`) | link to Event | **Required.** On delete: cascade. The event being processed. It is also the display name of the record. |
+| Lead rules (`event_lead_rule_ids`) | many-sided link to Event Lead Rule | The rules to apply. |
+| Processed registration (`processed_registration_id`) | integer | The identifier of the last processed registration, used to resume the run. |
+
+- **Ordering**: identifier ascending.
+- **Uniqueness**: one request per event, enforced by a stored rule — "You can only have one
+  generation request per event at a time."
+
+---
+
+## 18. Website identification entities
+
+These entities exist when the website identification capability is installed. They turn identified
+website traffic into Leads.
+
+### 18.1 Lead Generation Rule
+
+**Lead Generation Rule** (`crm.reveal.rule`, table `crm_reveal_rule`).
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Rule name (`name`) | single line text | **Required.** |
+| Active (`active`) | boolean | Default true. |
+| Countries (`country_ids`) | many-sided link to Country | Only visitors located in these countries are converted. Empty means every country. |
+| Website (`website_id`) | link to Website | Restricts the rule to one website. |
+| States (`state_ids`) | many-sided link to Country State | Only visitors located in these states are converted. |
+| Address expression (`regex_url`) | single line text | A pattern matched against the visited path. Empty tracks the whole site; a single slash targets the home page; a pattern such as a prefix followed by a star tracks every path beginning with that prefix. |
+| Sequence (`sequence`) | integer | Orders the rules that share a path pattern and a country; the lowest sequence is evaluated first. |
+| Industries (`industry_tag_ids`) | many-sided link to Industry | Empty always matches; otherwise no Lead is created when the identified company does not match. |
+| Filter on size (`filter_on_size`) | boolean | Default true. |
+| Size minimum (`company_size_min`) | integer | Default 0. |
+| Size maximum (`company_size_max`) | integer | Default 1000. |
+| Filter on (`contact_filter_type`) | selection | **Required.** Default `role`. Values `role` "Role" and `seniority` "Seniority". |
+| Preferred role (`preferred_role_id`) | link to Role | Used when filtering on role. |
+| Other roles (`other_role_ids`) | many-sided link to Role | Used when filtering on role. |
+| Seniority (`seniority_id`) | link to Seniority | Used when filtering on seniority. |
+| Number of contacts (`extra_contacts`) | integer | Default 1. The number of contacts tracked per identified company; each one consumes one service credit. |
+| Data tracking (`lead_for`) | selection | **Required.** Default `companies`. Values `companies` "Companies" and `people` "Companies and their Contacts". |
+| Type (`lead_type`) | selection | **Required.** Default `opportunity`. Values `lead` and `opportunity`. |
+| Suffix (`suffix`) | single line text | Appended to the title of the created records so that the rule can be recognised. |
+| Sales Team (`team_id`) | link to Sales Team | On delete: set to empty. Written on the created records. |
+| Tags (`tag_ids`) | many-sided link to Tag | Written on the created records. |
+| Salesperson (`user_id`) | link to User | Written on the created records. |
+| Priority (`priority`) | selection | Written on the created records. |
+| Generated leads (`lead_ids`) | reverse link to Lead | The records the rule produced. |
+| Number of generated leads (`lead_count`) | integer | Not stored. |
+| Number of generated opportunities (`opportunity_count`) | integer | Not stored. |
+
+- **Ordering**: sequence.
+- **Stored check** on the number of contacts: at least one and at most five — "Maximum 5 contacts
+  are allowed!"
+- **Programmed validation** on the address expression: the pattern must compile — "Enter Valid
+  Regex."
+- Creating, writing or deleting a rule clears the cached rule table used while serving pages.
+
+### 18.2 Reveal View
+
+**Reveal View** (`crm.reveal.view`, table `crm_reveal_view`). One visit of one network address to a
+page matched by a Lead Generation Rule, waiting to be resolved into a company.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Network address (`reveal_ip`) | single line text | The address the visit came from. It is the display name of the record. |
+| Lead generation rule (`reveal_rule_id`) | link to Lead Generation Rule | Indexed with a partial index that skips empty values. |
+| State (`reveal_state`) | selection | Default `to_process`. Values `to_process` "To Process" and `not_found` "Not Found". Indexed. |
+| Creation date (`create_date`) | date and time | Indexed; used to expire old rows. |
+
+- **Ordering**: identifier descending.
+- **Unique index** on the pair (`reveal_rule_id`, `reveal_ip`), so one address produces at most one
+  pending row per rule.
+- **Index** on the pair (`reveal_state`, `create_date`), which is what the scheduled job scans.
+
+---
+
+## 19. Telephone validation and blacklist entities
+
+These entities come with the telephone validation capability and are used by the Lead through the
+telephone mixin.
+
+### 19.1 Telephone blacklist
+
+**Telephone Blacklist** (`phone.blacklist`, table `phone_blacklist`). One blacklisted number.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Phone number (`number`) | single line text | **Required.** Stored in international notation with no separators. Tracked. Searchable through a dedicated search rule. It is the display name of the record. |
+| Active (`active`) | boolean | Default true. Tracked. Removing a number from the blacklist archives the record rather than deleting it. |
+
+- **Uniqueness**: a stored rule on the number — "Number already exists".
+- **Creation behaviour**: creating a number that already exists as an archived record reactivates
+  that record instead of creating a second one; creating one that already exists and is active
+  returns the existing record. A number that cannot be sanitised is refused with "*the parsing
+  error* Please correct the number and try again."
+- **Access**: only the system administration group may read or write it directly; every other path
+  goes through the add and remove operations.
+
+### 19.2 Remove a telephone number from the blacklist
+
+**Remove Telephone From Blacklist** (`phone.blacklist.remove`, transient). Asks for a reason before
+a number is taken off the blacklist.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Phone number (`phone`) | single line text | **Required**, read-only. The number being removed. |
+| Reason (`reason`) | single line text | Free text recorded with the removal. |
+
+Applying the wizard removes the number and posts the reason. A user without the right to
+un-blacklist is refused with "You do not have the access right to unblacklist phone numbers. Please
+contact your administrator."
+
+### 19.3 The telephone mixin
+
+**Telephone blacklist mixin** (`mail.thread.phone`) is an abstract entity. It contributes to the
+Lead:
+
+| Field (storage name) | Type | Meaning |
+|---|---|---|
+| `phone_sanitized` | single line text | Computed and stored. The primary telephone field of the record reduced to international notation with no separators, using the record's country and then the company's country as the parsing hint. Empty when the number cannot be parsed. |
+| `phone_sanitized_blacklisted` | boolean | Not stored, searchable, visible to internal users only. True when the sanitised number is on the telephone blacklist. |
+| `phone_blacklisted` | boolean | Not stored, visible to internal users only. Tells which of the record's number fields is the blacklisted one, for records that carry both a landline and a mobile number. |
+| `phone_mobile_search` | single line text | Not stored, searchable. A search over this field matches the raw number fields **and** the sanitised number, so that a search for a number written in international notation also finds records storing it in a local form. |
+
+Two refusals belong to the mixin: a search on the telephone with fewer than three characters is
+refused with "Please enter at least 3 characters when searching a Phone number."; a record that
+declares no primary telephone field is refused with "Missing definition of phone fields."
+
+---
+
+## 20. Lead enrichment helpers
+
+**Lead Enrichment Helpers** (`crm.iap.lead.helpers`, table `crm_iap_lead_helpers`). A stateless
+service entity with no field of its own, shared by the lead generation capability and by the website
+identification capability. Internal users have no access to it; it is only reachable from the
+operations that use it.
+
+| Operation | Inputs | Behaviour |
+|---|---|---|
+| Notify that credits are exhausted | the service name, the entity name, the name of the throttling parameter | Sends the delivered notification message to the buyers of the external credit account and records the instant in a system parameter, so that the same notification is not repeated inside the throttling window. |
+| Build record values from a service answer | the record type, the team, the tags, the salesperson, the company data and optionally the data of the first person | Produces the field values of a new Lead: the type, the team, the tags and the salesperson as supplied; the service company identifier; the title and the company name taken from the company name and falling back on the domain; the electronic mail address; the telephone; the website built as `https://` followed by the domain; and the six address fields with the country and the state resolved from their codes. When person data is supplied, the contact name, the electronic mail address and the job position of the first person override the company values. |
+| Resolve a state code | a state code and a country | Returns the state of that country whose code matches, and nothing when no state matches. |
+
+---
+
+## 21. Generated reference pages
+
+Every entity named above has a generated reference page carrying its complete field list, its
+constraints, its access rights and its views.
+
+| Entity | Reference page |
+|---|---|
+| Lead | [../../references/entities/crm.lead.md](../../references/entities/crm.lead.md) |
+| Stage | [../../references/entities/crm.stage.md](../../references/entities/crm.stage.md) |
+| Tag | [../../references/entities/crm.tag.md](../../references/entities/crm.tag.md) |
+| Lost Reason | [../../references/entities/crm.lost.reason.md](../../references/entities/crm.lost.reason.md) |
+| Recurring Plan | [../../references/entities/crm.recurring.plan.md](../../references/entities/crm.recurring.plan.md) |
+| Scoring Frequency | [../../references/entities/crm.lead.scoring.frequency.md](../../references/entities/crm.lead.scoring.frequency.md) |
+| Scoring Frequency Field | [../../references/entities/crm.lead.scoring.frequency.field.md](../../references/entities/crm.lead.scoring.frequency.field.md) |
+| Sales Team | [../../references/entities/crm.team.md](../../references/entities/crm.team.md) |
+| Sales Team Member | [../../references/entities/crm.team.member.md](../../references/entities/crm.team.member.md) |
+| Activity Analysis | [../../references/entities/crm.activity.report.md](../../references/entities/crm.activity.report.md) |
+| Convert to Opportunity Wizard | [../../references/entities/crm.lead2opportunity.partner.md](../../references/entities/crm.lead2opportunity.partner.md) |
+| Mass Convert Wizard | [../../references/entities/crm.lead2opportunity.partner.mass.md](../../references/entities/crm.lead2opportunity.partner.mass.md) |
+| Merge Wizard | [../../references/entities/crm.merge.opportunity.md](../../references/entities/crm.merge.opportunity.md) |
+| Lost Reason Wizard | [../../references/entities/crm.lead.lost.md](../../references/entities/crm.lead.lost.md) |
+| Probability Rebuild Wizard | [../../references/entities/crm.lead.pls.update.md](../../references/entities/crm.lead.pls.update.md) |
+| Quotation Contact Wizard | [../../references/entities/crm.quotation.partner.md](../../references/entities/crm.quotation.partner.md) |
+| Lead Generation Request | [../../references/entities/crm.iap.lead.mining.request.md](../../references/entities/crm.iap.lead.mining.request.md) |
+| Industry | [../../references/entities/crm.iap.lead.industry.md](../../references/entities/crm.iap.lead.industry.md) |
+| Role | [../../references/entities/crm.iap.lead.role.md](../../references/entities/crm.iap.lead.role.md) |
+| Seniority | [../../references/entities/crm.iap.lead.seniority.md](../../references/entities/crm.iap.lead.seniority.md) |
+| Lead Enrichment Helpers | [../../references/entities/crm.iap.lead.helpers.md](../../references/entities/crm.iap.lead.helpers.md) |
+| Partner Grade | [../../references/entities/res.partner.grade.md](../../references/entities/res.partner.grade.md) |
+| Partner Activation | [../../references/entities/res.partner.activation.md](../../references/entities/res.partner.activation.md) |
+| Partner Assignment Analysis | [../../references/entities/crm.partner.report.assign.md](../../references/entities/crm.partner.report.assign.md) |
+| Forward to Partner Wizard | [../../references/entities/crm.lead.forward.to.partner.md](../../references/entities/crm.lead.forward.to.partner.md) |
+| Lead Assignation Line | [../../references/entities/crm.lead.assignation.md](../../references/entities/crm.lead.assignation.md) |
+| Event Lead Rule | [../../references/entities/event.lead.rule.md](../../references/entities/event.lead.rule.md) |
+| Event Lead Request | [../../references/entities/event.lead.request.md](../../references/entities/event.lead.request.md) |
+| Lead Generation Rule | [../../references/entities/crm.reveal.rule.md](../../references/entities/crm.reveal.rule.md) |
+| Reveal View | [../../references/entities/crm.reveal.view.md](../../references/entities/crm.reveal.view.md) |
+| Telephone Blacklist | [../../references/entities/phone.blacklist.md](../../references/entities/phone.blacklist.md) |
+| Remove Telephone From Blacklist | [../../references/entities/phone.blacklist.remove.md](../../references/entities/phone.blacklist.remove.md) |
+| Telephone blacklist mixin | [../../references/entities/mail.thread.phone.md](../../references/entities/mail.thread.phone.md) |
+| Campaign | [../../references/entities/utm.campaign.md](../../references/entities/utm.campaign.md) |
+| Source | [../../references/entities/utm.source.md](../../references/entities/utm.source.md) |
+| Medium | [../../references/entities/utm.medium.md](../../references/entities/utm.medium.md) |
+| Campaign Stage | [../../references/entities/utm.stage.md](../../references/entities/utm.stage.md) |
+| Campaign Tag | [../../references/entities/utm.tag.md](../../references/entities/utm.tag.md) |
+| Attribution mixin | [../../references/entities/utm.mixin.md](../../references/entities/utm.mixin.md) |
+| Source mixin | [../../references/entities/utm.source.mixin.md](../../references/entities/utm.source.mixin.md) |
+
+---
+
+## 22. Reconciliation notes
+
+Two independently written descriptions of this domain were consolidated into this file. Where they
+agreed, the more precise wording was kept once. The differences that had to be resolved against the
+behaviour of the system are recorded here.
+
+| Subject | The two statements | Resolution |
+|---|---|---|
+| `email_domain_criterion` for a free public provider | One version said the criterion is **empty** for an address at a free public provider; the other said it is the **whole address**. | The whole address is correct. The domain-preparation routine returns the entire normalised address when the domain is a free public provider, and the entire text when there is no at sign at all. Section 1.4.13 now states this, and `calculations.md` was corrected in the same way. Consequence: two Leads carrying the *same* public address are still detected as duplicates, while two different individuals at that provider are not. |
+| `show_enrich_button` | One version made the flag depend on the enrichment mode setting; the other listed six record-level conditions. | The six record-level conditions are correct and the enrichment mode plays no part in the flag. Section 1.3.11 now lists them; the mode only decides whether the scheduled job runs. |
+| `date_partner_assign` | One version described a plain date field; the other described a stored computed field driven by the assigned partner. | The stored computed field is correct: it is recomputed from `partner_assigned_id`, remains writable, is copied on duplication, and is cleared when the assigned partner is cleared. |
+| Deleting a Sales Team that has sales orders | One version listed only the two delivered teams as undeletable; the other added a rule about active sales orders and described the threshold as "more than five". | Both rules exist. The threshold is **five or more** active sales orders, not more than five. Section 9.8 now carries both constraints with the corrected threshold. |
+| Naming of the frequency-table variables | One version wrote the variables as `stage`, `country`, `tag`; the other as `stage_id`, `country_id`, `tag_id`. | The storage names are contractual, so `stage_id`, `country_id`, `state_id`, `source_id`, `lang_id`, `email_state`, `phone_state` and the singular `tag_id` are used everywhere. |
+| Field naming convention | One version used descriptive canonical names such as `sales_team` and `probability_percentage`; the other reproduced the storage names. | The storage names are reproduced, because a rebuild that must import an existing database or serve an existing integration depends on them character for character. Every field table therefore carries the storage name and the full name in words. |
