@@ -4,10 +4,11 @@ Every operational procedure of the domain, end to end: actors, preconditions, nu
 
 ## 1. State machines
 
-The three state fields of this domain — the state of a Mass Mailing, the delivery status of a
-Mailing Trace and the share status of a Marketing Card — are specified completely, with every
-state, every transition, every guard, every refusal message and a diagram per machine, in
-[state-machines.md](state-machines.md). The procedures below name the states they move through and
+The state fields of this domain — the state of a Mass Mailing, the delivery status of a Mailing
+Trace, the share status of a Marketing Card, the reported state of the analytical view, the opt-out
+condition of a Mailing Subscription and the completion condition of a comparison-test Campaign — are
+specified completely, with every state, every transition, every guard, every refusal message and a
+diagram per machine, in [state-machines.md](state-machines.md). The procedures below name the states they move through and
 link to that document rather than repeating the tables.
 
 | Machine | Field | States | Specified in |
