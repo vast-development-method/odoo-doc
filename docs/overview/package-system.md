@@ -331,6 +331,8 @@ Refreshing requires the privilege to change configuration and is recorded in the
 
 **Category reconciliation** walks the current category chain of the record from root to leaf, fixing any ancestry loop it finds by clearing the offending parent link and recording a warning, then compares the resulting path with the manifest's slash-separated path. If they differ, the path is created segment by segment if necessary and the record is relinked.
 
+**Country reconciliation** compares the set of country records named by the manifest's two-letter codes with the set currently linked to the package record and applies the difference: codes that are new are linked, links whose code has left the manifest are unlinked, and links that are unchanged are left alone, so that a refresh writes nothing when a manifest has not changed. Writing the country links invalidates the derived field of the Company entity that lists the country-specific packages **not yet installed** for that company's country; that field is what drives the localisation proposal shown on a company, so the proposal reflects a refreshed package list immediately rather than after a restart. [Multi-company](multi-company.md) specifies what a company does with that proposal when it is created with a country.
+
 **Creating a package record also creates its external identifier**, in the `base` package namespace, named by the technical name prefixed with the word for package and an underscore, and marked not updatable. This is what makes a package record referable from data files.
 
 ### 4.6 Bootstrapping an empty database
@@ -776,6 +778,8 @@ The `auto_install` declaration takes three shapes:
 | A list of technical names | That set, which must be a subset of the declared dependencies | Install this package as soon as all the *listed* dependencies are installed. The remaining dependencies are still required, but they do not trigger. |
 | The empty list | The empty set | Install this package always: the condition over an empty set is vacuously satisfied. |
 
+The subset requirement of the third shape is **enforced**, not merely expected. While the manifest is normalised, every name in the trigger list is looked up in the declared dependency list, and a name that is not there aborts the reading of that manifest with **"auto_install triggers must be dependencies, found non-dependencies [<names>] for module <package>"**, where `<names>` is the list of offending technical names and `<package>` is the technical name of the package whose manifest is at fault. The package therefore never reaches the registration stage, so a mis-declared trigger is a load-time failure and not a silent no-trigger.
+
 The normalised set is recorded on the dependency records as the required-for-automatic-installation flag.
 
 ### 11.2 The condition
@@ -785,6 +789,8 @@ A not-installed package with automatic installation is installed when **all** of
 1. Every dependency marked required for automatic installation is in state `installed`, `to install` or `to upgrade`.
 2. **At least one** such dependency is in state `to install`. Without this clause the package would be scheduled on every build rather than only when something it links actually arrives.
 3. Either the package declares no countries, or at least one company of the tenant has a country among the declared ones.
+
+The country restriction is **not a hard guard**. It gates only the automatic decision of this section: an administrator may select a country-restricted package explicitly and install it whatever the countries of the companies, and nothing refuses that install. A rebuild that turns the restriction into a refusal would make it impossible to prepare a company for a country before its address is filled in.
 
 ### 11.3 The loop
 
@@ -976,7 +982,10 @@ The one case where reinitialisation and update differ observably is [section 10.
 4. Set the requested packages and all their downstream dependencies to `to remove`.
 5. Commit.
 
-An interactive removal first offers a confirmation screen listing what will be removed, because the cascade can be large and is irreversible.
+An interactive removal first offers a confirmation screen listing what will be removed, because the cascade can be large and is irreversible. The screen is computed by two rules:
+
+- **The impacted packages** are the downstream dependency set of the selection, computed as in [section 5.5](#55-dependency-closure-operations). By default the screen lists only those flagged as applications, so that the user sees the capabilities they are about to lose rather than the bridges; an option shows the whole set. When the selection itself contains no package flagged as an application, the screen switches to showing all impacted packages, so that it is never empty.
+- **The impacted entities** are exactly the entities whose external identifiers are **all** qualified by packages in that impacted set. An entity that also carries an identifier from a surviving package is not listed, because it will survive; an entity all of whose identifiers belong to packages being removed will disappear together with its table. This is the same rule that [section 16.3](#163-what-removal-does-to-records-and-columns) applies when the removal actually runs, so the preview cannot disagree with the outcome.
 
 ### 16.2 Building
 
@@ -1140,7 +1149,7 @@ The distribution by category shows where the weight lies:
 | Purchasing | 11 |
 | Manufacturing | 8 |
 
-More than a third of all packages are country localisations. A rebuild that implements the platform and the core domains but no localisation is a valid rebuild of a much smaller system; [the fiscal localisation domain](../domains/fiscal-localizations/README.md) specifies what the localisations add.
+More than a third of all packages are country localisations. A rebuild that implements the platform and the core domains but no localisation is a valid rebuild of a much smaller system. What a localisation package adds is always the same four kinds of record, loaded as data: a chart of accounts with its accounts and journals, the tax records and tax groups of the country with their reports, the fiscal positions that remap accounts and taxes for foreign counterparties, and the statutory report definitions the country requires. [The taxes domain](../domains/taxes/README.md) specifies the tax engine those records configure, and [the general ledger domain](../domains/general-ledger/README.md) specifies the chart of accounts they populate.
 
 ### 21.2 The applications
 

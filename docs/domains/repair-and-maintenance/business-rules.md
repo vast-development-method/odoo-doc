@@ -433,7 +433,7 @@ Messages are reproduced exactly as the system emits them, in quotation marks. A 
 
 **Condition.** The Sales Order Line reports that it is backed by a repair.
 
-**Effect.** The point-of-sale line takes the Sales Order Line's ordered quantity as it stands. The ordinary rule, which offers only the part of the ordered quantity that a delivery has not yet covered, is not applied to such a line. A repair-backed line's goods move through the repair's own movements and never through a delivery, so the ordered quantity is the amount the cashier charges for. Lines on the same order that are not repair-backed keep the ordinary rule.
+**Effect.** The point-of-sale line takes the Sales Order Line's ordered quantity as it stands. The ordinary rule, which offers only the part of the ordered quantity that no delivery has covered so far, is not applied to such a line. A repair-backed line's goods move through the repair's own movements and never through a delivery, so the ordered quantity is the amount the cashier charges for. Lines on the same order that are not repair-backed keep the ordinary rule.
 
 ## Lots and serial numbers
 

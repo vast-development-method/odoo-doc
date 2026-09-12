@@ -45,29 +45,29 @@ Where this domain has to name a mechanism owned by another domain — a unit con
 
 | Capability | Where specified |
 |---|---|
-| Delivery Method: identity, provider kind, integration level, environment flag, debug logging flag, company scoping, linked delivery product | `entities.md`, `configuration.md` |
-| Availability filter: countries, regions, postal-code prefixes with their regular-expression semantics, maximum weight, maximum volume, required tags, excluded tags | `calculations.md`, `business-rules.md` |
-| Fixed charge engine: the price list lookup, the absence of margins, the free-above-threshold waiver | `calculations.md` |
-| Rule-based charge engine: variable collection, rule ordering, operator evaluation, first-match rule, base-plus-factor formula, the no-match error | `calculations.md` |
-| The complete charge pipeline: engine, tax-inclusive adaptation, percentage margin, fixed margin, rounding, waiver above a threshold, currency conversion at each step | `calculations.md` |
-| Rate request contract for external carrier integrations: inputs, the result record, the four result keys, warning handling, failure handling | `workflows.md`, `interfaces.md` |
-| Shipment sending contract: inputs, the per-transfer result record, real charge, tracking reference, label attachment, message posted, failure turned into an activity | `workflows.md`, `interfaces.md`, `business-rules.md` |
-| Tracking-link contract and the placeholder substitution; multiple tracking references on one transfer | `calculations.md`, `interfaces.md` |
-| Shipment cancellation contract and the voiding of the tracking reference | `workflows.md`, `state-machines.md` |
-| Return-label contract, the attachment naming prefixes, and portal access to the return label | `workflows.md`, `interfaces.md` |
-| Parcel construction from an order and from a transfer: splitting by maximum container weight, commodity lists, declared values, country of origin, Harmonized System code | `calculations.md` |
-| The shipping charge line on a sales order: creation, naming, taxes, sequence, free-shipping annotation, deletion rules, recomputation triggers | `workflows.md`, `business-rules.md` |
-| Estimated order weight and the shipping weight override used for rating | `calculations.md` |
-| Real-cost invoicing: zero-priced estimate line, replacement at shipment time, protected-field bypass | `workflows.md`, `accounting-effects.md` |
-| Carrier propagation across multi-step delivery routes and the grouping of moves into transfers by carrier | `calculations.md`, `workflows.md` |
-| Pickup points: the two named remote operations, the location record shape, the delivery address created at confirmation | `interfaces.md`, `workflows.md` |
-| Collection in store: store list, distance sort, opening hours, per-store stock check, warehouse and fiscal position selection, pay on site, the blocking checkout errors | `workflows.md`, `calculations.md`, `business-rules.md` |
-| Cash on delivery: the payment method, the provider, the compatibility filter, order confirmation on a pending transaction | `workflows.md`, `configuration.md` |
-| Batch delivery: grouping key by carrier, maximum batch weight, wave weight | `calculations.md`, `configuration.md` |
-| Package weights for shipping: the computed weight, the shipping weight override, the maximum-weight warning, the weight in the parcel barcode | `calculations.md`, `interfaces.md` |
-| Printable documents: the delivery slip additions, the transfer document additions, the parcel barcode label additions, the quotation shipping description | `interfaces.md` |
-| Shipped records, security groups, access rights, record rules, the neutralisation statements | `configuration.md` |
-| Accounting consequences: this domain posts nothing itself; it feeds the sales order and therefore the customer invoice | `accounting-effects.md` |
+| Delivery Method: identity, provider kind, integration level, environment flag, debug logging flag, company scoping, linked delivery product | [`entities.md`](entities.md), [`configuration.md`](configuration.md) |
+| Availability filter: countries, regions, postal-code prefixes with their regular-expression semantics, maximum weight, maximum volume, required tags, excluded tags | [`calculations.md`](calculations.md), [`business-rules.md`](business-rules.md) |
+| Fixed charge engine: the price list lookup, the absence of margins, the free-above-threshold waiver | [`calculations.md`](calculations.md) |
+| Rule-based charge engine: variable collection, rule ordering, operator evaluation, first-match rule, base-plus-factor formula, the no-match error | [`calculations.md`](calculations.md) |
+| The complete charge pipeline: engine, tax-inclusive adaptation, percentage margin, fixed margin, rounding, waiver above a threshold, currency conversion at each step | [`calculations.md`](calculations.md) |
+| Rate request contract for external carrier integrations: inputs, the result record, the four result keys, warning handling, failure handling | [`workflows.md`](workflows.md), [`interfaces.md`](interfaces.md) |
+| Shipment sending contract: inputs, the per-transfer result record, real charge, tracking reference, label attachment, message posted, failure turned into an activity | [`workflows.md`](workflows.md), [`interfaces.md`](interfaces.md), [`business-rules.md`](business-rules.md) |
+| Tracking-link contract and the placeholder substitution; multiple tracking references on one transfer | [`calculations.md`](calculations.md), [`interfaces.md`](interfaces.md) |
+| Shipment cancellation contract and the voiding of the tracking reference | [`workflows.md`](workflows.md), [`state-machines.md`](state-machines.md) |
+| Return-label contract, the attachment naming prefixes, and portal access to the return label | [`workflows.md`](workflows.md), [`interfaces.md`](interfaces.md) |
+| Parcel construction from an order and from a transfer: splitting by maximum container weight, commodity lists, declared values, country of origin, Harmonized System code | [`calculations.md`](calculations.md) |
+| The shipping charge line on a sales order: creation, naming, taxes, sequence, free-shipping annotation, deletion rules, recomputation triggers | [`workflows.md`](workflows.md), [`business-rules.md`](business-rules.md) |
+| Estimated order weight and the shipping weight override used for rating | [`calculations.md`](calculations.md) |
+| Real-cost invoicing: zero-priced estimate line, replacement at shipment time, protected-field bypass | [`workflows.md`](workflows.md), [`accounting-effects.md`](accounting-effects.md) |
+| Carrier propagation across multi-step delivery routes and the grouping of moves into transfers by carrier | [`calculations.md`](calculations.md), [`workflows.md`](workflows.md) |
+| Pickup points: the two named remote operations, the location record shape, the delivery address created at confirmation | [`interfaces.md`](interfaces.md), [`workflows.md`](workflows.md) |
+| Collection in store: store list, distance sort, opening hours, per-store stock check, warehouse and fiscal position selection, pay on site, the blocking checkout errors | [`workflows.md`](workflows.md), [`calculations.md`](calculations.md), [`business-rules.md`](business-rules.md) |
+| Cash on delivery: the payment method, the provider, the compatibility filter, order confirmation on a pending transaction | [`workflows.md`](workflows.md), [`configuration.md`](configuration.md) |
+| Batch delivery: grouping key by carrier, maximum batch weight, wave weight | [`calculations.md`](calculations.md), [`configuration.md`](configuration.md) |
+| Package weights for shipping: the computed weight, the shipping weight override, the maximum-weight warning, the weight in the parcel barcode | [`calculations.md`](calculations.md), [`interfaces.md`](interfaces.md) |
+| Printable documents: the delivery slip additions, the transfer document additions, the parcel barcode label additions, the quotation shipping description | [`interfaces.md`](interfaces.md) |
+| Shipped records, security groups, access rights, record rules, the neutralisation statements | [`configuration.md`](configuration.md) |
+| Accounting consequences: this domain posts nothing itself; it feeds the sales order and therefore the customer invoice | [`accounting-effects.md`](accounting-effects.md) |
 
 ## Entities
 
@@ -106,32 +106,32 @@ The domain also adds fields to entities owned by other domains. They are listed 
 
 ## Reading order
 
-1. **`README.md`** (this file) — the map.
-2. **`entities.md`** — the Delivery Method, the Delivery Price Rule, the Delivery Postal Code Prefix, the selection wizard, the two parcel structures, and every field added to entities owned elsewhere. Read the Delivery Method field table before anything else; almost every rule in the other files is a rule about one of its fields.
-3. **`calculations.md`** — **the heart of the domain.** The availability filter, the two pricing engines, the complete charge pipeline with its evaluation order, the estimated weight, the parcel-splitting algorithm, the tracking-link construction, the store distance sort, the store stock check, the batch weight caps. Every formula has a worked numeric example.
-4. **`state-machines.md`** — the shipment lifecycle of a transfer (no carrier, carrier assigned, sent to carrier, tracked, cancelled), the shipping-charge lifecycle on a sales order, the pickup-location lifecycle, and the provider-kind and integration-level configuration states.
-5. **`workflows.md`** — the end-to-end procedures: adding a shipping charge from the back office, choosing a method in the storefront, choosing a pickup point, confirming an order that has a pickup point, validating an outgoing transfer and sending the shipment, printing a return label, cancelling a shipment, invoicing the delivery, collecting in a store, paying cash on delivery, and batching by carrier.
-6. **`business-rules.md`** — every validation, every constraint, every exact error message, every permission check and every edge case.
-7. **`interfaces.md`** — menus, views, the named remote operations of each integration contract, the routes, the printable documents and the portal fragments.
-8. **`accounting-effects.md`** — why this domain posts no journal entry of its own and exactly how it changes the entries that other domains post.
-9. **`configuration.md`** — shipped records, settings, groups, the access-rights matrix, record rules, and the neutralisation statements.
-10. **`acceptance-criteria.md`** — one hundred and more numbered Given/When/Then scenarios with concrete numbers, including the eight mandatory ones listed below.
-11. **`glossary.md`** — every term.
+1. **[`README.md`](README.md)** (this file) — the map.
+2. **[`entities.md`](entities.md)** — the Delivery Method, the Delivery Price Rule, the Delivery Postal Code Prefix, the selection wizard, the two parcel structures, and every field added to entities owned elsewhere. Read the Delivery Method field table before anything else; almost every rule in the other files is a rule about one of its fields.
+3. **[`calculations.md`](calculations.md)** — **the heart of the domain.** The availability filter, the two pricing engines, the complete charge pipeline with its evaluation order, the estimated weight, the parcel-splitting algorithm, the tracking-link construction, the store distance sort, the store stock check, the batch weight caps. Every formula has a worked numeric example.
+4. **[`state-machines.md`](state-machines.md)** — the shipment lifecycle of a transfer (no carrier, carrier assigned, sent to carrier, tracked, cancelled), the shipping-charge lifecycle on a sales order, the pickup-location lifecycle, and the provider-kind and integration-level configuration states.
+5. **[`workflows.md`](workflows.md)** — the end-to-end procedures: adding a shipping charge from the back office, choosing a method in the storefront, choosing a pickup point, confirming an order that has a pickup point, validating an outgoing transfer and sending the shipment, printing a return label, cancelling a shipment, invoicing the delivery, collecting in a store, paying cash on delivery, and batching by carrier.
+6. **[`business-rules.md`](business-rules.md)** — every validation, every constraint, every exact error message, every permission check and every edge case.
+7. **[`interfaces.md`](interfaces.md)** — menus, views, the named remote operations of each integration contract, the routes, the printable documents and the portal fragments.
+8. **[`accounting-effects.md`](accounting-effects.md)** — why this domain posts no journal entry of its own and exactly how it changes the entries that other domains post.
+9. **[`configuration.md`](configuration.md)** — shipped records, settings, groups, the access-rights matrix, record rules, and the neutralisation statements.
+10. **[`acceptance-criteria.md`](acceptance-criteria.md)** — one hundred and eighty-two numbered Given/When/Then scenarios with concrete numbers, including the eight mandatory ones listed below.
+11. **[`glossary.md`](glossary.md)** — every term.
 
 ## The eight reference scenarios
 
-These eight cases are specified end to end and appear as numbered scenarios in `acceptance-criteria.md`. They are the acceptance gate for a reimplementation of this domain.
+These eight cases are specified end to end and appear as numbered scenarios in [`acceptance-criteria.md`](acceptance-criteria.md). They are the acceptance gate for a reimplementation of this domain.
 
 | # | Scenario | Primary file |
 |---|---|---|
-| 1 | A fixed charge of nine point nine five is added to a quotation and taxed | `acceptance-criteria.md` §A |
-| 2 | A weight-banded charge is computed for a shipment of seven point five kilograms | `acceptance-criteria.md` §B |
-| 3 | A charge is waived because the order total without delivery reaches one hundred | `acceptance-criteria.md` §C |
-| 4 | A rate is requested from an external carrier integration and applied to the order | `acceptance-criteria.md` §D |
-| 5 | A label is produced at transfer validation and a tracking reference is stored | `acceptance-criteria.md` §E |
-| 6 | A shipment is cancelled and the label voided | `acceptance-criteria.md` §F |
-| 7 | The delivery is charged on the customer invoice | `acceptance-criteria.md` §G |
-| 8 | An order is collected from a store after a per-store stock check | `acceptance-criteria.md` §H |
+| 1 | A fixed charge of nine point nine five is added to a quotation and taxed | [`acceptance-criteria.md`](acceptance-criteria.md) §A |
+| 2 | A weight-banded charge is computed for a shipment of seven point five kilograms | [`acceptance-criteria.md`](acceptance-criteria.md) §B |
+| 3 | A charge is waived because the order total without delivery reaches one hundred | [`acceptance-criteria.md`](acceptance-criteria.md) §C |
+| 4 | A rate is requested from an external carrier integration and applied to the order | [`acceptance-criteria.md`](acceptance-criteria.md) §D |
+| 5 | A label is produced at transfer validation and a tracking reference is stored | [`acceptance-criteria.md`](acceptance-criteria.md) §E |
+| 6 | A shipment is cancelled and the label voided | [`acceptance-criteria.md`](acceptance-criteria.md) §F |
+| 7 | The delivery is charged on the customer invoice | [`acceptance-criteria.md`](acceptance-criteria.md) §G |
+| 8 | An order is collected from a store after a per-store stock check | [`acceptance-criteria.md`](acceptance-criteria.md) §H |
 
 ## Dependencies on other domains
 
@@ -159,6 +159,24 @@ These eight cases are specified end to end and appear as numbered scenarios in `
 | [`../website-and-storefront/`](../website-and-storefront/) | The list of delivery methods offered at checkout, their rates, the pickup-location selector data and the click-and-collect availability widget data |
 | [`../payment-providers/`](../payment-providers/) | The compatibility filters that hide the cash-on-delivery provider and the pay-on-site provider when the chosen method does not allow them |
 | [`../replenishment-and-procurement/`](../replenishment-and-procurement/) | The routes selected by a Delivery Method, which are pushed into the procurement values of every order line |
+
+## Files in this folder
+
+| File | Contents |
+|---|---|
+| [`README.md`](README.md) | This file: the scope, the capabilities, the entities, the reading order, the dependencies and the conventions |
+| [`entities.md`](entities.md) | Every entity in full, the two transport structures of the carrier contract, and every field added to entities owned elsewhere |
+| [`state-machines.md`](state-machines.md) | The seven lifecycles of the domain, each with its states, its transition table, its guards and a diagram |
+| [`workflows.md`](workflows.md) | Twenty end-to-end procedures, step by step, with the records each step creates or changes |
+| [`business-rules.md`](business-rules.md) | Every validation, constraint, permission and message, numbered from DSH-001, with an index |
+| [`calculations.md`](calculations.md) | Twenty formulas and algorithms with their rounding rules and worked numeric examples |
+| [`accounting-effects.md`](accounting-effects.md) | Why the domain posts no journal entry of its own, and the four entries it changes elsewhere |
+| [`configuration.md`](configuration.md) | Settings, parameters, shipped records, groups, access rights, record rules and the neutralisation statements |
+| [`interfaces.md`](interfaces.md) | Menus, screens, named operations, the carrier-integration contract, routes, printable documents and portal fragments |
+| [`acceptance-criteria.md`](acceptance-criteria.md) | One hundred and eighty-two numbered Given / When / Then scenarios with concrete numbers |
+| [`glossary.md`](glossary.md) | Every term of the domain, defined |
+
+There is no extra topic file in this folder: the eleven documents above are the whole deliverable.
 
 ## Conventions used in this folder
 
