@@ -1,6 +1,6 @@
 # Acceptance criteria of the Customer Portal
 
-Scenarios a replacement must pass, written as Given / When / Then with concrete values. Each scenario is independently verifiable. The rule or formula it exercises is named in the heading.
+Scenarios a replacement must pass, written as Given / When / Then with concrete values. Each scenario is independently verifiable. The rule, transition or formula it exercises is named in the heading; rules are defined in [business-rules.md](business-rules.md), transitions in [state-machines.md](state-machines.md) and formulas in [calculations.md](calculations.md).
 
 Unless a scenario says otherwise, the fixture is: one company named `Acme` whose country is Belgium; a Contact manager named `Maya`; an employee named `Ivan` who is not a Contact manager; a Contact `Testing Partner` with the address `testing_partner@example.com`; an external user `Willis` whose login is `portal_user`; and an anonymous visitor.
 
@@ -282,6 +282,18 @@ Unless a scenario says otherwise, the fixture is: one company named `Acme` whose
 - **And** this is a valid configuration: the record is reachable only through the endpoints that its own domain provides, and the token still protects those endpoints
 
 ---
+
+### PORT-AC-039a - A token survives every read and every report (state-machines.md section 6)
+- **Given** a sales order whose token is `3f2a7c18-5be4-4d0a-9f31-6c0b2e77a1d5`
+- **When** an anonymous visitor opens the page, downloads the portable document, reloads the page and opens it again the next day
+- **Then** the stored token is still `3f2a7c18-5be4-4d0a-9f31-6c0b2e77a1d5`
+- **And** no use counter and no expiry moment exist on the record
+
+### PORT-AC-039b - Clearing a token invalidates every personal link (state-machines.md section 6)
+- **Given** the same order, shared with Contact 412, whose personal link carries the signature computed over the database name, that token and the identifier 412
+- **When** the owning domain clears the order's token
+- **Then** opening the personal link no longer resolves the order
+- **And** the signature check fails as well, because the token is one of the three values the signature is computed over
 
 ## 4. Redirection of external people
 
@@ -600,11 +612,11 @@ Unless a scenario says otherwise, the fixture is: one company named `Acme` whose
 ### PORT-AC-106 - The author picture address follows the proof (author picture address)
 - **Given** message 3175 on a document
 - **When** the projection runs with a token
-- **Then** the picture address is `/mail/avatar/<message entity name>/3175/author_avatar/50x50?access_token=<the token>`
+- **Then** the picture address is `/mail/avatar/mail.message/3175/author_avatar/50x50?access_token=<the token>`
 - **When** it runs with a signature and a recipient identifier instead
-- **Then** the address is `/mail/avatar/<message entity name>/3175/author_avatar/50x50?_hash=<signature>&pid=<contact>`
+- **Then** the address is `/mail/avatar/mail.message/3175/author_avatar/50x50?_hash=<signature>&pid=<contact>`
 - **When** it runs with neither
-- **Then** the address is `/web/image/<message entity name>/3175/author_avatar/50x50`
+- **Then** the address is `/web/image/mail.message/3175/author_avatar/50x50`
 
 ### PORT-AC-107 - An unresolvable proof serves the placeholder picture
 - **Given** the picture endpoint called with a token that does not match the document
@@ -728,6 +740,26 @@ Unless a scenario says otherwise, the fixture is: one company named `Acme` whose
 - **Then** with the option on, its rating structure is the empty structure rather than being absent
 
 ---
+
+### PORT-AC-132 - Editing a published reply keeps the first stamp (state-machines.md section 9)
+- **Given** a rating that a website editor answered on the tenth of September 2026 at 09:00, the reply reading `Thank you for your feedback`
+- **When** the same editor calls the publish endpoint again on the eleventh of September 2026 with the reply `Thank you, we have fixed it`
+- **Then** the stored comment is `Thank you, we have fixed it`
+- **And** the publication moment is still the tenth of September 2026 at 09:00 and the publisher is unchanged
+- **And** the page therefore shows an edited reply under the original date; this is the recorded **compatibility finding** of section 9.2 of [state-machines.md](state-machines.md)
+
+### PORT-AC-133 - Emptying a reply leaves the stamps behind (state-machines.md section 9)
+- **Given** the rating at the end of `PORT-AC-132`
+- **When** the publish endpoint is called with an empty comment
+- **Then** the stored comment is empty
+- **And** the publisher and the publication moment still carry their values, because the stamping rule runs only when the incoming comment is non-empty
+- **And** the write guard is not evaluated at all for this call
+
+### PORT-AC-134 - A reply supplied at creation is guarded too (`PORT-RULE-082`, `PORT-RULE-083`)
+- **Given** a person who is neither a website editor nor able to write on the rated record
+- **When** a Rating is created with a non-empty publisher comment already in the values
+- **Then** the creation is refused with `Updating rating comment require write access on related record`
+- **And** no Rating row exists afterwards
 
 ## 12. Account details and addresses
 
@@ -1073,6 +1105,19 @@ Unless a scenario says otherwise, the fixture is: one company named `Acme` whose
 
 ---
 
+### PORT-AC-202 - A request another run has already taken is skipped (state-machines.md section 5)
+- **Given** two scheduled runs that start close together and a queue holding one request in `todo`
+- **When** the first run takes the exclusive row lock, deletes the user and sets the request to `done`
+- **And** the second run reaches the same request and obtains the lock afterwards
+- **Then** the second run re-reads the state, finds it is no longer `todo`, and skips the request
+- **And** exactly one deletion has been attempted
+
+### PORT-AC-203 - A failed request is never picked up again (`PORT-RULE-136`, state-machines.md section 5)
+- **Given** a request in `fail`
+- **When** the scheduled run executes on the following day
+- **Then** the request is not among the rows the run searches, because the run searches only for `todo`
+- **And** the account stays archived with its deleted-account login for ever unless an administrator intervenes
+
 ## 15. Permissions of the portal
 
 ### PORT-AC-210 - An external person sees only their commercial tree's orders (`PORT-RULE-171`)
@@ -1148,6 +1193,28 @@ Unless a scenario says otherwise, the fixture is: one company named `Acme` whose
 - **Then** the request is refused with `Non existing record or wrong token.`
 
 ---
+
+### PORT-AC-227 - Rebuilding an address replaces a parameter and keeps the rest (address rebuilding)
+- **Given** the address `/my?foo=bar&error=pay`
+- **When** the parameters `foo` with the value `bar2` and `alice` with the value `bob` are merged with duplicates removed
+- **Then** the result is `/my?foo=bar2&error=pay&alice=bob`
+- **When** the same merge is performed with duplicates kept
+- **Then** the result is `/my?foo=bar&foo=bar2&error=pay&alice=bob`
+
+### PORT-AC-228 - Choosing a sort keeps the page number, choosing a filter does not (`PORT-RULE-148`)
+- **Given** the invoice list opened at `/my/invoices/page/3?filterby=overdue_invoices&sortby=date`
+- **When** the reader chooses the sort `Due Date`
+- **Then** the browser goes to `/my/invoices/page/3?filterby=overdue_invoices&sortby=due_date`
+- **When** the reader then chooses the filter `Invoices`
+- **Then** the browser goes to `/my/invoices?filterby=invoices&sortby=due_date`, that is, back to the first page
+
+### PORT-AC-229 - A message edited down to nothing leaves the portal thread (state-machines.md section 8)
+- **Given** a sales order opened with a personal link for Contact 412, carrying one message posted by that Contact with the body `Please deliver on Friday` and no attachment
+- **When** that Contact edits the message and removes all of its text
+- **Then** the message still exists and is not internal
+- **And** the portal thread of the order no longer lists it, because its body is the emptied-message marker and it has neither an attachment nor a rating value
+- **When** the same Contact edits it again and types `Please deliver on Monday`
+- **Then** the portal thread lists it once more
 
 ## 17. Signing and paying
 

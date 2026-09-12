@@ -1,6 +1,6 @@
 # Workflows of the Customer Portal
 
-Every operational workflow of the Customer Portal end to end: the actors, the preconditions, the numbered steps, the branches, the records written with their field values, the messages sent and the postconditions. Rules cited as `PORT-RULE-nnn` are defined in [business-rules.md](business-rules.md); formulas cited by name are defined in [calculations.md](calculations.md).
+Every operational workflow of the Customer Portal end to end: the actors, the preconditions, the numbered steps, the branches, the records written with their field values, the messages sent and the postconditions. Rules cited as `PORT-RULE-nnn` are defined in [business-rules.md](business-rules.md); formulas cited by name are defined in [calculations.md](calculations.md); the state machines the steps move are specified in [state-machines.md](state-machines.md).
 
 Throughout this file, "elevated rights" means that the operation reads or writes while bypassing the permission layers, keeping the acting user for authorship; "acting user" means the identity that issued the request; "external user" means a user whose `share` characteristic is true.
 
@@ -624,7 +624,7 @@ The transaction endpoint resolves the document through the shared access check a
 2. The server builds the rendering values: the shared layout values, plus the address-form values computed for the acting user's **own** Contact with the "this address serves as both billing and delivery" flag set to true and the success address set to the `redirect` parameter (default `/my`), plus the page name `my_details`.
 3. The response carries two protective headers: framing restricted to the same origin, expressed both as a frame-options header and as a content-security policy.
 4. The page renders inside the account layout, which shows the heading `My account`, the form in the main column and the account sidebar in the side column (an offcanvas panel on a narrow screen).
-5. The form shows: `Your name`, `Email`, `Phone`; then, because the address serves as a billing address, `Company Name` and the tax identification number label; then `Street and Number`, `Apartment, suite, etc.`, `City`, `Zip Code`, `Country` and `State / Province`. The postal code is rendered before or after the city according to the country's address layout.
+5. The form shows: `Your name`, `Email`, `Phone`; then, because the address serves as a billing address, `Company Name` and the tax identification number under its reproduced label `VAT`; then `Street and Number`, `Apartment, suite, etc.`, `City`, `Zip Code`, `Country` and `State / Province`. The postal code is rendered before or after the city according to the country's address layout.
 6. Hidden inputs carry the request-forgery token, the address kind, the "use delivery as billing" flag, the parent identifier, the Contact identifier, the success address and the base list of required inputs (`name,email`).
 7. On loading, and again whenever the country changes, the form calls `/my/address/country_info` (section 23.3) and rewrites its inputs.
 8. Pressing `Save Address` runs the browser's own required-field validation, then posts the whole form to `/my/address/submit` (section 23.4).
@@ -944,6 +944,11 @@ The layout also sets the text direction of the whole document from the active la
 ---
 
 ## 33. State tables
+
+The complete machines — every state with its stored value, label and meaning, every transition with
+its guards and its exact refusal message, and a diagram for each — are in
+[state-machines.md](state-machines.md). The tables below are the short form used by the procedures of
+this file.
 
 ### 33.1 Address validity of an invitation line (`email_state`)
 

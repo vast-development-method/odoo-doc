@@ -15,13 +15,17 @@ Transient entities (the three wizards of this domain) also carry those five fiel
 - **abstract**: a contract with fields and operations that is never stored on its own; a persistent entity adopts it and then owns the columns.
 - **transient**: a row that exists only to back a dialog.
 
-### 0.3 Naming of the tax identification number label
+### 0.3 Naming and labelling of the tax identification number
 
-The label shown next to the tax identification number field, and the words used inside the messages that mention it, come from the country configuration of the operating company (the label is a per-country text, for example the local name of the value-added tax registration number). In this specification the placeholder is always written in full as "tax identification number". A replacement must substitute the configured label at render time.
+The field that holds a Contact's tax registration number is reproduced under its stored identifier `vat`, three letters that abbreviate value-added tax. In prose this specification always writes the term in full as "tax identification number", because the field carries whatever number the Contact's country uses, not only a value-added tax number.
+
+The address pages of this domain render the input under the reproduced label `VAT`, produced by translating that one word into the reader's language. The label is **not** derived from the country of the Contact or of the operating company. **Compatibility finding**: a storefront checkout screen in another domain does render a per-country label for the same field, so the same number is presented under two different captions depending on which page the reader is on. A corrected behaviour would read the country's own label on both pages; a replacement that aims at strict compatibility must keep the plain translated word on the pages of this domain.
 
 ---
 
 ## 1. Portal Access Mixin (`portal.mixin`)
+
+Generated reference page: [../../references/entities/portal.mixin.md](../../references/entities/portal.mixin.md).
 
 **Kind**: abstract. **Adopted by**: every document model that must be reachable from the portal (see section 15).
 
@@ -29,11 +33,11 @@ The label shown next to the tax identification number field, and the words used 
 
 ### 1.1 Fields
 
-| Canonical name | Type | Required | Default | Stored or derived | Copied on duplicate | Tracked | Visible or editable to | Meaning |
-|---|---|---|---|---|---|---|---|---|
-| `access_url` | text | no | `#` | derived, not stored; recomputed on every read | not applicable (not stored) | no | readable by anyone who may read the record | The path of the portal page of this record, relative to the platform root, for example `/my/orders/42`. The mixin's own rule returns the single character `#`; every adopting model overrides the rule with its own path (section 15). |
-| `access_token` | text | no | empty | stored | **no** (explicitly excluded from duplication) | no | readable by anyone who may read the record; written only with elevated rights | The per-record security token. A request that carries a value equal to this one is allowed to read the record even when the requester's permissions would refuse it. Generated on first demand as a version-4 random universally unique identifier in its canonical thirty-six character text form. |
-| `access_warning` | long_text | no | empty string | derived, not stored | not applicable | no | readable by anyone who may read the record | A message that the adopting model may fill to explain why this record must not be shared. When it is non-empty, the share wizard shows it and hides the send button. The mixin's own rule always returns the empty string. |
+| Identifier | Full name | Type | Required | Default | Stored or derived | Copied on duplicate | Tracked | Visible or editable to | Meaning |
+|---|---|---|---|---|---|---|---|---|---|
+| `access_url` | Portal Access Web Address | text | no | `#` | derived, not stored; recomputed on every read | not applicable (not stored) | no | readable by anyone who may read the record | The path of the portal page of this record, relative to the platform root, for example `/my/orders/42`. The mixin's own rule returns the single character `#`; every adopting model overrides the rule with its own path (section 15). |
+| `access_token` | Security Token | text | no | empty | stored | **no** (explicitly excluded from duplication) | no | readable by anyone who may read the record; written only with elevated rights | The per-record security token. A request that carries a value equal to this one is allowed to read the record even when the requester's permissions would refuse it. Generated on first demand as a version-4 random universally unique identifier in its canonical thirty-six character text form. |
+| `access_warning` | Access warning | long_text | no | empty string | derived, not stored | not applicable | no | readable by anyone who may read the record | A message that the adopting model may fill to explain why this record must not be shared. When it is non-empty, the share wizard shows it and hides the send button. The mixin's own rule always returns the empty string. |
 
 ### 1.2 Derivation rules
 
@@ -66,11 +70,11 @@ The operation is idempotent for a record that already has a token. Two concurren
 
 #### 1.4.2 `_get_share_url`
 
-Inputs: `redirect` (boolean, default false), `signup_partner` (boolean, default false), `recipient_contact` (identifier or empty, default empty), `include_token` (boolean, default true). Applies to exactly one record. Output: a path with a query string.
+Inputs: `redirect` (boolean, default false), `signup_partner` (boolean, default false), `pid` (a recipient Contact identifier or empty, default empty), `share_token` (boolean, default true). Applies to exactly one record. Output: a path with a query string.
 
 1. If `redirect` is true, start the parameter set with the record's model name and the record's identifier, so that the generic redirection endpoint can resolve the record; otherwise start with an empty parameter set.
-2. If `include_token` is true and the model carries the `access_token` field: check that the acting user may read the record (raising the standard read-refusal error if not), then call `_portal_ensure_token` and add the token to the parameter set.
-3. If `recipient_contact` is given: add it to the parameter set and add the signed recipient identity produced by `_sign_token` (section 5.3) for that Contact.
+2. If `share_token` is true and the model carries the `access_token` field: check that the acting user may read the record (raising the standard read-refusal error if not), then call `_portal_ensure_token` and add the token to the parameter set.
+3. If `pid` is given: add it to the parameter set and add the signed recipient identity produced by `_sign_token` (section 5.3) for that Contact.
 4. If `signup_partner` is true and the model has a customer Contact field with a value: add the sign-up parameters of that Contact (either a sign-up token, or the login of the existing user; see [Identity and Access](../identity-and-access/README.md)).
 5. Return `"/mail/view" + "?" + encoded_parameters` when `redirect` is true, and `access_url + "?" + encoded_parameters` otherwise.
 
@@ -118,19 +122,21 @@ The mixin adds no lifecycle of its own. The token is created lazily and never ro
 
 ## 2. Portal Share Wizard (`portal.share`)
 
+Generated reference page: [../../references/entities/portal.share.md](../../references/entities/portal.share.md).
+
 **Kind**: transient. **Opened from**: the "Share Document" action bound to this wizard, reachable from any record of a model that adopts the Portal Access Mixin.
 
 ### 2.1 Fields
 
-| Canonical name | Type | Required | Default | Stored or derived | Meaning |
-|---|---|---|---|---|---|
-| `res_model` | text | yes | the active model of the calling context | stored | The technical name of the model of the document being shared. |
-| `res_id` | integer | yes | the active record identifier of the calling context | stored | The identifier of the document being shared. |
-| `resource_ref` | reference (model name plus identifier) | no | none | derived from `res_model` and `res_id` | A single-value handle on the shared document, used to read its display name, its base web address and its discussion thread. The selectable models are every model registered in the platform. |
-| `partner_ids` | many_to_many to Contact | **yes** | empty | stored | The recipients of the invitation. At least one is required; the dialog cannot be sent with an empty list. |
-| `note` | long_text | no | empty | stored | Extra content added to the invitation body, rendered with line breaks preserved. |
-| `share_link` | text | no | computed at dialog opening and recomputed on change | derived from `res_model` and `res_id` | The absolute, copy-ready share web address. |
-| `access_warning` | long_text | no | empty | derived from `res_model` and `res_id` | Mirrors the shared document's access warning. When non-empty, the send button is hidden and a warning banner is shown. |
+| Identifier | Full name | Type | Required | Default | Stored or derived | Meaning |
+|---|---|---|---|---|---|---|
+| `res_model` | Related Document Model | text | yes | the active model of the calling context | stored | The transport name of the entity of the document being shared. |
+| `res_id` | Related Document Identifier | integer | yes | the active record identifier of the calling context | stored | The identifier of the document being shared. |
+| `resource_ref` | Related Document | reference (model name plus identifier) | no | none | derived from `res_model` and `res_id` | A single-value handle on the shared document, used to read its display name, its base web address and its discussion thread. The selectable models are every model registered in the platform. |
+| `partner_ids` | Recipients | many_to_many to Contact | **yes** | empty | stored | The recipients of the invitation. At least one is required; the dialog cannot be sent with an empty list. |
+| `note` | Note | long_text | no | empty | stored | Extra content added to the invitation body, rendered with line breaks preserved. |
+| `share_link` | Link | text | no | computed at dialog opening and recomputed on change | derived from `res_model` and `res_id` | The absolute, copy-ready share web address. |
+| `access_warning` | Access warning | long_text | no | empty | derived from `res_model` and `res_id` | Mirrors the shared document's access warning. When non-empty, the send button is hidden and a warning banner is shown. |
 
 ### 2.2 Default values at dialog opening
 
@@ -214,19 +220,21 @@ Dear <recipient name>,
 
 ## 3. Portal Access Wizard (`portal.wizard`)
 
+Generated reference page: [../../references/entities/portal.wizard.md](../../references/entities/portal.wizard.md).
+
 **Kind**: transient. **Opened from**: the "Grant portal access" action bound to Contacts, or the server action that creates the wizard first and then opens it.
 
 ### 3.1 Fields
 
-| Canonical name | Type | Required | Default | Stored or derived | Meaning |
-|---|---|---|---|---|---|
-| `partner_ids` | many_to_many to Contact | no | the expansion described in section 3.2 | stored | The Contacts in scope for this invitation session. |
-| `user_ids` | one_to_many to Portal Access Wizard User (inverse field `wizard_id`) | no | derived from `partner_ids`, stored, and editable afterwards | stored **and** derived | One line per Contact in scope. Recomputed whenever `partner_ids` changes; the user may then edit the electronic mail address on each line. |
-| `welcome_message` | long_text | no | empty | stored | Free text appended at the end of the invitation message sent to each new external user. |
+| Identifier | Full name | Type | Required | Default | Stored or derived | Meaning |
+|---|---|---|---|---|---|---|
+| `partner_ids` | Partners | many_to_many to Contact | no | the expansion described in section 3.2 | stored | The Contacts in scope for this invitation session. |
+| `user_ids` | Users | one_to_many to Portal Access Wizard User (inverse field `wizard_id`) | no | derived from `partner_ids`, stored, and editable afterwards | stored **and** derived | One line per Contact in scope. Recomputed whenever `partner_ids` changes; the user may then edit the electronic mail address on each line. |
+| `welcome_message` | Invitation Message | long_text | no | empty | stored | Free text appended at the end of the invitation message sent to each new external user. |
 
 ### 3.2 Default expansion of `partner_ids`
 
-Input: the `default_partners` context key when present, otherwise the active record identifiers of the calling context.
+Input: the `default_partner_ids` context key when present, otherwise the active record identifiers of the calling context.
 
 For each Contact in that input, add to the result:
 - its child Contacts whose address kind is `contact` or `other`, and
@@ -260,20 +268,22 @@ Only the Contact manager group may read, write and create this entity. Deletion 
 
 ## 4. Portal Access Wizard User (`portal.wizard.user`)
 
+Generated reference page: [../../references/entities/portal.wizard.user.md](../../references/entities/portal.wizard.user.md).
+
 **Kind**: transient. One line of an invitation session.
 
 ### 4.1 Fields
 
-| Canonical name | Type | Required | Default | Stored or derived | Deletion behavior of the relation | Meaning |
-|---|---|---|---|---|---|---|
-| `wizard_id` | many_to_one to Portal Access Wizard | yes | set by the parent | stored | cascade (deleting the wizard deletes the line) | The invitation session this line belongs to. |
-| `partner_id` | many_to_one to Contact | yes | set by the parent | stored, read-only in the dialog | cascade (deleting the Contact deletes the line) | The Contact whose access is being managed. Labelled `Contact`. |
-| `email` | text | no | the Contact's electronic mail address | stored, editable | not applicable | The address that will become the login of the external user and, when valid and different, is written back onto the Contact. Read-only in the dialog when the line represents an employee. |
-| `user_id` | many_to_one to User | no | derived | derived from `partner_id`, evaluated with elevated rights, not stored | not applicable | The user currently linked to the Contact, archived ones included. |
-| `login_date` | datetime | no | none | related to `user_id.login_date`, read-only | not applicable | Labelled `Latest Authentication`. Empty when the person has never signed in. |
-| `is_portal` | boolean | no | false | derived from `user_id`, `user_id.active` and `user_id.group_ids` | not applicable | True when the linked user exists, is active and is an external user. |
-| `is_internal` | boolean | no | false | derived from `user_id`, `user_id.active` and `user_id.group_ids` | not applicable | True when the linked user exists and is an employee, **whether active or archived**. |
-| `email_state` | selection | no | `ok` | derived from `email`, evaluated with elevated rights | not applicable | The validity of the address: see section 4.2. |
+| Identifier | Full name | Type | Required | Default | Stored or derived | Deletion behavior of the relation | Meaning |
+|---|---|---|---|---|---|---|---|
+| `wizard_id` | Wizard | many_to_one to Portal Access Wizard | yes | set by the parent | stored | cascade (deleting the wizard deletes the line) | The invitation session this line belongs to. |
+| `partner_id` | Contact | many_to_one to Contact | yes | set by the parent | stored, read-only in the dialog | cascade (deleting the Contact deletes the line) | The Contact whose access is being managed. Labelled `Contact`. |
+| `email` | Email | text | no | the Contact's electronic mail address | stored, editable | not applicable | The address that will become the login of the external user and, when valid and different, is written back onto the Contact. Read-only in the dialog when the line represents an employee. |
+| `user_id` | User | many_to_one to User | no | derived | derived from `partner_id`, evaluated with elevated rights, not stored | not applicable | The user currently linked to the Contact, archived ones included. |
+| `login_date` | Latest Authentication | datetime | no | none | related to `user_id.login_date`, read-only | not applicable | Labelled `Latest Authentication`. Empty when the person has never signed in. |
+| `is_portal` | Is Portal | boolean | no | false | derived from `user_id`, `user_id.active` and `user_id.group_ids` | not applicable | True when the linked user exists, is active and is an external user. |
+| `is_internal` | Is Internal | boolean | no | false | derived from `user_id`, `user_id.active` and `user_id.group_ids` | not applicable | True when the linked user exists and is an employee, **whether active or archived**. |
+| `email_state` | Status | selection | no | `ok` | derived from `email`, evaluated with elevated rights | not applicable | The validity of the address: see section 4.2. |
 
 `email_state` values, with their labels:
 
@@ -360,7 +370,7 @@ Applies to exactly one line. Creates a user by duplicating the portal user templ
 - `login` = the normalized address,
 - `partner_id` = the line's Contact,
 - `company` = the acting company (which step 5 of `action_grant_access` has already switched to the Contact's company when the Contact has one),
-- `allowed_companies` = exactly that one company,
+- `company_ids` = exactly that one company,
 - `active` = true,
 - the "do not send a password reset message" marker set, because this operation sends its own invitation.
 
@@ -413,6 +423,8 @@ This is an extension point. An override calls the inherited operation first; whe
 Same as the parent wizard: read, write and create for the Contact manager group only; no deletion for anybody.
 
 ### 4.5 Line state table
+
+The full machine, with its guards in evaluation order and its diagram, is in section 2 of [state-machines.md](state-machines.md); the table below is its short form.
 
 | From state (`is_portal`, `is_internal`, `email_state`) | Operation | Guard | To state | Side effects |
 |---|---|---|---|---|
@@ -477,9 +489,9 @@ Owned by [Messaging and Activities](../messaging-and-activities/README.md). The 
 
 ### 5.1 Field
 
-| Canonical name | Type | Required | Default | Stored or derived | Meaning |
-|---|---|---|---|---|---|
-| `website_message_ids` | one_to_many to Message, keyed on the message's related record identifier | no | empty | derived list, not a stored column | The messages of this record that may appear on a public page. The list is restricted by a filter, is not subject to the message record rules when read through the list (it bypasses the search-level access filter and relies on the caller having validated thread access), and is labelled `Website Messages` with the help text `Website communication history`. |
+| Identifier | Full name | Type | Required | Default | Stored or derived | Meaning |
+|---|---|---|---|---|---|---|
+| `website_message_ids` | Website Messages | one_to_many to Message, keyed on the message's related record identifier | no | empty | derived list, not a stored column | The messages of this record that may appear on a public page. The list is restricted by a filter, is not subject to the message record rules when read through the list (it bypasses the search-level access filter and relies on the caller having validated thread access), and is labelled `Website Messages` with the help text `Website communication history`. |
 
 The filter is:
 
@@ -494,7 +506,7 @@ Message kinds excluded by that filter are the purely technical ones (notificatio
 
 Every model that adopts the Discussion Thread Mixin declares which of its fields holds the secret used to authorize external posting. The default is `access_token`, that is, the field contributed by the Portal Access Mixin. A model may point it at another field; the only use of this indirection in the shipped behavior is the project sharing screen, which reads the project's token through the same name.
 
-### 5.3 `_sign_token(contact_identifier)`
+### 5.3 `_sign_token`, the signature over a recipient identity
 
 Applies to exactly one record. Output: a hexadecimal digest.
 
@@ -508,7 +520,7 @@ Properties that a replacement must preserve:
 - The digest is bound to the database, so a link cannot be replayed against another installation.
 - Comparison of a supplied digest with the computed one must be done in constant time with respect to the number of matching leading characters, to avoid leaking the digest through response timing.
 
-### 5.4 `_portal_get_parent_hash_token(contact_identifier)`
+### 5.4 `_portal_get_parent_hash_token`, the signature of a logical parent
 
 Returns nothing by default. A model whose records are shared indirectly through a parent record overrides it and returns the parent's signed identity. The shipped override is Task, which returns the signed identity of its Project: a person who received a link to a shared project may therefore post on any task of that project without a task-specific link.
 
@@ -516,7 +528,7 @@ Returns nothing by default. A model whose records are shared indirectly through 
 
 The set of query-string parameter names that the thread-resolution operations accept is extended with `hash` (the signed recipient identity), `pid` (the recipient Contact identifier) and `token` (the document security token). Any other parameter name passed to thread resolution is logged as invalid and ignored.
 
-### 5.6 `_get_thread_with_access(thread_identifier, hash, pid, token, mode)`
+### 5.6 `_get_thread_with_access`, resolving a thread from a proof
 
 1. Try the inherited resolution first: browse the record and return it when it exists and the acting user has the requested permission on it with the company restriction lifted.
 2. When that fails, browse the record with elevated rights and return it if **either**:
@@ -578,10 +590,10 @@ The access check is deliberately separate from the projection, because the priva
 
 | Projected property | Meaning |
 |---|---|
-| `attachments` | The list of attachments of the message, each formatted as described in section 6.5. |
-| `author_avatar_web_address` | The address at which the author's picture may be fetched, chosen as described in section 6.4. |
-| `author` | The author Contact, reduced to its identifier and its name, or false. |
-| `author_guest` | The anonymous guest identity that authored the message, when there is one. |
+| `attachment_ids` | The list of attachments of the message, each formatted as described in section 6.5. |
+| `author_avatar_url` | The address at which the author's picture may be fetched, chosen as described in section 6.4. |
+| `author_id` | The author Contact, reduced to its identifier and its name, or false. |
+| `author_guest_id` | The anonymous guest identity that authored the message, when there is one. |
 | `body` | The message body, transported as rich text. |
 | `date` | The publication moment. |
 | `id` | The message identifier. |
@@ -592,9 +604,9 @@ The access check is deliberately separate from the projection, because the priva
 | `published_date_str` | The publication moment formatted for the reader. |
 | `res_id` | The identifier of the discussed record. |
 | `starred` | Whether the reader has starred the message. |
-| `subtype` | The message subtype. |
+| `subtype_id` | The message subtype. |
 
-When the rating capability is installed and the caller passes the option "include rating", the set additionally contains the rating link and the rating value.
+When the rating capability is installed and the caller passes the option "include rating", the set additionally contains `rating` (the link to the Rating row) and `rating_value` (the number of stars).
 
 ### 6.4 `_portal_message_format(property_names, options)`
 
@@ -604,9 +616,9 @@ When the rating capability is installed and the caller passes the option "includ
    - Wrap the body so that it is transported as rich text rather than as escaped plain text.
    - Attach the formatted attachment list when attachments were requested.
    - Compute the author avatar web address:
-     - when the options carry a token: `/mail/avatar/message/<message identifier>/author_avatar/50x50?access_token=<token>`;
-     - else when the options carry a signed identity and a Contact identifier: `/mail/avatar/message/<message identifier>/author_avatar/50x50?_hash=<hash>&pid=<pid>`;
-     - else: `/web/image/message/<message identifier>/author_avatar/50x50`.
+     - when the options carry a token: `/mail/avatar/mail.message/<message identifier>/author_avatar/50x50?access_token=<token>`;
+     - else when the options carry a signed identity and a Contact identifier: `/mail/avatar/mail.message/<message identifier>/author_avatar/50x50?_hash=<hash>&pid=<pid>`;
+     - else: `/web/image/mail.message/<message identifier>/author_avatar/50x50`.
    - Compute the "is a private note" flag as `subtype = <the shipped "note" subtype>`; a message with no subtype yields false.
    - Compute the formatted publication date from the message date in the reader's language and time zone; empty when the message has no date.
    - Build the reaction groups: for each distinct reaction content, the content, the number of reactions, the list of reacting guests (identifier and name) and the list of reacting Contacts (identifier and name), plus the message identifier.
@@ -623,13 +635,13 @@ When the rating capability is installed and the caller passes the option "includ
 
 ### 6.6 Rating additions to the projection (rating capability installed)
 
-When `rating` is part of the property set:
-1. With elevated rights, read every Rating linked to the projected messages: identifier, publisher comment, publisher, publication moment and message.
-2. For each message, attach the formatted rating of that message (or an empty structure when it has none).
-3. For each message, resolve its related record; when that record exposes rating statistics, attach the statistics computed with elevated rights.
+The caller asks for rating information by passing the option "include rating"; the default property set then gains the two names `rating` and `rating_value`. When `rating` is part of the property set:
+1. With elevated rights, read every Rating linked to the projected messages, taking of each one its `id`, its `publisher_comment`, its `publisher_id`, its `publisher_datetime` and its `message_id`.
+2. For each message, attach the formatted rating of that message under the key `rating_id` (an empty structure when the message has none).
+3. For each message, resolve its related record; when that record exposes rating statistics, attach them under the key `rating_stats`, computed with elevated rights. The statistics are the total, the average and the per-level repartition and percentages specified in section 12 of [calculations.md](calculations.md).
 
 `_portal_message_format_rating(rating_values)` produces:
-- `publisher_avatar`: `/web/image/contact/<publisher identifier>/avatar_128/50x50` when there is a publisher, empty text otherwise;
+- `publisher_avatar`: `/web/image/res.partner/<publisher identifier>/avatar_128/50x50` when there is a publisher, empty text otherwise;
 - `publisher_comment`: the comment, or empty text when absent;
 - `publisher_datetime`: the publication moment formatted in the reader's language and time zone;
 - `publisher_id`: the publisher identifier or false;
@@ -641,11 +653,11 @@ When `rating` is part of the property set:
 
 Owned by [Messaging and Activities](../messaging-and-activities/README.md).
 
-| Canonical name | Type | Required | Default | Stored or derived | Copied on duplicate | Deletion behavior | Meaning |
-|---|---|---|---|---|---|---|---|
-| `publisher_comment` | long_text | no | empty | stored | yes | not applicable | The operating company's public reply to this rating, shown under the rating on the public page. Labelled `Publisher comment`. |
-| `publisher_id` | many_to_one to Contact | no | empty | stored, read-only | yes | set null (deleting the Contact leaves the comment without a publisher) | Who wrote the reply. Labelled `Commented by`. Indexed with a partial index that skips empty values. |
-| `publisher_datetime` | datetime | no | empty | stored, read-only | yes | not applicable | When the reply was written. Labelled `Commented on`. |
+| Identifier | Full name | Type | Required | Default | Stored or derived | Copied on duplicate | Deletion behavior | Meaning |
+|---|---|---|---|---|---|---|---|---|
+| `publisher_comment` | Publisher comment | long_text | no | empty | stored | yes | not applicable | The operating company's public reply to this rating, shown under the rating on the public page. Labelled `Publisher comment`. |
+| `publisher_id` | Commented by | many_to_one to Contact | no | empty | stored, read-only | yes | set null (deleting the Contact leaves the comment without a publisher) | Who wrote the reply. Labelled `Commented by`. Indexed with a partial index that skips empty values. |
+| `publisher_datetime` | Commented on | datetime | no | empty | stored, read-only | yes | not applicable | When the reply was written. Labelled `Commented on`. |
 
 ### 7.1 Automatic stamping
 
@@ -750,9 +762,9 @@ That is: the commercial entity itself plus its delivery and "other" addresses.
 
 Owned by [Identity and Access](../identity-and-access/README.md); the settings mechanism itself is described in [the security model](../../overview/security-model.md).
 
-| Canonical name | Type | Required | Default | Stored or derived | Meaning |
-|---|---|---|---|---|---|
-| `portal_allow_api_keys` | boolean | no | false | derived from a system parameter, with a write-back rule | Labelled `Customer API Keys` ("Customer Application Programming Interface Keys"), shown next to the checkbox caption `Customers can generate API keys`, inside the developer-only block of the general settings page. |
+| Identifier | Full name | Type | Required | Default | Stored or derived | Meaning |
+|---|---|---|---|---|---|---|
+| `portal_allow_api_keys` | Customer API Keys | boolean | no | false | derived from a system parameter, with a write-back rule | Labelled `Customer API Keys` ("Customer Application Programming Interface Keys"), shown next to the checkbox caption `Customers can generate API keys`, inside the developer-only block of the general settings page. |
 
 - **Read rule**: the value of the system parameter `portal.allow_api_keys` (the "customers may create application keys" switch), interpreted as a boolean.
 - **Write rule**: writes the boolean into that system parameter with elevated rights.
@@ -764,9 +776,9 @@ Owned by [Identity and Access](../identity-and-access/README.md); the settings m
 
 Owned by the platform foundation; see [views and actions](../../overview/views-and-actions.md) and [inheritance and extension](../../overview/inheritance-and-extension.md).
 
-| Canonical name | Type | Required | Default | Stored | Meaning |
-|---|---|---|---|---|---|
-| `customize_show` | boolean | no | false | yes | Labelled `Show As Optional Inherit`. Marks an inheriting layout fragment as an optional variant that a website editor may switch on or off from the editor's customization panel, instead of a fragment that is always applied. |
+| Identifier | Full name | Type | Required | Default | Stored | Meaning |
+|---|---|---|---|---|---|---|
+| `customize_show` | Show As Optional Inherit | boolean | no | false | yes | Labelled `Show As Optional Inherit`. Marks an inheriting layout fragment as an optional variant that a website editor may switch on or off from the editor's customization panel, instead of a fragment that is always applied. |
 
 Layout fragments shipped with this flag set to true: the pictogram variant of the portal home cards, and the per-domain home-page card blocks contributed by Sales, Accounts Receivable, Purchasing, Projects and Tasks, Timesheets, Manufacturing subcontracting and the payment capability.
 
@@ -844,6 +856,8 @@ Each adopting model overrides `access_url`. The table lists every adoption shipp
 ---
 
 ## 17. Lifecycle of an external user, seen from this domain
+
+The full machine, with its guards, its impossible moves and its diagram, is in section 3 of [state-machines.md](state-machines.md).
 
 | Stage | Trigger | Resulting state |
 |---|---|---|

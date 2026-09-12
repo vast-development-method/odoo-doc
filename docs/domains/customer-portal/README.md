@@ -37,6 +37,18 @@ The domain delivers the following capabilities.
 
 ## Entities owned by this domain
 
+The domain is delivered by two capability packages: the Customer Portal package, which carries
+everything described here, and the Portal Rating package, a bridge that adds star ratings and
+publisher replies to portal pages and installs itself automatically whenever both the Customer Portal
+and the rating capability are present. The four entities below are owned by this folder; the
+[Identity and Access](../identity-and-access/README.md) folder carries a one-paragraph summary of the
+same four because they sit at the boundary between the two domains, and this folder is the
+authoritative specification. The domain owns no persistent entity: one of the four is an abstract
+contract that document entities adopt, and the other three are transient rows that back a dialog.
+Every persistent consequence of the domain is written on Contacts, Users, Messages, Ratings and on
+the documents that adopt the access contract.
+
+
 | Canonical name | Identifier | Kind | Purpose |
 |---|---|---|---|
 | Portal Access Mixin | `portal.mixin` | abstract | The contract adopted by every document model that is reachable from the portal: portal web address, security token, access warning, share web address construction and access action override. |
@@ -85,14 +97,18 @@ These domains must exist before this one can work.
 
 ## Navigation
 
+This folder holds eleven documents. Read them in the order of the table.
+
 | File | Content |
 |---|---|
-| [entities.md](entities.md) | Every field of the four owned entities and of every entity this domain extends, with types, defaults, derivations, copy behavior, constraints, validation messages, on-change behavior and lifecycle. |
-| [workflows.md](workflows.md) | Granting, revoking and re-inviting portal access; sharing a document; opening a shared document; browsing a list page; opening a record page; posting a message; rating; editing the account details and the addresses; changing the password; managing the second factor, passkeys, sessions and application keys; requesting and processing an account deletion. Includes the state tables. |
+| [README.md](README.md) | This file: the scope, the capabilities, the actors, the entities the folder owns, the fields and behaviour it adds to entities owned elsewhere, the dependencies on other domains, and the list of every file in the folder. |
+| [entities.md](entities.md) | Every field of the four owned entities and of every entity this domain extends, with identifiers, full names, types, defaults, derivations, copy behaviour, constraints, validation messages, on-change behaviour and lifecycle, and a link to the generated reference page of each owned entity. |
+| [state-machines.md](state-machines.md) | Every state field this domain owns or drives: the address validity of an invitation line, the access state of an invitation line, the lifecycle of an external account, the outstanding-token marker on a Contact, the User Deletion Request, the security token of a document, the shareability of a document, the visibility of a message on a portal page, the publisher reply under a rating, and the order in which a request proves its access. Each with its stored values, its transition table, its guards with their exact refusal messages and a diagram. |
+| [workflows.md](workflows.md) | Granting, revoking and re-inviting portal access; sharing a document; opening a shared document; browsing a list page; opening a record page; posting a message; rating; editing the account details and the addresses; changing the password; managing the second factor, passkeys, sessions and application keys; requesting and processing an account deletion. |
 | [business-rules.md](business-rules.md) | The numbered rule catalogue with the exact messages, prefixed `PORT-RULE-nnn`. |
-| [calculations.md](calculations.md) | The page navigator algorithm, the counter batching, the token signing, the detection of an address that is already used as a login, the mandatory address field computation, the address completeness test, the star display computation, the rating statistics, the due-date label and the report file naming, each with a worked example. |
-| [accounting-effects.md](accounting-effects.md) | The boundary statement: this domain posts nothing itself and delegates every financial consequence to the payment and invoicing domains. |
-| [configuration.md](configuration.md) | Every setting, system parameter, shipped action, shipped message template, access group, model access rule and record rule relevant to the portal, plus the master data that must exist. |
-| [interfaces.md](interfaces.md) | The service operations, every request endpoint with its authentication level and payload, the screens described as workflows on views, the reports, the notifications and the scheduled job. |
-| [acceptance-criteria.md](acceptance-criteria.md) | Given/When/Then scenarios covering every rule, every transition and every formula. |
-| [glossary.md](glossary.md) | The terms used in this folder. |
+| [calculations.md](calculations.md) | The page navigator algorithm, the record navigator, the counter batching, the token generation and signing, the address assembly, the detection of an address that is already used as a login, the unchanged-address test, the mandatory address field computation, the address completeness test, the star display, the rating statistics, the due-date label, the author picture address, the report file naming, the deleted-account login, the user menu name, the language labels, the list ordering and the payment amount, each with a worked example. |
+| [accounting-effects.md](accounting-effects.md) | The boundary statement: this domain posts nothing itself and delegates every financial consequence to the payment and invoicing domains, action by action. |
+| [configuration.md](configuration.md) | Every capability package, setting, system parameter, constant, session key, shipped action, shipped screen definition, shipped message template, access group, model access rule, record rule, scheduled job and master-data prerequisite of the portal, plus the contract a document domain must satisfy to gain a portal presence. |
+| [interfaces.md](interfaces.md) | The service operations, every request endpoint with its authentication level and payload, the screens described as workflows on views, the reports, the exports, the notifications, the scheduled job and the front-end session payload. |
+| [acceptance-criteria.md](acceptance-criteria.md) | Numbered Given, When and Then scenarios with concrete records, inputs, amounts and states, covering every rule, every transition and every formula. |
+| [glossary.md](glossary.md) | Every term of the domain, defined. |

@@ -156,13 +156,41 @@ Each parameter names one row of the platform's system parameter store; the keys 
 
 ---
 
-## 8. Shipped message template
+## 8. Shipped message templates and bodies
 
-| Template | Entity it renders against | Subject | Sender | Recipient | Body |
-|---|---|---|---|---|---|
-| `Settings: New Portal User Invite` | User | `Your account at {{ company name }}` | the company's formatted address when set, otherwise the acting user's formatted address | the user's formatted address | Described in section 1.1 of [workflows.md](workflows.md). Its description reads `Sent to new portal user after you invited them`. It renders the welcome message of the invitation session and a tracking medium of `portalinvite`. |
+### 8.1 The invitation template
 
-The share dialog does not use a message template: it posts a rendered fragment as an internal note with the light notification layout.
+| Property | Value |
+|---|---|
+| External identifier | `auth_signup.portal_set_password_email` |
+| Name | `Settings: New Portal User Invite` |
+| Description | `Sent to new portal user after you invited them` |
+| Entity it renders against | User (`res.users`) |
+| Subject | `Your account at` followed by the name of the user's company |
+| Sender | the company's formatted address when set, otherwise the acting user's formatted address |
+| Recipient | the user's formatted address |
+| Delivery | forced immediate, not queued |
+| Rendering context supplied by this domain | the database name, the language of the invited user, the invitation session's `welcome_message`, and the tracking medium `portalinvite` |
+| Body | Described, sentence by sentence, in section 1.1 of [workflows.md](workflows.md) |
+
+The template is owned by the sign-up capability of [Identity and Access](../identity-and-access/README.md) and is listed here because the invitation dialog of this domain is one of the two places that send it. When it cannot be resolved, the send is refused with `The template "Portal: new user" not found for sending email to the portal user.` (`PORT-RULE-009`). Note that the refusal names the template by a wording that is not the template's own name; reproduce the message exactly as written.
+
+### 8.2 The share invitation body
+
+| Property | Value |
+|---|---|
+| External identifier | `portal.portal_share_template` |
+| Kind | a rendered fragment, not a message template: it is posted through the "post a message built from a source fragment" operation of the messaging domain |
+| Render values | the recipient Contact, the note, the shared record, the share link, and the lower-cased human name of the shared entity |
+| Subject | `Invitation to access` followed by the display name of the shared document |
+| Subtype | the private note subtype, so the body never appears on the document's portal page (`PORT-RULE-014`) |
+| Notification layout | the light notification layout |
+| Recipients | exactly one Contact per posted message |
+| Body | a greeting addressed to the recipient by name; a sentence naming the person who invited them and the lower-cased human name of the shared entity; a button labelled `Open` followed by the display name of the document, linking to that recipient's own share link; and, when a note was typed, the note rendered with its line breaks preserved |
+
+### 8.3 Templates this domain does not ship
+
+There is no template for a revocation: revoking access sends nothing at all. There is no template for the account deletion: the person is told by the redirection message `Account deleted!` and by nothing else. There is no digest and no reminder of any kind in this domain.
 
 ---
 
@@ -181,17 +209,21 @@ The share dialog does not use a message template: it posts a rendered fragment a
 
 ## 10. Model access rules shipped by this domain
 
-| Entity | Group | Read | Write | Create | Delete |
-|---|---|---|---|---|---|
-| Portal Share Wizard | Contact manager | yes | yes | yes | no |
-| Portal Access Wizard | Contact manager | yes | yes | yes | no |
-| Portal Access Wizard User | Contact manager | yes | yes | yes | no |
+Each row below is one shipped access-right record. The external identifier and the record name are reproduced because an installation carries them in its data and a replacement that imports an existing database must find them again.
 
-Shipped by the second-factor bridge:
+| External identifier | Record name | Entity | Group | Read | Write | Create | Delete |
+|---|---|---|---|---|---|---|---|
+| `access_portal_share` | `access.portal.share` | Portal Share Wizard (`portal.share`) | `base.group_partner_manager` | yes | yes | yes | no |
+| `access_portal_wizard` | `access.portal.wizard` | Portal Access Wizard (`portal.wizard`) | `base.group_partner_manager` | yes | yes | yes | no |
+| `access_portal_wizard_user` | `access.portal.wizard.user` | Portal Access Wizard User (`portal.wizard.user`) | `base.group_partner_manager` | yes | yes | yes | no |
 
-| Entity | Group | Read | Write | Create | Delete |
-|---|---|---|---|---|---|
-| Second Factor Enrollment Wizard | Portal | yes | yes | yes | yes |
+Shipped by the second-factor bridge for the portal:
+
+| External identifier | Record name | Entity | Group | Read | Write | Create | Delete |
+|---|---|---|---|---|---|---|---|
+| `access_auth_totp_portal_wizard` | `auth_totp_portal wizard access rules` | Second Factor Enrollment Wizard (`auth.totp.wizard`) | `base.group_portal` | yes | yes | yes | yes |
+
+The four permissions of a row are independent. Granting create without delete is deliberate for the three wizards of this domain: a Contact manager opens a dialog, which creates a transient row, and never removes one by hand; the platform's own collection of expired transient rows is what removes them.
 
 No other model access rule is shipped by this domain. The permissions that decide what an external person sees on each document are shipped by that document's own domain and are summarized in `PORT-RULE-171`.
 
@@ -200,6 +232,38 @@ No other model access rule is shipped by this domain. The permissions that decid
 ## 11. Record rules
 
 This domain ships no record rule. It depends on the ones shipped by the document domains, listed in `PORT-RULE-171` of [business-rules.md](business-rules.md).
+
+---
+
+## 11.1 Sequences
+
+This domain ships no sequence and consumes none. Nothing it creates carries a human-readable
+reference: the three wizards are transient rows identified only by their surrogate key, and the
+security token is a random value rather than a counted one. The references shown on a portal page —
+an order reference, an invoice reference, a purchase order reference — are produced by the domain
+that owns the document.
+
+## 11.2 Activity types
+
+This domain ships no activity type and schedules no activity. An action taken from a portal page may
+cause the owning domain to schedule one; for example confirming an order may raise a follow-up
+activity for the salesperson under the rules of [Sales](../sales/README.md). Nothing in this folder
+creates, completes or cancels an activity.
+
+## 11.3 Default records shipped by this domain
+
+| Record | Kind | Purpose |
+|---|---|---|
+| `portal_share_template` | rendered fragment | The body of the share invitation; see section 8.2. |
+| `access_portal_share`, `access_portal_wizard`, `access_portal_wizard_user` | access-right records | See section 10. |
+| `partner_wizard_action_create_and_open`, `partner_wizard_action`, `portal_share_action` | actions | See section 6. |
+| `wizard_view`, `portal_share_wizard`, `res_config_settings_view_form` | back-office screen definitions | See section 7.1. |
+| `rating_rating_view_form` | back-office screen definition, shipped by the rating bridge | See section 7.1. |
+| the thirty-eight front-end layout fragments | screen definitions | See section 7.2. |
+
+No default company, journal, product, group or parameter row is created by installing this domain.
+Installing it changes no existing record other than by adding the fields listed in
+[entities.md](entities.md).
 
 ---
 
