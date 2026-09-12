@@ -371,18 +371,18 @@ Input: a candidate date, whether the entry affects the tax report, and optionall
  6. If the document is a sale document:
       a. If no lock date was violated, return the candidate date unchanged.
       b. If there is no LAST at all, or the periodicity is monthly:
-         return the earlier of TODAY and the last day of the month of the candidate date.
+         the result is the earlier of TODAY and the last day of the month of the candidate date.
       c. If the periodicity is yearly:
-         return the earlier of TODAY and the last day of the year of the candidate date.
+         the result is the earlier of TODAY and the last day of the year of the candidate date.
       d. Otherwise return the candidate date.
  7. Otherwise (purchase document, plain entry, anything else):
       a. If there is no LAST at all, or the periodicity is monthly or year-range-monthly:
          - if (year, month) of TODAY is later than (year, month) of the candidate date,
-           return the last day of the month of the candidate date;
+           the result is the last day of the month of the candidate date;
          - otherwise return the later of the candidate date and TODAY.
       b. If the periodicity is yearly:
          - if the year of TODAY is later than the year of the candidate date,
-           return the thirty-first of December of the candidate year;
+           the result is the thirty-first of December of the candidate year;
          - otherwise return the later of the candidate date and TODAY.
       c. Otherwise return the candidate date.
 ```
@@ -652,13 +652,13 @@ So sale and liquidity journals number **yearly** by default and every other jour
       a. Build a cache key from the format filled with counter zero and from the grouping
          value of the entry (its journal).
       b. If the key is already in the transaction cache, increment the cached counter and
-         return the number built from it, without touching the database.
+         the result is the number built from it, without touching the stored data.
       c. Otherwise open a savepoint and loop:
            - increase the counter by one;
            - build the candidate number;
            - write it directly into the number column of this entry;
            - if the write succeeds, remember the counter in the transaction cache and
-             return the candidate;
+             the result is the candidate;
            - if the write violates the uniqueness constraint, roll back to the savepoint
              and loop again.
  6. Store the number on the record, schedule the recomputation of every stored computed
@@ -786,27 +786,52 @@ Refusal: renumbering by date in a journal that secures its entries with a hash i
 
 Each secured entry carries a hash that binds the hash of the previous secured entry of the same chain to the exact content of this entry. Any later modification of a hashed field breaks the verification.
 
+### The four hash versions
+
+A hash carries a **version**. Four exist, numbered one to four; four is the current one and the one every new hash is computed with. A verification must be able to reproduce all four, because an entry hashed under an older version keeps its old hash for ever and is re-verified under that version. Nothing else in the domain depends on the version.
+
+The three things that vary from one version to the next are the set of fields, the way a monetary amount is turned into text, and the way the result is stored. Everything else — the key naming, the sorting, the serialisation, the chaining — is identical in all four.
+
+| | Version 1 | Version 2 | Version 3 | Version 4 (current) |
+|---|---|---|---|---|
+| Entry fields | `date`, `journal_id`, `company_id` | `name`, `date`, `journal_id`, `company_id` | same as 2 | same as 2 |
+| Item fields | `debit`, `credit`, `account_id`, `partner_id` | `name`, `debit`, `credit`, `account_id`, `partner_id` | same as 2 | same as 2 |
+| A monetary amount is written | in the plain numeric form | in the plain numeric form | with exactly the decimals of the currency | with exactly the decimals of the currency |
+| The result is stored | as the bare digest | as the bare digest | as the bare digest | as a dollar sign, the digit 4, a dollar sign, then the digest |
+
+A version number outside one to four is not a version: asking for one is an error, not a fallback.
+
 ### The fields that enter the hash
 
-At the current hash version the fields are:
+At the current version the fields are:
 
 | Level | Fields, in this exact order of naming |
 |---|---|
 | Entry | `name` (the number), `date`, `journal_id`, `company_id` |
 | Each item | `name` (the label), `debit`, `credit`, `account_id`, `partner_id` |
 
-An earlier version omitted the two `name` fields; the verification report retries the older versions when the current one does not match, which is how historical hashes remain verifiable.
+Version one omits the two `name` fields at both levels; versions two, three and four all use the list above. The order in the table is the order in which the values are collected, but it does not survive into the input string, because the keys are sorted before serialisation.
 
 ### Rendering each value as text
 
 ```
  - a link field is rendered as the decimal identifier of the target record, or as the text
    "False" when empty (the identifier of an empty link is the boolean false);
- - a monetary field is rendered with exactly the number of decimals of the currency of the
-   record, without a thousands separator and with a dot as the decimal separator;
+ - a monetary field is rendered in one of two ways, according to the version:
+     * versions 3 and 4 — with exactly the number of decimals of the currency of the record,
+       without a thousands separator and with a dot as the decimal separator, so an amount of
+       one thousand in a two-decimal currency is written "1000.00" and a zero amount "0.00";
+     * versions 1 and 2 — in the plain numeric form of the stored number, that is the
+       shortest decimal text that reproduces the stored double-precision value exactly, always
+       carrying a decimal point and at least one digit after it, with a dot as the decimal
+       separator and no thousands separator; so the same amount of one thousand is written
+       "1000.0" and a zero amount "0.0". A magnitude below one ten-thousandth but not zero,
+       or of ten to the sixteenth or above, is written in exponent notation in this form;
  - every other field is rendered with the ordinary textual representation of its value:
    a date as "YYYY-MM-DD", a text as itself, an empty value as "False".
 ```
+
+The monetary rule applies to the two amount fields of an item, `debit` and `credit`, and to nothing else; the currency whose decimals are used is the currency of the **item**, that is the company currency, because the debit and the credit are always expressed in it.
 
 ### Building the input string
 
@@ -835,11 +860,15 @@ An earlier version omitted the two `name` fields; the verification report retrie
     and the serialised document, encode the result in the eight-bit Unicode transformation
     format, and compute the two-hundred-and-fifty-six-bit secure hash of that byte string,
     rendered as lowercase hexadecimal.
- 7. Store the result as: a dollar sign, the hash version number, a dollar sign, the
-    hexadecimal digest.
- 8. The digest just computed (without the marker) becomes the previous digest for the next
-    entry of the chain.
+ 7. Store the result. At version 4 the stored value is: a dollar sign, the version number,
+    a dollar sign, then the hexadecimal digest. At versions 1, 2 and 3 the stored value is
+    the bare hexadecimal digest with no marker at all. Step 5 is what makes the two forms
+    interchangeable when they meet in one chain.
+ 8. The digest just computed (without the marker, when there is one) becomes the previous
+    digest for the next entry of the chain.
 ```
+
+Step 5 has no version of its own: it strips a marker whenever the previous stored hash carries one, whatever version is being computed. So a chain whose older part was hashed at version 3 (bare digests) and whose newer part is hashed at version 4 (marked digests) chains correctly across the boundary, and re-verifying the newer part still feeds it the bare digest of the older one.
 
 ### Worked example
 
@@ -885,6 +914,8 @@ For each journal of the company:
  5. The first entry whose hash cannot be reproduced marks the prefix as corrupted; the
     remaining entries of that prefix are not checked.
 ```
+
+Step 4 is why the version table above must be reproduced in full: a verification that only knew the current version would report every entry hashed before it as corrupted. The retry starts at version one and stops at the first version whose recomputation matches the stored value, or at version four without a match, in which case the entry is corrupted. The retry is per entry and the version reached is carried forward as the starting version of the next entry of the same walk, so a chain hashed entirely at one version costs one attempt per entry after the first.
 
 The report shows, per journal and prefix, either "Entries are correctly hashed" with the first and last verified entry, their hashes and their dates, or "Corrupted data on journal entry with id *the identifier* (*the number*)." A journal with no hashed entry reports "There is no journal entry flagged for accounting data inalterability yet."
 
@@ -1678,21 +1709,76 @@ The list opened by the indicator shows every entry of the journals and prefixes 
 
 ## 30. The display name of an entry
 
+Two forms exist. `entities.md` states them in prose; this section states them as procedures, and the two must agree. The choice between them is made by one switch in the reading context.
+
+### 30.1 The ordinary form
+
 ```
- 1. Let PARTS be an empty list.
- 2. When the entry is draft:
-      a. Append the label of the document type, prefixed by the word "Draft" and a space
-         (for a plain entry the label is "Journal Entry").
-      b. Append, in parentheses, the reference when there is one, otherwise the word
-         "Unknown" — this is what identifies a draft document that has no number yet.
- 3. When the entry is cancelled, append the number and then the word "(Cancelled)".
- 4. When the entry is posted, append the number.
- 5. When the full display mode is requested, append the counterpart name and the accounting
-    date.
- 6. Join the parts with spaces.
+ 1. Let NAME be the empty text.
+ 2. When, and only when, the entry is draft, set NAME to the one fixed word group of the
+    document type of the entry. There are exactly seven and no other, all reproduced
+    verbatim: "Draft Entry" for a plain entry, "Draft Invoice" for a customer invoice,
+    "Draft Credit Note" for a customer credit note, "Draft Bill" for a vendor bill,
+    "Draft Vendor Credit Note" for a vendor credit note, "Draft Sales Receipt" for a sales
+    receipt and "Draft Purchase Receipt" for a purchase receipt.
+    A posted entry and a cancelled entry add nothing here: no prefix and no suffix
+    distinguishes the cancelled state in the display name.
+ 3. When the number exists and is not the placeholder "/":
+      a. set NAME to NAME, a space and the number;
+      b. remove the leading and trailing spaces of NAME, so a posted numbered entry ends up
+         as the bare number;
+      c. when the full display mode is requested:
+           - when the entry has a counterpart, append a comma, a space and the counterpart
+             name;
+           - when the entry has an accounting date, append a comma, a space and that date
+             formatted for the reading language.
+ 4. When the caller asks for the reference to be shown and the entry has one, append a space,
+    an opening parenthesis, the shortened reference and a closing parenthesis. The reference
+    is shortened by collapsing every run of whitespace to a single space and then, when the
+    result is still longer than fifty characters, cutting it at a word boundary and adding a
+    space and three dots between square brackets. The computation of the stored display name
+    always asks for the reference.
+ 5. The result is NAME, which is the empty text when the entry is neither draft nor numbered.
 ```
 
-The labels of the document types used here are: Journal Entry, **Invoice** (not "Customer Invoice"), **Credit Note** (not "Customer Credit Note"), Vendor Bill, Vendor Credit Note, Sales Receipt and Purchase Receipt. The two overrides exist so that the name printed to a customer says simply "Invoice".
+**Worked example.** A posted vendor bill numbered `BILL/2026/03/0007` whose reference is "Order 4711" displays as `BILL/2026/03/0007 (Order 4711)`. The same document while draft and unnumbered displays as "Draft Bill". The same document while draft, unnumbered, read in the full display mode, displays as "Draft Bill (Order 4711)" — the counterpart and the date are added only in step 3c, which is reached only when a number exists.
+
+### 30.2 The amount-total form
+
+```
+ 1. Format the grand total of the entry in the currency of the entry, with its symbol and
+    with exactly the decimals of that currency; call it AMOUNT.
+ 2. When the entry is a sale document (customer invoice, customer credit note or sales
+    receipt) and it is posted:
+      the result is the number, then — only when the entry has a reference — a space, a
+      hyphen, a space and the reference, then the text " at " and AMOUNT. Stop.
+ 3. Otherwise let LABEL be:
+      - the reference when the entry is a purchase document (vendor bill, vendor credit note
+        or purchase receipt) and it has one, otherwise the number of such an entry;
+      - the number for every other entry.
+    An empty value gives an empty LABEL.
+ 4. When LABEL is not empty and the entry is draft:
+      the result is LABEL, " at ", AMOUNT, a space and "(Draft)". Stop.
+ 5. When LABEL is not empty:
+      the result is LABEL, " at " and AMOUNT. Stop.
+ 6. Otherwise the result is "Draft (", AMOUNT and ")".
+```
+
+**Worked examples**, with a company currency of euros and a grand total of 1 150.00:
+
+| Entry | Result |
+|---|---|
+| posted customer invoice `INV/2026/00021`, no reference | `INV/2026/00021` at €1,150.00 |
+| posted customer invoice `INV/2026/00021`, reference "Order 4711" | `INV/2026/00021` - Order 4711 at €1,150.00 |
+| draft vendor bill, no number, reference "Order 4711" | Order 4711 at €1,150.00 (Draft) |
+| posted plain entry `MISC/2026/03/0004` | `MISC/2026/03/0004` at €1,150.00 |
+| draft plain entry with no number at all | Draft (€1,150.00) |
+
+Step 6 is the only place the word "Draft" appears in this form for an entry that is not draft: an entry with no label at all is announced as a draft whatever its state.
+
+### 30.3 The labels of the document types
+
+The labels used by the type-name field of the entry, which is a different thing from the display name, are: Journal Entry, **Invoice** (not "Customer Invoice"), **Credit Note** (not "Customer Credit Note"), Vendor Bill, Vendor Credit Note, Sales Receipt and Purchase Receipt. The two overrides exist so that the name printed to a customer says simply "Invoice". Those labels are **not** the ones used by step 2 of the ordinary form, which uses the seven fixed word groups quoted there.
 
 ---
 

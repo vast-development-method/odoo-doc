@@ -66,7 +66,7 @@ The entries that belong to this domain are:
 | Multi-ledger | Journal Group | list, form | — |
 | Settings | Settings | form | the accounting section |
 | Unmerge account | Account | list | used only as the target of the confirmation dialogue |
-| Merge accounts | Account merge wizard | form, in a dialogue | Bound to the Account as a contextual action of its list and card presentations, restricted to the Administrator group. It carries the name "Merge accounts". When the wizard re-opens itself (after a change that must be re-shown) it does so under the name "Merge Accounts" |
+| Merge accounts | Account merge wizard | form, in a dialogue | Bound to the Account as a contextual action of its list and card presentations, restricted to the Administrator group. It carries the name "Merge accounts". A second window action on the same form exists as an operation of the wizard itself, so that the dialogue can be shown again on the record it is already filling; that one carries the name "Merge Accounts" |
 
 ---
 
@@ -106,6 +106,7 @@ Columns: the number, the counterpart, the accounting date, the reference, the to
 
 - Header: the state buttons (Post, Reset to Draft, Cancel, Request Cancellation, Reverse, Secure) and the status bar with the three states.
 - Body: the number (with the placeholder showing the number that would be taken), the counterpart, the accounting date, the reference, the journal, the company, the currency, the automatic posting mode and its end date.
+- Above the number, a warning line appears whenever the "number too low" flag of `entities.md` is set. Its text is "The current highest number is *the highest number of the chain*. You might want to put a higher number here." — the number is shown inline inside the sentence, between the first full stop and the word that follows it. The line is hidden as soon as the flag clears.
 - A notebook with the journal items (account, label, counterpart, taxes, tax grids, analytic distribution, debit, credit, foreign amount, currency, matching number, due date), the other information and, when relevant, the hash.
 - The audit trail, the activity panel and the attachments.
 
@@ -244,11 +245,13 @@ These are the operations callable by name on a record or on the model. Each is l
 | Open the matched items | one entry | a window action on the items of the matched group | |
 | Open the source document | one entry | a window action on the record that produced the entry | |
 | Open the created cash-basis entries | one entry | a window action | |
-| Open the adjusting entries | one entry | a window action | |
-| Open the origin entries of an adjusting entry | one entry | a window action | |
+| Open the adjusting entries | one entry | a window action on the adjusting entries it produced, always named "Adjusting Entries" | |
+| Open the origin entries of an adjusting entry | one entry | a window action on the entries it was produced from, whose name is the origin label of the entry when the entry has exactly **one** adjusting entry, and the literal "Invoices" in every other case | see the note below |
 | Read the currency rate | a company, a currency, a date | the rate | used by the client to display the expected rate |
 | Refresh the currency rate | a set of entries | nothing | resets the stored rate to the expected one |
 | Check the numbering chain | a set of entries | true when they are the last ones of their chains | |
+
+The name of the action that opens the origin entries of an adjusting entry mixes two conditions that are not the same one. The origin label of `entities.md` is the label of the document type of the single **origin** entry, and it is empty when there are several origins; the choice between that label and "Invoices" is made on the number of **adjusting** entries. So an entry with one adjusting entry and several origins is opened under an empty name, and an entry with one origin and two adjusting entries is opened under "Invoices" although its single origin has a perfectly good label. **Compatibility finding.** A corrected behaviour would test the number of origin entries, which is what the label describes, and fall back to "Invoices" only when the label is empty. The observed behaviour is the one specified above.
 
 ### On the Journal Item
 
@@ -277,10 +280,19 @@ These are the operations callable by name on a record or on the model. Each is l
 |---|---|---|
 | Create documents from files | a set of attachment identifiers | a window action on the created documents |
 | Configure the bank journal | one journal | the bank setup dialogue |
-| Open the dashboard action | one journal, a chosen target | the corresponding window action |
+| Open the dashboard action | one journal, a chosen target | the corresponding window action, prepared as described below |
 | Post all entries | one journal | the validate-entries wizard |
-| Show the numbering holes | one journal | a window action |
-| Show the unhashed entries | one journal | a window action |
+| Show the numbering holes | one journal | a window action named "Journal Entries" |
+| Show the unhashed entries | one journal | a window action named "Journal Entries to Hash", or the form of the single entry when there is only one |
+
+**How a dashboard action is prepared.** Opening an action from a journal card takes the shipped window action of the requested target and adjusts it before returning it:
+
+1. The context gets the journal as the default journal of anything created from the action.
+2. When the context asked for the journal to be a default search filter, that filter is added and the request is then removed, so that the filter is not applied a second time further down.
+3. Any grouping carried in the context is dropped.
+4. When, and only when, the context asks for the action to be restricted by a domain, two things happen: the restriction is applied — either the explicit one carried in the context, or, by default, "the journal is this journal, or the record has no journal at all" — and the **name of the action is rewritten** to the pattern "*the original name of the action* for journal *the name of the journal*". An action opened without that request keeps its shipped name unchanged.
+
+So the same shipped action appears under its plain name when it is opened unrestricted and under the composed name when it is opened restricted to one journal.
 | Fetch incoming electronic invoices | one journal | nothing in the core; overridden by exchange packages |
 | Refresh the status of outgoing electronic invoices | one journal | nothing in the core |
 
@@ -362,6 +374,24 @@ Second table, one row per verified chain:
 | Last Hash | the hash of the last verified entry |
 | Last Entry | the number of the last verified entry and its date |
 
+### Extra items added to the print menu
+
+The print menu of the entry list and of the entry form is not fixed: an operation is asked, for the current selection, which extra items it should carry. This domain adds exactly one.
+
+| Key | Label | Condition | Effect |
+|---|---|---|---|
+| `download_all` | "Export ZIP" | At least one selected entry has exportable documents | Downloads the exportable documents of every selected entry that has some, as one archive |
+
+An entry has exportable documents only when it is **posted**. For a posted purchase document (vendor bill, vendor credit note or purchase receipt) the exportable document is the main attachment of its message thread, and only that one; an entry without a main attachment contributes nothing. For every other posted entry the exportable documents are its legal documents — the printable file and the structured files produced for it — as specified in `../accounts-receivable/` and `../electronic-invoicing-and-document-exchange/`. A selection in which no entry has any exportable document adds no item at all, so the menu shows no "Export ZIP" entry.
+
+### Server actions bound to a record
+
+One server action is shipped by this domain and appears in the action menu of the record it is bound to.
+
+| Name | Bound to | Shown on | Effect |
+|---|---|---|---|
+| "Share" | Journal Entry | the form only | Opens the sharing dialogue for the entry: it prepares a link carrying an access token so that the document can be opened by someone who has no account, and offers to send that link. The dialogue itself and the token belong to the portal mechanism described in `../accounts-receivable/`. |
+
 ### Reports produced by neighbouring domains from this data
 
 | Report | Where specified |
@@ -422,6 +452,20 @@ The templates of the commercial documents themselves belong to `../accounts-rece
 |---|---|
 | Account | "Import Template for Chart of Accounts", a spreadsheet |
 | Journal Item | "Import Template for Journal Items", a spreadsheet |
+| Journal Entry | one spreadsheet chosen by the document type, or none; see immediately below |
+
+The Journal Entry is the only entity of the domain whose offer is **conditional**: the list of templates it returns is decided by the default document type carried in the reading context, that is by the screen the user opened the import from, and not by any record.
+
+| Default document type in the context | Template offered |
+|---|---|
+| `entry` (a plain entry) | "Import Template for Misc. Operations" |
+| `out_invoice` (a customer invoice) | "Import Template for Invoices" |
+| `out_refund` (a customer credit note) | "Import Template for Credit Notes" |
+| `in_invoice` (a vendor bill) | "Import Template for Bills" |
+| `in_refund` (a vendor credit note) | "Import Template for Refunds" |
+| none, or any other value | **no template at all** |
+
+Exactly one template is offered in each of the five cases; the list never holds two. The two customer templates are two names for one and the same spreadsheet, and so are the two vendor templates, so three distinct files exist in all. The plain-entry template is the one that belongs to this domain; the four commercial ones are specified in `../accounts-receivable/` and `../accounts-payable/`. The sales-receipt and purchase-receipt document types are deliberately absent from the table: opening the import from a receipt screen offers nothing.
 
 ### Import behavior specific to this domain
 
@@ -433,7 +477,7 @@ The templates of the commercial documents themselves belong to `../accounts-rece
 
 ### Export behavior
 
-Every list view can be exported. Fields explicitly marked as non-exportable are the binary payloads used by the client: the outstanding-payments widget data, the matched-payments widget data, the totals structure, the payment-term details, the needed-terms structure, the quick-encoding values and the deprecated view of the items.
+Every list view can be exported. Fields explicitly marked as non-exportable are the binary payloads used by the client: the outstanding-payments widget data, the matched-payments widget data, the totals structure, the payment-term details, the needed-terms structure, the quick-encoding values and the second view of the items named `journal_line_ids` in `entities.md`.
 
 ---
 
@@ -468,7 +512,7 @@ The accounting dashboard reads two things per journal: a set of **computed field
 | `has_entries` | boolean | At least one entry exists |
 | `has_posted_entries` | boolean | At least one posted entry exists |
 | `has_sequence_holes` | boolean | At least one entry of the journal carries the gap flag after the applicable fiscal lock date |
-| `has_unhashed_entries` | boolean | The journal secures posted entries and at least one posted entry is still unhashed after that date |
+| `has_unhashed_entries` | boolean | The journal secures posted entries **and** the search behind it finds at least one entry to hash after that date. The search itself does not test the state: it selects the entries of the journal that carry no hash, whose journal secures posted entries, and whose accounting date is strictly after the effective fiscal lock date of the acting user for that journal; the posted-state condition is applied only later, inside the chain selection, which also forces hashing regardless of the journal setting. A draft entry of such a chain therefore takes part in the search that produces this indicator, which is one of the two reasons the indicator and the list opened by the button can disagree; the other is stated in section 4 |
 | `has_invalid_statements` | boolean | At least one statement of the journal is not valid or not complete |
 | `current_statement_balance`, `has_statement_lines`, `last_statement_id` | various | Liquidity figures; specified in `../payments-and-bank-reconciliation/` |
 

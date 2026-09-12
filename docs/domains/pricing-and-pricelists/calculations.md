@@ -2004,7 +2004,61 @@ When a purchase order is confirmed, for each of its lines:
 6. Write the new offer onto the product template with elevated rights, so that a buyer without
    product-write access can still confirm an order.
 
-### 15.11 The estimated price of a purchase suggestion
+### 15.11 Replenishment differences
+
+A replenishment reaches the same selection through the buy rule, with five differences. They are
+stated here because each of them changes the number that ends up on the purchase order line; the
+procurement machinery itself belongs to
+[replenishment and procurement](../replenishment-and-procurement/).
+
+1. **The offer may be chosen rather than selected.** The precedence is: the offer passed explicitly
+   in the procurement values, otherwise the offer named on the reordering rule, otherwise the
+   automatic selection of sections 15.1 to 15.4.
+2. **An unmatched product still gets an offer.** When that precedence yields nothing, the **first**
+   offer of the product whose company is empty or equals the buying company is taken anyway, so that
+   a replenishment is never blocked by the absence of a matching quantity break. Its minimum quantity
+   may be far above the quantity being bought and its price is used exactly as it stands.
+3. **A new line converts the quantity twice, half up.**
+
+```formula
+quantity_in_product_unit = convert_quantity( the procured quantity ,
+                                             the procurement unit → the product's own unit ,
+                                             rounding half up )
+
+the offer is selected on quantity_in_product_unit
+
+quantity_on_the_line     = convert_quantity( quantity_in_product_unit ,
+                                             the product's own unit → the selected offer's unit ,
+                                             rounding half up )
+                           , applied only when the selected offer's unit differs
+                             and no forced unit was demanded
+```
+
+   The line then adopts the offer's unit. Note the rounding: **half up**, not away from zero as in
+   the engine's own conversion of section 3.
+
+4. **Extending an existing line re-selects on the sum.** When the replenishment adds to a line
+   already present on an open order, the selection is redone on the **sum** of the existing quantity
+   and the new quantity, which is what makes an order cross a quantity break and reprice.
+5. **The currency conversion is rounded.** On this path the offer's price is converted into the
+   order's currency **rounded**, unlike the unrounded conversion of section 15.7 used when a line is
+   edited by hand. Recorded as observed; unifying the two changes the last hundredth of some
+   procurement-created lines.
+
+The lead time contribution of the buy rule is the selected offer's lead time in days, and **365**
+days when no offer at all could be found.
+
+**Worked example of crossing a break.** A vendor offers 750.00 above quantity one and 700.00 above
+quantity one hundred. An open purchase order already carries a line for sixty units at 750.00. A
+replenishment adds fifty units: the selection is redone on one hundred and ten units, the second
+offer wins, and the existing line becomes one hundred and ten units at **700.00**.
+
+**Worked example of the double conversion.** The procurement asks for twenty-four `Units` of a
+product whose own unit is `Units`, and the selected offer quotes in `Dozens`. The first conversion is
+the identity, so the selection runs on twenty-four; the second gives
+`convert_quantity( 24 , Units → Dozens , half up ) = 2`, and the line is created for **two `Dozens`**.
+
+### 15.12 The estimated price of a purchase suggestion
 
 The purchase suggestion screen proposes a quantity to buy for each product and shows what buying it
 would cost. The quantity itself belongs to

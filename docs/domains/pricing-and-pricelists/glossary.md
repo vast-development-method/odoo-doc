@@ -351,9 +351,9 @@ not as fractions — the opposite convention from the sales line margin percenta
 
 ## 9. Precisions, conversions and rounding
 
-**Decimal precision record.** A named, editable setting that fixes the number of decimal places a
-class of values is displayed and compared at. This domain uses `Product Price`, `Discount` and
-`Product Unit`.
+**Decimal precision record.** A named, editable setting that fixes the number of decimal places at
+which one kind of value is displayed and compared. This domain uses `Product Price`, `Discount`
+and `Product Unit`.
 
 **Minimum display precision.** A declaration that a stored number is shown with at least the digits
 of a named precision record. It does not round the stored value, and the price engine never rounds
@@ -413,3 +413,31 @@ calls the vendor price selection and contributes the selected lead time to the p
 **Valued stock move.** A stock movement that carries a value, owned by
 [inventory valuation and costing](../inventory-valuation-and-costing/). The stock margin variant
 reads the unit value of the done moves of a sales line.
+
+---
+
+## 11. Reconciliation notes
+
+1. **"Price list" as two words.** One of the two descriptions this glossary was merged from wrote the
+   term as one compound word throughout, following the platform's own stored identifiers. Prose in
+   this repository never abbreviates, and the compound spelling is an abbreviation of two words, so
+   every entry here writes **price list**. The stored identifiers keep the compound spelling, in code
+   font, because they are contractual.
+
+2. **"Seller" against "vendor price".** One description used the word "seller" for a stored offer,
+   following the storage name `seller_ids` (vendors). The record is one vendor's offer for one
+   product, and the entity's own label calls it a supplier price list. This folder calls it a **Vendor
+   Price** everywhere and reproduces the storage name only in code font.
+
+3. **"Pricelist item" against "price list rule".** One description used the storage name as the term.
+   The entity is called a **Price List Rule** here; `product.pricelist.item` appears only as a
+   reproduced identifier.
+
+4. **"Discount" as a single term.** The two descriptions used the one word for three different things:
+   the percentage a rule subtracts, the percentage a document line displays, and the percentage a
+   vendor offer subtracts. Section 3 and section 4 define the three separately, and every other file
+   uses the qualified term.
+
+5. **"Margin" as a single term.** Likewise the one word covered the two bounds of a formula rule and
+   the difference between a price and a cost. Section 3 defines the bounds as the **minimum price
+   margin** and the **maximum price margin**; section 8 defines the reporting measure.

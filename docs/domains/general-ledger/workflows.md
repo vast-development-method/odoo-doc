@@ -8,26 +8,27 @@ Contents:
 2. [Recording the opening balances](#2-recording-the-opening-balances)
 3. [Creating an account by hand](#3-creating-an-account-by-hand)
 4. [Splitting a shared account per company](#4-splitting-a-shared-account-per-company)
-5. [Creating a journal](#5-creating-a-journal)
-6. [Recording a miscellaneous entry](#6-recording-a-miscellaneous-entry)
-7. [Posting an entry](#7-posting-an-entry)
-8. [Posting entries in bulk](#8-posting-entries-in-bulk)
-9. [Automatic and recurring posting](#9-automatic-and-recurring-posting)
-10. [Resetting an entry to draft](#10-resetting-an-entry-to-draft)
-11. [Cancelling an entry](#11-cancelling-an-entry)
-12. [Reversing an entry](#12-reversing-an-entry)
-13. [Deleting an entry](#13-deleting-an-entry)
-14. [Matching journal items](#14-matching-journal-items)
-15. [Undoing a match](#15-undoing-a-match)
-16. [Moving an amount to another account](#16-moving-an-amount-to-another-account)
-17. [Moving an amount to another period](#17-moving-an-amount-to-another-period)
-18. [Renumbering a set of entries](#18-renumbering-a-set-of-entries)
-19. [Closing a period with a lock date](#19-closing-a-period-with-a-lock-date)
-20. [Granting a lock date exception](#20-granting-a-lock-date-exception)
-21. [Securing entries with the hash chain](#21-securing-entries-with-the-hash-chain)
-22. [Verifying the hash chain](#22-verifying-the-hash-chain)
-23. [Closing a fiscal year](#23-closing-a-fiscal-year)
-24. [The accounting onboarding path](#24-the-accounting-onboarding-path)
+5. [Merging several accounts into one](#5-merging-several-accounts-into-one)
+6. [Creating a journal](#6-creating-a-journal)
+7. [Recording a miscellaneous entry](#7-recording-a-miscellaneous-entry)
+8. [Posting an entry](#8-posting-an-entry)
+9. [Posting entries in bulk](#9-posting-entries-in-bulk)
+10. [Automatic and recurring posting](#10-automatic-and-recurring-posting)
+11. [Resetting an entry to draft](#11-resetting-an-entry-to-draft)
+12. [Cancelling an entry](#12-cancelling-an-entry)
+13. [Reversing an entry](#13-reversing-an-entry)
+14. [Deleting an entry](#14-deleting-an-entry)
+15. [Matching journal items](#15-matching-journal-items)
+16. [Undoing a match](#16-undoing-a-match)
+17. [Moving an amount to another account](#17-moving-an-amount-to-another-account)
+18. [Moving an amount to another period](#18-moving-an-amount-to-another-period)
+19. [Renumbering a set of entries](#19-renumbering-a-set-of-entries)
+20. [Closing a period with a lock date](#20-closing-a-period-with-a-lock-date)
+21. [Granting a lock date exception](#21-granting-a-lock-date-exception)
+22. [Securing entries with the hash chain](#22-securing-entries-with-the-hash-chain)
+23. [Verifying the hash chain](#23-verifying-the-hash-chain)
+24. [Closing a fiscal year](#24-closing-a-fiscal-year)
+25. [The accounting onboarding path](#25-the-accounting-onboarding-path)
 
 Roles used in this document:
 
@@ -162,8 +163,8 @@ Each prefix-derived code is obtained by the free-code walk of `calculations.md`,
  1. The accountant opens the chart of accounts and types an opening debit, an opening credit
     or an opening balance on each account — or imports a spreadsheet carrying an opening
     balance column.
- 2. Each value is collected in a pending buffer rather than written immediately, so that an
-    import of a thousand accounts produces one update of the opening entry instead of a
+ 2. Each value is collected in a pending buffer rather than written immediately, so that
+    importing a thousand accounts produces one update of the opening entry instead of a
     thousand.
  3. At the end of the operation the buffer is applied per company by the algorithm of
     `calculations.md`:
@@ -234,7 +235,115 @@ Nothing changes from an accounting point of view: every journal item keeps the c
 
 ---
 
-## 5. Creating a journal
+## 5. Merging several accounts into one
+
+**Who:** accounting administrator with access to every company of the accounts.
+
+**What it is for.** A chart that grew by hand, or a chart loaded twice, ends up with several accounts that mean the same thing. Merging collapses them into one account that keeps **every** code and **every** company of the set, so that no journal item changes its code and no company loses its account. It is the mirror image of the split of section 4: the split turns one account shared by several companies into one account per company, the merge turns several accounts into one shared account.
+
+**Preconditions.** The operation is offered on the chart of accounts to the Administrator group only. It refuses at once when the selection is not made of accounts, and when it holds fewer than two records. The two messages are in `business-rules.md`.
+
+### Step A — building the groups
+
+```
+ 1. The selected accounts are read, and every account whose type is Bank and Cash is dropped:
+    a liquidity account is tied to its journal and to the money it holds, and must never be
+    merged with another. Every other type is kept, the Credit Card type included.
+ 2. Each remaining account is reduced to a grouping key made of five values, in this order:
+      - the account type,
+      - the non-trade flag,
+      - the currency the account restricts its items to (empty when it restricts none),
+      - the reconcilable flag,
+      - the active flag.
+    When the "Group by name?" switch of the dialogue is ticked, the account name is appended
+    to the key as a sixth value, so that two accounts that differ only by name fall into two
+    groups instead of one.
+ 3. The accounts are grouped by that key, each group keeping the accounts in the order in
+    which they were read.
+ 4. The dialogue is filled: for each group in turn, one heading row followed by one row per
+    account of the group, numbered consecutively from one. The heading carries the group name
+    built by the rule of `business-rules.md`; every account row starts ticked.
+ 5. Every account row is then checked against the two blocking reasons of `business-rules.md`
+    (two accounts of one company, two accounts that both carry hashed entries). A blocked row
+    keeps its tick box but is skipped by the merge. Ticking or unticking any row re-runs this
+    check for the whole group, because whether one account is blocked depends on which others
+    are still selected.
+ 6. The Merge button is inert while no group holds at least two rows that are both ticked and
+    unblocked.
+```
+
+Changing the "Group by name?" switch, or changing the set of accounts, rebuilds the whole list from step 1, which discards any ticking the user had done.
+
+### Step B — the merge itself
+
+```
+ 1. The write access of the acting user on the selected accounts is checked, and then the
+    companies: every company of those accounts must be a company the user may act for,
+    otherwise the operation is refused with the company message of `business-rules.md`.
+ 2. For each group, the rows that are ticked and unblocked are collected. A group with fewer
+    than two such rows is skipped entirely.
+ 3. The accounts of the group are ordered so that an account carrying hashed entries comes
+    first; the order of the others is unchanged. At most one account of a group can carry
+    hashed entries and still be unblocked, so this makes that one the survivor and guarantees
+    that no hashed journal item ever changes its account identifier.
+ 4. The merge of one group then runs the eight steps below.
+```
+
+### Step C — merging one group of accounts
+
+```
+ 1. Collect, before anything is changed:
+      - the union of the companies of every account of the group;
+      - the union of their per-company code maps, read directly from storage, giving one code
+        per company over the whole group. No company can appear twice, because two accounts of
+        one company are never both eligible.
+    Nothing is written yet: writing the companies or the codes now would put two codes of one
+    company on two coexisting accounts and trip the code uniqueness rule.
+ 2. The first account of the ordered group becomes the surviving account; the others are the
+    accounts to remove.
+ 3. The write access and the company access are checked again, on the accounts of this group.
+ 4. Every stored reference to an account to remove is repointed to the survivor: for each
+    table that holds a column pointing at the account table, the rows naming an account to
+    remove are rewritten to name the survivor. Where that rewriting would break a uniqueness
+    or a validity constraint of the target table — typically a link table that already holds
+    the same pair for the survivor — the offending rows are deleted instead of rewritten,
+    because a row pointing at an account that is about to disappear is worthless. This is what
+    moves the journal items, the tax distribution lines, the fiscal position mappings, the
+    journal default accounts, the reconciliation models and every other reference in one pass.
+ 5. The references that name a record by model name and identifier rather than by a typed
+    column are repointed the same way, with the same deletion fallback. Five kinds are
+    covered: attachments, followers, scheduled activities, messages and external identifiers.
+ 6. The translated names are merged. The stored translations of the name of every account of
+    the group are read, and merged into one map by walking the accounts from the last to the
+    first, each overwriting the previous: the **first account wins** for every language it has
+    a translation in, and a language it has no translation in is filled from the first
+    following account that has one. The merged map is written on the survivor, replacing its
+    own name.
+ 7. The accounts to remove are deleted directly from storage, in one operation. Because the
+    deletion is direct, the ordinary deletion guards of the Account (no journal item, no
+    fiscal position mapping, no tax distribution line) are not consulted — they would all be
+    satisfied anyway, since step 4 has just emptied those references. The caches of the
+    external identifiers are cleared afterwards.
+ 8. The collected code map of step 1 is written on the survivor, then the collected companies,
+    and the recomputation of the tags of the survivor is scheduled. The survivor now belongs
+    to every company of the group and carries, in each of them, the code the merged account
+    had there.
+```
+
+### Step D — the result
+
+```
+ 1. A success notification is shown carrying the message "Accounts successfully merged!"
+ 2. Dismissing it closes the dialogue.
+```
+
+**What has changed in the ledger:** nothing. Every journal item keeps its amount, its date, its entry and its code, because the code is per company and every code was preserved. What has changed is the chart: several rows became one, and that one row is now shared by all the companies that had their own.
+
+**What is lost.** The identifiers of the removed accounts, their own translated names in the languages the survivor already covers, and any row that step 4 or step 5 had to delete rather than rewrite. The survivor keeps its own identifier, so every reference to it, hashed entries included, stays valid.
+
+---
+
+## 6. Creating a journal
 
 **Who:** accounting administrator.
 
@@ -258,7 +367,7 @@ Nothing changes from an accounting point of view: every journal item keeps the c
 
 ---
 
-## 6. Recording a miscellaneous entry
+## 7. Recording a miscellaneous entry
 
 **Who:** accountant.
 
@@ -282,7 +391,7 @@ Nothing changes from an accounting point of view: every journal item keeps the c
 
 ---
 
-## 7. Posting an entry
+## 8. Posting an entry
 
 **Who:** billing clerk or accountant.
 
@@ -318,7 +427,7 @@ Nothing changes from an accounting point of view: every journal item keeps the c
 
 ---
 
-## 8. Posting entries in bulk
+## 9. Posting entries in bulk
 
 **Who:** billing clerk or accountant.
 
@@ -347,7 +456,7 @@ others.
 
 ---
 
-## 9. Automatic and recurring posting
+## 10. Automatic and recurring posting
 
 **Who:** the system, once a day.
 
@@ -380,7 +489,7 @@ others.
 
 ---
 
-## 10. Resetting an entry to draft
+## 11. Resetting an entry to draft
 
 **Who:** accountant (and, for an entry marked reviewed, a user allowed to review).
 
@@ -400,7 +509,7 @@ others.
 
 ---
 
-## 11. Cancelling an entry
+## 12. Cancelling an entry
 
 **Who:** accountant.
 
@@ -419,7 +528,7 @@ A cancelled entry keeps its number and its items so that the numbering chain has
 
 ---
 
-## 12. Reversing an entry
+## 13. Reversing an entry
 
 **Who:** accountant.
 
@@ -477,7 +586,7 @@ A cancelled entry keeps its number and its items so that the numbering chain has
 
 ---
 
-## 13. Deleting an entry
+## 14. Deleting an entry
 
 **Who:** accountant or accounting administrator.
 
@@ -518,7 +627,7 @@ For each entry:
 
 ---
 
-## 14. Matching journal items
+## 15. Matching journal items
 
 **Who:** accountant, or the system.
 
@@ -557,7 +666,7 @@ For each entry:
 
 ---
 
-## 15. Undoing a match
+## 16. Undoing a match
 
 **Who:** accountant.
 
@@ -575,7 +684,7 @@ The action that unreconciles "matched entries" from a list first expands the sel
 
 ---
 
-## 16. Moving an amount to another account
+## 17. Moving an amount to another account
 
 **Who:** accountant.
 
@@ -604,7 +713,7 @@ The action that unreconciles "matched entries" from a list first expands the sel
 
 ---
 
-## 17. Moving an amount to another period
+## 18. Moving an amount to another period
 
 **Who:** accountant.
 
@@ -645,7 +754,7 @@ The action that unreconciles "matched entries" from a list first expands the sel
 
 ---
 
-## 18. Renumbering a set of entries
+## 19. Renumbering a set of entries
 
 **Who:** accounting administrator (the action is visible in developer mode).
 
@@ -666,7 +775,7 @@ The action that unreconciles "matched entries" from a list first expands the sel
 
 ---
 
-## 19. Closing a period with a lock date
+## 20. Closing a period with a lock date
 
 **Who:** accounting administrator.
 
@@ -689,7 +798,7 @@ The practical closing sequence an accountant follows is: post or delete every dr
 
 ---
 
-## 20. Granting a lock date exception
+## 21. Granting a lock date exception
 
 **Who:** accounting administrator.
 
@@ -715,7 +824,7 @@ The practical closing sequence an accountant follows is: post or delete every dr
 
 ---
 
-## 21. Securing entries with the hash chain
+## 22. Securing entries with the hash chain
 
 Three paths lead to the same routine.
 
@@ -756,7 +865,7 @@ Three paths lead to the same routine.
 
 ---
 
-## 22. Verifying the hash chain
+## 23. Verifying the hash chain
 
 **Who:** accountant or auditor with the full accounting features.
 
@@ -779,7 +888,7 @@ Three paths lead to the same routine.
 
 ---
 
-## 23. Closing a fiscal year
+## 24. Closing a fiscal year
 
 The domain does not ship a dedicated year-closing routine; the closing is the combination of the mechanisms above, and the profit-or-loss appropriation is produced by the reports rather than by a stored entry.
 
@@ -807,7 +916,7 @@ The fiscal year boundaries themselves are computed by the rule of `calculations.
 
 ---
 
-## 24. The accounting onboarding path
+## 25. The accounting onboarding path
 
 **Who:** accounting administrator, guided by a checklist on the accounting dashboard.
 

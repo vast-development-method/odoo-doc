@@ -263,3 +263,27 @@ nothing to refresh on a schedule. Two recurring computations owned elsewhere cal
 |---|---|---|
 | The replenishment scheduler | [replenishment and procurement](../replenishment-and-procurement/) | The vendor price selection, for the lead time and for the price of the purchase order line it creates |
 | The point of sale data load, on session opening and on each incremental refresh | [point of sale](../point-of-sale/) | The price lists and rules to be re-implemented client-side |
+
+---
+
+## 13. Reconciliation notes
+
+1. **The access rights matrix.** The two descriptions this file was merged from listed different
+   subsets of the capabilities that hold rights on the three entities: one named the internal user,
+   the contacts manager, the products manager, the salesperson, the sales manager and the accounting
+   user; the other named the point of sale, portal, public and purchase capabilities but omitted the
+   inventory manager and the manufacturing manager. Section 3 lists every capability that holds a
+   right on Price List, Price List Rule or Vendor Price, taken from the shipped access entries, and
+   is the authority for [`business-rules.md`](business-rules.md#16-access-visibility-and-permissions).
+
+2. **The two configuration parameters.** One description gave only the global parameter; the other
+   gave both. Both exist, the company-scoped one is read first, and both are read with elevated
+   rights. Section 7 states them with their exact keys.
+
+3. **Where the decimal precisions live.** One description treated the three precisions as fields of
+   this domain; they are shipped records owned by the platform foundation and merely **used** here.
+   Section 6 lists them with their shipped values and names what each one governs in this domain.
+
+4. **Scheduled jobs.** One description asserted a nightly recomputation of prices. No such job exists:
+   prices are computed on demand and never materialised. Section 12 states that and names the two
+   jobs owned elsewhere that call into this domain.
