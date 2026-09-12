@@ -2,7 +2,7 @@
 
 How to prove that a rebuilt system behaves like this specification: eleven layers of test, the three fixed data sets they run on, forty-seven end-to-end golden scenarios with the records and the amounts they must produce, the invariants that must hold over the whole fixture at every moment, and the tolerance rules, which are: none for amounts, and documented rounding everywhere else.
 
-The premise of the plan is that behavioral equivalence is not a judgement made at the end but a property held continuously, proved by a suite that grows alongside the rebuild. Each layer catches a class of divergence that the layers below it cannot see. A rebuild that passes the first five layers and has no sixth is not wrong; it is making a smaller claim, and [conformance profiles](conformance-profiles.md) names which claim.
+The premise of the plan is that behavioral equivalence is not a judgment made at the end but a property held continuously, proved by a suite that grows alongside the rebuild. Each layer catches a class of divergence that the layers below it cannot see. A rebuild that passes the first five layers and has no sixth is not wrong; it is making a smaller claim, and [conformance profiles](conformance-profiles.md) names which claim.
 
 ---
 
@@ -32,6 +32,8 @@ Everything else may differ: the internal ordering of unordered results, surrogat
 ## 2. The eleven layers of test
 
 Every layer states what it catches, where its cases come from, how it is built and what counts as passing. The order is the order in which a failure is cheapest to attribute: a rounding defect found in layer one costs minutes, and the same defect found through a failing golden scenario costs a day.
+
+The layer numbers are stable and are part of the repository's identifier set: the stage gates of [milestones](milestones.md) name the layer that proves each of their rows by number, [conformance profiles](conformance-profiles.md) states which layers each level requires by number, and [traceability rules](traceability-rules.md) governs the reference. A new class of test is added as a twelfth layer; the eleven below are never renumbered.
 
 ### Layer one: arithmetic and numeric precision
 
@@ -83,7 +85,9 @@ guard:       every move line has a quantity and, for tracked products, a lot
 to:          done
 side effects: quantity records updated; valuation layers written; backorder offered when
               the done quantity is below the demand
-refused when: the guard fails, with "You need to supply a Lot/Serial Number for product Coffee Beans."
+refused when: the guard fails, with "You need to supply a Lot/Serial number for products
+              <the comma-separated display names of the products whose lines carry neither a
+              lot nor a typed lot name>."
 ```
 
 **Pass rule.** Every transition of the state machine catalog is executed, and the count of refused transitions equals the count the catalog declares.
@@ -168,14 +172,26 @@ Always tested as well: that a field restricted to a group is absent from the rea
 
 **What it catches.** A validation that does not fire, a default that is not applied, a derivation that reads the wrong input, a constraint that is missing, an on-change behavior that writes a different value.
 
-**Source of cases.** Every numbered rule of every `business-rules.md`, and the message index in [validation messages](../references/validation-messages.md).
+**Source of cases.** Every rule of every `business-rules.md`, whether that file numbers its rules or names them, and the message index in [validation messages](../references/validation-messages.md).
 
-**Method.** One test per rule identifier. The test names the rule identifier, sets up the smallest record set that can trigger it, performs the action, and asserts either the written value or the exact refusal message. A rule with branches — a setting that changes the behavior — has one test per branch.
+**Method.** One test per rule. The test names the rule, sets up the smallest record set that can trigger it, performs the action, and asserts either the written value or the exact refusal message. A rule with branches — a setting that changes the behavior — has one test per branch.
 
-**Shape of a case.**
+**How a case names its rule.** A domain whose `business-rules.md` numbers its rules is cited by the rule identifier, which is the form governed by [traceability rules](traceability-rules.md): a short domain prefix, a hyphen and a sequence number. A domain whose `business-rules.md` states its rules as a named table of constraints is cited by the document, the heading and the rule name, which is equally stable. Both forms are a single string, and the coverage matrix carries whichever the rule's own domain publishes.
+
+**Shape of a case, a rule cited by identifier.**
 
 ```
-rule:        BOOK-RULE-001
+rule:        MCUR-001, the currency code is unique
+given:       a Currency with the code EUR in the reference company
+when:        a second Currency with the code EUR is created
+then:        the creation is refused with "The currency code must be unique!"
+and:         no Currency record was written
+```
+
+**Shape of a case, a rule cited by name.**
+
+```
+rule:        general ledger, account rules, creation and modification, "Code unique"
 given:       an Account with the code 400000 in the reference company
 when:        a second Account with the code 400000 is created in the same company
 then:        the creation is refused with
@@ -183,9 +199,9 @@ then:        the creation is refused with
 and:         no Account record was written
 ```
 
-**Pass rule.** Every numbered rule of every domain has at least one test, and every one passes.
+**Pass rule.** Every rule of every domain has at least one test, and every one passes.
 
-**Coverage measurement.** The coverage matrix of [traceability rules](traceability-rules.md) lists every rule identifier and the tests that cover it; an uncovered rule is a build blocker, not a warning.
+**Coverage measurement.** The coverage matrix of [traceability rules](traceability-rules.md) lists every rule, by identifier or by name, and the tests that cover it; an uncovered rule is a build blocker, not a warning.
 
 ### Layer ten: accounting consequences
 
@@ -982,13 +998,13 @@ finished unit cost = 617.50 ÷ 5 = 123.50
 | | 110300 Stock Valuation | | 340.00 |
 | Components, Table Leg | 110400 Production | 165.00 | |
 | | 110300 Stock Valuation | | 165.00 |
-| Labour | 110400 Production | 112.50 | |
+| Labor | 110400 Production | 112.50 | |
 | | 610100 Work Center Expenses | | 112.50 |
 | Finished product | 110300 Stock Valuation | 617.50 | |
 | | 110400 Production | | 617.50 |
 
 7. The balance of 110400 Production returns to zero. The average cost of Dining Table becomes 123.50 and the stock is five units for 617.50.
-8. Posting the labour entry a second time is refused because every productivity record already carries its journal item.
+8. Posting the labor entry a second time is refused because every productivity record already carries its journal item.
 
 ### GS-23: Manufacturing backorder
 
@@ -1025,7 +1041,7 @@ total cost = 741.00 ; finished unit cost = 741.00 ÷ 6 = 123.50
 | Components returned, Table Leg | 110300 Stock Valuation | 33.00 | |
 | | 110400 Production | | 33.00 |
 
-3. The production account keeps a debit balance of `123.50 − 101.00 = 22.50`, which is the labour that was capitalized into the unbuilt unit and is now released. The specification does not clear it automatically; an accountant posts the charge.
+3. The production account keeps a debit balance of `123.50 − 101.00 = 22.50`, which is the labor that was capitalized into the unbuilt unit and is now released. The specification does not clear it automatically; an accountant posts the charge.
 4. Unbuilding two units when only one was produced is refused with the insufficient quantity message.
 
 ### GS-25: Selling a kit
@@ -1417,7 +1433,7 @@ These are not scenarios: they are assertions run after every scenario, over the 
 | INV-06 | For every product under automated valuation, the balance of its stock valuation account equals the sum of its valuation layers. |
 | INV-07 | For every product, and for every product and location pair, the quantity on hand equals the sum of its quantity records, and equals the sum of the signed quantities of its done movements. |
 | INV-08 | For every product, the sum of the remaining quantities of its first in first out layers equals its quantity on hand when the quantity is positive. |
-| INV-09 | For every completed manufacturing order, the production account balance attributable to it is zero, except for the released labour of an unbuild. |
+| INV-09 | For every completed manufacturing order, the production account balance attributable to it is zero, except for the released labor of an unbuild. |
 | INV-10 | For every Journal Item with an analytic distribution, the sum of the analytic line amounts equals the item amount. |
 | INV-11 | For every closed point of sale session, the session entry balances and the sum of its payment lines equals the sum of the order payments. |
 | INV-12 | No document number is used twice inside one journal; every sequence has produced a strictly increasing series within each period; and the numbering has no gap that the gap check does not report. |
@@ -1545,16 +1561,3 @@ Where a running instance of the described system is available, add a differentia
 
 Where it is not available, the worked examples, the golden scenarios and the acceptance criteria are the reference, and the coverage report must say so plainly. [Coverage and evidence](coverage-and-evidence.md) keeps the two kinds of evidence separate, because a rebuild verified only against the specification inherits every gap the specification has.
 
----
-
-## Reconciliation notes
-
-1. **Two taxonomies of test.** One version organized the suite into eight layers ordered by the class of divergence each catches; the other into eight categories ordered by the artifact each starts from. Five of the eight appear in both lists under different names and are merged: arithmetic with numeric precision, state machines with state machine coverage, business scenarios with workflow scenarios, contracts with interface contracts, and authorization with the access control matrix. A sixth, the invariant layer, was a layer in one list and a separate continuously checked section in the other; it is a layer here, and its two lists of invariants are merged in section 18. The two that only the first version had — entity structure and concurrency and recovery — are kept as layers two and eight. The three that only the second version had — business rules, accounting consequences and report content — are kept as layers nine, ten and eleven. The numbering of the first eight is unchanged, because the stage gates of [milestones](milestones.md) cite layers by number.
-2. **The invariants.** One version listed seventeen invariants, the other eight. Four statements of the shorter list had no counterpart and are added as INV-18 to INV-21: the reservation bound, the invoicing policy bound, the company reachability bound and the layer-to-statement agreement. Two statements of the longer list were widened rather than duplicated: INV-07 now asserts conservation per product and per product and location pair, and INV-12 now asserts that a sequence is strictly increasing within a period as well as free of unreported gaps.
-3. **The data sets.** One version named three fixed data sets — the reference set, the configured set and the migration set — without specifying any of them; the other specified one fixture in full. Both are kept, and the specified fixture is the configured set. Section 3 says so in its first paragraph.
-4. **When each layer runs.** The running order and the gating table come from the version that had them. They now cover the three added layers: layers nine and ten run at the same frequency as the layers whose failures they localize, and layer eleven runs nightly with the other layers that need a built system.
-5. **The four reporting numbers.** Specified, implemented, exercised and verified come from the version that had them, and are folded into the coverage reporting of section 20.5 rather than kept as a separate section, because both versions asked for one report per domain.
-6. **The differential harness.** The comparison against a running reference is kept as section 21 because [coverage and evidence](coverage-and-evidence.md) points a reader at this document for it.
-7. **A citation of a file that is not part of a domain folder's standard set.** The subcontracting scenario cited a separate subcontracting file; it cites the workflows file of the manufacturing domain, which owns that procedure.
-8. **Two counts were checked against the catalogs of this repository and one was corrected.** The state field catalog of this repository lists two hundred and fifty-two state fields, not the one hundred and eighty that one version cited, and layer three now says two hundred and fifty-two. Every seed count that the two versions share — countries, country groups, subdivisions, cities, banks, languages, currencies, units of measure, removal strategies, routes, tags, report structures, payment terms, delivery terms, cash rounding rules, barcode rules, chat bot steps, leave types, work entry types and vehicle brands — was re-counted from the reference data catalog and agrees exactly.
-9. **No contradiction of fact was found between the two versions.** They describe the same arithmetic, the same rounding discipline and the same tolerance rule. The fixture's numbers were re-checked for internal consistency where the two versions overlap: the tax of the reference invoice, the balance of every entry shown in the golden scenarios, the counter session totals and the seven decimal precisions, which agree with the shipped precision catalog.

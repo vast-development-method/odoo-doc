@@ -777,7 +777,7 @@ The complete catalogue of every operation of every entity, including the ones no
 
 ### 10.4 Calendar and scheduling
 
-11 operations on 2 entities. Preconditions, guards, refusal messages and side effects: [`../domains/calendar-and-scheduling/`](../domains/calendar-and-scheduling/).
+11 operations on 2 entities. Preconditions, guards, refusal messages and side effects: the calendar and scheduling domain, whose entry is carried by the domain index [`../domains/README.md`](../domains/README.md).
 
 | Entity | Entity identifier | Operation | Control label |
 |---|---|---|---|
@@ -951,7 +951,7 @@ The complete catalogue of every operation of every entity, including the ones no
 
 ### 10.11 Fiscal localizations
 
-40 operations on 18 entities. Preconditions, guards, refusal messages and side effects: [`../domains/fiscal-localizations/`](../domains/fiscal-localizations/).
+40 operations on 18 entities. Preconditions, guards, refusal messages and side effects: the fiscal localizations domain, whose entry is carried by the domain index [`../domains/README.md`](../domains/README.md).
 
 | Entity | Entity identifier | Operation | Control label |
 |---|---|---|---|
@@ -1409,7 +1409,7 @@ The complete catalogue of every operation of every entity, including the ones no
 
 ### 10.21 Marketing and mass mailing
 
-79 operations on 21 entities. Preconditions, guards, refusal messages and side effects: [`../domains/marketing-and-mass-mailing/`](../domains/marketing-and-mass-mailing/).
+79 operations on 21 entities. Preconditions, guards, refusal messages and side effects: the marketing and mass mailing domain, whose entry is carried by the domain index [`../domains/README.md`](../domains/README.md).
 
 | Entity | Entity identifier | Operation | Control label |
 |---|---|---|---|
@@ -1560,7 +1560,7 @@ The complete catalogue of every operation of every entity, including the ones no
 
 ### 10.24 Payment providers
 
-23 operations on 4 entities. Preconditions, guards, refusal messages and side effects: [`../domains/payment-providers/`](../domains/payment-providers/).
+23 operations on 4 entities. Preconditions, guards, refusal messages and side effects: the payment providers domain, whose entry is carried by the domain index [`../domains/README.md`](../domains/README.md).
 
 | Entity | Entity identifier | Operation | Control label |
 |---|---|---|---|
@@ -2151,3 +2151,7 @@ settled against the source of the system and against the generated catalogues
 4. **Reproduced control labels.** Three control labels contain the product's own name in the shipped installation.
    Section 10 reproduces every label in quotation marks, and those three with the product's name replaced by "the
    platform", because a replacement substitutes its own name and no observable behaviour depends on the word.
+5. **Links to four domain folders.** Four of the areas of section 10 — calendar and scheduling, fiscal localizations,
+   marketing and mass mailing, and payment providers — are referred to through the domain index
+   [`../domains/README.md`](../domains/README.md), which carries the entry of every domain, rather than by a direct
+   folder link, so that every cross-reference in this file resolves to a file of this repository.

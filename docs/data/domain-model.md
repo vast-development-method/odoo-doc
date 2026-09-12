@@ -52,7 +52,7 @@ For a polymorphic relation the target column names the entities the relation may
 
 ## 2. Domain inventory
 
-Folder gives the folder under [`../domains/`](../domains/) that specifies the domain; the platform foundation is specified in the platform documents instead. Where the folder is present in this repository the column links to it. Where the domain index [`../domains/README.md`](../domains/README.md) names the folder and the repository carries the material on the per-entity reference pages under [`../references/entities/`](../references/entities/) instead of in a folder, the folder name is written in code font rather than as a link, so that a link never points at a path the reader cannot open; the six domains written that way are Calendar and Scheduling, Fiscal Localizations, Fleet, Learning, Surveys and Gamification, Marketing and Mass Mailing, and Payment Providers. Customer Portal is written the same way for the same reason and is additionally the one domain the domain index does not name: it owns the four portal entities listed in section 3.34, and the pages it exposes are served by the machinery specified with Website and Storefront.
+Folder gives the folder under [`../domains/`](../domains/) that specifies the domain; the platform foundation is specified in the platform documents instead. Where the folder is present in this repository the column links to it. Where the domain index [`../domains/README.md`](../domains/README.md) names the folder and the repository carries the material on the per-entity reference pages under [`../references/entities/`](../references/entities/) instead of in a folder, the folder name is written in code font rather than as a link, so that a link never points at a path the reader cannot open; the domains written that way are Calendar and Scheduling, Fiscal Localizations, Marketing and Mass Mailing, and Payment Providers. Customer Portal is written the same way for the same reason and is additionally the one domain the domain index does not name: it owns the four portal entities listed in section 3.34, and the pages it exposes are served by the machinery specified with Website and Storefront.
 
 | Domain | Group | Folder | Persistent | Assistants | Shared behaviours | Relation fields | Scope |
 |---|---|---|---|---|---|---|---|
@@ -94,14 +94,14 @@ Folder gives the folder under [`../domains/`](../domains/) that specifies the do
 | Timesheets | services | [`../domains/timesheets/`](../domains/timesheets/) | 3 | 1 | 0 | 24 | Timesheet lines on tasks and projects, employee hourly cost, timesheet billing to customers and the comparison with attendances. |
 | Attendances and Working Time | human resources | [`../domains/attendances-and-working-time/`](../domains/attendances-and-working-time/) | 9 | 0 | 1 | 36 | Working schedules and their attendance lines, resource calendars and leaves, resources, check-in and check-out records, overtime rules and rulesets. |
 | Expenses | human resources | [`../domains/expenses/`](../domains/expenses/) | 1 | 5 | 0 | 37 | Employee expenses, expense reports, approval, reimbursement or company payment and re-invoicing to customers. |
-| Fleet | human resources | `../domains/fleet/` | 13 | 1 | 0 | 52 | Vehicles, models, brands and categories, contracts, services, odometer readings, assignment logs, states, tags and cost reporting. |
+| Fleet | human resources | [`../domains/fleet/`](../domains/fleet/) | 13 | 1 | 0 | 52 | Vehicles, models, brands and categories, contracts, services, odometer readings, assignment logs, states, tags and cost reporting. |
 | Human Resources Core | human resources | [`../domains/human-resources-core/`](../domains/human-resources-core/) | 22 | 6 | 2 | 165 | Employees and employee versions, departments, job positions, work locations, skills and resumes, the organization chart, presence, remote work, departure reasons and hourly cost. |
-| Lunch Ordering | human resources | `../domains/lunch-ordering/` | 9 | 0 | 0 | 35 | Meal suppliers, products and categories, locations, orders, cash movements and alerts. |
+| Lunch Ordering | human resources | [`../domains/lunch-ordering/`](../domains/lunch-ordering/) | 9 | 0 | 0 | 35 | Meal suppliers, products and categories, locations, orders, cash movements and alerts. |
 | Recruitment | human resources | [`../domains/recruitment/`](../domains/recruitment/) | 8 | 4 | 0 | 47 | Job openings, candidates, applicants, recruitment stages, sources, degrees, refuse reasons, interviews and the job board. |
 | Time Off | human resources | [`../domains/time-off/`](../domains/time-off/) | 11 | 4 | 0 | 70 | Time off types, requests, allocations, accrual plans and levels, approval flows, public holidays and mandatory days. |
 | Work Entries | human resources | [`../domains/work-entries/`](../domains/work-entries/) | 3 | 1 | 0 | 13 | Work entry types, generated work entries and their conflicts. |
 | Events | marketing | [`../domains/events/`](../domains/events/) | 33 | 4 | 0 | 161 | Events and event types, tickets, registrations and answers, booths and booth categories, tracks and track stages, sponsors, tags, stages and event communications. |
-| Learning, Surveys and Gamification | marketing | `../domains/learning-surveys-and-gamification/` | 25 | 4 | 0 | 144 | Surveys, questions and answers, participations and scoring, courses, slides and content, quizzes, certifications, forums and posts, badges, challenges, goals and karma. |
+| Learning, Surveys and Gamification | marketing | [`../domains/learning-surveys-and-gamification/`](../domains/learning-surveys-and-gamification/) | 25 | 4 | 0 | 144 | Surveys, questions and answers, participations and scoring, courses, slides and content, quizzes, certifications, forums and posts, badges, challenges, goals and karma. |
 | Marketing and Mass Mailing | marketing | `../domains/marketing-and-mass-mailing/` | 15 | 6 | 0 | 55 | Mass mailings, mailing lists, contacts and subscriptions, traces and trace statistics, link tracking, campaign tracking, marketing cards and social links. |
 | **Total** |  |  | **600** | **222** | **161** | **4,012** |  |
 
@@ -5028,7 +5028,7 @@ Specified in [`../domains/expenses/`](../domains/expenses/).
 
 Vehicles, models, brands and categories, contracts, services, odometer readings, assignment logs, states, tags and cost reporting.
 
-Specified in the domain folder `../domains/fleet/`, listed in the domain index [`../domains/README.md`](../domains/README.md).
+Specified in the domain folder [`../domains/fleet/`](../domains/fleet/), listed in the domain index [`../domains/README.md`](../domains/README.md).
 
 #### Persistent entities (13)
 
@@ -5336,7 +5336,7 @@ Specified in [`../domains/human-resources-core/`](../domains/human-resources-cor
 
 Meal suppliers, products and categories, locations, orders, cash movements and alerts.
 
-Specified in the domain folder `../domains/lunch-ordering/`, listed in the domain index [`../domains/README.md`](../domains/README.md).
+Specified in the domain folder [`../domains/lunch-ordering/`](../domains/lunch-ordering/), listed in the domain index [`../domains/README.md`](../domains/README.md).
 
 #### Persistent entities (9)
 
@@ -5839,7 +5839,7 @@ Specified in [`../domains/events/`](../domains/events/).
 
 Surveys, questions and answers, participations and scoring, courses, slides and content, quizzes, certifications, forums and posts, badges, challenges, goals and karma.
 
-Specified in the domain folder `../domains/learning-surveys-and-gamification/`, listed in the domain index [`../domains/README.md`](../domains/README.md).
+Specified in the domain folder [`../domains/learning-surveys-and-gamification/`](../domains/learning-surveys-and-gamification/), listed in the domain index [`../domains/README.md`](../domains/README.md).
 
 #### Persistent entities (25)
 

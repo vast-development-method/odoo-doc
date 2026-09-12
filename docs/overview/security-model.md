@@ -2409,7 +2409,7 @@ Each criterion is independently verifiable. Unless a criterion says otherwise, t
 
 ## 26. Reconciliation notes
 
-Eight behaviours in this document contradict the reading a careful person would most naturally arrive at, and two organisational decisions are recorded with them. Each behaviour below was verified against the running system.
+Eight behaviours in this document contradict the reading a careful person would most naturally arrive at, and two organisational decisions are recorded with them. Each behaviour below is recorded as observed.
 
 1. **The number of layers.** Four gates and six layers are both correct, at different granularities: four gates guard *data* (entity, record, field and the reachability of an operation), and the six-layer view adds the transport-level authentication level and the exposure rule as layers of their own. [Section 1](#1-the-layers-at-a-glance) states both views and says which is which, so that neither reader loses the frame they came with.
 2. **Where company scoping belongs.** It is specified in [multi-company](multi-company.md), because company scoping is not a gate of its own but an application of record rules, and because the company tree, per-company values, currency and cross-company flows are far larger than the part the gates need. [Section 12](#12-company-scoping-and-company-consistency) keeps the part the gates need, and the acceptance criteria for company behaviour live with the rest in that document.

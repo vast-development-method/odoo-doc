@@ -1885,7 +1885,7 @@ The same keys drive the top-level resolution of [section 14.3](#143-resolution-s
 
 ## 33. Reconciliation notes
 
-Four behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below was verified against the running system.
+Four behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below is recorded as observed.
 
 1. **How many view kinds there are.** Eight and twelve are both right, at different scopes: the foundation defines the eight of [section 2.1](#21-the-eight-kinds), and the activity view, the hierarchy chart, the scheduling chart and the map are contributed by capability packages. [Section 2.1](#21-the-eight-kinds) says so and [section 28](#28-further-view-kinds-contributed-by-capability-packages) specifies the four contributed kinds.
 2. **What the resolution step "post-process for access rights" does.** It is not a single pruning pass. It is seven passes in a fixed order, and three of them — the group annotation that precedes pruning, the injection of fields used only by conditions, and the embedding of a missing sub-view — change the description in ways a client depends on. [Section 14.7](#147-the-post-processing-passes-in-full) states all seven; [section 14.3](#143-resolution-steps) keeps the outline.

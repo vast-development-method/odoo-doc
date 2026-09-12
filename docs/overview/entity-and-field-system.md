@@ -614,7 +614,7 @@ Rules:
 2. The value is decoded from base-64. A value that is not valid base-64 is refused with **"Image is not encoded in base64."**
 3. If the decoded content is already in an efficient web image format: with no size limit declared it is stored unchanged; otherwise the platform first looks for an already-resized variant among the attachments of the file store, matching on the content checksum of the original together with a description of the form `resize: <largest limit>`, where `<largest limit>` is the larger of the declared maximum width and maximum height in pixels. A matching variant is stored instead of the original; when none is found the original is stored.
 4. Otherwise the image is resized to fit inside the declared maximum width and maximum height, preserving the aspect ratio, the resolution is verified when the verify-resolution attribute is on, and the result is encoded back to base-64.
-5. **The resolution ceiling.** When the resolution is verified, an image whose width in pixels multiplied by its height in pixels exceeds **50,000,000 pixels** is refused rather than resized. The ceiling is a defence against a small compressed file that expands to an image large enough to exhaust memory, so it is applied to the decoded dimensions before any resizing work is done.
+5. **The resolution ceiling.** When the resolution is verified, an image whose width in pixels multiplied by its height in pixels exceeds **50,000,000 pixels** is refused rather than resized, with **"Too large image (above 50.0Mpx), reduce the image size."** — the number in the message being the ceiling expressed in millions of pixels. The ceiling is a defence against a small compressed file that expands to an image large enough to exhaust memory, so it is applied to the dimensions of the image as received, before any resizing or cropping work is done.
 
 ```formula
 total resolution (pixels) = decoded width (pixels) × decoded height (pixels)
@@ -2285,7 +2285,7 @@ Three indexes are created: a balanced tree on the product column; a balanced tre
 
 **AC-ENT-86.** *Given* a transient entity declaring a maximum idle lifetime of 0.001 hours (3.6 seconds), *when* a cleaning pass runs, *then* the threshold used is the current time minus 300 seconds, because the floor replaces any smaller value, and no row updated within the last five minutes is deleted.
 
-**AC-ENT-87.** *Given* an image field with verified resolution, *when* a 9,000 × 6,000 image (54,000,000 pixels) is written, *then* the write is refused; *and given* an 8,000 × 6,000 image (48,000,000 pixels), *then* it is accepted and resized to the declared maximum width and height.
+**AC-ENT-87.** *Given* an image field with verified resolution, *when* a 9,000 × 6,000 image (54,000,000 pixels) is written, *then* the write is refused with "Too large image (above 50.0Mpx), reduce the image size."; *and given* an 8,000 × 6,000 image (48,000,000 pixels), *then* it is accepted and resized to the declared maximum width and height.
 
 **AC-ENT-88.** *Given* a binary field and a text value that is neither valid base-64 nor plain seven-bit text, *when* it is written, *then* the write fails with "ASCII characters are required for " the value " in " the field name.
 
@@ -2313,7 +2313,7 @@ Three indexes are created: a balanced tree on the product column; a balanced tre
 
 ## 27. Reconciliation notes
 
-Five behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below was verified against the running system.
+Five behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below is recorded as observed.
 
 1. **Where the filter grammar lives.** The grammar could sit with the fields it constrains or with the operations that consume filters. It lives in [record operations and query notation, section 4](record-operations-and-query-notation.md#4-the-filter-notation). [Section 20](#20-the-filter-grammar) keeps what belongs to fields: the two notations at a glance, the three contributions this document makes to how a condition compiles, and the three forms in which a filter is stored. Nothing was dropped in the move, and no rule is stated in both places.
 2. **The rounding rule.** Describing the rounding of a decimal number as "half away from zero" and stopping there is wrong. The routine takes an explicit step, applies one of five tie-breaking methods, and adds a tolerance derived from the magnitude of the normalised value in order to correct binary representation error; without the tolerance, 2.675 rounds to 2.67 rather than 2.68. [Section 6.4](#64-decimal-number) states the full routine, and criteria AC-ENT-68 to AC-ENT-70 assert it.

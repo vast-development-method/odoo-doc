@@ -69,14 +69,23 @@ views it offers in order (the first is the one opened), the default filters, gro
 applies, and the access groups the entry is restricted to. An empty entity means the action is not a set of views over
 one entity (a client screen, an address, or work that returns another action).
 
-The installation ships eight hundred and ninety-three menu entries, of which six hundred and forty-five open an action;
-the remaining two hundred and forty-eight only group other entries and appear as the intermediate segments of the menu
-paths. The tables below list six hundred and thirty of them, spread over the thirty-five applications a user works in.
-Fifteen entries that open an action are deliberately not listed: the ten entries of the application that drives the
-automated test suite, the single entry of a translation test fixture application, one page-configuration entry of the
-same fixture inside the site application, and the three application entries whose own action is repeated by a child
-entry that is listed (the discussion application, the dashboard application and the course application each carry an
-action on the application entry itself, and that same action already appears as a child entry).
+The installation declares eight hundred and ninety-three menu records for eight hundred and seventy-six distinct menu
+entries: seventeen entries are declared twice, once as a menu element that fixes the entry's place in the tree and once
+as a record that adds the entry's label or its action, and the generated catalogue
+[`../references/actions-and-menus.md`](../references/actions-and-menus.md) carries both declarations. Of the eight
+hundred and seventy-six distinct entries, six hundred and thirty-three open an action; the remaining two hundred and
+forty-three only group other entries and appear as the intermediate segments of the menu paths. The tables below list
+six hundred and thirty of them, spread over the thirty-five applications a user works in.
+
+Three entries that open an action are deliberately not listed: the three application entries whose own action is
+repeated by a child entry that is listed. The discussion application, the dashboard application and the course
+application each carry an action on the application entry itself, and that same action already appears as a child
+entry, so listing the application entry would duplicate a row. Twelve further menu entries that open an action belong
+to capability packages whose only purpose is to drive the automated test suite: ten in the two testing-support
+packages, one in a translation test fixture and one page-configuration entry of the same fixture inside the site
+application. Those twelve are outside the eight hundred and seventy-six an installation of the business capabilities
+carries, and they are not listed here either. Six hundred and thirty-three minus the three repeated application entries
+is the six hundred and thirty rows below.
 
 An application entry that carries an action of its own and has no child entry is listed as a single row bearing the name
 of the application, as the personal task application is.
@@ -684,7 +693,7 @@ Menu order 210; contributed by the Recruitment capability package; visible to th
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
 | Applications > By Job Positions | Job Positions | Job Position | card, list, form |  | Officer: Manage all applicants |
-| Applications > By Job Positions | Job Positions | Job Position | card, form |  | Interviewer |
+| Applications > By Job Positions | Job Positions | Job Position | card, form | filter: the signed-in user is an interviewer or an extended interviewer of the position; creation switched off | Interviewer |
 | Applications > By Talent Pools | Talent Pool | Talent Pool | card, list, form |  | Officer: Manage all applicants |
 | Applications > All Applications | Applications | Applicant | card, list, form, pivot, chart, calendar, activity | filter: applicants |  |
 | Reporting > Recruitment Analysis | Recruitment Analysis | Applicant | chart, pivot | filter: creation month, job |  |
@@ -702,6 +711,14 @@ Menu order 210; contributed by the Recruitment capability package; visible to th
 | Configuration > Activities > Activity Plans | Recruitment Plans | Activity Plan | list, card, form | new records apply to: Applicant | Administrator |
 | Configuration > Interviews | Interviews | Survey | card, list, activity, form | new records: survey type = recruitment | Administrator |
 | Configuration > Job Boards > Emails | Emails | Job Platform | list, form |  |  |
+
+The two entries at the path "Applications > By Job Positions" are two distinct menu entries, not a repeated row. The
+recruitment application declares the same label twice at the same place with two different actions and two different
+access groups: the entry restricted to the officer group runs the action that lists every job position with the card,
+list and form views and allows a position to be created, and the entry restricted to the interviewer group runs the
+action that lists only the positions the signed-in user is an interviewer or an extended interviewer of, with the card
+and form views alone and with record creation switched off. A user sees whichever of the two entries the groups they
+hold grant, so the path is never ambiguous on screen.
 
 ### Fleet
 
@@ -1094,8 +1111,9 @@ of an invoice, the received vendor bill) is the one previewed beside the form.
 
 ### The command palette
 
-The command palette is a single search box opened from the keyboard with `control` and `k`, from anywhere in the client
-and even while a field is being edited. It replaces hunting through menus.
+The command palette is a single search box opened from the keyboard with `control` and `k` — with the command key and
+`k` on the platform whose keyboard carries one, as the modifier mapping under "Keyboard shortcuts" below sets out — from
+anywhere in the client and even while a field is being edited. It replaces hunting through menus.
 
 The first character typed may select a **namespace**, which decides what is searched:
 
@@ -1129,6 +1147,16 @@ schedule an activity, and, when diagnostics are on, the developer tools.
 The shortcut modifier is the `alt` key. Holding it alone reveals a small badge on every control that has a shortcut
 letter, so the shortcuts of the current screen are discoverable without documentation.
 
+**The two physical keys the modifiers map to.** The dispatcher names two modifiers, written throughout this document as
+`alt` and `control`, and it maps each of them to a different physical key depending on the desktop platform the browser
+reports. On every platform except one, `alt` is the alternate key and `control` is the control key. On the one platform
+whose keyboard has a command key, `alt` is the **control** key and `control` is the **command** key. The shortcut
+letters are identical on both; only the key held down changes, and the badge overlay is revealed by whichever key plays
+the `alt` role. The table below therefore reads, on that platform, as `control` + the letter for every row written
+`alt` + the letter, and as `command` + the letter for the two rows written `control` + the letter. The third modifier,
+`shift`, is the shift key everywhere. The two mappings are the complete set: the dispatcher branches once, on whether
+the platform is the one with a command key, and has no other case.
+
 | Shortcut | Control |
 |---|---|
 | `alt` + `h` | Open the application switcher. |
@@ -1161,6 +1189,11 @@ Three rules govern dispatch:
    protection; the command palette shortcut does.
 2. Only the controls of the top-most active layer answer. A dialog masks the shortcuts of the screen behind it.
 3. A shortcut bound to a control that is hidden or disabled does nothing.
+
+Three further dispatch details a replacement must reproduce. A keystroke that the browser reports without a key value,
+or that an input method is still composing, is ignored entirely. The digit keys of the number row are identified by
+their physical position, so a shortcut on a digit works on every keyboard layout. A letter that the layout does not
+produce is likewise resolved by physical position, so the letters above hold on a keyboard that is not a Latin one.
 
 ### Notifications
 
@@ -1527,6 +1560,13 @@ offered with its full path, and choosing it opens the chart of accounts with the
 **AC-DESKTOP-010 — The shortcut overlay.** Given a form in edit, when the user holds the shortcut modifier, then a badge
 appears on Save, Discard and every other control that declares a letter, and releasing the modifier removes them.
 
+**AC-DESKTOP-010a — The shortcut modifier on the platform with a command key.** Given the same form in edit, opened in a
+browser that reports the desktop platform whose keyboard carries a command key, when the user holds the alternate key,
+then nothing happens; when the user holds the **control** key instead, the same badges appear, and control together with
+`s` saves the record exactly as alternate together with `s` does on the other platforms. Given the same screen, when the
+user presses control together with `k`, then no command palette opens; the palette opens on **command** together with
+`k`.
+
 **AC-DESKTOP-011 — A pushed notification.** Given a user whose screen is a list, when another user assigns a record to
 them, then a notification appears without the list being reloaded, and the activity counter of the systray increases by
 one.
@@ -1558,9 +1598,19 @@ actually declares. Each point was settled against the source of the system and a
    journals, the multi-ledger, fiscal positions, currencies, cash roundings, payment terms, international commercial
    terms, product categories, the three analytic configuration entries and the two management reports), and the
    timesheet application was missing three reporting entries. All were added.
-4. **Counts.** The stated totals (858 entries, 765 listed) matched neither the menu tree nor the tables. The menu tree
-   declares 893 entries, 645 of which open an action; the tables now list 630 of them and the introduction states
-   exactly which fifteen are left out and why.
+4. **Counts.** The stated totals disagreed with the menu tree and with one another: one draft stated 858 entries with
+   765 listed, and a later revision stated 893 entries of which 645 open an action and 248 only group. Neither pair is
+   right. The generated catalogue [`../references/actions-and-menus.md`](../references/actions-and-menus.md) and the
+   structured form [`../../schemas/interfaces/menus.json`](../../schemas/interfaces/menus.json) carry 893 menu records
+   for 876 distinct menu entries — seventeen identifiers appear twice, because the entry is declared once as a menu
+   element that fixes its place in the tree and once as a record that adds its label or its action — and 633 of the 876
+   open an action while 243 only group. The figure 645 is 633 plus the twelve menu entries of the test-fixture
+   capability packages, which the catalogue does not carry at all, so it cannot be a count taken out of 893; and 248 was
+   893 minus 645. The source of the system declares 639 menu elements carrying an action attribute, which is 627 outside
+   the test fixtures plus those twelve; the six entries that make 627 up to 633 receive their action from the separate
+   record that also carries their label, which is why counting attributes gives a different number from counting
+   entries. The tables now list 630, which is 633 less the three application entries whose own action is repeated by a
+   listed child entry, and the introduction names those three and the twelve fixture entries.
 5. **Mis-expanded abbreviations.** One draft expanded the abbreviation in the Egyptian electronic invoicing
    configuration branch as "Estimated Time of Arrival"; it stands for the Egyptian Tax Authority, and the branch is now
    named after it.
@@ -1576,3 +1626,14 @@ actually declares. Each point was settled against the source of the system and a
 8. **Command palette, keyboard shortcuts and notifications.** Neither draft specified them beyond a single line in the
    frame table. They are now specified in full in part 3, because they are the only way several operations can be
    reached and because the shortcut letters are observable behaviour.
+9. **The shortcut modifier differs by platform.** The shortcut section stated flatly that the modifier is the `alt` key
+   and listed every binding against it. The dispatcher in fact maps its two named modifiers onto different physical
+   keys on the one desktop platform whose keyboard carries a command key: there the `alt` role is played by the control
+   key and the `control` role by the command key. The letters are the same on both platforms. Both cases are now
+   stated, because which key a person holds down is observable behaviour and a rebuild that binds the alternate key
+   everywhere would leave that platform without shortcuts.
+10. **Two recruitment entries share a label.** The recruitment table carries two rows at the path
+    "Applications > By Job Positions". They are not a surviving duplicate: the application declares the label twice at
+    the same place, once for the officer group and once for the interviewer group, with two different actions. The row
+    of the interviewer entry now states the filter and the creation rule that distinguish it, and a sentence under the
+    table explains the pair. It is the only place in the six hundred and thirty rows where one path appears twice.

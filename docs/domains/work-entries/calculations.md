@@ -57,7 +57,7 @@ Generation reads exactly seven things and writes exactly two. Nothing else influ
 | The Time Off Request behind an exclusion, and its absence kind's work entry kind | Time Off | The labelling of an absence interval and the absence link |
 | The shipped ordinary-attendance kind and the shipped generic-absence kind | This domain | The two fallbacks |
 
-**Writes:** work entries, and the three marker fields of the version. Nothing else. In particular,
+**Writes:** work entries, and three fields of the version — the two coverage markers and the last generation date. Nothing else. In particular,
 generation never writes an exclusion, never writes an absence request and never writes a schedule.
 
 ---
@@ -138,6 +138,12 @@ The versions of the run are grouped by working schedule. Versions whose generati
 all. For each remaining schedule, the schedule is expanded once for all the resources of that group,
 over the whole window, in the schedule's own zone, producing for each resource a set of intervals
 whose payload is the working schedule line that produced it.
+
+Adjacent intervals are deliberately kept distinct: a morning line ending at 12:00 and an afternoon
+line starting at 12:00 remain two intervals carrying one schedule line each, rather than becoming one
+interval carrying both. Two intervals are combined into one only when they genuinely overlap, and the
+combined interval then carries both lines. This distinctness is what lets two lines of the same day
+carrying different work entry kinds produce two rows.
 
 The expansion covers the two-week alternation, the per-resource lines, the flexible-hours case and the
 public-holiday-free view of the week; all of that belongs to
@@ -295,9 +301,10 @@ time purely to bound the absences.
 
 ### 5.4 Splitting intervals that carry several records
 
-The interval algebra merges touching intervals and accumulates their payloads, so one interval can
-end up carrying several schedule lines or several exclusions. Three splits undo that, each producing
-one interval per payload record over the same bounds:
+The interval algebra keeps **adjacent** intervals distinct but merges **overlapping** ones,
+accumulating their payloads, so one interval can end up carrying several schedule lines or several
+exclusions. Three splits undo that, each producing one interval per payload record over the same
+bounds:
 
 | Set | When it is split | Why |
 |---|---|---|

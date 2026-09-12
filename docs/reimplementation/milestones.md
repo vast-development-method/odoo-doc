@@ -85,8 +85,8 @@ A step gate names the evidence a reviewer inspects. A stage gate names the layer
 
 | Gate | Check | Evidence |
 |---|---|---|
-| GATE-M0-01 | The rounding function rounds half away from zero on a decimal step: rounding 2.675 to 0.01 gives 2.68; rounding −2.675 gives −2.68; rounding 0.005 gives 0.01; rounding 1.3 to a step of 0.5 gives 1.5; rounding 47.62 to a step of 0.05 gives 47.60. | [`../domains/taxes/calculations.md`](../domains/taxes/calculations.md) section 1.1. |
-| GATE-M0-02 | Comparison of two amounts is performed on the rounded difference, not on the raw values: with a step of 0.01, 1.004 and 1.0 compare equal, 1.006 and 1.0 do not. | [`../domains/taxes/calculations.md`](../domains/taxes/calculations.md) section 1.1. |
+| GATE-M0-01 | The rounding function rounds half away from zero on a decimal step: rounding 2.675 to 0.01 gives 2.68; rounding −2.675 gives −2.68; rounding 0.005 gives 0.01; rounding 1.3 to a step of 0.5 gives 1.5; rounding 47.62 to a step of 0.05 gives 47.60. | [`../domains/taxes/calculations.md`](../domains/taxes/calculations.md) section 2.1, rounding to a step. |
+| GATE-M0-02 | Comparison of two amounts rounds each amount to the step first and subtracts afterwards, while the zero test subtracts first and rounds afterwards; the two therefore disagree on purpose. With a step of 0.01: 1.004 and 1.0 compare equal and 1.006 and 1.0 do not; 0.006 and 0.002 compare unequal, because they round to 0.01 and 0.00, even though the zero test on their difference of 0.004 reports zero. | [`../domains/taxes/calculations.md`](../domains/taxes/calculations.md) section 2.3, comparison, and section 2.2, zero test. |
 | GATE-M0-03 | Every date-only field is stored without a time component and every moment field is stored in coordinated universal time and displayed in the user's time zone. Creating a record at 23:30 in a time zone eight hours ahead stores the moment of the same instant, and the list groups it by the local date. | [`../data/persistence-identity-and-values.md`](../data/persistence-identity-and-values.md). |
 | GATE-M0-04 | The seven decimal precision records exist with the values of build sequence section 6, are editable, and a change is observed by the next computation without a restart. | [`../domains/products-and-catalog/configuration.md`](../domains/products-and-catalog/configuration.md). |
 | GATE-M0-05 | Currency rounding uses the currency's own step: an amount of 1234.567 in a two-decimal currency stores 1234.57; in a zero-decimal currency stores 1235; in a currency with a step of 0.05 stores 1234.55; in a six-decimal currency stores 1234.567000. | [`../domains/multi-currency/calculations.md`](../domains/multi-currency/calculations.md). |
@@ -213,7 +213,7 @@ A step gate names the evidence a reviewer inspects. A stage gate names the layer
 | GATE-M4-21 | The daily automatic posting job posts only entries flagged for it whose accounting date has arrived, and records a failure without stopping the batch. | Build sequence step 4 job table. |
 | GATE-M4-22 | Every printed ledger document renders with the content declared in the domain's interfaces file. | [`../domains/general-ledger/interfaces.md`](../domains/general-ledger/interfaces.md). |
 | GATE-M4-23 | An entry whose journal belongs to another company than the entry is refused. | `BOOK-AC` company consistency section. |
-| GATE-M4-24 | One hundred percent of the general ledger acceptance criteria are executed and pass. | [`../domains/general-ledger/acceptance-criteria.md`](../domains/general-ledger/acceptance-criteria.md). |
+| GATE-M4-24 | One hundred percent of the general ledger acceptance criteria are executed and pass; that file carries two hundred and seventy-seven numbered scenarios in thirty sections, and none of them may be skipped. | [`../domains/general-ledger/acceptance-criteria.md`](../domains/general-ledger/acceptance-criteria.md). |
 
 ---
 
@@ -223,8 +223,8 @@ A step gate names the evidence a reviewer inspects. A stage gate names the layer
 
 | Gate | Check | Evidence |
 |---|---|---|
-| GATE-M5-01 | A twenty-one percent price-excluded tax on three units at 19.99 gives a base of 59.97 and a tax of 12.59, and the total including tax is 72.56. | [`../domains/taxes/calculations.md`](../domains/taxes/calculations.md) section 3.10.1; `TAX-AC` single-line section. |
-| GATE-M5-02 | A twenty-one percent price-included tax on 121.00 gives a base of 100.00 and a tax of 21.00; on 11.90 with rounding per line gives 2.07 and 9.83; with global rounding gives 2.065289 and 9.834711. | [`../domains/taxes/calculations.md`](../domains/taxes/calculations.md) section 3.10.2. |
+| GATE-M5-01 | A twenty-one percent price-excluded tax on three units at 19.99 gives a base of 59.97 and a tax of 12.59, and the total including tax is 72.56. | [`../domains/taxes/calculations.md`](../domains/taxes/calculations.md) section 4.2, percentage price-excluded, with the line arithmetic of section 6; section A, single-line computation, of [`../domains/taxes/acceptance-criteria.md`](../domains/taxes/acceptance-criteria.md). |
+| GATE-M5-02 | A twenty-one percent price-included tax on 121.00 gives a base of 100.00 and a tax of 21.00; on 11.90 with rounding per line gives 2.07 and 9.83; with global rounding gives 2.065289 and 9.834711. | [`../domains/taxes/calculations.md`](../domains/taxes/calculations.md) section 4.3, percentage price-included, and section 7.8, round per line against round per tax. |
 | GATE-M5-03 | A five percent price-included tax on 50.00 in a currency whose step is 0.05 gives a tax of 2.40 and a base of 47.60. | Same section. |
 | GATE-M5-04 | Two chained percentage taxes where the first affects the base of the second produce the amounts of the worked example, in the declared evaluation order. | Section 3.10.3. |
 | GATE-M5-05 | A fixed tax per unit multiplies by the quantity and is not affected by the discount unless the domain says it is. | Section 3.10.5 and 3.10.7. |
@@ -324,7 +324,7 @@ A step gate names the evidence a reviewer inspects. A stage gate names the layer
 | GATE-M7-27 | A quantity record is never negative unless the location allows negative stock, and the refusal message is the one of the domain document. | `INV-AC` negative stock section. |
 | GATE-M7-28 | Relocating quantities between locations writes the internal moves and preserves lots and packages. | `INV-AC` relocation section. |
 | GATE-M7-29 | Printing lot labels, product labels and location barcodes produces the declared layouts. | Inventory interfaces. |
-| GATE-M7-30 | One hundred percent of the inventory acceptance criteria are executed and pass. | [`../domains/inventory-operations/acceptance-criteria.md`](../domains/inventory-operations/acceptance-criteria.md). |
+| GATE-M7-30 | One hundred percent of the inventory acceptance criteria are executed and pass; that file carries two hundred and one numbered scenarios, and none of them may be skipped. | [`../domains/inventory-operations/acceptance-criteria.md`](../domains/inventory-operations/acceptance-criteria.md). |
 
 ---
 
@@ -336,7 +336,7 @@ A step gate names the evidence a reviewer inspects. A stage gate names the layer
 |---|---|---|
 | GATE-M8-01 | Every movement is classified as incoming, outgoing, internal or neither, by the tests the domain declares, and the classification is stored on the movement. | [`../domains/inventory-valuation-and-costing/acceptance-criteria.md`](../domains/inventory-valuation-and-costing/acceptance-criteria.md) `VAL-AC` classification section. |
 | GATE-M8-02 | With standard costing, a receipt of ten units at a bill price of 12.00 while the product cost is 10.00 values the layer at 100.00 and posts the difference of 20.00 to the price difference account. | `VAL-AC` standard costing section. |
-| GATE-M8-03 | With average costing, receiving eight units at 10.00 then four at 16.00 gives a cost of 12.00; delivering ten values the delivery at 120.00; receiving two at 6.00 gives a cost of 9.00 and a value of 36.00. | [`../domains/inventory-valuation-and-costing/calculations.md`](../domains/inventory-valuation-and-costing/calculations.md) section 5.3. |
+| GATE-M8-03 | With average costing, receiving eight units at 10.00 then four at 16.00 gives a cost of 12.00; delivering ten values the delivery at 120.00; receiving two at 6.00 gives a cost of 9.00 and a value of 36.00. | [`../domains/inventory-valuation-and-costing/calculations.md`](../domains/inventory-valuation-and-costing/calculations.md) section 3.2, maintaining the product unit cost, and section 4.3, the average replay. |
 | GATE-M8-04 | With average costing and negative stock, the sequence of the worked example ends with a cost of 20.00, a quantity of 5 and a value of 100.00, and no earlier movement is edited. | Section 5.4. |
 | GATE-M8-05 | The average is never rounded before it is multiplied: receiving three units at 1.00, 1.00 and 1.01 and delivering all three leaves a total value of exactly 0.00. | Section 5.5. |
 | GATE-M8-06 | With first in first out, receipts of sixty-eight at 15.00 and one hundred and forty at 15.50 followed by a delivery of ninety-four value the delivery at 1 423.00 and leave a remaining value of 1 767.00 and a cost of 15.50. | Section 4.5. |
@@ -403,7 +403,7 @@ A step gate names the evidence a reviewer inspects. A stage gate names the layer
 | GATE-M10-11 | A purchase agreement of type blanket order carries the agreed prices to every order created from it, within its validity window and quantity limits. | `PUR-AC` agreement section. |
 | GATE-M10-12 | A call for tenders compares the alternative quotations line by line and confirming one offers to cancel the others. | `PUR-AC` alternatives section. |
 | GATE-M10-13 | A dropship order creates the direct move from the vendor to the customer and no warehouse stock is affected. | `PUR-AC` dropship section. |
-| GATE-M10-14 | Posting the vendor bill of a received purchase with a different price posts the price difference according to the costing method and the accounts of step 8. | [`../domains/inventory-valuation-and-costing/calculations.md`](../domains/inventory-valuation-and-costing/calculations.md) section 2.2. |
+| GATE-M10-14 | Posting the vendor bill of a received purchase with a different price posts the price difference according to the costing method and the accounts of step 8. | [`../domains/inventory-valuation-and-costing/calculations.md`](../domains/inventory-valuation-and-costing/calculations.md) section 10, price difference at the vendor bill under standard price. |
 | GATE-M10-15 | The vendor's currency is kept on the order and the bill, and the company amounts use the rate of each document's date. | `PUR-AC` currency section. |
 | GATE-M10-16 | The purchase reminder job sends the reminder only once per order and records the vendor's answer on the order. | Build sequence step 10 job table. |
 | GATE-M10-17 | The purchase order and request for quotation documents render the declared content including the vendor reference and the delivery address. | [`../domains/purchasing/interfaces.md`](../domains/purchasing/interfaces.md). |
@@ -461,7 +461,7 @@ A step gate names the evidence a reviewer inspects. A stage gate names the layer
 | GATE-M12-05 | Producing the full quantity consumes the reserved components, produces the finished quantity, and closes the order with the declared states. | Manufacturing workflows, production. |
 | GATE-M12-06 | Producing less than planned offers the backorder, and the backorder carries the remaining quantity with its own components. | Manufacturing workflows, backorder. |
 | GATE-M12-07 | Consuming more of a component than planned raises the consumption warning, and the user may confirm or correct it. | Manufacturing rules, consumption warning. |
-| GATE-M12-08 | The valuation of the finished item equals the sum of the consumed component values plus the declared operation costs, to the currency step. | [`../domains/inventory-valuation-and-costing/calculations.md`](../domains/inventory-valuation-and-costing/calculations.md) section 2.3. |
+| GATE-M12-08 | The valuation of the finished item equals the sum of the consumed component values plus the declared operation costs, to the currency step. | [`../domains/inventory-valuation-and-costing/calculations.md`](../domains/inventory-valuation-and-costing/calculations.md) section 8.1, the cost of a finished good. |
 | GATE-M12-09 | A by-product with a cost share of twenty percent receives twenty percent of the total value and the finished item the rest. | Manufacturing accounting effects, by-products. |
 | GATE-M12-10 | Unbuilding a finished unit reverses the component and finished moves at the original values and is refused beyond the produced quantity. | Manufacturing workflows, unbuild. |
 | GATE-M12-11 | Planning a manufacturing order schedules its work orders on the work centers respecting their capacity, working schedule and the declared dependencies. | [`../domains/manufacturing/workflows.md`](../domains/manufacturing/workflows.md). |
@@ -786,7 +786,7 @@ Performance is a behavior of the platform, not an infrastructure concern: the ga
 | Rendered documents | 24 | Domain `interfaces.md` files. |
 | Timed job runs | 38 | Build sequence job tables and [`../references/scheduled-jobs.md`](../references/scheduled-jobs.md). |
 | Access matrices | 8 | [`../../schemas/operational/access-rights.json`](../../schemas/operational/access-rights.json) and [`../../schemas/operational/record-rules.json`](../../schemas/operational/record-rules.json). |
-| Numeric invariants over the whole fixture | 17 | The invariants of section 18 of the [equivalence test plan](equivalence-test-plan.md). |
+| Numeric invariants over the whole fixture | 21 | The twenty-one invariants INV-01 to INV-21 of section 18 of the [equivalence test plan](equivalence-test-plan.md). |
 
 ---
 
@@ -970,20 +970,7 @@ Closes stage ten, delivered by step 18 and the spreadsheet and automation part o
 
 ---
 
-## 30. Closing the programme
+## 30. Closing the program
 
 The rebuild is complete when every step milestone and every stage gate is closed at the conformance level claimed in [conformance profiles](conformance-profiles.md), when the invariants of layer five hold continuously across the whole suite, and when [coverage and evidence](coverage-and-evidence.md) shows no artifact in the specified column without an entry in either the verified column or the acknowledged-difference list.
 
----
-
-## Reconciliation notes
-
-1. **Two gate schemes.** One version gated ten steps with property statements mapped to test layers; the other gated twenty steps with named checks, each citing the acceptance criteria that specify it, plus four cross-cutting milestones. Both are kept, and neither is a restatement of the other: the twenty-one step milestones and the four cross-cutting milestones ask whether one delivery is correct, and the ten stage gates ask whether the property the stage exists for holds across its steps. Section 1 says which question each answers.
-2. **Milestone numbering.** The step milestones keep the identifiers `GATE-M<milestone>-<nn>`, which other documents and test suites already cite, and the milestone numbers still match the step numbers of the build sequence. The ten gates of the other version are renumbered as stage gates one to ten, matching the stage map of the build sequence; their row numbers are unchanged, so a row that was cited as 6.4 is still 6.4.
-3. **Two citations of the equivalence test plan pointed at the wrong section.** The valuation replay gate and the numeric drift gates cited sections 7 and 8 of that plan, which are golden scenario families. They cite the invariants of section 18, which is what those gates actually assert.
-4. **Files that do not exist in this repository.** Gates citing a separate document of date and rounding conventions, a condition-notation reference, an error-message reference, a scheduled-action reference and a document of industry configuration blueprints now cite the documents of this repository that own those facts: persistence, identity and values; the record operations and query notation; the validation message index; the scheduled job index; and step 20 of the build sequence.
-5. **Catalog names.** The access rule catalog is `access-rights.json` in this repository, and the catalogs live one level further up, under `../../schemas/`. Every citation was corrected.
-6. **Topic files inside domain folders.** Gates that cited an optional topic file of a domain folder now cite the folder's standard file that owns the topic, so that a gate stays valid however a domain distributes its optional files.
-7. **The employee services folder.** Its gates are split as the charter requires: the meal cut-off gate cites lunch ordering, and the challenge and badge gate cites learning, questionnaires and recognition.
-8. **Two acceptance criteria counts were dropped.** Two coverage gates cited a number of acceptance criteria — five hundred and forty-one for inventory operations and three hundred and ninety-five for the general ledger — that came from a different draft of those domain documents and does not match the criteria this repository now carries. The gates require one hundred percent of the criteria of the cited file, which is the durable statement, and the count itself lives in the domain document and in [coverage and evidence](coverage-and-evidence.md).
-9. **Wording.** Two replenishment gates used a pair of directional words for the move that supplies a demand and the move that follows it. They now say supplying move and resulting move; the pair they replace is avoided throughout this repository, because one of the two words is also how a document sends a reader outside it.

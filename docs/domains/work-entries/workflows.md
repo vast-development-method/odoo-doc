@@ -12,9 +12,9 @@ in [calculations.md](calculations.md).
 
 | Role | What it may do here |
 |---|---|
-| Human Resources Officer | Read and write the catalogue of kinds only for reading; read, create and write work entries; never delete one; manage their own calendar filter |
-| Human Resources Manager | Everything an officer may do, plus create, change and archive work entry kinds, set the generation source on a version, and run the regeneration wizard |
-| Settings group | In addition, delete a work entry — subject to `WKE-035`, which still protects validated entries |
+| Human Resources Officer | Read the catalogue of kinds; read, create and write work entries; never delete one; manage their own calendar filter |
+| Human Resources Administrator | Everything an officer may do, plus create, change and archive work entry kinds, set the generation source on a version, and run the regeneration wizard |
+| Settings Administrator group | In addition, delete a work entry — subject to `WKE-035`, which still protects validated entries |
 | The platform's own scheduled runner | Runs the daily generation job as the root user |
 | Payroll capability | Reads the day book and calls the validation operation; not part of this domain |
 | Employee | Has no access to work entries at all; an employee sees only the absence requests that produce them |
@@ -23,7 +23,7 @@ in [calculations.md](calculations.md).
 
 ## 2. Setting up the catalogue of work entry kinds
 
-Performed once, by a human resources manager, before any payroll period is run.
+Performed once, by a human resources administrator, before any payroll period is run.
 
 1. Review the shipped catalogue. The universal kinds — ordinary attendance, overtime, out of contract,
    generic time off, compensatory time off, home working, unpaid, sick time off and paid time off —
@@ -132,7 +132,7 @@ nothing for the days concerned.
 
 ## 6. Regenerating a range by hand
 
-Performed by a human resources manager when the day book of a period no longer reflects reality —
+Performed by a human resources administrator when the day book of a period no longer reflects reality —
 after a schedule was corrected retroactively, or after somebody edited entries by hand and wants the
 derived ones back.
 

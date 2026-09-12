@@ -114,8 +114,8 @@ that specifies the behaviour the endpoints invoke.
 | General Ledger and Invoicing Documents | 12 | 4 | [general-ledger](../domains/general-ledger/) |
 | Accounts Receivable Payment Actions | 3 | 1 | [accounts-receivable](../domains/accounts-receivable/) |
 | Electronic Document Interchange | 5 | 1 | [electronic-invoicing-and-document-exchange](../domains/electronic-invoicing-and-document-exchange/) |
-| Fiscal Localizations | 15 | 2 | [fiscal-localizations](../domains/fiscal-localizations/) |
-| Calendar and Scheduling | 12 | 2 | [calendar-and-scheduling](../domains/calendar-and-scheduling/) |
+| Fiscal Localizations | 15 | 2 | [fiscal localizations](../domains/README.md) |
+| Calendar and Scheduling | 12 | 2 | [calendar and scheduling](../domains/README.md) |
 | Attendance Recording | 13 | 2 | [attendances-and-working-time](../domains/attendances-and-working-time/) |
 | Employee Services | 9 | 2 | [lunch-ordering](../domains/lunch-ordering/), [human-resources-core](../domains/human-resources-core/) |
 | Time Off Approvals | 5 | 1 | [time-off](../domains/time-off/) |
@@ -132,14 +132,14 @@ that specifies the behaviour the endpoints invoke.
 | Loyalty and Promotions | 5 | 1 | [loyalty-and-promotions](../domains/loyalty-and-promotions/) |
 | Sales Quotations and Orders | 19 | 3 | [sales](../domains/sales/) |
 | Customer Relationship Management | 9 | 3 | [customer-relationship-management](../domains/customer-relationship-management/) |
-| Payment Providers | 62 | 2 | [payment-providers](../domains/payment-providers/) |
+| Payment Providers | 62 | 2 | [payment providers](../domains/README.md) |
 | Messaging and Collaboration | 141 | 12 | [messaging-and-activities](../domains/messaging-and-activities/) |
 | Surveys, Certifications, Courses and Community Forum | 104 | 3 | [learning-surveys-and-gamification](../domains/learning-surveys-and-gamification/) |
 | Site and Content Management | 90 | 9 | [website-and-storefront](../domains/website-and-storefront/) |
 | Commerce Storefront | 66 | 4 | [website-and-storefront](../domains/website-and-storefront/) |
 | Point of Sale | 41 | 3 | [point-of-sale](../domains/point-of-sale/) |
 | Events | 38 | 3 | [events](../domains/events/) |
-| Marketing Campaigns | 31 | 3 | [marketing-and-mass-mailing](../domains/marketing-and-mass-mailing/) |
+| Marketing Campaigns | 31 | 3 | [marketing and mass mailing](../domains/README.md) |
 | Automation and Integration Services | 21 | 5 | [automation-and-integration](../domains/automation-and-integration/) |
 
 ## Platform Foundation
@@ -843,7 +843,8 @@ back to the provider), and then apply the outcome to the transaction. Notificati
 cross-site submission, because the caller is the provider, and each answers with the exact acknowledgement string the
 provider expects; a wrong or missing answer makes the provider retry. Notification handling is idempotent: applying the
 same outcome twice leaves the transaction in the same state. The transaction state machine, the signature rules and the
-error paths are specified in [`../domains/payment-providers/workflows.md`](../domains/payment-providers/workflows.md).
+error paths are specified by the payment providers domain, whose entry is carried by the domain index
+[`../domains/README.md`](../domains/README.md).
 
 ### Shared payment flow
 

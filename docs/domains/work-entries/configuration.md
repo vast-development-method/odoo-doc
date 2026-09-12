@@ -43,10 +43,11 @@ rules.
 
 ## 3. The shipped catalogue of work entry kinds
 
-One hundred and eighteen work entry kinds are shipped. All of them are defined by the core package,
-deliberately: a test refuses an installation in which a work entry kind is defined anywhere else, so
-that the catalogue has exactly one home. All of them are loaded with the no-update marker, so an
-administrator's later edits survive an upgrade of the package.
+One hundred and eighteen work entry kinds are shipped. All of them are defined by the **core** package
+and by no other, deliberately: the catalogue has exactly one home, and a country package that needs a
+new kind contributes it there rather than shipping its own. The installation is checked against that
+invariant, and a kind found anywhere else is reported as a fault. All of them are loaded with the
+no-update marker, so an administrator's later edits survive an upgrade of the package.
 
 ### 3.1 The universal kinds
 
@@ -443,7 +444,7 @@ message template and **no** activity type. Everything configurable lives on reco
 | Working Time Exclusion | Work entry kind | empty | The kind of the rows the closure produces; empty falls through to the shipped generic-absence kind |
 | Time Off Type | Work entry kind | empty | The kind of the rows an absence of that kind produces; empty falls through to the shipped generic-absence kind |
 | Work Entry Type | Pay rate | 1.0 | Copied onto every entry created with the kind |
-| Work Entry Type | Order | 25 | Presentation order only; editable only by the technical group |
+| Work Entry Type | Order | 25 | Presentation order only; editable only by the technical-features group |
 | Work Entry | Duration | 8 | The default of a hand-created entry |
 | Work Entry | Kind | the first kind in identifier order | A weak default so that a manually opened form is not empty |
 | Calendar filter | Ticked | true | Whether a pinned employee's entries are shown |
@@ -465,23 +466,27 @@ contract:
 
 The domain defines no group of its own. It uses four groups owned by other domains:
 
-| Group | Owned by | Role here |
-|---|---|---|
-| Human Resources Officer | [Human resources core](../human-resources-core/configuration.md) | The everyday user of the day book |
-| Human Resources Manager | Human resources core | Configures kinds, sets the generation source, regenerates |
-| Settings | [Identity and access](../identity-and-access/configuration.md) | The only group that may delete a work entry |
-| Internal User | Identity and access | Scope of the calendar-filter record rule |
+| Group | Identifier | Owned by | Role here |
+|---|---|---|---|
+| Human Resources Officer | `hr.group_hr_user` | [Human resources core](../human-resources-core/configuration.md) | The everyday user of the day book |
+| Human Resources Administrator | `hr.group_hr_manager` | Human resources core | Configures kinds, sets the generation source, regenerates |
+| Settings Administrator | `base.group_system` | [Identity and access](../identity-and-access/configuration.md) | The only group that may delete a work entry |
+| Internal User | `base.group_user` | Identity and access | Scope of the calendar-filter record rule |
+| Technical features | `base.group_no_one` | Identity and access | Sees the order field of a work entry kind |
+
+The five identifiers are reproduced exactly, because access rights and record rules are keyed on them
+and a rebuild that imports an existing database must resolve the same names.
 
 ### 6.2 The access matrix
 
 | Entity | Group | Read | Write | Create | Delete |
 |---|---|---|---|---|---|
 | Work Entry | Human Resources Officer | yes | yes | yes | no |
-| Work Entry | Settings | yes | yes | yes | yes |
+| Work Entry | Settings Administrator | yes | yes | yes | yes |
 | Work Entry Type | Human Resources Officer | yes | no | no | no |
-| Work Entry Type | Human Resources Manager | yes | yes | yes | yes |
+| Work Entry Type | Human Resources Administrator | yes | yes | yes | yes |
 | Work Entry Employee Filter | Human Resources Officer | yes | yes | yes | yes |
-| Work Entry Regeneration Wizard | Human Resources Manager | yes | yes | yes | yes |
+| Work Entry Regeneration Wizard | Human Resources Administrator | yes | yes | yes | yes |
 
 No group other than those listed has any access at all. In particular an ordinary internal user
 cannot read a work entry, and an employee cannot see their own.
@@ -506,12 +511,12 @@ have pinned an employee.
 | Field | Entity | Visible to |
 |---|---|---|
 | Generated From, Generated To, Last Generation Date | Employee Version | Human Resources Officer and above |
-| Generation source and the invalid-source indicator | Employee Version | Human Resources Manager only |
-| Generation source and the invalid-source indicator | Employee | Human Resources Manager only |
-| Has work entries | Employee | Settings group and Human Resources Officer |
+| Generation source and the invalid-source indicator | Employee Version | Human Resources Administrator only |
+| Generation source and the invalid-source indicator | Employee | Human Resources Administrator only |
+| Has work entries | Employee | Settings Administrator group and Human Resources Officer |
 | Work entry kind | Working Schedule Line | Human Resources Officer and above |
 | Work entry kind | Working Time Exclusion | Human Resources Officer and above |
-| Order, on a work entry kind | Work Entry Type | the technical group only |
+| Order, on a work entry kind | Work Entry Type | the technical-features group only |
 
 ### 6.5 Elevated execution
 

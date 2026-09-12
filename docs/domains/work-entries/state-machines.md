@@ -227,7 +227,7 @@ The two markers on an Employee Version are not a state field. They are a pair of
 how far the day book of that version has been generated, and they move only outward, except in four
 cases where they are pulled back deliberately. The full progression is a small machine in its own
 right and is specified in
-[calculations.md, chapter 9](calculations.md#9-advancing-and-retracting-the-generation-markers).
+[calculations.md, chapter 9](calculations.md#9-advancing-the-generation-markers).
 The four retractions are:
 
 | Retraction | When | Which marker | To what |
@@ -236,3 +236,50 @@ The four retractions are:
 | Creating a version | A new version is created through the employee's version-creation operation | both | today at midnight |
 | Contract start moved forward | A write changes the contract start, the contract end or the version date, and the generated-from marker lies before the new effective start | the generated-from marker | the new effective start, and every entry of that version dated before it is deleted |
 | Contract end moved backward | The same write, and the generated-to marker lies after the end of the new effective end date | the generated-to marker | the end of the new effective end date, and every entry of that version dated after it is deleted |
+
+---
+
+## 7. Which combinations of state and archived flag can exist
+
+Because the two are coupled but the coupling is one-directional for two of the four states, not every
+combination is reachable, and the ones that are reachable arrive by particular paths. A rebuild that
+enforces a stricter invariant will refuse data the specified system produces.
+
+| State | Archived flag | Reachable | How it is reached | What it means in practice |
+|---|---|---|---|---|
+| `draft` | true | yes, and it is the ordinary case | Creation, or any write of the state `draft`, or any write of the archived flag true | A live, editable, replaceable entry |
+| `draft` | false | **no** | Writing the state `draft` forces the flag true, and writing the flag false forces the state `cancelled` | — |
+| `conflict` | true | yes, and it is the ordinary case | A conflict condition marking a live entry | A live entry a human must look at |
+| `conflict` | false | yes, but only by an unusual path | Writing the state `conflict` onto an entry that is already archived; the state write leaves the flag alone | An archived entry recorded as conflicting; it counts nowhere and no interface shows it |
+| `validated` | true | yes, and it is the ordinary case | The validation operation | A locked entry a payroll run has taken |
+| `validated` | false | yes, but only by an unusual path | Writing the state `validated` onto an entry that is already archived, or writing the state `validated` while the archived flag is already false | A locked entry that counts nowhere. It survives every regeneration, because the nullifying condition excludes validated entries, and it cannot be deleted |
+| `cancelled` | false | yes, and it is the ordinary case | Writing the state `cancelled`, or writing the archived flag false | A withdrawn entry, still readable as history |
+| `cancelled` | true | **no** | Writing the state `cancelled` forces the flag false, and writing the flag true forces the state `draft` | — |
+
+The two unusual combinations both arise from the same asymmetry: writing `conflict` or `validated`
+leaves the archived flag alone. A rebuild must allow them, because the four conflict passes write the
+state `conflict` without consulting the flag, and the validation operation writes `validated` without
+consulting it either.
+
+---
+
+## 8. A worked trace: the life of one work entry
+
+Every step below is a real transition of the table in [1.3](#13-transition-table). The entry belongs
+to an employee on a five-day, eight-hour schedule in Europe/Brussels.
+
+| Step | Event | Transition | State after | Archived flag after | Duration after |
+|---|---|---|---|---|---|
+| 1 | Generation is run for the week of 1 September 2025 | T1 | `draft` | true | 8.000 |
+| 2 | A person adds a second entry of seventeen hours on the same date | T2, caused by the other entry's creation | `conflict` | true | 8.000 |
+| 3 | The person corrects the second entry to sixteen hours | T3 then no re-marking | `draft` | true | 8.000 |
+| 4 | A payroll run validates the week | T4 | `validated` | true | 8.000 |
+| 5 | An absence is validated covering that day | no transition; rule `WKE-034` excludes validated entries from the archiving | `validated` | true | 8.000 |
+| 6 | A forced regeneration is run over the week | no transition; rule `WKE-033` excludes validated entries from the nullifying condition | `validated` | true | 8.000 |
+| 7 | Somebody attempts to delete the entry | T8, refused with "This work entry is validated. You can't delete it." | `validated` | true | 8.000 |
+| 8 | An administrator archives the entry | T6, and the flag rule overwrites the state | `cancelled` | false | 8.000 |
+| 9 | The administrator unarchives it | T7, and the day is re-checked | `draft` | true | 8.000 |
+
+Step 8 is the only way a validated entry leaves the validated state, and it is deliberate: an
+administrator who must correct a closed period has exactly one lever, and using it is recorded by the
+entry staying in the table with its archived flag false.

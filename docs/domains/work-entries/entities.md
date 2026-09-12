@@ -51,6 +51,21 @@ Reading the map:
 | Work Entry Employee Filter | `hr.user.work.entry.employee` | `hr_user_work_entry_employee` | persistent | by identifier | yes, through `active` | no |
 | Work Entry Regeneration Wizard | `hr.work.entry.regeneration.wizard` | transient | transient | by identifier | no | through the employees it names |
 
+Each of the four has a generated reference page listing its fields exactly as the system declares
+them, together with the machine-readable definition the catalogues carry:
+[Work Entry Type](../../references/entities/hr.work.entry.type.md),
+[Work Entry](../../references/entities/hr.work.entry.md),
+[Work Entry Employee Filter](../../references/entities/hr.user.work.entry.employee.md) and
+[Work Entry Regeneration Wizard](../../references/entities/hr.work.entry.regeneration.wizard.md).
+The entities this domain extends have their own reference pages:
+[Employee Version](../../references/entities/hr.version.md),
+[Employee](../../references/entities/hr.employee.md),
+[Working Schedule](../../references/entities/resource.calendar.md),
+[Working Schedule Line](../../references/entities/resource.calendar.attendance.md),
+[Working Time Exclusion](../../references/entities/resource.calendar.leaves.md),
+[Time Off Type](../../references/entities/hr.leave.type.md) and
+[Time Off Request](../../references/entities/hr.leave.md).
+
 ---
 
 ## 3. Work Entry Type (`hr.work.entry.type`, table `hr_work_entry_type`)
@@ -79,22 +94,22 @@ A work entry type answers three questions at once:
 
 ### 3.2 Field table
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `name` | single line text | **Required**, translatable. The human label, for example "Attendance", "Paid Time Off", "Overtime Hours". Copied on duplication. |
-| `display_code` | single line text, at most three characters | Optional, translatable. A very short badge shown on each day cell of the work entry calendar, for example `A`, `PTO`, `OoC`. Its help text reads "This code can be changed, it is only for a display purpose (3 letters max)". Purely cosmetic: nothing keys off it. Copied on duplication. |
-| `code` | single line text | **Required**. The payroll code. Its help text reads "Careful, the Code is used in many references, changing it could lead to unwanted changes." Unique within a country scope — see [3.5](#35-uniqueness-of-the-payroll-code). Copied on duplication. Examples: `WORK100` for ordinary attendance, `LEAVE100` for generic absence, `OVERTIME`, `OUT` for out of contract. |
-| `external_code` | single line text | Optional. A second code carried only so that exports to a third-party system can use the third party's own vocabulary. Its help text reads "Use this code to export your data to a third party". Nothing inside the platform reads it; it is exposed as an optional column on the work entry list. Copied on duplication. |
-| `color` | whole number | Default `0`. The palette index used to colour the type's cards in the kanban view and its entries in the calendar view. Copied on duplication. |
-| `sequence` | whole number | Default `25`. Presentation order. Editable only by users in the technical group. Copied on duplication. |
-| `active` | true/false | Default true. Archiving hides the type without deleting it. Its help text reads "If the active field is set to false, it will allow you to hide the work entry type without removing it." Copied on duplication. |
-| `country_id` | many-to-one to Country | Optional, on delete set empty. The country whose payroll vocabulary this type belongs to. Empty means the type is universal and usable by every company. The selectable values are restricted to the countries of the acting companies. Changing it is heavily restricted — see [3.4](#34-the-country-change-restriction). Copied on duplication. |
-| `country_code` | single line text | Read-only, not stored. Mirror of the country's two-letter code. |
-| `is_leave` | true/false | Default false. Labelled "Time Off". True means "this time is an absence, not work". Its help text reads "Allow the work entry type to be linked with time off types." Drives the duration measurement, the outside-schedule conflict test, the hours-per-week exclusion and the post-processing branch. Copied on duplication. |
-| `is_work` | true/false | Labelled "Working Time". **Not stored.** Computed as the logical negation of the absence flag, and writable: writing it writes the negation back onto the absence flag. It exists purely so that a form can offer the positive phrasing. Its help text reads "If checked, the work entry is counted as work time in the working schedule". |
-| `amount_rate` | decimal number | Labelled "Rate", default `1.0`. The pay multiplier. Its help text reads "If you want the hours should be paid double, the rate should be 200%." Displayed as a percentage. Copied onto every work entry created with this type unless the creating caller supplies its own rate. Copied on duplication. |
-| `is_extra_hours` | true/false | Labelled "Added to Monthly Pay", default false. Its help text reads "Check this setting if you want the hours to be considered as extra time and added as a bonus to the basic salary." Copied on duplication. |
-| `leave_type_ids` | reverse collection of Time Off Type | Added by the absence companion. Every absence kind that produces this work entry kind. Its help text reads "Work entry used in the payslip." |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `name` | Name | single line text | **Required**, translatable. The human label, for example "Attendance", "Paid Time Off", "Overtime Hours". Copied on duplication. |
+| `display_code` | Display Code | single line text, at most three characters | Optional, translatable. A very short badge shown on each day cell of the work entry calendar, for example `A`, `PTO`, `OoC`. Its help text reads "This code can be changed, it is only for a display purpose (3 letters max)". Purely cosmetic: nothing keys off it. Copied on duplication. |
+| `code` | Payroll Code | single line text | **Required**. The payroll code. Its help text reads "Careful, the Code is used in many references, changing it could lead to unwanted changes." Unique within a country scope — see [3.5](#35-uniqueness-of-the-payroll-code). Copied on duplication. Examples: `WORK100` for ordinary attendance, `LEAVE100` for generic absence, `OVERTIME`, `OUT` for out of contract. |
+| `external_code` | External Code | single line text | Optional. A second code carried only so that exports to a third-party system can use the third party's own vocabulary. Its help text reads "Use this code to export your data to a third party". Nothing inside the platform reads it; it is exposed as an optional column on the work entry list. Copied on duplication. |
+| `color` | Colour | whole number | Default `0`. The palette index used to colour the type's cards in the kanban view and its entries in the calendar view. Copied on duplication. |
+| `sequence` | Order | whole number | Default `25`. Presentation order. Editable only by users in the technical-features group. Copied on duplication. |
+| `active` | Active | true/false | Default true. Archiving hides the type without deleting it. Its help text reads "If the active field is set to false, it will allow you to hide the work entry type without removing it." Copied on duplication. |
+| `country_id` | Country | many-to-one to Country | Optional, on delete set empty. The country whose payroll vocabulary this type belongs to. Empty means the type is universal and usable by every company. The selectable values are restricted to the countries of the acting companies. Changing it is heavily restricted — see [3.4](#34-the-country-change-restriction). Copied on duplication. |
+| `country_code` | Country Code | single line text | Read-only, not stored. Mirror of the country's two-letter code. |
+| `is_leave` | Time Off | true/false | Default false. Labelled "Time Off". True means "this time is an absence, not work". Its help text reads "Allow the work entry type to be linked with time off types." Drives the duration measurement, the outside-schedule conflict test, the hours-per-week exclusion and the post-processing branch. Copied on duplication. |
+| `is_work` | Working Time | true/false | Labelled "Working Time". **Not stored.** Computed as the logical negation of the absence flag, and writable: writing it writes the negation back onto the absence flag. It exists purely so that a form can offer the positive phrasing. Its help text reads "If checked, the work entry is counted as work time in the working schedule". |
+| `amount_rate` | Rate | decimal number | Labelled "Rate", default `1.0`. The pay multiplier. Its help text reads "If you want the hours should be paid double, the rate should be 200%." Displayed as a percentage. Copied onto every work entry created with this type unless the creating caller supplies its own rate. Copied on duplication. |
+| `is_extra_hours` | Added to Monthly Pay | true/false | Labelled "Added to Monthly Pay", default false. Its help text reads "Check this setting if you want the hours to be considered as extra time and added as a bonus to the basic salary." Copied on duplication. |
+| `leave_type_ids` | Time Off Type | reverse collection of Time Off Type | Added by the absence companion. Every absence kind that produces this work entry kind. Its help text reads "Work entry used in the payslip." |
 
 ### 3.3 Ordering, display name and record name
 
@@ -203,28 +218,28 @@ report — works on the date-and-duration pair.
 
 ### 4.2 Field table
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `name` | single line text | Optional, plain stored text; labelled "Description" on every form. The generator writes `"<kind name>: <employee name>"` for attendance intervals and for worked-absence intervals, and `"<kind name>: <employee name>"` for absence intervals as well — with the kind-name-and-colon part omitted when no kind could be resolved, leaving just the employee name. A human may overwrite it freely. Copied on duplication. |
-| `active` | true/false | Default true. **Coupled to the state**: see [4.6](#46-the-coupling-between-the-state-and-the-archived-flag). Copied on duplication. |
-| `employee_id` | many-to-one to Employee | **Required**, indexed, on delete restrict. Restricted to employees whose company is empty or equal to the entry's company. Copied on duplication. |
-| `version_id` | many-to-one to Employee Version | **Required**, indexed, on delete restrict, labelled "Employee Record". The employment version the entry belongs to. Defaulted on create and on form change from the employee and the date — see [4.5](#45-defaulting-the-version). Copied on duplication. |
-| `work_entry_source` | selection | Read-only, not stored. Mirror of the version's generation source. Used by the calendar view to warn when an entry's source does not match the source now configured on its version. |
-| `date` | calendar date | **Required**. The calendar date the hours belong to, expressed in the **schedule's time zone**, not in universal time. Copied on duplication. |
-| `duration` | decimal number | Default `8`. The number of hours, as a decimal (seven and a half hours is `7.5`). Must be strictly greater than zero and at most twenty-four — see [Business Rules, chapter 3](business-rules.md#3-the-duration-constraint). Copied on duplication. |
-| `work_entry_type_id` | many-to-one to Work Entry Type | Optional, indexed, on delete set empty. Default: the first work entry type found in identifier order — a weak default that exists only so a manually opened form is not empty. Restricted by the country domain described in [3.7](#37-multi-company-behaviour). An entry with **no** kind is always in conflict. Copied on duplication. |
-| `display_code` | single line text | Read-only, not stored. Mirror of the kind's display code. |
-| `code` | single line text | Read-only, not stored, labelled "Payroll Code". Mirror of the kind's payroll code. Available as an optional column on the list. |
-| `external_code` | single line text | Read-only, not stored. Mirror of the kind's external code. Available as an optional column on the list. |
-| `color` | whole number | Read-only, not stored. Mirror of the kind's colour index; the calendar view colours each event by it. |
-| `state` | selection | Default `draft`. Values: `draft` "New"; `conflict` "In Conflict"; `validated` "In Payslip"; `cancelled` "Cancelled". Not copied on duplication (a copy starts at `draft`). See [state-machines.md](state-machines.md). |
-| `company_id` | many-to-one to Company | **Required**, read-only, on delete restrict. Default: the acting company; on create, overridden by the employee's company whenever the caller did not supply one. Copied on duplication. |
-| `conflict` | true/false | Stored, read-only, computed from the state as "the state is `conflict`". Labelled "Conflicts". It exists solely so that a list can sort conflicting entries first without joining on a selection value. Not copied. |
-| `department_id` | many-to-one to Department | Stored, read-only mirror of the employee's department. Stored so that the day book can be grouped and filtered by department without a join. Not copied. |
-| `amount_rate` | decimal number | Labelled "Pay rate". On create, when the caller did not supply it and did supply a kind, it is copied from that kind's rate. It is **not** recomputed afterwards: changing the kind's rate does not retroactively change existing entries, and changing the entry's kind does not change its rate. This is deliberate — a rate already used by a payslip must not move. Copied on duplication. |
-| `country_id` | many-to-one to Country | Read-only, not stored. Mirror of the country of the employee's company. Searchable: a search on it is rewritten as a search on the country of the contact of the employee's company. |
-| `leave_id` | many-to-one to Time Off Request | Added by the absence companion. On delete set empty. The absence request that produced this entry, set by the generator for every interval fully inside a validated absence. Cleared when the entry is reset out of conflict and its kind is not an absence kind. Copied on duplication. |
-| `leave_state` | selection | Added by the absence companion. Read-only, not stored. Mirror of the absence request's state. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `name` | Description | single line text | Optional, plain stored text; labelled "Description" on every form. The generator writes `"<kind name>: <employee name>"` for attendance intervals and for worked-absence intervals, and `"<kind name>: <employee name>"` for absence intervals as well — with the kind-name-and-colon part omitted when no kind could be resolved, leaving just the employee name. A human may overwrite it freely. Copied on duplication. |
+| `active` | Active | true/false | Default true. **Coupled to the state**: see [4.6](#46-the-coupling-between-the-state-and-the-archived-flag). Copied on duplication. |
+| `employee_id` | Employee | many-to-one to Employee | **Required**, indexed, on delete restrict. Restricted to employees whose company is empty or equal to the entry's company. Copied on duplication. |
+| `version_id` | Employee Record | many-to-one to Employee Version | **Required**, indexed, on delete restrict, labelled "Employee Record". The employment version the entry belongs to. Defaulted on create and on form change from the employee and the date — see [4.5](#45-defaulting-the-version). Copied on duplication. |
+| `work_entry_source` | Work Entry Source | selection | Read-only, not stored. Mirror of the version's generation source. Used by the calendar view to warn when an entry's source does not match the source now configured on its version. |
+| `date` | Date | calendar date | **Required**. The calendar date the hours belong to, expressed in the **schedule's time zone**, not in universal time. Copied on duplication. |
+| `duration` | Duration | decimal number | Default `8`. The number of hours, as a decimal (seven and a half hours is `7.5`). Must be strictly greater than zero and at most twenty-four — see [Business Rules, chapter 3](business-rules.md#3-the-duration-constraint). Copied on duplication. |
+| `work_entry_type_id` | Work Entry Type | many-to-one to Work Entry Type | Optional, indexed, on delete set empty. Default: the first work entry type found in identifier order — a weak default that exists only so a manually opened form is not empty. Restricted by the country domain described in [3.7](#37-multi-company-behaviour). An entry with **no** kind is always in conflict. Copied on duplication. |
+| `display_code` | Display Code | single line text | Read-only, not stored. Mirror of the kind's display code. |
+| `code` | Payroll Code | single line text | Read-only, not stored, labelled "Payroll Code". Mirror of the kind's payroll code. Available as an optional column on the list. |
+| `external_code` | External Code | single line text | Read-only, not stored. Mirror of the kind's external code. Available as an optional column on the list. |
+| `color` | Colour | whole number | Read-only, not stored. Mirror of the kind's colour index; the calendar view colours each event by it. |
+| `state` | State | selection | Default `draft`. Values: `draft` "New"; `conflict` "In Conflict"; `validated` "In Payslip"; `cancelled` "Cancelled". Not copied on duplication (a copy starts at `draft`). See [state-machines.md](state-machines.md). |
+| `company_id` | Company | many-to-one to Company | **Required**, read-only, on delete restrict. Default: the acting company; on create, overridden by the employee's company whenever the caller did not supply one. Copied on duplication. |
+| `conflict` | Conflicts | true/false | Stored, read-only, computed from the state as "the state is `conflict`". Labelled "Conflicts". It exists solely so that a list can sort conflicting entries first without joining on a selection value. Not copied. |
+| `department_id` | Department | many-to-one to Department | Stored, read-only mirror of the employee's department. Stored so that the day book can be grouped and filtered by department without a join. Not copied. |
+| `amount_rate` | Pay rate | decimal number | Labelled "Pay rate". On create, when the caller did not supply it and did supply a kind, it is copied from that kind's rate. It is **not** recomputed afterwards: changing the kind's rate does not retroactively change existing entries, and changing the entry's kind does not change its rate. This is deliberate — a rate already used by a payslip must not move. Copied on duplication. |
+| `country_id` | Country | many-to-one to Country | Read-only, not stored. Mirror of the country of the employee's company. Searchable: a search on it is rewritten as a search on the country of the contact of the employee's company. |
+| `leave_id` | Time Off | many-to-one to Time Off Request | Added by the absence companion. On delete set empty. The absence request that produced this entry, set by the generator for every interval fully inside a validated absence. Cleared when the entry is reset out of conflict and its kind is not an absence kind. Copied on duplication. |
+| `leave_state` | Time Off State | selection | Added by the absence companion. Read-only, not stored. Mirror of the absence request's state. |
 
 ### 4.3 Ordering, display name and record name
 
@@ -236,7 +251,12 @@ report — works on the date-and-duration pair.
 - **Display name**: `"<kind name> - <hours>h<minutes>"`. The duration is converted to a
   span of hours, minutes and seconds and the first two components are used. Eight hours
   renders as `"Attendance - 8h00"`; seven and a half hours renders as
-  `"Attendance - 7h30"`.
+  `"Attendance - 7h30"`; half an hour renders as `"Attendance - 0h30"`.
+  The recomputation of the display name is declared to depend on the **display code** and the
+  duration, while the text it produces uses the kind's **name**. Changing only the name of a kind
+  therefore leaves the display names of its entries stale until something else invalidates them.
+  This is recorded as a **compatibility finding**; a corrected behaviour would depend on the kind's
+  name and the duration.
 - **Record name**: `name`.
 
 ### 4.4 Indexes
@@ -330,12 +350,12 @@ and must survive across sessions. One row per (user, employee) pair records that
 
 ### 5.2 Field table
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `user_id` | many-to-one to User | **Required**, labelled "Me", on delete cascade. Default: the acting user. Deleting the user deletes the row. |
-| `employee_id` | many-to-one to Employee | **Required**, on delete restrict. The pinned employee. |
-| `active` | true/false | Default true. Unpinning archives rather than deletes, so that re-pinning restores the previous ticked state. |
-| `is_checked` | true/false | Default true. Whether the pinned employee's entries are currently included in the calendar. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `user_id` | Me | many-to-one to User | **Required**, labelled "Me", on delete cascade. Default: the acting user. Deleting the user deletes the row. |
+| `employee_id` | Employee | many-to-one to Employee | **Required**, on delete restrict. The pinned employee. |
+| `active` | Active | true/false | Default true. Unpinning archives rather than deletes, so that re-pinning restores the previous ticked state. |
+| `is_checked` | Checked | true/false | Default true. Whether the pinned employee's entries are currently included in the calendar. |
 
 ### 5.3 Uniqueness
 
@@ -362,13 +382,13 @@ The Employee Version (`hr.version`, table `hr_version`) is owned by
 [Human Resources Core](../human-resources-core/entities.md#3-employee-version-hrversion-table-hr_version).
 This domain adds five fields to it and makes it the host of the whole generation engine.
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `date_generated_from` | instant | **Required**, read-only, tracked. Labelled "Generated From". Readable by human-resources officers. Default: today at midnight, in the server's own reckoning of "now" with the hour, minute, second and sub-second parts zeroed. The earliest instant for which the day book of this version has been generated. |
-| `date_generated_to` | instant | **Required**, read-only, tracked. Labelled "Generated To". Readable by human-resources officers. Default: the same as the from marker. The latest instant for which the day book of this version has been generated. |
-| `last_generation_date` | calendar date | Read-only, tracked. Labelled "Last Generation Date". Readable by human-resources officers. The date on which generation last ran for this version. Written at the very start of every generation run, before any entry is produced, so it records *attempts*, not successes. Used by the scheduled job to avoid re-visiting the same version twice on the same day. |
-| `work_entry_source` | selection | **Required**, default `calendar`, tracked. Readable and writable by human-resources managers only. The only shipped value is `calendar` "Working Schedule". Its help text enumerates three sources — "Working Schedule: Work entries will be generated from the working hours below.", "Attendances: Work entries will be generated from the employee's attendances. (requires Attendance app)", "Planning: Work entries will be generated from the employee's planning. (requires Planning app)" — of which only the first is a selectable value in the specified system; see [Business Rules, chapter 12](business-rules.md#12-the-generation-source-extension-point). Whitelisted for copying from a contract template. |
-| `work_entry_source_calendar_invalid` | true/false | Not stored, computed, readable by human-resources managers. True exactly when the generation source is `calendar` **and** the version names no working schedule — that is, the version claims to generate from a schedule it does not have. Used to surface a warning; it does not by itself block generation, which simply produces nothing for such a version. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `date_generated_from` | Generated From | instant | **Required**, read-only, tracked. Labelled "Generated From". Readable by human-resources officers. Default: today at midnight, in the server's own reckoning of "now" with the hour, minute, second and sub-second parts zeroed. The earliest instant for which the day book of this version has been generated. |
+| `date_generated_to` | Generated To | instant | **Required**, read-only, tracked. Labelled "Generated To". Readable by human-resources officers. Default: the same as the from marker. The latest instant for which the day book of this version has been generated. |
+| `last_generation_date` | Last Generation Date | calendar date | Read-only, tracked. Labelled "Last Generation Date". Readable by human-resources officers. The date on which generation last ran for this version. Written at the very start of every generation run, before any entry is produced, so it records *attempts*, not successes. Used by the scheduled job to avoid re-visiting the same version twice on the same day. |
+| `work_entry_source` | Work Entry Source | selection | **Required**, default `calendar`, tracked. Readable and writable by human resources administrators only. The only shipped value is `calendar` "Working Schedule". Its help text enumerates three sources — "Working Schedule: Work entries will be generated from the working hours below.", "Attendances: Work entries will be generated from the employee's attendances. (requires Attendance app)", "Planning: Work entries will be generated from the employee's planning. (requires Planning app)" — of which only the first is a selectable value in the specified system; see [Business Rules, chapter 12](business-rules.md#12-the-generation-source-extension-point). Whitelisted for copying from a contract template. |
+| `work_entry_source_calendar_invalid` | Work Entry Source Calendar Invalid | true/false | Not stored, computed, readable by human resources administrators. True exactly when the generation source is `calendar` **and** the version names no working schedule — that is, the version claims to generate from a schedule it does not have. Used to surface a warning; it does not by itself block generation, which simply produces nothing for such a version. |
 
 ### 6.1 The meaning of the two markers
 
@@ -435,11 +455,11 @@ context, because a simulation must not touch the real day book.
 The Employee (`hr.employee`, table `hr_employee`) is owned by
 [Human Resources Core](../human-resources-core/entities.md#2-employee-hremployee-table-hr_employee).
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `has_work_entries` | true/false | Not stored, computed. Readable by the technical group and by human-resources officers. True when at least one work entry exists for the employee, in **any** state, including archived and cancelled ones. Computed with a single existence query per batch rather than per record, so that a list of employees costs one round trip. Used only to decide whether to show the "Work Entries" button on the employee form. |
-| `work_entry_source` | selection | Writable mirror of the current version's generation source. Readable and writable by human-resources managers only. |
-| `work_entry_source_calendar_invalid` | true/false | Read-only mirror of the current version's invalid-source indicator. Readable by human-resources managers only. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `has_work_entries` | Has Work Entries | true/false | Not stored, computed. Readable by the technical-features group and by human-resources officers. True when at least one work entry exists for the employee, in **any** state, including archived and cancelled ones. Computed with a single existence query per batch rather than per record, so that a list of employees costs one round trip. Used only to decide whether to show the "Work Entries" button on the employee form. |
+| `work_entry_source` | Work Entry Source | selection | Writable mirror of the current version's generation source. Readable and writable by human resources administrators only. |
+| `work_entry_source_calendar_invalid` | Work Entry Source Calendar Invalid | true/false | Read-only mirror of the current version's invalid-source indicator. Readable by human resources administrators only. |
 
 ### 7.1 Operations contributed to the employee
 
@@ -463,9 +483,9 @@ turns the working-time model into something payroll can label.
 
 ### 8.1 Working Schedule Line (`resource.calendar.attendance`)
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `work_entry_type_id` | many-to-one to Work Entry Type | Readable by human-resources officers. **Default: the shipped ordinary-attendance type** (payroll code `WORK100`), resolved by reference at default time and left empty if that record is absent. The kind of time this line of the weekly pattern produces. Copied when the line is copied. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `work_entry_type_id` | Work Entry Type | many-to-one to Work Entry Type | Readable by human-resources officers. **Default: the shipped ordinary-attendance type** (payroll code `WORK100`), resolved by reference at default time and left empty if that record is absent. The kind of time this line of the weekly pattern produces. Copied when the line is copied. |
 
 Two behaviours change as a result:
 
@@ -486,9 +506,9 @@ an attendance entry.
 
 ### 8.2 Working Time Exclusion (`resource.calendar.leaves`)
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `work_entry_type_id` | many-to-one to Work Entry Type | Readable by human-resources officers. No default. The kind of time this exclusion produces when it swallows part of a generated day. Copied when the exclusion is copied. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `work_entry_type_id` | Work Entry Type | many-to-one to Work Entry Type | Readable by human-resources officers. No default. The kind of time this exclusion produces when it swallows part of a generated day. Copied when the exclusion is copied. |
 
 This is the field that makes a public holiday appear in the day book as a public-holiday
 entry rather than as a generic absence. When it is empty, the generator falls back to the
@@ -509,9 +529,9 @@ the global-attendance filter and the hours-per-week dependency.
 
 ### 9.1 Time Off Type (`hr.leave.type`)
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `work_entry_type_id` | many-to-one to Work Entry Type | Indexed with a partial index that skips empty values. The kind of work entry an absence of this kind produces. Shown on the absence-kind form in a group labelled "Payroll" and as an optional column on the absence-kind list. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `work_entry_type_id` | Work Entry Type | many-to-one to Work Entry Type | Indexed with a partial index that skips empty values. The kind of work entry an absence of this kind produces. Shown on the absence-kind form in a group labelled "Payroll" and as an optional column on the absence-kind list. |
 
 When it is empty, an absence of that kind still produces a work entry, but with no kind
 resolvable from the absence, so the generator falls back to the shipped generic-absence
@@ -566,18 +586,18 @@ whose range contains validated entries.
 
 ### 10.2 Field table
 
-| Field (storage name) | Type | Meaning and rules |
-|---|---|---|
-| `employee_ids` | many-to-many to Employee | **Required**, labelled "Employees". Restricted to employees of the acting companies. On the form it is further narrowed to employees that have at least one version. |
-| `date_from` | calendar date | **Required**, labelled "From". Default: the value of the context key `date_start` when the wizard is opened from a place that supplies one. |
-| `date_to` | calendar date | **Required**, labelled "To". Stored, computed, writable. Computed from the from-date as **the last day of the month containing the from-date**: add one month, move to day one, subtract one day. Recomputed whenever the from-date changes unless the user has overridden it. Default: the context key `date_end`. |
-| `earliest_available_date` | calendar date | Read-only, not stored, labelled "Earliest date". The **minimum** of the from-markers of every version of every selected employee; empty when there are none. |
-| `latest_available_date` | calendar date | Read-only, not stored, labelled "Latest date". The **maximum** of the to-markers of every version of every selected employee; empty when there are none. |
-| `earliest_available_date_message` | single line text | Read-only, not stored, default the empty string. Set to `"The earliest available date is <date in the user's date format>"` when the requested from-date had to be pushed forward. |
-| `latest_available_date_message` | single line text | Read-only, not stored, default the empty string. Set to `"The latest available date is <date in the user's date format>"` when the requested to-date had to be pulled back. |
-| `validated_work_entry_employee_ids` | many-to-many to Employee | Read-only, not stored. The selected employees that have at least one **validated** entry inside the requested range. Computed by grouping validated entries in the range by employee. Rendered in red on the form. |
-| `search_criteria_completed` | true/false | Read-only, not stored. True when a from-date, a to-date, at least one employee, an earliest available date and a latest available date are all present. |
-| `valid` | true/false | Read-only, not stored. True when the search criteria are complete **and** at least one selected employee is not in the validated set. Controls which of the two footer buttons is shown. |
+| Field (storage name) | Full name | Type | Meaning and rules |
+|---|---|---|---|
+| `employee_ids` | Employees | many-to-many to Employee | **Required**, labelled "Employees". Restricted to employees of the acting companies. On the form it is further narrowed to employees that have at least one version. |
+| `date_from` | From | calendar date | **Required**, labelled "From". Default: the value of the context key `date_start` when the wizard is opened from a place that supplies one. |
+| `date_to` | To | calendar date | **Required**, labelled "To". Stored, computed, writable. Computed from the from-date as **the last day of the month containing the from-date**: add one month, move to day one, subtract one day. Recomputed whenever the from-date changes unless the user has overridden it. Default: the context key `date_end`. |
+| `earliest_available_date` | Earliest date | calendar date | Read-only, not stored, labelled "Earliest date". The **minimum** of the from-markers of every version of every selected employee; empty when there are none. |
+| `latest_available_date` | Latest date | calendar date | Read-only, not stored, labelled "Latest date". The **maximum** of the to-markers of every version of every selected employee; empty when there are none. |
+| `earliest_available_date_message` | Earliest available date message | single line text | Read-only, not stored, default the empty string. Set to `"The earliest available date is <date in the user's date format>"` when the requested from-date had to be pushed forward. |
+| `latest_available_date_message` | Latest available date message | single line text | Read-only, not stored, default the empty string. Set to `"The latest available date is <date in the user's date format>"` when the requested to-date had to be pulled back. |
+| `validated_work_entry_employee_ids` | Validated work entry employees | many-to-many to Employee | Read-only, not stored. The selected employees that have at least one **validated** entry inside the requested range. Computed by grouping validated entries in the range by employee. Rendered in red on the form. |
+| `search_criteria_completed` | Search criteria completed | true/false | Read-only, not stored. True when a from-date, a to-date, at least one employee, an earliest available date and a latest available date are all present. |
+| `valid` | Valid | true/false | Read-only, not stored. True when the search criteria are complete **and** at least one selected employee is not in the validated set. Controls which of the two footer buttons is shown. |
 
 ### 10.3 The interactive clamping
 
@@ -616,3 +636,41 @@ also writes `state` = `cancelled`, so the superseded entries end up cancelled an
 
 A reimplementation should keep this indirection, because country-specific payroll packages
 extend the list with their own fields.
+
+---
+
+## 11. Extension points contributed to and by other packages
+
+The generation engine is built to be extended, and a rebuild that omits the extension points will
+find country payroll packages impossible to add later. Each point below is a named decision the
+engine delegates, together with what the core answers and what an extending package typically
+answers instead.
+
+| Extension point | What the core answers | What an extending package does with it |
+|---|---|---|
+| The default work entry kind of an interval | the shipped ordinary-attendance kind, payroll code `WORK100`, resolved by reference and cached | A country package may substitute its own default |
+| The default overtime kind | the shipped overtime kind, payroll code `OVERTIME`, resolved by reference and cached | An attendance-based package uses it to label hours beyond the schedule |
+| The work entry kind of an exclusion | the exclusion's own work entry kind | The absence companion returns the work entry kind of the exclusion's absence request's absence kind when the exclusion has one, and the exclusion's own kind otherwise |
+| The work entry kind of an exclusion, for a given span | the same answer, ignoring the span | A country package that pays a statutory absence at different rates on different days of the same absence returns different kinds for different spans |
+| Extra values for an attendance interval | nothing | A planning package adds the planning slot the interval came from |
+| Extra values for an absence interval | nothing | The absence companion adds the absence link |
+| The bypassing payroll codes | an empty list | A country package lists the codes that outrank a company closure, so that a statutory absence continues to run across a public holiday |
+| Which absence intervals are valid | every interval, unchanged | A package that must discard absences falling outside some window filters them here |
+| Whether the version is statically generated | true when the generation source is `calendar` | A package adding a variable source answers false, which changes the interval splitting, the absence bounding and the batching order of the daily job |
+| Which fields make a version recompute its day book | the working schedule and the generation source | A package whose own field changes the produced day book adds it |
+| Which fields a nullifying write sets | the archived flag | A country package adds its own fields |
+| Whether a row is measured against the theoretical schedule | true when the kind carries the absence flag | The absence companion widens it to rows that name a kind and carry an absence link |
+| Which fields are copied from a contract template | the platform's own list | This domain adds the generation source, so that a template can carry it |
+| The values produced for a version over a window | the attendance, worked-absence and absence rows of [calculations.md, chapter 6](calculations.md#6-the-generation-algorithm-step-by-step) | The French companion appends the gap-filling rows of [calculations.md, chapter 13](calculations.md#13-the-gap-filling-rule-for-french-part-time-absences) |
+| The real attendance intervals | the attendance intervals minus the absences and the worked absences | An attendance-based package adds overtime intervals here |
+| The set of exclusions to read | those of the version's schedule, or of no schedule | The absence companion widens it to exclusions whose absence request belongs to one of the employees, whatever schedule they name |
+| The outside-schedule conflict test | the whole-day intersection test of rule [`WKE-022`](business-rules.md#5-the-four-conflict-conditions) | The French companion exempts part-time employees from it |
+
+Two further extension surfaces are not delegated decisions but shared fields, and are listed for
+completeness:
+
+1. The group headed "Time Off Options" on the work entry kind form, into which a bridging package
+   inserts the fields it adds to the kind. The absence companion inserts the reverse collection of
+   absence kinds that produce this work entry kind.
+2. The reverse collection itself, which lets a person open a work entry kind and see every absence
+   kind that produces it. Its help text reads "Work entry used in the payslip."

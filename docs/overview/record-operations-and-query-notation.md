@@ -1169,7 +1169,7 @@ The column paths are: the external identifier; the name; the external identifier
 
 ## 22. Reconciliation notes
 
-Five decisions about the shape of this document are recorded so that a reader who expects a subject elsewhere can find it, and so that a rebuild knows which of two plausible readings was verified against the running system.
+Five decisions about the shape of this document are recorded so that a reader who expects a subject elsewhere can find it, and so that a rebuild knows, where two readings are plausible, which one is recorded as observed.
 
 1. **Where the filter grammar lives.** The grammar could sit with the fields it constrains or here. It is here, because this document is where every operation that consumes a filter is specified and because the grammar is longer than the rest of that document's field material put together. [The entity and field system, section 20](entity-and-field-system.md#20-the-filter-grammar) keeps the definition of a filter, the two notations at a glance and the three forms in which a filter is stored, and links here for the operators, the empty-value rules, the optimisation stages and the per-type semantics. No rule is stated twice.
 2. **The operator set.** Each operator is given twice over: its transport spelling is reproduced in code font, because a caller writes it literally, and its meaning is stated in words. Neither form alone is enough for a rebuild.
