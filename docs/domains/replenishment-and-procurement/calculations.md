@@ -581,7 +581,7 @@ delay_alert_date = max( scheduled date of the origin moves that are not done )
 
 ## 18. The "take from stock, otherwise trigger another rule" split
 
-For a move whose rule's supply method is `make_to_stock_else_make_to_order`, at confirmation:
+For a move whose rule's supply method is `mts_else_mto` (make to stock, else make to order), at confirmation:
 
 ```
 when move real quantity ≤ 0 or the move's source location bypasses reservation:
@@ -719,8 +719,8 @@ receipt_late  = incoming move is not done and its date < now
 | `three_months` | now minus 3 months | now |
 | `one_year` | now minus 1 year | now |
 | `last_year` | the first day of the current month of last year | start plus 1 month |
-| `last_year_next_month` | the first day of the current month of last year plus 1 month | start plus 1 month |
-| `last_year_month_after_next` | the first day of the current month of last year plus 2 months | start plus 1 month |
+| `last_year_2` | the first day of the current month of last year plus 1 month | start plus 1 month |
+| `last_year_3` | the first day of the current month of last year plus 2 months | start plus 1 month |
 | `last_year_quarter` | the first day of the current month of last year | start plus 3 months |
 
 **Step 2: the quantities.** Over the stock moves of the product in the rule's company whose state is `assigned`, `confirmed`, `partially_available` or `done` and whose date lies between the start date and the end of the limit date:
@@ -897,8 +897,8 @@ Period:
 | `three_months` | now minus 3 months | end of today | 3 |
 | `one_year` | now minus 1 year | end of today | 12 |
 | `last_year` | the first day of the current month of last year | start plus 1 month | 1 |
-| `last_year_next_month` | that day plus 1 month | start plus 1 month | 1 |
-| `last_year_month_after_next` | that day plus 2 months | start plus 1 month | 1 |
+| `last_year_m_plus_1` | that day plus 1 month | start plus 1 month | 1 |
+| `last_year_m_plus_2` | that day plus 2 months | start plus 1 month | 1 |
 | `last_year_quarter` | the first day of the current month of last year | start plus 3 months | 3 |
 
 Moves counted: state `waiting`, `assigned`, `confirmed`, `partially_available` or `done`, date in the period, and:
@@ -1009,7 +1009,7 @@ when action is pull or pull_push, direct_destination exists and location_destina
     suffix += "<br>The products will be moved towards <b>{direct_destination}</b>, <br/> as specified from <b>{operation}</b> destination."
 when procure_method = make_to_order and location_source is set:
     suffix += "<br>A need is created in <b>{source}</b> and a rule will be triggered to fulfill it."
-when procure_method = make_to_stock_else_make_to_order and location_source is set:
+when procure_method = mts_else_mto and location_source is set:
     suffix += "<br>If the products are not available in <b>{source}</b>, a rule will be triggered to bring the missing quantity in this location."
 ```
 

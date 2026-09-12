@@ -8,7 +8,7 @@ Sixteen end-to-end procedures. Each step states what it reads, what it creates o
 
 1. The administrator opens the dashboards configuration list, reached from the dashboards menu, configuration submenu, dashboards entry.
 2. The list shows every Dashboard Group, ordered by `sequence` then by identifier, each row showing a drag handle — offered only to a technical user — and the name.
-3. Creating a row creates one Dashboard Group. The name is required; an empty name is refused by rule [SD-003](business-rules.md#sd-003).
+3. Creating a row creates one Dashboard Group. The name is required; an empty name is refused by rule [SD-006](business-rules.md#sd-006).
 4. Dragging a row rewrites the `sequence` of the moved row and of the rows it passed, so that the stored order matches the shown order.
 5. Opening a row opens the group form: the name as a heading, and one page named "Spreadsheets" holding the group's dashboards in the dashboard list presentation.
 6. Deleting a row runs the guard of [`entities.md`](entities.md) §4.4. A group shipped by a capability package is refused by rule [SD-009](business-rules.md#sd-009). A group still holding dashboards is refused by the storage rule that protects the link, rule [SD-010](business-rules.md#sd-010).
@@ -221,7 +221,7 @@ Changing a pivot's definition reloads its data only when the change can alter th
 
 **Actor.** Any internal user.
 
-1. The user opens an ordinary view — a list, a chart, a pivot — narrows it with the search controls, and asks for it to be added to the personal board, giving it a name.
+1. The user opens an ordinary view — a list, a chart, a pivot — narrows it with the search controls, and asks for it to be pinned onto the personal board, giving it a name.
 2. The request carries: the window action's identifier, the context to remember, the record selection, the presentation kinds to offer, and the name.
 3. The board's shipped action is read with elevated rights. The procedure continues only when that action exists, addresses the board entity, offers a form as its first presentation, and an action identifier was supplied; otherwise the request answers negatively and nothing is stored.
 4. The board layout is read for this user, already merged with any existing customisation and already preprocessed.
@@ -229,9 +229,39 @@ Changing a pivot's definition reloads its data only when the change can alter th
 6. The remembered context has the active-companies key removed, so that the pinned element follows the companies the reader has active at reading time rather than those active at pinning time.
 7. A pinned-action element is inserted at the top of that column, carrying the action identifier, the name, the presentation kinds, the context and the record selection.
 8. The whole layout is stored as a new Custom View record owned by this user and referring to the shipped board view, written with elevated rights. The request answers positively.
-9. Opening the board afterwards reads the newest such record for this user — the search takes one record — and returns its layout in place of the shipped one, after the preprocessing of [`entities.md`](entities.md) §6.4.
+9. Opening the board afterwards reads the newest such record for this user — the search takes one record, and Custom View records are ordered by creation moment descending and then by identifier descending, so the one taken is the most recently created — and returns its layout in place of the shipped one, after the preprocessing of [`entities.md`](entities.md) §6.4, together with the identifier of that record so that later edits know which record to rewrite.
 
-**Note.** Each addition stores a further Custom View record rather than replacing the previous one, and the board reads one of them. Removing a pinned element, or resetting the board, is done by deleting those records.
+**Note.** Each pinning from another screen stores a *further* Custom View record rather than rewriting the previous one, and the board always reads the newest. Every edit made from the board itself, by contrast, rewrites the record the board was read from (§15.2). Over time a heavy user therefore accumulates one record per pinning; only the newest is ever read. This is recorded as a **compatibility finding**: a corrected behaviour would rewrite the newest record when one exists and create one only when none does, so that the table does not grow without bound.
+
+### 15.1 Reading the board
+
+1. The board's window action opens the shipped board form.
+2. The layout is read: the newest Custom View record owned by this user and referring to that view, when there is one; otherwise the shipped layout.
+3. Every pinned element marked invisible is removed, at any depth.
+4. The root of the layout is marked so that the client instantiates the board presentation rather than an ordinary form.
+5. The layout is parsed into: a title, a layout style, a number of columns derived from that style, and three columns each holding an ordered list of pinned elements. Each pinned element carries a position number assigned in reading order, a title, a window action identifier, a presentation kind, a reading context, a record selection and a folded mark. The folded mark comes from a whole number on the element, zero meaning unfolded.
+6. A layout in which no pinned element was found is drawn as the empty board, with the three texts of [`interfaces.md`](interfaces.md) §4.2.
+7. Each pinned element loads its window action's definition once, by identifier, and caches it. An action identifier that resolves to nothing marks that element as not valid and it draws nothing.
+8. Each pinned element is drawn in the presentation its own kind names, or, when it names none, in the first presentation its action offers, without a control panel, and with row selectors suppressed in a list. Its reading context is merged with the reader's own language. A grouping key found in that context becomes the element's grouping. Its record selection, when it has one, narrows it.
+9. Selecting a record inside a pinned element opens that record in a form, using the form presentation of the pinned action when it offers one.
+
+### 15.2 Changing the board
+
+Five operations change a board, and every one of them ends the same way.
+
+| Operation | Effect on the layout |
+|---|---|
+| Drag a pinned element within its column | The element is removed from its position and re-inserted at the target position; a drag that lands where it started changes nothing and stores nothing |
+| Drag a pinned element into another column | The element is removed from the source column and inserted at the target position of the target column |
+| Fold or unfold a pinned element | The element's folded mark is flipped; the element's body stops or starts being drawn. On a small screen the flip is not stored |
+| Remove a pinned element | The reader is asked to confirm; on confirmation the element is removed from its column |
+| Change the layout style | The style becomes one of the five offered; when the new style has fewer columns than the current one, the elements of every column that disappears are appended, in order, to the last column that remains |
+
+The common ending: the whole board — its title, its layout style, its columns and every pinned element with its title, action identifier, presentation kind, context, record selection and folded mark — is serialised back into a layout description and written to the platform's custom-view update address, naming the Custom View record the board was read from. The platform refuses the write when that record belongs to another user. The client's cached view definitions are then cleared, so that the next read sees the new layout.
+
+A board that has never been customised is never asked to store anything, because the layout control and the per-element controls are drawn only once at least one element is pinned, and pinning always creates the record.
+
+On a small screen the board is forced to the single-column style without storing anything, and the removal control is not offered.
 
 ## 16. Logging an export of data
 

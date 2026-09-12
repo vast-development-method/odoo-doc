@@ -1606,11 +1606,19 @@ because that absence covered them:
 
 | Formula | Used by |
 |---|---|
-| §1 cost | [entities.md](entities.md) §1.4.4; [accounting-effects.md](accounting-effects.md) §2; [business-rules.md](business-rules.md) TS-030 |
-| §2.4 project total | project screens, §5.6, §5.7 |
-| §4 binding | [workflows.md](workflows.md) §4 to §6; [state-machines.md](state-machines.md) §2 |
-| §6.2 delivered quantity | [workflows.md](workflows.md) §7 |
-| §6.6 period quantity | [workflows.md](workflows.md) §8 |
-| §6.7 upselling | [workflows.md](workflows.md) §9 |
+| §1 cost | [entities.md](entities.md) §1.4.4; [accounting-effects.md](accounting-effects.md) §2; [business-rules.md](business-rules.md) TS-008 |
+| §2.2 to §2.3 conversion | every aggregate below; [interfaces.md](interfaces.md) §9 |
+| §2.4 project total | project screens, §5.6, §5.7; [acceptance-criteria.md](acceptance-criteria.md) H5 to H7 |
+| §2.5 total recorded duration | the "Recorded" stat buttons of [interfaces.md](interfaces.md) §5.9 |
+| §2.6 to §2.8 display suffixes | [interfaces.md](interfaces.md) §3.8, §9.2, §9.3 |
+| §3 encoding | [configuration.md](configuration.md) §7; [interfaces.md](interfaces.md) §9 |
+| §4 binding | [workflows.md](workflows.md) §5 to §7; [state-machines.md](state-machines.md) §1 and §2 |
+| §5 aggregates | [entities.md](entities.md) §7 and §8; [interfaces.md](interfaces.md) §5.1 and §5.3 |
+| §6.2 delivered quantity | [workflows.md](workflows.md) §8 |
+| §6.6 period quantity | [workflows.md](workflows.md) §9 |
+| §6.7 upselling | [workflows.md](workflows.md) §10; [business-rules.md](business-rules.md) TS-170 |
 | §7 classification | [interfaces.md](interfaces.md) §4; profitability panel |
-| §11 absence sizing | [workflows.md](workflows.md) §10 |
+| §8 analysis rows | [interfaces.md](interfaces.md) §4.1; [acceptance-criteria.md](acceptance-criteria.md) section O |
+| §9 comparison rows | [interfaces.md](interfaces.md) §4.2; [acceptance-criteria.md](acceptance-criteria.md) section P |
+| §10 margin cost per unit | [business-rules.md](business-rules.md) TS-173; [acceptance-criteria.md](acceptance-criteria.md) section Q |
+| §11 absence sizing | [workflows.md](workflows.md) §11 |

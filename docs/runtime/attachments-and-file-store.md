@@ -172,7 +172,7 @@ Reduction applies when the media type belongs to the image family, its subtype i
 
 1. If the bounding box reads as false, stop.
 2. Decode the image without verifying its resolution.
-3. If it decoded to nothing, which happens for empty content, for vector images and for the modern web format, log `Post processing ignored : Empty source, SVG, or WEBP` and stop.
+3. If it decoded to nothing, which happens for empty content, for vector images and for the modern web format, log the line "Post processing ignored : Empty source, SVG, or WEBP" and stop.
 4. Take the image width and height, and the bounding width and height from the parameter.
 5. If the width exceeds the bounding width or the height exceeds the bounding height, resize the image to fit inside the bounding box, preserving the aspect ratio and never enlarging.
 6. Choose the quality: the configured quality when the subtype is the lossy one, and zero otherwise. Zero means that the encoder's own default is used and that a palette is not touched, which is what keeps a palette image lossless.
@@ -559,7 +559,7 @@ Ten records each receive the same 500 000-byte document in one operation.
 11. **Given** an image of 4 000 by 3 000 pixels in the lossy format with the default settings, **when** it is uploaded, **then** the stored content is 1 920 by 1 440 pixels re-encoded at quality 80.
 12. **Given** an image of 1 600 by 1 200 pixels, **when** it is uploaded with the default settings, **then** the original bytes are stored unchanged.
 13. **Given** the same 4 000 by 3 000 image and a bounding-box parameter that reads as false, **when** it is uploaded, **then** the original bytes are stored unchanged.
-14. **Given** a vector image or one in the modern web format, **when** it is uploaded, **then** it is stored unchanged and the line `Post processing ignored : Empty source, SVG, or WEBP` is logged.
+14. **Given** a vector image or one in the modern web format, **when** it is uploaded, **then** it is stored unchanged and the line "Post processing ignored : Empty source, SVG, or WEBP" is logged.
 15. **Given** a palette image above the bounding box, **when** it is reduced, **then** the quality is zero, so the encoder's default is used and the palette is not altered.
 16. **Given** a markup document uploaded by a user who may not write view definitions, **when** it is stored, **then** its media type is `text/plain`.
 17. **Given** the same document uploaded by a user who may write view definitions, **when** it is stored, **then** its media type is the markup type.

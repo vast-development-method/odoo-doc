@@ -105,11 +105,13 @@ the unit cost of *Mileage* has been set to **0.30** per kilometre by an administ
 | Person | User | Employee | Rights | Notes |
 |---|---|---|---|---|
 | **Dana Okwu** | `dana` | yes | internal user only | Work contact *Dana Okwu*, payable account `400000`, primary bank account, department *Field Services*, designated expense approver **Priya Raman** |
-| **Sam Rhee** | `sam` | yes | internal user only | Work contact *Sam Rhee*, payable account `400000`, department *Field Services*, **no** designated expense approver |
+| **Sam Rhee** | `sam` | yes | internal user only | Work contact *Sam Rhee*, payable account `400000`, **no** department, **no** designated expense approver — so no responsible approver can be computed for him |
 | **Kit Bauer** | none | yes | — | Work electronic-mail address only, **no** user, **no** designated expense approver |
 | **Priya Raman** | `priya` | yes | Team Approver | Manager of the department *Field Services* |
 | **Lee Novak** | `lee` | yes | All Approver | |
 | **Morgan Fell** | `morgan` | yes | expenses Administrator **and** the accounting right to create journal entries | |
+| **Robin Ashe** | `robin` | yes | internal user only | Work contact *Robin Ashe*, department *Logistics* whose manager is Priya Raman, designated expense approver **Priya Raman** |
+| **Alex Vidal** | `alex` | yes | Team Approver | Manages no department, approves nobody by designation, and is not an All Approver |
 
 The user partner of Dana Okwu hangs under Northwind's own contact record; this is deliberate and is
 what rule EXP-EXT-1 exists to handle.
@@ -433,16 +435,36 @@ base amount of the taxes after it, followed by tax *B* of five per cent.
 `106.493506494… + 10.649350649… = 117.142857143…`; tax *B* is
 `round_to(Euro, 117.142857143… × 0.05) = 5.86`; and `10.65 + 5.86 = 16.51 = 123.00 − 106.49`.
 
-### EXP-AC-21 — A fixed-amount tax is subtracted before the percentage divisor
+### EXP-AC-21 — A fixed-amount tax, and where the record and its entry disagree
 
-**Given** a category with no unit cost carrying a fixed tax of **0.50 per unit** and no percentage
-tax, and an expense of quantity **4**.
+**Given** the category *Office Furniture* with a unit cost of **5.00** per unit, carrying a single
+fixed purchase tax of **0.50 per unit** and no percentage tax, and an expense of Dana Okwu with a
+quantity of **4**.
 
-**When** Dana Okwu records a total of **20.00**.
+**When** the amounts settle.
 
-**Then** the fixed tax removes `4 × 0.50 = 2.00` from the total, the untaxed amount is **18.00**
-and the tax amount is **2.00**. Had a percentage tax also been present, the remaining 18.00 would
-have been the figure the percentage divisor was applied to.
+**Then** the total in receipt currency is `round_to(Euro, 4 × 5.00) = 20.00`; the expense's own tax
+amount is **0.50**, and its untaxed amount is **19.50**, because the base line used for the
+expense's own tax fields always carries a quantity of **one** and a unit price equal to the total.
+
+**And when** Morgan Fell posts the expense as an employee-paid receipt, the product line carries
+quantity **4** and unit price **5.00**, so its fixed tax is applied **once per unit** and the entry
+reads:
+
+| # | Label | Account | Debit | Credit |
+|---|---|---|---|---|
+| 1 | Dana Okwu: «description» | `600100` | **18.00** | |
+| 2 | the fixed tax | `131000` | **2.00** | |
+| 3 | *(empty)* | `400000` | | **20.00** |
+
+The record says 0.50 of tax and its entry says 2.00. This is the **compatibility finding** of
+[`calculations.md`](calculations.md) §4.5; a rebuild must reproduce both figures. Had a percentage
+tax also been present on the entry's product line, the remaining 18.00 would have been the figure
+its divisor was applied to.
+
+**And when** the same expense is posted as **company-paid**, its base line carries quantity **1**
+and a unit price equal to the total, so the entry's fixed tax is **0.50** and the base line is
+19.50 — matching the record, and differing from the employee-paid entry.
 
 ### EXP-AC-22 — A tax line that rounds to zero is dropped
 
@@ -618,9 +640,9 @@ EXP-AMT-1) and the status stays *Draft*.
 
 ### EXP-AC-33 — Automatic validation when the employee has no approver
 
-**Given** Sam Rhee, who has **no** designated expense approver, and whose department manager slot
-is empty for the purposes of this scenario, with a draft expense of 100.00 whose manager field is
-empty.
+**Given** Sam Rhee, who has **no** designated expense approver and **no** department, with a draft
+expense of 100.00 whose manager field is empty — so the responsible-approver algorithm returns
+nothing.
 
 **When** Sam Rhee presses *Submit*.
 
@@ -639,8 +661,8 @@ deliberately **not** run on this path.
 
 ### EXP-AC-35 — Submission by someone who is neither the employee nor an approver
 
-**Given** the draft expense of Dana Okwu from EXP-AC-3, and a second internal user *Robin Ashe*
-who is neither Dana Okwu, nor a Team Approver, nor Dana Okwu's designated approver.
+**Given** the draft expense of Dana Okwu from EXP-AC-3, and Robin Ashe, who is neither Dana Okwu,
+nor a Team Approver, nor Dana Okwu's designated approver.
 
 **When** Robin Ashe presses *Submit* on it.
 
@@ -675,9 +697,9 @@ EXP-PRM-2. The status stays *Submitted*.
 
 ### EXP-AC-38 — A team approver may not approve an employee they do not manage
 
-**Given** an employee *Robin Ashe* whose designated expense approver is Priya Raman, a submitted
-expense of Robin Ashe, and a second Team Approver *Alex Vidal* who is neither Robin Ashe's
-approver, nor the manager of Robin Ashe's department, nor an All Approver.
+**Given** a submitted expense of Robin Ashe, whose designated expense approver is Priya Raman, and
+the Team Approver *Alex Vidal*, who is neither Robin Ashe's approver, nor the manager of Robin
+Ashe's department, nor an All Approver, and for whom Robin Ashe is not a subordinate.
 
 **When** Alex Vidal presses *Approve*.
 
@@ -1475,16 +1497,33 @@ a locked Sales Order."* (rule EXP-REB-1).
 **Then** the "can be rebilled" flag becomes false and the sales order reference is **cleared**
 (rule EXP-REB-2), so posting produces no rebilling line.
 
-### EXP-AC-95 — The margin of a rebilling line
+### EXP-AC-95 — The margin of a rebilling line, and the rounded division
 
 **Given** the rebilling line of EXP-AC-86 — unit price 55.00, quantity 11.30, produced by an
-expense whose untaxed company-currency amount is 621.50 — and the expense-margin capability active.
+expense whose stored untaxed amount in its receipt currency is 621.50, the receipt currency being
+Euro — and the expense-margin capability active.
 
 **Then** the line's cost per unit is `621.50 ÷ 11.30 = 55.00` and its margin is
 `(55.00 − 55.00) × 11.30 = 0.00`.
 
 **And given** the *at sales price* variant of EXP-AC-87, the line carries price 80.00, cost 55.00
 and a margin of `(80.00 − 55.00) × 11.30 = 282.50`.
+
+**And given** four further rebilled expenses on a confirmed order in Euro, the cost per unit is the
+**stored, already rounded** untaxed amount divided by the quantity:
+
+| Expense | Receipt total | Tax | Stored untaxed amount | Quantity | Cost per unit |
+|---|---|---|---|---|---|
+| amount-driven, taxed at fifteen per cent | 100.00 | *Purchase 15 %* | 86.96 | 1 | **86.96** |
+| amount-driven, untaxed | 100.00 | none | 100.00 | 1 | **100.00** |
+| quantity-driven, unit cost 1 000.00, taxed at fifteen per cent | 3 000.00 | *Purchase 15 %* | 2 608.70 | 3 | **869.5666667** |
+| quantity-driven, unit cost 1 000.00, untaxed | 5 000.00 | none | 5 000.00 | 5 | **1 000.00** |
+
+The third row is the rounding edge: `2 608.70 ÷ 3 = 869.566666…`, whereas dividing the exact
+untaxed figure would give `3 000.00 ÷ 1.15 ÷ 3 = 869.565217…`. The stored cost is **869.5666667**,
+and a rebuild that divides the unrounded figure will disagree in the third decimal. The ordinary
+order line of the same order, not produced by an expense, keeps its own cost of 1 000.00 and is not
+flagged as an expense line.
 
 ### EXP-AC-96 — A company-paid expense is rebilled too
 
@@ -1584,40 +1623,52 @@ carries none unless the tax is flagged as analytic; and the outstanding line of 
 
 ### EXP-AC-104 — An employee may not create an expense for someone else
 
-**Given** Dana Okwu, an internal user with no expense right, and an employee record *Robin Ashe*
-that is neither Dana Okwu's nor a subordinate of Dana Okwu's.
+**Given** Dana Okwu, an internal user with no expense right, and the employee record *Robin Ashe*,
+which is neither Dana Okwu's own nor a subordinate of Dana Okwu's.
 
 **When** Dana Okwu creates an expense naming *Robin Ashe* as its employee.
 
 **Then** the creation fails on the record rules of rule EXP-PRM-5: the employee selector is
 restricted to the employees Dana Okwu may encode for, and the write is refused.
 
-### EXP-AC-105 — An employee may not write the status directly
+### EXP-AC-105 — An employee may not approve by writing the status
 
 **Given** a draft expense of Dana Okwu.
 
 **When** Dana Okwu writes the status field as `approved`.
 
-**Then** the write is refused with
-*"You cannot edit the security fields of an expense manually"* (rule EXP-PRM-7).
+**Then** the write is refused: the approval test runs after the write and raises
+*"You cannot approve:"* followed by *"«expense description»: It is your own expense"* (rules
+EXP-LIF-7 and EXP-PRM-9), and the whole write is undone.
 
-**And when** Dana Okwu writes the status field as `draft`, the write **succeeds** — writing the
-value the record already holds is not a security change.
+**And when** Dana Okwu writes the status field as `draft`, the write **succeeds**: the read-only
+record rule permits it and the status is recomputed from the approval state anyway.
+
+**And when** anyone writes the editability flag, the approvability flag or the name `can_refuse`,
+the write is refused with
+*"You cannot edit the security fields of an expense manually"* (rule EXP-PRM-7). The reset flag
+`can_reset` is **not** named in that guard — a **compatibility finding** — but the storage layer
+still refuses to write it, because it is a computed field with no write-back rule.
 
 ### EXP-AC-106 — An expense stops being editable once it leaves draft
 
-**Given** a draft expense of Dana Okwu.
+**Given** an expense of Dana Okwu, whose designated expense approver is Priya Raman, taken through
+every status in turn.
 
-| Actor | Status | Editable? |
-|---|---|---|
-| Dana Okwu (the employee) | Draft | yes |
-| Dana Okwu | Submitted | no |
-| Priya Raman (the manager on the expense) | Submitted | yes |
-| Priya Raman | Approved | no |
-| Morgan Fell (Administrator) | Approved | yes |
-| Morgan Fell | Posted | no |
+| Actor | Draft | Submitted | Approved | Refused | Posted, In Payment, Paid |
+|---|---|---|---|---|---|
+| Dana Okwu, the employee | **yes** | no | no | no | no |
+| Priya Raman, a manager of this expense | **yes** | **yes** | **yes** | no | no |
+| Lee Novak, All Approver | **yes** | **yes** | **yes** | no | no |
+| Morgan Fell, Administrator, on this expense | **yes** | **yes** | **yes** | no | no |
+| Morgan Fell, Administrator, on **his own** expense | **yes** | **yes** | **yes** | no | no |
+| Robin Ashe, an unrelated internal user | no | no | no | no | no |
 
-**Then** attempting to write a consequential field outside the editable window is refused with
+**And** an expense with **no** company is editable by nobody, whatever the status, so that an
+interface edit which momentarily empties the required company cannot make fields look editable.
+
+**Then** attempting to write a consequential field — the tax set, the analytic distribution, the
+account or the manager — outside the editable window is refused with
 *"Uh-oh! You can’t edit this expense.*
 *Reach out to the administrators, flash your best smile, and see if they'll grant you the magical
 access you seek."* (rule EXP-PRM-8), reproduced verbatim including its typographic apostrophe.

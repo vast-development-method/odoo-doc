@@ -414,11 +414,29 @@ total   = 123.00 ;  tax total = 123.00 − 106.49 = 16.51 ;  10.65 + 5.86 = 16.5
 
 | Tax kind | Behaviour on an expense |
 |---|---|
-| Fixed amount per unit | The fixed amount is **subtracted** from the total before the percentage divisor is applied, because the mode is total-included. A fixed tax of 0.50 per unit on a quantity of 4 removes 2.00 from the total and leaves the remainder to the percentage taxes. |
+| Fixed amount per unit | The fixed amount, multiplied by the quantity of the base line it is applied to, is **subtracted** from the total before the percentage divisor is applied, because the mode is total-included. See the note on the quantity below: the base line the expense uses for its own tax fields always carries a quantity of **one**, so a fixed tax removes its amount once there, whereas the journal item of an employee-paid expense carries the real quantity and removes it once per unit. |
 | Percentage of price | §4.2 to §4.4. |
 | Percentage of price, tax included by declaration | Identical to §4.2; the forced mode changes nothing, because the tax already behaves that way. |
 | Group of taxes | Expanded into the taxes it contains, each treated by its own kind and in the group's order; the divisor is built from the expanded list. |
 | Tax with several distribution lines | One tax line per distribution line (§4.6). The base and the total tax are unaffected. |
+
+**The quantity of the base line, and why it differs between the record and its entry.** Three
+different base lines are built from one expense, and they do not all carry the same quantity:
+
+| Base line | Unit price | Quantity | What it produces |
+|---|---|---|---|
+| The total of a quantity-driven expense (§2.2) | the expense's unit price | the expense's **quantity** | `total_amount_currency` |
+| The expense's own tax and untaxed fields (§4.7) | the expense's **total** | **1** | `tax_amount_currency`, `untaxed_amount_currency`, `tax_amount`, `untaxed_amount` |
+| The product line of an **employee-paid** journal entry | the expense's unit price | the expense's **quantity**, or 1 when the quantity is zero | the entry's tax lines |
+| The base line of a **company-paid** journal entry | the expense's **total** in receipt currency | **1** | that entry's tax lines |
+
+For a percentage tax the difference is invisible, because a percentage of `quantity × unit price`
+equals a percentage of the total. For a **fixed amount per unit** it is not: an expense of quantity
+4 bearing a fixed tax of 0.50 per unit shows a tax amount of **0.50** on the record, because its own
+base line has a quantity of one, while the employee-paid journal entry it produces carries a tax
+line of **2.00**, because its product line has a quantity of four. This is a **compatibility
+finding**; a corrected behaviour would build the record's own base line with the expense's
+quantity, so that the record and its entry agree.
 
 The complete tax engine, including negative distribution factors, tax report tags, tax
 exigibility and the ordering of taxes by sequence, is specified in

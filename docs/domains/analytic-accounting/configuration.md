@@ -219,7 +219,9 @@ analytic lines of the documents shared with them. Those rules belong to
 ## 9. Record rules
 
 Four **global** rules are shipped. Global means they apply to every reader, administrators
-included, and cannot be switched off by granting a group.
+included, and cannot be switched off by granting a group. The mechanics of groups, access rights
+and record rules are described in
+[../../overview/security-model.md](../../overview/security-model.md).
 
 | Entity | A record is visible when | Rule identifier in [business-rules.md](business-rules.md) |
 |---|---|---|
@@ -279,7 +281,8 @@ prerequisite, not an optimisation, except where the row says otherwise.
    and deletion of a plan. The platform must be able to add a stored link column with a partial
    index and a restricting deletion rule, to add a derived read-only relation field with a
    traversal path, and to remove both again. This is the single most demanding prerequisite of the
-   domain; the contract is specified in [entities.md](entities.md) section 3.
+   domain; the contract is specified in [entities.md](entities.md) section 3, and the field system
+   it relies on in [../../overview/entity-and-field-system.md](../../overview/entity-and-field-system.md).
 2. **Stored view definitions that can refuse a deletion.** Deleting a plan whose column is still
    named by a stored view definition must be refused with "Cannot rename/delete fields that are
    still present in views:" followed by the field list and the view name, and nothing at all may be
@@ -287,13 +290,16 @@ prerequisite, not an optimisation, except where the row says otherwise.
 3. **View patching at read time.** A view containing the base plan's column must gain one column
    per other root plan, and a grouping filter on that column must gain one filter per root plan and
    per sub-plan depth, without the stored definition being modified ([entities.md](entities.md)
-   section 9.4).
+   section 9.4). The view and action machinery is described in
+   [../../overview/views-and-actions.md](../../overview/views-and-actions.md).
 4. **A per-company stored value** for the default applicability of a plan: one value per company for
    the same record, with a system-wide default (`AA-019`).
 5. **Translatable text** for the name of a plan and the name of an analytic account.
 6. **A discussion thread** on Analytic Account, tracking four fields.
 7. **A transaction-scoped cache** for the answer to *which plans are relevant*, keyed by the exact
-   set of situation arguments and dropped by the operations of `AA-020`.
+   set of situation arguments and dropped by the operations of `AA-020`. The caching and
+   transaction rules are in [../../runtime/caching.md](../../runtime/caching.md) and
+   [../../runtime/transactions-and-concurrency.md](../../runtime/transactions-and-concurrency.md).
 8. **A generalised inverted index** over the account identifiers extracted from the keys of a stored
    distribution, on every entity that stores one (`AA-052`). Without it, "which documents mention
    this analytic account" scans every row; the behaviour is unchanged, the cost is not.

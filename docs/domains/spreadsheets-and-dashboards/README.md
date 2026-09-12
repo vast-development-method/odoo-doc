@@ -133,10 +133,10 @@ The extensions this domain adds to those entities — six new operations on Acco
 | [`state-machines.md`](state-machines.md) | Publication, favourite mark, dashboard rendering status, data-source status, sample-versus-live presentation, share-link reachability, and global-filter value state, each with states, transitions, guards and a diagram |
 | [`global-filters.md`](global-filters.md) | The six filter kinds, every operator, every value shape, default values, the record-selection rule each produces, the field matching, the period offset, and the filter sheet written on export |
 | [`workflows.md`](workflows.md) | Sixteen numbered end-to-end procedures with the records each step creates or changes and the failures each step can raise |
-| [`business-rules.md`](business-rules.md) | Fifty-one numbered rules with exact messages, plus the permission matrix, the locking position and the rule index |
-| [`calculations.md`](calculations.md) | Nineteen calculation families with quantities named in words, evaluation order, rounding and worked numeric examples |
+| [`business-rules.md`](business-rules.md) | Sixty-six numbered rules with exact messages, plus the permission matrix, the locking position and the rule index |
+| [`calculations.md`](calculations.md) | Twenty calculation families with quantities named in words, evaluation order, rounding and worked numeric examples |
 | [`accounting-effects.md`](accounting-effects.md) | The reasoned statement that the domain posts nothing, the ledger data it reads, the correctness obligations that follow, and links to the domains that do post |
 | [`configuration.md`](configuration.md) | Privilege, group, access rights, record rules, menus, actions, views, shipped dashboard groups, shipped dashboards, the session capability flag, and the explicit absence of sequences, scheduled jobs, message templates and activity types |
 | [`interfaces.md`](interfaces.md) | Menus, views, client action, six routes, named operations, the complete formula surface, cell actions, printing, import and export |
-| [`acceptance-criteria.md`](acceptance-criteria.md) | Sixty-two numbered Given-When-Then scenarios with concrete records, inputs and results |
+| [`acceptance-criteria.md`](acceptance-criteria.md) | One hundred and twenty-five numbered Given-When-Then scenarios with concrete records, inputs and results |
 | [`glossary.md`](glossary.md) | Every term of the domain, defined |

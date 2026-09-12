@@ -587,7 +587,7 @@ term, and an employee-paid expense cannot be posted without one.
 
 | Not used | Because |
 |---|---|
-| *Expense report* | This domain has no report entity; an expense is posted individually and only the **journal entry** groups several of them. A field carrying an old report identifier survives on the record for reference and is inert. |
+| *Expense report* | This domain has no report entity; an expense is posted individually and only the **journal entry** groups several of them. The whole-number field `former_sheet_id`, labelled *Former Report*, lets expenses that were submitted together stay groupable by a common number; it references nothing and is never validated. |
 | *Expense sheet* | Same reason. |
 | *Approval workflow* | There is no configurable chain: there is one approval step, whose actor is decided by the four-branch permission test. |
 | *Advance* or *cash advance* | The domain has no advance entity. An employee-paid expense is an advance in substance, and the payable line is how it is tracked. |

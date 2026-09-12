@@ -431,7 +431,7 @@ specification records the absence of a defined behaviour and marks the resolutio
 
 ## 11. Machine K — the absence request, seen from this domain
 
-The absence request's own machine belongs to [Time Off](../time-off/README.md). Only the states this
+The absence request's own machine belongs to [Time Off](../time-off/). Only the states this
 domain reacts to are restated, with the effect each transition has here.
 
 | Absence request state | Effect on recorded lines |

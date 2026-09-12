@@ -255,7 +255,7 @@ When the order is confirmed.
 Then the delivery move and the origin move are created and no access-rights error is raised.
 
 **AC-075 The take-from-stock-otherwise split orders only the missing part (`RP-RULE-142`).**
-Given a rule whose supply method is `make_to_stock_else_make_to_order`, and 12 free units of `P` at its source location, and two moves of 10 units each confirmed in the same batch.
+Given a rule whose supply method is `mts_else_mto` (make to stock, else make to order), and 12 free units of `P` at its source location, and two moves of 10 units each confirmed in the same batch.
 When the batch is confirmed.
 Then one supply need for 8 units is created, and neither move is linked to the resulting document.
 
@@ -1180,7 +1180,7 @@ Then the pull request creates its move, the buy request fails, and the collected
 ## 27. The pull action details
 
 **AC-458 The supply method of a split rule is written as take-from-stock (`RP-RULE-081`).**
-Given a rule whose `procure_method` is `make_to_stock_else_make_to_order`.
+Given a rule whose `procure_method` is `mts_else_mto`.
 When it creates a move.
 Then the move's `procure_method` is `make_to_stock`.
 
@@ -1366,7 +1366,7 @@ Then the need created origin is for 10 units, not for zero.
 Given a move `M` of 10 units whose rule's supply method is `make_to_order`.
 When `M` is confirmed.
 Then the created need carries `M` in `values.move_destinations`.
-Given instead a move whose rule's supply method is `make_to_stock_else_make_to_order` and a shortage of 8 units.
+Given instead a move whose rule's supply method is `mts_else_mto` and a shortage of 8 units.
 Then the created need for 8 units carries no downstream move.
 
 **AC-487 The partner of a need comes from the transit warehouse (`RP-RULE-144`).**
@@ -1427,7 +1427,7 @@ When the supply method of the move is adjusted.
 Then the move's supply method becomes `make_to_stock` and its `rule` stays empty.
 
 **AC-496 A split rule is written as take from stock on an existing move (`RP-RULE-153`).**
-Given a move whose adjusted rule has supply method `make_to_stock_else_make_to_order`.
+Given a move whose adjusted rule has supply method `mts_else_mto`.
 When the supply method is adjusted.
 Then the rule is written on the move and the move's supply method becomes `make_to_stock`.
 Given instead a rule with supply method `make_to_order`.

@@ -497,12 +497,13 @@ and it is contributed by the general ledger capability.
 
 | Aspect | Behaviour |
 |---|---|
-| Export | Every entity of this domain is exportable through the platform's record export, which writes the chosen fields of the chosen records. The fiscal-year search helper of Analytic Line is excluded from the exportable fields, because it is a search helper with no value of its own. |
+| Export | Every entity of this domain is exportable through the platform's record export, which writes the chosen fields of the chosen records. Two kinds of field are excluded from the exportable set: the fiscal-year search helper of Analytic Line, because it is a search helper with no value of its own; and the derived grouping keys of Journal Item that the general ledger capability uses to build the tax lines, the early payment discount lines and the discount allocation lines, whose distributions this domain propagates. |
 | Import of analytic lines | Supported through the platform's record import. Creating an analytic line that points at a journal item rebuilds that journal item's distribution (`AA-093`); creating one on a journal item of a **draft** entry is allowed and the line is consumed and then deleted, because a draft entry never owns analytic lines (`AA-073`). The procedure is workflow 22 of [workflows.md](workflows.md). |
 | Import of a distribution | A distribution is a structured document; importing it writes the document as supplied, then normalises every percentage to the percentage precision (`AA-041`). An imported document carrying the reserved key `__update__` (the partial-update marker) triggers the merge instead of a replacement (`AA-043`). |
 | Import of plans and accounts | Ordinary. A plan created by an import creates its stored column exactly as a plan created by hand does, so importing a list of plans reshapes the analytic line table. |
 | Loading template | Analytic Line accepts the file-loading template contributed by the timesheets domain, used to load timesheet lines. |
 | Exchange formats | None. This domain publishes no structured document format and takes part in no electronic exchange. |
+| Scheduled loading | None. No job of this domain imports or exports anything on a schedule; the domain owns no scheduled job at all, as [configuration.md](configuration.md) section 11 states. |
 
 ---
 
@@ -546,9 +547,9 @@ The customer portal exposes analytic lines of the timesheet kind through the por
 1. **A single source, restructured.** Only one of the two drafts of this folder carried an
    interfaces document. Every row of it is kept. It described the screens as "workflows on
    presentations" and listed the screens and their stable paths in its configuration document; this
-   file uses the charter's division instead — menus, actions, views, operations, notifications,
-   import and export here, and settings, groups, rules and shipped records in
-   [configuration.md](configuration.md).
+   file uses the charter's division instead: menus, actions, views, operations, notifications and
+   the loading and unloading of records belong here, while settings, groups, rules and shipped
+   records belong in [configuration.md](configuration.md).
 2. **Operation names.** The former draft named each service operation by its internal identifier.
    The charter reproduces identifiers only where they are contractual — storage names, transport
    names, column names, stored values, route paths and message keys — so section 9 names each

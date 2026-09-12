@@ -132,7 +132,7 @@ Terms used in the Replenishment and Procurement domain, written in full words. A
 
 **Supply method.** The field of a Stock Rule that says where the goods come from: take from stock, trigger another rule, or take from stock and trigger another rule for the missing quantity only.
 
-**Take from stock, if unavailable, trigger another rule.** The supply method `make_to_stock_else_make_to_order`. The move itself takes from stock and keeps its full demand; only the missing quantity becomes a new, unlinked need.
+**Take from stock, if unavailable, trigger another rule.** The supply method `mts_else_mto` (make to stock, else make to order). The move itself takes from stock and keeps its full demand; only the missing quantity becomes a new, unlinked need.
 
 **Temporary reordering rule.** A rule created by the replenishment report under the superuser account with the trigger `manual`, a minimum of zero, a maximum of zero and the name `Replenishment Report`. It is deleted as soon as the shortage it describes is covered.
 
