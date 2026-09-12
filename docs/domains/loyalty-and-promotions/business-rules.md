@@ -1,8 +1,17 @@
 # Business rules
 
-The complete rule catalog of the Loyalty, Coupons and Promotions domain: validations, guards, permissions per operation, company and currency consistency rules, locking rules, uniqueness rules, rounding rules, date rules and the exact messages shown to the user. Every rule carries a stable number so that other documents can cite it.
+The complete rule catalogue of the Loyalty and Promotions domain: validations, guards, permissions
+per operation, company and currency consistency rules, locking rules, uniqueness rules, rounding
+rules, date rules and the exact text of every message shown to the user. Every rule carries a stable
+identifier of the form LOY-nnn, unique within this file, so that the other files of the folder can
+cite it. Section 17 indexes every identifier, and section 18 maps them back to the two schemes used
+before this folder was consolidated.
 
-A note on message wording: user-facing messages are reproduced exactly as the user sees them, except that the name of the reference product is removed and channel names that appear abbreviated are written in full ("point of sale" in place of the abbreviated form). Placeholders are written between angle brackets.
+A note on message wording: user-facing messages are reproduced exactly as the user sees them, in
+quotation marks, except that the name of the reference product is removed and channel names that
+appear abbreviated in the interface are written in full ("point of sale" in place of the abbreviated
+form). A placeholder inside a message is written between angle brackets and its content is described
+in words.
 
 ## 1. Program definition
 
@@ -206,13 +215,13 @@ A note on message wording: user-facing messages are reproduced exactly as the us
 
 **LOY-094** Confirming an order re-evaluates it first, so a reward that has become invalid is removed before the points move.
 
-**LOY-095** Confirming an order writes one Loyalty History Entry per card involved, carrying both the points granted and the points spent, with the description `Order <order display name>` and a reference to the order.
+**LOY-095** Confirming an order writes one Loyalty History movement per card involved, carrying both the points granted and the points spent, with the description `Order <order display name>` and a reference to the order.
 
 **LOY-096** Confirming a single order that still has claimable rewards shows an informational notification titled `Rewards Available` with the message `There are available rewards not added to this order.` The notification never blocks the confirmation.
 
 **LOY-097** Confirming an order sends the "at creation" communication of every card the order granted points to whose program has `applies_on` equal to `future`, with immediate delivery rather than queued delivery.
 
-**LOY-098** Cancelling a previously confirmed order deletes its history entries, reverses the point changes on every card, deletes its reward lines, deletes the non-nominative cards it created that were never used, and deletes its pending promises.
+**LOY-098** Cancelling a previously confirmed order deletes its history movements, reverses the point changes on every card, deletes its reward lines, deletes the non-nominative cards it created that were never used, and deletes its pending promises.
 
 **LOY-099** Duplicating an order deletes every reward line of the copy and copies neither the applied cards, nor the activated code rules, nor the pending promises.
 
@@ -224,7 +233,7 @@ A note on message wording: user-facing messages are reproduced exactly as the us
 
 **LOY-103** An order whose total including tax is zero and whose reward total is not zero is invoiced anyway when automatic invoicing is enabled: the lines are forced to the "ordered quantities" invoicing policy, the invoice is created and posted, and, when it is ready, it is marked as sent and dispatched with the configured invoice email template.
 
-**LOY-104** On a confirmed order, creating, rewriting or deleting a reward line moves the points on the card immediately and updates the order's history entry by the same amount.
+**LOY-104** On a confirmed order, creating, rewriting or deleting a reward line moves the points on the card immediately and updates the order's history movement by the same amount.
 
 **LOY-105** Deleting one line of a reward deletes every line of the same reward application.
 
@@ -252,15 +261,15 @@ A note on message wording: user-facing messages are reproduced exactly as the us
 
 ## 9. Permissions
 
-**LOY-116** No access is granted to any loyalty entity by the internal user group alone. Access is granted by the sales groups and by the point-of-sale groups; a deployment with neither installed exposes nothing.
+**LOY-116** No access is granted to any loyalty entity by the internal user group (`base.group_user`) alone. Access is granted by the sales groups and by the point-of-sale groups; a deployment with neither installed exposes nothing.
 
-**LOY-117** A Salesperson may read programs, rules, rewards and communication rules, may read and update cards, may create cards through the generation wizard, may read, create and update history entries, and may create and update the pending promises of their own orders but may not delete them. A Sales Administrator may additionally create, update and delete programs, rules, rewards, communication rules and pending promises, and may create but not delete cards.
+**LOY-117** A Salesperson (the own-documents sales group `sales_team.group_sale_salesman`) may read programs, rules, rewards and communication rules, may read and update cards, may create cards through the generation wizard, may read, create and update history movements, and may create and update the pending promises of their own orders but may not delete them. A Sales Administrator (the sales administration group `sales_team.group_sale_manager`) may additionally create, update and delete programs, rules, rewards, communication rules and pending promises, and may create but not delete cards.
 
-**LOY-118** A Point of Sale Cashier may read programs, rules, rewards and communication rules, may read and update cards, may run the generation wizard and the balance update wizard, and may create history entries. A Point of Sale Administrator may additionally create, update and delete programs, rules, rewards and communication rules, and may create cards.
+**LOY-118** A Point of Sale Cashier (the counter user group `point_of_sale.group_pos_user`) may read programs, rules, rewards and communication rules, may read and update cards, may run the generation wizard and the balance update wizard, and may create history movements. A Point of Sale Administrator (the counter management group `point_of_sale.group_pos_manager`) may additionally create, update and delete programs, rules, rewards and communication rules, and may create cards.
 
 **LOY-119** Nobody may delete a card through an access rule: the delete permission is not granted to any group on the card entity.
 
-**LOY-120** Programs, rules, rewards, cards and history entries are filtered by a company record rule: a record is visible when its company is empty, is one of the user's allowed companies, or is a parent of one of them.
+**LOY-120** Programs, rules, rewards, cards and history movements are filtered by a company record rule: a record is visible when its company is empty, is one of the user's allowed companies, or is a parent of one of them.
 
 **LOY-121** Card creation, card deletion, pending promise creation and pending promise deletion performed by the evaluation run with elevated rights, so that a salesperson who may not create cards can still save a quotation that earns one.
 
@@ -284,7 +293,7 @@ A note on message wording: user-facing messages are reproduced exactly as the us
 
 ## 11. Consistency rules
 
-**LOY-130** A program, its rules, its rewards, its cards and its history entries always share the same company, because the company is mirrored from the program and stored on each of them.
+**LOY-130** A program, its rules, its rewards, its cards and its history movements always share the same company, because the company is mirrored from the program and stored on each of them.
 
 **LOY-131** A card always has the currency and the point name of its program; neither can be set independently.
 
@@ -356,3 +365,399 @@ These five guards live on entities owned by other domains but are installed and 
 **LOY-151** The hidden discount product of a reward may not be deleted while that reward exists: the reward's reference to its hidden discount product is a restricted reference and the deletion is refused at the database level. The product has to be archived instead, which is what the cascade of LOY-010 does.
 
 **LOY-152** Archiving a program archives the hidden discount product of each of its rewards but never the reward product of a free product reward: the real product that is given away stays active. The propagation of LOY-010 writes `active` on the rules, then on the rewards, then on the communication rules, then on the hidden discount products, in that order; because the rewards are already archived by the time the hidden discount products are written, LOY-148 finds no active reward and does not refuse the archive.
+
+## 16. Further invariants
+
+These rules complete the catalogue with invariants that govern ordering, derivation and the shape of
+the records, and that the sections above assume without stating.
+
+**LOY-153** The default ordering of Loyalty Program is `sequence` ascending, then insertion order.
+That order is also the order in which automatic programs are offered to a document, so moving a
+program up the list makes it the one whose global discount is compared first.
+
+**LOY-154** The default ordering of Loyalty Reward is `required_points` ascending. When several
+rewards of one program are affordable, the cheapest is therefore the one offered first, and it is
+the one the automatic claiming of a single-reward program picks.
+
+**LOY-155** The default ordering of Loyalty History is identifier descending, so the newest movement
+of a card comes first everywhere it is listed.
+
+**LOY-156** `total_order_count` is derived, never stored. Its base value is zero; the sales channel
+adds `order_count` and the counter channel adds `pos_order_count`. A rebuild that stores the count
+instead of deriving it must recompute it whenever a reward line is created or deleted on either
+channel, or the usage ceiling will drift.
+
+**LOY-157** `loyalty_data` on a sales order is empty for every order that is not confirmed, and for a
+confirmed order that has no history movement. It is never written by a user.
+
+**LOY-158** `available_on` on a Loyalty Program is declared but never persisted: it carries a label
+in the form and holds no value. A rebuild must not create a column for it.
+
+**LOY-159** A reward line's point cost is carried by exactly one line of a claim, whichever tax
+combination that line represents. Summing `points_cost` over the lines of a claim therefore yields
+the cost once, and a rebuild that writes the cost on every line would debit the card several times
+over.
+
+**LOY-160** A card's `currency_id` and `point_name` are mirrors of its program and can never be set
+independently; a rule's and a reward's `company_id` are stored mirrors of the program's company,
+written for the sole purpose of letting the company record rule filter on them.
+
+## 17. Index of rule identifiers
+
+| Identifier | Subject |
+|---|---|
+| LOY-001 | Program name required |
+| LOY-002 | Program currency required and derived from the company |
+| LOY-003 | Price-list currency must match the program currency |
+| LOY-004 | Validity window must be ordered |
+| LOY-005 | A program keeps at least one reward |
+| LOY-006 | A usage cap must be strictly positive |
+| LOY-007 | Changing the program type rewrites the preset |
+| LOY-008 | Point label forced to the currency symbol for stored-value programs |
+| LOY-009 | Trigger products dropped on creation of a non-stored-value program |
+| LOY-010 | Archiving a program cascades to rules, rewards, plans and hidden products |
+| LOY-011 | An active program may not be deleted |
+| LOY-012 | A program that has issued cards may not be deleted |
+| LOY-013 | Un-archiving re-runs the promotional-code uniqueness checks |
+| LOY-014 | A printable document needs a message template first |
+| LOY-015 | Writing the simplified template rewrites the whole communication plan |
+| LOY-016 | Turning off the counter flag empties the till restriction |
+| LOY-017 | A program is used only at a till of its own currency |
+| LOY-018 | Rule point amount strictly positive |
+| LOY-019 | Split per unit forbidden on accumulating and wallet programs |
+| LOY-020 | Split per unit only takes effect on future, non-per-order grants |
+| LOY-021 | A promotional code is unique among active rules |
+| LOY-022 | A rule code and a card code may not collide |
+| LOY-023 | Storefront relaxation of the code uniqueness rule |
+| LOY-024 | Code and application mode derive from each other |
+| LOY-025 | Writing a code regenerates the scannable alternative |
+| LOY-026 | A code-mode rule contributes nothing until its code is entered |
+| LOY-027 | An empty product filter matches everything except on a gift card program |
+| LOY-028 | Required points strictly positive |
+| LOY-029 | Free product quantity strictly positive |
+| LOY-030 | Discount magnitude strictly positive |
+| LOY-031 | A reward product may not be a combination product |
+| LOY-032 | Every reward owns one hidden discount product |
+| LOY-033 | The description renames and re-translates the hidden product |
+| LOY-034 | Archiving a reward archives its hidden product |
+| LOY-035 | Deleting a used reward archives it instead |
+| LOY-036 | Deleting a reward re-runs the at-least-one-reward check |
+| LOY-037 | Definition of a global discount |
+| LOY-038 | A card code is globally unique |
+| LOY-039 | How a card code is generated |
+| LOY-040 | No expiry date on a loyalty card |
+| LOY-041 | An expired card is excluded, detached and refused |
+| LOY-042 | Card creation runs the "at creation" communication plan |
+| LOY-043 | A balance change runs the milestone communication plan |
+| LOY-044 | Archiving a card first deletes its draft-order promises |
+| LOY-045 | How the recipient of a card communication is resolved |
+| LOY-046 | When a balance is rounded by the program currency |
+| LOY-047 | A future-program card is not claimable on the document that created it |
+| LOY-048 | A promise towards a card of another customer is removed |
+| LOY-049 | A card of the anonymous visitor is re-owned when the document names a customer |
+| LOY-050 | An unusable current-order card is deleted at confirmation |
+| LOY-051 | An unused card created by a cancelled document is deleted |
+| LOY-052 | One pending promise per order and card |
+| LOY-053 | The program applicability filter |
+| LOY-054 | Storefront substitution in the applicability filter |
+| LOY-055 | The reference date of a document |
+| LOY-056 | The evaluation time zone |
+| LOY-057 | A program at its usage cap is excluded and its code refused |
+| LOY-058 | How the total document count is composed |
+| LOY-059 | A wallet program without trigger products grants nothing |
+| LOY-060 | A program with no rule and current applicability matches unconditionally |
+| LOY-061 | The three gate refusals of a non-nominative program, in priority order |
+| LOY-062 | A nominative program is applicable even at zero points |
+| LOY-063 | Which documents allow nominative programs |
+| LOY-064 | Automatic discounts do not reduce a minimum purchase; coded ones do |
+| LOY-065 | A combination item never counts on its own |
+| LOY-066 | Quantities are converted to the reference unit of measure |
+| LOY-067 | Reward lines never count towards the quantity gate |
+| LOY-068 | Which reward lines are excluded from the amount paid |
+| LOY-069 | Shipping lines are threshold-neutral and earn nothing |
+| LOY-070 | Points per unit of currency are truncated downward |
+| LOY-071 | A program may be attached only once |
+| LOY-072 | A program outside the applicability filter is refused |
+| LOY-073 | A reward is claimable only at or above its point price |
+| LOY-074 | No discount on a zero discountable amount, except under a payment reward |
+| LOY-075 | An applied non-payment discount is not claimable again |
+| LOY-076 | A free product reward needs a live product |
+| LOY-077 | The better global discount wins |
+| LOY-078 | Two over-large discounts: the smaller one wins |
+| LOY-079 | A future-program reward may not be claimed on its own document |
+| LOY-080 | A reward may not be claimed without enough points |
+| LOY-081 | Nothing to discount, and the placeholder line |
+| LOY-082 | A free product must be among the reward's products |
+| LOY-083 | Only one free shipping reward at a time |
+| LOY-084 | Payment rewards are recomputed last |
+| LOY-085 | A payment reward may not pay for its own top-up |
+| LOY-086 | Fixed-amount taxes are discounted only by a payment reward |
+| LOY-087 | A discount is capped by the document total and by the maximum amount |
+| LOY-088 | Per-point mode truncates the points to whole claims outside a payment program |
+| LOY-089 | How the point cost is computed in each mode |
+| LOY-090 | One line per tax combination, cost on the first line only |
+| LOY-091 | When the tax-name suffix is appended to a reward line description |
+| LOY-092 | A manually edited line description survives a recomputation |
+| LOY-093 | Confirmation refuses a negative available balance |
+| LOY-094 | Confirmation recomputes the document first |
+| LOY-095 | Confirmation writes one history movement per card |
+| LOY-096 | Confirmation notifies about rewards not added |
+| LOY-097 | Confirmation sends the coupons the document earned, immediately |
+| LOY-098 | What cancellation of a confirmed order undoes |
+| LOY-099 | Duplication carries no promotion |
+| LOY-100 | Repricing an order that carries rewards re-runs the recomputation |
+| LOY-101 | A reward line may never be invoiced alone |
+| LOY-102 | Invoice lines from discount rewards are classified as discount lines |
+| LOY-103 | A fully rewarded order is invoiced anyway |
+| LOY-104 | Reward line changes on a confirmed order move points at once |
+| LOY-105 | Deleting one line of a claim deletes the whole claim |
+| LOY-106 | Reward lines are read-only on the portal and not sellable |
+| LOY-107 | Which reward line fields are read-only on the order screen |
+| LOY-108 | A code is matched against rules first, then against cards |
+| LOY-109 | An already applied promotional code is refused |
+| LOY-110 | An unmatched or unusable code is refused and flagged "not found" |
+| LOY-111 | A card that pays for no reward is refused as already used |
+| LOY-112 | Loyalty and wallet programs may never be applied by code |
+| LOY-113 | The program row lock that makes the usage cap exact |
+| LOY-114 | What a successful code application records |
+| LOY-115 | What a refused attach step undoes |
+| LOY-116 | The internal user group alone grants nothing |
+| LOY-117 | Rights of the Salesperson and the Sales Administrator |
+| LOY-118 | Rights of the Point of Sale Cashier and Administrator |
+| LOY-119 | No group may delete a card |
+| LOY-120 | The company record rule on the five stored entities |
+| LOY-121 | Which writes of the recomputation run with elevated rights |
+| LOY-122 | Public access to the image of a hidden discount product |
+| LOY-123 | Point values carry two decimal places and truncate downward |
+| LOY-124 | Reward amounts are rounded per line by the document currency |
+| LOY-125 | Conversion of a minimum purchase amount |
+| LOY-126 | Conversion of a maximum discount and of a fixed discount value |
+| LOY-127 | Both bounds of the validity window are inclusive |
+| LOY-128 | The expiry date itself is still usable |
+| LOY-129 | Monetary comparisons use the document currency's rounding step |
+| LOY-130 | Program, rules, rewards, cards and history share one company |
+| LOY-131 | A card's currency and point label follow its program |
+| LOY-132 | A reward line carries the taxes it compensates |
+| LOY-133 | A free product line carries the product's taxes and a hundred percent discount |
+| LOY-134 | The reward grouping code identifies one claim |
+| LOY-135 | A counter session needs its reward products available at the counter |
+| LOY-136 | The shape a gift card program must have at a counter |
+| LOY-137 | Printing gift cards at a counter needs a template and a document |
+| LOY-138 | The server revalidates the device's point changes before payment |
+| LOY-139 | The six refusals of the counter code redemption service, in order |
+| LOY-140 | How the counter chooses the card behind a scanned code |
+| LOY-141 | When a cart claims a reward automatically |
+| LOY-142 | A reward removed by hand is never claimed automatically again |
+| LOY-143 | A coupon link visited without a cart is remembered |
+| LOY-144 | The cart is revalidated before a payment is finalised |
+| LOY-145 | Several discount lines are merged into one visual cart line |
+| LOY-146 | Reward lines do not count in the cart quantity badge |
+| LOY-147 | A zero-priced reward line never blocks the checkout |
+| LOY-148 | Archive guard on a product used by an active reward |
+| LOY-149 | Delete guard on the shipped gift card and top-up products |
+| LOY-150 | Archive guard on a price list used by an active program |
+| LOY-151 | A hidden discount product may not be deleted while its reward exists |
+| LOY-152 | Archiving a program never archives a free product |
+| LOY-153 | Program ordering also fixes the order of automatic candidates |
+| LOY-154 | Reward ordering offers the cheapest affordable reward first |
+| LOY-155 | History ordering puts the newest movement first |
+| LOY-156 | The total document count is derived, never stored |
+| LOY-157 | The loyalty summary is empty on an unconfirmed order |
+| LOY-158 | The channel label carrier holds no value |
+| LOY-159 | The point cost of a claim is carried once |
+| LOY-160 | Mirrored currency, point label and company may not be set independently |
+
+## 18. Mapping from the identifiers used before this consolidation
+
+Two independently written descriptions of this domain were merged into this folder. One numbered its
+rules `LOY-RULE-nnn` with gaps between the groups; the other used a per-topic prefix and cited only
+one identifier, `BR-P-03`, from its entity document. Both schemes are replaced by the single
+contiguous scheme of this file. The table below maps every former identifier to its new one, so that
+a reader holding either earlier text can find the rule again.
+
+| Former identifier (first version) | Former identifier (second version) | New identifier |
+|---|---|---|
+| LOY-RULE-001 | — | LOY-001 |
+| LOY-RULE-002 | — | LOY-002 |
+| LOY-RULE-003 | — | LOY-003 |
+| LOY-RULE-004 | — | LOY-004 |
+| LOY-RULE-005 | BR-P-03 | LOY-005 |
+| LOY-RULE-006 | — | LOY-006 |
+| LOY-RULE-007 | — | LOY-007 |
+| LOY-RULE-008 | — | LOY-008 |
+| LOY-RULE-009 | — | LOY-009 |
+| LOY-RULE-010 | — | LOY-010 |
+| LOY-RULE-011 | — | LOY-011 |
+| LOY-RULE-012 | — | LOY-012 |
+| LOY-RULE-013 | — | LOY-013 |
+| LOY-RULE-014 | — | LOY-014 |
+| LOY-RULE-015 | — | LOY-015 |
+| LOY-RULE-016 | — | LOY-016 |
+| LOY-RULE-017 | — | LOY-017 |
+| LOY-RULE-021 | — | LOY-018 |
+| LOY-RULE-022 | — | LOY-019 |
+| LOY-RULE-023 | — | LOY-020 |
+| LOY-RULE-024 | — | LOY-021 |
+| LOY-RULE-025 | — | LOY-022 |
+| LOY-RULE-026 | — | LOY-023 |
+| LOY-RULE-027 | — | LOY-024 |
+| LOY-RULE-028 | — | LOY-025 |
+| LOY-RULE-029 | — | LOY-026 |
+| LOY-RULE-030 | — | LOY-027 |
+| LOY-RULE-031 | — | LOY-028 |
+| LOY-RULE-032 | — | LOY-029 |
+| LOY-RULE-033 | — | LOY-030 |
+| LOY-RULE-034 | — | LOY-031 |
+| LOY-RULE-035 | — | LOY-032 |
+| LOY-RULE-036 | — | LOY-033 |
+| LOY-RULE-037 | — | LOY-034 |
+| LOY-RULE-038 | — | LOY-035 |
+| LOY-RULE-039 | — | LOY-036 |
+| LOY-RULE-040 | — | LOY-037 |
+| LOY-RULE-041 | — | LOY-038 |
+| LOY-RULE-042 | — | LOY-039 |
+| LOY-RULE-043 | — | LOY-040 |
+| LOY-RULE-044 | — | LOY-041 |
+| LOY-RULE-045 | — | LOY-042 |
+| LOY-RULE-046 | — | LOY-043 |
+| LOY-RULE-047 | — | LOY-044 |
+| LOY-RULE-048 | — | LOY-045 |
+| LOY-RULE-049 | — | LOY-046 |
+| LOY-RULE-050 | — | LOY-047 |
+| LOY-RULE-051 | — | LOY-048 |
+| LOY-RULE-052 | — | LOY-049 |
+| LOY-RULE-053 | — | LOY-050 |
+| LOY-RULE-054 | — | LOY-051 |
+| LOY-RULE-055 | — | LOY-052 |
+| LOY-RULE-056 | — | LOY-053 |
+| LOY-RULE-057 | — | LOY-054 |
+| LOY-RULE-058 | — | LOY-055 |
+| LOY-RULE-059 | — | LOY-056 |
+| LOY-RULE-060 | — | LOY-057 |
+| LOY-RULE-061 | — | LOY-058 |
+| LOY-RULE-062 | — | LOY-059 |
+| LOY-RULE-063 | — | LOY-060 |
+| LOY-RULE-064 | — | LOY-061 |
+| LOY-RULE-065 | — | LOY-062 |
+| LOY-RULE-066 | — | LOY-063 |
+| LOY-RULE-067 | — | LOY-064 |
+| LOY-RULE-068 | — | LOY-065 |
+| LOY-RULE-069 | — | LOY-066 |
+| LOY-RULE-070 | — | LOY-067 |
+| LOY-RULE-071 | — | LOY-068 |
+| LOY-RULE-072 | — | LOY-069 |
+| LOY-RULE-073 | — | LOY-070 |
+| LOY-RULE-074 | — | LOY-071 |
+| LOY-RULE-075 | — | LOY-072 |
+| LOY-RULE-076 | — | LOY-073 |
+| LOY-RULE-077 | — | LOY-074 |
+| LOY-RULE-078 | — | LOY-075 |
+| LOY-RULE-079 | — | LOY-076 |
+| LOY-RULE-080 | — | LOY-077 |
+| LOY-RULE-081 | — | LOY-078 |
+| LOY-RULE-082 | — | LOY-079 |
+| LOY-RULE-083 | — | LOY-080 |
+| LOY-RULE-084 | — | LOY-081 |
+| LOY-RULE-085 | — | LOY-082 |
+| LOY-RULE-086 | — | LOY-083 |
+| LOY-RULE-087 | — | LOY-084 |
+| LOY-RULE-088 | — | LOY-085 |
+| LOY-RULE-089 | — | LOY-086 |
+| LOY-RULE-090 | — | LOY-087 |
+| LOY-RULE-091 | — | LOY-088 |
+| LOY-RULE-092 | — | LOY-089 |
+| LOY-RULE-093 | — | LOY-090 |
+| LOY-RULE-094 | — | LOY-091 |
+| LOY-RULE-095 | — | LOY-092 |
+| LOY-RULE-096 | — | LOY-093 |
+| LOY-RULE-097 | — | LOY-094 |
+| LOY-RULE-098 | — | LOY-095 |
+| LOY-RULE-099 | — | LOY-096 |
+| LOY-RULE-100 | — | LOY-097 |
+| LOY-RULE-101 | — | LOY-098 |
+| LOY-RULE-102 | — | LOY-099 |
+| LOY-RULE-103 | — | LOY-100 |
+| LOY-RULE-104 | — | LOY-101 |
+| LOY-RULE-105 | — | LOY-102 |
+| LOY-RULE-106 | — | LOY-103 |
+| LOY-RULE-107 | — | LOY-104 |
+| LOY-RULE-108 | — | LOY-105 |
+| LOY-RULE-109 | — | LOY-106 |
+| LOY-RULE-110 | — | LOY-107 |
+| LOY-RULE-111 | — | LOY-108 |
+| LOY-RULE-112 | — | LOY-109 |
+| LOY-RULE-113 | — | LOY-110 |
+| LOY-RULE-114 | — | LOY-111 |
+| LOY-RULE-115 | — | LOY-112 |
+| LOY-RULE-116 | — | LOY-113 |
+| LOY-RULE-117 | — | LOY-114 |
+| LOY-RULE-118 | — | LOY-115 |
+| LOY-RULE-131 | — | LOY-116 |
+| LOY-RULE-132 | — | LOY-117 |
+| LOY-RULE-133 | — | LOY-118 |
+| LOY-RULE-134 | — | LOY-119 |
+| LOY-RULE-135 | — | LOY-120 |
+| LOY-RULE-136 | — | LOY-121 |
+| LOY-RULE-137 | — | LOY-122 |
+| LOY-RULE-141 | — | LOY-123 |
+| LOY-RULE-142 | — | LOY-124 |
+| LOY-RULE-143 | — | LOY-125 |
+| LOY-RULE-144 | — | LOY-126 |
+| LOY-RULE-145 | — | LOY-127 |
+| LOY-RULE-146 | — | LOY-128 |
+| LOY-RULE-147 | — | LOY-129 |
+| LOY-RULE-151 | — | LOY-130 |
+| LOY-RULE-152 | — | LOY-131 |
+| LOY-RULE-153 | — | LOY-132 |
+| LOY-RULE-154 | — | LOY-133 |
+| LOY-RULE-155 | — | LOY-134 |
+| LOY-RULE-161 | — | LOY-135 |
+| LOY-RULE-162 | — | LOY-136 |
+| LOY-RULE-163 | — | LOY-137 |
+| LOY-RULE-164 | — | LOY-138 |
+| LOY-RULE-165 | — | LOY-139 |
+| LOY-RULE-166 | — | LOY-140 |
+| LOY-RULE-171 | — | LOY-141 |
+| LOY-RULE-172 | — | LOY-142 |
+| LOY-RULE-173 | — | LOY-143 |
+| LOY-RULE-174 | — | LOY-144 |
+| LOY-RULE-175 | — | LOY-145 |
+| LOY-RULE-176 | — | LOY-146 |
+| LOY-RULE-177 | — | LOY-147 |
+| LOY-RULE-181 | — | LOY-148 |
+| LOY-RULE-182 | — | LOY-149 |
+| LOY-RULE-183 | — | LOY-150 |
+| LOY-RULE-184 | — | LOY-151 |
+| LOY-RULE-185 | — | LOY-152 |
+| — (new in this consolidation) | — | LOY-153 to LOY-160 |
+
+## 19. Reconciliation notes
+
+1. **Rule numbering.** The gapped scheme `LOY-RULE-001` … `LOY-RULE-185` of the first version and the
+   single `BR-P-03` citation of the second were renumbered into the contiguous scheme LOY-001 …
+   LOY-160 of this file. Section 18 gives the full mapping; every citation in the other files of the
+   folder was rewritten at the same time.
+2. **Card code length (LOY-039).** One version stated that the generated code is thirteen characters
+   long. The slice taken from the universally unique identifier is eleven characters, so the code is
+   **fourteen** characters long and begins with `044`. The corrected length is used here, in
+   [entities.md](entities.md) and in [acceptance-criteria.md](acceptance-criteria.md).
+3. **System parameter keys (LOY-056, LOY-057, LOY-103, LOY-143).** One version invented descriptive
+   keys. The reproduced keys `loyalty.timezone`,
+   `loyalty.compute_all_discount_product_ids`,
+   `website_sale_coupon.abandonned_coupon_validity`, `sale.automatic_invoice` and
+   `sale.default_invoice_email_template` are used throughout, including the spelling of the third
+   one, which is part of the stored key.
+4. **Access group identifiers (LOY-116 to LOY-118).** One version named the groups by invented
+   identifiers. The reproduced identifiers `base.group_user`, `sales_team.group_sale_salesman`,
+   `sales_team.group_sale_manager`, `point_of_sale.group_pos_user` and
+   `point_of_sale.group_pos_manager` are used, each with its role named in words.
+5. **Field identifiers.** Every rule that names a field now names the reproduced storage name
+   (`max_usage`, `discount`, `minimum_qty`, `pos_ok`, `sale_ok`, `ecommerce_ok`,
+   `pos_config_ids`, `discount_max_amount`, `reward_product_qty` and the rest) rather than the
+   full-word form one version had invented for it. The full names are carried in the field tables of
+   [entities.md](entities.md).
+6. **Rules added during the merge (LOY-153 to LOY-160).** The second version stated a number of
+   invariants — the two default orderings that decide which program and which reward is considered
+   first, the derivation of the usage count, the emptiness of the loyalty summary on a quotation, the
+   label carrier that holds no value, the single point cost of a claim and the mirrored fields — that
+   the first version's catalogue did not number. They are numbered here so that nothing is lost.

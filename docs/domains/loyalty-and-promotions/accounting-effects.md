@@ -1,6 +1,6 @@
 # Accounting effects
 
-The Loyalty, Coupons and Promotions domain creates no journal entry of its own. It has no journal, no account field, no valuation and no reconciliation logic. Its accounting footprint is entirely indirect: it writes lines on sales documents, and those lines reach the general ledger through the ordinary customer invoicing of the [Sales Management](../sales/) domain and the ordinary session closing of the [Point of Sale](../point-of-sale/) domain. This file states exactly what those lines look like when they arrive in accounting, how the accounts are chosen, and what a replacement must and must not do.
+The Loyalty and Promotions domain creates no journal entry of its own. It has no journal, no account field, no valuation and no reconciliation logic. Its accounting footprint is entirely indirect: it writes lines on sales documents, and those lines reach the general ledger through the ordinary customer invoicing of the [Sales Management](../sales/) domain and the ordinary session closing of the [Point of Sale](../point-of-sale/) domain. This file states exactly what those lines look like when they arrive in accounting, how the accounts are chosen, and what a replacement must and must not do.
 
 ## 1. The boundary
 
@@ -104,10 +104,10 @@ Steps 1 and 2 are pure configuration and require no code. Steps 3 and 4 are outs
 
 The same reasoning applies to an electronic wallet: a top-up is a prepayment, not revenue.
 
-## 7. Loyalty points and the cost of the programme
+## 7. Loyalty points and the cost of the program
 
 1. Points carried on a loyalty card are **not** recognized anywhere in the ledger. No provision, no accrual and no deferred revenue is booked when a customer earns points.
-2. The cost of a loyalty programme reaches the ledger only when a reward is claimed, as the negative revenue of the reward line or as the zero-revenue delivery of a free product.
+2. The cost of a loyalty program reaches the ledger only when a reward is claimed, as the negative revenue of the reward line or as the zero-revenue delivery of a free product.
 
 **Industry-standard completion**: revenue recognition standards treat a loyalty point granted with a sale as a separate performance obligation: part of the transaction price of the original sale must be allocated to the points and deferred until they are redeemed or expire. A replacement that must satisfy those standards should compute, per sale, the stand-alone selling price of the points earned, book that portion to a contract liability instead of revenue, and release it when the points are spent or lapse. The reference behavior does none of this, and a replacement that only needs behavioral equivalence must not do it either, because it would change the amounts of the invoices produced.
 
@@ -119,7 +119,7 @@ At a counter, reward lines are ordinary ticket lines with negative amounts. They
 
 1. Cancelling a sales order removes its reward lines and reverses the point movements, but does not touch any invoice. An invoice already posted must be reversed by the ordinary credit note workflow of [../accounts-receivable/](../accounts-receivable/).
 2. A credit note produced from an invoice that carries reward lines reverses those lines like any other line, with the opposite sign. The points are **not** given back by the credit note: point movements follow the order lifecycle, not the invoice lifecycle. A replacement must not couple the two.
-3. Deleting a history entry, which happens when a confirmed order is cancelled, has no accounting effect.
+3. Deleting a history movement, which happens when a confirmed order is cancelled, has no accounting effect.
 
 ## 10. Reconciliation
 

@@ -1,6 +1,6 @@
 # Configuration
 
-Every setting, parameter, default, access group, shipped record and master-data prerequisite of the Loyalty, Coupons and Promotions domain, with its data type, its default and its effect.
+Every setting, parameter, default, access group, shipped record and master-data prerequisite of the Loyalty and Promotions domain, with its data type, its default and its effect.
 
 ## 1. Master-data prerequisites
 
@@ -42,11 +42,11 @@ There is no per-company setting and no per-counter setting other than the progra
 
 ## 4. System parameters
 
-System parameters are key-and-value records held by the platform, shared by every company and settable by an administrator. Each key is written here with the full-word name used throughout this specification; a replacement may store each key under any stable name of its own, as long as the five values remain distinguishable and independently settable. Every value is stored as text and is interpreted as described in the Effect column.
+System parameters are key-and-value records held by the platform, shared by every company and settable by an administrator; the platform document [../../runtime/configuration-parameters.md](../../runtime/configuration-parameters.md) describes the store itself. Each key below is reproduced exactly, because an existing deployment and its integrations read it under that spelling — including the misspelling in the third key, which is part of the stored value. Every value is stored as text and is interpreted as described in the Effect column.
 
 | Parameter | Shipped value | Value assumed when the parameter is absent | Effect |
 |---|---|---|---|
-| `loyalty.compute_all_discount_product_ids` | `False` | `enabled` | When the effective value is exactly `enabled`, the discounted-product filter of every reward is expanded eagerly into a stored list of products, and the serialized condition sent to a counter is the empty value. When it is anything else, the expansion is skipped, the product list stays empty and the serialized condition is sent instead, so that the counter evaluates the condition itself. The shipped value therefore disables the expansion; a deployment with few products may enable it to make the counter faster. |
+| `loyalty.compute_all_discount_product_ids` | `False` | `enabled` | When the effective value is exactly `enabled`, the discounted-product filter of every reward is expanded eagerly into a stored list of products, and the serialized condition sent to a counter is the literal text `null`. When it is anything else, the expansion is skipped, the product list stays empty and the serialized condition is sent instead, so that the counter evaluates the condition itself. The shipped value therefore disables the expansion; a deployment with few products may enable it to make the counter faster. |
 | `loyalty.timezone` | not shipped | the coordinated universal time zone | The time zone used to judge program validity when the company's own contact declares none. |
 | `website_sale_coupon.abandonned_coupon_validity` | not shipped | `4` | Number of days after which a draft online cart that has not been written to is considered abandoned and has its manually applied cards detached. |
 | `sale.automatic_invoice` | not shipped | false | Owned by [../sales/](../sales/), where it backs the Automatic Invoice setting. When true, an order whose total including tax is zero and whose reward total is not zero is invoiced and posted automatically. |
@@ -54,61 +54,67 @@ System parameters are key-and-value records held by the platform, shared by ever
 
 ## 5. Access groups
 
-This domain ships **no access group of its own**. It grants rights to four groups owned by other domains, and to no other group.
+This domain ships **no access group of its own**. It grants rights to five groups owned by other
+domains, and to no other group. Each group is named here by its reproduced identifier and by its
+role in words; [../../overview/security-model.md](../../overview/security-model.md) describes the
+access model itself.
 
-| Group identifier | Owning domain | Role in this domain |
-|---|---|---|
-| `internal_user` | [../identity-and-access/](../identity-and-access/) | Explicitly granted **nothing** on every loyalty entity. A deployment with neither the sales nor the point-of-sale packages exposes no loyalty data at all. |
-| `sales_user_own_documents_only` | [../customer-relationship-management/](../customer-relationship-management/) | Reads the configuration, uses the cards, applies codes and rewards. |
-| `sales_administrator` | [../customer-relationship-management/](../customer-relationship-management/) | Maintains the configuration and the shareable links. |
-| `point_of_sale_user` | [../point-of-sale/](../point-of-sale/) | Reads the configuration, uses the cards at a counter. |
-| `point_of_sale_manager` | [../point-of-sale/](../point-of-sale/) | Maintains the configuration usable at a counter. |
+| Group identifier | Role in words | Owning domain | Role in this domain |
+|---|---|---|---|
+| `base.group_user` | Internal user | [../identity-and-access/](../identity-and-access/) | Explicitly granted **nothing** on every loyalty entity. A deployment with neither the sales nor the counter capability exposes no loyalty data at all. |
+| `sales_team.group_sale_salesman` | Salesperson, own documents only | [../customer-relationship-management/](../customer-relationship-management/) | Reads the configuration, uses the cards, applies codes and rewards. |
+| `sales_team.group_sale_manager` | Sales Administrator | [../customer-relationship-management/](../customer-relationship-management/) | Maintains the configuration and the shareable links. |
+| `point_of_sale.group_pos_user` | Point of Sale Cashier | [../point-of-sale/](../point-of-sale/) | Reads the configuration, uses the cards at a counter. |
+| `point_of_sale.group_pos_manager` | Point of Sale Administrator | [../point-of-sale/](../point-of-sale/) | Maintains the configuration usable at a counter. |
 
-The `technical_features` group of [../identity-and-access/](../identity-and-access/) is not granted any right; it only reveals the advanced fields on the rule and reward screens (the free-form product conditions, the point grant block on program types that hide it, the hidden discount product and the "clear the whole balance" flag).
+The technical-features group `base.group_no_one` of
+[../identity-and-access/](../identity-and-access/) is granted no right at all; it only reveals the
+advanced fields on the rule and reward screens — the free-form product conditions, the point-grant
+block on program types that hide it, the hidden discount product and the whole-balance flag.
 
 ## 6. Model access rules
 
-Rights are written as read / write / create / delete.
+Rights are written as read / write / create / delete. Column headings use the group identifiers of
+section 5.
 
-| Entity | `internal_user` | `sales_user_own_documents_only` | `sales_administrator` | `point_of_sale_user` | `point_of_sale_manager` |
+| Entity | `base.group_user` | `sales_team.group_sale_salesman` | `sales_team.group_sale_manager` | `point_of_sale.group_pos_user` | `point_of_sale.group_pos_manager` |
 |---|---|---|---|---|---|
-| Loyalty Program | none | read | read, write, create, delete | read | read, write, create, delete |
-| Loyalty Rule | none | read | read, write, create, delete | read | read, write, create, delete |
-| Loyalty Reward | none | read | read, write, create, delete | read | read, write, create, delete |
-| Loyalty Communication | none | read | read, write, create, delete | read | read, write, create, delete |
-| Loyalty Card | none | read, write | read, write, create | read, write | read, write, create |
-| Loyalty History Entry | none | read, write, create | read, write, create | read, write, create | read, write, create |
-| Loyalty Coupon Generation Wizard | none | read, write, create | read, write, create | read, write, create | read, write, create |
-| Update Loyalty Card Points Wizard | none | read, write, create | read, write, create | read, write, create | read, write, create |
-| Sales Order Coupon Points | none | read | read, write, create, delete | none | none |
-| Sale Loyalty - Apply Coupon Wizard | none | read, write, create | read, write, create | none | none |
-| Loyalty Reward Selection Wizard | none | read, write, create | read, write, create | none | none |
-| Coupon Share Wizard | none | none | read, write, create | none | none |
+| Loyalty Program (`loyalty.program`) | none | read | read, write, create, delete | read | read, write, create, delete |
+| Loyalty Rule (`loyalty.rule`) | none | read | read, write, create, delete | read | read, write, create, delete |
+| Loyalty Reward (`loyalty.reward`) | none | read | read, write, create, delete | read | read, write, create, delete |
+| Loyalty Communication (`loyalty.mail`) | none | read | read, write, create, delete | read | read, write, create, delete |
+| Loyalty Card (`loyalty.card`) | none | read, write | read, write, create | read, write | read, write, create |
+| Loyalty History movement (`loyalty.history`) | none | read, write, create | read, write, create | read, write, create | read, write, create |
+| Card Generation Wizard (`loyalty.generate.wizard`) | none | read, write, create | read, write, create | read, write, create | read, write, create |
+| Card Balance Wizard (`loyalty.card.update.balance`) | none | read, write, create | read, write, create | read, write, create | read, write, create |
+| Sales Order Coupon Points (`sale.order.coupon.points`) | none | read | read, write, create, delete | none | none |
+| Coupon Entry Wizard (`sale.loyalty.coupon.wizard`) | none | read, write, create | read, write, create | none | none |
+| Reward Selection Wizard (`sale.loyalty.reward.wizard`) | none | read, write, create | read, write, create | none | none |
+| Coupon Sharing Wizard (`coupon.share`) | none | none | read, write, create | none | none |
 
-Two consequences a replacement must reproduce:
+Two consequences a rebuild must reproduce:
 
-1. **Nobody may delete a Loyalty Card through the access rules.** Every deletion of a card performed by the evaluation runs with elevated rights.
-2. A Salesperson may not create or delete pending promises, yet saving a quotation creates them. Those writes also run with elevated rights.
+1. **Nobody may delete a Loyalty Card through the access rules.** Every deletion of a card performed
+   by the recomputation runs with elevated rights.
+2. A Salesperson may not create or delete pending point entries, yet saving a quotation creates them
+   and cancelling an order deletes them. Those writes also run with elevated rights.
 
 ## 7. Record rules
 
 Five record rules, one per stored entity, all with the same shape and all applying to every operation:
 
-```
-company IS EMPTY
-OR company IN the user's allowed companies
-OR company IS A PARENT OF one of the user's allowed companies
-```
+A record passes when its company is empty, **or** its company is one of the user's allowed
+companies, **or** its company is a parent of one of the user's allowed companies.
 
 | Rule name | Entity |
 |---|---|
 | Loyalty program multi company rule | Loyalty Program |
 | Loyalty card multi company rule | Loyalty Card |
-| Loyalty history multi company rule | Loyalty History Entry |
+| Loyalty history multi company rule | Loyalty History movement |
 | Loyalty rule multi company rule | Loyalty Rule |
 | Loyalty reward multi company rule | Loyalty Reward |
 
-The company of a rule, a reward, a card and a history entry is a stored mirror of the program's company, written for exactly this purpose.
+The company of a rule, a reward, a card and a history movement is a stored mirror of the program's company, written for exactly this purpose.
 
 ## 8. Shipped records
 
