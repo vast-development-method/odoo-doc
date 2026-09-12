@@ -1971,3 +1971,471 @@ Four rules:
 4. Switching company changes the cache key of the rule filter rather than invalidating anything.
 
 In development mode the rule cache is switched off entirely, so that editing a rule takes effect immediately.
+
+---
+
+## 20. What is not enforcement
+
+Several mechanisms look like security and are not. Confusing them produces a rebuild with holes: each of the mechanisms below shapes what a client offers, and every one of them can be sidestepped by a caller that speaks the transport directly.
+
+| Mechanism | What it actually does |
+|---|---|
+| A field marked read-only in its declaration or in a view | Instructs the client not to offer editing. The transport can still write the field. |
+| A field marked invisible in a view | Removes the node from the rendered screen. The field is still readable over the transport unless the **field itself** is restricted by [section 7](#7-field-level-restrictions). |
+| A view node carrying a group condition | Removes the node from the resolved view for users outside the group ([section 18.1](#181-the-two-phase-view-pipeline)). The field is still readable over the transport unless the field is restricted. |
+| A menu restricted to groups | Hides the menu ([section 18.4](#184-menu-visibility)). The action and the entity behind it are still reachable by anyone holding the access rights. |
+| A button restricted to groups | Hides the button. The operation is still callable if it is exposed ([section 11.1](#111-the-exposure-rule)). |
+| A relational field's candidate restriction | Narrows the list a client offers. The transport can still write any identifier of the target entity; a real constraint needs a validation. |
+| An on-change reaction rule that refuses or warns | Guides the person filling a form. A transport write carrying the same value succeeds. |
+| A required flag declared only in a view | Makes the client refuse to save. A transport write omitting the value succeeds unless the **field** is required. |
+| An action's declared context or filter | Pre-filters what a screen shows. The same entity can be searched without them. |
+| Naming an operation with a leading underscore | Makes it unreachable from the transport. This **is** enforcement, and it is the only naming convention that is. |
+| Marking an operation as not remotely callable | Also enforcement. |
+| A field declared with a group requirement | Also enforcement: it is the field gate of [section 7](#7-field-level-restrictions). |
+
+The rule: **if a restriction can be observed only through a client, it is not enforcement.** Every real restriction is one of the four data gates of [section 1.1](#11-the-four-data-gates), the private-name rule, the exposure flag, or a declared validation.
+
+---
+
+## 21. Trust boundaries and construction rules
+
+These rules govern behaviour written on top of the platform. They are not optional: most of them are the only thing standing between an ordinary operation and a bypass of sections 5 to 7.
+
+1. **Everything reachable from outside is untrusted**, including the record set an operation is invoked on. The exposure rule decides only *whether* an operation may be called; it says nothing about which records were named or what the arguments contain. An exposed operation must therefore perform its reads and writes through the ordinary path, so that the entity, record and field gates run.
+2. **Elevation is introduced in private operations only.** A public operation never elevates on the caller's behalf. A private operation may, and is the only place where elevation is introduced.
+3. **Elevation is introduced as narrowly as possible**, around the single read or write that needs it, never around a whole procedure, and never around a call back into caller-supplied behaviour.
+4. **An elevated write to a to-many relation whose target refuses privileged commands is silently de-elevated** ([section 9.3](#93-command-protection-on-sensitive-entities)); a write that genuinely intends to change such a target must be expressed as a direct write on the target entity, where the gates run and are seen to run.
+5. **Never construct a filter by appending to a caller-supplied filter** in a way that lets the caller change the combination. A caller-supplied filter is combined with the security filter by an explicit conjunction of two complete filters; a caller that supplies a disjunction must not be able to make the security filter optional.
+6. **Never build a database query by concatenating values into its text.** Values are passed to the database as parameters, whatever their type.
+7. **Never resolve a field name or an operation name from caller-supplied text by a generic attribute lookup.** A field name is resolved against the entity's field map, which fails for an unknown name and cannot reach anything that is not a field; an operation name is resolved only against an explicit list of permitted names.
+8. **Evaluate caller-supplied text with a parser, never with an evaluator.** A number is parsed as a number and a structured document is parsed as a structured document. The sandboxed evaluator is reserved for values that only a settings administrator can write — record-rule filters, server-action bodies, evaluated view attributes — and the fact that it is reachable at all is part of what makes the settings group a privileged group.
+9. **Escape when data becomes markup.** Escaping converts text into markup and is mandatory every time a value is placed into rendered markup, even when the value is trusted. Sanitising converts untrusted markup into safer markup and is meaningful only on values that are markup to begin with. Sanitising a value that was never escaped destroys it; escaping a value that is already markup is harmless only where the markup type is tracked.
+10. **Compare secrets in constant time.** Session tokens ([section 14.4](#144-validating-a-session)) and record access tokens ([section 16.2](#162-the-record-access-token)) are compared digit by digit over their whole length, so that the time taken carries no information about how much of the value was right.
+11. **Invalidate the record cache after an elevated read performed only to build a refusal.** The record-rule refusal of [section 6.7](#67-the-refusal-message) and the attachment layer of [section 16.8](#168-the-attachment-access-layer) do this; any behaviour that reads with elevated rights in order to decide a refusal must do the same, otherwise the elevated values stay in the cache and become readable to the caller that was just refused.
+12. **A token authorises a document, not an entity.** After a token check succeeds, elevate for that one record only, and render only what the external page is meant to show.
+13. **A check that is skipped in an unrestricted environment is a permission; a check that runs anyway is a validation.** Company consistency is a validation and runs whatever the acting identity ([multi-company, section 6.3](multi-company.md#63-when-the-check-runs)); the four data gates are permissions and are skipped.
+14. **Never derive a permission decision from the presentation layer.** The flags a view carries about creating, modifying and deleting are computed from the gates and served for the client's convenience ([section 18.1](#181-the-two-phase-view-pipeline)); they are never consulted when the operation itself is performed.
+
+---
+
+## 22. The shipped catalogue
+
+The shipped system defines **140 groups**, organised into **29 privilege families**, granting **1,933 access rights** and restricted by **576 record rules**.
+
+### 22.1 The foundational groups
+
+| External identifier | Name | Role |
+|---|---|---|
+| `base.group_user` | Internal User | Every employee. The base of the back office, and the group nearly every capability's own groups imply. |
+| `base.group_portal` | Portal | External correspondents with their own sign-in. |
+| `base.group_public` | Public | Anonymous visitors. |
+| `base.group_system` | Settings | Full configuration of the tenant. Implies the access-rights group. |
+| `base.group_erp_manager` | Access Rights | May administer users, groups, access rights and record rules. |
+| `base.group_no_one` | Technical Features | Reveals technical detail; membership is only effective in debug mode ([section 3.9](#39-the-debug-only-group)). |
+| `base.group_multi_company` | Multi Company | Reveals the company switcher and the company field. |
+| `base.group_multi_currency` | Multi Currency | Reveals currency fields and exchange rates. |
+| `base.group_partner_manager` | Contact Creation | May create contacts. |
+| `base.group_allow_export` | Allowed to Export | May export data. Absence of this group blocks every export ([section 8.11](#811-export)). |
+
+### 22.2 The shape of a capability's groups
+
+A capability presented to the user as an application almost always defines a privilege family with two or three graded groups:
+
+| Grade | Typical name | Implies |
+|---|---|---|
+| Read-only | "Show \<capability name\> — Readonly" | The internal-user group |
+| User | "\<capability name\> User", or the capability's own name | The read-only group |
+| Manager | "\<capability name\> Administrator" | The user group |
+
+The grading is expressed by implication, which is what makes the single-selection presentation of a privilege family faithful ([section 4.6](#46-privilege-families)): choosing the manager grade grants the user grade and the read-only grade with it.
+
+### 22.3 The shape of a record rule set
+
+A capability that stores company-scoped documents almost always ships:
+
+1. one **global** multi-company rule per entity, admitting records whose company is empty or among the allowed companies;
+2. one **group** rule per graded group, widening as the grade rises — often the highest grade's rule is simply "everything", expressed as a filter that is always true, whose purpose is to *widen* the disjunction and thereby neutralise the narrower rules of the lower grades;
+3. one or more **portal** rules restricting external users to records on which they are the correspondent.
+
+Point 2 is the idiom that makes the disjunctive combination of group rules work, and a rebuild must support it: a group rule whose filter is always true is not a rule that does nothing, it is a grant.
+
+### 22.4 Complete catalogues
+
+The complete lists — every group with its family, its implications and its shipped members; every access right with its entity, its group and its four flags; every record rule with its entity, its groups, its filter and its four flags — are in [the machine-readable operational catalogues](../../schemas/operational/README.md) and are rendered in [the groups and access reference](../references/groups-and-access.md) and [the access matrix by group](../references/access-matrix-by-group.md).
+
+---
+
+## 23. Message catalogue
+
+Every message this document specifies, in one place, with its triggering situation. Placeholders are named in angle brackets and described by what they hold. The messages are reproduced exactly, including their punctuation; the complete catalogue for the whole platform is in [the validation message reference](../references/validation-messages.md).
+
+### 23.1 The data gates
+
+| Situation | Message |
+|---|---|
+| Entity gate, read | "You are not allowed to access '\<entity description\>' (\<transport name\>) records." |
+| Entity gate, write | "You are not allowed to modify '\<entity description\>' (\<transport name\>) records." |
+| Entity gate, create | "You are not allowed to create '\<entity description\>' (\<transport name\>) records." |
+| Entity gate, delete | "You are not allowed to delete '\<entity description\>' (\<transport name\>) records." |
+| Entity gate, list of allowing groups | "This operation is allowed for the following groups:" then one line per group, each prefixed by a tab, a hyphen and a space |
+| Entity gate, nothing grants it | "No group currently allows this operation." |
+| Entity gate, closing line | "Contact your administrator to request access if necessary." |
+| Record gate, opening line | "Uh-oh! Looks like you have stumbled upon some top-secret records." |
+| Record gate, naming line | "Sorry, \<user display name\> (id=\<user identifier\>) doesn't have '\<operation\>' access to:" then one line per entity, then one line per offending record in debug mode |
+| Record gate, closing line | "If you really, really need access, perhaps you can win over your friendly administrator with a batch of freshly baked cookies." |
+| Record gate, debug mode | adds "Blame the following rules:" and the name of each failing rule |
+| Record gate, several companies would give access | adds "Note: this might be a multi-company issue. Switching company may help." |
+| Record gate, exactly one company would give access and the user belongs to it | adds "This seems to be a multi-company issue, you might be able to access the record by switching to the company: \<company name\>." |
+| Record gate, exactly one company would give access and the user does not belong to it | adds "This seems to be a multi-company issue, but you do not have access to the proper company to access the record anyhow." |
+| Record gate, reached through an embedded parent | adds "Implicitly accessed through '\<embedding entity description\>' (\<embedding transport name\>)." |
+| Field gate | "You do not have enough rights to access the field \"\<field name\>\" on \<entity description\> (\<transport name\>). Please contact your system administrator." then "Operation: \<read or write\>" |
+| Field gate, debug mode | adds "User: \<user identifier\>" and one of "Groups: always forbidden", "Groups: custom field access rules", "Groups: allowed for groups '\<group\>', '\<group\>'" |
+
+### 23.2 Declaring groups, rights and rules
+
+| Situation | Message |
+|---|---|
+| A record rule declared on the record-rule entity itself | "Rules can not be applied on the Record Rules model." |
+| A record rule with no operation flag set | "Rule must have at least one checked access right!" |
+| A record rule whose filter does not evaluate | "Invalid domain: " followed by the reason |
+| Removing a user from a group that another of their groups implies | "It is not possible to remove implied group \<group name\> from users \<user names\>." |
+| A user placed in two mutually exclusive kind groups | "User \<user name\> cannot be at the same time in exclusive groups \<group names\>." |
+| Two groups of one privilege family sharing a name | "The name of the group must be unique within a group privilege!" |
+| Resolving an external identifier the acting user may not read | "Not enough access rights on the external identifier \"\<package\>.\<name\>\"" |
+
+### 23.3 Reachability and views
+
+| Situation | Message |
+|---|---|
+| Calling a privately named operation from outside | "Private methods (such as '\<transport name\>.\<operation name\>') cannot be called remotely." |
+| Calling an operation marked not remotely callable | "The method '\<transport name\>.\<operation name\>' cannot be called remotely." |
+| Calling an operation that does not exist | "The method '\<transport name\>.\<operation name\>' does not exist" |
+| Opening a view whose own group list excludes the acting user | "View '\<view external identifier\>' accessible only to groups \<group names\>" |
+| Opening a view that may not be opened directly | "View '\<view external identifier\>' is private" |
+| Declaring a group list on a view extension record | "Inherited view cannot have 'groups' defined on the record. Use 'groups' attributes inside the view definition" |
+| Mixing saved and unsaved records in one set | "\<record set\> contains a mix of real and new records. It is not supported." |
+
+### 23.4 Sessions, sign-in and credentials
+
+| Situation | Message |
+|---|---|
+| The session is no longer valid and the endpoint requires an account | "Session expired" |
+| The request-forgery token is missing or invalid | "Session expired (invalid cross-site request forgery token)" |
+| Bearer level, the application key is unknown | "Invalid application key" |
+| Bearer level, the key belongs to another user than the session | "Session user does not match the used application key." |
+| Bearer level, nothing presented | "User not authenticated, use an application key with a bearer authorization header." |
+| Bearer level, an interactive request without the fetch-metadata headers | "Missing \"Authorization\" or fetch-metadata headers for interactive usage." |
+| Too many failed sign-in attempts from one source | "Too many login failures, please wait a bit before trying again." |
+| Setting an empty password | "Setting empty passwords is not allowed for security reasons!" |
+| Changing one's own password through the administrator screen | "Please use the change password wizard (in User Preferences or User menu) to change your own password." |
+| The new password and its confirmation differ | "The new password and its confirmation must be identical." |
+| An empty field on the self-service password page | "You cannot leave any password empty." |
+| A wrong current password on the self-service password page | "The old password you provided is incorrect, your password was not changed." |
+| Re-authentication with a wrong password | "Incorrect Password, try again or click on Forgot Password to reset your password." |
+| Re-authentication attempted outside a request | "This method can only be accessed over a request transport." |
+| Second factor, wrong code | "Verification failed, please double-check the 6-digit code" |
+| Second factor, a code already used | "Verification failed, please use the latest 6-digit code" |
+| Second factor, malformed code | "Invalid authentication code format." |
+| Second factor, too many verification attempts | "You reached the limit of code verifications for your account, please try again later." |
+| Second factor, too many messages sent | "You reached the limit of authentication mails sent for your account, please try again later." |
+| Second factor, enrolling on behalf of another user | "Two-factor authentication can only be enabled for yourself" |
+| Second factor, already enrolled | "Two-factor authentication already enabled" |
+
+### 23.5 Application keys
+
+| Situation | Message |
+|---|---|
+| A key created without an expiry by a user who is not a settings administrator | "The application key must have an expiration date" |
+| A key whose expiry exceeds the allowance | "You cannot exceed \<number\> days." |
+| A key whose expiry is in the past | "You cannot set an expiration date in the past." |
+| A key created by an external user | "Only internal users can create application keys" |
+| A key deleted by somebody who neither owns it nor administers the tenant | "You can not remove application keys unless they're yours or you are a system user" |
+| Programmatic key creation disabled | "Programmatic application keys are not enabled" |
+| The programmatic key limit reached | "Limit of \<number\> application keys is reached for programmatic creation" |
+| A programmatic key that does not belong to the caller | "The provided application key is invalid or does not belong to the current user." |
+| Revoking an unknown key | "The provided application key is invalid." |
+
+### 23.6 External access, tokens and attachments
+
+| Situation | Message |
+|---|---|
+| An external page asked for a record that does not exist | "This document does not exist." |
+| An attachment served with a wrong token | "Invalid access token" |
+| An attachment refused by the attachment layer | "Sorry, you are not allowed to access this document. Please contact your system administrator." then "(Operation: \<operation\>)" then "Records: \<record display names\>, User: \<user identifier\>" |
+| Writing on an attachment that could be served as a static resource | "Sorry, you are not allowed to write on this document" |
+| Requesting a correspondent signature on an entity that carries no access token field | "Model \<entity description\> does not support token signature, as it does not have \<field name\> field." |
+| Signing a payload with an empty scope | "Non-empty scope required" |
+| An invitation or reset token that is unknown or spent | "Signup token '\<token\>' is not valid or expired" |
+| Signing up without an invitation where that is not allowed | "Signup is not allowed for uninvited users" |
+| Signing up with an electronic mail address already in use | "Another user is already registered using this email address." |
+
+### 23.7 The special identities and companies
+
+| Situation | Message |
+|---|---|
+| Activating the root identity | "You cannot activate the superuser." |
+| Deactivating the user one is signed in as | "You cannot deactivate the user you're currently logged in as." |
+| Deleting the root identity | "You can not remove the admin user as it is used internally for resources created by the platform (updates, module installation, ...)" |
+| Deleting the human administrator | "You cannot delete the admin user because it is utilized in various places (such as security configurations,...). Instead, archive it." |
+| Deleting the external-user template | "Deleting the template users is not allowed. Deleting this profile will compromise critical functionalities." |
+| Deleting the public identity | "Deleting the public user is not allowed. Deleting this profile will compromise critical functionalities." |
+| Removing the last settings administrator | "You must have at least an administrator user." |
+| Asking whether another user holds a group | "You can ony call user.has_group() with your current user." |
+| An internal user asking for self-service account removal | "Only the portal users can delete their accounts. The user(s) \<user names\> can not be deleted." |
+| Selecting a company the acting user is not allowed in | "Access to unauthorized or invalid companies." |
+
+The refusal texts of the company consistency check are in [multi-company, section 6.5](multi-company.md#65-the-message).
+
+---
+
+## 24. Invariants a rebuild must preserve
+
+1. Access rights are permissive and combine by disjunction; an entity with no access right at all is reachable by nobody in a restricted environment.
+2. Record rules are restrictive; global rules conjoin, group rules disjoin, and a user with no applicable group rule is restricted only by the global ones.
+3. Record rules of an embedded parent apply to the embedding entity, traversed through the link field.
+4. Access rights are checked before record rules, so a user without the entity-level right never learns whether a particular record exists.
+5. A search silently hides records excluded by rules; a direct read refuses and names them.
+6. A field's group requirement governs both reading and writing, and a field the acting user may not read is omitted from the field description entirely rather than being returned empty.
+7. Elevating privileges changes what is allowed, never who is acting; audit fields record the real user.
+8. Elevating from a restricted environment without an explicit context strips the default-value and active-record keys and keeps the language, the time zone and the company selection.
+9. Any environment whose acting user is the root identity is unrestricted, whatever the flag says.
+10. The three user kinds are mutually exclusive, and the exclusivity is enforced over the implied-group closure, not over explicit membership alone.
+11. The implied-group closure of a group includes the group itself and is computed with elevated rights.
+12. A group requirement consisting of a single full stop is satisfied by nobody, including the root identity, and a requirement of only negated groups is satisfied by everybody who is in none of them.
+13. An empty allowed-company list means all of the user's companies, not the main one alone.
+14. A restricted environment may not select a company the user does not belong to; an unrestricted one may.
+15. An empty company on a linked record is compatible with every owning company.
+16. A record access token is compared in constant time and, when it matches, yields an elevated record set containing that one record and nothing else.
+17. Every signed value includes a non-empty scope and the tenant's secret, so that a signature minted for one purpose never verifies for another.
+18. Every security cache is invalidated when its source changes, and the invalidation is signalled to the other workers.
+19. Only the four data gates, the private-name rule, the exposure flag and declared validations restrict anything; every presentation-level restriction is guidance.
+20. Every operation reachable from outside treats its record set and its arguments as untrusted, and performs its work through the ordinary path so that the gates run.
+
+---
+
+## 25. Acceptance criteria
+
+Each criterion is independently verifiable. Unless a criterion says otherwise, the acting user is an internal user who belongs to no capability group, `A` and `B` are persistent entities, and `g1` and `g2` are groups. Company scoping and company consistency have their own scenarios in [multi-company, section 16](multi-company.md#16-acceptance-criteria).
+
+### Users, groups and the acting identity
+
+**AC-SEC-1.** *Given* group `manager` implying `user` implying `internal`, and a user explicitly in `manager` only, *when* the user's effective groups are resolved, *then* the result is exactly `manager`, `user` and `internal`.
+
+**AC-SEC-2.** *Given* a user in the internal-user group, *when* a write adds them to the portal-user group, *then* the write is refused with "User " the user's name " cannot be at the same time in exclusive groups " and both group names.
+
+**AC-SEC-3.** *Given* a group whose implications are changed so that some active user would then be both internal and external, *when* the change is written, *then* it is refused with the same message, naming the users concerned.
+
+**AC-SEC-4.** *Given* a group implied by another group the user holds, *when* the user is removed from the implied group alone, *then* the write is refused with "It is not possible to remove implied group " the group name " from users " the user names.
+
+**AC-SEC-5.** *Given* a tenant with exactly one member of the settings group, *when* that user is removed from it, *then* the write is refused with "You must have at least an administrator user."
+
+**AC-SEC-6.** *Given* a portal user, *when* they ask whether another user belongs to a group, *then* the call is refused with "You can ony call user.has_group() with your current user."; *when* they ask about themselves, *then* the answer is returned.
+
+**AC-SEC-7.** *Given* a user who belongs to the technical-features group and a request not in debug mode, *when* membership of that group is tested, *then* the answer is false; *when* the same test runs in debug mode, *then* it is true.
+
+**AC-SEC-8.** *Given* a group requirement naming one positive group and one negated group, *when* a user who is in both is tested, *then* the requirement is not satisfied, because negated terms are evaluated first and refuse outright.
+
+**AC-SEC-9.** *Given* a group requirement consisting only of negated groups, *when* a user in none of them is tested, *then* the requirement is satisfied.
+
+**AC-SEC-10.** *Given* a group requirement of a single full stop, *when* any user, including a settings administrator and the root identity, is tested, *then* the requirement is not satisfied.
+
+**AC-SEC-11.** *Given* a privilege family that already contains a group named "User", *when* a second group of that family is created with the same name, *then* the creation is refused with "The name of the group must be unique within a group privilege!"
+
+### Access rights
+
+**AC-SEC-12.** *Given* an entity with no access right at all, *when* a restricted user reads it, *then* the read is refused; *when* an unrestricted environment reads it, *then* it succeeds.
+
+**AC-SEC-13.** *Given* two access rights on one entity, one granting read to `g1` and one granting read and create to `g2`, *when* a user holding only `g1` creates a record, *then* it is refused and the group paragraph names `g2` alone; *when* a user holding both creates a record, *then* it succeeds.
+
+**AC-SEC-14.** *Given* a refused read on an entity whose description is "Journal Entry" and whose transport name is `account.move`, *when* the refusal is produced, *then* its first paragraph is "You are not allowed to access 'Journal Entry' (account.move) records.", its second lists the allowing groups as family-slash-group lines, and its third is "Contact your administrator to request access if necessary."
+
+**AC-SEC-15.** *Given* the same entity where no group at all grants read, *when* the refusal is produced, *then* the second paragraph is "No group currently allows this operation."
+
+**AC-SEC-16.** *Given* an access right whose active flag is false, *when* the check runs, *then* it grants nothing and it is not listed among the allowing groups.
+
+**AC-SEC-17.** *Given* an access right with no group and the read flag set, *when* it is created, *then* a warning is recorded stating that every access-granting rule should specify a group, and the right grants read to every identity including the public one.
+
+**AC-SEC-18.** *Given* a package introducing a persistent entity with no access right, *when* it is installed, *then* a warning lists the entity and suggests a granting line.
+
+**AC-SEC-19.** *Given* an access right is created, written or deleted, *when* any user performs any operation afterwards in the same transaction, *then* the new decision applies immediately.
+
+### Record rules
+
+**AC-SEC-20.** *Given* a global rule and no group rule on an entity, *when* a user reads, *then* only the global rule restricts.
+
+**AC-SEC-21.** *Given* one global rule and two group rules, the user holding both groups, *when* the effective filter is computed, *then* it is the global rule conjoined with the **disjunction** of the two group rules.
+
+**AC-SEC-22.** *Given* one global rule and two group rules, the user holding neither group, *when* the effective filter is computed, *then* it is the global rule alone; the group term is omitted rather than becoming a term that admits nothing.
+
+**AC-SEC-23.** *Given* a single group rule for `g1` whose filter requires the field `value` to equal 42, the user holding `g1`, *when* the user writes on a record whose `value` is 0, *then* the write is refused and exactly that rule is blamed.
+
+**AC-SEC-24.** *Given* two group rules for groups the user holds, with filters requiring `value` to equal 42 and 78, *when* the user writes on a record whose `value` is 0, *then* the composed filter is the disjunction, the write is refused, and **both** rules are blamed.
+
+**AC-SEC-25.** *Given* two global rules, one requiring `value` to equal 42 and one that is always true, *when* the user writes on a record whose `value` is 0, *then* only the first rule is blamed.
+
+**AC-SEC-26.** *Given* an entity embedding a parent that carries a record rule, *when* the effective filter is computed, *then* it includes a traversal condition on the link field requiring the parent to satisfy the parent's own rule; *when* the parent rule hides the parent, *then* reading the embedding record is refused and the message carries "Implicitly accessed through" and the embedding entity's description and transport name.
+
+**AC-SEC-27.** *Given* a rule excluding some records and a **search**, *when* the search runs, *then* the excluded records are absent from the result and no refusal is raised.
+
+**AC-SEC-28.** *Given* the same rule and a **direct read** of an excluded record, *when* it runs, *then* it is refused, and the message names the operation and the acting user with their identifier.
+
+**AC-SEC-29.** *Given* the same refusal for a user in the technical-features group in debug mode, *then* it lists up to six offending records with their display names and identifiers, and the names of the failing rules after "Blame the following rules:".
+
+**AC-SEC-30.** *Given* a failing rule whose filter mentions the company field, and exactly one company that would give access and to which the user belongs, *when* the refusal is produced, *then* the resolution paragraph names that company and the refusal carries it as structured context.
+
+**AC-SEC-31.** *Given* a rule with no operation flag set, *when* it is created, *then* it is refused with "Rule must have at least one checked access right!"
+
+**AC-SEC-32.** *Given* a rule whose filter expression does not evaluate, *when* it is created active, *then* it is refused with "Invalid domain: " followed by the failure.
+
+**AC-SEC-33.** *Given* a global rule the record satisfies, a group rule it does not, and the record archived, *when* the user reads it, *then* the read is refused and only the group rule is blamed, because verification switches the archive filter off.
+
+**AC-SEC-34.** *Given* a user who may write a record, *when* the write sets a value that makes the record fail the write rule, *then* the write succeeds and the record becomes invisible to that user afterwards, because rules are checked on the records before the write.
+
+**AC-SEC-35.** *Given* a rule whose filter traverses a relation of the acting user, *when* the caller supplies a context value that would change that traversal, *then* the composed filter is unchanged, because the rule is evaluated in a context built from the environment and not from caller-supplied keys.
+
+**AC-SEC-36.** *Given* a record rule created inside a transaction, *when* a search runs later in the same transaction, *then* the new rule applies, because creating a rule flushes the unit of work before clearing the caches.
+
+**AC-SEC-37.** *Given* a rule declared on the record-rule entity itself, *when* it is created, *then* it is refused with "Rules can not be applied on the Record Rules model."
+
+### Field restrictions
+
+**AC-SEC-38.** *Given* a field restricted to `g1`, *when* a user outside `g1` requests the entity's field descriptions, *then* the field is absent from the result.
+
+**AC-SEC-39.** *Given* the same, *when* the user reads the field by naming it, *then* the read is refused with "You do not have enough rights to access the field" naming the field, the entity description and the transport name, and ending with the operation.
+
+**AC-SEC-40.** *Given* the same, *when* the user reads the record **without** naming fields, *then* the restricted field is silently absent from the result and no refusal is raised.
+
+**AC-SEC-41.** *Given* the same, *when* the user orders by, groups by, aggregates over or filters on the field, *then* each of the four is refused.
+
+**AC-SEC-42.** *Given* a user in `g1` who may read but, by an entity-specific override, may not write the field, *when* the field descriptions are produced, *then* the read-only flag on that field is true.
+
+**AC-SEC-43.** *Given* a field restricted by a single full stop, *when* any user reads it, *then* the read is refused, and in debug mode the explanation line is "Groups: always forbidden"; *when* an elevated flow reads it, *then* the value is returned; *when* the field descriptions are built, *then* the field is absent whatever the elevation.
+
+**AC-SEC-44.** *Given* a form view naming a field restricted to `g1`, with a separate label element for it, *when* a user outside `g1` resolves the view, *then* neither the field node nor its label node is present and the field is absent from the field descriptions served with the view.
+
+### Elevation and identity
+
+**AC-SEC-45.** *Given* a restricted user and an operation that elevates and creates a record, *when* the record is created, *then* its created-by field records the restricted user, not the root identity.
+
+**AC-SEC-46.** *Given* a restricted environment whose context sets a default for a field and names an active record, *when* an elevated environment is derived from it with no explicit context, *then* those keys are absent and the language, the time zone and the company selection remain.
+
+**AC-SEC-47.** *Given* the same, *when* the elevated environment is derived **with** an explicit context, *then* no cleaning happens and every key survives.
+
+**AC-SEC-48.** *Given* an environment whose acting user is the root identity and whose unrestricted flag has been explicitly cleared, *when* an access check runs, *then* it is still bypassed.
+
+**AC-SEC-49.** *Given* an elevated environment and an entity that refuses privileged relational commands, *when* commands targeting it are applied through a to-many relation, *then* they are evaluated as the transaction's original acting user and without elevation.
+
+**AC-SEC-50.** *Given* a relational field declared to bypass the target's read permission, *when* it is assigned in a restricted environment to a target record the user may not read, *then* the assignment is refused; *when* the same field is read, *then* the target's display value is returned without a read check on the target.
+
+**AC-SEC-51.** *Given* an operation that switches the acting user to another user, *when* it runs, *then* every gate is evaluated as that other user and the resulting environment is restricted.
+
+### Reachability, authentication levels and sessions
+
+**AC-SEC-52.** *Given* an operation whose name begins with an underscore, *when* it is invoked over the transport, *then* it is refused with "Private methods (such as " the qualified name ") cannot be called remotely."
+
+**AC-SEC-53.** *Given* an endpoint at the account level, *when* an anonymous visitor requests it, *then* the request is refused with "Session expired" and the visitor is redirected to the sign-in page carrying the original address as the return target.
+
+**AC-SEC-54.** *Given* an endpoint at the public level, *when* an anonymous visitor requests it, *then* the request runs as the public identity and every gate applies to that identity.
+
+**AC-SEC-55.** *Given* a signed-in session, *when* an administrator changes that user's password, *then* the next request of the session fails validation and continues anonymously.
+
+**AC-SEC-56.** *Given* a signed-in session, *when* the user's language is changed, *then* the session remains valid, because the language is not a token input.
+
+**AC-SEC-57.** *Given* a session created more than three hours ago, *when* any request other than the excluded polling paths is served, *then* the rotating part of the session key changes while the stable part does not, the previous key keeps working for the grace period, and a request-forgery token issued before the change still validates.
+
+**AC-SEC-58.** *Given* two concurrent requests on a session due for rotation, *when* both reach their save phase, *then* exactly one new key is generated and both responses carry it.
+
+**AC-SEC-59.** *Given* a session whose deletion instant has passed, *when* a request presents it, *then* it is treated as absent.
+
+**AC-SEC-60.** *Given* the configured number of failed sign-in attempts from one source address inside the cooldown window, *when* another attempt is made, *then* it is refused without the credential being verified, with "Too many login failures, please wait a bit before trying again."; *when* a successful sign-in happens later from that address, *then* the counter is cleared.
+
+**AC-SEC-61.** *Given* a user with a second factor enrolled, *when* the correct password is presented, *then* the session holds a pending identifier and no acting identifier, and no operation can be performed until the second step succeeds.
+
+**AC-SEC-62.** *Given* a user with a second factor enrolled, *when* a non-interactive call presents the password, *then* it is refused; *when* it presents a global application key, *then* it succeeds.
+
+**AC-SEC-63.** *Given* a second-factor code accepted at one counter value, *when* the same code is presented again, *then* it is refused with "Verification failed, please use the latest 6-digit code".
+
+**AC-SEC-64.** *Given* an endpoint that requires forgery protection, *when* a state-changing request arrives without a valid token, *then* it is refused before the endpoint runs and the endpoint never sees the request.
+
+**AC-SEC-65.** *Given* a bearer request carrying an application key limited to a scope, *when* it reaches an ordinary endpoint, *then* it is refused; *when* the key is global, *then* it succeeds and no session is created.
+
+### External access with tokens and attachments
+
+**AC-SEC-66.** *Given* a record with no access token and a share link requested by a user who may read it, *when* the link is produced, *then* a token is generated and stored with elevated rights and returned.
+
+**AC-SEC-67.** *Given* a user who may not read the record, *when* they request a share link, *then* the request is refused before any token is generated.
+
+**AC-SEC-68.** *Given* a public caller and a correct token, *when* the record is requested, *then* an elevated record set containing that record alone is returned.
+
+**AC-SEC-69.** *Given* a public caller and a token differing in one character, *when* the record is requested, *then* the ordinary read refusal is raised and the comparison takes the same time as a correct one.
+
+**AC-SEC-70.** *Given* a record that does not exist, *when* it is requested with any token, *then* the refusal is "This document does not exist."
+
+**AC-SEC-71.** *Given* a record carrying a token, *when* it is duplicated, *then* the copy carries no token.
+
+**AC-SEC-72.** *Given* a correspondent signature for a record and a correspondent, *when* the record's token is regenerated, *then* the old signature no longer verifies.
+
+**AC-SEC-73.** *Given* the same payload signed under two different scopes, *when* the two signatures are compared, *then* they differ.
+
+**AC-SEC-74.** *Given* a signing request with an empty scope, *when* it runs, *then* it is refused with "Non-empty scope required".
+
+**AC-SEC-75.** *Given* a record reached with a token alone, *when* the visitor posts a message, *then* the message is attributed to the record's own contact; *when* the address also carries a correspondent identifier and a matching signature, *then* the message is attributed to that correspondent.
+
+**AC-SEC-76.** *Given* a limited field token, *when* it is used after its validity window, *then* the content is refused; *when* it is used for another field or another record, *then* it is refused.
+
+**AC-SEC-77.** *Given* an invitation token, *when* the invited person completes sign-in once, *then* the token no longer verifies and a further use is refused with "Signup token '" the token "' is not valid or expired".
+
+**AC-SEC-78.** *Given* an attachment attached to no record, *when* a user other than its author reads it, *then* it is refused; *when* its author reads it, *then* it is served.
+
+**AC-SEC-79.** *Given* an attachment holding the content of a field the acting user may not read, *when* the user reads the attachment, *then* it is refused.
+
+**AC-SEC-80.** *Given* a public attachment, *when* an anonymous visitor reads it, *then* it is served; *when* the same visitor writes on it, *then* it is refused with "Sorry, you are not allowed to write on this document".
+
+**AC-SEC-81.** *Given* a refused attachment read, *when* the same values are read again in the same transaction, *then* the refusal is raised again and no value comes back from the cache, because the elevated read performed to build the refusal invalidated it.
+
+### Views, menus and caching
+
+**AC-SEC-82.** *Given* a user who may not create, write or delete records of an entity, *when* a form view of it is served, *then* the three flags carried with the view are false and every field description is marked read-only.
+
+**AC-SEC-83.** *Given* a menu item without an action whose descendants are all hidden, *when* the menu tree is served, *then* the item is absent; *when* one descendant becomes visible, *then* the item and all its ancestors appear.
+
+**AC-SEC-84.** *Given* a menu item carrying a group list, *when* a user outside those groups loads the menu, *then* the item is absent even though the action's entity is readable.
+
+**AC-SEC-85.** *Given* a cached decision that a user may read an entity, *when* the access right granting it is deleted, *then* the next check in any worker refuses, because the invalidation is signalled to the other workers.
+
+**AC-SEC-86.** *Given* a cached rule filter for a user whose company selection is one company, *when* the selection changes to another, *then* a different cache entry is used and the filter reflects the new selection, with nothing invalidated.
+
+---
+
+## 26. Reconciliation notes
+
+The two drafts merged into this document disagreed on eight points; each was settled against the observed behaviour of the system, and two organisational decisions are recorded with them.
+
+1. **The number of layers.** One draft described four gates, the other six layers. Both are correct at different granularities: four gates guard *data* (entity, record, field and the reachability of an operation), and the six-layer view adds the transport-level authentication level and the exposure rule as layers of their own. [Section 1](#1-the-layers-at-a-glance) states both views and says which is which, so that neither reader loses the frame they came with.
+2. **Where company scoping belongs.** One draft treated company scoping and company consistency as two sections of the security model; the other gave them a separate document. They are kept in [multi-company](multi-company.md), because company scoping is not a gate of its own but an application of record rules, and because the company tree, per-company values, currency and cross-company flows are far larger than the part the gates need. [Section 12](#12-company-scoping-and-company-consistency) keeps the part the gates need, and the acceptance criteria for company behaviour live with the rest in that document.
+3. **Whether a group rule that is always true does anything.** One draft implied that such a rule is a no-operation. It is a grant: because group rules combine by disjunction, a group rule whose filter is always true widens the disjunction and neutralises the narrower rules of the lower grades. [Section 22.3](#223-the-shape-of-a-record-rule-set) states this, and criterion AC-SEC-25 distinguishes it from the conjunctive behaviour of global rules.
+4. **Whether an access right with no group grants anything.** One draft said such a right is a configuration error that grants nothing; the other said it grants to everyone. It grants to every identity, including the public one, and additionally records a warning at load time. [Section 5.1](#51-the-entity) and criterion AC-SEC-17 state the observed behaviour, and the warning is what marks it as a mistake rather than the right being ignored.
+5. **The exclusivity of the user kinds.** One draft checked exclusivity over explicitly assigned groups. It is checked over the implied-group closure, which is why changing a group's implications can make an existing user invalid and is refused at that moment. [Section 3.4](#34-exclusivity-of-the-kinds) and criterion AC-SEC-3 state the corrected rule.
+6. **The meaning of an empty allowed-company list.** One draft read it as the user's main company alone. It means all of the user's companies. Invariant 13 of [section 24](#24-invariants-a-rebuild-must-preserve) states the corrected rule.
+7. **The message when a refusal is reached through an embedded parent.** One draft dropped the wrapper sentence. It is present and is reproduced verbatim in [section 23.1](#231-the-data-gates); criterion AC-SEC-26 asserts it.
+8. **Constant-time comparison.** One draft described the token comparison as an ordinary equality test. Both the session token and the record access token are compared over their whole length so that the elapsed time carries no information; [construction rule 10](#21-trust-boundaries-and-construction-rules) and criteria AC-SEC-69 state it.
+9. **Message presentation.** One draft carried the messages only where they arise, the other only in a catalogue. Both are kept: each message is quoted where its condition is specified, and [section 23](#23-message-catalogue) gathers them so that a rebuild can check its coverage in one pass. No message appears in the catalogue that is not also specified in place.
+10. **Acceptance criteria identifiers.** The two drafts numbered their scenarios in two independent series. They are unified here in one series with the prefix `AC-SEC`, scenarios that appeared in both are stated once, and the company scenarios moved to [multi-company](multi-company.md#16-acceptance-criteria).
+
+---
+
+## Related documents
+
+- [Architecture](architecture.md) — the environment that carries the acting user, the company selection and the unrestricted flag, and the call path the gates sit in.
+- [Multi-company](multi-company.md) — the company tree, company scoping through record rules, the company consistency check, per-company values and cross-company flows.
+- [The entity and field system](entity-and-field-system.md) — field attributes, the group requirement on a field, company-dependent values and the filter grammar the rules are written in.
+- [Record operations and query notation](record-operations-and-query-notation.md) — the generic operations whose checks are listed in [section 8](#8-the-checks-performed-by-each-generic-operation), and the filter grammar of a record rule.
+- [Inheritance and extension](inheritance-and-extension.md) — how a package adds groups, rights, rules and field restrictions without touching another package's.
+- [Views and actions](views-and-actions.md) — the presentation-level group conditions that are guidance, not enforcement.
+- [The package system](package-system.md) — the categories that name privilege families, and the load-time warnings about missing access rights.
+- [Client architecture](client-architecture.md) — what the client does with the flags and field descriptions served alongside a view.
+- [The request lifecycle](../runtime/request-lifecycle.md) — routing, the authentication level of an endpoint and error mapping.
+- [Caching](../runtime/caching.md) — the record cache and the cross-worker signalling that the invalidations of [section 19](#19-caching-and-invalidation-of-security-decisions) rely on.
+- [Identity and access](../domains/identity-and-access/README.md) — the entity-by-entity field catalogues of User, Group, Privilege Family, Access Right and Record Rule, and the shipped groups, rules and settings.
+- [The groups and access reference](../references/groups-and-access.md) — the complete shipped catalogues.
+- [The validation message reference](../references/validation-messages.md) — every message of the platform in one list.

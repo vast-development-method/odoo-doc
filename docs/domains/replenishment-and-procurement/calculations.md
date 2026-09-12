@@ -250,7 +250,7 @@ The forecast after ordering is 4 + 48 = 52, which is above the maximum of 50; th
 
 ```
 multiple = replenishment_unit_of_measure, or the fallback multiple when that is empty
-if no multiple:
+when no multiple:
     rounded_quantity = raw_quantity
 else:
     quantity_in_multiples = convert(raw_quantity, product reference unit, multiple)
@@ -397,7 +397,7 @@ adjusted by the weekly shift of section 13.4 when the vendor groups weekly on a 
 planned              = order.date_planned when set, otherwise
                        the minimum date_planned among the lines about to be created
 candidate_order_date = planned − vendor lead time days
-if date_part(candidate_order_date) < date_part(order.date_order):
+when date_part(candidate_order_date) < date_part(order.date_order):
     order.date_order = candidate_order_date
 ```
 
@@ -410,7 +410,7 @@ When the vendor's grouping mode is `week` and `grouping_weekday` names a target 
 ```
 delta_days        = (7 + t − weekday(values.date_planned)) modulo 7
 line.date_planned = values.date_planned + delta_days days
-if order.date_planned is empty or order.date_planned ≥ line.date_planned:
+when order.date_planned is empty or order.date_planned ≥ line.date_planned:
     order.date_order = order.date_order + delta_days days
 ```
 
@@ -428,7 +428,7 @@ A sales order line for 10 units is confirmed on day 0 with a promised delivery d
 | Rule selection returns the delivery rule, supply method `make_to_order`; the pull action creates the delivery move | `date` = day 20 − 0 = day 20; `deadline` = day 20 | delivery move on day 20 |
 | Confirming the delivery move builds a need at the warehouse stock location | dates information: `date_planned` = day 20, `date_order` = day 20 − `purchase_delay` 3 = day 17 | need on day 20, to order on day 17 |
 | Rule selection returns the Buy rule; the buy action selects the vendor and creates the purchase order | `date_order` = day 17 (taken from `values.date_order`); the single line's `date_planned` = day 20 | Order Deadline day 17, Expected Arrival day 20 |
-| Confirming the purchase order creates the receipt move | `date` = day 20; `deadline` = day 20; linked as the upstream move of the delivery move | receipt on day 20 |
+| Confirming the purchase order creates the receipt move | `date` = day 20; `deadline` = day 20; linked as the origin move of the delivery move | receipt on day 20 |
 
 The days to purchase of 2 did not move either date on the purchase order. It only widens the forecast window: a reordering rule for the same product would have read its forecast at `today + 3 + 2 + horizon`.
 
@@ -503,7 +503,7 @@ When the request carries a reordering rule, that rule is written on the line.
 ### 15.2 Creating a new line
 
 ```
-if not force_unit_of_measure and vendor unit ≠ request unit:
+when not force_unit_of_measure and vendor unit ≠ request unit:
     line_quantity = convert(request quantity, request unit, vendor unit)
     line_unit     = vendor unit
 else:
@@ -557,25 +557,25 @@ purchase:    move.date     = move.deadline = line.date_planned, or order.date_pl
 
 ```
 delta = current deadline − new deadline          (zero when the move had no deadline)
-for every upstream and downstream move M that is neither done nor cancelled and not yet visited:
-    if M has a deadline and delta ≠ 0:
+for every origin and destination move M that is neither done nor cancelled and not yet visited:
+    when M has a deadline and delta ≠ 0:
         M.deadline = M.deadline − delta          (which propagates recursively)
 ```
 
 The visited set prevents a cycle from looping forever. The effect is that the whole chain shifts by the same amount while keeping the relative offsets that the rule lead times introduced.
 
-**Worked example.** A delivery move and its upstream internal move both have a deadline of day 30. The delivery deadline is moved to day 24. `delta` = 30 − 24 = 6 days, so the upstream move's deadline becomes 30 − 6 = day 24 as well. Completing the upstream move afterwards sets its scheduled date to the moment of completion but leaves both deadlines at day 24.
+**Worked example.** A delivery move and its origin internal move both have a deadline of day 30. The delivery deadline is moved to day 24. `delta` = 30 − 24 = 6 days, so the origin move's deadline becomes 30 − 6 = day 24 as well. Completing the origin move afterwards sets its scheduled date to the moment of completion but leaves both deadlines at day 24.
 
 ### 17.3 Delay alert
 
 ```
-delay_alert_date = max( scheduled date of the upstream moves that are not done )
+delay_alert_date = max( scheduled date of the origin moves that are not done )
                    when that maximum is later than this move's own scheduled date
                  = empty otherwise
                  = empty always, for a move that is done or cancelled
 ```
 
-**Worked example.** A delivery is scheduled on day 10. Its upstream receipt is scheduled on day 12 and is not completed. The delivery's delay alert date is day 12 and the delivery is shown as late; the pop-over names the receipt as the responsible document.
+**Worked example.** A delivery is scheduled on day 10. Its origin receipt is scheduled on day 12 and is not completed. The delivery's delay alert date is day 12 and the delivery is shown as late; the pop-over names the receipt as the responsible document.
 
 ---
 
@@ -584,7 +584,7 @@ delay_alert_date = max( scheduled date of the upstream moves that are not done )
 For a move whose rule's supply method is `make_to_stock_else_make_to_order`, at confirmation:
 
 ```
-if move real quantity ≤ 0 or the move's source location bypasses reservation:
+when move real quantity ≤ 0 or the move's source location bypasses reservation:
     quantity_to_procure = move.demand_quantity
 else:
     free       = free quantity of the product at the move's source location      (read once per pair)
@@ -619,7 +619,7 @@ The move itself stays with supply method `make_to_stock` and keeps its full dema
 - Then outgoing moves whose reservation date is later than today or empty, ordered by reservation date ascending, then priority descending, then scheduled date ascending, then surrogate key ascending.
 - Incoming moves are ordered by priority descending, then scheduled date ascending, then surrogate key ascending.
 
-**Step 3: build the linked-move set per outgoing move.** Roll up the upstream moves of each outgoing move recursively, stopping at the incoming moves, and remove the incoming moves themselves from the result. The remainder is the set of internal moves that feed that outgoing move.
+**Step 3: build the linked-move set per outgoing move.** Roll up the origin moves of each outgoing move recursively, stopping at the incoming moves, and remove the incoming moves themselves from the result. The remainder is the set of internal moves that feed that outgoing move.
 
 **Step 4: read the current stock.** Read the positive stock quantity records in the warehouse locations, grouped by product and location. A quantity in a descendant of the warehouse stock location is added both to its own location total and to the warehouse stock location total.
 
@@ -632,7 +632,7 @@ for each linked move whose state is partially_available or assigned:
     reserved_out += reserved
     already_used[linked move] += reserved
     current[product, linked move source location] −= reserved
-    if that source location is a descendant of the warehouse stock location:
+    when that source location is a descendant of the warehouse stock location:
         current[product, warehouse stock location] −= reserved
     stop when reserved_out reaches the outgoing move's quantity
 ```
@@ -648,16 +648,16 @@ for each linked move whose state is not draft, cancel, assigned or done:
     demand    = max(linked move.demand_quantity_in_reference_unit − reserved, 0)
     demand    = min(demand, demand_out)
     skip when demand rounds to zero
-    if the linked move has upstream moves:
-        move_available = (sum of the quantities of its completed upstream moves)
-                       − (sum of the quantities of the completed moves fed by those upstream moves, other than itself)
+    when the linked move has origin moves:
+        move_available = (sum of the quantities of its completed origin moves)
+                       − (sum of the quantities of the completed moves fed by those origin moves, other than itself)
                        − reserved
     else:
         move_available = current[product, linked move source location]
     taken = min(demand, move_available, current[product, linked move source location])
     when taken > 0:
         current[product, linked move source location] −= taken
-        if that source location is a descendant of the warehouse stock location:
+        when that source location is a descendant of the warehouse stock location:
             current[product, warehouse stock location] −= taken
         taken_from_stock_out += taken
     demand_out −= taken
@@ -673,7 +673,7 @@ transit_stock = (sum of current[product, L] over the warehouse locations L that 
 
 then for each outgoing move of that product, in order:
 
-1. When `reserved_out` is greater than zero, emit a line of that quantity with the outgoing move, the reservation document, and the "in transit" flag set when the reservation document itself has upstream moves; subtract it from the remaining demand.
+1. When `reserved_out` is greater than zero, emit a line of that quantity with the outgoing move, the reservation document, and the "in transit" flag set when the reservation document itself has origin moves; subtract it from the remaining demand.
 2. When the remaining demand rounds to zero, continue with the next outgoing move.
 3. When `taken_from_stock_out` is greater than zero, emit a line of that quantity with the outgoing move; subtract it.
 4. When the remaining demand rounds to zero, continue.
@@ -740,7 +740,7 @@ daily_demand = ( (quantity_out − quantity_returned) ÷ (limit_date − start_d
 **Step 4: the derived figures.**
 
 ```
-if product_maximum_quantity < product_minimum_quantity:
+when product_maximum_quantity < product_minimum_quantity:
     product_maximum_quantity = product_minimum_quantity
 average_stock   = product_minimum_quantity + (product_maximum_quantity − product_minimum_quantity) ÷ 2
 quantity_range  = product_maximum_quantity − product_minimum_quantity, or 1 when that is zero
@@ -814,7 +814,7 @@ counting only the records whose location is the replenishment location itself or
 
 ```
 in_progress = quantity_in_progress[product, location] + sum of quantity_to_order of existing rules
-if in_progress = 0:
+when in_progress = 0:
     shortage stays unchanged
 else:
     shortage = shortage + in_progress
@@ -923,11 +923,11 @@ The divisor turns the quantity observed over the period into a quantity per mont
 ### 23.2 Suggested quantity
 
 ```
-if suggest_based_on = "actual_demand":
-    if forecast quantity ≥ 0: suggested_quantity = 0
+when suggest_based_on = "actual_demand":
+    when forecast quantity ≥ 0: suggested_quantity = 0
     else: suggested_quantity = max( round_up( −forecast quantity × suggest_percent ÷ 100, 1 ), 0 )
 else:
-    if monthly_demand ≤ 0: suggested_quantity = 0
+    when monthly_demand ≤ 0: suggested_quantity = 0
     else:
         monthly_ratio      = suggest_days ÷ (365.25 ÷ 12)
         raw                = monthly_demand × monthly_ratio × suggest_percent ÷ 100
@@ -1005,11 +1005,11 @@ A suffix is then built:
 
 ```
 suffix = ""
-if action is pull or pull_push, direct_destination exists and location_destination_from_rule is false:
+when action is pull or pull_push, direct_destination exists and location_destination_from_rule is false:
     suffix += "<br>The products will be moved towards <b>{direct_destination}</b>, <br/> as specified from <b>{operation}</b> destination."
-if procure_method = make_to_order and location_source is set:
+when procure_method = make_to_order and location_source is set:
     suffix += "<br>A need is created in <b>{source}</b> and a rule will be triggered to fulfill it."
-if procure_method = make_to_stock_else_make_to_order and location_source is set:
+when procure_method = make_to_stock_else_make_to_order and location_source is set:
     suffix += "<br>If the products are not available in <b>{source}</b>, a rule will be triggered to bring the missing quantity in this location."
 ```
 
@@ -1136,7 +1136,7 @@ procure_method = make_to_stock   when the rule's source location is the supplyin
 For a list of routings (source location, destination location, operation type, action) and a set of shared values:
 
 ```
-for each routing, in order:
+for each routing, following the given order:
     name           = "<warehouse code>: <source name> → <destination name>" plus " (<suffix>)" when a suffix is given
     location_source, destination_location, action, operation_type from the routing
     auto           = manual
@@ -1144,7 +1144,7 @@ for each routing, in order:
     warehouse      = the warehouse
     company        = the warehouse company
     then overwritten by the shared values
-if the shared values requested propagate_cancel and the list is not empty:
+when the shared values requested propagate_cancel and the list is not empty:
     the last rule of the list has propagate_cancel forced to false
 ```
 
@@ -1195,16 +1195,16 @@ days_to_arrival = round( (reference − date_order) in seconds ÷ 86400, 2 )
 
 **Outputs.** A purchase order line, or nothing; and a contact, or nothing.
 
-**Steps.** This is a breadth-first walk backwards along the chain of upstream moves.
+**Steps.** This is a breadth-first walk backwards along the chain of origin moves.
 
 1. Put the starting move into a queue. Let *seen* be the empty set.
 2. While the queue is not empty:
    1. Take the first move out of the queue, call it *current*.
    2. When *current* carries a purchase order line, return that line together with the counterparty of the transfer that carries *current*, and stop.
    3. Add *current* to *seen*.
-   4. Append to the end of the queue every upstream move of *current* that is neither already in the queue nor in *seen*.
+   4. Append to the end of the queue every origin move of *current* that is neither already in the queue nor in *seen*.
 3. When the queue empties without a match, return nothing for both outputs.
 
 The walk is breadth-first, not depth-first, so that the nearest purchase order line in the chain wins when a move is fed by several branches.
 
-**Worked example.** A warehouse receives in three steps, so a purchase of 10 units produces three moves: Vendors to Input (this move carries the purchase order line), Input to Quality Control, Quality Control to Stock. The buyer returns 2 units, which creates a return move from Stock to an internal "Vendor returns processing" location; a push rule then creates a second move from that location to the vendor location. Walking backwards from that last move: the push move has no purchase order line, its upstream move is the return move, which has none either; the return move's upstream move is "Quality Control to Stock", which has none; then "Input to Quality Control", which has none; then "Vendors to Input", which carries the line. The walk returns that line and the vendor of its receipt, so the move that leaves for the vendor is stamped with both. The received quantity of the line falls from 10 to 8.
+**Worked example.** A warehouse receives in three steps, so a purchase of 10 units produces three moves: Vendors to Input (this move carries the purchase order line), Input to Quality Control, Quality Control to Stock. The buyer returns 2 units, which creates a return move from Stock to an internal "Vendor returns processing" location; a push rule then creates a second move from that location to the vendor location. Walking backwards from that last move: the push move has no purchase order line, its origin move is the return move, which has none either; the return move's origin move is "Quality Control to Stock", which has none; then "Input to Quality Control", which has none; then "Vendors to Input", which carries the line. The walk returns that line and the vendor of its receipt, so the move that leaves for the vendor is stamped with both. The received quantity of the line falls from 10 to 8.

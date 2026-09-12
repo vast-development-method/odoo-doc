@@ -11,7 +11,7 @@ Replenishment turns a need into a supplying document. The workflows below carry 
 5. The buy action
 6. The manufacture action
 7. Push application
-8. Confirming a stock move and creating the upstream need
+8. Confirming a stock move and creating the supply need
 9. Make to order versus multi-step routes
 10. Adjusting the supply method of an existing move
 11. Reordering rule evaluation
@@ -332,7 +332,7 @@ A sales order line for 10 units is confirmed on day 0 with a promised delivery d
 3. Confirming the delivery move creates a need at the warehouse stock location with `date_planned` = day 20 and `date_deadline` = day 20, and, because the source location is inside the warehouse, with `date_order` computed by the dates-information rule: `date_order` = day 20 minus the purchase delay carried by the rule chain = day 20 minus 3 = day 17.
 4. Rule selection at the warehouse stock location returns the Buy rule. The buy action selects the vendor, and creates a purchase order with `date_order` = day 17 (taken from `values.date_order`) and one line with `date_planned` = day 20.
 5. The company's days to purchase of 2 does not move the order deadline or the expected arrival; it widens the forecast window used by reordering rules (see section 11). The purchase order therefore reads: Order Deadline day 17, Expected Arrival day 20.
-6. Confirming the purchase order creates the receipt move with `date` = day 20 and `deadline` = day 20, linked as the upstream move of the delivery move.
+6. Confirming the purchase order creates the receipt move with `date` = day 20 and `deadline` = day 20, linked as the origin move of the delivery move.
 
 Had the sales safety days been 2, step 1 would give `date_planned` = day 18 and `date_deadline` = day 20, step 4 would give `date_order` = day 15 and a line `date_planned` of day 18, and step 6 would give a receipt scheduled on day 18 with a deadline of day 20.
 
@@ -436,14 +436,14 @@ Had the sales safety days been 2, step 1 would give `date_planned` = day 18 and 
 
 ---
 
-## 8. Confirming a stock move and creating the upstream need
+## 8. Confirming a stock move and creating the supply need
 
 **Purpose.** Move a draft stock move into its running state and, when required, create the need that will supply it.
 
 **Steps.** For a batch of moves:
 
 1. **Classify each draft move.**
-   - If the move already has upstream moves: it becomes *waiting*.
+   - If the move already has origin moves: it becomes *waiting*.
    - Else if its supply method is `make_to_order`: it becomes *waiting* and a procurement request is created for it.
    - Else if its rule's supply method is `make_to_stock_else_make_to_order`: it becomes *confirmed* and a procurement request is created for it.
    - Else: it becomes *confirmed*.
@@ -483,10 +483,10 @@ Had the sales safety days been 2, step 1 would give `date_planned` = day 18 and 
 9. **Merge** the moves with their siblings, unless merging was disabled by the caller.
 10. **Handle negative moves.** For each merged move whose demand quantity is negative:
     1. When it has a final location that differs from its destination location, push it first (section 7), which produces new push moves.
-    2. Swap its source and destination locations, set its final location to its (new) destination location, rebuild its upstream and downstream links by re-orienting each linked move according to the sign of its own quantity, flip the sign of its demand quantity, switch its operation type to the return operation type when one is configured, and set its supply method to `make_to_stock`.
+    2. Swap its source and destination locations, set its final location to its (new) destination location, rebuild its origin and destination links by re-orienting each linked move according to the sign of its own quantity, flip the sign of its demand quantity, switch its operation type to the return operation type when one is configured, and set its supply method to `make_to_stock`.
     3. Assign it to a transfer.
 11. **Reserve where possible.** Every move now in state `confirmed` or `partially_available` whose source location bypasses reservation, or which should be reserved at confirmation, is reserved.
-12. **Confirm the new push moves.** Positive push moves are confirmed normally; negative push moves are confirmed with merging restricted to the siblings of their upstream moves.
+12. **Confirm the new push moves.** Positive push moves are confirmed normally; negative push moves are confirmed with merging restricted to the siblings of their origin moves.
 
 ---
 
@@ -497,10 +497,10 @@ Two different mechanisms create a chain of moves. A replacement must implement b
 | | Make to order chain | Multi-step route chain |
 |---|---|---|
 | Trigger | A move whose supply method is `make_to_order` is confirmed. | A move is completed and a push rule applies to its destination location. |
-| Direction | Backwards: the downstream move exists first, the upstream document is created to supply it. | Forwards: the upstream move exists first, the downstream move is created to continue. |
+| Direction | Backwards: the downstream move exists first, the origin document is created to supply it. | Forwards: the origin move exists first, the downstream move is created to continue. |
 | Link | The created move lists the triggering move in `move_destinations`. | The created move is listed in the completing move's `move_destinations`. |
-| Reservation | The downstream move waits for the upstream move; it reserves nothing from general stock. | The downstream move is created with supply method `make_to_order` and is therefore bound to the move that created it. |
-| Quantity | The full demand quantity, except for `make_to_stock_else_make_to_order` where only the missing part is chained. | The quantity actually completed on the upstream move (or the full negative demand for a negative move). |
+| Reservation | The downstream move waits for the origin move; it reserves nothing from general stock. | The downstream move is created with supply method `make_to_order` and is therefore bound to the move that created it. |
+| Quantity | The full demand quantity, except for `make_to_stock_else_make_to_order` where only the missing part is chained. | The quantity actually completed on the origin move (or the full negative demand for a negative move). |
 | Cancellation | Governed by the rule's `propagate_cancel`, evaluated downstream. | Same. |
 | Typical use | Buying or manufacturing specifically for one sales order. | Two-step reception, three-step reception, two-step and three-step delivery. |
 
@@ -512,7 +512,7 @@ Two different mechanisms create a chain of moves. A replacement must implement b
 A purchase order for 12 units is confirmed:
 
 1. The receipt move is created from the vendor location to the Input location, with `location_final` = the warehouse stock location, scheduled on the expected arrival date.
-2. Confirming the receipt does not create anything upstream (supply method `make_to_stock`).
+2. Confirming the receipt creates no supply need (supply method `make_to_stock`).
 3. When the receipt is validated, push application finds the push rule at the Input location and creates a second move Input → Stock for the quantity actually received (12), with `procure_method` = `make_to_order`, `date` = the receipt date plus the push rule lead time, `deadline` = the receipt deadline, and `move_destinations` on the receipt pointing at it.
 4. Increasing the purchase order line from 12 to 15 after validation creates a second receipt move for the extra 3; validating that second receipt pushes another 3 into the existing downstream transfer, which then shows 15.
 
@@ -881,13 +881,13 @@ Per warehouse, while "Resupply Subcontractors" is on, a pull rule inside the sam
 1. Refuse when any move in the batch is completed and its destination is not an inventory-loss location: `You cannot cancel a stock move that has been set to 'Done'. Create a return in order to reverse the moves which took place.`
 2. Unmark the moves as picked and release their reservations.
 3. Set their state to `cancel`.
-4. For each cancelled move, look at the sibling moves (the other upstream moves of its downstream moves):
-   - **When the move has `propagate_cancel` true** and every sibling is already cancelled: cancel the downstream moves whose state is not `done` and whose source location equals this move's destination location; for the remaining downstream moves, set their supply method to `make_to_stock` and unlink this move from their upstream moves. When the stored parameter `inventory.cancel_originating_moves` is set, also cancel the upstream moves that are not completed.
-   - **When the move has `propagate_cancel` false** and every sibling is completed or cancelled: set the downstream moves' supply method to `make_to_stock` and unlink this move from their upstream moves.
+4. For each cancelled move, look at the sibling moves (the other origin moves of its downstream moves):
+   - **When the move has `propagate_cancel` true** and every sibling is already cancelled: cancel the downstream moves whose state is not `done` and whose source location equals this move's destination location; for the remaining downstream moves, set their supply method to `make_to_stock` and unlink this move from their origin moves. When the stored parameter `inventory.cancel_originating_moves` is set, also cancel the origin moves that are not completed.
+   - **When the move has `propagate_cancel` false** and every sibling is completed or cancelled: set the downstream moves' supply method to `make_to_stock` and unlink this move from their origin moves.
 5. Unless the caller asked to skip it, log a cancellation activity on the non-cancelled origin documents.
-6. Clear the upstream links of the cancelled moves and set their supply method to `make_to_stock`.
+6. Clear the origin links of the cancelled moves and set their supply method to `make_to_stock`.
 
-**Breaking a make to order link.** Unlinking one specific upstream move from a downstream move: the upstream move is removed from the downstream move's `move_origins`, the downstream move's supply method becomes `make_to_stock`, and its state is recomputed from its remaining links and reservation.
+**Breaking a make to order link.** Unlinking one specific origin move from a downstream move: the origin move is removed from the downstream move's `move_origins`, the downstream move's supply method becomes `make_to_stock`, and its state is recomputed from its remaining links and reservation.
 
 **Cancelling a purchase order.** For every line of every order being cancelled (in state draft, sent, to approve or purchase):
 
@@ -917,13 +917,13 @@ Per warehouse, while "Resupply Subcontractors" is on, a pull rule inside the sam
 
 1. Remember the set of moves already visited in this propagation, to prevent loops.
 2. Compute `delta` = the move's current deadline minus the new deadline (zero when the move had no deadline).
-3. For every upstream and downstream move that is neither completed nor cancelled and has not yet been visited, when it has a deadline and `delta` is not zero, subtract `delta` from its deadline. Writing that value propagates recursively.
+3. For every origin and destination move that is neither completed nor cancelled and has not yet been visited, when it has a deadline and `delta` is not zero, subtract `delta` from its deadline. Writing that value propagates recursively.
 
 The effect is that the whole chain shifts by the same amount while keeping the relative offsets that the rule lead times introduced.
 
-**Worked example.** A delivery move and its upstream internal move both have a deadline of day 30. Moving the delivery deadline 6 days earlier, to day 24, gives `delta` = 6 days; the upstream move's deadline becomes day 24 as well. Completing the upstream move afterwards sets its `date` to the moment of completion but leaves both deadlines at day 24.
+**Worked example.** A delivery move and its origin internal move both have a deadline of day 30. Moving the delivery deadline 6 days earlier, to day 24, gives `delta` = 6 days; the origin move's deadline becomes day 24 as well. Completing the origin move afterwards sets its `date` to the moment of completion but leaves both deadlines at day 24.
 
-**Delay alert.** For every move that is neither completed nor cancelled, `delay_alert_date` is the maximum scheduled date among its not-yet-completed upstream moves, when that maximum is later than the move's own scheduled date; empty otherwise. A move with a non-empty `delay_alert_date` is shown as late and offers a pop-over listing the responsible upstream documents.
+**Delay alert.** For every move that is neither completed nor cancelled, `delay_alert_date` is the maximum scheduled date among its not-yet-completed origin moves, when that maximum is later than the move's own scheduled date; empty otherwise. A move with a non-empty `delay_alert_date` is shown as late and offers a pop-over listing the responsible origin documents.
 
 **Deadline change notification.** When a deadline change is propagated from one document to another, a note is posted on each affected document, with subject `Deadline updated due to delay on <origin document name>` and body `The deadline has been automatically updated due to a delay on <link to the origin document>.`, authored by the system account. The note is skipped when the most recent message on the document already has the same subject.
 
@@ -933,7 +933,7 @@ The effect is that the whole chain shifts by the same amount while keeping the r
 
 ## 24. The forecast report
 
-**Purpose.** Explain, for one product (or every variant of one template) in one warehouse, where every unit of forecast stock comes from and where it goes, and let a user reserve or release the upstream chain of a specific outgoing document.
+**Purpose.** Explain, for one product (or every variant of one template) in one warehouse, where every unit of forecast stock comes from and where it goes, and let a user reserve or release the origin chain of a specific outgoing document.
 
 **Actor.** Any user with inventory read rights.
 
@@ -944,7 +944,7 @@ The effect is that the whole chain shifts by the same amount while keeping the r
 3. **Build the header** (see `interfaces.md`, "Forecast report payload"): the product display names and variant names, the on-hand quantity, the forecast quantity, the free quantity, the incoming and outgoing quantities, the draft incoming and outgoing quantities, and the lead time with its breakdown.
 4. **Build the lines** by running the reconciliation algorithm of `calculations.md`, section "Forecast reconciliation".
 5. **Reserve or release a chain.** Two operations are offered on a line that carries an outgoing move:
-   - reserve: take every upstream move of that outgoing move, recursively, keep those whose state is not draft, cancelled, assigned or done, and reserve them;
+   - reserve: take every origin move of that outgoing move, recursively, keep those whose state is not draft, cancelled, assigned or done, and reserve them;
    - release: take the same set, keep those whose state is not draft, cancelled or done, and release their reservations.
 
 ---

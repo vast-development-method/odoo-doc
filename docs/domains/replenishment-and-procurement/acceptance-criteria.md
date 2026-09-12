@@ -229,7 +229,7 @@ Then rule `X` is returned; and when it runs with warehouse `Second`, rule `Y` is
 
 ## 5. The pull action and chaining
 
-**AC-070 A make-to-order move creates the upstream need (`RP-RULE-140`).**
+**AC-070 A make-to-order move creates the supply need (`RP-RULE-140`).**
 Given product `P` carrying a route with a rule `Stock to Output` that pulls from `WH/Stock` to `WH/Output` with the internal operation type and the flag "destination location from rule"; and a delivery of 10 units from `WH/Output` to the customer location whose supply method is make to order.
 When the delivery is confirmed and the scheduler runs.
 Then exactly one move from `WH/Stock` to `WH/Output` exists, and the delivery move is listed among its downstream moves.
@@ -252,12 +252,12 @@ Then the created move's "update quantities on the order" flag is true.
 **AC-074 A move is created even when the requester has no inventory rights (`RP-RULE-086`).**
 Given a salesperson with no inventory rights who confirms a sales order for a make-to-order product.
 When the order is confirmed.
-Then the delivery move and the upstream move are created and no access-rights error is raised.
+Then the delivery move and the origin move are created and no access-rights error is raised.
 
 **AC-075 The take-from-stock-otherwise split orders only the missing part (`RP-RULE-142`).**
 Given a rule whose supply method is `make_to_stock_else_make_to_order`, and 12 free units of `P` at its source location, and two moves of 10 units each confirmed in the same batch.
 When the batch is confirmed.
-Then one upstream need for 8 units is created, and neither move is linked to the resulting document.
+Then one supply need for 8 units is created, and neither move is linked to the resulting document.
 
 **AC-076 A two-step reception chain pushes the received quantity forward (`workflows.md` section 9).**
 Given a warehouse that receives in two steps, and a purchase order for 12 units of `P` confirmed.
@@ -486,12 +486,12 @@ When two days pass and the scheduler runs again with 5 more units of demand.
 Then the same purchase order line is updated to 30 units and the order deadline is still today plus 2 counted from the first run.
 
 **AC-165 A deadline change propagates along the chain (`RP-RULE-223`).**
-Given a delivery move and its upstream internal move, both with a deadline of day 30.
+Given a delivery move and its origin internal move, both with a deadline of day 30.
 When the delivery move's deadline is written as day 24.
-Then the upstream move's deadline becomes day 24; and completing the upstream move afterwards leaves both deadlines at day 24 while setting the upstream move's scheduled date to the moment of completion.
+Then the origin move's deadline becomes day 24; and completing the origin move afterwards leaves both deadlines at day 24 while setting the origin move's scheduled date to the moment of completion.
 
-**AC-166 A late upstream move raises a delay alert (`RP-RULE-224`).**
-Given a delivery scheduled on day 10 and an upstream receipt scheduled on day 12 that is not completed.
+**AC-166 A late origin move raises a delay alert (`RP-RULE-224`).**
+Given a delivery scheduled on day 10 and an origin receipt scheduled on day 12 that is not completed.
 Then the delivery's delay alert date is day 12.
 When the receipt is completed.
 Then the delivery's delay alert date is empty.
@@ -885,8 +885,8 @@ Then the last line carries 4 units for `D2` with the "replenishment filled" flag
 Given no outgoing move and a confirmed receipt of 4 units.
 Then one line carries 4 units with the incoming move alone.
 
-**AC-363 Reserving the upstream chain from the report (`interfaces.md` section 1.19).**
-Given a delivery whose upstream internal move is in state `confirmed`.
+**AC-363 Reserving the origin chain from the report (`interfaces.md` section 1.19).**
+Given a delivery whose origin internal move is in state `confirmed`.
 When the reserve operation is run on the delivery from the report.
 Then the internal move is reserved; and running the release operation afterwards releases it.
 
@@ -1197,7 +1197,7 @@ Then the move's partner is `Warehouse B Address`.
 **AC-461 A created move is confirmed at once (`RP-RULE-087`).**
 Given a two-step reception route.
 When a need at `WH/Stock` creates the "Input to Stock" move.
-Then that move is immediately confirmed, which is what makes it create the upstream need at `WH/Input`.
+Then that move is immediately confirmed, which is what makes it create the supply need at `WH/Input`.
 
 ---
 
@@ -1360,7 +1360,7 @@ Then that move is scheduled for 12 March at 08:00 and its deadline is 12 March.
 **AC-485 A non-split move procures its whole demand (`RP-RULE-141`).**
 Given a move of 10 units whose rule's supply method is `make_to_order`, and 12 free units at its source location.
 When the move is confirmed.
-Then the need created upstream is for 10 units, not for zero.
+Then the need created origin is for 10 units, not for zero.
 
 **AC-486 Only a make-to-order move links its need (`RP-RULE-143`).**
 Given a move `M` of 10 units whose rule's supply method is `make_to_order`.
@@ -1547,17 +1547,17 @@ Then the procurement date is 4 March of next year at 12:00 in coordinated univer
 
 ## 36. Cancellation details
 
-**AC-514 The parameter cancels upstream moves too (`RP-RULE-243`).**
-Given the stored parameter `inventory.cancel_originating_moves` present, and a chain of an upstream receipt move and a downstream delivery move whose `propagate_cancel` is true.
+**AC-514 The parameter cancels origin moves too (`RP-RULE-243`).**
+Given the stored parameter `inventory.cancel_originating_moves` present, and a chain of an origin receipt move and a downstream delivery move whose `propagate_cancel` is true.
 When the delivery move is cancelled.
 Then the receipt move is cancelled as well.
 Given the parameter absent.
 Then the receipt move stays open.
 
 **AC-515 Breaking a make-to-order link recomputes the downstream state (`RP-RULE-244`).**
-Given a waiting delivery move fed by one upstream move.
+Given a waiting delivery move fed by one origin move.
 When the link is broken.
-Then the upstream move leaves the delivery move's upstream list, the delivery move's supply method becomes `make_to_stock`, and its state is recomputed to `confirmed` or `assigned` from its own reservation.
+Then the origin move leaves the delivery move's origin list, the delivery move's supply method becomes `make_to_stock`, and its state is recomputed to `confirmed` or `assigned` from its own reservation.
 
 ---
 

@@ -66,8 +66,9 @@ Contents:
 
 **Steps.**
 
-1. The actor opens the accounting settings and, in the analytics block, switches on "Track costs
-   and revenues by project, department, and other axes".
+1. The actor opens the accounting settings and, in the block titled "Analytics", switches on the
+   setting whose text is "Track costs & revenues by project, department, etc", reproduced as the
+   system displays it.
 2. Switching it on immediately switches on the full accounting capability setting as well; this is
    a form-level consequence applied before saving.
 3. The actor saves. The analytic accounting permission group is granted to every user of the
@@ -928,3 +929,7 @@ read-only accounting group.
 3. **The editor's proposed percentage.** Only one draft carried the rule for the percentage proposed
    on a new row; it is kept verbatim in workflow 16 step 4, and restated in
    [interfaces.md](interfaces.md).
+4. **The label of the analytic accounting setting.** Both drafts paraphrased it. Workflow 1 now
+   quotes the emitted text, "Track costs & revenues by project, department, etc", as
+   [configuration.md](configuration.md) section 1.1 and [business-rules.md](business-rules.md)
+   `AA-110` do.

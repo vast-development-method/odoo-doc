@@ -85,7 +85,7 @@ All of the following are fields of Company. They are edited on the settings scre
 | Parameter | Data type | Default when absent | Effect |
 |---|---|---|---|
 | `inventory.disable_automatic_scheduler` | text, treated as a switch | absent | While present, the event-driven trigger that runs automatic reordering rules when moves are confirmed is disabled entirely. The daily scheduled action still runs. |
-| `inventory.cancel_originating_moves` | text, treated as a switch | absent | While present, cancelling a move whose `propagate_cancel` is true also cancels its not-yet-completed upstream moves. |
+| `inventory.cancel_originating_moves` | text, treated as a switch | absent | While present, cancelling a move whose `propagate_cancel` is true also cancels its not-yet-completed origin moves. |
 | `purchasing.on_time_delivery_days` | integer as text | 365 | The length in days of the window over which a vendor's on-time delivery rate is measured. |
 | `sales.use_security_lead_time` | boolean as text | false | Backs the "Security Lead Time for Sales" switch. |
 

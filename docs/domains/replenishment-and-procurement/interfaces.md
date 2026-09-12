@@ -162,7 +162,7 @@ Renders the routes diagram (section 5.1) for the chosen product and warehouses.
 |---|---|
 | Inputs | one stock move |
 | Output | the set of moves that were acted upon |
-| Writes | reservations. Reserve keeps the upstream moves, recursively, whose state is not draft, cancelled, available or completed, and reserves them. Release keeps the upstream moves whose state is not draft, cancelled or completed, and releases their reservations. |
+| Writes | reservations. Reserve keeps the origin moves, recursively, whose state is not draft, cancelled, available or completed, and reserves them. Release keeps the origin moves whose state is not draft, cancelled or completed, and releases their reservations. |
 | Errors | none |
 
 ### 1.20 `action_view_purchase` (collection operation on one Reordering Rule)
@@ -421,7 +421,7 @@ A structured document with a header and a list of lines.
 | `move_out` | the outgoing move's key and date, plus its transfer's key and priority when it has a transfer |
 | `move_in` | the incoming move's key and date |
 | `reservation` | the reserving transfer's model name, name and key, or false |
-| `in_transit` | true when the quantity is held outside the warehouse stock location, or when the reserving move itself has upstream moves |
+| `in_transit` | true when the quantity is held outside the warehouse stock location, or when the reserving move itself has origin moves |
 | `is_matched` | true when either move is one of the moves the caller asked to highlight |
 | `unit_of_measure` | the product's unit |
 

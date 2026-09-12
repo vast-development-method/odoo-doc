@@ -172,7 +172,7 @@ Closed list for `procure_method`:
 
 | Value | Label | Meaning |
 |---|---|---|
-| `make_to_stock` | Take From Stock | The goods are taken from the stock available in `location_source`. No upstream need is created. |
+| `make_to_stock` | Take From Stock | The goods are taken from the stock available in `location_source`. No supply need is created. |
 | `make_to_order` | Trigger Another Rule | The available stock in `location_source` is ignored; a new need is created in `location_source` and rule selection runs again for it. |
 | `make_to_stock_else_make_to_order` | Take From Stock, if unavailable, Trigger Another Rule | The goods are taken from the free stock of `location_source`; only the missing quantity creates a new need in `location_source`. |
 
@@ -481,7 +481,7 @@ Aggregation of `on_time_rate`: when a report query asks for the sum of `on_time_
 
 ```
 on_time_rate_percentage =
-    if sum(quantity_total) ≠ 0
+    when sum(quantity_total) ≠ 0
         then sum(quantity_on_time) ÷ sum(quantity_total) × 100
         else 100
 ```
@@ -604,10 +604,10 @@ The complete generation logic for these routes and rules is specified in `config
 | `rule` | many_to_one to Stock Rule | empty | stored | The stock rule that created this move. |
 | `procure_method` | selection (`make_to_stock` = "Default: Take From Stock", `make_to_order` = "Advanced: Apply Procurement Rules") | `make_to_stock` | stored, required | How this move gets its goods. A make-to-order move creates a procurement request at its source location when it is confirmed and waits for the resulting move. |
 | `move_destinations` | many_to_many to Stock Move | empty | stored | The downstream moves this move feeds. |
-| `move_origins` | many_to_many to Stock Move (inverse of `move_destinations`) | empty | stored | The upstream moves that feed this move. |
+| `move_origins` | many_to_many to Stock Move (inverse of `move_destinations`) | empty | stored | The origin moves that feed this move. |
 | `location_final` | many_to_one to Location | empty | stored, writable | The ultimate destination of the chain this move belongs to. The move brings goods to `destination_location`, which may be an intermediate location on the way to `location_final`. |
-| `deadline` | datetime | empty | stored, read-only, writable through an inverse rule | The date by which the move must be completed to keep a downstream promise. Writing it propagates the same shift to upstream and downstream moves (see `calculations.md`, section "Deadline propagation"). |
-| `delay_alert_date` | datetime | empty | derived and stored | The latest scheduled date among the not-yet-completed upstream moves, when that date is later than this move's own scheduled date; empty otherwise, and always empty for completed or cancelled moves. |
+| `deadline` | datetime | empty | stored, read-only, writable through an inverse rule | The date by which the move must be completed to keep a downstream promise. Writing it propagates the same shift to origin and destination moves (see `calculations.md`, section "Deadline propagation"). |
+| `delay_alert_date` | datetime | empty | derived and stored | The latest scheduled date among the not-yet-completed origin moves, when that date is later than this move's own scheduled date; empty otherwise, and always empty for completed or cancelled moves. |
 | `orderpoint` | many_to_one to Reordering Rule | empty | stored | The reordering rule that caused this move. |
 | `routes` | many_to_many to Route | empty | stored | Preferred routes carried by the move, offered first to rule selection when this move creates a procurement request or applies a push rule. |
 | `warehouse` | many_to_one to Warehouse | empty | stored | The warehouse to consider for rule selection on the next procurement. |

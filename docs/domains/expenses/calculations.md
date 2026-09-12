@@ -119,11 +119,11 @@ journal item.
 Two branches:
 
 ```formula
-if the category has a cost :
-    price_unit = unit cost of the category , converted into the expense's unit
-otherwise :
-    price_unit = round_to( company currency , total_amount ÷ quantity )   when quantity ≠ 0
-    price_unit = 0                                                       when quantity = 0
+price_unit = unit cost of the category , converted into the expense's unit
+                                       ( when the category has a non-zero unit cost )
+price_unit = round_to( company currency , total_amount ÷ quantity )
+                                       ( when the category has no unit cost and quantity ≠ 0 )
+price_unit = 0                         ( when the category has no unit cost and quantity = 0 )
 ```
 
 Note which total the second branch divides: the **company-currency** total (`total_amount`, the

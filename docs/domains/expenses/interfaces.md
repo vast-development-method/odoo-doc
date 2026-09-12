@@ -411,10 +411,10 @@ show nothing.
 ### 7.4 The application download code
 
 Links marked as application links do not navigate. On a large screen they open a modal titled
-*"Download our App"* showing a quick-response code generated from the link's address, under the
-heading *"Scan this QR code to get the Odoo app:"*. On a small screen the link is followed
-directly. The heading is reproduced verbatim; it is the only place in this folder where a shipped
-interface string names the vendor's application.
+*"Download our App"* showing a quick-response code generated from the link's address, under a
+heading that invites the reader to scan that code to obtain the mobile application. On a small
+screen the link is followed directly. The heading is described rather than reproduced, because the
+shipped wording names the vendor's own application and a rebuild must substitute its own name.
 
 ---
 

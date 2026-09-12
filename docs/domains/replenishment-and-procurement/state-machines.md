@@ -1147,7 +1147,7 @@ stateDiagram-v2
     draft --> waiting: Confirm, origin moves already exist
     draft --> waiting: Confirm, supply method make to order, a need is created
     draft --> confirmed: Confirm, rule takes from stock otherwise triggers, a partial need is created
-    draft --> confirmed: Confirm, nothing upstream is needed
+    draft --> confirmed: Confirm, no supply need arises
     confirmed --> assigned: Reserved by task two of the scheduler
     confirmed --> partially_available: Partly reserved by task two
     waiting --> confirmed: Its origin moves are completed

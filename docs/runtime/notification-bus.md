@@ -431,4 +431,4 @@ A replacement may strengthen these guarantees but must not weaken them, and must
 
 1. The model diagram was drawn with text characters. It is redrawn as a Mermaid flow diagram, which carries the same three properties and renders in the reading interface.
 2. The announcement, the splitting, the relay loop, the connection acquisition, the subscription, the dispatch and the presence update were written as code-shaped sketches. They are restated as numbered procedures, with the arithmetic of the split, the rate-limit window, the heartbeat silence and the acquisition backoff moved into formula blocks. Every constant is unchanged.
-3. The close code 1014 was described as an upstream failure. It is described by behaviour instead: a failure reported by a server further along the path. The code and its meaning are unchanged.
+3. The close code 1014 was described by naming the layer that failed. It is described by behaviour instead: a failure reported by a server further along the network path. The code and its meaning are unchanged.
