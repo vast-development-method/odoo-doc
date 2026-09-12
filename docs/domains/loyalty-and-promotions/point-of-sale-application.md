@@ -10,15 +10,14 @@ Opening a counter session loads four loyalty entities in addition to the ordinar
 
 A program is available at a counter when all of the following hold, evaluated with today's date in the counter's time zone:
 
-```
-pos_ok = true
-AND (pos_config_ids CONTAINS this counter OR pos_config_ids IS EMPTY)
-AND (date_from IS EMPTY OR date_from <= today)
-AND (date_to IS EMPTY OR date_to >= today)
-AND (pricelists IS EMPTY OR pricelists INTERSECTS the counter's available pricelists)
-AND currency = the counter's currency
-AND (limit_usage = false OR total_order_count < max_usage)
-```
+- `pos_ok` is true;
+- `pos_config_ids` contains this counter, or it is empty;
+- `date_from` is empty, or it is not later than today;
+- `date_to` is empty, or it is not earlier than today;
+- `pricelist_ids` is empty, or it has at least one price list in common with the counter's available
+  price lists;
+- `currency_id` equals the counter's currency;
+- `limit_usage` is false, or `total_order_count` is strictly below `max_usage`.
 
 An empty counter restriction means every counter, which is the opposite of the usual convention and is deliberate: a program that names no counter is published everywhere.
 
@@ -120,7 +119,7 @@ The device computation follows the same shape as the server computation of secti
 
 Points available on a card for the ticket:
 
-```
+```formula
 points = balance of the card known to the device
        + the point change of this ticket for that card, unless the program's applies_on is "future"
        − Σ point costs of the reward lines of this ticket that use that card
@@ -177,7 +176,7 @@ Unlike the sales application, a free product at a counter is **not** a hundred-p
    free_quantity   = min(unclaimed,
                          reward_product_qty × claimable_count,
                          requested quantity)
-   ```
+   ```formula
 4. Produce one line: the hidden discount product, quantity `free_quantity`, unit price the negative of the product's price for that quantity under the ticket's pricelist rounded by the ticket currency, the product's taxes, the chosen product remembered on the line, the point cost and a fresh grouping code.
 
 ### 7.3 Applying a reward
@@ -283,11 +282,11 @@ Once the ticket exists on the server, the device sends the card data: per card i
 The server then:
 
 1. **Re-points nominative cards**: for every entry that names an owner, look for an existing card of the same program owned by that contact whose program type is `loyalty` or `ewallet`; when one exists, move the entry onto that card's identifier. This is what merges a locally created card with the customer's real one.
-2. **Drops duplicates**: an entry whose program already has a history entry for this very ticket is dropped, so that a retried confirmation does not double the points.
+2. **Drops duplicates**: an entry whose program already has a history movement for this very ticket is dropped, so that a retried confirmation does not double the points.
 3. **Applies gift card entries separately**: for every entry whose program is a gift card program, find the card by code or by identifier; when it exists:
-   - when it has no owner and the ticket has a customer, set the owner and write a history entry `Assigning partner <customer name>` with `issued` equal to the current balance;
-   - when it has never been used on a document, set its source ticket and write a history entry `Assigning order <ticket display name>` with `issued` equal to the current balance;
-   - when the entry's points differ from the balance, add the entry's points to the balance and write a history entry `Onsite <ticket display name>` carrying the movement as `used` when it is negative and as `issued` when it is positive.
+   - when it has no owner and the ticket has a customer, set the owner and write a history movement `Assigning partner <customer name>` with `issued` equal to the current balance;
+   - when it has never been used on a document, set its source ticket and write a history movement `Assigning order <ticket display name>` with `issued` equal to the current balance;
+   - when the entry's points differ from the balance, add the entry's points to the balance and write a history movement `Onsite <ticket display name>` carrying the movement as `used` when it is negative and as `issued` when it is positive.
    The entry is then removed from the payload.
 4. **Creates the remaining new cards** (negative identifiers with points or with reward grouping codes): program, owner (validated against the contact table, defaulting to the ticket's customer), code taken from the payload code, then the payload barcode, then a freshly generated code, balance zero, expiration date from the payload, and the source ticket. Creation runs with elevated rights and with the "at creation" communication suppressed.
 5. **Applies the points**: every card in the payload receives its points, and every reward line whose grouping code appears in an entry is bound to that card.
@@ -363,7 +362,7 @@ won     = the points the ticket grants − the point correction of section 10.3
 spent   = Σ point costs of the reward lines of this ticket that use that card
 total   = balance + won − spent
 name    = the program's point name when the program is portal visible, otherwise the literal "Points"
-```
+```formula
 
 `total` is shown while the ticket is being built and `balance` once it is paid. The point correction removes the contribution of the free product lines, which would otherwise be counted as a payment by a rule that grants points per unit of currency spent.
 

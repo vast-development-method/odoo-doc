@@ -1,6 +1,6 @@
 # Calculations
 
-Every formula and algorithm of the Loyalty, Coupons and Promotions domain, with its inputs, its outputs, its precision, its order of operations and at least one worked example with real numbers. The algorithms are written as numbered steps over named quantities; they are the authoritative description of the behavior that a replacement implementation must reproduce.
+Every formula and algorithm of the Loyalty and Promotions domain, with its inputs, its outputs, its precision, its order of operations and at least one worked example with real numbers. The algorithms are written as numbered steps over named quantities; they are the authoritative description of the behavior that a replacement implementation must reproduce.
 
 ## 1. Notation, precision and rounding
 
@@ -40,33 +40,27 @@ Worked example: the company contact declares the `Europe/London` time zone. A ca
 
 A Loyalty Program is applicable to a document when all of the following hold. `today` is the reference date of section 2.
 
-```
-active = true
-AND (sales channel flag) = true
-AND (company IS EMPTY OR company IN (document.company, document.company.parent))
-AND (pricelists IS EMPTY OR document.pricelist IN pricelists)
-AND (date_from IS EMPTY OR date_from <= today)
-AND (date_to IS EMPTY OR date_to >= today)
-```
+- `active` is true;
+- the channel flag of the document's channel is true;
+- `company_id` is empty, or it is the document's company, or it is a parent of the document's company;
+- `pricelist_ids` is empty, or it contains the document's price list;
+- `date_from` is empty, or it is not later than `today`;
+- `date_to` is empty, or it is not earlier than `today`.
 
 The **sales channel flag** is `sale_ok` for a sales order. When the order belongs to a website, the leaf is replaced by `ecommerce_ok = true` and an extra condition is added:
 
-```
-AND (website IS EMPTY OR website = document.website)
-```
+- `website_id` is empty, or it equals the document's storefront.
 
 ### 3.2 The rule filter
 
 A Loyalty Rule is reachable from a document when the same conditions hold on its program:
 
-```
-active = true
-AND program.(sales channel flag) = true
-AND (program.company IS EMPTY OR program.company IN (document.company, document.company.parent))
-AND (program.pricelists IS EMPTY OR document.pricelist IN program.pricelists)
-AND (program.date_from IS EMPTY OR program.date_from <= today)
-AND (program.date_to IS EMPTY OR program.date_to >= today)
-```
+- the rule's `active` is true;
+- the program's channel flag for that document's channel is true;
+- the program's `company_id` is empty, or it is the document's company, or a parent of it;
+- the program's `pricelist_ids` is empty, or it contains the document's price list;
+- the program's `date_from` is empty, or it is not later than `today`;
+- the program's `date_to` is empty, or it is not earlier than `today`.
 
 with the same website substitution when the document belongs to a website.
 
@@ -74,12 +68,10 @@ with the same website substitution when the document belongs to a website.
 
 When a document is re-evaluated, the programs considered for automatic application are those that satisfy the program filter and additionally:
 
-```
-identifier NOT IN (programs already granting points on this document)
-AND trigger = "auto"
-AND at least one rule has mode = "auto"
-AND (limit_usage = false OR total_order_count < max_usage)
-```
+- the program is not already granting points on this document;
+- its `trigger` is `auto`;
+- at least one of its rules has `mode` equal to `auto`;
+- `limit_usage` is false, or `total_order_count` is strictly below `max_usage`.
 
 ### 3.4 The valid product set of a rule
 
@@ -122,14 +114,14 @@ For each rule `R` of the program, in the program's rule order:
    - **Split branch**, taken when the program's `applies_on` is `future`, `R.reward_point_split` is true and `R.reward_point_mode` is not `order`:
      - mode `unit`: append `R.reward_point_amount` to `split_points` once for each whole unit of `matched_quantity` (the quantity is truncated to an integer).
      - mode `money`: for every document line that is not a reward line, is not a combination item, whose product belongs to `R`'s valid set and whose quantity is strictly positive, let `line_total` be the tax-included total of the line (the sum over its priced item lines for a combination product) and compute
-       ```
+       ```formula
        points_per_unit = round_down(R.reward_point_amount × line_total ÷ line_quantity, 2)
        ```
        When `points_per_unit` is zero, skip the line; otherwise append `points_per_unit` to `split_points` once for each whole unit of the line quantity.
    - **Aggregate branch**, taken otherwise:
      - mode `order`: `points = points + R.reward_point_amount`.
      - mode `money`: let `amount_paid` be zero; for every document line except the threshold-neutral ones, skip the line when it is a combination item or when it is a reward line of a program of type `gift_card`, of type `ewallet`, or of the same type as the program being evaluated; otherwise add the line's tax-included total to `amount_paid` when the line's product belongs to `R`'s whole-document valid set. Then
-       ```
+       ```formula
        points = points + round_down(R.reward_point_amount × amount_paid, 2)
        ```
      - mode `unit`: `points = points + R.reward_point_amount × matched_quantity`.
@@ -177,12 +169,10 @@ Worked example: a card holds 30.00 points. The order will grant 120.00 points (p
 
 The net effect of a document on every card, used at confirmation and at cancellation:
 
-```
-for each pending promise (card, points) of the document:
-    change[card] = change[card] + points
-for each line of the document that has a reward and a card:
-    change[line.card] = change[line.card] − line.points_cost
-```
+1. Start with a change of zero for every card.
+2. For each pending point entry of the document, add its `points` to the change of its card.
+3. For each line of the document that carries both a reward and a card, subtract that line's
+   `points_cost` from the change of that card.
 
 Confirming the document adds `change[card]` to each card's balance; cancelling a confirmed document subtracts it again.
 
@@ -275,7 +265,7 @@ Input: a reward whose applicability is `order`.
 5. Compute and round the tax details of all the prepared lines together, using the company's tax rounding method.
 6. Aggregate the tax details by the pair (`discount_taxes` of the line, a skip flag). A detail is skipped when its tax is not in the line's `discountable_taxes` or when the line is not among `lines`.
 7. For every non-skipped group:
-   ```
+   ```formula
    discountable = discountable + raw_base + raw_tax
    discountable_per_tax[taxes] = discountable_per_tax[taxes]
                                  + raw_base
@@ -290,7 +280,7 @@ The two sums differ on purpose. The **total** is what the customer perceives: ba
 1. Find the **cheapest line**: among the document lines that are not threshold-neutral, ignore lines that carry a reward, lines that are items of a combination product, lines with zero quantity, lines whose unit price (the sum of the unit prices of its priced item lines for a combination product) is zero, and lines whose product does not satisfy the reward's discounted-product filter. Keep the line with the smallest unit price; ties are broken by document order, the first one encountered winning. Expand a combination product line into its priced item lines.
 2. When there is no such line, return no discountable amount at all; the reward cannot be applied.
 3. Otherwise, for each line of the expansion:
-   ```
+   ```formula
    discountable = discountable + line.tax_included_total ÷ line.quantity
    discountable_per_tax[non-fixed taxes of the line] += line.unit_price × (1 − line.discount ÷ 100)
    ```
@@ -320,7 +310,7 @@ This is the most intricate computation, because a specific discount must never p
    - When `W.discount_mode` is `percent`: for every line of `affected`, multiply `remaining[line]` by `(1 − W.discount ÷ 100)` for applicability `order` and `specific`, and by `(1 − W.discount ÷ 100 ÷ line.quantity)` for applicability `cheapest`.
    - When `W.discount_mode` is not `percent` (a fixed amount): build `budget[tax set]` from the absolute tax-included totals of the lines of `G`, keyed by the non-fixed taxes of each of those lines. Then walk the lines of `affected` that are **not** in `lines_to_discount` first, and the ones that are in `lines_to_discount` afterwards; for each such line take `key` as the non-fixed taxes of the group's lines when `W` belongs to a payment program and the non-fixed taxes of the walked line otherwise; when `budget[key]` is zero, continue; otherwise consume `min(remaining[line], budget[key])` from both `budget[key]` and `remaining[line]`.
 6. For each line of `lines_to_discount`:
-   ```
+   ```formula
    discountable = discountable + remaining[line]
    line_base = line.unit_price × line.quantity × (1 − line.discount ÷ 100)
    discountable_per_tax[non-fixed taxes of the line] += line_base × (remaining[line] ÷ line.tax_included_total)
@@ -357,7 +347,7 @@ Input: a discount reward `W`, a card `C`.
    - when `W`'s program is not a payment program and at least one line of the document carries a payment reward, produce a single **placeholder line**: description `TEMPORARY DISCOUNT LINE`, unit price zero, quantity zero, point cost zero. The placeholder keeps the reward attached to the document so that it can come back if the payment reward is removed.
    - otherwise refuse with `There is nothing to discount`.
 3. Compute the ceiling:
-   ```
+   ```formula
    max_discount = convert(W.discount_max_amount, program currency, document currency)
    if W.discount_max_amount = 0 then max_discount = +infinity
    max_discount = min(max_discount, document.total_including_tax)
@@ -367,7 +357,7 @@ Input: a discount reward `W`, a card `C`.
    - `per_order`: `max_discount = min(max_discount, convert(W.discount, program currency, document currency))`.
    - `percent`: `max_discount = min(max_discount, discountable × W.discount ÷ 100)`.
 5. Compute the point cost:
-   ```
+   ```formula
    if W.clear_wallet then point_cost = points available on C
    else point_cost = W.required_points
    if W.discount_mode = "per_point" and not W.clear_wallet then
@@ -378,7 +368,7 @@ Input: a discount reward `W`, a card `C`.
    - For a gift card program only, the line then adopts the taxes of the discount product: map the discount product's company taxes through the document's fiscal position; when there are any, recompute the price treating it as tax-included and without rounding, then set the unit price to the tax-excluded base plus the amounts of the tax-included taxes, and set the line's taxes to the mapped set. This makes the gift card reduce the tax-included total by exactly its face value whatever the taxes on it.
    - For an electronic wallet program the line carries no tax.
 7. **Ordinary branch**:
-   ```
+   ```formula
    discount_factor = min(1, max_discount ÷ discountable)   (1 when discountable is zero)
    ```
    For every entry `(taxes, amount)` of `discountable_per_tax` whose `amount` is not zero, produce one line:
@@ -402,7 +392,7 @@ Input: a free product reward `W`, a card `C`, optionally a chosen product.
    claimable_count = floor(points ÷ W.required_points)      otherwise
    point_cost = points                                      if W.clear_wallet
    point_cost = claimable_count × W.required_points          otherwise
-   ```
+   ```formula
 6. Produce one line: the chosen product, quantity `W.reward_product_qty × claimable_count`, a discount percentage of 100, the mapped taxes and `point_cost`. The 100 percent discount is what makes the line free while keeping the product's list price visible on the document.
 
 ### 9.4 Free shipping rewards
@@ -435,7 +425,7 @@ The counter application must decide how many free units a ticket has earned **wi
 
 Given a number of items `n`, a rule "buy `b` take `t`":
 
-```
+```formula
 factor      = truncate(n ÷ (b + t))
 free        = factor × t
 charged     = n − free
@@ -457,14 +447,14 @@ Inputs: a reward `W`, a card, a product `P`, the remaining points. The four step
    - `claimed`: the quantity of reward lines of this same reward; their point cost is added back to the remaining points.
    - a flag `needs_correction` when a reward line of a **different** reward gives out one of the eligible products.
 2. **The plain branch.** When the program's `trigger` is `with_code`, or when `P` is not part of any rule of the program, or when the program's `applies_on` is `future`:
-   ```
+   ```formula
    free_quantity = floor((remaining_points ÷ W.required_points) × W.reward_product_qty)
    ```
    The floor is taken after the multiplication, not before it, so a reward that gives 3 units for 2 points yields 4 units for 3 points and not 3.
 3. **The point-factor branch.** Otherwise, compute the point factor of `P` over the rules that were actually counted for the program (or over every rule when that information is not available): for each such rule whose valid products contain `P` or which has no product filter, add `rule.reward_point_amount` to `order_points` when its mode is `order`, add `round(rule.reward_point_amount × P.list_price, product price precision)` to `factor` when its mode is `money`, and add `rule.reward_point_amount` to `factor` when its mode is `unit`.
    - 3a. When `factor` is zero: `free_quantity = floor((remaining_points ÷ W.required_points) × W.reward_product_qty)`, exactly as in step 2.
    - 3b. Otherwise, let `correction` be the point correction of section 10.3 when `needs_correction` is set and zero otherwise, and
-     ```
+     ```formula
      free_quantity = buy_some_take_some((remaining_points − correction − order_points) ÷ factor,
                                         W.required_points ÷ factor,
                                         W.reward_product_qty)
@@ -480,7 +470,7 @@ A promotion with `trigger` `auto` and `applies_on` `current`. Its single rule gr
 1. No reward line exists, so only the lines whose product is exactly Alpha count: `available = 7`. `claimed = 0`, `needs_correction` is not set, `remaining_points = 7`.
 2. The trigger is `auto`, Alpha is part of the rule and `applies_on` is `current`, so step 2 does not apply.
 3. The only rule is in mode `unit`, so `factor = 1` and `order_points = 0`. `factor` is not zero, and `needs_correction` is not set, so `correction = 0`:
-   ```
+   ```formula
    free_quantity = buy_some_take_some((7 − 0 − 0) ÷ 1, 2 ÷ 1, 1) + floor((0 ÷ 2) × 1)
                  = buy_some_take_some(7, 2, 1) + 0
    ```
@@ -494,7 +484,7 @@ The same program shape, but the rule grants `reward_point_amount` 1 in mode `mon
 1. `available = 8`, `claimed = 0`, `needs_correction` not set, `remaining_points = 24`.
 2. Does not apply, for the same reasons as before.
 3. The rule is in mode `money`, so `factor = round(1 × 3.00, 2) = 3.00` and `order_points = 0`:
-   ```
+   ```formula
    free_quantity = buy_some_take_some((24 − 0 − 0) ÷ 3.00, 10 ÷ 3.00, 1) + floor((0 ÷ 10) × 1)
                  = buy_some_take_some(8, 3.3333…, 1)
    ```
@@ -508,7 +498,7 @@ The same program, with two rules on Alpha: rule A grants `reward_point_amount` 2
 1. `available = 6`, `claimed = 0`, `needs_correction` not set, `remaining_points = 22`.
 2. Does not apply.
 3. Rule A contributes to the factor and rule B to the order points: `factor = 2`, `order_points = 10`:
-   ```
+   ```formula
    free_quantity = buy_some_take_some((22 − 0 − 10) ÷ 2, 4 ÷ 2, 1) + floor((10 ÷ 4) × 1)
                  = buy_some_take_some(6, 2, 1) + floor(2.5)
    ```
@@ -545,7 +535,7 @@ The correction is `4.00 + 40.00 = 44.00`. Step 3b of section 10.2 then evaluates
 
 ### 11.1 Reward total
 
-```
+```formula
 reward_total = Σ over lines carrying a reward:
                  + line.tax_excluded_subtotal              when the reward is not a free product
                  − line.product_list_price × line.quantity  when the reward is a free product
@@ -555,17 +545,17 @@ Discount reward lines carry negative subtotals, so a document with a 30.00 disco
 
 ### 11.2 Loyalty summary of a confirmed order
 
-For a confirmed order that has history entries, the summary holds:
+For a confirmed order that has history movements, the summary holds:
 
 - `point_name`: the `point_name` of the single card involved when exactly one card is involved, and the literal `Points` otherwise;
-- `issued`: the sum of the `issued` of the order's history entries;
-- `cost`: the sum of the `used` of the order's history entries.
+- `issued`: the sum of the `issued` of the order's history movements;
+- `cost`: the sum of the `used` of the order's history movements.
 
 ### 11.3 Amount excluding shipping
 
 When the shipping capability package is present, the amount used to decide whether shipping is free above a threshold excludes the payment reward lines:
 
-```
+```formula
 amount_total_without_shipping = base amount without shipping
                                 − Σ unit prices of the lines whose card belongs to
                                    a gift card or electronic wallet program
@@ -656,8 +646,8 @@ The customer already owns a card of this program holding 90.00 points. The custo
 9. One reward line: the description derived by section 3.5 of [entities.md](entities.md) is the formatted amount followed by ` on your order`, which for a program currency whose symbol is placed after the amount reads `5 <symbol> on your order`; quantity 1, unit price `−(250.00 × 0.02) = −5.00`, no tax, point cost 100.00.
 10. Order total: 245.00.
 11. Points available now: `90.00 + 25.00 − 100.00 = 15.00`, so the reward is no longer claimable a second time.
-12. On confirmation, the net change for the card is `+25.00 − 100.00 = −75.00` and the balance becomes 15.00. One history entry is written on the card: `issued` 25.00, `used` 100.00, description `Order S00042`, referencing the order.
-13. Cancelling the order afterwards deletes that history entry and adds 75.00 back, restoring the balance to 90.00.
+12. On confirmation, the net change for the card is `+25.00 − 100.00 = −75.00` and the balance becomes 15.00. One history movement is written on the card: `issued` 25.00, `used` 100.00, description `Order S00042`, referencing the order.
+13. Cancelling the order afterwards deletes that history movement and adds 75.00 back, restoring the balance to 90.00.
 
 ## 15. Worked example D: a gift card of fifty spent on an order of eighty
 
@@ -678,7 +668,7 @@ Setup: a program of type `gift_card`, `applies_on` `future`, `trigger` `auto`, p
 5. Ceiling: `max_discount = min(+infinity, 80.00) = 80.00`. Mode `per_point` with a payment program: the points are **not** floored to a multiple of `required_points`; `max_discount = min(80.00, 1 × 50.00) = 50.00`.
 6. Point cost: mode `per_point` and not `clear_wallet`, so `converted = convert(min(50.00, 80.00)) = 50.00` and `point_cost = round_currency(50.00 ÷ 1, card currency) = 50.00`.
 7. One reward line: description `Gift Card`, quantity 1, unit price `−min(50.00, 80.00) = −50.00`, no tax (the discount product carries none), point cost 50.00.
-8. Order total: 30.00. On confirmation the card's balance becomes `50.00 − 50.00 = 0.00` and a history entry records `used` 50.00.
+8. Order total: 30.00. On confirmation the card's balance becomes `50.00 − 50.00 = 0.00` and a history movement records `used` 50.00.
 
 **Variant: the card is worth more than the order.** With an order of 30.00 and a card of 50.00: `discountable = 30.00`; `max_discount = min(30.00, 50.00) = 30.00`; `point_cost = round_currency(30.00 ÷ 1) = 30.00`; the reward line carries `−30.00`; the order total is 0.00 and the card keeps 20.00 for a later purchase.
 

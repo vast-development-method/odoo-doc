@@ -1,6 +1,6 @@
 # Glossary
 
-Terms of the Loyalty, Coupons and Promotions domain, with full-word definitions. A term written in bold inside a definition is itself defined in this glossary.
+Terms of the Loyalty and Promotions domain, with full-word definitions. A term written in bold inside a definition is itself defined in this glossary.
 
 **Aggregate branch** The branch of the point computation that adds the points of a **rule** to a single running total, producing one point value for the whole document. It is taken whenever the **split branch** is not.
 
@@ -32,7 +32,7 @@ Terms of the Loyalty, Coupons and Promotions domain, with full-word definitions.
 
 **Discountable amount** What a discount is allowed to reduce on a document, computed differently for each **applicability**. Every computation produces a total and a breakdown per tax combination.
 
-**Discountable per tax** The breakdown of the **discountable amount** by tax combination. It is what allows a single discount to be written as one document line per tax so that the tax amounts stay exact.
+**Discountable per tax** The breakdown of the **discountable amount** by tax combination. It is what lets a single discount become one document line per tax combination, so that the tax amounts stay exact.
 
 **Discount factor** The ratio of the granted discount to the **discountable amount**, capped at one, by which every entry of the **discountable per tax** breakdown is multiplied to produce the reward lines.
 
@@ -56,13 +56,13 @@ Terms of the Loyalty, Coupons and Promotions domain, with full-word definitions.
 
 **Hidden discount product** The service product created automatically for every **reward**, used to carry the reward amount on a document line. It is not sellable, not purchasable and priced zero.
 
-**History entry** See **Loyalty History Entry**.
+**History entry** See **Loyalty History movement**.
 
 **Loyalty Card** An individual coupon, gift card, electronic wallet or loyalty card: a unique code, a **balance**, an optional owner and an optional expiration date.
 
 **Loyalty Communication** One rule of a **communication plan**: when to send, which email template to use, and which document to print at a counter.
 
-**Loyalty History Entry** One movement on a **card**: points issued, points used, a description and a reference to the document that caused it.
+**Loyalty History movement** One movement on a **card**: points issued, points used, a description and a reference to the document that caused it.
 
 **Loyalty Program** The offer definition: the type, the validity window, the usage limit, the channels, the currency, the customer restrictions, and the collections of **rules**, **rewards** and communication rules.
 

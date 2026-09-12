@@ -1,6 +1,6 @@
 # Interfaces
 
-The service operations a client or an integration invokes, the request endpoints, the screens described as workflows on views, the printed documents, the emails and the scheduled jobs of the Loyalty, Coupons and Promotions domain. Screens are described without reference to any client technology: a view is a way of working on records, with the fields it shows, the buttons it offers, the guards on those buttons, the filters and the groupings.
+The service operations a client or an integration invokes, the request endpoints, the screens described as workflows on views, the printed documents, the emails and the scheduled jobs of the Loyalty and Promotions domain. Screens are described without reference to any client technology: a view is a way of working on records, with the fields it shows, the buttons it offers, the guards on those buttons, the filters and the groupings.
 
 ## 1. Service operations
 
@@ -51,15 +51,15 @@ Operations are named with full-word snake_case identifiers. Every operation runs
 |---|---|---|---|---|
 | `use_coupon_code` | a counter, a code, the ticket timestamp, a customer, a pricelist | success with the program, the card, its owner, its balance, its formatted balance and whether it has a source document; or failure with a message | none | `This coupon is invalid (<code>).`, `This coupon is expired (<code>).`, `This coupon is not yet valid (<code>).`, `No reward can be claimed with this coupon.`, `This coupon is not available with the current pricelist.`, `This programs requires a code to be applied.` |
 | `validate_coupon_programs` | a map from card identifier to net points, a list of new codes | success, or failure with a message and a corrective payload | none | `Some coupons are invalid. The applied coupons have been updated. Please check the order.`, `There are not enough points for the coupon: <code>.`, `The following codes already exist in the database, perhaps they were already sold?` |
-| `confirm_coupon_programs` | one ticket, the card data computed on the device | the card updates, the new usage counts, the new card information for the receipt and the documents to print | Creates cards, updates gift cards, applies points, binds reward lines to cards, sends creation communications, writes history entries. | none; invalid entries are skipped |
+| `confirm_coupon_programs` | one ticket, the card data computed on the device | the card updates, the new usage counts, the new card information for the receipt and the documents to print | Creates cards, updates gift cards, applies points, binds reward lines to cards, sends creation communications, writes history movements. | none; invalid entries are skipped |
 | `get_program_identifiers` | a counter | the programs available at that counter | none | none |
 
 ### 1.6 On the wizards
 
 | Operation | Inputs | Output | Side effects | Errors |
 |---|---|---|---|---|
-| `generate_coupons` | the generation wizard | the created cards | Creates cards and history entries; sends the creation communications. | `Can not generate coupon, no program is set.`, `Invalid quantity.` |
-| `update_card_points` | the balance wizard | nothing | Creates a history entry and writes the new balance. | `New Balance should be positive and different then old balance.` |
+| `generate_coupons` | the generation wizard | the created cards | Creates cards and history movements; sends the creation communications. | `Can not generate coupon, no program is set.`, `Invalid quantity.` |
+| `update_card_points` | the balance wizard | nothing | Creates a history movement and writes the new balance. | `New Balance should be positive and different then old balance.` |
 | `apply_coupon_code` | the coupon code wizard | an instruction to open the reward selection wizard filtered to the rewards the code unlocked | Applies the code to the order. | `Invalid sales order.`, plus the refusal of `try_apply_code` |
 | `apply_selected_reward` | the reward selection wizard | true | Applies the reward, re-evaluates the order, deletes the unused current-order cards. | `No reward selected.`, `Coupon not found while trying to add the following reward: <description>` |
 | `cancel_reward_selection` | the reward selection wizard | nothing | Deletes the unused current-order cards. | none |
@@ -70,8 +70,8 @@ Operations are named with full-word snake_case identifiers. Every operation runs
 
 | Path pattern | Method | Authentication | Purpose | Request | Response |
 |---|---|---|---|---|---|
-| `/my/loyalty_card/<card identifier>/history` and `/my/loyalty_card/<card identifier>/history/page/<page number>` | page request | authenticated user | The paginated movement history of one of the visitor's own cards | optional sort key among `date`, `used`, `description`, `issued` | A rendered page listing the history entries with a pager and a sort selector. A card that does not belong to the visitor redirects to the portal home. |
-| `/my/loyalty_card/<card identifier>/values` | remote call | authenticated user | The data behind the portal card dialog | the card identifier | The card (identifier, formatted balance, expiration date, code), the program (name and type), the last five history entries (document identifier, description, portal link of the document, signed formatted movement), the three most expensive rewards the balance already pays for ordered by required points descending, the picture path for the program type, and, in the online shop, the published trigger products with their formatted list prices. An unknown or foreign card returns an empty result. |
+| `/my/loyalty_card/<card identifier>/history` and `/my/loyalty_card/<card identifier>/history/page/<page number>` | page request | authenticated user | The paginated movement history of one of the visitor's own cards | optional sort key among `date`, `used`, `description`, `issued` | A rendered page listing the history movements with a pager and a sort selector. A card that does not belong to the visitor redirects to the portal home. |
+| `/my/loyalty_card/<card identifier>/values` | remote call | authenticated user | The data behind the portal card dialog | the card identifier | The card (identifier, formatted balance, expiration date, code), the program (name and type), the last five history movements (document identifier, description, portal link of the document, signed formatted movement), the three most expensive rewards the balance already pays for ordered by required points descending, the picture path for the program type, and, in the online shop, the published trigger products with their formatted list prices. An unknown or foreign card returns an empty result. |
 | `/shop/cart` | page request | public | The cart page | none | The cart page, after the cart has been evaluated and the automatic rewards claimed. |
 | `/wallet/top_up` | page request | authenticated user | Adds one unit of a wallet top-up product to the cart | the trigger product identifier | A redirection to the cart page. |
 | the promotional code submission of the online shop | form submission | public | Applies a code to the cart | the code, optionally a reward identifier | A redirection to the page named by the form, defaulting to the cart, with the outcome stored in the session. |
@@ -222,7 +222,7 @@ The domain ships no dedicated analysis model. The figures it exposes are:
 | Total document count per program | the program form, next to the usage ceiling | the sum of the two counts above; it is the figure compared with the ceiling |
 | Active card count per contact | the contact form | the number of active, unexpired, positively valued cards of the contact and of its descendants |
 | Gift card count per order | the sales order form | the number of gift cards generated by the order |
-| Points issued and used per order | the sales order form and the portal page | the sums of the issued and used amounts of the order's history entries |
+| Points issued and used per order | the sales order form and the portal page | the sums of the issued and used amounts of the order's history movements |
 | Discount classification | the invoice lines | an invoice line coming from a reward of type `discount`, or from a reward discount product of the ticket behind the invoice, is flagged as a discount line |
 
-The full movement history of every card is queryable through the Loyalty History Entry entity, grouped by card, by company or by document, and is the basis of any redemption analysis a deployment wishes to build.
+The full movement history of every card is queryable through the Loyalty History movement entity, grouped by card, by company or by document, and is the basis of any redemption analysis a deployment wishes to build.

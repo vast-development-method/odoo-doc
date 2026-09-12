@@ -96,7 +96,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-051** Given a generated card, Then its code is fourteen characters long and begins with `044`, and no other card carries the same code.
 
-**AC-LOY-052** Given the generation wizard on a program, When the mode is `anonymous`, the quantity is 25 and the grant is 10, Then 25 cards are created with balance 10, no owner and a history entry each with `issued` 10, `used` 0 and the description `Gift For Customer` when no description was typed.
+**AC-LOY-052** Given the generation wizard on a program, When the mode is `anonymous`, the quantity is 25 and the grant is 10, Then 25 cards are created with balance 10, no owner and a history movement each with `issued` 10, `used` 0 and the description `Gift For Customer` when no description was typed.
 
 **AC-LOY-053** Given the generation wizard in mode `selected` with two customers chosen, Then the quantity is recomputed to 2 and two cards are created, one per customer, each owned by its customer.
 
@@ -110,9 +110,9 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-058** Given a card with balance 30, When the balance wizard is confirmed with a new balance of 30, Then it is refused with `New Balance should be positive and different then old balance.`; When it is confirmed with a new balance of −5, Then it is refused with the same message.
 
-**AC-LOY-059** Given a card with balance 30, When the balance wizard is confirmed with a new balance of 50 and the description `Compensation`, Then a history entry is created with `issued` 20, `used` 0 and that description, and the card's balance becomes 50.
+**AC-LOY-059** Given a card with balance 30, When the balance wizard is confirmed with a new balance of 50 and the description `Compensation`, Then a history movement is created with `issued` 20, `used` 0 and that description, and the card's balance becomes 50.
 
-**AC-LOY-060** Given a card with balance 30, When the balance wizard is confirmed with a new balance of 12, Then a history entry is created with `used` 18 and `issued` 0, and the balance becomes 12.
+**AC-LOY-060** Given a card with balance 30, When the balance wizard is confirmed with a new balance of 12, Then a history movement is created with `used` 18 and `issued` 0, and the balance becomes 12.
 
 **AC-LOY-061** Given a program with milestone communication rules at 100, 250 and 500 points and a card owned by a contact whose balance moves from 80 to 300 in one write, Then exactly one email is sent, the one of the 250 milestone.
 
@@ -260,9 +260,9 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-171** Given an order whose reward lines would leave a card with a negative available balance, When the order is confirmed, Then the confirmation is refused with `One or more rewards on the sale order is invalid. Please check them.`
 
-**AC-LOY-172** Given an order granting 25.00 points to a card holding 90.00 and spending 100.00 points on a reward, When it is confirmed, Then the card's balance becomes 15.00 and one history entry is created with `issued` 25.00, `used` 100.00, the description `Order <order name>` and a reference to the order.
+**AC-LOY-172** Given an order granting 25.00 points to a card holding 90.00 and spending 100.00 points on a reward, When it is confirmed, Then the card's balance becomes 15.00 and one history movement is created with `issued` 25.00, `used` 100.00, the description `Order <order name>` and a reference to the order.
 
-**AC-LOY-173** Given that confirmed order, When it is cancelled, Then the history entry is deleted, the card's balance returns to 90.00 and the reward lines are deleted.
+**AC-LOY-173** Given that confirmed order, When it is cancelled, Then the history movement is deleted, the card's balance returns to 90.00 and the reward lines are deleted.
 
 **AC-LOY-174** Given an order that created a bearer coupon of a `next_order_coupons` program and was confirmed, When it is cancelled, Then the coupon is deleted because it is not nominative, was created by that order and was never used.
 
@@ -274,7 +274,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-178** Given an order carrying reward lines, When it is duplicated, Then the copy carries no reward line, no applied card, no activated code rule and no pending promise.
 
-**AC-LOY-179** Given a confirmed order, When a reward line's point cost is changed from 30 to 50 on the same card, Then the card's balance drops by 20 more and the order's history entry for that card increases its `used` by 20.
+**AC-LOY-179** Given a confirmed order, When a reward line's point cost is changed from 30 to 50 on the same card, Then the card's balance drops by 20 more and the order's history movement for that card increases its `used` by 20.
 
 **AC-LOY-180** Given a confirmed order, When a reward line is deleted, Then every line of that reward application is deleted and the whole point cost is given back to the card.
 
@@ -354,9 +354,9 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-232** Given a confirmed ticket with a locally created nominative card and a customer who already owns a card of that program, When the confirmation exchange runs, Then the points land on the existing card and no duplicate card is created.
 
-**AC-LOY-233** Given a confirmation exchange that is replayed for the same ticket, Then no point is applied twice, because an entry whose program already has a history entry for that ticket is dropped.
+**AC-LOY-233** Given a confirmation exchange that is replayed for the same ticket, Then no point is applied twice, because an entry whose program already has a history movement for that ticket is dropped.
 
-**AC-LOY-234** Given a ticket that sells a physical gift card with a typed code and an amount of 75.00, When it is confirmed, Then a card with that code and a balance of 75.00 is created, its source ticket is set and a history entry describes the assignment.
+**AC-LOY-234** Given a ticket that sells a physical gift card with a typed code and an amount of 75.00, When it is confirmed, Then a card with that code and a balance of 75.00 is created, its source ticket is set and a history movement describes the assignment.
 
 **AC-LOY-235** Given a restaurant ticket with courses, When a reward line is produced, Then it is assigned to the last course of the ticket.
 
@@ -408,7 +408,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-272** Given a customer requesting the history page of a card they do not own, Then the request redirects to the portal home.
 
-**AC-LOY-273** Given a card with seven history entries, When the portal dialog is opened, Then it shows the five most recent entries, each with a signed formatted movement and a link to the sales order behind it when there is one.
+**AC-LOY-273** Given a card with seven history movements, When the portal dialog is opened, Then it shows the five most recent entries, each with a signed formatted movement and a link to the sales order behind it when there is one.
 
 **AC-LOY-274** Given a card with a balance that pays for five rewards, When the portal dialog is opened, Then it shows the three most expensive of them, ordered by required points descending.
 
@@ -416,7 +416,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 ## 19. Permissions and scoping
 
-**AC-LOY-281** Given a user who is only an internal user, Then they may read no program, no rule, no reward, no card and no history entry.
+**AC-LOY-281** Given a user who is only an internal user, Then they may read no program, no rule, no reward, no card and no history movement.
 
 **AC-LOY-282** Given a Salesperson, Then they may read a program but not modify it, may read and modify a card but not delete it, and may run the generation wizard.
 
@@ -424,7 +424,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-284** Given a Salesperson cancelling an order carrying pending promises, Then the cancellation succeeds even though the Salesperson has no delete right on pending promises.
 
-**AC-LOY-285** Given a program whose company is company A and a user whose allowed companies are company B only, Then the program, its rules, its rewards, its cards and its history entries are invisible to that user.
+**AC-LOY-285** Given a program whose company is company A and a user whose allowed companies are company B only, Then the program, its rules, its rewards, its cards and its history movements are invisible to that user.
 
 **AC-LOY-286** Given a program whose company is empty, Then it is visible to every user of every company.
 

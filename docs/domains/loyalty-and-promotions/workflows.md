@@ -1,8 +1,13 @@
 # Workflows
 
-Every operational workflow of the Loyalty, Coupons and Promotions domain, end to end: the actors, the preconditions, the numbered steps, the decisions and branches, the records created or modified with the field values written, the notifications sent and the postconditions. The state tables of every lifecycle in the domain close the file.
+Every operational workflow of the Loyalty and Promotions domain, end to end: the actors, the
+preconditions, the numbered steps, the decisions and branches, the records created or modified with
+the field values written, the messages sent and the postconditions.
 
-Rules cited as `LOY-RULE-nnn` are defined in [business-rules.md](business-rules.md); formulas cited by number are defined in [calculations.md](calculations.md).
+Rules cited as LOY-nnn are defined in [business-rules.md](business-rules.md); formulas cited by
+section number are defined in [calculations.md](calculations.md); the states each procedure moves a
+record through, with their guards and refusal messages, are tabulated in
+[state-machines.md](state-machines.md).
 
 ## 1. Configuration workflows
 
@@ -76,7 +81,7 @@ Rules cited as `LOY-RULE-nnn` are defined in [business-rules.md](business-rules.
    3. Create one Loyalty Card per customer (or per unit of quantity in anonymous mode) with `program_id`, `points` equal to the grant, `expiration_date` equal to the validity limit and `partner_id` equal to the customer or empty.
    4. Each card receives a generated unique code.
    5. The "at creation" communication plan runs for every card that has a recipient.
-   6. One Loyalty History Entry per card: `issued` equal to the grant, `used` zero, `description` equal to the typed description or `Gift For Customer`.
+   6. One Loyalty History movement per card: `issued` equal to the grant, `used` zero, `description` equal to the typed description or `Gift For Customer`.
 
 **Postcondition**: the cards exist, are listed behind the program's card button, and, when the program has an "at creation" plan and the cards have owners, their owners have received them by email.
 
@@ -88,7 +93,7 @@ Rules cited as `LOY-RULE-nnn` are defined in [business-rules.md](business-rules.
 2. The wizard shows the old balance and asks for the new balance and a mandatory description.
 3. Confirming:
    1. Refuse with `New Balance should be positive and different then old balance.` when the new balance equals the old one or is negative.
-   2. Create a Loyalty History Entry: `issued` equal to the positive difference, or `used` equal to the absolute negative difference; `description` equal to the typed text, or `Gift for customer` when empty.
+   2. Create a Loyalty History movement: `issued` equal to the positive difference, or `used` equal to the absolute negative difference; `description` equal to the typed text, or `Gift for customer` when empty.
    3. Write the new balance into `points`. This write is tracked in the card's discussion thread and triggers the milestone communications.
 
 ### 2.3 Send a card by email
@@ -279,7 +284,7 @@ Cards created here are created with elevated rights, with loyalty emails suppres
 
 1. For each order being confirmed, gather every card involved: the applied cards, the cards of the pending promises and the cards referenced by the lines. When the points available on any of them are negative, refuse the whole confirmation with `One or more rewards on the sale order is invalid. Please check them.`
 2. Re-evaluate the order (section 3.1). This is the last chance for an expired program, an archived card or a no-longer-met condition to remove its reward lines.
-3. Write the history entries (section 3.8).
+3. Write the history movements (section 3.8).
 4. When exactly one order is being confirmed, remember whether it still has claimable rewards.
 5. Delete every card whose program has `applies_on` equal to `current` that this order promises points to and that no reward line uses. Such a card could never be spent and would be lost forever.
 6. For every order that is not already confirmed, apply the point changes (section 5.1 of [calculations.md](calculations.md)) to the cards: `card.points = card.points + change`.
@@ -289,10 +294,10 @@ Cards created here are created with elevated rights, with loyalty emails suppres
 
 **Postcondition**: the cards carry their new balances, the history records the movement, the reward lines are frozen with the order, and the customer has received the cards the order produced.
 
-### 3.8 Write the history entries of a confirmed order
+### 3.8 Write the history movements of a confirmed order
 
 1. Build a map per card: `issued` is the pending promise of the order towards that card; `cost` is the sum of the point costs of the order's lines that reference it.
-2. Create one Loyalty History Entry per card in the map: `card_id`, `order_model` the sales order entity, `order_id` the order identifier, `description` `Order <order display name>`, `used` equal to `cost` (zero when absent) and `issued` equal to `issued` (zero when absent).
+2. Create one Loyalty History movement per card in the map: `card_id`, `order_model` the sales order entity, `order_id` the order identifier, `description` `Order <order display name>`, `used` equal to `cost` (zero when absent) and `issued` equal to `issued` (zero when absent).
 
 A card that both earns and spends on the same order gets a single entry carrying both numbers.
 
@@ -302,8 +307,8 @@ Once the order is confirmed, every change to a reward line moves points immediat
 
 | Change | Effect |
 |---|---|
-| A reward line is created with a card and a non-zero point cost | The card's balance is reduced by the cost; the order's history entry for that card is updated by the same amount, or created when there is none. |
-| The point cost of a line is written | The previous cost is given back to the previous card and the new cost is taken from the new card. When the card is unchanged, the order's history entry is adjusted by the difference in one operation; when the card changed, the old card's entry is reduced by the old cost and the new card's entry is increased by the new cost. |
+| A reward line is created with a card and a non-zero point cost | The card's balance is reduced by the cost; the order's history movement for that card is updated by the same amount, or created when there is none. |
+| The point cost of a line is written | The previous cost is given back to the previous card and the new cost is taken from the new card. When the card is unchanged, the order's history movement is adjusted by the difference in one operation; when the card changed, the old card's entry is reduced by the old cost and the new card's entry is increased by the new cost. |
 | The card of a line is written | Same as above. |
 | A reward line is deleted | Every line of the same reward application is deleted with it and each point cost is given back to its card. |
 
@@ -313,7 +318,7 @@ Once the order is confirmed, every change to a reward line moves points immediat
 
 1. Remember which of the orders were confirmed.
 2. Run the ordinary cancellation.
-3. Delete every Loyalty History Entry that references one of the previously confirmed orders.
+3. Delete every Loyalty History movement that references one of the previously confirmed orders.
 4. For every order that left the confirmed state, subtract the point changes from the cards: `card.points = card.points − change`. The customer gets back what they spent and loses what they earned.
 5. Delete every reward line of the orders.
 6. Delete every card that this order promised points to, whose program is not nominative, that was created by this order, and whose use count is zero. A gift card that was bought and already spent elsewhere survives; one that was never used disappears.
@@ -350,7 +355,7 @@ When a salesperson resets the prices of an order to the pricelist, the ordinary 
 2. The code application (section 3.4) attaches the card to the order and returns the gift card reward as claimable.
 3. Claiming it produces the single payment line described in section 9.2 of [calculations.md](calculations.md): unit price the negative of the smaller of the balance and the order's discountable amount, taxes taken from the gift card discount product.
 4. The payment line is always recomputed last, after every other discount, so that it pays the discounted total.
-5. On confirmation the card's balance drops by the point cost and a history entry records the use. When the balance reaches zero the card can no longer be applied; the code application then answers `This coupon has already been used.`
+5. On confirmation the card's balance drops by the point cost and a history movement records the use. When the balance reaches zero the card can no longer be applied; the code application then answers `This coupon has already been used.`
 
 ### 4.3 Top up and spend an electronic wallet
 
@@ -385,7 +390,7 @@ When a salesperson resets the prices of an order to the pricelist, the ordinary 
 **Actor**: Customer with a portal account.
 
 1. The customer's portal home lists, per program, the cards they own whose program is active, whose program type is `loyalty` or `ewallet`, and that are not expired.
-2. Opening a card shows the balance formatted with the program's point name, the expiration date, the code, the last five history entries with a link to the sales order behind each one, and the three most expensive rewards the current balance can already pay for, ordered by required points descending.
+2. Opening a card shows the balance formatted with the program's point name, the expiration date, the code, the last five history movements with a link to the sales order behind each one, and the three most expensive rewards the current balance can already pay for, ordered by required points descending.
 3. The full history page is paginated and can be sorted by date (most recent first), by used amount, by description or by issued amount.
 4. A customer may only read their own cards; requesting another customer's card redirects to the portal home.
 
@@ -409,61 +414,14 @@ When a salesperson resets the prices of an order to the pricelist, the ordinary 
 | Delete a reward already used on a sales order line or a point-of-sale line | Silently converted into an archive of that reward. | `LOY-035` |
 | Delete a program that is active | Refused with `You can not delete a program in an active state` | `LOY-011` |
 
-## 6. State tables
+## 6. The state machines these workflows drive
 
-### 6.1 Loyalty Program
-
-| From state | Trigger or operation | Guard conditions | To state | Side effects |
-|---|---|---|---|---|
-| (none) | Create from a template or from the form | The family defaults are applied; at least one reward must remain | Active | Rules, rewards, communication rules and one hidden discount product per reward are created. |
-| Active | Change `program_type` | none | Active | `applies_on`, `trigger`, `portal_visible`, `portal_point_name`, rules, rewards and communication rules are replaced by the family defaults of the new type; the at-least-one-reward validation is suspended for this write. |
-| Active | Archive | none | Archived | Rules, rewards, communication rules and reward discount products are archived. Documents lose the program's reward lines at their next evaluation. |
-| Archived | Unarchive | No other active rule carries any of the program's codes | Active | Rules, rewards, communication rules and reward discount products are reactivated. |
-| Archived | Unarchive | Another active rule carries one of the codes | Archived | Refused with `The promo code must be unique.` |
-| Active | Delete | none | Active | Refused with `You can not delete a program in an active state`. |
-| Archived | Delete | No card references the program | (deleted) | Rules, rewards and communication rules are deleted by cascade. |
-| Archived | Delete | At least one card references the program | Archived | Refused by the restricted reference of the card. |
-
-### 6.2 Loyalty Card
-
-| From state | Trigger or operation | Guard conditions | To state | Side effects |
-|---|---|---|---|---|
-| (none) | Generation wizard | Quantity strictly positive and a program is set | Issued | Balance set to the grant, code generated, "at creation" communication sent, one history entry created. |
-| (none) | Order evaluation creates a card for a program | The program grants points | Issued with balance zero | A pending promise is recorded; the card carries the order reference. |
-| (none) | Ticket confirmation at a counter | The ticket earned points | Issued | Balance set from the ticket, code taken from the device or generated, "at creation" communication sent and the printed document rendered. |
-| Issued | Order confirmation applies the point change | none | Issued with a new balance | Balance increased by the promise and decreased by the reward costs; a history entry is written; milestone communications may be sent. |
-| Issued | Order cancellation reverses the point change | The order was confirmed | Issued with the previous balance | The history entries of that order are deleted. |
-| Issued | Order cancellation | The card is not nominative, was created by that order and has never been used | (deleted) | The card disappears. |
-| Issued | Order evaluation finds the program no longer applicable | The card was created by this order and the program is not nominative | (deleted) | The reward lines it paid for are deleted. |
-| Issued | Balance reaches zero | none | Emptied | Code application answers `This coupon has already been used.` |
-| Issued or Emptied | The reference date passes `expiration_date` | `expiration_date` is set | Expired | The card is excluded from the claimable computation and from the code application. |
-| Any | Archive | none | Archived | Pending promises towards draft orders are deleted first. |
-| Any | Contact merge | The card is nominative and its owner is merged away | Archived with balance zero, or surviving with the summed balance | See section 2.6. |
-
-### 6.3 Reward line on a sales order
-
-| From state | Trigger or operation | Guard conditions | To state | Side effects |
-|---|---|---|---|---|
-| (none) | A reward is claimed | The card has enough points and the guards pass | Applied | One line per tax group for a discount, one line for a free product, a payment or free shipping; a grouping code is generated; the point cost is written on the first line. |
-| Applied | The order is re-evaluated | The reward is still applicable | Applied with refreshed amounts | The lines are reset, recomputed and rewritten in place; a manually edited description survives when the product is unchanged. |
-| Applied | The order is re-evaluated | The card, the points or the program no longer qualify | (deleted) | The lines are deleted in the cleanup step. |
-| Applied | The user deletes one of the lines | none | (deleted) | Every line of the same reward application is deleted; the points are returned when the order is confirmed; the card may be detached or deleted. |
-| Applied | A better global discount is applied | The new one is strictly better | (reset and reused) | The lines are reset completely and handed to the new reward as reusable lines. |
-| Applied | The order is confirmed | none | Frozen | The point cost is moved onto the card and a history entry is written. |
-| Frozen | The order is cancelled | none | (deleted) | The points are returned and the history entry is deleted. |
-| Applied | The discountable amount becomes zero while a payment reward is applied | The reward is not a payment reward | Placeholder | A single line named `TEMPORARY DISCOUNT LINE` with quantity zero and price zero keeps the reward attached. |
-
-### 6.4 Pending promise (Sales Order Coupon Points)
-
-| From state | Trigger or operation | Guard conditions | To state | Side effects |
-|---|---|---|---|---|
-| (none) | The evaluation attaches a program | The program grants points, or the program is nominative | Pending | The promise carries the points the order will grant. |
-| Pending | The evaluation recomputes the points | The program is still applicable | Pending with new points | The promise is rewritten in place. |
-| Pending | The evaluation finds the program no longer applicable | none | (deleted) | The points are set to zero first, so that no intermediate computation uses them. |
-| Pending | The card's owner differs from the order's customer | The card has an owner | (deleted) | The points are set to zero first. |
-| Pending | The order is confirmed | none | Applied | The points are added to the card's balance and the promise stays as the record of what was granted. |
-| Applied | The order is cancelled | none | (deleted) | The points are subtracted from the card's balance. |
-| Pending | The card is archived | The order is still a draft | (deleted) | Removed before the archive is written. |
+Every life cycle this file moves a record through — the availability of a program, the usability
+and the ownership of a card, the pending point entry, the reward line, the attachment of a card or a
+rule to an order, and the point change on a counter document — is tabulated state by state and
+transition by transition, with its guards and its exact refusal messages, in
+[state-machines.md](state-machines.md). Nothing in that file repeats a procedure; nothing in this
+file repeats a transition table.
 
 ## 7. End-to-end walkthrough: four programs on one order
 
@@ -544,4 +502,4 @@ The customer owns a Club card holding 250.00 points and a gift card holding 60.0
 
 **Step 7: cancellation**
 
-Cancelling the order deletes the three history entries, restores the Club card to 250.00 and the gift card to 60.00, deletes the five reward lines, deletes the Spring sale card (not nominative, created by this order, use count zero once its lines are gone) and deletes the three promises.
+Cancelling the order deletes the three history movements, restores the Club card to 250.00 and the gift card to 60.00, deletes the five reward lines, deletes the Spring sale card (not nominative, created by this order, use count zero once its lines are gone) and deletes the three promises.
