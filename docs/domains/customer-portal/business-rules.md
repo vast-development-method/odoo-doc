@@ -1,9 +1,9 @@
 # Business rules of the Customer Portal
 
-The numbered rule catalogue of the Customer Portal. Every rule states the condition, the consequence and, when the system emits one, the exact message. Rules are cited from [workflows.md](workflows.md), [entities.md](entities.md), [interfaces.md](interfaces.md) and [acceptance-criteria.md](acceptance-criteria.md).
+The numbered rule catalogue of the Customer Portal. Every rule states the condition, the consequence and, when the system emits one, the exact message. Rules are cited from [workflows.md](workflows.md), [entities.md](entities.md), [state-machines.md](state-machines.md), [interfaces.md](interfaces.md) and [acceptance-criteria.md](acceptance-criteria.md).
 
 **About the messages.** Messages are reproduced as the system emits them. Two substitutions are applied throughout this specification:
-- the words that name the tax identification number are written in full as "tax identification number"; at render time a replacement substitutes the label configured for the country of the operating company;
+- the words that name the tax identification number are written in full as "tax identification number"; the stored identifier of the field is reproduced as `vat` and the label the address pages render is the reproduced single word `VAT` (see section 0.3 of [entities.md](entities.md));
 - the words that name an application key are written in full as "application key".
 Placeholders written as `%s` or `%(name)s` are the system's own substitution markers and are filled with the value named in the rule.
 
@@ -88,6 +88,7 @@ Placeholders written as `%s` or `%(name)s` are the system's own substitution mar
 ### PORT-RULE-013 - Building a share address requires read permission
 **Condition**: a share address is built with the token included.
 **Consequence**: the acting user's read permission on the record is checked before the token is created or read; a failure raises the platform's standard read refusal. The address builder used by the record pages (`get_portal_url`) deliberately skips this check, because its callers have already resolved the record.
+**Message**: the read variant of the standard access refusal composed in `PORT-RULE-031`, that is `You are not allowed to access '%(document_kind)s' (%(document_model)s) records.` followed by the allowed-groups sentence and the closing sentence. When the refusal comes from a record rule rather than from the access-right table, the platform appends its own record-level explanation; this domain adds nothing to it.
 
 ### PORT-RULE-014 - The invitation note is an internal note
 **Condition**: an invitation is sent from the share dialog.
@@ -142,7 +143,9 @@ Placeholders written as `%s` or `%(name)s` are the system's own substitution mar
 
 ### PORT-RULE-031 - Only a Contact manager may open the invitation session
 **Condition**: any read, write or create on the invitation session or on its lines.
-**Consequence**: allowed only for members of the Contact manager group; refused for every other user with the platform's standard model-access refusal. Deletion is granted to nobody.
+**Consequence**: allowed only for members of the Contact manager group `base.group_partner_manager`; refused for every other user. Deletion is granted to nobody, so a delete is refused even for a Contact manager.
+**Message**: the platform's standard model-access refusal, which is composed of three reproduced parts: a header that depends on the operation — `You are not allowed to access '%(document_kind)s' (%(document_model)s) records.` for a read, `You are not allowed to modify '%(document_kind)s' (%(document_model)s) records.` for a write, `You are not allowed to create '%(document_kind)s' (%(document_model)s) records.` for a create and `You are not allowed to delete '%(document_kind)s' (%(document_model)s) records.` for a delete, where the first placeholder is the human name of the entity (`Portal Sharing`, `Grant Portal Access` or `Portal User Config`) and the second is its transport name; then either `This operation is allowed for the following groups:` followed by the list of groups that do allow it, or `No group currently allows this operation.` when none does; then `Contact your administrator to request access if necessary.`
+**Worked message**: a read attempted by an employee who is not a Contact manager on the invitation session produces `You are not allowed to access 'Grant Portal Access' (portal.wizard) records.`, then the group list naming the Contact manager group, then the closing sentence.
 
 ### PORT-RULE-032 - Invitation lines must exist before they can be acted upon
 **Condition**: the dialog is opened.
@@ -216,6 +219,7 @@ Placeholders written as `%s` or `%(name)s` are the system's own substitution mar
 ### PORT-RULE-060 - Posting permission is resolved from the model's declared posting permission
 **Condition**: a post, a reaction or the initialization of a portal discussion thread.
 **Consequence**: the model declares which permission a person must have on the record in order to post on it. The thread is re-resolved with that permission; when the model declares no permission, posting is refused. The resolution accepts the same three proofs as reading: direct permission, a valid security token, or a valid signed recipient identity.
+**Message**: none. The refusal is silent by design: the thread simply does not resolve, the initialization response carries no thread and therefore no composer, and a post attempted anyway is answered with the transport's not-found response rather than with a sentence. A replacement must not invent an error text here, because the absence of one is what prevents a caller from probing which records exist.
 
 ### PORT-RULE-061 - What a portal discussion thread shows
 **Condition**: any fetch of messages for a portal page.
@@ -333,6 +337,7 @@ Placeholders written as `%s` or `%(name)s` are the system's own substitution mar
 ### PORT-RULE-091 - Which addresses a person may edit
 **Condition**: any address form load, address submission or address archiving that names a Contact.
 **Consequence**: the Contact must satisfy the editability predicate, that is, it must be the acting person's own Contact, or a descendant of the acting person's commercial entity whose address kind is `invoice`, `delivery` or `other`. A failure is answered with a forbidden response.
+**Message**: none of this domain's own. The response is the transport's forbidden response, status code 403, carrying the platform's standard refusal page. No sentence naming the Contact is produced, deliberately: an address form that said which Contact it refused would confirm the existence of a Contact the reader may not see. A replacement must keep the refusal contentless for the same reason.
 **Corollary**: the personal Contact of a colleague (kind `contact`) can never be edited from the portal.
 
 ### PORT-RULE-092 - What the address form is allowed to write
@@ -551,7 +556,8 @@ When the choice was not made, neither list is touched.
 
 ### PORT-RULE-142 - A security token may only be filtered by membership
 **Condition**: a filter on the token column.
-**Consequence**: only the two membership operators are supported; every other operator is rejected as unsupported, which forbids pattern matching and ordering comparisons on a secret.
+**Consequence**: only the two membership operators, *is in* and *is not in*, are supported; every other operator is refused, which forbids pattern matching and ordering comparisons on a secret. The field's own search rule answers "not implemented" for any other operator, and the platform then raises the refusal below.
+**Message**: `Unsupported operator on %(field_label)s %(model_label)s in %(domain)s`, where the first placeholder is the label of the field (`Security Token`), the second is the human name of the entity followed by its transport name in parentheses, and the third is the filter expression that was submitted.
 
 ### PORT-RULE-143 - The portal web address of a document is owned by the document's domain
 **Condition**: the portal web address is read.

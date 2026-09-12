@@ -20,9 +20,9 @@ The service operations a client or an integration invokes, the request endpoints
 
 | Operation | Inputs | Output | Side effects | Errors |
 |---|---|---|---|---|
-| `_sign_token` | exactly one record, `contact_identifier` | a sixty-four character hexadecimal signature | none | `Model %(model_name)s does not support token signature, as it does not have %(field_name)s field.` |
-| `_portal_get_parent_hash_token` | exactly one record, `contact_identifier` | a signature or nothing | none | none |
-| `_get_thread_with_access` | `thread_identifier`, `mode`, and any of `hash`, `pid`, `token` | the record, or an empty set | none | Unknown parameter names are logged and ignored. |
+| `_sign_token` | exactly one record, a recipient Contact identifier | a sixty-four character hexadecimal signature | none | `Model %(model_name)s does not support token signature, as it does not have %(field_name)s field.` |
+| `_portal_get_parent_hash_token` | exactly one record, a recipient Contact identifier | a signature or nothing | none | none |
+| `_get_thread_with_access` | the record identifier, the permission wanted, and any of `hash`, `pid`, `token` | the record, or an empty set | none | Unknown parameter names are logged and ignored. |
 | `get_portal_partner` | a thread, `hash`, `pid`, `token` | a Contact, or an empty set | none | none |
 
 ### 1.3 On messages
@@ -85,7 +85,7 @@ Authentication levels: **public** means the endpoint answers a request with no s
 | `/my/security` | GET, POST | user | The connection and security page, and the password change. | On POST: `old`, `new1`, `new2` and the request-forgery token. | The page, with success or error state. Same framing headers as the account page. |
 | `/my/deactivate_account` | POST | user | Request the deletion of the account. | `validation` (the login typed back), `password`, `request_blacklist` (present when the checkbox is ticked) and the request-forgery token. | On success a redirection to `/web/login?message=Account deleted!` with the message percent-encoded and the session closed. On failure the security page re-rendered with the dialog open and the error placed on the offending input. |
 | `/portal/attachment/remove` | structured call | **public** | Remove a pending attachment. | `attachment_id`, `access_token` (optional). | Nothing on success; the three refusals of `PORT-RULE-070`, `PORT-RULE-071` and `PORT-RULE-072`. |
-| `/mail/avatar/<message entity name>/<message>/author_avatar/<width>x<height>` | GET | **public** | The author picture of a message in a portal thread. | `access_token`, or `_hash` and `pid`. | The picture stream at the requested dimensions, or the shipped placeholder when the proof does not resolve the thread, or when neither a token nor a signed identity was supplied. |
+| `/mail/avatar/mail.message/<message>/author_avatar/<width>x<height>` | GET | **public** | The author picture of a message in a portal thread. | `access_token`, or `_hash` and `pid`. | The picture stream at the requested dimensions, or the shipped placeholder when the proof does not resolve the thread, or when neither a token nor a signed identity was supplied. |
 | `/portal/chatter_init` | structured call | **public** | Initialize a portal discussion thread. | `thread_model`, `thread_id`, and any of `token`, `hash`, `pid`. | The store seed: the reader's own user data, the publisher marker, the resolved portal Contact (active flag, picture, main user, name), whether the reader may react, whether the reader has direct read access, and the thread display name. |
 | `/mail/chatter_fetch` | structured call | **public** | Fetch a page of portal messages. | `thread_model`, `thread_id`, `fetch_params` (the paging parameters), `token`, and, with the rating bridge, `rating_value` and the "include rating" flag. | The paging result, the projected messages and their identifiers. A "not found" response when the thread does not resolve. |
 | `/mail/update_is_internal` | structured call | user | Toggle a message between public and internal. | `message_id`, `is_internal`. | The resulting value. |
@@ -138,6 +138,24 @@ These are specified in their own folders; they are listed here because they form
 | `/my/productions`, `/my/productions/<production>`, `/my/productions/<production>/subcontracting_portal` | GET | user | The subcontracting production pages. | Manufacturing |
 | `/my/leads`, `/my/opportunities` and their record pages | GET | user | The assigned lead and opportunity pages of a partnership. | Customer Relationship Management |
 | `/event/<event>/my_tickets` | GET | public | The attendee tickets of an event, proved by a signed value over the registration identifiers. | Events |
+
+---
+
+## 2.4 Menus
+
+This domain contributes **no menu item** to the back office. Its two back-office entry points are
+action bindings rather than menus, which is deliberate: an invitation is started from the Contacts a
+person has already selected, and a share is started from the document a person already has open.
+
+| Entry point | Where it appears | What it opens |
+|---|---|---|
+| `Grant portal access` | The action menu of the Contact list and of the Contact form, because the server action is bound to the Contact entity | One Portal Access Wizard row over the selected Contacts and their expansion, then the invitation dialog. |
+| `Share Document` | The action menu of any record whose entity adopts the Portal Access Mixin, because the window action is bound to the Portal Share Wizard entity and the mixin's own share operation merges the active entity and record into its context | The share dialog in a medium dialog. |
+
+The portal itself has no menu structure either: navigation is by cards on the home page, by the
+breadcrumb, by the account sidebar and by the user menu. The three fixed destinations are `/my/home`
+(reached from the breadcrumb home icon and from the `My Account` entry of the user menu),
+`/my/addresses` and `/my/security` (reached from the two cards of the common row).
 
 ---
 
@@ -210,7 +228,7 @@ Described as a contract in section 11 of [workflows.md](workflows.md).
 | `email` | `Email` | yes | Format checked. Refused for an employee's own Contact. |
 | `phone` | `Phone` | when the page needs an address | The placeholder becomes the country's telephone prefix. |
 | `company_name` | `Company Name` | no | Shown only on a billing address; read-only when the edited address is not the main address. |
-| `vat` (the input name abbreviates value-added tax) | the tax identification number label | no | Shown only on a billing address; read-only when the address is not the commercial address or when the number is frozen; the reason is explained underneath. |
+| `vat` (the input name abbreviates value-added tax) | the reproduced label `VAT`, that is, the tax identification number | no | Shown only on a billing address; read-only when the address is not the commercial address or when the number is frozen; the reason is explained underneath. |
 | `street` | `Street and Number` | when the page needs an address | |
 | `street2` | `Apartment, suite, etc.` | no | |
 | `zip` | `Zip Code` | when the country requires it | Rendered before or after the city according to the country's layout. |
@@ -281,6 +299,39 @@ This domain renders no report of its own. It provides the rendering path and the
 | Order interchange document | The order download endpoints | The interchange representation of the order produced by the first available builder, served as a rich-structured text document with an attachment disposition and a file name produced by the builder. |
 | Product documents of an order | The order document endpoint | The attachment behind the product document, served as an attachment, only when the document is active and belongs to the order's product document set. |
 | Attendee tickets | The event ticket endpoint | The ticket or badge document for a set of registrations, proved by a signed value over the registration identifiers. |
+
+---
+
+## 5.1 Imported files
+
+This domain imports nothing on its own. Two endpoints accept an uploaded file, and neither of them
+parses it:
+
+| Endpoint | What it accepts | What happens to it |
+|---|---|---|
+| The shared attachment upload of the messaging domain, called from the portal composer | Any file the attachment rules of [Messaging and Activities](../messaging-and-activities/README.md) accept | The file is stored as a pending attachment (attached to the message-composition entity with a record identifier of zero) and is re-parented onto the message when the message is posted. |
+| The signature panel of a record page | An image of a signature, either drawn, generated from the typed name or uploaded | The bytes are handed to the endpoint the owning domain supplied; this domain neither stores nor validates them. A payload that does not decode is refused by that endpoint. |
+
+The generic import screens of the platform are back-office screens and are not reachable by an
+external person, because every one of them requires an employee session.
+
+---
+
+## 5.2 External integrations
+
+This domain contacts no third-party service. Three of its behaviours are nevertheless visible to
+software outside the system, and a replacement must keep them stable:
+
+| Surface | Contract |
+|---|---|
+| The share link | An absolute address of the form base address, then `/mail/view`, then a query string carrying the entity transport name, the record identifier, the security token and, for a personal link, the recipient Contact identifier and the signed recipient identity. Links of this shape are pasted into other systems and mailed on; they must keep resolving. |
+| The record page address with a token | The document's own portal path with `access_token` appended, plus the optional `report_type`, `download`, extra query string and fragment. Monitoring and archiving tools fetch reports through this address. |
+| The signed recipient identity | A keyed hash over the triple of database name, document token and recipient Contact identifier. Its value is embedded in links that other systems store. Rotating the database secret or clearing a document's token invalidates every stored link. |
+
+The social preview metadata the front-end layout emits — title, description, site name, image, image
+dimensions and the summary card marker — is consumed by link-preview crawlers. A request identified
+as such a crawler must not be treated as a customer opening the page; the quotation page relies on
+this when it decides whether to log the "viewed by the customer" note.
 
 ---
 

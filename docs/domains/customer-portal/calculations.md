@@ -164,7 +164,13 @@ Note the side effect: computing the two links calls the token creation on both n
 
 **Algorithm**: generate a version-4 random universally unique identifier, that is, one hundred and twenty-eight bits of which one hundred and twenty-two come from a cryptographically adequate random source, four are the version marker with the value four, and two are the variant marker with the value binary one-zero. Render it as thirty-two lowercase hexadecimal digits grouped as eight, four, four, four and twelve, separated by hyphens, for a total length of thirty-six characters.
 
-**Example of the shape**: `3f2a7c18-5be4-4d0a-9f31-6c0b2e77a1d5` (the fifteenth character is the version marker `4`; the twentieth is one of `8`, `9`, `a` or `b`).
+**Worked example**: a generator produces the one hundred and twenty-eight bits whose hexadecimal rendering begins `3f2a7c18 5be4 0d0a 1f31 6c0b2e77a1d5`. The version marker is written into the first four bits of the third group, replacing `0` by `4`, which gives `4d0a`. The variant marker is written into the first two bits of the fourth group: `1f31` becomes `9f31`, because the two high bits must be binary one-zero, which restricts the first character of that group to `8`, `9`, `a` or `b`. Inserting the hyphens gives:
+
+```
+3f2a7c18-5be4-4d0a-9f31-6c0b2e77a1d5
+```
+
+Counting from one, the fifteenth character is the version marker `4` and the twentieth is the variant marker `9`. The result is thirty-six characters long: thirty-two hexadecimal digits and four hyphens.
 
 **Collision probability**: with one hundred and twenty-two random bits, the chance that any two of one hundred million issued tokens collide is below one in ten to the twentieth power. This is why the shipped behavior stores the value without a uniqueness constraint; an **industry-standard completion** is nevertheless to add a unique index per adopting model, because a collision would hand a reader the wrong document.
 
@@ -240,12 +246,12 @@ portal_web_address(suffix, report_type, download, query_string, anchor) =
 ### 6.2 The share address
 
 ```
-share_address(redirect, signup_partner, recipient_contact, include_token) =
+share_address(redirect, signup_partner, pid, share_token) =
       ( "/mail/view"  when redirect is true, else access_url )
     + "?" + encoded(parameters)
 
 parameters =   { model, res_id }                             when redirect is true
-             ∪ { access_token }                              when include_token and the model has the field
+             ∪ { access_token }                              when share_token and the model has the field
              ∪ { pid, hash }                                 when a recipient contact is given
              ∪ { auth_signup_token } or { auth_login }       when signup_partner and the record has a customer
 ```
@@ -253,7 +259,7 @@ parameters =   { model, res_id }                             when redirect is tr
 **Worked example**: the share dialog of sales order 42, sent to Contact 412 who already has an account:
 
 ```
-https://acme.example/mail/view?access_token=3f2a7c18-5be4-4d0a-9f31-6c0b2e77a1d5&hash=9d41…c07e&model=<technical model name>&pid=412&res_id=42
+https://acme.example/mail/view?access_token=3f2a7c18-5be4-4d0a-9f31-6c0b2e77a1d5&hash=9d41…c07e&model=<entity transport name>&pid=412&res_id=42
 ```
 
 **Worked example**: the same document sent to Contact 987 who has no account, with free sign-up enabled:
@@ -261,6 +267,52 @@ https://acme.example/mail/view?access_token=3f2a7c18-5be4-4d0a-9f31-6c0b2e77a1d5
 ```
 https://acme.example/web/login?database=acme_production&token=<sign-up token>&redirect=/mail/view%3Fmodel%3D…%26res_id%3D42
 ```
+
+### 6.3 Rebuilding an address with extra parameters
+
+**Purpose**: several portal pages take an address that already carries a query string and have to add, or replace, some of its parameters — the sort selector of a list page, the filter selector, the language selector and the flash messages of a record page all do this. The helper is shared, so its exact behaviour with duplicated parameter names is part of the contract.
+
+**Inputs**: `address` (a text address that may already carry a query string), `extra_parameters` (a set of name-value pairs), `remove_duplicates` (boolean, default true).
+
+**Steps**
+
+```
+1. split the address into its path part and its query part
+2. decode the query part into a list of (name, value) pairs, keeping the order and keeping
+   repeated names
+3. when remove_duplicates is true, collapse that list into a map, so that a name that occurred
+   several times keeps only its last value
+4. merge extra_parameters into the result: a name already present takes the new value,
+   a name not present is appended
+5. re-encode the result as a query string and put it back on the path part
+```
+
+**Worked example one**, with duplicates removed (the default):
+
+```
+address           = "/my?foo=bar&error=pay"
+extra_parameters  = { foo: "bar2", alice: "bob" }
+result            = "/my?foo=bar2&error=pay&alice=bob"
+```
+
+**Worked example two**, with duplicates kept:
+
+```
+address           = "/my?foo=bar&error=pay"
+extra_parameters  = { foo: "bar2", alice: "bob" }
+remove_duplicates = false
+result            = "/my?foo=bar&foo=bar2&error=pay&alice=bob"
+```
+
+**Worked example three**, the sort selector of the invoice list on page three:
+
+```
+address           = "/my/invoices/page/3?filterby=overdue_invoices&sortby=date"
+extra_parameters  = { sortby: "due_date" }
+result            = "/my/invoices/page/3?filterby=overdue_invoices&sortby=due_date"
+```
+
+The page number survives because the selector rebuilds the **current** path; the filter selector, by contrast, rebuilds the page's default address, so the same merge produces `/my/invoices?filterby=invoices&sortby=due_date` and the reader returns to the first page (`PORT-RULE-148`).
 
 ---
 
@@ -580,16 +632,16 @@ The star widget for the same record renders `average = 3.6`, `fraction = round(0
 
 ```
 when the call carried a security token:
-    /mail/avatar/<message entity name>/<message identifier>/author_avatar/50x50?access_token=<token>
+    /mail/avatar/mail.message/<message identifier>/author_avatar/50x50?access_token=<token>
 else when the call carried a signed identity and a recipient identifier:
-    /mail/avatar/<message entity name>/<message identifier>/author_avatar/50x50?_hash=<signature>&pid=<contact>
+    /mail/avatar/mail.message/<message identifier>/author_avatar/50x50?_hash=<signature>&pid=<contact>
 else:
-    /web/image/<message entity name>/<message identifier>/author_avatar/50x50
+    /web/image/mail.message/<message identifier>/author_avatar/50x50
 ```
 
 The serving endpoint resolves the message with elevated rights, then resolves the thread of that message with the supplied proof; when the thread does not resolve, it serves the shipped placeholder image instead of the author's picture, at the requested dimensions. When neither a token nor a signed identity was supplied, it serves the placeholder without even looking at the message.
 
-**Worked example**: message 3175 on a sales order opened with a signed link for Contact 412 produces `/mail/avatar/<message entity name>/3175/author_avatar/50x50?_hash=9d41…c07e&pid=412`, which returns the author's picture scaled to fifty by fifty pixels.
+**Worked example**: message 3175 on a sales order opened with a signed link for Contact 412 produces `/mail/avatar/mail.message/3175/author_avatar/50x50?_hash=9d41…c07e&pid=412`, which returns the author's picture scaled to fifty by fifty pixels.
 
 ---
 

@@ -27,7 +27,7 @@ Every rule states: what it protects, the exact condition that makes it fail, the
 | [FLT-017](#flt-017-a-vehicle-without-a-fleet-manager-falls-back-to-the-acting-user) | A vehicle without a fleet manager falls back to the acting user | Non-blocking warning with message | Activity Plan Template |
 | [FLT-018](#flt-018-every-driver-written-to-must-have-an-electronic-mail-address) | Every driver written to must have an electronic mail address | Refusal with message | Send Mails to Drivers |
 | [FLT-019](#flt-019-company-consistency) | Company consistency | Cross-record check | Vehicle, Vehicle Contract |
-| [FLT-020](#flt-020-a-model-must-name-a-name-and-a-manufacturer) | A model must carry a name and a manufacturer | Required fields | Vehicle Model |
+| [FLT-020](#flt-020-a-model-must-carry-a-name-and-a-manufacturer) | A model must carry a name and a manufacturer | Required fields | Vehicle Model |
 | [FLT-021](#flt-021-a-manufacturer-must-carry-a-name) | A manufacturer must carry a name | Required field | Vehicle Manufacturer |
 | [FLT-022](#flt-022-a-service-kind-must-carry-a-name-and-a-category) | A service kind must carry a name and a category | Required fields | Fleet Service Type |
 | [FLT-023](#flt-023-a-vehicle-status-must-carry-a-name) | A vehicle status must carry a name | Required field | Vehicle Status |
@@ -87,6 +87,7 @@ Every rule states: what it protects, the exact condition that makes it fail, the
 | [FLT-C22](#flt-c22-the-departure-option-carries-a-misspelled-storage-name) | The departure option carries a misspelled storage name |
 | [FLT-C23](#flt-c23-a-billed-service-is-dated-on-the-posting-day-not-the-bill-date) | A billed service is dated on the posting day, not the bill date |
 | [FLT-C24](#flt-c24-assignment-entries-are-closed-only-at-departure) | Assignment entries are closed only at departure |
+| [FLT-C25](#flt-c25-the-contract-half-of-the-cost-analysis-multiplies-its-amounts) | The contract half of the cost analysis multiplies its amounts |
 
 ---
 
@@ -258,7 +259,7 @@ The exclamation mark is part of the message and must be reproduced.
 
 ## FLT-002: the distance of a vehicle may never decrease
 
-**What it protects.** The distance shown on a vehicle is derived from its readings, and the derivation takes the greatest value. Allowing a lower value to be written would create a reading that the derivation immediately ignores, so the user's change would appear to have no effect at all.
+**What it protects.** The distance shown on a vehicle is derived from its readings, and the derivation takes the greatest value. Allowing a lower value to reach the table would create a reading that the derivation immediately ignores, so the user's change would appear to have no effect at all.
 
 **Failing condition.** A write on one or more Vehicles that includes the field `odometer`, where **at least one** of the vehicles being written has a current derived distance strictly greater than the value being written.
 
@@ -828,3 +829,13 @@ A worked divergence: a vehicle has one contract in state `expired` that lapsed f
 **Corrected behaviour.** When a driver is replaced, set the end date of the previous open entry of that vehicle to the day before the new start date, and keep the reminder activity only for the case where several entries are open.
 
 **Compatibility.** Reproducing the observed behaviour matters, because a rebuild that closed the entries would change the answers the assignment history gives for existing data.
+
+## FLT-C25: the contract half of the cost analysis multiplies its amounts
+
+**Observed.** The contract half of the Fleet Analysis Report attaches four independent sets of contracts to each pair of vehicle and month — the one-off set, the daily set, the monthly set and the yearly set — and then sums each set's amounts. The four sets are combined by forming every combination of one member of each before the sums are taken, so each set's amounts are counted once for every combination of the other three. Treating an empty set as contributing one combination, the multiplier applied to each set is the product of the sizes of the other three sets.
+
+**Worked consequence.** A vehicle with one activation cost of 500.00 in March 2026 and two monthly contracts of 100.00 and 150.00 covering March 2026 is reported as costing 1 250.00 in March instead of 750.00: the activation cost is counted twice, once per monthly contract. The full arithmetic is in [calculations.md](calculations.md), worked example 4 of C-29.
+
+**Corrected behaviour.** Compute each of the four contributions independently, per vehicle and month, and add the four scalars, instead of joining the four sets and aggregating over the product.
+
+**Compatibility.** Reproducing the observed behaviour matters, because correcting it lowers reported costs for every vehicle that has more than one kind of contract active in the same month. A rebuild that corrects it must say so, because the two systems then disagree on the same data.
