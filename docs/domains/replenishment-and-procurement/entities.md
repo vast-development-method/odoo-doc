@@ -298,6 +298,8 @@ Identifier: `reordering_rule`. Kind: persistent, archivable, company-scoped.
 | Company is immutable | Refused when `company` is written with a value different from the current one. | `Changing the company of this record is forbidden at this point, you should rather archive it and create a new one.` |
 | Warehouse must exist | When computing `warehouse` no warehouse can be found for the company, the system raises the shared "no warehouse configured" redirect warning owned by `../inventory-operations/`. | (Owned by the Inventory Operations domain.) |
 
+The kit constraint is enforced from both sides. The mirror of the "Product must not be a kit" rule above sits on Bill of Materials, which is owned by `../manufacturing/`: making a bill of materials a kit, or pointing an existing kit bill at another product, is refused with `You can not create a kit-type bill of materials for products that have at least one reordering rule.` as soon as any product the bill covers has at least one active Reordering Rule. Both directions are catalogued in `business-rules.md`, section 23 (`RP-RULE-042`, `RP-RULE-355`, `RP-RULE-356`).
+
 ### 3.4 On-change behavior in a form
 
 | Field edited | Effect |
@@ -362,7 +364,7 @@ Identifier: `reordering_rule_snooze_wizard`. Kind: transient (discarded by the p
 | `predefined_date` | selection (`day` = 1 Day, `week` = 1 Week, `month` = 1 Month, `custom` = Custom) | no | `day` | Shortcut for computing the snooze date. |
 | `snoozed_until` | date | no | empty | The date until which the rules are hidden. |
 
-On-change: when `predefined_date` changes, `snoozed_until` is set to today plus one day, today plus one week, or today plus one month respectively; when the value is `custom` the date is left untouched for the user to type.
+On-change: when `predefined_date` changes, `snoozed_until` is set to today plus one day, today plus one week, or today plus one month respectively; when the value is `custom` the date is left untouched for the user to type. Building the transient record runs every on-change once the defaults are in place, so the dialog opens with `predefined_date` at `day` and `snoozed_until` already at today plus one day. "Today" is the current date in the acting user's time zone. The states and transitions of the preset are in `state-machines.md`, section 15.6.
 
 Operation `action_snooze`: writes `snoozed_until` on every rule in `orderpoints`. Because the snooze validation rule of the Reordering Rule applies, the operation fails with `You can only snooze manual orderpoints. You should rather archive 'auto-trigger' orderpoints if you do not want them to be triggered.` when any selected rule is automatic.
 

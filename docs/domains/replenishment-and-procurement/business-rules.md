@@ -421,3 +421,12 @@ Notation used throughout:
 | `RP-RULE-352` | The warehouse column of the purchase analysis view is the warehouse of the purchase order's operation type. It is empty for every order whose operation type has no warehouse, which includes every drop shipping order. | none |
 | `RP-RULE-353` | The grouping of the purchase analysis view includes the warehouse, the effective date and the earliest completion date, so two lines of one order that arrived on different days are not merged into one row. | none |
 | `RP-RULE-354` | The purchase analysis view is read-only. No operation of this domain writes it; it is recomputed from the purchase order lines and their transfers on every read. | none |
+
+---
+
+## 23. Constraints this domain places on records owned elsewhere
+
+| Rule | Statement | Message on violation |
+|---|---|---|
+| `RP-RULE-355` | A bill of materials may not be given, or kept at, the type "kit" while any of the products it covers has at least one Reordering Rule. The check runs whenever a bill of materials' product template, product variant or type is written, and it counts the rules of every variant of the template when the bill names no single variant. It is the mirror of `RP-RULE-042`, which refuses the reordering rule when the kit bill already exists; together the two make the invariant "a kit product never carries a reordering rule" hold whichever record is created first. Only **active** reordering rules count: the search that backs the check applies the default archive filter, so an archived rule for the product does not block the kit bill. | `You can not create a kit-type bill of materials for products that have at least one reordering rule.` |
+| `RP-RULE-356` | The two checks of `RP-RULE-042` and `RP-RULE-355` are the only ones that couple the two records, and neither of them cascades: making a bill of materials a kit never deletes or archives a reordering rule, and creating a reordering rule never archives a kit bill. Both checks apply the default archive filter to the record they look for, so archiving is the way out of the deadlock in either direction — archiving the reordering rules of the product lets the kit bill be saved, and archiving the kit bill lets the reordering rule be created. **Compatibility finding.** Because the two checks fire only when their own record is written, an archived kit bill and an active reordering rule can be unarchived back into the forbidden combination without either check running. A corrected behaviour runs the same two checks on unarchiving. | none |

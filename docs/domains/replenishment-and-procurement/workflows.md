@@ -1000,7 +1000,7 @@ An exchange may also be created from a return that has no originating transfer a
 
 ## 26. State tables
 
-### 25.1 Reordering Rule
+### 26.1 Reordering Rule
 
 There is no explicit state field. The observable state is the combination of `active`, `trigger`, `snoozed_until` and `quantity_to_order`.
 
@@ -1017,7 +1017,7 @@ There is no explicit state field. The observable state is the combination of `ac
 | Archived | Unarchive, or unarchive the product | | Active | |
 | Any | Write `company` with a different value | | Refused | `Changing the company of this record is forbidden at this point, you should rather archive it and create a new one.` |
 
-### 25.2 Route
+### 26.2 Route
 
 | From | Trigger | Guard | To | Side effects |
 |---|---|---|---|---|
@@ -1026,7 +1026,7 @@ There is no explicit state field. The observable state is the combination of `ac
 | Archived | Unarchive | | Active | Those rules are unarchived. |
 | Any | Delete | | Deleted | Every rule of the route is deleted (cascade). |
 
-### 25.3 Stock Rule
+### 26.3 Stock Rule
 
 | From | Trigger | Guard | To | Side effects |
 |---|---|---|---|---|
@@ -1036,7 +1036,7 @@ There is no explicit state field. The observable state is the combination of `ac
 | Archived | The warehouse is reconfigured and the same routing is needed again | Same operation type, source, destination, route and action | Active | The rule is reused instead of a duplicate being created. |
 | Any | The route is deleted | | Deleted | |
 
-### 25.4 The procurement request
+### 26.4 The procurement request
 
 A procurement request is not persistent, but it has a well-defined life:
 
