@@ -184,8 +184,13 @@ Two paths exist.
 
 1. The plug-in authenticates against the dedicated route family and asks for the leads already
    linked to the Contact of the correspondent.
-2. The user may create a Lead from the correspondent, which produces a record carrying the
-   correspondent's name, address and company data.
+2. The user may create a Lead from the correspondent. The plug-in supplies the Contact identifier,
+   the message subject and the message body.
+   - **Failure condition**: when the Contact identifier resolves to nothing, the answer is the error
+     code `partner_not_found` and no record is created.
+   - Otherwise a Lead is created in the company of that Contact, with the plain text of the subject
+     as its title, that Contact as its customer and the message body as its notes. The identifier of
+     the created record is returned to the plug-in.
 3. The user may log the body of the current message onto an existing lead, which posts it as a
    message on that lead's discussion thread.
 
@@ -232,6 +237,102 @@ Two paths exist.
 
 **Failure condition**: any transport error aborts with "Your request could not be executed: *the
 error*".
+
+### 2.8 By an event registration
+
+**Actor**: the attendee, the event manager or the scheduled job runner.
+
+**Precondition**: at least one active Event Lead Rule.
+
+1. A trigger fires: registrations are created, registrations become confirmed, or registrations
+   become attended. A registration created or written by a data import fires nothing.
+2. The rules whose trigger matches are collected and their conditions are evaluated against the
+   registrations, using the filtering rule of [entities.md](entities.md), section 17.1.
+3. Registrations that already produced a Lead for the same rule are excluded, so that a status that
+   changes twice does not produce two Leads. Archived Leads count for this exclusion.
+4. **Per attendee**: one Lead per registration, built from that registration's values.
+5. **Per order**: the registrations are grouped by event and by creation instant — and, where the
+   sales coupling is installed, by sales order as well. For each group either the Lead that group
+   already produced is updated, or one Lead is created per event inside the group.
+6. Values written on a created Lead: the type, the salesperson, the team, the tags and the rule
+   reference from the rule; the event, the referrer — the event's name — and the registration list
+   from the registrations; the campaign, the source and the medium from the first registration that
+   carries one; and notes holding the enumerated participants, one line each, written as the name
+   followed by the address and the telephone in brackets.
+7. Contact values: the first registration whose contact is not the public contact is the candidate.
+   In per-attendee mode with exactly one registration, that contact is kept only when its address
+   matches the registration's, raw or normalised, **and** its telephone matches, raw or formatted;
+   otherwise the registration's own values are used instead of the contact. When a contact is kept,
+   the whole contact block is copied from it and the registration's address or telephone is used
+   only where the contact has none.
+8. When an existing group Lead is updated instead of created, its notes receive an appended block
+   titled "New registrations" and the new registrations are added to its registration list.
+9. When the contact of a registration changes afterwards, the Leads already produced are updated:
+   the customer is rewritten and, when the customer actually changed, a block titled "Updated
+   registrations" whose entries carry the suffix "(updated)" is appended to the notes.
+
+**Creating a rule from an answer option.** Standing on the answer options of a question of an event,
+the user presses **Add rules** next to one option. The creation dialogue of an Event Lead Rule opens
+as a modal, pre-filled with the label of the answer option as the rule name, the acting user as the
+salesperson written on the created records, and a registration condition selecting the registrations
+that answered that question with that option. Nothing is written until the dialogue is saved; once
+saved, the rule takes part in step 2 like any other.
+
+**Regenerating the Leads of an event.** Below the volume threshold the run is synchronous and the
+records appear immediately. Above it an Event Lead Request is created — at most one per event — and
+the scheduled job processes the registrations in batches, remembering the identifier of the last
+processed registration so that it can resume.
+
+**Failure conditions**: a user who is not an event manager is refused with "Only Event Managers are
+allowed to re-generate all leads."; a second generation request for the same event is refused with
+"You can only have one generation request per event at a time."
+
+### 2.9 By a survey participation
+
+**Actor**: the participant, or the person responsible for a live session.
+
+**Precondition**: at least one answer option of the survey is flagged as lead generating.
+
+1. The participation is completed. For a live session the responsible closes the session instead,
+   and the Leads of the whole session are produced then.
+2. The participations that selected at least one lead-generating answer are kept and grouped by
+   survey.
+3. Values common to one survey: the medium is the delivered medium named "Survey", created when it
+   is missing; the originating survey is the survey; the source is a source named after the survey's
+   title, found or created; the team is the team configured on the survey; the type is **always**
+   `opportunity`, on the assumption that the answers already qualify the interest; the salesperson is
+   the person responsible for the survey when that user belongs to the survey's team, otherwise the
+   team leader, otherwise nobody.
+4. Values per participation: the title is the participant's name followed by "survey results", or by
+   "live session results" for a session; the contact name is the participant's name, or the nickname
+   given during the session; the notes are the formatted list of questions and answers; the customer
+   is the participant's Contact when that Contact is active, and otherwise the address the
+   participant typed is written into the electronic mail field.
+5. The Leads are created in one batch with elevated rights, and each participation is then linked to
+   the Lead it produced.
+
+A participation that selected no lead-generating answer produces nothing.
+
+### 2.10 By identified website traffic
+
+**Actor**: an anonymous visitor, then the scheduled job runner.
+
+**Precondition**: the website identification capability is installed and at least one Lead
+Generation Rule is active.
+
+1. While a page is served, the active rules are matched against the visit: the website, the path
+   pattern, the visitor's country and the visitor's state. Rules already excluded for that visitor
+   are skipped, and among the remaining matches the lowest sequence wins.
+2. A Reveal View is created for the pair of that rule and the visitor's network address, unless a
+   row already exists for that pair.
+3. The scheduled job first deletes the Reveal Views whose address already produced a Lead inside the
+   retention window, then groups the remaining rows by address and asks the identification service
+   to resolve them.
+4. For each address the service resolves, one Lead is created carrying the values of the rule — the
+   type, the team, the salesperson, the tags, the priority and the title suffix — together with the
+   company data, the network address, the number of credits consumed and the rule reference.
+5. The rows the service cannot resolve move to the state "not found".
+6. Rows older than one month are deleted by the cleanup.
 
 ---
 
@@ -301,13 +402,30 @@ found, so that it is never asked for twice.
 4. **Advance the stage.** Dragging the card or clicking the status bar writes the stage, stamps
    the last stage update, accumulates the duration in the previous stage and recomputes the
    probability.
-5. **Plan the next step.** Activities are scheduled on the record; the pipeline can be sorted by
-   the current user's earliest activity deadline.
-6. **Schedule a meeting.** The meeting button opens the calendar pre-filled with the opportunity,
-   the Contact, the team and the title, and positioned on the most relevant period (see
-   `interfaces.md`). Creating the meeting posts a note on the opportunity.
-7. **Watch for duplicates.** The duplicate counter appears as soon as at least one other record
-   shares the electronic mail domain, the sanitised telephone number or the commercial entity.
+5. **Adjust the probability.** Typing a value detaches the record from the automatic computation:
+   the automated probability keeps being refreshed underneath, but it no longer overwrites the typed
+   value. The explanation control re-runs the model, writes the fresh automated value and, when the
+   probability was still automatic, realigns it. The "use the automated value" control writes the
+   automated value into the probability, which makes the record automatic again.
+6. **Plan the next step.** Activities are scheduled on the record; the pipeline can be sorted by
+   the current user's earliest activity deadline. That ordering is a two-pass read: first the
+   records on which the reader has at least one open activity, ordered by their earliest deadline,
+   then the remaining records in the ordinary ordering, excluding the ones already returned.
+7. **Schedule a meeting.** The meeting button opens the calendar pre-filled with the opportunity,
+   the Contact, the acting user, the team and the title, and positioned on the most relevant period:
+   the week mode focused on the single upcoming meeting; the week mode focused on the first of
+   several meetings that all fall inside one week of the reader's language; the month mode focused
+   on the first of several meetings spread over more than one week; and, when there is no meeting at
+   all, the week mode with no imposed date. Only meetings that are not finished are considered when
+   at least one such meeting exists. Creating the meeting posts a note on the opportunity holding
+   the scheduled instant, the subject as a link and the duration, a missing duration being rendered
+   as the word "unknown".
+8. **Watch rotting.** When the stage defines a rotting threshold, an opportunity whose last stage
+   change is older than that threshold is highlighted and the number of days is displayed. Only a
+   pending opportunity rots.
+9. **Watch for duplicates.** The duplicate counter appears as soon as at least one other record
+   shares the electronic mail domain criterion, the sanitised telephone number or the commercial
+   entity.
 
 ---
 
@@ -795,8 +913,19 @@ The same rebuild runs on the schedule of the probability job when that job is ac
    widening geographic search with weighted choice, and the partner is written on the record along
    with that partner's salesperson. Opportunities for which no partner was found receive the tag
    reserved for "no partner available".
-4. Optionally the user opens the forwarding wizard, which proposes one pairing per opportunity,
-   renders a message per pairing and sends it to the partners.
+4. Optionally the user opens the forwarding wizard. In single mode it proposes the partner already
+   carried by the selected records; in automatic mode it runs the geographic search for every
+   selected record and proposes one partner per record.
+   - **Failure conditions**: in automatic mode every proposed partner must have an electronic mail
+     address, otherwise "Set an email address for the partner(s): *the partner names*"; in single
+     mode the chosen partner must have one, otherwise "Set an email address for the partner *the
+     partner name*"; a missing forwarding template gives "The Forward Email Template is not in the
+     database".
+   - The records are grouped by recipient partner. For each group the template is rendered with the
+     partner, the list of records with their portal links and a flag telling whether that partner
+     already has a portal account, and **one** message is sent.
+   - Each record of the group is then written with the assigned partner and with the salesperson of
+     that partner, without notifying the followers, and the partner is subscribed to the record.
 5. The partner opens the opportunity in the partner portal and either declares interest or
    declines; see [state-machines.md](state-machines.md), section 7.
 
@@ -899,3 +1028,169 @@ per salesperson and batched:
 | Time to Qualify a Lead | sum of the days-to-close of records of type `lead`, dated by closed date | **lower** is better |
 | Days to Close a Deal | sum of the days-to-assign, dated by assignment date | **lower** is better |
 | New Opportunities | count of records of type `opportunity`, dated by assignment date | higher is better |
+
+The recognition capability additionally contributes five goal definitions that do not read the Lead
+entity — new sales orders, paid sales orders, the total of paid sales orders, customer credit notes
+and the total of customer credit notes — and two challenges. All ten definitions and the two
+challenges are listed in [configuration.md](configuration.md), section 7.13.
+
+---
+
+## 18. Communicating with a lead
+
+### 18.1 The available channels
+
+**Actor**: salesperson.
+
+| Operation | Behaviour |
+|---|---|
+| Send one message | Opens the message composer in comment mode on the record. Replies come back to the alias of the record's team. |
+| Send a batch of messages | Opens the composer in mass-mail mode over the selection. |
+| Send one text message | Opens the text message composer in comment mode on the record. The target is the sanitised international form of the record's telephone number, and the result is logged on the record. |
+| Send a batch of text messages | Opens the text message composer in batch mode over the selection, with the option that keeps a log on each record already enabled. |
+| Mass mailing | The Lead is a valid mailing target; recipients are selected with an ordinary search condition on Leads. |
+
+The electronic mail blacklist and the telephone blacklist both apply: a blacklisted address or
+number is skipped by the mass paths.
+
+### 18.2 Suggested recipients when a message is composed
+
+**Actor**: any user who may read the record. **Precondition**: the record exists.
+
+1. The composer asks the record which recipients it suggests.
+2. The record proposes, in this order: its Contact when one is set; then every address contained in
+   `email_from` (electronic mail address), in the order in which they appear in the field; then
+   every address contained in `email_cc` (electronic mail carbon copy); then its salesperson, unless
+   that salesperson is the acting user.
+3. Each proposed address is matched against the existing Contacts. A match yields a proposal
+   carrying that Contact and nothing else.
+4. An address matching no Contact yields a proposal carrying the values that would create the
+   Contact. Only the **first** address of the electronic mail field carries those creation values,
+   because only it is the candidate customer of the record; the further addresses and the carbon
+   copy addresses carry an empty name and no creation values.
+5. Followers of the record, the platform's own alias addresses and the system identity are removed
+   from the proposal list. A Contact with no address is still proposed, with an empty address.
+6. The user keeps, removes or edits the proposals. **No record is written by steps 1 to 5**;
+   Contacts are created only when the user confirms the composition.
+
+**Postcondition**: the record is linked to none of the Contacts created this way. Linking the
+customer happens through conversion, or through the recipient-naming rule below.
+
+### 18.3 Naming a recipient can attach the customer
+
+When a message is posted on a Lead that has an electronic mail address and **no** customer, and the
+message explicitly names a recipient whose address equals the Lead's address, that Contact is
+written as the customer on **every** Lead that has no customer, matches that address — on the
+normalised address when there is one, otherwise on the raw address — and whose stage is not folded.
+A Lead that already has a customer is left alone.
+
+### 18.4 Text messages in detail
+
+1. The target number is the record's telephone field reduced to its sanitised international form.
+2. A number on the telephone blacklist is skipped.
+3. In batch mode the option that keeps a log is enabled by default, so that every record receives a
+   note recording what was sent.
+4. Writing the telephone of a record propagates to the Contact under the synchronisation rule, and
+   refreshes the sanitised number, which in turn refreshes the potential duplicate count.
+5. Administrators may create and edit text message templates whose entity is the Lead or the
+   Contact; other users may only use them.
+6. From a website visitor, the text message control targets the visitor's Contact when the visitor
+   has one, taking the number from that Contact. When the visitor has no Contact but has at least
+   one Lead whose telephone equals the visitor's number, it targets the most trustworthy of those
+   Leads in the confidence order and takes the number from that Lead. When neither applies the
+   control is not offered. **No Contact is created by this path.**
+7. From the same screen, the message composer behaves differently: when the visitor has no Contact
+   but has Leads, the most trustworthy Lead that already has a Contact is used; when none of them
+   has one, a Contact is created from the visitor's first Lead and linked to the visitor.
+
+### 18.5 Mass mailing on leads
+
+1. A mass mailing whose target is the Lead selects its recipients with an ordinary search condition.
+2. The mailing carries a source. Every reply that creates a Lead through the team alias inherits
+   that source, which is how the mailing counts the Leads it generated.
+3. The lead counter of a mailing counts, with elevated rights and archived records included, the
+   Leads whose source is the source of the mailing.
+4. The navigation control of the mailing opens the leads screen — or the opportunities screen for a
+   reader outside the group *Show Lead Menu* — restricted to that source, grouped by creation day,
+   with creation disabled, and with the empty-state text "No Leads yet!" or "No Opportunities yet!"
+   followed by a note explaining that replies sent to addresses outside the system cannot be
+   tracked.
+5. The statistics message of the mailing shows the lead figure in its second indicator column, but
+   only when the mailing has a responsible user and that user may read Leads.
+
+---
+
+## 19. Campaign attribution at the data level
+
+Every Lead carries three attribution references — the campaign, the source and the medium. How they
+are filled is not a user action but a data-level default, and it must be reproduced exactly.
+
+### 19.1 The three tracked values
+
+| Reference | Request parameter | Cookie | Meaning |
+|---|---|---|---|
+| Campaign (`campaign_id`) | the campaign parameter of the visited address | the campaign cookie | The named effort that produced the visit, for instance an autumn drive or a seasonal offer. |
+| Source (`source_id`) | the source parameter | the source cookie | Where the link came from: a search engine, another site, the name of a mailing list. |
+| Medium (`medium_id`) | the medium parameter | the medium cookie | How the link was delivered: a postcard, an electronic mail, a banner. |
+
+All three are indexed with a partial index that skips empty values, and all three clear themselves
+when the referenced record is deleted: deleting a campaign, a source or a medium never blocks and
+never leaves a dangling reference.
+
+### 19.2 Capture while a page is served
+
+When a page is served and the visited address carries one of the three parameters, the request layer
+stores the value in the matching cookie. The cookie therefore survives the rest of the visit and the
+later form submission.
+
+### 19.3 Filling the three values at creation
+
+1. When the acting identity is the system identity, continue.
+2. Otherwise, when the acting user holds the group *User: Own Documents Only*, stop: **no**
+   attribution default is applied at all.
+3. For each of the three references that is being defaulted, read the matching cookie of the current
+   request, when there is a request.
+4. When the cookie holds a text rather than an identifier, look for a record of the matching entity
+   whose name equals that text, ignoring case and surrounding spaces, archived records included, and
+   create one with that name when none is found. A campaign created this way is flagged as
+   automatically generated.
+5. When the resulting value is not empty, use it as the default.
+
+Two consequences must be reproduced. **A salesperson never inherits tracking cookies**: a record
+created by hand in the internal screens carries no campaign, no source and no medium unless they are
+typed. Only anonymous visitors, portal users and system-driven creations inherit them — which is
+what lets the public contact form fill them even though it runs with elevated rights. **A text value
+creates the referenced record**, so an unknown campaign name in a link never loses the attribution.
+
+### 19.4 Values imposed by a channel
+
+| Channel | Imposed value |
+|---|---|
+| Public contact form | the medium submitted, else the default medium of the entity, else the delivered medium named "website", created when it is missing |
+| Live chat operator command | the delivered source named "Livechat" |
+| Live chat script step | the source of the script |
+| Survey participation | the delivered medium named "Survey", created when missing, and a source named after the survey's title, found or created |
+| Event registration rule | the campaign, the source and the medium of the first registration of the group that carries one |
+| Mass mailing reply | the source of the mailing, carried by the alias of the team |
+
+### 19.5 Roll-up counters
+
+| Counter | Definition |
+|---|---|
+| Leads of a campaign | the number of Leads whose campaign is that campaign, archived records included, visible to salespeople only |
+| Leads of a mass mailing | the number of Leads whose source is the source of the mailing, archived records included |
+
+Merging two Leads keeps the first non-empty campaign, source and medium in confidence order, so a
+merge never invents an attribution and never keeps two.
+
+---
+
+## 20. Reconciliation notes
+
+| Subject | The two statements | Resolution |
+|---|---|---|
+| Acquisition channels covered | One version specified the interface, the incoming message gateway, the public form, live chat, the plug-in and the lead generation service; the other added event registrations, survey participations and identified website traffic. | Every channel is specified. Sections 2.8, 2.9 and 2.10 were added and the plug-in section was completed with its error code. |
+| The customer created from a lead | Both described the same routine; only one gave the field-by-field table. | The table is in [entities.md](entities.md), sections 8.7 and 8.8, and the conversion workflow refers to it. |
+| The state machines | One version opened this file with the state tables; the other kept them in a document of their own. | They live in [state-machines.md](state-machines.md); this file describes the operations that drive them. |
+| The forwarding message | One version described only the assignment of a partner; the other added the guards of the forwarding message. | Both are in section 15: assignment first, then the message with its three refusals. |
+| Campaign attribution | One version described it as a field default in the entity document; the other as a workflow. | The field definitions stay in [entities.md](entities.md); the behaviour, including the rule that a salesperson never inherits a cookie, is specified once here, in section 19. |

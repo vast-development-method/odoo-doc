@@ -793,14 +793,17 @@ a new line starting today.
 have overlapping validity windows, and two identical certification lines — same skill, same
 level, same validity start, same validity end — may not coexist. The refusal is:
 `The following skills can't be created as they overlap or exactly match existing skills:`
-followed by one bullet line per conflict reading the new line's display name, then
-` conflicts with the existing skill/certification `, then the existing line's display name,
-then ` from `, the existing validity start, ` to `, and the existing validity end.
+then a line break, then one bullet line per **existing** line in conflict. A bullet line
+begins with `• `, then the display names of the new lines that clash with it separated by a
+comma and a space, then ` conflicts with the existing skill/certification `, then the
+existing line's display name, then ` from `, the existing validity start, ` to `, and the
+existing validity end. A skill line's display name is the skill's name, a colon, a space and
+the level's name.
 
 **REC-152.** A validity end earlier than the validity start is refused with:
 `The following skills have their valid stop date prior to their valid start date:`
-followed by one bullet line per offending record reading the skill's display name, then
-` from `, the validity start, ` to `, and the validity end.
+then a line break, then, for each offending record, `• `, the line's display name, ` from `,
+the validity start, ` to `, and the validity end.
 
 **REC-153.** The skill must belong to the chosen skill type:
 `The skill %(name)s and skill type %(type)s don't match`
@@ -849,8 +852,9 @@ directly or through the position; an Officer may act on all of them.
 ## 14. Access rights, record rules and menu visibility
 
 The complete matrices are in [configuration.md](configuration.md#6-access-rights-matrix) and
-[configuration.md](configuration.md#7-record-rules). The rules below state the decisions those
-matrices encode.
+[configuration.md](configuration.md#7-record-rules). How privileges, model access rights and
+record rules combine is defined once in [the security model](../../overview/security-model.md);
+the rules below state the decisions this domain's matrices encode.
 
 **REC-163.** Three privileges form a chain: Interviewer implies the internal-user privilege;
 Officer implies Interviewer; Administrator implies Officer. All three belong to one privilege
@@ -1108,8 +1112,9 @@ by the platform's system contact rather than by the candidate.
 ## 18. Locking, concurrency and ordering of side effects
 
 **REC-219.** The domain takes no explicit lock. Concurrency is handled by the storage layer's
-own record-level protection, and a rebuild must reproduce the **order** of the side effects
-rather than any locking scheme.
+own record-level protection, described in
+[transactions and concurrency](../../runtime/transactions-and-concurrency.md), and a rebuild
+must reproduce the **order** of the side effects rather than any locking scheme.
 
 **REC-220.** On an Application write the order is: adjust the value set (assignment moment,
 last-stage-update moment, readiness reset, previous stage); adjust the position's remaining

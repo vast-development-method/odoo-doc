@@ -1015,3 +1015,1032 @@ days  = 4 ÷ 8 = 0.5
 ```
 
 ---
+
+## 6. The balance consumption algorithm
+
+This is the algorithm that decides which allocation pays for which absence and what is left.
+**Input**: a set of employees, a set of types, an evaluation date, a flag saying whether future
+accrual is to be projected, optionally a list of requests to ignore, and optionally the set of
+allocations whose accrual has already been simulated. **Output**: two nested maps.
+
+### 6.1 Output shape
+
+The **first map** is indexed by employee, then type, then allocation — with one special empty
+key for a type that requires no allocation — and holds six numbers.
+
+| Key | Full name | Meaning |
+|---|---|---|
+| `max_leaves` | Maximum allowed | The granted amount of the allocation, in the type's unit, plus the accrual bonus. |
+| `accrual_bonus` | Accrual bonus | How much **more** the allocation will have accrued by the evaluation date than it has today. Zero for a regular allocation. |
+| `leaves_taken` | Time off taken | The part consumed by **approved** absences. |
+| `virtual_leaves_taken` | Provisionally taken | The part consumed by approved **and** pending absences. |
+| `remaining_leaves` | Remaining | Granted minus taken. |
+| `virtual_remaining_leaves` | Provisionally remaining | Granted minus provisionally taken. This is the figure every screen and every guard reads. |
+
+The **second map** is indexed by employee, then type, and holds three entries.
+
+| Key | Full name | Meaning |
+|---|---|---|
+| `to_recheck_leaves` | Deferred absences | Absences starting after the evaluation date and covered by an accrual allocation, which cannot yet be charged. |
+| `excess_days` | Excess entries | A map from the end date of an over-consuming absence to a record of the excess amount, whether it is provisional, and the absence. |
+| `exceeding_duration` | Exceeding duration | A number that is zero or negative: by how much the deferred absences will exceed what will have accrued. |
+
+### 6.2 Steps
+
+1. **Select the absences.** Every request of the given employees, for the given types, whose
+   state is *To Approve*, *Second Approval* or *Approved*. When the calling context names
+   requests to ignore, exclude them. When the projection flag says to ignore the future,
+   restrict the selection to requests whose absolute start is on or before the evaluation date.
+   Group them by employee and type.
+
+2. **Select the allocations.** Every allocation of the given employees, for the given types, in
+   state *Approved*, including those of archived employees. Group them by employee and type.
+
+3. **Seed each allocation's figures.**
+
+   ```formula
+   future gain = the projected accrual gain at the evaluation date
+   future gain = 0 , when the allocation is not accrual-driven, or it was already simulated, or the future is ignored
+   maximum allowed = the displayed hour amount + future gain , when the type's request unit is `hour`
+   maximum allowed = the displayed day amount  + future gain , otherwise
+   accrual bonus            = future gain
+   provisionally remaining  = maximum allowed
+   remaining                = maximum allowed
+   taken                    = 0
+   provisionally taken      = 0
+   ```
+
+   The projection is specified in
+   [accrual-plans.md, chapter 8](accrual-plans.md#8-projecting-future-accrual-without-committing-it).
+
+4. **Order the allocations for consumption**, per employee and type, by the rule `TOF-054`:
+   first those carrying a validity end date, ascending by that end date; then those with no end
+   date whose kind is Accrual Allocation; then those with no end date whose kind is Regular
+   Allocation.
+
+5. **Choose the unit.** Days and the absence's day figure for a type whose request unit is `day`
+   or `half_day`; hours and the absence's hour figure for a type whose request unit is `hour`.
+
+6. **Charge the absences**, in ascending order of absolute start. For each absence:
+
+   6.1. **Defer it when it belongs to the future of an accrual.** When the absence starts
+   strictly after the evaluation date **and** at least one accrual allocation in the order is
+   still valid at the evaluation date and starts on or before the absence's end, add the absence
+   to the deferred set, exempt it from the excess bookkeeping, and move to the next absence.
+
+   6.2. **When the type requires an allocation**, walk the ordered allocations:
+
+   - skip an allocation whose validity start falls after the calendar date of the absence's end,
+     or which carries a validity end falling before the calendar date of the absence's start;
+   - compute the overlap:
+
+     ```formula
+     interval start = the later   of the absence start and the allocation's validity start at midnight
+     interval end   = the earlier of the absence end and the allocation's validity end at 23:59:59.999999,
+                      or the absence end when the allocation carries no validity end
+     ```
+
+   - when the overlap is the whole absence the chargeable duration is the absence's own figure;
+     otherwise it is recomputed by measuring the employee's working time over the overlap alone,
+     expressed in the chosen unit;
+   - the amount actually charged to this allocation is
+
+     ```formula
+     largest allowed = minimum( chargeable duration , the allocation's provisionally remaining balance )
+     allocated       = minimum( largest allowed , the remaining absence duration )
+     ```
+
+     and an allocation whose largest allowed amount is zero is skipped;
+   - apply it:
+
+     ```formula
+     allocation provisionally taken     = allocation provisionally taken     + allocated
+     allocation provisionally remaining = allocation provisionally remaining − allocated
+     ```
+
+     and additionally, when the absence is **Approved**:
+
+     ```formula
+     allocation taken     = allocation taken     + allocated
+     allocation remaining = allocation remaining − allocated
+     ```
+
+   - subtract the charged amount from the remaining absence duration and stop the walk when it
+     reaches zero.
+
+   6.3. **Record the excess.** When, after walking every allocation, the remaining absence
+   duration rounded to two decimal places is still strictly greater than zero and the absence was
+   not exempted, record an entry under the calendar date of the absence's end carrying the
+   amount, a flag saying whether the absence is not yet *Approved*, and the absence's identity.
+
+   6.4. **When the type requires no allocation**, charge the whole absence to the pseudo
+   allocation under the empty key: add the duration to the provisionally taken figure, set both
+   remaining figures to zero, and, for an *Approved* absence, add the duration to the taken figure
+   as well.
+
+7. **Resolve the deferred absences.** For each employee and type whose deferred set is not empty:
+
+   ```formula
+   simulation date         = the latest absolute start among the deferred absences, as a date
+   latest accrual bonus    = sum over the allocations of the projected accrual gain at the simulation date
+   evaluation accrual bonus = sum over the allocations of the accrual bonus already recorded at the evaluation date
+   provisionally remaining  = sum over the allocations of their provisionally remaining balance
+   additional duration      = sum over the deferred absences of their duration in the chosen unit
+   latest remaining         = provisionally remaining − evaluation accrual bonus + latest accrual bonus
+   exceeding duration       = round to digits( minimum( 0 , latest remaining − additional duration ) , 2 )
+   ```
+
+   A negative exceeding duration is the amount by which the future absences will overrun what
+   will have accrued by the time they start.
+
+### 6.3 Worked example — twenty days allocated, five taken, two planned
+
+**Given** an employee on the standard schedule; a day-based type that requires an allocation and
+does not allow a negative balance; one *Approved* allocation of **twenty days** valid from the
+first of January to the thirty-first of December. **And** one **Approved** absence of five
+working days, Monday the fourth of March to Friday the eighth of March. **And** one absence still
+**To Approve** of two working days, Thursday the twenty-first of March to Friday the
+twenty-second of March. The evaluation date is the first of March.
+
+Seeding:
+
+```formula
+maximum allowed = 20 , accrual bonus = 0
+provisionally remaining = 20 , remaining = 20 , taken = 0 , provisionally taken = 0
+```
+
+Charging the approved five-day absence, which starts before the evaluation date and is therefore
+not deferred, and which the single allocation covers entirely:
+
+```formula
+chargeable duration = 5
+allocated = minimum( minimum( 5 , 20 ) , 5 ) = 5
+provisionally taken     = 0 + 5 = 5
+provisionally remaining = 20 − 5 = 15
+taken     = 0 + 5 = 5     , the absence being approved
+remaining = 20 − 5 = 15
+the remaining absence duration reaches 0 , so the walk stops
+```
+
+Charging the pending two-day absence:
+
+```formula
+chargeable duration = 2
+allocated = minimum( minimum( 2 , 15 ) , 2 ) = 2
+provisionally taken     = 5 + 2 = 7
+provisionally remaining = 15 − 2 = 13
+taken     = 5  , unchanged, the absence not being approved
+remaining = 15 , unchanged
+```
+
+**Then** the published figures are:
+
+| Figure | Value | Meaning to the user |
+|---|---|---|
+| Maximum allowed | 20 | the entitlement granted |
+| Time off already taken | 5 | consumed by approved absence |
+| **Remaining** | **15** | what is left once only approved absence is counted |
+| Provisionally taken | 7 | consumed by approved and pending absence |
+| **Provisionally remaining** | **13** | what is left once pending absence is also counted |
+| Requested | 2 | pending |
+| Approved | 5 | |
+| Total excess | 0 | |
+
+The employee-aware display name of the type reads `Paid Time Off (13 remaining out of 20 days)`:
+the display name uses the **provisionally remaining** figure, never the remaining one.
+
+### 6.4 Worked example — consumption order across two allocations
+
+**Given** two *Approved* allocations of the same type for one employee: allocation P of six days
+valid from the first of January to the thirtieth of June, and allocation Q of ten days valid from
+the first of January with no end date. **When** the employee files an approved absence of eight
+days in March.
+
+Ordering puts P first, because it carries an end date.
+
+```formula
+against P : allocated = minimum( minimum( 8 , 6 ) , 8 ) = 6 → P provisionally remaining 0 , absence left 2
+against Q : allocated = minimum( minimum( 8 , 10 ) , 2 ) = 2 → Q provisionally remaining 8 , absence left 0
+```
+
+The *chargeable duration* stays eight in both passes, because the absence lies entirely inside
+both validity windows, while the *remaining absence duration* falls to two. The two minimum
+operations are therefore not redundant.
+
+### 6.5 Worked example — two allocations of different validity, with a pending absence
+
+**Given** an employee on the standard schedule and a day-based type that requires an allocation
+and does not allow a negative balance. Two *Approved* regular allocations:
+
+| Allocation | Amount | Validity start | Validity end |
+|---|---|---|---|
+| A | 10 days | 1 January 2024 | 30 June 2024 |
+| B | 15 days | 1 April 2024 | none |
+
+Two absences:
+
+| Absence | Period | Days | State |
+|---|---|---|---|
+| One | 11 March 2024 to 15 March 2024 | 5 | Approved |
+| Two | 6 May 2024 to 8 May 2024 | 3 | To Approve |
+
+Evaluation date: the first of May 2024. The consumption order is [A, B].
+
+```formula
+seeding : A maximum 10 , provisionally remaining 10 ; B maximum 15 , provisionally remaining 15
+absence One starts 11 March , not after the evaluation date , so it is not deferred
+   A is eligible : 1 January ≤ 15 March and 30 June ≥ 11 March
+   the interval equals the absence , so the chargeable duration is 5
+   allocated = minimum( minimum( 5 , 10 ) , 5 ) = 5
+   A : provisionally taken 5 , provisionally remaining 5 , taken 5 , remaining 5
+absence Two starts 6 May , after the evaluation date , but no accrual allocation exists , so it is not deferred
+   A is eligible : 1 January ≤ 8 May and 30 June ≥ 6 May
+   the interval equals the absence , so the chargeable duration is 3
+   allocated = minimum( minimum( 3 , 5 ) , 3 ) = 3
+   A : provisionally taken 8 , provisionally remaining 2 , taken 5 , remaining 5
+   the absence duration reaches 0 , so B is never reached
+```
+
+| Allocation | Maximum | Taken | Provisionally taken | Remaining | Provisionally remaining |
+|---|---|---|---|---|---|
+| A | 10 | 5 | 8 | 5 | 2 |
+| B | 15 | 0 | 0 | 15 | 15 |
+
+Aggregated over the allocations valid on the evaluation date, which is both of them:
+
+```formula
+maximum allowed         = 10 + 15 = 25
+taken                   = 5 + 0   = 5
+provisionally taken     = 8 + 0   = 8
+remaining               = 5 + 15  = 20
+provisionally remaining = 2 + 15  = 17
+requested = provisionally taken − taken = 3
+approved  = taken = 5
+```
+
+The dashboard tile therefore reads seventeen available out of twenty-five, with three days
+requested and five days taken.
+
+Two variants of the same fixture:
+
+```formula
+absence Two of 8 days , 6 May to 15 May :
+   against A : allocated = minimum( minimum( 8 , 5 ) , 8 ) = 5 → A provisionally remaining 0 , absence left 3
+   against B : the interval equals the absence , chargeable duration 8
+               allocated = minimum( minimum( 8 , 15 ) , 3 ) = 3 → B provisionally remaining 12 , absence left 0 , no excess
+absence Two of 30 days :
+   after A and B the remainder is 30 − 5 − 15 = 10
+   an excess entry of 10 days is recorded under the absence's end date , flagged provisional
+   rule TOF-052 rejects the request
+```
+
+### 6.6 Worked example — an absence straddling an allocation boundary
+
+**Given** the same employee, one *Approved* allocation C of four days valid from the first to the
+fifth of June 2024, and one *Approved* absence from Monday the third of June to Friday the
+seventh of June, five working days.
+
+```formula
+C is eligible : 1 June ≤ 7 June and 5 June ≥ 3 June
+interval start = the later of 3 June 06:00 and 1 June 00:00 = 3 June 06:00
+interval end   = the earlier of 7 June 15:00 and 5 June 23:59:59.999999 = 5 June 23:59:59.999999
+the interval is narrower than the absence , so the chargeable duration is recomputed :
+   the schedule offers Monday, Tuesday and Wednesday inside it = 3 days
+allocated = minimum( minimum( 3 , 4 ) , 5 ) = 3
+C : provisionally remaining 1 , taken 3
+the absence duration left is 5 − 3 = 2 , no further allocation exists
+an excess entry of 2 days is recorded under 7 June
+```
+
+The employee is therefore two days short even though the allocation still shows one unused day,
+because that day is only usable up to the fifth of June.
+
+---
+
+## 7. Aggregating the balance for a date, and the dashboard payload
+
+**Input**: a set of employees, the types to display, an evaluation date. **Output**: for each
+employee, one entry per type that requires an allocation, holding the figures, the type's request
+unit, the public address of the type's cover image, the type's negative-balance flag, the type's
+maximum excess amount and the employee's company.
+
+1. Run the consumption algorithm of [chapter 6](#6-the-balance-consumption-algorithm) for those
+   employees, types and evaluation date, passing on any requests the caller asks to ignore.
+2. Initialise, for each employee and each type requiring an allocation, a figure map with every
+   amount at zero, plus the constants listed above and the exceeding duration taken from the
+   second map.
+3. **Fold the excess entries into the figures.** For each excess entry, in ascending order of its
+   date:
+
+   ```formula
+   total provisional excess = total provisional excess + the entry amount
+   the entry is recorded under its date, written as year, month and day
+   ```
+
+   and then, **only when the type allows a negative balance**:
+
+   ```formula
+   provisionally taken     = provisionally taken     + the entry amount
+   provisionally remaining = provisionally remaining − the entry amount
+   requested = requested + the entry amount , when the entry is provisional
+   approved  = approved  + the entry amount , when it is not
+   taken     = taken     + the entry amount , when it is not
+   remaining = remaining − the entry amount , when it is not
+   ```
+
+   A type that does not allow a negative balance therefore reports its excess in the total
+   provisional excess alone, and its balance never goes below zero on the tile.
+4. **Fold the per-allocation figures**, skipping allocations whose validity start falls after the
+   evaluation date and those whose validity end falls before it:
+
+   ```formula
+   remaining               = remaining               + the allocation's remaining
+   provisionally remaining = provisionally remaining + the allocation's provisionally remaining
+   maximum allowed         = maximum allowed         + the allocation's maximum allowed
+   accrual bonus           = accrual bonus           + the allocation's accrual bonus
+   taken                   = taken                   + the allocation's taken
+   provisionally taken     = provisionally taken     + the allocation's provisionally taken
+   requested               = requested + ( the allocation's provisionally taken − the allocation's taken )
+   approved                = approved  + the allocation's taken
+   ```
+
+   While folding, two auxiliary sets are built: the allocations valid today, and the allocations
+   valid at the evaluation date.
+5. Compute the closest expiry of [chapter 9](#9-the-closest-expiring-entitlement).
+6. Set the *holds changes* marker to true when the evaluation date is not today and either the
+   accrual bonus is strictly positive or the two auxiliary sets differ. This is what tells the
+   screen that the figures shown are not the figures of today.
+7. Round every decimal figure of the result to two decimal places, as the last step before
+   publication.
+
+---
+
+## 8. The coverage check
+
+**Input**: the requests being created or written, grouped by the pair (type, requested start
+date). **Effect**: raises one of the messages of rules `TOF-050`, `TOF-051` and `TOF-052`, or
+passes.
+
+For each group:
+
+1. A type that requires no allocation passes immediately.
+2. Let the employees be the employees of the requests in the group, and compute the aggregated
+   balance of [chapter 7](#7-aggregating-the-balance-for-a-date-and-the-dashboard-payload) for
+   that type, those employees and the group's date.
+3. **When the type allows a negative balance:** when every request in the group is already
+   *Cancelled* or *Refused*, the group passes. Otherwise, for each employee: a maximum allowed of
+   zero raises `TOF-050`; a provisionally remaining balance strictly below the negative of the
+   type's maximum excess amount raises `TOF-051`.
+4. **When the type does not allow a negative balance:** compute the aggregated balance a second
+   time with the requests of the group ignored. For each employee: a maximum allowed of zero
+   raises `TOF-050`; when both excess maps are empty the employee passes; when the two maps
+   differ **and** the map computed with the requests holds at least as many entries as the map
+   computed without them, `TOF-052` is raised.
+5. After every group has passed, and only for an actor who does not hold the Officer group, a
+   request intersecting an applicable Mandatory Day raises `TOF-071`.
+
+Two subtleties follow from comparing the two excess maps. First, an employee who is already
+over-consuming on dates unrelated to the request being edited is not blocked, because the two maps
+carry the same entries. Second, an edit that moves an excess from one date to another without
+adding one **is** blocked, because the maps differ while their counts are equal.
+
+---
+
+## 9. The closest expiring entitlement
+
+**Input**: the allocations whose provisionally remaining balance is strictly positive, their
+consumption figures, and the evaluation date. **Output**: a pair (date, amount), or (none, zero).
+
+1. For each such allocation collect three candidate dates:
+   - its **validity end date**;
+   - its **carry-over cut-off**, but only when a level is in force at the evaluation date and that
+     level either loses unused accruals or limits the carry-over. When the computed cut-off equals
+     the evaluation date exactly, one year is added, because entitlement accrued **on** the
+     cut-off belongs to the next carry-over period;
+   - its **carried-over expiry date**, obtained by cloning the allocation, advancing the clone
+     with the accrual engine to the evaluation date, and reading the clone's expiry date.
+2. Drop the empty candidates and sort the rest ascending.
+3. Walk the sorted candidates. For each candidate date, sum over all the allocations:
+
+   ```formula
+   contribution = the allocation's provisionally remaining balance
+                  , when the allocation's validity end date equals the candidate
+   contribution = maximum( 0 , the allocation's provisionally remaining balance − the level's carry-over maximum )
+                  , when the allocation's carry-over cut-off equals the candidate
+   contribution = maximum( 0 , the clone's expiring carried-over pool − the allocation's consumed amount )
+                  , when the allocation's carried-over expiry date equals the candidate
+   ```
+
+4. Produce the first candidate whose total contribution is not zero, together with that total.
+5. When no candidate produces a non-zero total, produce (none, zero).
+
+### 9.1 The working time until the closest expiry
+
+Once a closest expiry date is known, the platform also publishes how much working time separates
+the evaluation date from it.
+
+```formula
+window start = the evaluation date at local midnight, converted to coordinated universal time
+window end   = the closest expiry date at the last instant of its day, converted to coordinated universal time
+```
+
+- **When the employee has no working schedule at all**:
+
+  ```formula
+  hours = round to multiple( ( window end − window start ) in seconds ÷ 3600 , 0.001 )
+  days  = ( window end − window start ) in whole days + 1
+  ```
+
+- **When the employee has a working schedule**: measure the employee's work intervals over the
+  window and aggregate them per [section 2.8](#28-aggregating-intervals-into-days-and-hours).
+
+The hour figure is published for an hour-based type and the day figure for every other type.
+
+### 9.2 Worked example
+
+Take the fixture of [section 6.5](#65-worked-example--two-allocations-of-different-validity-with-a-pending-absence).
+The allocations with a strictly positive provisionally remaining balance are A, with two days, and
+B, with fifteen. A carries a validity end date of the thirtieth of June 2024; B carries none, and
+neither is accrual-driven, so neither contributes a carry-over candidate. The sorted candidate
+list holds one date, the thirtieth of June 2024, whose total contribution is A's provisionally
+remaining balance, two days. The tile therefore announces that **two days expire on the thirtieth
+of June 2024**, together with the working time the schedule offers between the first of May and
+that date.
+
+---
+
+## 10. Derived displays and counters
+
+### 10.1 Allocation amount conversions
+
+```formula
+displayed hour amount = number of days × hours per day( employee , the allocation's validity start date )
+```
+
+```formula
+number of days = the displayed day amount                                                          , when the request unit is not `hour`
+number of days = the displayed hour amount ÷ hours per day( employee , the validity start date )   , when it is `hour`
+```
+
+The two formulas are mutually inverse and are evaluated in that order. When the working schedule
+in force for the employee changes, the stored day figure of every hour-based allocation is
+**explicitly** recomputed from the stored hour figure at the new hours per day, so that the hours
+already accrued are preserved rather than revalued:
+
+```formula
+number of days = the displayed hour amount ÷ the new hours per day( employee , the validity start date )
+```
+
+**Worked example.** An employee on an eight-hour day receives an allocation typed as forty hours.
+
+```formula
+number of days = 40 ÷ 8 = 5
+generated description = "Paid Time Off (40.0 hour(s))"
+duration text = "40 hours"
+```
+
+When the employee later moves to a six-hour day the stored day amount is restated to
+40 ÷ 6 = 6.666667, which preserves the forty hours.
+
+### 10.2 Employee counters
+
+```formula
+allocated days = round to digits( sum of the day amounts over the employee's approved allocations
+                                  of active, allocation-requiring types whose validity window contains today , 2 )
+number of allocations = the count of those allocations
+```
+
+```formula
+allocated display  = printed( round to digits( sum of the day amounts over the employee's approved allocations
+                     whose validity window contains today, restricted to the types that are neither hidden from
+                     the dashboard nor archived , 2 ) )
+remaining display  = printed( round to digits( sum over exactly the same allocations of their provisionally
+                     remaining balance, each divided by hours per day for an hour-based type , 2 ) )
+```
+
+Both display strings are printed with two decimal places and trailing zeros removed. The
+allocated display does **not** exclude types that require no allocation, while the allocated-days
+counter does; the two figures therefore differ for an employee holding entitlement of both kinds.
+
+### 10.3 Department counters
+
+```formula
+absences today             = the count of approved requests of the department whose period intersects
+                             the current coordinated-universal-time day, from 00:00:00 to 23:59:59
+requests to approve        = the count of requests    of the department in state To Approve
+allocations to approve     = the count of allocations of the department in state To Approve
+```
+
+### 10.4 Working schedule counter
+
+```formula
+public holidays of a schedule = the count of resource-less Working Time Exclusions attached to this schedule
+                              + the count of resource-less Working Time Exclusions attached to no schedule at all
+```
+
+### 10.5 Unusual days
+
+The calendar widgets shade the days an employee does not normally work. For a fixed schedule a day
+is unusual when it carries no work interval. For a flexible schedule the sense is inverted: the
+widget instead marks the days covered by an exclusion. When no employee is present in the calling
+context, the acting user's own employee record is used.
+
+---
+
+## 11. Extra hours convertible into time off
+
+With the attendance companion package installed:
+
+```formula
+unspent compensable extra hours( employee ) =
+      the sum of the manual durations of the employee's approved overtime lines flagged compensable as time off
+    − the sum of the hour figures of the employee's requests whose type deducts extra hours and requires
+      no allocation, in any state other than Refused and Cancelled
+    − the sum of the displayed hour amounts of the employee's allocations whose type deducts extra hours,
+      in state To Approve, Second Approval or Approved
+```
+
+A negative result blocks the operation under rules `TOF-110` and `TOF-111`. The overtime summary of
+an employee publishes three figures:
+
+```formula
+compensable overtime         = the sum of the durations of the employee's overtime lines flagged compensable
+non-compensable overtime     = the sum of the durations of the employee's overtime lines not flagged compensable
+unspent compensable overtime = unspent compensable extra hours( employee )
+```
+
+**Worked example.** An employee has accumulated twelve hours of compensable overtime and three
+hours of non-compensable overtime, has already taken a five-hour absence of a deductible type, and
+holds a pending allocation of two hours of a deductible type.
+
+```formula
+unspent compensable extra hours = 12 − 5 − 2 = 5
+compensable overtime     = 12
+non-compensable overtime = 3
+```
+
+A new request of four hours of the deductible type is accepted, the balance becoming one; a request
+of six hours is rejected with "You do not have enough extra hours to request this leave".
+
+---
+
+## 12. Report row building
+
+### 12.1 Time Off Analysis
+
+The projection `hr.leave.report` produces one row per Time Off Allocation and one row per Time Off
+Request of an **active** employee.
+
+For an allocation:
+
+```formula
+request link = empty , allocation link = the allocation , description = the allocation's description
+number of days  = the allocation's day amount
+number of hours = the allocation's displayed hour amount
+department = the department of the employee's current Employee Version
+row kind   = `allocation` , labelled "Allocation"
+state, start date, end date, type and company are copied from the allocation
+```
+
+For a request:
+
+```formula
+request link = the request , allocation link = empty , description = the request's private description
+number of days  = − the request's day figure
+number of hours = − the request's hour figure
+department = the department of the employee's current Employee Version
+row kind   = `request` , labelled "Time Off"
+state, start date, end date, type and company are copied from the request
+```
+
+Summing the day column over a group therefore yields the net balance of that group directly,
+because allocations carry positive amounts and absences negative ones.
+
+### 12.2 Time Off Balance by Employee and Type
+
+The projection `hr.leave.employee.type.report` computes a first-in-first-out remaining balance per
+allocation and then adds the absences.
+
+1. **Validated absences.** Every request whose state is *Approved* or *Second Approval*, with its
+   duration in days and hours, its employee, its type and its period.
+2. **Overlap groups.** The *Approved* allocations of one employee and type are ordered by validity
+   start date and then by identity. A new overlap group starts at an allocation whose validity
+   start is strictly after the greatest validity end seen so far in the group, an empty validity
+   end counting as infinitely far away. Overlapping allocations therefore share one pool; disjoint
+   allocations do not.
+3. **Ranking within a group.** Rank the allocations by validity start and then by identity, and
+   compute the running cumulative allocated days and hours.
+4. **Entry point of each absence.** For each validated absence, find every allocation of the same
+   employee and type whose validity window intersects the absence — the absence starting on or
+   before the allocation's end and either the allocation carrying no end or the absence ending on
+   or after the allocation's start — and take the smallest rank among them, within the overlap
+   group.
+5. **Consumption by rank.** Sum the days and hours of the absences whose entry rank is that rank.
+6. **Remaining balance per allocation.**
+
+   ```formula
+   cumulative remaining( rank ) = maximum( 0 , cumulative allocated( rank ) − the sum of the consumption of ranks 1 to rank )
+   remaining( rank )            = maximum( 0 , cumulative remaining( rank ) − cumulative remaining( rank − 1 ) )
+   ```
+
+   with a cumulative remaining of zero at rank zero.
+7. **Rows.** One row per allocation whose remaining day figure is at least zero, with the row kind
+   `left` labelled "Left", the remaining days and hours, and the validity dates shifted to twelve
+   hours so that the pivot groups them on the right day; plus one row per request whose state is
+   *To Approve*, *Second Approval* or *Approved*, with the row kind `taken` labelled "Taken" when
+   the state is *Approved* or *Second Approval* and `planned` labelled "Planned" when it is *To
+   Approve*, carrying the request's duration and period.
+
+**Worked example.** An employee holds one *Approved* allocation of ten days and one *Approved*
+absence of three days charged against it.
+
+```formula
+cumulative allocated( 1 ) = 10 , consumption( 1 ) = 3
+cumulative remaining( 1 ) = maximum( 0 , 10 − 3 ) = 7
+remaining( 1 )            = maximum( 0 , 7 − 0 )  = 7
+```
+
+so one row of kind Left carries seven days and one row of kind Taken carries three days.
+
+### 12.3 Time Off Calendar Report
+
+The projection `hr.leave.report.calendar` produces one row per request whose state is *To Approve*,
+*Second Approval*, *Approved* or *Refused*; cancelled requests are excluded. Each row is flattened
+with the employee's company and login user, the job position of the employee's current Employee
+Version, and the time zone resolved as the first non-empty of the employee's resource time zone,
+the working schedule of the current Employee Version, the acting company's schedule, and
+coordinated universal time.
+
+```formula
+struck through = the state is `refuse`
+hatched        = the state is neither `validate` nor `refuse`
+```
+
+### 12.4 The absence ledger
+
+The projection `hr.leave.attendance.report`, added by the attendance companion package, covers a
+window running from the first day of the month one year before today to yesterday inclusive. For
+each employee and each day of the window on which an Employee Version carrying a contract is in
+force:
+
+```formula
+expected hours   = the hours the version's working schedule expects that day
+worked hours     = the sum of the attendance durations mapped to that day in the schedule's time zone
+absence hours    = the sum of the prorated durations of the approved absences covering that day
+difference hours = worked hours − expected hours + absence hours
+```
+
+A day that a closure covers entirely, in the schedule's local time, is excluded from the window
+altogether. An absence whose type excludes public holidays contributes nothing on a public holiday.
+
+**Worked example.** An employee expected to work eight hours on a Tuesday records six hours of
+attendance and holds an approved absence of two hours that day.
+
+```formula
+difference hours = 6 − 8 + 2 = 0
+```
+
+so the day balances exactly and does not appear under the negative-difference filter.
+
+### 12.5 The printed sixty-day summary
+
+The grid covers the sixty consecutive days starting at the chosen date. For each employee:
+
+1. For every index from zero to fifty-nine, the day is the start date plus that many days, and the
+   cell colour is grey when the day is a Saturday or a Sunday and empty otherwise.
+2. For every absence of the employee in the chosen states that overlaps the window from the start
+   date to the start date plus fifty-nine days: for every day from the absence's start to the
+   absence's end, both converted into the reader's time zone, when the day lies inside the window,
+   the colour of that cell becomes the palette colour of the absence's type. Later absences
+   overwrite earlier ones in the same cell.
+3. The row total is the sum of the day figures of those absences, including the part of an absence
+   that falls outside the window.
+
+The palette maps the colour index to a named colour:
+
+| Index | Colour | Index | Colour |
+|---|---|---|---|
+| 0 | light grey | 6 | light coral |
+| 1 | tomato | 7 | steel blue |
+| 2 | sandy brown | 8 | dark slate blue |
+| 3 | khaki | 9 | crimson |
+| 4 | sky blue | 10 | medium sea green |
+| 5 | dim grey | 11 | medium purple |
+
+The states painted are *Approved* when Approved was chosen, *To Approve* when Confirmed was chosen,
+and both when Both Approved and Confirmed was chosen. The header prints the chosen start date, the
+date fifty-nine days later, and the label "Approved", "Confirmed" or "Confirmed and Approved". The
+month band above the grid prints each month name together with the number of days of that month
+inside the window.
+
+**Worked example.** A start date of the first of May 2024 gives a window ending on the twenty-ninth
+of June 2024. The month band reads May with thirty-one days and June with twenty-nine days,
+totalling sixty. An employee with one approved absence of three days from the eighth to the tenth
+of May has three cells painted and a row total of three.
+
+---
+
+## 13. Projecting future accrual
+
+**Input**: an allocation and a future date. **Output**: the number of days, or of hours for an
+hour-based type, that the allocation will have gained between today and that date.
+
+1. The projection is zero when the date is empty or is not strictly after today.
+2. The projection is zero unless **all** of the following hold: the allocation carries an Accrual
+   Plan; its state is *Approved*; its allocation type is `accrual`; its validity end date is empty
+   or strictly after the target date; and its next call date is empty or on or before the target
+   date.
+3. Otherwise create a **detached copy** of the allocation, an in-memory record that shares the
+   stored values and writes nowhere, run the accrual engine of
+   [accrual-plans.md, chapter 7](accrual-plans.md#7-the-engine) on the copy with that target date
+   and with logging suppressed, and take the difference:
+
+   ```formula
+   projection = round to digits( the copy's displayed hour amount − the allocation's displayed hour amount , 2 )
+                , when the type's request unit is `hour`
+   projection = round to digits( the copy's day amount − the allocation's day amount , 2 )
+                , otherwise
+   ```
+
+4. Discard the copy. The stored allocation is never advanced by this computation.
+
+Recursion is prevented by two mechanisms: the consumption algorithm passes the set of allocations
+it is already simulating down through the calling context, and the projection is skipped entirely
+when the consumption algorithm is told to ignore the future.
+
+### 13.1 Worked example
+
+Take the allocation of
+[accrual-plans.md, chapter 13](accrual-plans.md#13-worked-example-five--fourteen-months-at-one-and-a-half-days-a-month)
+on the fifteenth of June 2024, when its stored balance is 7.5 days and its next call date is the
+first of July 2024. Asking what the balance will be on the first of October 2024:
+
+```formula
+the copy is advanced through 1 July, 1 August, 1 September and 1 October
+the copy's day amount = 7.5 + 1.5 + 1.5 + 1.5 + 1.5 = 13.5
+projection = round to digits( 13.5 − 7.5 , 2 ) = 6.0
+```
+
+so an absence placed in October is measured against a maximum allowed of 13.5 days rather than 7.5,
+and the accrual bonus reported for the allocation is six.
+
+### 13.2 The carried-over expiry projection
+
+To tell the user when their carried-over entitlement will disappear, the platform projects the
+expiry without committing it:
+
+1. For each allocation under consideration, create a detached copy.
+2. Run the accrual engine on the copies with the target date and with logging suppressed.
+3. For each copy read back:
+
+   ```formula
+   expiry date            = the copy's carried-over expiry date
+   non-expiring pool      = maximum( 0 , the copy's expiring carried-over pool − the allocation's taken figure )
+   ```
+
+4. Discard the copies.
+
+---
+
+## 14. Other formulas
+
+### 14.1 The calendar entry created at validation
+
+```formula
+duration in hours of the calendar entry = duration in days × ( schedule hours per day , or 8 when there is none )
+```
+
+The entry is marked as covering the whole day when:
+
+```formula
+whole day = the request is not half-day-based
+            OR ( the start day period is Morning AND the end day period is Afternoon )
+```
+
+and, for an hour-based type, instead:
+
+```formula
+whole day = duration in days ≥ 1 , compared to one decimal place
+```
+
+When the whole-day marker is true the start and stop are the local wall-clock instants in the
+request's time zone; otherwise they are the absolute instants.
+
+### 14.2 The activity deadline
+
+```formula
+deadline = ( the absolute start date − the activity type's delay count × its delay unit ) as a date
+deadline = today , when the request carries no absolute start
+deadline = today , when the computed deadline falls before today
+```
+
+The shipped first-approval activity type carries a delay of **fifteen days**; the second-approval
+type and both allocation types carry no delay.
+
+**Worked example.** A request created on the first of May 2024 with an absolute start on the third
+of June 2024 produces a first-approval deadline of the nineteenth of May 2024. The same request
+with an absolute start on the fifth of May 2024 produces a computed deadline of the twentieth of
+April, which falls before today and is therefore floored at the first of May 2024.
+
+### 14.3 Adjusting absence intervals for availability publication
+
+When an employee's availability is published, for meeting scheduling, absence intervals are widened
+so that a half-day or hour-based absence blocks the right slice of the day.
+
+| Request unit | Adjustment |
+|---|---|
+| `half_day` | The interval is replaced by local midnight to noon when the start day period is Morning, and by noon to local midnight when it is Afternoon; the daily and weekly available-hour counters are reduced by the request's hour figure. |
+| `hour` | The interval is replaced by the request's own absolute bounds converted into local time; the same counter reduction applies. |
+| `day` | The interval is widened to local midnight of the start day through local midnight of the day after the end day. |
+
+### 14.4 Rounding of the dashboard payload
+
+Every decimal number in the dashboard payload is rounded to **two decimal places** as the last step
+before it is published.
+
+---
+
+## 15. Country-specific duration rules
+
+Two localization packages inside the scope of this folder change the duration arithmetic. Both act
+after the ordinary computation of [chapter 4](#4-the-duration-computation-algorithm) and replace
+its result.
+
+### 15.1 The French part-time rule
+
+**When it applies.** All of the following must hold for a single request: the request has an
+employee; the company's country is France; the request's working schedule differs from the
+company's working schedule, which is what makes the employee part-time; and the request's type is
+the company's reference paid-time-off type (`l10n_fr_reference_leave_type`). Asking for that type
+while it is empty raises *"You must first define a reference time off type for the company."*
+
+**Extending the resolved period.** After the ordinary resolution of
+[chapter 3](#3-from-request-dates-to-absolute-dates):
+
+1. When the employee's working schedule carries no attendance line at all, the operation is refused
+   with *"An employee can't take paid time off in a period without any work hours."*
+2. When the request is **not** hour-based, the two instants are re-derived against the union of the
+   company's attendance lines and the employee's attendance lines: the start instant takes the
+   smallest start hour of the groups of the requested start weekday and day period, and the end
+   instant takes the largest end hour of the groups of the requested end weekday and day period.
+   For a half-day request the day periods are the requested ones; otherwise both morning and
+   afternoon are considered.
+3. When the request is half-day-based and ends in the Morning, and the employee's own schedule
+   carries an afternoon or full-day attendance on that weekday, the period is left as it is: the
+   employee works that afternoon, so there is nothing to bridge.
+4. Otherwise the start is moved forward to the first date on which the **employee's** schedule
+   works, and the end is moved forward while the **employee's** schedule does not work on the day
+   after it. When the resulting start would pass the resulting end, the original pair is kept.
+5. When the end instant was moved, the flag "end date extended by the French rule"
+   (`l10n_fr_date_to_changed`) is set on the request; otherwise it is cleared.
+
+**Counting the legal days.** The duration in days is then recomputed on the **company's** calendar
+rather than the employee's:
+
+1. Collect the resource-less exclusions of the company, or of no company, that overlap the request,
+   and expand each into the set of local dates it touches, using the time zone of the user who last
+   wrote it.
+2. Move the start forward to the first date on which the employee's schedule works, and compute an
+   extended end by moving forward while the **company's** schedule does not work on the day after
+   it.
+3. Walk every date from that start to that extended end. A date that is one of the collected
+   holiday dates contributes nothing. A date on which the company's schedule works contributes one
+   day, or **half a day** when it is the start date and the request is a half day starting in the
+   afternoon or a single-day half-day request, and half a day when it is the end date and the
+   request is a half day ending in the morning whose end was **not** extended.
+4. The duration in hours is left at the figure the ordinary computation produced.
+
+**Worked example.** An employee works Monday to Wednesday in a company whose schedule is Monday to
+Friday, both eight hours a day. The employee requests a full-day absence from Monday to Wednesday of
+the same week, on the company's reference type, with no public holiday in the window.
+
+```formula
+the employee's schedule does not work on Thursday, so the end is moved to Thursday
+the employee's schedule does not work on Friday either, so the end is moved to Friday
+the company's schedule works on the Saturday? no → the extended end stays Friday
+legal days = Monday 1 + Tuesday 1 + Wednesday 1 + Thursday 1 + Friday 1 = 5
+duration in hours = 24 , unchanged, being the employee's own three working days of eight hours
+```
+
+The absence therefore costs **five days** of entitlement although the employee was only scheduled
+to work three of them, which is the effect French law requires; the flag "end date extended by the
+French rule" is set, and the work entry gap filling of rule `TOF-109` then produces payroll entries
+for the Thursday and the Friday.
+
+### 15.2 The Indian bridging-day rule
+
+**When it applies.** The company's country is India and the request's type carries the bridging-day
+flag (`l10n_in_is_sandwich_leave`). The rule is skipped for a request whose ordinary duration is
+zero, and for a request in state *Approved* or *Second Approval* when the reader does not hold the
+Officer group.
+
+**The full-day test.** A request qualifies only when it covers a whole day.
+
+```formula
+default hours = the working hours the employee's schedule, or failing that the acting company's schedule,
+                offers between the requested start date at hour zero and the requested end date at hour
+                twenty-four, exclusions ignored
+```
+
+For an hour-based type the request is a full day when the default hours are not zero and the
+request's hour figure is greater than or equal to them, compared to two decimal places. For any
+other type the request is a full day when the two requested day periods differ and are not the pair
+(Afternoon, Morning), or when the default hours are zero; otherwise the same comparison of the hour
+figure against the default hours decides.
+
+**Counting.** Let a date be *working* when it is not one of the company's public-holiday dates —
+the empty set when the type includes public holidays in the duration — and the employee's schedule
+works on it.
+
+1. When both the requested start date and the requested end date are non-working, and no date
+   strictly between them is working, the rule produces zero and the ordinary duration stands.
+2. Otherwise start from the number of calendar days of the requested period:
+
+   ```formula
+   total = ( requested end date − requested start date ) in days + 1
+   ```
+
+3. Find the **linked absences**: walking backwards from the requested start date, and forwards from
+   the requested end date, up to thirty days, stop at the first working date and take the absence
+   of the same employee that covers it, when one exists, is of a bridging-enabled type, is in a
+   state other than *Cancelled* and *Refused*, and is itself a full-day request.
+4. When a linked absence exists **before** this one and starts strictly before it, add the number of
+   consecutive non-working days immediately before the requested start date, counted up to thirty.
+   Otherwise, when the requested start date is itself non-working, subtract the number of
+   consecutive non-working days starting at the requested start date and running forwards.
+5. When a linked absence exists **after** this one and starts strictly after it, add the number of
+   consecutive non-working days immediately after the requested end date, counted up to thirty.
+   Otherwise, when the requested end date is itself non-working, subtract the number of consecutive
+   non-working days ending at the requested end date and running backwards.
+6. When the resulting total is not zero and differs from the ordinary day figure, it replaces it and
+   the hour figure is scaled in proportion:
+
+   ```formula
+   new hours = the new day count × ( the ordinary hour figure ÷ the ordinary day figure )
+   ```
+
+   and the flag "contains bridging days" (`l10n_in_contains_sandwich_leaves`) is set; otherwise the
+   flag is cleared.
+
+**Neighbour restatement.** Approving, refusing, cancelling or deleting a bridging-enabled absence
+recomputes the durations of the absences linked before and after it, with the same rule; when the
+acting absence is itself *Approved* or *Second Approval* it is included in the recomputation.
+
+**Worked example.** An employee works Monday to Friday. The employee holds one absence on Friday the
+fifth of July and files a second on Monday the eighth of July, both of a bridging-enabled type,
+neither day being a public holiday.
+
+```formula
+the second absence : total = 1
+walking backwards from Monday 8 July , the first working date is Friday 5 July , which carries a
+   full-day absence of a bridging-enabled type starting strictly before Monday
+   → the two non-working days, Saturday and Sunday, are added
+total = 1 + 2 = 3
+the ordinary day figure was 1 , so the new figure 3 replaces it
+new hours = 3 × ( 8 ÷ 1 ) = 24
+```
+
+The Monday absence therefore costs **three days** of entitlement, the weekend being bridged, and the
+flag "contains bridging days" is set on it.
+
+---
+
+## 16. Reconciliation notes
+
+1. **Where the accrual arithmetic lives.** One draft carried the level selection, the period
+   boundaries, the engine and the accrual examples inside this file as chapters seven to thirteen;
+   the other carried them in a dedicated file. They now live in
+   [accrual-plans.md](accrual-plans.md), and this file keeps only the projection that the balance
+   algorithm calls, [chapter 13](#13-projecting-future-accrual). Every formula of both drafts was
+   carried over; none was dropped in the move.
+2. **Two presentations of the duration algorithm.** One draft expressed it as a numbered procedure
+   with three branches and a partitioning step; the other as a five-step procedure with the same
+   three branches. The branch conditions and the rounding were checked against each other line by
+   line and are identical; the fuller presentation is kept, and the second draft's worked examples
+   are kept as [sections 5.12](#512-scenario--the-half-day-request-of-section-38) to
+   [5.15](#515-scenario--a-request-with-no-employee).
+3. **The day figure of the general branch.** One draft described it as the sum of the covered
+   fractions of each attendance line's day value; the other as the hours of each day inside the
+   interval divided by the hours the schedule expects that day. The two agree on a schedule whose
+   attendance lines carry the default day values and diverge on a schedule whose day values were
+   overridden by hand. The first statement is the one the aggregation performs and is kept in
+   [section 2.8](#28-aggregating-intervals-into-days-and-hours); the second is kept as the
+   explanation of what the figure means on an ordinary schedule.
+4. **The consumption order.** Both drafts agree on the three tiers. One added that an allocation
+   whose largest allowed amount is zero is skipped before the charge, which matters when a
+   provisionally remaining balance is exactly zero; that step is kept in
+   [section 6.2](#62-steps), step 6.2.
+5. **The excess fold.** One draft described the fold into the dashboard figures, the other only the
+   raw excess map. The fold is kept in
+   [chapter 7](#7-aggregating-the-balance-for-a-date-and-the-dashboard-payload), step 3, including
+   the rule that a type forbidding a negative balance reports its excess only in the total.
+6. **The closest expiry.** One draft placed it inside the dashboard aggregation, the other in its
+   own chapter. It is a self-contained function and is kept as
+   [chapter 9](#9-the-closest-expiring-entitlement), called from step 5 of the aggregation.
+7. **Country-specific duration rules.** One draft deliberately omitted them. The packages that add
+   them are inside the scope of this folder, so they are specified in
+   [chapter 15](#15-country-specific-duration-rules), with their guards in
+   [business-rules.md](business-rules.md#7-mandatory-days-and-optional-holidays) and
+   [business-rules.md](business-rules.md#10-timesheet-lines-and-payroll-work-entries).
+8. **The report row rules.** Only one draft carried them. They are kept in full as
+   [chapter 12](#12-report-row-building), with the absence ledger and the printed grid included.

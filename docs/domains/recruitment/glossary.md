@@ -181,6 +181,29 @@ printable from the Application afterwards. The screens call it an interview form
 
 ---
 
+## Names that point at an entry above
+
+| Name | Entry |
+|---|---|
+| Blocking indicator | Readiness colour |
+| Interview form | Written interview |
+| Interview questionnaire | Written interview |
+| Job Platform | Job Board |
+| Kanban state | Readiness colour |
+| Medium | Attribution |
+| Position slug | Readable identifier: the part of a public address that names a position, for example `sales-manager-3` in `/jobs/sales-manager-3` |
+| Progress indicator | Readiness colour |
+| Recruitment target | Remaining target |
+| Refuse reason | Refusal Reason |
+| Resume | Curriculum vitae |
+| Rotting | Stale application |
+| Source | Recruitment Source, and, through it, the Tracking Source of the attribution vocabulary |
+| Stage | Recruitment Stage |
+| Talent entry | Talent |
+| Tracking web address | Tracking address |
+
+---
+
 ## Terms that mean something narrower here than elsewhere
 
 | Term | Meaning in this folder |

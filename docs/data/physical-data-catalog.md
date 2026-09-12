@@ -1,8 +1,8 @@
 # Physical data catalogue
 
-How every entity, field and relation of the domain model becomes storage: the table of each entity, the physical type of each column, the association tables of the many-to-many relations, the indexes, the foreign keys, the constraints, the number generators, and the derivation procedure that builds and maintains the schema. The catalogue of section 12 lists every entity with its table, its column count, its association tables, its indexes and its constraints. The complete column-level catalogue, one structured document per entity with every field attribute, is in [`../../schemas/data/`](../../schemas/data/): `entities/<transport name>.json` for the field-by-field description, `physical-tables.json` for tables and columns, `association-tables.json` for association tables, `indexes.json` for indexes, `foreign-keys.json` for foreign keys, `table-constraints.json` for the constraints the store reports and `database-sequences.json` for the number generators.
+How every entity, field and relation of the domain model becomes storage: the table of each entity, the physical type of each column, the association tables of the many-to-many relations, the indexes, the foreign keys, the constraints, the number generators, and the derivation procedure that builds and maintains the schema. The catalogue of section 12 lists every entity with its table, its column count, its association tables, its indexes and its constraints. Where this document says "table" it means the relation that stores an entity, which for the thirty-two entities of section 1.1 is a stored query rather than a table. The complete column-level catalogue, one structured document per entity with every field attribute, is in [`../../schemas/data/`](../../schemas/data/): `entities/<transport name>.json` for the field-by-field description, `physical-tables.json` for tables and columns, `association-tables.json` for association tables, `indexes.json` for indexes, `foreign-keys.json` for foreign keys, `table-constraints.json` for the constraints the store reports and `database-sequences.json` for the number generators.
 
-Everything counted in this document is observed on one installation carrying every capability package: 1,240 tables holding 13,518 columns, 2,933 indexes and 4,575 foreign keys.
+Everything counted in this document is observed on one installation carrying every capability package: 1,240 relations holding 13,518 columns, 2,933 indexes and 4,575 foreign keys. 1,217 of the relations are tables and 23 are stored queries materialized as views.
 
 The storage shapes described here are abstract. A replacement must reproduce the value domain, the precision, the null semantics, the uniqueness and the deletion behaviour of each column. The spelling of a type in a particular storage engine is not part of the specification; the mapping tables name the shape (exact decimal, unbounded text, structured document) and state the behaviour that the shape must provide. Where a type name is reproduced in code font it is the name the observed schema reports, because a rebuild that must import an existing database needs it.
 
@@ -15,8 +15,9 @@ The identity, value, rounding, translation, archiving and deletion rules that th
 1. Every persistent entity owns one table. One row is one record. 600 entities are persistent.
 2. Every interactive assistant entity also owns one table, with the same rules. Its rows are removed by the periodic cleanup, and its foreign key defaults differ (section 9.2). 222 entities are interactive assistants.
 3. A shared behaviour entity has no table. Its fields are merged into every entity that carries it and become columns of those entities' tables. 161 entities are shared behaviours.
-4. 10 persistent entities have no table at all: they are read from a stored query over other tables. They accept reads and filters, they refuse writes, and the schema builder creates no column, no index, no constraint and no foreign key for them. They are marked in the catalogue of section 12.
-5. 437 of the 1,240 tables back no entity: they are the association tables of section 8.
+4. 32 persistent entities have no table of their own: they are read from a stored query over other tables. They accept reads and filters, they refuse writes, and the schema builder creates no column, no index, no constraint and no foreign key for them. 22 of them materialize the query as a view, which the schema therefore does carry; the other 10 build the query at read time and the schema carries no relation for them at all. They are marked in the catalogue of section 12.
+5. 2 further entities classified persistent carry no relation in the observed installation: one because its capability package is not part of that installation, and one because it is a shared behaviour that the registry reports as persistent. They are marked in the catalogue of section 12.
+6. 437 of the 1,240 relations back no entity: they are the association tables of section 8.
 
 ### 1.2 The columns every table has
 
@@ -126,7 +127,7 @@ The complete mapping. "No column" means the value is not stored in the entity's 
 | Any text type declared translatable | per-language text | `jsonb`, structured document keyed by language code | See section 4.1. 319 stored columns take this shape. | counted with the row above |
 | Any type declared company-dependent | per-company value | `jsonb`, structured document keyed by company identifier | See section 4.2. 52 stored columns take this shape. | counted with the row above |
 
-The same columns counted by the type the storage engine reports, across all 1,240 tables including the association tables:
+The same columns counted by the type the storage engine reports, across all 1,240 relations, including the association tables and the views:
 
 | Storage type | Meaning | Columns |
 |---|---|---|
@@ -2236,7 +2237,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Access Groups | `res.groups` | `res_groups` | Identity and Access | 10 | 16 | 1 | 2 | 0 |  |
 | Account | `account.account` | `account_account` | General Ledger | 15 | 4 | 3 | 0 | 0 |  |
 | Account Cash Rounding | `account.cash.rounding` | `account_cash_rounding` | General Ledger | 6 | 0 | 2 | 0 | 0 |  |
-| Account codes first 2 digits | `account.root` | `account_root` | General Ledger | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Account codes first 2 digits | `account.root` | `account_root` | General Ledger | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Account electronic data interchange proxy user | `account_edi_proxy_client.user` | `account_edi_proxy_client_user` | Electronic Invoicing and Document Exchange | 11 | 0 | 1 | 2 | 4 |  |
 | Account Group | `account.group` | `account_group` | General Ledger | 5 | 0 | 1 | 1 | 0 |  |
 | Account Journal Group | `account.journal.group` | `account_journal_group` | General Ledger | 3 | 1 | 0 | 1 | 0 |  |
@@ -2278,7 +2279,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Asset | `ir.asset` | `ir_asset` | Platform Foundation | 10 | 0 | 1 | 0 | 0 |  |
 | Attachment | `ir.attachment` | `ir_attachment` | Platform Foundation | 20 | 14 | 4 | 0 | 1 |  |
 | Attendance | `hr.attendance` | `hr_attendance` | Attendances and Working Time | 21 | 0 | 3 | 0 | 0 |  |
-| Attendance and Leave Analysis Report | `hr.leave.attendance.report` | `hr_leave_attendance_report` | Time Off | 7 | 0 | 0 | 0 | 0 |  |
+| Attendance and Leave Analysis Report | `hr.leave.attendance.report` | `hr_leave_attendance_report` | Time Off | 7 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Attendance Overtime Line | `hr.attendance.overtime.line` | `hr_attendance_overtime_line` | Attendances and Working Time | 9 | 1 | 2 | 1 | 0 |  |
 | Attribute Value | `product.attribute.value` | `product_attribute_value` | Products and Catalog | 8 | 1 | 2 | 0 | 0 |  |
 | Authentication Device | `auth_totp.device` | `auth_totp_device` | Identity and Access | 6 | 0 | 0 | 0 | 0 |  |
@@ -2289,7 +2290,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Bank Statement Line | `account.bank.statement.line` | `account_bank_statement_line` | General Ledger | 20 | 1 | 5 | 0 | 3 |  |
 | Barcode Nomenclature | `barcode.nomenclature` | `barcode_nomenclature` | Products and Catalog | 4 | 0 | 0 | 0 | 0 |  |
 | Barcode Rule | `barcode.rule` | `barcode_rule` | Products and Catalog | 10 | 0 | 1 | 0 | 0 |  |
-| Base Import Mapping | `base_import.mapping` | `base_import_mapping` | Platform Foundation | 3 | 0 | 1 | 0 | 0 |  |
+| Base Import Mapping | `base_import.mapping` | `base_import_mapping` | Automation and Integration | 3 | 0 | 1 | 0 | 0 |  |
 | Batch Transfer | `stock.picking.batch` | `stock_picking_batch` | Inventory Operations | 27 | 0 | 3 | 0 | 0 |  |
 | Bill of Material | `mrp.bom` | `mrp_bom` | Manufacturing | 18 | 3 | 3 | 1 | 0 |  |
 | Bill of Material Line | `mrp.bom.line` | `mrp_bom_line` | Manufacturing | 9 | 1 | 4 | 1 | 0 |  |
@@ -2311,7 +2312,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | campaign tracking parameter Source | `utm.source` | `utm_source` | Customer Relationship Management | 1 | 0 | 0 | 1 | 0 |  |
 | campaign tracking parameter Tag | `utm.tag` | `utm_tag` | Customer Relationship Management | 2 | 1 | 0 | 1 | 0 |  |
 | Canned Response | `mail.canned.response` | `mail_canned_response` | Messaging and Activities | 4 | 1 | 1 | 0 | 0 |  |
-| Cashmoves report | `lunch.cashmove.report` | `lunch_cashmove_report` | Lunch Ordering | 5 | 0 | 0 | 0 | 0 |  |
+| Cashmoves report | `lunch.cashmove.report` | `lunch_cashmove_report` | Lunch Ordering | 5 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Category of applicant | `hr.applicant.category` | `hr_applicant_category` | Recruitment | 2 | 3 | 0 | 1 | 0 |  |
 | Category of the model | `fleet.vehicle.model.category` | `fleet_vehicle_model_category` | Fleet | 4 | 0 | 0 | 1 | 0 |  |
 | Certificate | `certificate.certificate` | `certificate_certificate` | Electronic Invoicing and Document Exchange | 13 | 0 | 0 | 0 | 0 |  |
@@ -2325,13 +2326,13 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Chatbot Script Step | `chatbot.script.step` | `chatbot_script_step` | Messaging and Activities | 5 | 2 | 2 | 0 | 0 |  |
 | City | `res.city` | `res_city` | Contacts and Organizations | 5 | 0 | 0 | 0 | 0 |  |
 | Client Action | `ir.actions.client` | `ir_act_client` | Platform Foundation | 12 | 0 | 0 | 0 | 0 |  |
-| Cloud Storage Migration Report | `cloud.storage.migration.report` | `cloud_storage_migration_report` | Automation and Integration | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Cloud Storage Migration Report | `cloud.storage.migration.report` | `cloud_storage_migration_report` | Automation and Integration | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Code Translation | `transifex.code.translation` | `transifex_code_translation` | Automation and Integration | 4 | 0 | 0 | 0 | 0 | no audit columns |
 | Coins/Bills | `pos.bill` | `pos_bill` | Point of Sale | 2 | 1 | 0 | 0 | 0 |  |
 | Collaborators in project shared | `project.collaborator` | `project_collaborator` | Projects and Tasks | 3 | 0 | 0 | 1 | 0 |  |
 | Communication Bus | `bus.bus` | `bus_bus` | Messaging and Activities | 2 | 0 | 1 | 0 | 0 |  |
 | Companies | `res.company` | `res_company` | Contacts and Organizations | 334 | 5 | 4 | 2 | 0 |  |
-| Company directory access protocol configuration | `res.company.ldap` | `res_company_ldap` | Identity and Access | 0 | 0 | 0 | 0 | 0 | no table in the observed installation |
+| Company directory access protocol configuration | `res.company.ldap` | `res_company_ldap` | Identity and Access | 0 | 0 | 0 | 0 | 0 | no relation in the observed installation |
 | Configuration Wizards | `ir.actions.todo` | `ir_actions_todo` | Platform Foundation | 4 | 0 | 1 | 0 | 0 |  |
 | Contact | `res.partner` | `res_partner` | Contacts and Organizations | 175 | 30 | 41 | 3 | 0 |  |
 | Content Quiz Question | `event.quiz.question` | `event_quiz_question` | Events | 3 | 0 | 1 | 0 | 0 |  |
@@ -2351,11 +2352,11 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Custom links that the restaurant can configure to be displayed on the self order screen | `pos_self_order.custom_link` | `pos_self_order_custom_link` | Point of Sale | 5 | 1 | 0 | 0 | 0 |  |
 | Custom View | `ir.ui.view.custom` | `ir_ui_view_custom` | Platform Foundation | 3 | 0 | 2 | 0 | 1 |  |
 | Customer Alias on Nilvera | `l10n_tr.nilvera.alias` | `l10n_tr_nilvera_alias` | Fiscal Localizations | 2 | 0 | 0 | 0 | 0 |  |
-| customer relationship management Activity Analysis | `crm.activity.report` | `crm_activity_report` | Customer Relationship Management | 19 | 0 | 0 | 0 | 0 |  |
+| customer relationship management Activity Analysis | `crm.activity.report` | `crm_activity_report` | Customer Relationship Management | 19 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | customer relationship management in-app purchase Lead Industry | `crm.iap.lead.industry` | `crm_iap_lead_industry` | Customer Relationship Management | 4 | 2 | 0 | 1 | 0 |  |
 | customer relationship management Lead Generation Rules | `crm.reveal.rule` | `crm_reveal_rule` | Customer Relationship Management | 18 | 5 | 0 | 1 | 0 |  |
 | customer relationship management Lead Mining Request | `crm.iap.lead.mining.request` | `crm_iap_lead_mining_request` | Customer Relationship Management | 15 | 5 | 0 | 0 | 0 |  |
-| customer relationship management Partnership Analysis | `crm.partner.report.assign` | `crm_partner_report_assign` | Customer Relationship Management | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| customer relationship management Partnership Analysis | `crm.partner.report.assign` | `crm_partner_report_assign` | Customer Relationship Management | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | customer relationship management Recurring revenue plans | `crm.recurring.plan` | `crm_recurring_plan` | Customer Relationship Management | 4 | 0 | 0 | 1 | 0 |  |
 | customer relationship management Reveal View | `crm.reveal.view` | `crm_reveal_view` | Customer Relationship Management | 3 | 0 | 3 | 0 | 2 |  |
 | customer relationship management Stages | `crm.stage` | `crm_stage` | Customer Relationship Management | 7 | 1 | 0 | 0 | 0 |  |
@@ -2368,7 +2369,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Department | `hr.department` | `hr_department` | Human Resources Core | 9 | 2 | 3 | 0 | 0 |  |
 | Departure Reason | `hr.departure.reason` | `hr_departure_reason` | Human Resources Core | 3 | 0 | 0 | 0 | 0 |  |
 | Device Log | `res.device.log` | `res_device_log` | Identity and Access | 11 | 0 | 3 | 0 | 2 |  |
-| Devices | `res.device` | `res_device` | Identity and Access | 11 | 0 | 0 | 0 | 0 |  |
+| Devices | `res.device` | `res_device` | Identity and Access | 11 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Digest | `digest.digest` | `digest_digest` | Messaging and Activities | 18 | 1 | 0 | 0 | 0 |  |
 | Digest Tips | `digest.tip` | `digest_tip` | Messaging and Activities | 4 | 1 | 0 | 0 | 0 |  |
 | Discussion Channel | `discuss.channel` | `discuss_channel` | Messaging and Activities | 32 | 7 | 5 | 5 | 5 |  |
@@ -2391,10 +2392,10 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Embedded Slides View Counter | `slide.embed` | `slide_embed` | Learning, Surveys and Gamification | 3 | 0 | 1 | 0 | 0 |  |
 | Employee | `hr.employee` | `hr_employee` | Human Resources Core | 58 | 13 | 6 | 2 | 0 |  |
 | Employee Category | `hr.employee.category` | `hr_employee_category` | Human Resources Core | 2 | 1 | 0 | 1 | 0 |  |
-| Employee Certification Report | `hr.employee.certification.report` | `hr_employee_certification_report` | Human Resources Core | 8 | 0 | 0 | 0 | 0 |  |
+| Employee Certification Report | `hr.employee.certification.report` | `hr_employee_certification_report` | Human Resources Core | 8 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Employee Location | `hr.employee.location` | `hr_employee_location` | Human Resources Core | 3 | 0 | 0 | 1 | 0 |  |
-| Employee Skills Report | `hr.employee.skill.history.report` | `hr_employee_skill_history_report` | Human Resources Core | 5 | 0 | 0 | 0 | 0 |  |
-| Employee Skills Report | `hr.employee.skill.report` | `hr_employee_skill_report` | Human Resources Core | 8 | 0 | 0 | 0 | 0 |  |
+| Employee Skills Report | `hr.employee.skill.history.report` | `hr_employee_skill_history_report` | Human Resources Core | 5 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
+| Employee Skills Report | `hr.employee.skill.report` | `hr_employee_skill_report` | Human Resources Core | 8 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Estimated Time of Arrival code for activity type | `l10n_eg_edi.activity.type` | `l10n_eg_edi_activity_type` | Fiscal Localizations | 2 | 0 | 0 | 0 | 0 |  |
 | Estimated Time of Arrival code for the unit of measures | `l10n_eg_edi.uom.code` | `l10n_eg_edi_uom_code` | Fiscal Localizations | 2 | 0 | 0 | 0 | 0 |  |
 | Event | `event.event` | `event_event` | Events | 45 | 4 | 2 | 0 | 0 |  |
@@ -2412,7 +2413,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Event Recurrence Rule | `calendar.recurrence` | `calendar_recurrence` | Calendar and Scheduling | 27 | 0 | 3 | 1 | 0 |  |
 | Event Registration | `event.registration` | `event_registration` | Events | 22 | 1 | 11 | 1 | 0 |  |
 | Event Registration Answer | `event.registration.answer` | `event_registration_answer` | Events | 4 | 0 | 1 | 1 | 0 |  |
-| Event Sales Report | `event.sale.report` | `event_sale_report` | Events | 25 | 0 | 0 | 0 | 0 |  |
+| Event Sales Report | `event.sale.report` | `event_sale_report` | Events | 25 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Event Slot | `event.slot` | `event_slot` | Events | 7 | 0 | 1 | 0 | 0 |  |
 | Event Sponsor | `event.sponsor` | `event_sponsor` | Events | 16 | 0 | 2 | 0 | 0 |  |
 | Event Sponsor Level | `event.sponsor.type` | `event_sponsor_type` | Events | 3 | 0 | 0 | 0 | 0 |  |
@@ -2435,8 +2436,8 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Fields that can be used for predictive lead scoring computation | `crm.lead.scoring.frequency.field` | `crm_lead_scoring_frequency_field` | Customer Relationship Management | 2 | 1 | 0 | 0 | 0 |  |
 | Filters | `ir.filters` | `ir_filters` | Platform Foundation | 10 | 1 | 1 | 2 | 1 |  |
 | Fiscal Position | `account.fiscal.position` | `account_fiscal_position` | General Ledger | 14 | 5 | 1 | 0 | 0 |  |
-| Fleet Analysis Report | `fleet.vehicle.cost.report` | `fleet_vehicle_cost_report` | Fleet | 9 | 0 | 0 | 0 | 0 |  |
-| Fleet Odometer Analysis Report | `fleet.vehicle.odometer.report` | `fleet_vehicle_odometer_report` | Fleet | 4 | 0 | 0 | 0 | 0 |  |
+| Fleet Analysis Report | `fleet.vehicle.cost.report` | `fleet_vehicle_cost_report` | Fleet | 9 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
+| Fleet Odometer Analysis Report | `fleet.vehicle.odometer.report` | `fleet_vehicle_odometer_report` | Fleet | 4 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Fleet Service Type | `fleet.service.type` | `fleet_service_type` | Fleet | 2 | 1 | 0 | 0 | 0 |  |
 | Form fields of inside quotation documents. | `sale.pdf.form.field` | `sale_pdf_form_field` | Sales | 3 | 2 | 0 | 1 | 0 |  |
 | Forum | `forum.forum` | `forum_forum` | Website and Storefront | 55 | 0 | 1 | 0 | 0 |  |
@@ -2471,7 +2472,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Industry | `res.partner.industry` | `res_partner_industry` | Contacts and Organizations | 3 | 0 | 0 | 0 | 0 |  |
 | Inventory Locations | `stock.location` | `stock_location` | Inventory Operations | 16 | 2 | 5 | 2 | 1 |  |
 | Inventory Routes | `stock.route` | `stock_route` | Inventory Operations | 12 | 8 | 2 | 0 | 0 |  |
-| Invoices Statistics | `account.invoice.report` | `account_invoice_report` | General Ledger | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Invoices Statistics | `account.invoice.report` | `account_invoice_report` | General Ledger | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Italian Document Type | `l10n_it.document.type` | `l10n_it_document_type` | Fiscal Localizations | 3 | 0 | 0 | 0 | 0 |  |
 | Job Platforms | `hr.job.platform` | `hr_job_platform` | Recruitment | 3 | 0 | 0 | 1 | 0 |  |
 | Job Position | `hr.job` | `hr_job` | Human Resources Core | 31 | 7 | 5 | 2 | 0 |  |
@@ -2497,7 +2498,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Live Chat Expertise | `im_livechat.expertise` | `im_livechat_expertise` | Messaging and Activities | 1 | 4 | 0 | 0 | 1 |  |
 | Livechat Channel | `im_livechat.channel` | `im_livechat_channel` | Messaging and Activities | 11 | 1 | 0 | 1 | 0 |  |
 | Livechat Channel Rules | `im_livechat.channel.rule` | `im_livechat_channel_rule` | Messaging and Activities | 7 | 1 | 1 | 0 | 0 |  |
-| Livechat Support Channel Report | `im_livechat.report.channel` | `im_livechat_report_channel` | Messaging and Activities | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Livechat Support Channel Report | `im_livechat.report.channel` | `im_livechat_report_channel` | Messaging and Activities | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Logging | `ir.logging` | `ir_logging` | Platform Foundation | 8 | 0 | 3 | 0 | 0 |  |
 | Lot/Serial | `stock.lot` | `stock_lot` | Inventory Operations | 13 | 2 | 4 | 0 | 0 |  |
 | Loyalty Communication | `loyalty.mail` | `loyalty_mail` | Loyalty and Promotions | 6 | 0 | 1 | 0 | 0 |  |
@@ -2538,13 +2539,13 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Mandatory Day | `hr.leave.mandatory.day` | `hr_leave_mandatory_day` | Time Off | 6 | 2 | 0 | 1 | 0 |  |
 | Manufacturing Order | `mrp.production` | `mrp_production` | Manufacturing | 36 | 11 | 7 | 2 | 0 |  |
 | manufacturing Workorder productivity losses | `mrp.workcenter.productivity.loss.type` | `mrp_workcenter_productivity_loss_type` | Manufacturing | 1 | 0 | 0 | 0 | 0 |  |
-| Mapping of account codes per company | `account.code.mapping` | `account_code_mapping` | General Ledger | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Mapping of account codes per company | `account.code.mapping` | `account_code_mapping` | General Ledger | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Marketing Card | `card.card` | `card_card` | Marketing and Mass Mailing | 5 | 0 | 1 | 1 | 0 |  |
 | Marketing Card Campaign | `card.campaign` | `card_campaign` | Marketing and Mass Mailing | 35 | 1 | 0 | 0 | 0 |  |
 | Marketing Card Campaign Tag | `card.campaign.tag` | `card_campaign_tag` | Marketing and Mass Mailing | 2 | 1 | 0 | 1 | 0 |  |
 | Marketing Card Template | `card.template` | `card_template` | Marketing and Mass Mailing | 6 | 0 | 0 | 0 | 0 |  |
 | Mass Mailing | `mailing.mailing` | `mailing_mailing` | Marketing and Mass Mailing | 36 | 2 | 3 | 2 | 0 |  |
-| Mass Mailing Statistics | `mailing.trace.report` | `mailing_trace_report` | Marketing and Mass Mailing | 17 | 0 | 0 | 0 | 0 |  |
+| Mass Mailing Statistics | `mailing.trace.report` | `mailing_trace_report` | Marketing and Mass Mailing | 17 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Menu | `ir.ui.menu` | `ir_ui_menu` | Platform Foundation | 7 | 1 | 2 | 0 | 0 |  |
 | Message | `mail.message` | `mail_message` | Messaging and Activities | 25 | 3 | 5 | 0 | 3 |  |
 | Message Notifications | `mail.notification` | `mail_notification` | Messaging and Activities | 14 | 0 | 8 | 2 | 3 | no audit columns |
@@ -2563,7 +2564,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Module | `ir.module.module` | `ir_module_module` | Platform Foundation | 26 | 3 | 2 | 1 | 0 |  |
 | Module dependency | `ir.module.module.dependency` | `ir_module_module_dependency` | Platform Foundation | 3 | 0 | 1 | 0 | 0 | no audit columns |
 | Module exclusion | `ir.module.module.exclusion` | `ir_module_module_exclusion` | Platform Foundation | 2 | 0 | 1 | 0 | 0 |  |
-| Multi Website Published Mixin | `website.published.multi.mixin` | `website_published_multi_mixin` | Website and Storefront | 0 | 0 | 0 | 0 | 0 | no table in the observed installation |
+| Multi Website Published Mixin | `website.published.multi.mixin` | `website_published_multi_mixin` | Website and Storefront | 0 | 0 | 0 | 0 | 0 | no relation in the observed installation |
 | MyInvois Document | `myinvois.document` | `myinvois_document` | Fiscal Localizations | 18 | 2 | 2 | 0 | 0 |  |
 | OAuth2 provider | `auth.oauth.provider` | `auth_oauth_provider` | Identity and Access | 10 | 0 | 0 | 0 | 0 |  |
 | Odometer log for a vehicle | `fleet.vehicle.odometer` | `fleet_vehicle_odometer` | Fleet | 5 | 0 | 0 | 0 | 0 |  |
@@ -2610,7 +2611,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Point of Sale Note | `pos.note` | `pos_note` | Point of Sale | 3 | 1 | 0 | 1 | 0 |  |
 | Point of Sale Order Lines | `pos.order.line` | `pos_order_line` | Point of Sale | 36 | 2 | 8 | 1 | 0 |  |
 | Point of Sale Orders | `pos.order` | `pos_order` | Point of Sale | 71 | 3 | 8 | 1 | 0 |  |
-| Point of Sale Orders Report | `report.pos.order` | `report_pos_order` | Platform Foundation | 26 | 0 | 0 | 0 | 0 |  |
+| Point of Sale Orders Report | `report.pos.order` | `report_pos_order` | Platform Foundation | 26 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Point of Sale Payment Methods | `pos.payment.method` | `pos_payment_method` | Point of Sale | 76 | 3 | 1 | 0 | 0 |  |
 | Point of Sale Payments | `pos.payment` | `pos_payment` | Point of Sale | 30 | 0 | 4 | 1 | 0 |  |
 | Point of Sale Printer | `pos.printer` | `pos_printer` | Point of Sale | 5 | 2 | 0 | 0 | 0 |  |
@@ -2656,14 +2657,14 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Project Tags | `project.tags` | `project_tags` | Projects and Tasks | 2 | 2 | 0 | 1 | 0 |  |
 | Project Update | `project.update` | `project_update` | Projects and Tasks | 13 | 0 | 1 | 0 | 0 |  |
 | Properties Base Definition | `properties.base.definition` | `properties_base_definition` | Platform Foundation | 2 | 0 | 0 | 1 | 0 |  |
-| Public Employee | `hr.employee.public` | `hr_employee_public` | Human Resources Core | 34 | 0 | 0 | 0 | 0 |  |
-| Purchase Line and Vendor Bill line matching view | `purchase.bill.line.match` | `purchase_bill_line_match` | Purchasing | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Public Employee | `hr.employee.public` | `hr_employee_public` | Human Resources Core | 34 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
+| Purchase Line and Vendor Bill line matching view | `purchase.bill.line.match` | `purchase_bill_line_match` | Purchasing | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Purchase Order | `purchase.order` | `purchase_order` | Purchasing | 38 | 5 | 11 | 0 | 0 |  |
 | Purchase Order Line | `purchase.order.line` | `purchase_order_line` | Purchasing | 30 | 3 | 6 | 2 | 0 |  |
-| Purchase Report | `purchase.report` | `purchase_report` | Purchasing | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Purchase Report | `purchase.report` | `purchase_report` | Purchasing | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Purchase Requisition | `purchase.requisition` | `purchase_requisition` | Purchasing | 14 | 0 | 0 | 0 | 0 |  |
 | Purchase Requisition Line | `purchase.requisition.line` | `purchase_requisition_line` | Purchasing | 9 | 0 | 2 | 0 | 0 |  |
-| Purchases & Bills Union | `purchase.bill.union` | `purchase_bill_union` | Purchasing | 9 | 0 | 0 | 0 | 0 |  |
+| Purchases & Bills Union | `purchase.bill.union` | `purchase_bill_union` | Purchasing | 9 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Push Notification Device | `mail.push.device` | `mail_push_device` | Messaging and Activities | 4 | 0 | 1 | 1 | 0 |  |
 | Push Notifications | `mail.push` | `mail_push` | Messaging and Activities | 2 | 0 | 0 | 0 | 0 |  |
 | Putaway Rule | `stock.putaway.rule` | `stock_putaway_rule` | Inventory Operations | 9 | 1 | 4 | 0 | 0 |  |
@@ -2702,7 +2703,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Salary Structure Type | `hr.payroll.structure.type` | `hr_payroll_structure_type` | Human Resources Core | 3 | 0 | 0 | 0 | 0 |  |
 | Sale Closing | `account.sale.closing` | `account_sale_closing` | Fiscal Localizations | 11 | 0 | 0 | 0 | 0 |  |
 | Sale Order Coupon Points - Keeps track of how a sale order impacts a coupon | `sale.order.coupon.points` | `sale_order_coupon_points` | Loyalty and Promotions | 3 | 0 | 1 | 1 | 0 |  |
-| Sales Analysis Report | `sale.report` | `sale_report` | Sales | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Sales Analysis Report | `sale.report` | `sale_report` | Sales | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Sales Order | `sale.order` | `sale_order` | Sales | 73 | 9 | 14 | 1 | 1 |  |
 | Sales Order Line | `sale.order.line` | `sale_order_line` | Sales | 59 | 5 | 8 | 2 | 1 |  |
 | Sales Team | `crm.team` | `crm_team` | Sales | 13 | 2 | 1 | 0 | 0 |  |
@@ -2741,7 +2742,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Stock Move | `stock.move` | `stock_move` | Inventory Operations | 65 | 8 | 24 | 0 | 1 |  |
 | Stock Package History | `stock.package.history` | `stock_package_history` | Inventory Operations | 10 | 1 | 0 | 0 | 0 |  |
 | Stock package type | `stock.package.type` | `stock_package_type` | Inventory Operations | 13 | 2 | 1 | 5 | 0 |  |
-| Stock Quantity Report | `report.stock.quantity` | `report_stock_quantity` | Platform Foundation | 7 | 0 | 0 | 0 | 0 |  |
+| Stock Quantity Report | `report.stock.quantity` | `report_stock_quantity` | Platform Foundation | 7 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Stock Rule | `stock.rule` | `stock_rule` | Inventory Operations | 19 | 0 | 6 | 0 | 0 |  |
 | Storage Category | `stock.storage.category` | `stock_storage_category` | Inventory Operations | 4 | 0 | 0 | 1 | 0 |  |
 | Storage Category Capacity | `stock.storage.category.capacity` | `stock_storage_category_capacity` | Inventory Operations | 4 | 0 | 3 | 3 | 0 |  |
@@ -2757,7 +2758,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Task | `project.task` | `project_task` | Projects and Tasks | 45 | 3 | 14 | 2 | 1 |  |
 | Task Recurrence | `project.task.recurrence` | `project_task_recurrence` | Projects and Tasks | 4 | 0 | 0 | 0 | 0 |  |
 | Task Stage | `project.task.type` | `project_task_type` | Projects and Tasks | 15 | 2 | 1 | 0 | 0 |  |
-| Tasks Analysis | `report.project.task.user` | `report_project_task_user` | Platform Foundation | 38 | 0 | 0 | 0 | 0 |  |
+| Tasks Analysis | `report.project.task.user` | `report_project_task_user` | Platform Foundation | 38 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Tax | `account.tax` | `account_tax` | General Ledger | 76 | 14 | 0 | 0 | 0 |  |
 | Tax Group | `account.tax.group` | `account_tax_group` | General Ledger | 12 | 0 | 2 | 0 | 0 |  |
 | Tax office in Czech Republic | `l10n_cz.tax_office` | `l10n_cz_tax_office` | Fiscal Localizations | 4 | 0 | 0 | 1 | 0 |  |
@@ -2772,12 +2773,12 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | TicketBAI Document | `l10n_es_edi_tbai.document` | `l10n_es_edi_tbai_document` | Fiscal Localizations | 8 | 0 | 0 | 0 | 0 |  |
 | Time Off | `hr.leave` | `hr_leave` | Time Off | 29 | 0 | 4 | 3 | 1 |  |
 | Time Off Allocation | `hr.leave.allocation` | `hr_leave_allocation` | Time Off | 24 | 0 | 3 | 1 | 0 |  |
-| Time Off Calendar | `hr.leave.report.calendar` | `hr_leave_report_calendar` | Time Off | 15 | 0 | 0 | 0 | 0 |  |
-| Time Off Summary / Report | `hr.leave.employee.type.report` | `hr_leave_employee_type_report` | Time Off | 11 | 0 | 0 | 0 | 0 |  |
-| Time Off Summary / Report | `hr.leave.report` | `hr_leave_report` | Time Off | 13 | 0 | 0 | 0 | 0 |  |
+| Time Off Calendar | `hr.leave.report.calendar` | `hr_leave_report_calendar` | Time Off | 15 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
+| Time Off Summary / Report | `hr.leave.employee.type.report` | `hr_leave_employee_type_report` | Time Off | 11 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
+| Time Off Summary / Report | `hr.leave.report` | `hr_leave_report` | Time Off | 13 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Time Off Type | `hr.leave.type` | `hr_leave_type` | Time Off | 28 | 1 | 1 | 1 | 0 |  |
-| Timesheet Attendance Report | `hr.timesheet.attendance.report` | `hr_timesheet_attendance_report` | Attendances and Working Time | 9 | 0 | 0 | 0 | 0 |  |
-| Timesheets Analysis Report | `timesheets.analysis.report` | `timesheets_analysis_report` | Timesheets | 22 | 0 | 0 | 0 | 0 |  |
+| Timesheet Attendance Report | `hr.timesheet.attendance.report` | `hr_timesheet_attendance_report` | Attendances and Working Time | 9 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
+| Timesheets Analysis Report | `timesheets.analysis.report` | `timesheets_analysis_report` | Timesheets | 22 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Tour's step | `web_tour.tour.step` | `web_tour_tour_step` | Automation and Integration | 6 | 0 | 1 | 0 | 0 |  |
 | Tours | `web_tour.tour` | `web_tour_tour` | Automation and Integration | 5 | 1 | 0 | 1 | 0 |  |
 | Track / Visitor Link | `event.track.visitor` | `event_track_visitor` | Events | 7 | 0 | 3 | 0 | 0 |  |
@@ -2806,7 +2807,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Vehicle Contract | `fleet.vehicle.log.contract` | `fleet_vehicle_log_contract` | Fleet | 16 | 1 | 2 | 0 | 0 |  |
 | Vehicle Status | `fleet.vehicle.state` | `fleet_vehicle_state` | Fleet | 3 | 0 | 0 | 1 | 0 |  |
 | Vehicle Tag | `fleet.vehicle.tag` | `fleet_vehicle_tag` | Fleet | 2 | 1 | 0 | 1 | 0 |  |
-| Vendor Delay Report | `vendor.delay.report` | `vendor_delay_report` | Replenishment and Procurement | 7 | 0 | 0 | 0 | 0 |  |
+| Vendor Delay Report | `vendor.delay.report` | `vendor_delay_report` | Replenishment and Procurement | 7 | 0 | 0 | 0 | 0 | no table: read from a stored query, materialized as a view |
 | Veri*Factu Document | `l10n_es_edi_verifactu.document` | `l10n_es_edi_verifactu_document` | Fiscal Localizations | 9 | 0 | 0 | 0 | 0 |  |
 | Version | `hr.version` | `hr_version` | Human Resources Core | 53 | 0 | 3 | 1 | 1 |  |
 | View | `ir.ui.view` | `ir_ui_view` | Platform Foundation | 24 | 1 | 4 | 2 | 1 |  |
@@ -2820,7 +2821,7 @@ One row per entity. "Value columns" counts the columns of the table other than t
 | Website Product Category | `product.public.category` | `product_public_category` | Website and Storefront | 16 | 2 | 4 | 0 | 0 |  |
 | Website rewrite | `website.rewrite` | `website_rewrite` | Website and Storefront | 8 | 0 | 2 | 0 | 0 |  |
 | Website Snippet Filter | `website.snippet.filter` | `website_snippet_filter` | Website and Storefront | 9 | 0 | 2 | 0 | 0 |  |
-| Website Technical Page | `website.technical.page` | `website_technical_page` | Website and Storefront | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query |
+| Website Technical Page | `website.technical.page` | `website_technical_page` | Website and Storefront | 0 | 0 | 0 | 0 | 0 | no table: read from a stored query built at read time |
 | Website Theme Menu | `theme.website.menu` | `theme_website_menu` | Website and Storefront | 9 | 0 | 2 | 0 | 0 |  |
 | Website Theme Page | `theme.website.page` | `theme_website_page` | Website and Storefront | 10 | 0 | 1 | 0 | 0 |  |
 | Website Visitor | `website.visitor` | `website_visitor` | Website and Storefront | 9 | 1 | 2 | 1 | 0 |  |
@@ -2864,7 +2865,7 @@ Assistant tables follow the same rules with two differences: their links to pers
 | Bank Account Allocation Line (Wizard) | `hr.bank.account.allocation.wizard.line` | `hr_bank_account_allocation_wizard_line` | Human Resources Core | 6 | 0 | 0 | 0 | 0 |  |
 | Bank Account Allocation Wizard | `hr.bank.account.allocation.wizard` | `hr_bank_account_allocation_wizard` | Human Resources Core | 1 | 0 | 0 | 0 | 0 |  |
 | Bank setup manual config | `account.setup.bank.manual.config` | `account_setup_bank_manual_config` | General Ledger | 4 | 0 | 0 | 0 | 0 |  |
-| Base Import | `base_import.import` | `base_import_import` | Platform Foundation | 4 | 0 | 0 | 0 | 0 |  |
+| Base Import | `base_import.import` | `base_import_import` | Automation and Integration | 4 | 0 | 0 | 0 | 0 |  |
 | Batch Transfer Lines | `stock.picking.to.batch` | `stock_picking_to_batch` | Inventory Operations | 5 | 0 | 0 | 0 | 0 |  |
 | Bill to Purchase Order | `bill.to.po.wizard` | `bill_to_po_wizard` | Purchasing | 2 | 0 | 0 | 0 | 0 |  |
 | Calendar Popover Delete Wizard | `calendar.popover.delete.wizard` | `calendar_popover_delete_wizard` | Calendar and Scheduling | 6 | 0 | 0 | 0 | 0 |  |
@@ -2873,7 +2874,7 @@ Assistant tables follow the same rules with two differences: their links to pers
 | Cancel Electronic Waybill | `l10n.in.ewaybill.cancel` | `l10n_in_ewaybill_cancel` | Fiscal Localizations | 3 | 0 | 0 | 0 | 0 |  |
 | Cancel multiple quotations | `sale.mass.cancel.orders` | `sale_mass_cancel_orders` | Sales | 0 | 1 | 0 | 0 | 0 |  |
 | Cancel Time Off Wizard | `hr.holidays.cancel.leave` | `hr_holidays_cancel_leave` | Time Off | 2 | 0 | 0 | 0 | 0 |  |
-| Change Password Wizard | `change.password.wizard` | `change_password_wizard` | Platform Foundation | 0 | 0 | 0 | 0 | 0 |  |
+| Change Password Wizard | `change.password.wizard` | `change_password_wizard` | Identity and Access | 0 | 0 | 0 | 0 | 0 |  |
 | Change Production Qty | `change.production.qty` | `change_production_qty` | Platform Foundation | 2 | 0 | 0 | 0 | 0 |  |
 | Channel Invitation Wizard | `slide.channel.invite` | `slide_channel_invite` | Learning, Surveys and Gamification | 7 | 2 | 0 | 0 | 0 |  |
 | Checks Mass Transfers | `l10n_latam.payment.mass.transfer` | `l10n_latam_payment_mass_transfer` | Payments and Bank Reconciliation | 3 | 1 | 0 | 0 | 0 |  |
@@ -2881,7 +2882,7 @@ Assistant tables follow the same rules with two differences: their links to pers
 | Choose the sheet layout to print the labels | `product.label.layout` | `product_label_layout` | Products and Catalog | 6 | 3 | 0 | 0 | 0 |  |
 | Choose whether to print product or lot/sn labels | `picking.label.type` | `picking_label_type` | Inventory Operations | 1 | 2 | 0 | 0 | 0 |  |
 | Close Session Wizard | `pos.close.session.wizard` | `pos_close_session_wizard` | Point of Sale | 4 | 0 | 0 | 0 | 0 |  |
-| Company Document Layout | `base.document.layout` | `base_document_layout` | Platform Foundation | 3 | 0 | 0 | 0 | 0 |  |
+| Company Document Layout | `base.document.layout` | `base_document_layout` | Contacts and Organizations | 3 | 0 | 0 | 0 | 0 |  |
 | Compliance Letter for EXO Number | `compliance.letter.wizard` | `compliance_letter_wizard` | Fiscal Localizations | 1 | 0 | 0 | 0 | 0 |  |
 | Config | `res.config` | `res_config` | Platform Foundation | 0 | 0 | 0 | 0 | 0 |  |
 | Config Settings | `res.config.settings` | `res_config_settings` | Platform Foundation | 278 | 3 | 0 | 0 | 0 |  |
@@ -2951,8 +2952,8 @@ Assistant tables follow the same rules with two differences: their links to pers
 | Mailing Contact Import | `mailing.contact.import` | `mailing_contact_import` | Marketing and Mass Mailing | 1 | 1 | 0 | 0 | 0 |  |
 | Merge Mass Mailing List | `mailing.list.merge` | `mailing_list_merge` | Marketing and Mass Mailing | 4 | 1 | 0 | 0 | 0 |  |
 | Merge Opportunities | `crm.merge.opportunity` | `crm_merge_opportunity` | Customer Relationship Management | 2 | 1 | 0 | 0 | 0 |  |
-| Merge Partner Line | `base.partner.merge.line` | `base_partner_merge_line` | Platform Foundation | 3 | 0 | 0 | 0 | 0 |  |
-| Merge Partner Wizard | `base.partner.merge.automatic.wizard` | `base_partner_merge_automatic_wizard` | Platform Foundation | 12 | 1 | 0 | 0 | 0 |  |
+| Merge Partner Line | `base.partner.merge.line` | `base_partner_merge_line` | Contacts and Organizations | 3 | 0 | 0 | 0 | 0 |  |
+| Merge Partner Wizard | `base.partner.merge.automatic.wizard` | `base_partner_merge_automatic_wizard` | Contacts and Organizations | 12 | 1 | 0 | 0 | 0 |  |
 | Microsoft Calendar Account Reset | `microsoft.calendar.account.reset` | `microsoft_calendar_account_reset` | Calendar and Scheduling | 3 | 0 | 0 | 0 | 0 |  |
 | Module Activation Request | `base.module.install.request` | `base_module_install_request` | Platform Foundation | 3 | 0 | 0 | 0 | 0 |  |
 | Module Activation Review | `base.module.install.review` | `base_module_install_review` | Platform Foundation | 1 | 0 | 0 | 0 | 0 |  |
@@ -3047,8 +3048,8 @@ Assistant tables follow the same rules with two differences: their links to pers
 | Update the probabilities | `crm.lead.pls.update` | `crm_lead_pls_update` | Customer Relationship Management | 1 | 1 | 0 | 0 | 0 |  |
 | Upgrade Module | `base.module.upgrade` | `base_module_upgrade` | Platform Foundation | 1 | 0 | 0 | 0 | 0 |  |
 | User list of blocked 3rd-party domains | `website.custom_blocked_third_party_domains` | `website_custom_blocked_third_party_domains` | Website and Storefront | 1 | 0 | 0 | 0 | 0 |  |
-| User, change own password wizard | `change.password.own` | `change_password_own` | Platform Foundation | 2 | 0 | 0 | 0 | 0 |  |
-| User, Change Password Wizard | `change.password.user` | `change_password_user` | Platform Foundation | 4 | 0 | 0 | 0 | 0 |  |
+| User, change own password wizard | `change.password.own` | `change_password_own` | Identity and Access | 2 | 0 | 0 | 0 | 0 |  |
+| User, Change Password Wizard | `change.password.user` | `change_password_user` | Identity and Access | 4 | 0 | 0 | 0 | 0 |  |
 | Validate Account Move | `validate.account.move` | `validate_account_move` | General Ledger | 4 | 1 | 0 | 0 | 0 |  |
 | Warn Insufficient Repair Quantity | `stock.warn.insufficient.qty.repair` | `stock_warn_insufficient_qty_repair` | Repair and Maintenance | 5 | 0 | 0 | 0 | 0 |  |
 | Warn Insufficient Scrap Quantity | `stock.warn.insufficient.qty.scrap` | `stock_warn_insufficient_qty_scrap` | Inventory Operations | 5 | 0 | 0 | 0 | 0 |  |
@@ -3114,14 +3115,19 @@ Every column of two representative tables, one master-data table and one documen
 
 | Measure | Count |
 |---|---|
-| Tables | 1,240 |
-| Tables backing an entity | 803 |
+| Relations | 1,240 |
+| Of which tables | 1,217 |
+| Of which stored queries materialized as views | 23 |
+| Relations backing an entity | 803 |
 | Association tables | 422 |
-| Columns, all tables | 13,518 |
+| Columns, all relations | 13,518 |
 | Persistent entities | 600 |
 | Interactive assistant entities | 222 |
 | Shared behaviour entities, which have no table | 161 |
-| Persistent entities read from a stored query instead of a table | 10 |
+| Persistent entities read from a stored query instead of a table | 32 |
+| Of which materialized as a view | 22 |
+| Of which built at read time, with no relation in the schema | 10 |
+| Entities classified persistent with no relation for another reason | 2 |
 | Entities with no audit columns | 10 |
 | Value columns on persistent tables, system columns excluded | 7,623 |
 | Value columns on interactive assistant tables, system columns excluded | 1,098 |
@@ -3172,7 +3178,7 @@ The target branch carried no file for this topic, so the structure and the prose
 | Point | Working branch | Resolution |
 |---|---|---|
 | Table, column, index, constraint and association-table names | Written as de-identified paraphrases: tables named after the full name of the entity, association tables named `<entity>__<field>__association`, association columns named `<entity>_identifier`, system columns named `identifier`, `created_on`, `created_by_user`, `last_updated_on`, `last_updated_by_user`. | Replaced throughout by the names the observed schema reports: `<transport name with underscores>` for a table, `<first table>_<second table>_rel` for an association table, `<table>_id` for an association column, and `id`, `create_date`, `create_uid`, `write_date`, `write_uid` for the system columns. A physical catalogue whose names cannot be found in the database it describes is unusable, and rule three of the documentation rules requires identifiers to be reproduced exactly. |
-| Number of tables | Counted only the tables of entities: 601 persistent and 222 assistant. | The observed schema holds 1,240 tables, of which 803 back an entity and 422 are association tables. The entity counts themselves are 600 persistent and 222 interactive assistants; the difference on the persistent side is that one entity classified as persistent carries no table because its capability package is not part of the observed installation, and one is a shared behaviour classified as persistent. |
+| Number of tables | Counted only the tables of entities: 601 persistent and 222 assistant. | The observed schema holds 1,240 relations, of which 1,217 are tables and 23 are views, 803 back an entity and 422 are association tables. The entity counts themselves are 600 persistent and 222 interactive assistants; the difference of one on the persistent side is that one entity classified as persistent is a shared behaviour with no records of its own. |
 | Binary columns held inline | "Seven fields opt out of attachment storage." | Twelve do, and the observed schema carries exactly twelve `bytea` columns. All twelve are named in section 4.3. |
 | Association tables | 428 were counted. | The observed schema carries 422, and each is listed in section 8.2 with both foreign keys. |
 | Indexed columns | 877 were counted, of which 555 plain and 285 partial. | The observed schema carries 1,000 column indexes, of which 603 plain, 360 partial and 37 text similarity. The count of text-similarity indexes is identical in both, which is what identifies the difference as coverage rather than definition. |

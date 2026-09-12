@@ -5,7 +5,9 @@ valuation layer and no payment**. Nothing in this domain debits or credits an ac
 operation described in [workflows.md](workflows.md) reaches the general ledger.
 
 This file states why that is the correct answer rather than an omission, draws the boundary
-at which a financial consequence does begin, and names the domains that produce it.
+at which a financial consequence does begin, and names the domains that produce it. The
+cross-domain hand-overs it describes are catalogued, with every other one, in
+[cross-domain transactions](../cross-domain-transactions.md).
 
 ## 1. Why there is no ledger effect
 

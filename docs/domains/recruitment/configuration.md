@@ -283,9 +283,13 @@ This domain owns **no scheduled job**. Three periodic mechanisms owned elsewhere
 2. The platform's periodic cleanup of transient records removes stale dialog records,
    including the four dialogs of this domain.
 3. The inbound message poller of
-   [Messaging and Activities](../messaging-and-activities/README.md) delivers messages to the
+   [Messaging and Activities](../messaging-and-activities/README.md), whose mechanism is
+   described in [the mail gateway](../../runtime/mail-gateway.md), delivers messages to the
    position addresses and to the source addresses, which is what creates applications by
    electronic mail.
+
+The platform's own periodic runs are catalogued in
+[scheduled jobs](../../runtime/scheduled-jobs.md); none of them belongs to this domain.
 
 Every derived value of this domain is recomputed when its inputs change; none depends on a
 nightly run.
@@ -300,6 +304,9 @@ nightly run.
 | Recent-application window of the public live check | fixed constant | six months | The first branch of REC-099 |
 | Staleness look-back window | platform-wide parameter, shared with the opportunity pipeline | twelve months | Applications whose last stage update is older are excluded from the staleness search |
 | Public form metadata capture | platform-wide parameter | disabled | When enabled, the note carrying the custom entries of a public submission also lists the visitor's network address, browser identification, accepted languages and referring page (REC-094) |
+
+The two platform-wide parameters are held in the shared parameter store described in
+[configuration parameters](../../runtime/configuration-parameters.md).
 | Colour index range for a new tag or pool | fixed constant | 1 to 11 inclusive | The pseudo-random colour drawn at creation |
 | Electronic mail address length on an Application | fixed constant | 128 characters | REC-003 |
 | Telephone number length on an Application | fixed constant | 32 characters | REC-003 |

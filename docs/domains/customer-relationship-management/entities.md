@@ -354,7 +354,7 @@ Depends on `email_normalized`. The rule is the domain-preparation routine:
 
 Worked examples: `robert.poilvert@mycompany.example` yields `@mycompany.example`;
 `accounting@mycompany.example` yields `@mycompany.example` as well, so the two Leads are potential
-duplicates of each other; `robert.poilvert@gmail.example` yields `robert.poilvert@gmail.example` in
+duplicates of each other; `robert.poilvert@freemail.example` yields `robert.poilvert@freemail.example` in
 full; a value with no at sign, such as `not-an-address`, yields `not-an-address`.
 
 #### 1.4.14 Telephone quality (`phone_state`)

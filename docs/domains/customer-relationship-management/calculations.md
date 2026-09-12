@@ -350,6 +350,11 @@ strategic" (sequence 6, won).
 
 ## 4. The predictive probability
 
+The model is also specified, from the point of view of the statistical store it maintains, in
+[predictive-lead-scoring.md](predictive-lead-scoring.md), which carries four fully worked examples,
+the explanation panel and the configuration dialogue. This section carries the arithmetic and one
+end-to-end example; the two agree on every number.
+
 This is the central computation of the domain. It answers the question: *given everything we know
 about this deal and everything that happened to comparable deals in the past, what is the chance
 this one is won?*
@@ -990,6 +995,20 @@ higher.
 Adding an archived record T of type lead would place T last whatever its other values, because key
 1 is false for it alone.
 
+**Second worked example, with opportunities in the set.** Four records:
+
+| Record | Type | Active | Stage sequence | Probability | Identifier | Key, most significant first |
+|---|---|---|---|---|---|---|
+| P | lead | no | 3 | 25 | 91 | (false, false, 3, 25, 91) |
+| Q | lead | yes | 1 | 10 | 45 | (true, false, 1, 10, 45) |
+| R | opportunity | no | 2 | 60 | 12 | (true, true, 2, 60, 12) |
+| S | opportunity | yes | 2 | 60 | 77 | (true, true, 2, 60, 77) |
+
+Most trustworthy first, the order is **S, R, Q, P**. S beats R only on the fifth key, the identifier,
+because the first four are equal — an archived **opportunity** is still trustworthy on key 1. Q beats
+P because an archived **lead** is the only thing key 1 rejects. The survivor of a merge of the four
+is S.
+
 ---
 
 ## 7. The merge algorithm
@@ -1155,6 +1174,18 @@ The six address fields are never mixed between records. The rule is:
 4. The merged values of all six fields are that record's six values, including its empty ones.
 ```
 
+**Worked example of the score alone.** Three records in confidence order R1, R2, R3:
+
+| Record | street | street line two | city | postal code | state | country | score |
+|---|---|---|---|---|---|---|---|
+| R1 | *(empty)* | *(empty)* | `Brussels` | *(empty)* | *(empty)* | Belgium | 2 |
+| R2 | `Rue du Test 5` | `Box 3` | `Namur` | `5000` | Namur | Belgium | 6 |
+| R3 | `Chaussée 12` | *(empty)* | `Liège` | `4000` | *(empty)* | Belgium | 4 |
+
+R2 wins with a score of six, so the merged record receives `Rue du Test 5`, `Box 3`, `Namur`,
+`5000`, Namur and Belgium. Had R2 not existed and had R1 and R3 both scored four, R1 would have won,
+because it comes first in the confidence order.
+
 **Worked example (mandated) — two leads sharing an address.** Two leads are detected as
 duplicates because they share the electronic mail domain `northwind-parts.example`. Both are
 unqualified leads, both active. Their data:
@@ -1219,6 +1250,69 @@ Beta has five (street, street line two, postal code, city, country). Beta has th
 **Result.** Record 5101 survives with those values; record 5140 is deleted after its messages,
 activities, attachments and meetings have been repointed at 5101.
 
+### 7.6.1 Second worked example — a lead merged into an opportunity
+
+Two records are selected for a manual merge.
+
+| Field | Record A | Record B |
+|---|---|---|
+| type | `lead` | `opportunity` |
+| active | yes | yes |
+| stage | `Qualified`, sequence 3 | `New`, sequence 1 |
+| probability | 25 | 50 |
+| identifier | 41 | 17 |
+| title | `Website request` | `Nibbler Spacecraft Request` |
+| salesperson | *(empty)* | Lucy |
+| team | `Europe` | `Direct Sales` |
+| notes | `Asked for a demonstration.` | `Wants a quotation for 3 units.` |
+| priority | `1` | `2` |
+| tags | Training | Service, Training |
+| expected revenue | 0.00 | 1 500.00 |
+| contact | *(empty)* | Nibbler |
+| electronic mail address | `contact@nibbler.example.com` | *(empty)* |
+| street / city / postal code / country | `Test street` / `Test City` / `5000` / Belgium | *(empty)* |
+| lost reason | *(empty)* | *(empty)* |
+| messages | 4 | 9 |
+| attachments | `offer.txt` | none |
+| followers active in the last thirty days | Robert | Lucy |
+
+**Step 1 — confidence order.** Both are active, so key 1 is true for both. Key 2 separates them: B is
+an opportunity and A is not. B wins and the stage sequence is never compared. The order is B then A;
+B is the head and A is merged away.
+
+**Step 2 — merged values.**
+
+| Field | Result | Why |
+|---|---|---|
+| type | `opportunity` | at least one record is an opportunity |
+| title | `Nibbler Spacecraft Request` | first non-empty in confidence order |
+| salesperson | Lucy | first non-empty |
+| team | `Direct Sales` | first non-empty |
+| stage | `New` | first non-empty |
+| notes | `Wants a quotation for 3 units.` then a blank line then `Asked for a demonstration.` | concatenation in confidence order |
+| priority | `2` | the maximum |
+| tags | Service and Training | the union |
+| expected revenue | 1 500.00 | first non-empty; A's zero counts as empty |
+| contact | Nibbler | first non-empty |
+| electronic mail address | `contact@nibbler.example.com` | first non-empty; B has none, so A supplies it |
+| address block | `Test street`, empty, `Test City`, `5000`, empty, Belgium | A scores four non-empty fields, B scores zero |
+| lost reason | *(empty)* | the head's probability is strictly positive |
+| probability | 50 | not a merged field; the head keeps its own |
+| prorated revenue | round to two decimals of 1 500.00 × 50 ÷ 100 = **750.00** | recomputed after the write |
+
+**Step 3 — dependent records.** Robert followed A and posted on it eleven days ago, so Robert is
+added as a follower of B; Lucy already follows B, so nothing happens for her. The four messages of A
+move to B: one whose subject was `Demo request` becomes `From Website request: Demo request`, and one
+with no subject becomes `From Website request`. The attachment moves and is renamed `offer.txt (from
+Website request)` — the title is truncated to its first twenty characters and `Website request` is
+fifteen characters long, so it is kept whole. B then carries thirteen messages plus the merge
+summary note.
+
+**Step 4 — deletion.** A is deleted with elevated rights.
+
+**Step 5 — a later consequence.** B now carries at least fourteen messages; when it reaches
+twenty-five, winning it will trigger the effort message of section 11.
+
 ### 7.7 The follower transfer rule
 
 Not every follower of a tail record is moved; only the **active** ones, defined as follows.
@@ -1248,6 +1342,10 @@ followers moved.
 ---
 
 ## 8. Assignment arithmetic
+
+The complete two-phase procedure, its entry points, its notifications and four further worked
+examples are in [lead-assignment.md](lead-assignment.md). This section carries the arithmetic that
+procedure relies on.
 
 ### 8.1 Team capacity and saturation
 
@@ -1354,6 +1452,11 @@ capacity, and the *weights*, the corresponding team capacities. Then repeat:
 
 Because exactly one lead is handled per draw, teams whose domains overlap all receive work, in
 proportion to their capacities.
+
+**Second worked example.** Three teams with capacities 75, 90 and 135 draw with probabilities
+75 ÷ 300 = 0.25, 90 ÷ 300 = 0.30 and 135 ÷ 300 = 0.45, so over a long run in which every team always
+has candidates they receive leads in the ratio five to six to nine. When the third team runs out of
+candidates the remaining probabilities become 75 ÷ 165 ≈ 0.4545 and 90 ÷ 165 ≈ 0.5455.
 
 **Worked example.** Three teams with capacities 60, 30 and 10, all matching the same fifty
 unassigned leads. The draw probabilities are 60 ÷ 100 = 0.6, 30 ÷ 100 = 0.3 and 10 ÷ 100 = 0.1, so
@@ -1710,6 +1813,19 @@ evaluated after 9 and are the only ones that can be reached when 9's stage test 
 
 The message is displayed with a celebratory animation whose picture is the team leader's portrait
 when the leader has one, and a generic smiling face otherwise.
+
+**Worked example.** A salesperson wins an opportunity of 18 000.00 for their team. The record carries
+six messages, so condition 0 does not fire. The salesperson has closed seven deals this year, so
+condition 1 does not fire. The best team deal of the last thirty-one days, this one excluded, is
+22 000.00, so condition 2 does not fire; the best of the last seven days is 9 500.00, which is below
+18 000.00, so **condition 3 fires** and the message is "Yeah! Best deal out of the last 7 days for
+the team."
+
+**Second worked example.** A record whose expected revenue is zero is won by a salesperson who has
+already closed four deals today, in a country where the team has never closed a deal. Conditions 2
+to 5 are skipped because the expected revenue is zero. The count of deals closed today is now five,
+so **condition 6 fires** and the message is "You're on fire! Fifth deal won today 🔥". The
+first-win-in-a-country condition is never reached.
 
 ---
 

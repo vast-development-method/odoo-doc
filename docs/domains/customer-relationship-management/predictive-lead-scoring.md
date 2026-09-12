@@ -47,9 +47,9 @@ Two system parameters drive the model. They are text values, because the paramet
 
 Reading rules:
 
-- A name in the variable list that is not a field of the Lead entity is ignored (`LEAD-RULE-132`).
-- A start date that cannot be parsed makes the model inactive: no probability is computed and no frequency row is written (`LEAD-RULE-131`). The settings screen then displays the date eight days before today, without writing it.
-- Creating, writing or deleting the variable list parameter reloads the Lead entity, because the set of fields the probability derivation depends on is dynamic (`LEAD-RULE-135`).
+- A name in the variable list that is not a field of the Lead entity is ignored (`LEAD-110`).
+- A start date that cannot be parsed makes the model inactive: no probability is computed and no frequency row is written (`LEAD-109`). The settings screen then displays the date eight days before today, without writing it.
+- Creating, writing or deleting the variable list parameter reloads the Lead entity, because the set of fields the probability derivation depends on is dynamic (`LEAD-113`).
 
 ### 1.4 The variables actually read for a record
 
@@ -111,7 +111,7 @@ The contribution of a record leaving a closed state is computed **before** the v
 
 Writing a row: `new_count = current_count + contribution × step`, where `step` is `+1` for an increment and `−1` for a decrement; the result is stored as `0.1` when it is not strictly positive. Creating a row: `count = contribution + 0.1` on both columns.
 
-Rows are written with elevated rights (`LEAD-RULE-181`).
+Rows are written with elevated rights (`LEAD-156`).
 
 ### 2.4 Full rebuild
 
@@ -209,7 +209,7 @@ A row whose variable is `tag_id` and whose `won_count + lost_count` is strictly 
    probability     = minimum( maximum( round( 100 × raw probability , 2 ) , 0.01 ) , 99.99 )
    ```
 
-Step 7 is the clamping of `LEAD-RULE-138`: a pending record is never exactly zero and never exactly one hundred, because those two values are reserved for lost and won.
+Step 7 is the clamping of `LEAD-116`: a pending record is never exactly zero and never exactly one hundred, because those two values are reserved for lost and won.
 
 ### 3.7 What the model writes
 
@@ -239,13 +239,13 @@ The model always writes `automated_probability`. It writes `probability` as well
    value, write `probability` with the same value only where `probability` currently equals
    `automated_probability` or is empty, and commit the batch.
 
-The grouping by identical value exists to reduce the number of write statements: thousands of records usually share the same computed value. A batch whose write fails is logged and skipped; the remaining batches proceed (`LEAD-RULE-185`).
+The grouping by identical value exists to reduce the number of write statements: thousands of records usually share the same computed value. A batch whose write fails is logged and skipped; the remaining batches proceed (`LEAD-160`).
 
 Note the difference with 3.7: this mass write realigns a record whose stored probability is **empty** as well, which the record-by-record path does not do.
 
 ### 4.4 On a configuration change
 
-Confirming the probability update dialogue writes the two system parameters and then runs the full rebuild followed by the recomputation of 4.3. Only an administrator may confirm; for any other user the operation does nothing at all (`LEAD-RULE-130`).
+Confirming the probability update dialogue writes the two system parameters and then runs the full rebuild followed by the recomputation of 4.3. Only an administrator may confirm; for any other user the operation does nothing at all (`LEAD-108`).
 
 ## 5. The explanation panel
 
@@ -545,7 +545,7 @@ A record of that team sits in `Qualified`, carries the country `C1` and an email
 | `country_id` | `C1` | 0.1 | `1.1 + 1 = 2.1` |
 | `email_state` | `correct` | 1.1 | `2.1 + 1 = 3.1` |
 
-**Step 2: the record is unarchived.** Its status moves from lost to pending. The lost counts are decreased by one and the table returns exactly to its starting state. Note that unarchiving does not realign the probability (`LEAD-RULE-051`).
+**Step 2: the record is unarchived.** Its status moves from lost to pending. The lost counts are decreased by one and the table returns exactly to its starting state. Note that unarchiving does not realign the probability (`LEAD-051`).
 
 **Step 3: the record is moved into the won stage.** Its status moves from pending to won. The won counts are increased by one, and the stage contribution uses the "won" rule: **every** stage, whatever its sequence.
 
@@ -622,6 +622,6 @@ The settings screen displays the start date, the list of variables as removable 
 | Leads are merged | The survivor keeps its own status; the merged-away records are deleted, so their contribution stays until the next full rebuild. |
 | A stage is flagged as won | Every record of that stage is written with a probability of one hundred, which moves each of them into the won state and increments the won columns accordingly. |
 | A stage stops being flagged as won | Every record of that stage has its automated probability recomputed and its probability realigned where it was automatic, which moves those records out of the won state and decrements the won columns. |
-| A team is deleted | Its rows are folded into the cross-team rows, see [calculations.md](calculations.md) section 7.1, and then removed by cascade. |
+| A team is deleted | Its rows are folded into the cross-team rows, see [calculations.md](calculations.md) section 14, and then removed by cascade. |
 | The scoring start date moves forward | Records created before the new date stop contributing at the next full rebuild, and stop being recomputed. |
 | A variable is removed from the configuration | Its rows survive in the table until the next full rebuild, but they are no longer read, because the model only reads rows whose variable is among the fields present on the records being scored. |

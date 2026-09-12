@@ -1,0 +1,228 @@
+# Interfaces
+
+The service operations a client or an integration invokes, the request endpoints, the screens described as workflows on views, the printed documents, the emails and the scheduled jobs of the Loyalty, Coupons and Promotions domain. Screens are described without reference to any client technology: a view is a way of working on records, with the fields it shows, the buttons it offers, the guards on those buttons, the filters and the groupings.
+
+## 1. Service operations
+
+Operations are named with full-word snake_case identifiers. Every operation runs inside a single transaction unless stated otherwise.
+
+### 1.1 On a Loyalty Program
+
+| Operation | Inputs | Output | Side effects | Errors |
+|---|---|---|---|---|
+| `get_program_templates` | the menu context (`gift_ewallet` or nothing) | a map from template key to title, description and icon name | none | none |
+| `create_program_from_template` | a template key | an instruction to open the created program in a form | Creates one Loyalty Program with the template name, type and family defaults, including its rules, rewards, communication rules and one hidden discount product per reward. | An unknown key returns nothing and creates nothing. |
+| `open_loyalty_cards` | one program | an instruction to open the card list filtered to that program, titled with the family noun, with creation disabled and the generation wizard pre-armed | none | none |
+| `share_program` | one program | an instruction to open the Coupon Share Wizard | none | `Provide either a coupon or a program.` |
+
+### 1.2 On a Loyalty Card
+
+| Operation | Inputs | Output | Side effects | Errors |
+|---|---|---|---|---|
+| `send_card` | one card | an instruction to open a message composition window pre-filled with the card's default template | none until the message is sent | none |
+| `open_balance_update` | one card | an instruction to open the Update Loyalty Card Points Wizard | none | none |
+| `share_card` | one card | an instruction to open the Coupon Share Wizard | none | `Provide either a coupon or a program.` |
+| `archive_card` | one or more cards | nothing | Deletes every pending promise linking those cards to draft sales orders, then archives them. | none |
+| `get_gift_card_status` | a code, a counter | a flag saying whether the code may be used, and the card data when the code exists | none | none |
+| `get_loyalty_card_partner_by_code` | a code | the owner of the loyalty card carrying that code, or nothing | none | none |
+
+### 1.3 On a Contact
+
+| Operation | Inputs | Output | Side effects | Errors |
+|---|---|---|---|---|
+| `view_loyalty_cards` | one or more contacts | an instruction to open the card list filtered to those contacts and all their descendants, with the active filter preselected and creation disabled | none | none |
+
+### 1.4 On a Sales Order
+
+| Operation | Inputs | Output | Side effects | Errors |
+|---|---|---|---|---|
+| `update_programs_and_rewards` | one order | nothing | The full evaluation of section 3.1 of [workflows.md](workflows.md): creates, updates and deletes reward lines, cards and pending promises. | none; individual refusals are absorbed |
+| `try_apply_code` | one order, a code | either a refusal, or the claimable rewards grouped by card | Records the rule among the activated code rules, records the card among the applied cards, attaches the program, locks the program row. | `This promo code is already applied.`, `This code is invalid (<code>).`, `This coupon is expired.`, `This coupon has already been used.`, `This program cannot be applied with code.`, `This code is expired (<code>).`, plus any refusal of `try_apply_program` |
+| `try_apply_program` | one order, a program, optionally a card | either a refusal, or the cards attached | Creates cards and pending promises. | `The program is not available for this order.`, `This program is already applied to this order.`, `This discount (<candidate>) is not compatible with "<applied>". Please remove it in order to apply this one.`, plus the point-computation refusals |
+| `apply_program_reward` | one order, a reward, a card, optionally a product, optionally reusable lines | an empty result on success, a refusal otherwise | Writes the reward lines. | `A better global discount is already applied.`, `The coupon can only be claimed on future orders.`, `The coupon does not have enough points for the selected reward.`, `There is nothing to discount`, `Invalid product to claim.` |
+| `get_claimable_rewards` | one order, optionally forced cards | the claimable rewards grouped by card | none | none |
+| `open_reward_wizard` | one order | true when nothing needs to be asked, otherwise an instruction to open the Loyalty Reward Selection Wizard | Re-evaluates the order; applies the reward directly when exactly one card offers exactly one non-multi-product reward. | the refusals of `apply_program_reward` |
+| `view_gift_cards` | one order | an instruction to open the card list filtered to the gift cards generated by that order, with creation disabled | none | none |
+| `send_reward_coupon_mail` | one or more orders | nothing | Sends the "at creation" communication, with immediate delivery, of every card the orders granted points to whose program applies to future orders. | none |
+
+### 1.5 At a counter
+
+| Operation | Inputs | Output | Side effects | Errors |
+|---|---|---|---|---|
+| `use_coupon_code` | a counter, a code, the ticket timestamp, a customer, a pricelist | success with the program, the card, its owner, its balance, its formatted balance and whether it has a source document; or failure with a message | none | `This coupon is invalid (<code>).`, `This coupon is expired (<code>).`, `This coupon is not yet valid (<code>).`, `No reward can be claimed with this coupon.`, `This coupon is not available with the current pricelist.`, `This programs requires a code to be applied.` |
+| `validate_coupon_programs` | a map from card identifier to net points, a list of new codes | success, or failure with a message and a corrective payload | none | `Some coupons are invalid. The applied coupons have been updated. Please check the order.`, `There are not enough points for the coupon: <code>.`, `The following codes already exist in the database, perhaps they were already sold?` |
+| `confirm_coupon_programs` | one ticket, the card data computed on the device | the card updates, the new usage counts, the new card information for the receipt and the documents to print | Creates cards, updates gift cards, applies points, binds reward lines to cards, sends creation communications, writes history entries. | none; invalid entries are skipped |
+| `get_program_identifiers` | a counter | the programs available at that counter | none | none |
+
+### 1.6 On the wizards
+
+| Operation | Inputs | Output | Side effects | Errors |
+|---|---|---|---|---|
+| `generate_coupons` | the generation wizard | the created cards | Creates cards and history entries; sends the creation communications. | `Can not generate coupon, no program is set.`, `Invalid quantity.` |
+| `update_card_points` | the balance wizard | nothing | Creates a history entry and writes the new balance. | `New Balance should be positive and different then old balance.` |
+| `apply_coupon_code` | the coupon code wizard | an instruction to open the reward selection wizard filtered to the rewards the code unlocked | Applies the code to the order. | `Invalid sales order.`, plus the refusal of `try_apply_code` |
+| `apply_selected_reward` | the reward selection wizard | true | Applies the reward, re-evaluates the order, deletes the unused current-order cards. | `No reward selected.`, `Coupon not found while trying to add the following reward: <description>` |
+| `cancel_reward_selection` | the reward selection wizard | nothing | Deletes the unused current-order cards. | none |
+| `generate_short_link` | the share wizard | an instruction to reopen the same wizard in short-link mode | Creates a tracked link when none exists for that address. | none |
+| `create_share_action` | a card or a program | an instruction to open the share wizard | none | `Provide either a coupon or a program.` |
+
+## 2. Request endpoints
+
+| Path pattern | Method | Authentication | Purpose | Request | Response |
+|---|---|---|---|---|---|
+| `/my/loyalty_card/<card identifier>/history` and `/my/loyalty_card/<card identifier>/history/page/<page number>` | page request | authenticated user | The paginated movement history of one of the visitor's own cards | optional sort key among `date`, `used`, `description`, `issued` | A rendered page listing the history entries with a pager and a sort selector. A card that does not belong to the visitor redirects to the portal home. |
+| `/my/loyalty_card/<card identifier>/values` | remote call | authenticated user | The data behind the portal card dialog | the card identifier | The card (identifier, formatted balance, expiration date, code), the program (name and type), the last five history entries (document identifier, description, portal link of the document, signed formatted movement), the three most expensive rewards the balance already pays for ordered by required points descending, the picture path for the program type, and, in the online shop, the published trigger products with their formatted list prices. An unknown or foreign card returns an empty result. |
+| `/shop/cart` | page request | public | The cart page | none | The cart page, after the cart has been evaluated and the automatic rewards claimed. |
+| `/wallet/top_up` | page request | authenticated user | Adds one unit of a wallet top-up product to the cart | the trigger product identifier | A redirection to the cart page. |
+| the promotional code submission of the online shop | form submission | public | Applies a code to the cart | the code, optionally a reward identifier | A redirection to the page named by the form, defaulting to the cart, with the outcome stored in the session. |
+| `/coupon/<code>` | page request | public | Applies a shared coupon link | the code in the path, the landing page under the key `r` | A redirection to the landing page with either `coupon_error` and possibly `coupon_error_type`, or `notify_coupon`, added to its query string. |
+| `/shop/claimreward` | form submission | public | Claims a reward from the cart | the reward identifier, the card code, optionally a product identifier, optionally the return page | A redirection to the return page, defaulting to the cart. |
+| the express checkout address step of the online shop | remote call | public | Returns the order summary for an express payment sheet | a partial delivery address | The ordinary summary plus the shipping discount as a minor-unit integer, present only when the cart carries at least one free shipping reward line. |
+| the express payment values of the cart page | derived values of the page | public | Feeds the express payment sheet with the amount to authorize | none | The ordinary express payment values, with the amount computed over the cart's lines minus the shipping lines minus the free shipping reward lines, so that neither the shipping price nor its discount is part of the amount presented before the shipping method is chosen. |
+
+## 3. Screens
+
+### 3.1 Program list
+
+Fields shown: the ordering handle, the name, the program type, the card count with the family noun under the column title `Items`, and the company when several companies exist. Rows can be dragged to change the ordering. Creating a record opens the template chooser instead of an empty form. Filters: `Archived`. Free-text search on the name.
+
+### 3.2 Program form
+
+**Header buttons**, each visible only for its program type: `Generate Coupons` for `coupons`, `Generate Gift Cards` for `gift_card`, `Generate eWallet` for `ewallet` (the last one opens the generation wizard with the mode already set to selected customers).
+
+**Ribbon**: `Archived` when the program is archived.
+
+**Statistic button**: the card count, labelled with the family noun, opening the card list of the program.
+
+**Title**: the program name, with the placeholder `e.g. 10% discount on laptops`.
+
+**Left column**: the program type as a filterable chooser, read-only once the program has at least one card and never offering the gift card and wallet types; an explanatory paragraph per type; the trigger products for a gift card or wallet program, labelled `Gift Card Products` or `eWallet Products`; the hidden discount product of a payment program, visible only with the technical features group; the email template for a payment program; the currency; the pricelist restriction, hidden for a payment program and visible only with the pricelist feature; the point name, labelled `Points Unit` for a loyalty program and `Displayed as` for a payment program; the point visibility flag; the trigger, read-only; the point usage mode, editable only for a loyalty program.
+
+**Right column**: the start date and the end date, hidden for a payment program; the usage limit with the ceiling and the current count shown as `<count> used`; the company when several companies exist, with the placeholder `Visible to all`; the channel flags.
+
+**Pages**: `Rules & Rewards`, showing the rules and the rewards side by side as editable cards, hidden for a payment program; `Rewards` alone for a payment program, visible only with the technical features group; `Communications`, listing the communication rules, hidden when the point usage mode is `current` and for a payment program.
+
+### 3.3 Rule card and rule form
+
+The card summarizes the rule in words: the discount code when there is one; `If minimum <quantity> item(s) bought` when the minimum quantity is positive; `If minimum <amount> spent` followed by ` (tax excluded)` when the tax mode is exclusive; then, under the heading `Among:`, the products, the category, the tag, `All Products` when none of the three is set, and the free-form condition for the technical features group. On the right, the grant: `the value of the coupon` for a coupon program, and otherwise the point amount, the point name and the point mode.
+
+The form shows the discount code (required for a discount-code program), then a `Conditions` block with the minimum quantity, the minimum amount and its tax mode, and an `Among` block with the free-form condition, the products, the category and the tag; and a `Point(s)` block with the grant and the point mode as a radio choice, visible only for the program types that grant points or to the technical features group.
+
+### 3.4 Reward card and reward form
+
+The card summarizes the reward: the discount value, the discount mode, the word `discount` and `( Max <amount> )` when a ceiling is set; then, for a specific applicability, under the heading `Applied to:`, the products, the category, the tag and the free-form condition.
+
+The form shows a `Reward` block with the reward type (read-only for a buy-some-get-some program), the discount value, the discount mode and the applicability as a radio choice; an `Among` block for a free product reward with the rewarded quantity, the reward product and the reward product tag, one of the two being required; a `Discount` block with the maximum discount and the discounted-product filter, hidden when the applicability is `order`; a `Points` block with the required points, the point name, the suffix ` (or more)` when the whole balance is consumed, and the "clear all promotion points" flag; and the description under the label `Description on order`.
+
+### 3.5 Communication list
+
+An inline editable list with three columns: the trigger, the milestone (visible and required only when the trigger is `When Reaching`) and the email template. At a counter an extra column holds the printed document.
+
+### 3.6 Card list, form and search
+
+**List**: the code (read-only), the creation date (hidden by default), the balance under the column title `Balance`, the expiration date, the program, the owner, and a send button. Editing and deletion are disabled from the list.
+
+**Form**: the code (read-only), the expiration date, the owner, and the balance rendered as a button that opens the balance update wizard. A page `History Lines` lists the movements with their description, document, date, issued and used amounts. A discussion thread is attached.
+
+**Search**: free text on the code, the owner and the program. Two filters:
+
+- `Active`: the card is active, its program is active, and its expiration date is empty or not in the past.
+- `Inactive`: the card is archived, or its program is archived, or its expiration date is in the past.
+
+### 3.7 Generation wizard
+
+Fields: the program, the mode (`Anonymous Customers` or `Selected Customers`) labelled `For`, the customers and the customer tags for the selected mode, the quantity, the grant with the point name, the validity limit and the description. A confirmation sentence is shown, and a warning when emails will be sent. Buttons: the generation button and `Cancel`.
+
+### 3.8 Balance update wizard
+
+Fields: the old balance (read-only), the new balance and a mandatory description. Buttons: the update button and a cancel button.
+
+### 3.9 Coupon code wizard
+
+One field, the code, and the buttons `Apply` and `Discard`.
+
+### 3.10 Reward selection wizard
+
+Fields: the reward chooser restricted to the claimable rewards, and, for a multi-product reward, the product chooser restricted to the reward's products. Buttons: `Apply`, `Discard`, and a link to the discount and loyalty configuration labelled `Coupons & Loyalty`.
+
+### 3.11 Coupon share wizard
+
+Fields: the website, the program, the card, the landing page, the code and the resulting link. Buttons: the short-link action and a close action.
+
+### 3.12 Sales order form additions
+
+- A statistic button `Gift Cards` showing the number of gift cards generated by the order, hidden when there is none.
+- Two buttons placed before the discount button: `Coupon Code`, which opens the coupon code wizard, and `Reward`, which opens the reward flow with the help text `Update current promotional lines and select new rewards if applicable.` Both are shown disabled when the order is locked or cancelled.
+- On the line list, the reward flag is loaded invisibly and makes the quantity and the unit price read-only for a reward line, and the taxes read-only for a reward line while the order is a quotation.
+- Under the totals, a loyalty summary showing, for a confirmed order, the point name, the points issued with a plus sign and the points used with a minus sign.
+
+### 3.13 Contact form addition
+
+A statistic button showing the number of active cards of the contact and of its descendants, visible only when that number is not zero, opening the card list filtered to the contact and its descendants.
+
+### 3.14 Portal pages
+
+- The portal home lists, grouped by program, the loyalty cards and electronic wallets the visitor owns whose program is active and which are not expired.
+- Opening one shows a dialog with the formatted balance, the expiration date, the code, the last five movements each linking to its sales order, the three most expensive rewards the balance already pays for, and, in the online shop, the published trigger products with their prices so that the balance can be topped up.
+- The full history page lists every movement with a pager and a sort selector offering `Date`, `Used`, `Description` and `Issued`.
+- The portal page of a sales order shows the gift card codes the order produced, numbered, each with its value and a copy button, and shows the masked code and expiration date of any bearer card used to pay.
+
+### 3.15 Cart and checkout
+
+Described in [storefront-application.md](storefront-application.md).
+
+### 3.16 Counter screens
+
+Described in [point-of-sale-application.md](point-of-sale-application.md).
+
+## 4. Printed documents
+
+### 4.1 Coupon document
+
+One page per card, rendered in the language of the card's recipient when there is one.
+
+Content, in order: a congratulation line naming the recipient when the card has one; the sentence `Here is your reward from <company name>.`; then, for every reward of the card's program, the reward description, separated by the word `OR` when there are several; the line `on your next order` in large type; the sentence `Use this promo code before <expiration date>` when the card expires; the code in large type on a light background; `Minimum purchase of <quantity> products` when the first rule requires more than one unit; `Valid for purchase above <amount>` when the first rule requires an amount; the code again as a barcode; the closing `Thank you,`; the company logo; and the company address and email address.
+
+### 4.2 Gift card document
+
+One page per card, rendered in the language of the card's recipient when there is one.
+
+Content, in order: the line `Here is your gift card!`; the shipped gift card picture; the balance rendered as a monetary amount in the card's currency, in large type; a grey block containing the words `Gift Card Code` and the code; the line `Card expires <expiration date>` when the card expires; and the code as a barcode.
+
+Both documents are bound to the Loyalty Card entity, so they can be printed from the card list, from the card form, from a communication plan and, at a counter, automatically when a card is created.
+
+## 5. Emails
+
+| Email | Sent when | Recipient | Sender | Content |
+|---|---|---|---|---|
+| Gift card information | A gift card is created, through the "at creation" communication rule | the card's resolved recipient | the template's sender when it names one, otherwise the computed author | The gift card document as an attachment. Deleted once sent. |
+| Coupon information | A coupon or a next-order coupon is created, through the "at creation" communication rule | the card's resolved recipient | the company email address, or the computed author | The coupon document as an attachment. Deleted once sent. |
+| Milestone email | A card's balance crosses the highest milestone of a `When Reaching` communication rule | the card's owner | the template's sender | Whatever the chosen template contains. |
+| Manual send | A user presses the send button on a card | chosen in the composition window, pre-filled with the card's recipients | the acting user | The card's default template, editable before sending. |
+
+Every automatic send is suppressed when the acting context disables loyalty emails, which is the case for every card created by the evaluation of a quotation; those cards are only mailed when the order is confirmed.
+
+## 6. Scheduled jobs
+
+| Job | Frequency | What it does |
+|---|---|---|
+| Abandoned cart coupon release | with the ordinary periodic cleanup | Detaches manually applied cards from draft online carts untouched for longer than the abandonment delay, then re-evaluates each of them. |
+
+There is no scheduled job that expires cards, sends reminders or recomputes balances. A card becomes unusable the day after its expiration date purely by comparison, without any record being written.
+
+## 7. Reporting
+
+The domain ships no dedicated analysis model. The figures it exposes are:
+
+| Figure | Where | Definition |
+|---|---|---|
+| Card count per program | the program list and the program form | the number of cards of the program, rendered as `<count> <family noun>` |
+| Sales document count per program | the program form | the number of distinct sales orders carrying one of the program's rewards |
+| Counter document count per program | the program form | the number of distinct tickets carrying one of the program's rewards |
+| Total document count per program | the program form, next to the usage ceiling | the sum of the two counts above; it is the figure compared with the ceiling |
+| Active card count per contact | the contact form | the number of active, unexpired, positively valued cards of the contact and of its descendants |
+| Gift card count per order | the sales order form | the number of gift cards generated by the order |
+| Points issued and used per order | the sales order form and the portal page | the sums of the issued and used amounts of the order's history entries |
+| Discount classification | the invoice lines | an invoice line coming from a reward of type `discount`, or from a reward discount product of the ticket behind the invoice, is flagged as a discount line |
+
+The full movement history of every card is queryable through the Loyalty History Entry entity, grouped by card, by company or by document, and is the basis of any redemption analysis a deployment wishes to build.

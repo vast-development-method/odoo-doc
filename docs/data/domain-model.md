@@ -22,7 +22,7 @@ Every entity is given three names, and all three are needed:
 |---|---|
 | Entity | The full name in words. Where the label of an entity carries an abbreviation, a dotted technical name or a sentence fragment, this document writes the name in full words. |
 | Transport name | The dotted name a client, an integration or an import file uses to address the entity. Reproduced exactly, because it is contractual. |
-| Table | The name of the table that stores the entity, which is the transport name with every dot replaced by an underscore. Empty for a shared behaviour, which has no table. |
+| Table | The name of the relation that stores the entity, which is the transport name with every dot replaced by an underscore. It reads `none` for a shared behaviour, which has no storage of its own, and `none, read from a stored query` for an entity whose rows are computed at read time. Where the relation is a stored query materialized as a view, the name given is the name of that view. |
 
 The reference page of an entity is `../references/entities/<transport name>.md` and its machine-readable definition is `../../schemas/data/entities/<transport name>.json`.
 
@@ -100,7 +100,7 @@ Folder gives the folder under [`../domains/`](../domains/) that specifies the do
 | Events | marketing | [`../domains/events/`](../domains/events/) | 33 | 4 | 0 | 159 | Events and event types, tickets, registrations and answers, booths and booth categories, tracks and track stages, sponsors, tags, stages and event communications. |
 | Learning, Surveys and Gamification | marketing | `../domains/learning-surveys-and-gamification/` | 25 | 4 | 0 | 143 | Surveys, questions and answers, participations and scoring, courses, slides and content, quizzes, certifications, forums and posts, badges, challenges, goals and karma. |
 | Marketing and Mass Mailing | marketing | `../domains/marketing-and-mass-mailing/` | 15 | 6 | 0 | 52 | Mass mailings, mailing lists, contacts and subscriptions, traces and trace statistics, link tracking, campaign tracking, marketing cards and social links. |
-| **Total** | | | **600** | **222** | **161** | **3985** | |
+| **Total** | | | **600** | **222** | **161** | **3,985** | |
 
 ## 3. Entity map by domain
 
@@ -115,7 +115,7 @@ Specified in [`../domains/automation-and-integration/`](../domains/automation-an
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
 | Base Import Mapping | `base_import.mapping` | `base_import_mapping` | Persistent record with 3 stored columns. | Base import |
-| Cloud Storage Migration Report | `cloud.storage.migration.report` | none, read from a stored query | Persistent record with 0 stored columns. | Cloud Storage Migration |
+| Cloud Storage Migration Report | `cloud.storage.migration.report` | `none, read from a stored query` | Persistent record with 0 stored columns. | Cloud Storage Migration |
 | Code Translation | `transifex.code.translation` | `transifex_code_translation` | Persistent record with 4 stored columns. | Transifex integration |
 | in-app purchase Account | `iap.account` | `iap_account` | In Application Purchase Account. | In-App Purchases |
 | in-app purchase Service | `iap.service` | `iap_service` | In Application Purchase Service. | In-App Purchases |
@@ -142,9 +142,9 @@ Specified in [`../domains/automation-and-integration/`](../domains/automation-an
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| in-app purchase Lead Enrichment application programming interface | `iap.enrich.api` | none | In Application Purchase Lead Enrichment Application Programming Interface. | In-App Purchases |
-| in-app purchase Partner Autocomplete application programming interface | `iap.autocomplete.api` | none | In Application Purchase Partner Autocomplete Application Programming Interface. | Partner Autocomplete |
-| Transifex Translation | `transifex.translation` | none | Shared behaviour definition reused through composition. | Transifex integration |
+| in-app purchase Lead Enrichment application programming interface | `iap.enrich.api` | `none` | In Application Purchase Lead Enrichment Application Programming Interface. | In-App Purchases |
+| in-app purchase Partner Autocomplete application programming interface | `iap.autocomplete.api` | `none` | In Application Purchase Partner Autocomplete Application Programming Interface. | Partner Autocomplete |
+| Transifex Translation | `transifex.translation` | `none` | Shared behaviour definition reused through composition. | Transifex integration |
 
 #### Relationships (30)
 
@@ -193,7 +193,7 @@ Specified in [`../domains/identity-and-access/`](../domains/identity-and-access/
 |---|---|---|---|---|
 | Access Groups | `res.groups` | `res_groups` | Persistent record with 10 stored columns; owns Model Access; referenced by 28 relation fields. | Base |
 | Authentication Device | `auth_totp.device` | `auth_totp_device` | Persistent record with 6 stored columns. | Two-Factor Authentication (time-based one-time password) |
-| Company directory access protocol configuration | `res.company.ldap` | none in the observed installation | Persistent record with 0 stored columns; belongs to Companies. | Authentication via directory access protocol |
+| Company directory access protocol configuration | `res.company.ldap` | `none in the observed installation` | Persistent record with 0 stored columns; belongs to Companies. | Authentication via directory access protocol |
 | Device Log | `res.device.log` | `res_device_log` | Persistent record with 11 stored columns. | Base |
 | Devices | `res.device` | `res_device` | Persistent record with 11 stored columns. | Base |
 | OAuth2 provider | `auth.oauth.provider` | `auth_oauth_provider` | Persistent record with 10 stored columns; referenced by 1 relation field. | OAuth2 Authentication |
@@ -223,8 +223,8 @@ Specified in [`../domains/identity-and-access/`](../domains/identity-and-access/
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| key performance indicator Provider | `kpi.provider` | none | Shared behaviour definition reused through composition. | Initial Setup Tools |
-| Show application programming interface Key | `res.users.apikeys.show` | none | Shared behaviour definition reused through composition. | Base |
+| key performance indicator Provider | `kpi.provider` | `none` | Shared behaviour definition reused through composition. | Initial Setup Tools |
+| Show application programming interface Key | `res.users.apikeys.show` | `none` | Shared behaviour definition reused through composition. | Base |
 
 #### Relationships (79)
 
@@ -399,64 +399,64 @@ Specified in the platform documents of [`../overview/`](../overview/), [`../runt
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Account report with payment lines | `report.account.report_invoice_with_payments` | none | Shared behaviour definition reused through composition. | Invoicing |
-| Account report without payment lines | `report.account.report_invoice` | none | Shared behaviour merged into 1 entity. | Invoicing |
-| Account Test Report | `report.account_test.report_accounttest` | none | Shared behaviour definition reused through composition. | Accounting Consistency Tests |
-| Automatic Vacuum | `ir.autovacuum` | none | Shared behaviour definition reused through composition. | Base |
-| Avatar Mixin | `avatar.mixin` | none | Shared behaviour merged into 5 entities. | Base |
-| Base | `base` | none | Shared behaviour definition reused through composition. | Base |
-| bill of materials Overview Report | `report.mrp.report_bom_structure` | none | Shared behaviour definition reused through composition. | Manufacturing |
-| Employee Resume | `report.hr_skills.report_employee_cv` | none | Shared behaviour definition reused through composition. | Skills Management |
-| Fields Converter | `ir.fields.converter` | none | Shared behaviour definition reused through composition. | Base |
-| File streaming helper model for controllers | `ir.binary` | none | Shared behaviour definition reused through composition. | Base |
-| Geo Coder | `base.geocoder` | none | Shared behaviour definition reused through composition. | Partners Geolocation |
-| Get french point of sale hash integrity result as Portable Document Format. | `report.l10n_fr_pos_cert.report_pos_hash_integrity` | none | Shared behaviour definition reused through composition. | France - value-added tax Anti-Fraud Certification for Point of Sale (CGI 286 I-3 bis) |
-| Get hash integrity result as Portable Document Format. | `report.account.report_hash_integrity` | none | Shared behaviour definition reused through composition. | Invoicing |
-| Holidays Summary Report | `report.hr_holidays.report_holidayssummary` | none | Shared behaviour definition reused through composition. | Time Off |
-| Hypertext Transfer Protocol Routing | `ir.http` | none | Shared behaviour definition reused through composition. | Base |
-| Image Mixin | `image.mixin` | none | Shared behaviour merged into 13 entities. | Base |
-| Lot Label Report | `report.stock.label_lot_template_view` | none | Shared behaviour definition reused through composition. | Inventory |
-| manufacturing order Overview Report | `report.mrp.report_mo_overview` | none | Shared behaviour definition reused through composition. | Manufacturing |
-| Module Reference Report (base) | `report.base.report_irmodulereference` | none | Shared behaviour definition reused through composition. | Base |
-| Point of Sale Details | `report.point_of_sale.report_saledetails` | none | Shared behaviour merged into 1 entity. | Point of Sale |
-| Point of Sale Invoice Report | `report.point_of_sale.report_invoice` | none | Shared behaviour definition reused through composition. | Point of Sale |
-| Pricelist Report | `report.product.report_pricelist` | none | Shared behaviour definition reused through composition. | Products & Pricelists |
-| Product Label Report | `report.product.report_producttemplatelabel_dymo` | none | Shared behaviour definition reused through composition. | Products & Pricelists |
-| Product Label Report | `report.stock.label_product_product_view` | none | Shared behaviour definition reused through composition. | Inventory |
-| Product Label Report 2x7 | `report.product.report_producttemplatelabel2x7` | none | Shared behaviour definition reused through composition. | Products & Pricelists |
-| Product Label Report 4x12 | `report.product.report_producttemplatelabel4x12` | none | Shared behaviour definition reused through composition. | Products & Pricelists |
-| Product Label Report 4x12 No Price | `report.product.report_producttemplatelabel4x12noprice` | none | Shared behaviour definition reused through composition. | Products & Pricelists |
-| Product Label Report 4x7 | `report.product.report_producttemplatelabel4x7` | none | Shared behaviour definition reused through composition. | Products & Pricelists |
-| Properties Base Definition Mixin | `properties.base.definition.mixin` | none | Shared behaviour merged into 2 entities. | Base |
-| Qweb | `ir.qweb` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field | `ir.qweb.field` | none | Shared behaviour merged into 17 entities. | Base |
-| Qweb Field Barcode | `ir.qweb.field.barcode` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Contact | `ir.qweb.field.contact` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Date | `ir.qweb.field.date` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Datetime | `ir.qweb.field.datetime` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Duration | `ir.qweb.field.duration` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Float | `ir.qweb.field.float` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Float Time | `ir.qweb.field.float_time` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field hypertext markup language | `ir.qweb.field.html` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Image | `ir.qweb.field.image` | none | Shared behaviour merged into 1 entity. | Base |
-| Qweb Field Image | `ir.qweb.field.image_url` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Integer | `ir.qweb.field.integer` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Many to One | `ir.qweb.field.many2one` | none | Shared behaviour merged into 2 entities. | Base |
-| Qweb field many2many | `ir.qweb.field.many2many` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Monetary | `ir.qweb.field.monetary` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb field one2many | `ir.qweb.field.one2many` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field qweb | `ir.qweb.field.qweb` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Relative | `ir.qweb.field.relative` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Selection | `ir.qweb.field.selection` | none | Shared behaviour definition reused through composition. | Base |
-| Qweb Field Text | `ir.qweb.field.text` | none | Shared behaviour definition reused through composition. | Base |
-| Scheduled Actions | `ir.cron` | none | Shared behaviour definition reused through composition. | Base |
-| Session sales details for a single employee | `report.pos_hr.single_employee_sales_report` | none | Shared behaviour definition reused through composition. | point of sale - human resources |
-| Stock Reception Report | `report.stock.report_reception` | none | Shared behaviour definition reused through composition. | Inventory |
-| Stock rule report | `report.stock.report_stock_rule` | none | Shared behaviour definition reused through composition. | Inventory |
-| Swiss quick response-bill report | `report.l10n_ch.qr_report_main` | none | Shared behaviour definition reused through composition. | Switzerland - Accounting |
-| template engine Field Time | `ir.qweb.field.time` | none | Shared behaviour definition reused through composition. | Base |
-| Unknown | `_unknown` | none | Shared behaviour definition reused through composition. | Base |
-| websocket message handling | `ir.websocket` | none | Shared behaviour definition reused through composition. | Instant Messaging Bus |
+| Account report with payment lines | `report.account.report_invoice_with_payments` | `none` | Shared behaviour definition reused through composition. | Invoicing |
+| Account report without payment lines | `report.account.report_invoice` | `none` | Shared behaviour merged into 1 entity. | Invoicing |
+| Account Test Report | `report.account_test.report_accounttest` | `none` | Shared behaviour definition reused through composition. | Accounting Consistency Tests |
+| Automatic Vacuum | `ir.autovacuum` | `none` | Shared behaviour definition reused through composition. | Base |
+| Avatar Mixin | `avatar.mixin` | `none` | Shared behaviour merged into 5 entities. | Base |
+| Base | `base` | `none` | Shared behaviour definition reused through composition. | Base |
+| bill of materials Overview Report | `report.mrp.report_bom_structure` | `none` | Shared behaviour definition reused through composition. | Manufacturing |
+| Employee Resume | `report.hr_skills.report_employee_cv` | `none` | Shared behaviour definition reused through composition. | Skills Management |
+| Fields Converter | `ir.fields.converter` | `none` | Shared behaviour definition reused through composition. | Base |
+| File streaming helper model for controllers | `ir.binary` | `none` | Shared behaviour definition reused through composition. | Base |
+| Geo Coder | `base.geocoder` | `none` | Shared behaviour definition reused through composition. | Partners Geolocation |
+| Get french point of sale hash integrity result as Portable Document Format. | `report.l10n_fr_pos_cert.report_pos_hash_integrity` | `none` | Shared behaviour definition reused through composition. | France - value-added tax Anti-Fraud Certification for Point of Sale (CGI 286 I-3 bis) |
+| Get hash integrity result as Portable Document Format. | `report.account.report_hash_integrity` | `none` | Shared behaviour definition reused through composition. | Invoicing |
+| Holidays Summary Report | `report.hr_holidays.report_holidayssummary` | `none` | Shared behaviour definition reused through composition. | Time Off |
+| Hypertext Transfer Protocol Routing | `ir.http` | `none` | Shared behaviour definition reused through composition. | Base |
+| Image Mixin | `image.mixin` | `none` | Shared behaviour merged into 13 entities. | Base |
+| Lot Label Report | `report.stock.label_lot_template_view` | `none` | Shared behaviour definition reused through composition. | Inventory |
+| manufacturing order Overview Report | `report.mrp.report_mo_overview` | `none` | Shared behaviour definition reused through composition. | Manufacturing |
+| Module Reference Report (base) | `report.base.report_irmodulereference` | `none` | Shared behaviour definition reused through composition. | Base |
+| Point of Sale Details | `report.point_of_sale.report_saledetails` | `none` | Shared behaviour merged into 1 entity. | Point of Sale |
+| Point of Sale Invoice Report | `report.point_of_sale.report_invoice` | `none` | Shared behaviour definition reused through composition. | Point of Sale |
+| Pricelist Report | `report.product.report_pricelist` | `none` | Shared behaviour definition reused through composition. | Products & Pricelists |
+| Product Label Report | `report.product.report_producttemplatelabel_dymo` | `none` | Shared behaviour definition reused through composition. | Products & Pricelists |
+| Product Label Report | `report.stock.label_product_product_view` | `none` | Shared behaviour definition reused through composition. | Inventory |
+| Product Label Report 2x7 | `report.product.report_producttemplatelabel2x7` | `none` | Shared behaviour definition reused through composition. | Products & Pricelists |
+| Product Label Report 4x12 | `report.product.report_producttemplatelabel4x12` | `none` | Shared behaviour definition reused through composition. | Products & Pricelists |
+| Product Label Report 4x12 No Price | `report.product.report_producttemplatelabel4x12noprice` | `none` | Shared behaviour definition reused through composition. | Products & Pricelists |
+| Product Label Report 4x7 | `report.product.report_producttemplatelabel4x7` | `none` | Shared behaviour definition reused through composition. | Products & Pricelists |
+| Properties Base Definition Mixin | `properties.base.definition.mixin` | `none` | Shared behaviour merged into 2 entities. | Base |
+| Qweb | `ir.qweb` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field | `ir.qweb.field` | `none` | Shared behaviour merged into 17 entities. | Base |
+| Qweb Field Barcode | `ir.qweb.field.barcode` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Contact | `ir.qweb.field.contact` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Date | `ir.qweb.field.date` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Datetime | `ir.qweb.field.datetime` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Duration | `ir.qweb.field.duration` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Float | `ir.qweb.field.float` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Float Time | `ir.qweb.field.float_time` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field hypertext markup language | `ir.qweb.field.html` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Image | `ir.qweb.field.image` | `none` | Shared behaviour merged into 1 entity. | Base |
+| Qweb Field Image | `ir.qweb.field.image_url` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Integer | `ir.qweb.field.integer` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Many to One | `ir.qweb.field.many2one` | `none` | Shared behaviour merged into 2 entities. | Base |
+| Qweb field many2many | `ir.qweb.field.many2many` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Monetary | `ir.qweb.field.monetary` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb field one2many | `ir.qweb.field.one2many` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field qweb | `ir.qweb.field.qweb` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Relative | `ir.qweb.field.relative` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Selection | `ir.qweb.field.selection` | `none` | Shared behaviour definition reused through composition. | Base |
+| Qweb Field Text | `ir.qweb.field.text` | `none` | Shared behaviour definition reused through composition. | Base |
+| Scheduled Actions | `ir.cron` | `none` | Shared behaviour definition reused through composition. | Base |
+| Session sales details for a single employee | `report.pos_hr.single_employee_sales_report` | `none` | Shared behaviour definition reused through composition. | point of sale - human resources |
+| Stock Reception Report | `report.stock.report_reception` | `none` | Shared behaviour definition reused through composition. | Inventory |
+| Stock rule report | `report.stock.report_stock_rule` | `none` | Shared behaviour definition reused through composition. | Inventory |
+| Swiss quick response-bill report | `report.l10n_ch.qr_report_main` | `none` | Shared behaviour definition reused through composition. | Switzerland - Accounting |
+| template engine Field Time | `ir.qweb.field.time` | `none` | Shared behaviour definition reused through composition. | Base |
+| Unknown | `_unknown` | `none` | Shared behaviour definition reused through composition. | Base |
+| websocket message handling | `ir.websocket` | `none` | Shared behaviour definition reused through composition. | Instant Messaging Bus |
 
 #### Relationships (237)
 
@@ -730,13 +730,13 @@ Specified in the domain folder `../domains/calendar-and-scheduling/`, listed in 
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Event Alarm Manager | `calendar.alarm_manager` | none | Shared behaviour definition reused through composition. | Calendar |
-| Google Gmail Mixin | `google.gmail.mixin` | none | Shared behaviour merged into 2 entities. | Google Gmail |
-| Google Service | `google.service` | none | Shared behaviour definition reused through composition. | Google Users |
-| Microsoft Outlook Mixin | `microsoft.outlook.mixin` | none | Shared behaviour merged into 2 entities. | Microsoft Outlook |
-| Microsoft Service | `microsoft.service` | none | Shared behaviour definition reused through composition. | Microsoft Users |
-| Synchronize a record with Google Calendar | `google.calendar.sync` | none | Shared behaviour merged into 2 entities. | Google Calendar |
-| Synchronize a record with Microsoft Calendar | `microsoft.calendar.sync` | none | Shared behaviour merged into 2 entities. | Outlook Calendar |
+| Event Alarm Manager | `calendar.alarm_manager` | `none` | Shared behaviour definition reused through composition. | Calendar |
+| Google Gmail Mixin | `google.gmail.mixin` | `none` | Shared behaviour merged into 2 entities. | Google Gmail |
+| Google Service | `google.service` | `none` | Shared behaviour definition reused through composition. | Google Users |
+| Microsoft Outlook Mixin | `microsoft.outlook.mixin` | `none` | Shared behaviour merged into 2 entities. | Microsoft Outlook |
+| Microsoft Service | `microsoft.service` | `none` | Shared behaviour definition reused through composition. | Microsoft Users |
+| Synchronize a record with Google Calendar | `google.calendar.sync` | `none` | Shared behaviour merged into 2 entities. | Google Calendar |
+| Synchronize a record with Microsoft Calendar | `microsoft.calendar.sync` | `none` | Shared behaviour merged into 2 entities. | Outlook Calendar |
 
 #### Relationships (29)
 
@@ -806,8 +806,8 @@ Specified in [`../domains/contacts-and-organizations/`](../domains/contacts-and-
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Address Format | `format.address.mixin` | none | Shared behaviour merged into 3 entities. | Base |
-| Country Specific value-added tax Label | `format.vat.label.mixin` | none | Shared behaviour merged into 2 entities. | Base |
+| Address Format | `format.address.mixin` | `none` | Shared behaviour merged into 3 entities. | Base |
+| Country Specific value-added tax Label | `format.vat.label.mixin` | `none` | Shared behaviour merged into 2 entities. | Base |
 
 #### Relationships (230)
 
@@ -1083,7 +1083,7 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 | Live Chat Expertise | `im_livechat.expertise` | `im_livechat_expertise` | Persistent record with 1 stored column; referenced by 7 relation fields. | Live Chat |
 | Livechat Channel | `im_livechat.channel` | `im_livechat_channel` | Persistent record with 11 stored columns; owns Discussion Channel, Livechat Channel Rules; referenced by 7 relation fields. | Live Chat |
 | Livechat Channel Rules | `im_livechat.channel.rule` | `im_livechat_channel_rule` | Persistent record with 7 stored columns. | Live Chat |
-| Livechat Support Channel Report | `im_livechat.report.channel` | none, read from a stored query | Persistent record with 0 stored columns. | Live Chat |
+| Livechat Support Channel Report | `im_livechat.report.channel` | `none, read from a stored query` | Persistent record with 0 stored columns. | Live Chat |
 | Mail Blacklist | `mail.blacklist` | `mail_blacklist` | Persistent record with 3 stored columns. | Discuss |
 | Mail Gateway Allowed | `mail.gateway.allowed` | `mail_gateway_allowed` | Persistent record with 2 stored columns. | Discuss |
 | Mail Group | `mail.group` | `mail_group` | Persistent record with 12 stored columns; owns Mailing List Member, Mailing List Message, Mailing List black/white list; referenced by 3 relation fields. | Mail Group |
@@ -1138,20 +1138,20 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Activity Mixin | `mail.activity.mixin` | none | Shared behaviour merged into 60 entities. | Discuss |
-| Can send messages via bus.bus | `bus.listener.mixin` | none | Shared behaviour merged into 13 entities. | Instant Messaging Bus |
-| Email Aliases Mixin | `mail.alias.mixin` | none | Shared behaviour merged into 5 entities. | Discuss |
-| Email Aliases Mixin (light) | `mail.alias.mixin.optional` | none | Shared behaviour merged into 2 entities. | Discuss |
-| Email Carbon Copy management | `mail.thread.cc` | none | Shared behaviour merged into 5 entities. | Discuss |
-| Email Thread | `mail.thread` | none | Shared behaviour merged into 82 entities. | Discuss |
-| Mail Blacklist mixin | `mail.thread.blacklist` | none | Shared behaviour merged into 4 entities. | Discuss |
-| Mail Bot | `mail.bot` | none | Shared behaviour definition reused through composition. | The system bot |
-| Mail Composer Mixin | `mail.composer.mixin` | none | Shared behaviour merged into 8 entities. | Discuss |
-| Mail Main Attachment management | `mail.thread.main.attachment` | none | Shared behaviour merged into 8 entities. | Discuss |
-| Mail Render Mixin | `mail.render.mixin` | none | Shared behaviour merged into 5 entities. | Discuss |
-| Mixin to compute the time a record has spent in each value a many2one field can take | `mail.tracking.duration.mixin` | none | Shared behaviour merged into 4 entities. | Discuss |
-| Publisher Warranty Contract | `publisher_warranty.contract` | none | Shared behaviour definition reused through composition. | Discuss |
-| Template Reset Mixin | `template.reset.mixin` | none | Shared behaviour merged into 2 entities. | Discuss |
+| Activity Mixin | `mail.activity.mixin` | `none` | Shared behaviour merged into 60 entities. | Discuss |
+| Can send messages via bus.bus | `bus.listener.mixin` | `none` | Shared behaviour merged into 13 entities. | Instant Messaging Bus |
+| Email Aliases Mixin | `mail.alias.mixin` | `none` | Shared behaviour merged into 5 entities. | Discuss |
+| Email Aliases Mixin (light) | `mail.alias.mixin.optional` | `none` | Shared behaviour merged into 2 entities. | Discuss |
+| Email Carbon Copy management | `mail.thread.cc` | `none` | Shared behaviour merged into 5 entities. | Discuss |
+| Email Thread | `mail.thread` | `none` | Shared behaviour merged into 82 entities. | Discuss |
+| Mail Blacklist mixin | `mail.thread.blacklist` | `none` | Shared behaviour merged into 4 entities. | Discuss |
+| Mail Bot | `mail.bot` | `none` | Shared behaviour definition reused through composition. | The system bot |
+| Mail Composer Mixin | `mail.composer.mixin` | `none` | Shared behaviour merged into 8 entities. | Discuss |
+| Mail Main Attachment management | `mail.thread.main.attachment` | `none` | Shared behaviour merged into 8 entities. | Discuss |
+| Mail Render Mixin | `mail.render.mixin` | `none` | Shared behaviour merged into 5 entities. | Discuss |
+| Mixin to compute the time a record has spent in each value a many2one field can take | `mail.tracking.duration.mixin` | `none` | Shared behaviour merged into 4 entities. | Discuss |
+| Publisher Warranty Contract | `publisher_warranty.contract` | `none` | Shared behaviour definition reused through composition. | Discuss |
+| Template Reset Mixin | `template.reset.mixin` | `none` | Shared behaviour merged into 2 entities. | Discuss |
 
 #### Relationships (297)
 
@@ -1494,8 +1494,8 @@ Specified in [`../domains/spreadsheets-and-dashboards/`](../domains/spreadsheets
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Board | `board.board` | none | Shared behaviour definition reused through composition. | Dashboards |
-| Spreadsheet mixin | `spreadsheet.mixin` | none | Shared behaviour merged into 2 entities. | Spreadsheet |
+| Board | `board.board` | `none` | Shared behaviour definition reused through composition. | Dashboards |
+| Spreadsheet mixin | `spreadsheet.mixin` | `none` | Shared behaviour merged into 2 entities. | Spreadsheet |
 
 #### Relationships (8)
 
@@ -1563,8 +1563,8 @@ Specified in [`../domains/analytic-accounting/`](../domains/analytic-accounting/
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Analytic Mixin | `analytic.mixin` | none | Shared behaviour merged into 10 entities. | Analytic Accounting |
-| Analytic Plan Fields | `analytic.plan.fields.mixin` | none | Shared behaviour merged into 2 entities. | Analytic Accounting |
+| Analytic Mixin | `analytic.mixin` | `none` | Shared behaviour merged into 10 entities. | Analytic Accounting |
+| Analytic Plan Fields | `analytic.plan.fields.mixin` | `none` | Shared behaviour merged into 2 entities. | Analytic Accounting |
 
 #### Relationships (47)
 
@@ -1649,24 +1649,24 @@ Specified in [`../domains/electronic-invoicing-and-document-exchange/`](../domai
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| A-NZ BIS Billing 3.0 | `account.edi.xml.ubl_a_nz` | none | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Base helpers for Cross Industry Invoice | `account.edi.cii` | none | Shared behaviour merged into 1 entity. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Base helpers for Universal Business Language | `account.edi.ubl` | none | Shared behaviour merged into 3 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| BIS3 DE (XRechnung) | `account.edi.xml.ubl_de` | none | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Common functions for electronic data interchange documents: generate the data, the constraints, etc | `account.edi.common` | none | Shared behaviour merged into 3 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| E-FFF (BE) | `account.edi.xml.ubl_efff` | none | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Factur-x/ZUGFeRD Cross Industry Invoice 2.2.0 | `account.edi.xml.cii` | none | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Point of Sale Order Universal Business Language 2.1 builder | `pos.edi.xml.ubl_21` | none | Shared behaviour merged into 1 entity. | Point of Sale Universal Business Language |
-| Purchase Universal Business Language BIS Ordering 3.5 | `purchase.edi.xml.ubl_bis3` | none | Shared behaviour definition reused through composition. | Import/Export electronic orders with Universal Business Language |
-| Sale BIS Ordering 3.5 | `sale.edi.xml.ubl_bis3` | none | Shared behaviour definition reused through composition. | Import electronic orders with Universal Business Language |
-| SG BIS Billing 3.0 | `account.edi.xml.ubl_sg` | none | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| SI-Universal Business Language 2.0 (NLCIUS) | `account.edi.xml.ubl_nl` | none | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Universal Business Language 2.0 | `account.edi.xml.ubl_20` | none | Shared behaviour merged into 3 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Universal Business Language 2.1 | `account.edi.xml.ubl_21` | none | Shared behaviour merged into 8 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Universal Business Language BIS Billing 3.0.12 | `account.edi.xml.ubl_bis3` | none | Shared behaviour merged into 13 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Universal Business Language CEN-EN16931 | `account.edi.ubl_cen_en16931` | none | Shared behaviour merged into 1 entity. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Universal Business Language Peppol International Invoice | `account.edi.ubl_pint` | none | Shared behaviour merged into 1 entity. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
-| Universal Business Language Peppol International Invoice-European Union Layer | `account.edi.ubl_pint_eu` | none | Shared behaviour merged into 1 entity. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| A-NZ BIS Billing 3.0 | `account.edi.xml.ubl_a_nz` | `none` | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Base helpers for Cross Industry Invoice | `account.edi.cii` | `none` | Shared behaviour merged into 1 entity. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Base helpers for Universal Business Language | `account.edi.ubl` | `none` | Shared behaviour merged into 3 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| BIS3 DE (XRechnung) | `account.edi.xml.ubl_de` | `none` | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Common functions for electronic data interchange documents: generate the data, the constraints, etc | `account.edi.common` | `none` | Shared behaviour merged into 3 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| E-FFF (BE) | `account.edi.xml.ubl_efff` | `none` | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Factur-x/ZUGFeRD Cross Industry Invoice 2.2.0 | `account.edi.xml.cii` | `none` | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Point of Sale Order Universal Business Language 2.1 builder | `pos.edi.xml.ubl_21` | `none` | Shared behaviour merged into 1 entity. | Point of Sale Universal Business Language |
+| Purchase Universal Business Language BIS Ordering 3.5 | `purchase.edi.xml.ubl_bis3` | `none` | Shared behaviour definition reused through composition. | Import/Export electronic orders with Universal Business Language |
+| Sale BIS Ordering 3.5 | `sale.edi.xml.ubl_bis3` | `none` | Shared behaviour definition reused through composition. | Import electronic orders with Universal Business Language |
+| SG BIS Billing 3.0 | `account.edi.xml.ubl_sg` | `none` | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| SI-Universal Business Language 2.0 (NLCIUS) | `account.edi.xml.ubl_nl` | `none` | Shared behaviour definition reused through composition. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Universal Business Language 2.0 | `account.edi.xml.ubl_20` | `none` | Shared behaviour merged into 3 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Universal Business Language 2.1 | `account.edi.xml.ubl_21` | `none` | Shared behaviour merged into 8 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Universal Business Language BIS Billing 3.0.12 | `account.edi.xml.ubl_bis3` | `none` | Shared behaviour merged into 13 entities. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Universal Business Language CEN-EN16931 | `account.edi.ubl_cen_en16931` | `none` | Shared behaviour merged into 1 entity. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Universal Business Language Peppol International Invoice | `account.edi.ubl_pint` | `none` | Shared behaviour merged into 1 entity. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
+| Universal Business Language Peppol International Invoice-European Union Layer | `account.edi.ubl_pint_eu` | `none` | Shared behaviour merged into 1 entity. | Import/Export electronic invoices with Universal Business Language/Cross Industry Invoice |
 
 #### Relationships (21)
 
@@ -1799,22 +1799,22 @@ Specified in the domain folder `../domains/fiscal-localizations/`, listed in the
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Australia & New Zealand implementation of Peppol International (Peppol International Invoice) model for Billing | `account.edi.xml.pint_anz` | none | Shared behaviour definition reused through composition. | Australia & New Zealand - Universal Business Language Peppol International Invoice |
-| CIUS human resources | `account.edi.xml.ubl_hr` | none | Shared behaviour definition reused through composition. | Croatia - Electronic Invoicing |
-| CIUS RO | `account.edi.xml.ubl_ro` | none | Shared behaviour definition reused through composition. | Romania - Electronic Invoicing |
-| Flow 10 extensible markup language Builder | `pdp.flow.10.xml.builder` | none | Shared behaviour definition reused through composition. | France - Electronic Invoicing (Approved Platform) |
-| France Universal Business Language 2.1 Electronic Invoicing Format | `account.edi.xml.ubl_21_fr` | none | Shared behaviour definition reused through composition. | France - Electronic Invoicing (Approved Platform) |
-| Japanese implementation of Peppol International (Peppol International Invoice) model for Billing | `account.edi.xml.pint_jp` | none | Shared behaviour definition reused through composition. | Japan - Universal Business Language Peppol International Invoice |
-| Malaysian implementation of Peppol International (Peppol International Invoice) model for Billing | `account.edi.xml.pint_my` | none | Shared behaviour definition reused through composition. | Malaysia - Universal Business Language Peppol International Invoice |
-| Malaysian implementation of universal business language for the MyInvois portal | `account.edi.xml.ubl_myinvois_my` | none | Shared behaviour definition reused through composition. | Malaysia - Electronic Invoicing |
-| Public Electronic Invoicing Format 2.01 | `account.edi.xml.oioubl_201` | none | Shared behaviour definition reused through composition. | Denmark - Electronic Invoicing |
-| Public Electronic Invoicing Format 2.1 | `account.edi.xml.oioubl_21` | none | Shared behaviour definition reused through composition. | Denmark electronic data interchange - Nemhandel |
-| Singapore implementation of Peppol International (Peppol International Invoice) model for Billing | `account.edi.xml.pint_sg` | none | Shared behaviour definition reused through composition. | Singapore - Universal Business Language Peppol International Invoice |
-| Universal Business Language 2.1 (JoFotara) | `account.edi.xml.ubl_21.jo` | none | Shared behaviour definition reused through composition. | Jordan Electronic Invoicing |
-| Universal Business Language 2.1 (JoFotara) for Point of Sale Orders | `pos.edi.xml.ubl_21.jo` | none | Shared behaviour definition reused through composition. | Jordan Accounting electronic data interchange for point of sale |
-| Universal Business Language 2.1 (RS eFaktura) | `account.edi.xml.ubl.rs` | none | Shared behaviour definition reused through composition. | Serbia - eFaktura Electronic Invoicing |
-| Universal Business Language 2.1 (Zakat Tax and Customs Authority) | `account.edi.xml.ubl_21.zatca` | none | Shared behaviour definition reused through composition. | Saudi Arabia - Electronic Invoicing |
-| Universal Business Language-TR 1.2 | `account.edi.xml.ubl.tr` | none | Shared behaviour definition reused through composition. | Türkiye - Nilvera Electronic Invoice |
+| Australia & New Zealand implementation of Peppol International (Peppol International Invoice) model for Billing | `account.edi.xml.pint_anz` | `none` | Shared behaviour definition reused through composition. | Australia & New Zealand - Universal Business Language Peppol International Invoice |
+| CIUS human resources | `account.edi.xml.ubl_hr` | `none` | Shared behaviour definition reused through composition. | Croatia - Electronic Invoicing |
+| CIUS RO | `account.edi.xml.ubl_ro` | `none` | Shared behaviour definition reused through composition. | Romania - Electronic Invoicing |
+| Flow 10 extensible markup language Builder | `pdp.flow.10.xml.builder` | `none` | Shared behaviour definition reused through composition. | France - Electronic Invoicing (Approved Platform) |
+| France Universal Business Language 2.1 Electronic Invoicing Format | `account.edi.xml.ubl_21_fr` | `none` | Shared behaviour definition reused through composition. | France - Electronic Invoicing (Approved Platform) |
+| Japanese implementation of Peppol International (Peppol International Invoice) model for Billing | `account.edi.xml.pint_jp` | `none` | Shared behaviour definition reused through composition. | Japan - Universal Business Language Peppol International Invoice |
+| Malaysian implementation of Peppol International (Peppol International Invoice) model for Billing | `account.edi.xml.pint_my` | `none` | Shared behaviour definition reused through composition. | Malaysia - Universal Business Language Peppol International Invoice |
+| Malaysian implementation of universal business language for the MyInvois portal | `account.edi.xml.ubl_myinvois_my` | `none` | Shared behaviour definition reused through composition. | Malaysia - Electronic Invoicing |
+| Public Electronic Invoicing Format 2.01 | `account.edi.xml.oioubl_201` | `none` | Shared behaviour definition reused through composition. | Denmark - Electronic Invoicing |
+| Public Electronic Invoicing Format 2.1 | `account.edi.xml.oioubl_21` | `none` | Shared behaviour definition reused through composition. | Denmark electronic data interchange - Nemhandel |
+| Singapore implementation of Peppol International (Peppol International Invoice) model for Billing | `account.edi.xml.pint_sg` | `none` | Shared behaviour definition reused through composition. | Singapore - Universal Business Language Peppol International Invoice |
+| Universal Business Language 2.1 (JoFotara) | `account.edi.xml.ubl_21.jo` | `none` | Shared behaviour definition reused through composition. | Jordan Electronic Invoicing |
+| Universal Business Language 2.1 (JoFotara) for Point of Sale Orders | `pos.edi.xml.ubl_21.jo` | `none` | Shared behaviour definition reused through composition. | Jordan Accounting electronic data interchange for point of sale |
+| Universal Business Language 2.1 (RS eFaktura) | `account.edi.xml.ubl.rs` | `none` | Shared behaviour definition reused through composition. | Serbia - eFaktura Electronic Invoicing |
+| Universal Business Language 2.1 (Zakat Tax and Customs Authority) | `account.edi.xml.ubl_21.zatca` | `none` | Shared behaviour definition reused through composition. | Saudi Arabia - Electronic Invoicing |
+| Universal Business Language-TR 1.2 | `account.edi.xml.ubl.tr` | `none` | Shared behaviour definition reused through composition. | Türkiye - Nilvera Electronic Invoice |
 
 #### Relationships (101)
 
@@ -1934,7 +1934,7 @@ Specified in [`../domains/general-ledger/`](../domains/general-ledger/).
 |---|---|---|---|---|
 | Account | `account.account` | `account_account` | Persistent record with 15 stored columns; owns Mapping of account codes per company; referenced by 104 relation fields. | Invoicing |
 | Account Cash Rounding | `account.cash.rounding` | `account_cash_rounding` | Persistent record with 6 stored columns; referenced by 2 relation fields. | Invoicing |
-| Account codes first 2 digits | `account.root` | none, read from a stored query | Persistent record with 0 stored columns; referenced by 2 relation fields. | Invoicing |
+| Account codes first 2 digits | `account.root` | `none, read from a stored query` | Persistent record with 0 stored columns; referenced by 2 relation fields. | Invoicing |
 | Account Group | `account.group` | `account_group` | Persistent record with 5 stored columns; belongs to Companies; company scoped; referenced by 2 relation fields. | Invoicing |
 | Account Journal Group | `account.journal.group` | `account_journal_group` | Persistent record with 3 stored columns; company scoped; referenced by 3 relation fields. | Invoicing |
 | Account Lock Exception | `account.lock_exception` | `account_lock_exception` | Persistent record with 8 stored columns; belongs to Companies; lifecycle states Active, Revoked, Expired; company scoped. | Invoicing |
@@ -1950,11 +1950,11 @@ Specified in [`../domains/general-ledger/`](../domains/general-ledger/).
 | Fiscal Position | `account.fiscal.position` | `account_fiscal_position` | Persistent record with 14 stored columns; belongs to Companies; owns Accounts Mapping of Fiscal Position, Preferred myDATA classification combinations for a particular product; company scoped; referenced by 20 relation fields. | Invoicing |
 | Full Reconcile | `account.full.reconcile` | `account_full_reconcile` | Persistent record with 0 stored columns; owns Journal Item, Partial Reconcile; referenced by 2 relation fields. | Invoicing |
 | Incoterms | `account.incoterms` | `account_incoterms` | Persistent record with 3 stored columns; referenced by 5 relation fields. | Invoicing |
-| Invoices Statistics | `account.invoice.report` | none, read from a stored query | Persistent record with 0 stored columns; lifecycle states Draft, Open, Cancelled; 2 state fields in all; company scoped. | Invoicing |
+| Invoices Statistics | `account.invoice.report` | `none, read from a stored query` | Persistent record with 0 stored columns; lifecycle states Draft, Open, Cancelled; 2 state fields in all; company scoped. | Invoicing |
 | Journal | `account.journal` | `account_journal` | Persistent record with 64 stored columns; belongs to Companies; owns Payment Methods, Point of Sale Payment Methods, Report Action; carries the state field `account_peppol_proxy_state`; 3 state fields in all; company scoped; referenced by 62 relation fields. | Invoicing |
 | Journal Entry | `account.move` | `account_move` | Persistent record with 249 stored columns; belongs to Currency, Journal; owns Analytic Line, Attachment, Bank Statement Line and 19 further collections; lifecycle states Draft, Posted, Cancelled; 27 state fields in all; company scoped; referenced by 73 relation fields. | Invoicing |
 | Journal Item | `account.move.line` | `account_move_line` | Persistent record with 70 stored columns; belongs to Currency, Journal Entry; owns Account payment check, Analytic Line, Partial Reconcile and 1 further collections; carries the state field `parent_state`; referenced by 17 relation fields. | Invoicing |
-| Mapping of account codes per company | `account.code.mapping` | none, read from a stored query | Persistent record with 0 stored columns; company scoped. | Invoicing |
+| Mapping of account codes per company | `account.code.mapping` | `none, read from a stored query` | Persistent record with 0 stored columns; company scoped. | Invoicing |
 | Partial Reconcile | `account.partial.reconcile` | `account_partial_reconcile` | Persistent record with 12 stored columns; belongs to Journal Item; company scoped; referenced by 1 relation field. | Invoicing |
 | Payment Methods | `account.payment.method` | `account_payment_method` | Persistent record with 3 stored columns; referenced by 2 relation fields. | Invoicing |
 | Payment Methods | `account.payment.method.line` | `account_payment_method_line` | Persistent record with 7 stored columns; belongs to Payment Methods; carries the state field `payment_provider_state`; referenced by 12 relation fields. | Invoicing |
@@ -1990,10 +1990,10 @@ Specified in [`../domains/general-ledger/`](../domains/general-ledger/).
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Account Chart Template | `account.chart.template` | none | Shared behaviour definition reused through composition. | Invoicing |
-| Account Move Send | `account.move.send` | none | Shared behaviour merged into 2 entities. | Invoicing |
-| Automatic sequence | `sequence.mixin` | none | Shared behaviour merged into 2 entities. | Invoicing |
-| Business document import mixin | `account.document.import.mixin` | none | Shared behaviour merged into 3 entities. | Invoicing |
+| Account Chart Template | `account.chart.template` | `none` | Shared behaviour definition reused through composition. | Invoicing |
+| Account Move Send | `account.move.send` | `none` | Shared behaviour merged into 2 entities. | Invoicing |
+| Automatic sequence | `sequence.mixin` | `none` | Shared behaviour merged into 2 entities. | Invoicing |
+| Business document import mixin | `account.document.import.mixin` | `none` | Shared behaviour merged into 3 entities. | Invoicing |
 
 #### Relationships (425)
 
@@ -2483,7 +2483,7 @@ Specified in [`../domains/taxes/`](../domains/taxes/).
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| withholding line | `account.withholding.line` | none | Shared behaviour merged into 2 entities. | Withholding Tax on Payment |
+| withholding line | `account.withholding.line` | `none` | Shared behaviour merged into 2 entities. | Withholding Tax on Payment |
 
 #### Relationships (9)
 
@@ -2608,10 +2608,10 @@ Specified in [`../domains/inventory-operations/`](../domains/inventory-operation
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Product Replenish Mixin | `stock.replenish.mixin` | none | Shared behaviour merged into 1 entity. | Inventory |
-| Stock Replenishment Report | `stock.forecasted_product_product` | none | Shared behaviour merged into 1 entity. | Inventory |
-| Stock Replenishment Report | `stock.forecasted_product_template` | none | Shared behaviour definition reused through composition. | Inventory |
-| Warn Insufficient Quantity | `stock.warn.insufficient.qty` | none | Shared behaviour merged into 3 entities. | Inventory |
+| Product Replenish Mixin | `stock.replenish.mixin` | `none` | Shared behaviour merged into 1 entity. | Inventory |
+| Stock Replenishment Report | `stock.forecasted_product_product` | `none` | Shared behaviour merged into 1 entity. | Inventory |
+| Stock Replenishment Report | `stock.forecasted_product_template` | `none` | Shared behaviour definition reused through composition. | Inventory |
+| Warn Insufficient Quantity | `stock.warn.insufficient.qty` | `none` | Shared behaviour merged into 3 entities. | Inventory |
 
 #### Relationships (383)
 
@@ -3020,8 +3020,8 @@ Specified in [`../domains/inventory-valuation-and-costing/`](../domains/inventor
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Stock average cost Justifier | `stock.avco.report` | none | Shared behaviour definition reused through composition. | WMS Accounting |
-| Stock Valuation | `stock_account.stock.valuation.report` | none | Shared behaviour definition reused through composition. | WMS Accounting |
+| Stock average cost Justifier | `stock.avco.report` | `none` | Shared behaviour definition reused through composition. | WMS Accounting |
+| Stock Valuation | `stock_account.stock.valuation.report` | `none` | Shared behaviour definition reused through composition. | WMS Accounting |
 
 #### Relationships (28)
 
@@ -3292,8 +3292,8 @@ Specified in [`../domains/products-and-catalog/`](../domains/products-and-catalo
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Barcode Event Mixin | `barcodes.barcode_events_mixin` | none | Shared behaviour definition reused through composition. | Barcode |
-| Product Catalog Mixin | `product.catalog.mixin` | none | Shared behaviour merged into 6 entities. | Products & Pricelists |
+| Barcode Event Mixin | `barcodes.barcode_events_mixin` | `none` | Shared behaviour definition reused through composition. | Barcode |
+| Product Catalog Mixin | `product.catalog.mixin` | `none` | Shared behaviour merged into 6 entities. | Products & Pricelists |
 
 #### Relationships (156)
 
@@ -3466,10 +3466,10 @@ Specified in [`../domains/purchasing/`](../domains/purchasing/).
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Purchase Line and Vendor Bill line matching view | `purchase.bill.line.match` | none, read from a stored query | Persistent record with 0 stored columns; company scoped. | Purchase |
+| Purchase Line and Vendor Bill line matching view | `purchase.bill.line.match` | `none, read from a stored query` | Persistent record with 0 stored columns; company scoped. | Purchase |
 | Purchase Order | `purchase.order` | `purchase_order` | Persistent record with 38 stored columns; belongs to Companies, Contact, Currency and 1 further required links; owns Purchase Order, Purchase Order Line; lifecycle states Request for Quotation, Request for Quotation Sent, To Approve, Purchase Order, Cancelled; 3 state fields in all; company scoped; referenced by 14 relation fields. | Purchase |
 | Purchase Order Line | `purchase.order.line` | `purchase_order_line` | Persistent record with 30 stored columns; belongs to Purchase Order; owns Journal Item, Stock Move; carries the state field `state`; company scoped; referenced by 6 relation fields. | Purchase |
-| Purchase Report | `purchase.report` | none, read from a stored query | Persistent record with 0 stored columns; lifecycle states Draft Request for Quotation, Request for Quotation Sent, To Approve, Purchase Order, Cancelled; company scoped. | Purchase |
+| Purchase Report | `purchase.report` | `none, read from a stored query` | Persistent record with 0 stored columns; lifecycle states Draft Request for Quotation, Request for Quotation Sent, To Approve, Purchase Order, Cancelled; company scoped. | Purchase |
 | Purchase Requisition | `purchase.requisition` | `purchase_requisition` | Persistent record with 14 stored columns; belongs to Companies, Currency, Picking Type; owns Purchase Order, Purchase Requisition Line; lifecycle states Draft, Confirmed, Closed, Cancelled; company scoped; referenced by 3 relation fields. | Purchase Agreements |
 | Purchase Requisition Line | `purchase.requisition.line` | `purchase_requisition_line` | Persistent record with 9 stored columns; belongs to Product Variant, Purchase Requisition; owns Supplier Pricelist; company scoped; referenced by 1 relation field. | Purchase Agreements |
 | Purchases & Bills Union | `purchase.bill.union` | `purchase_bill_union` | Persistent record with 9 stored columns; company scoped; referenced by 1 relation field. | Purchase |
@@ -3604,7 +3604,7 @@ Specified in [`../domains/repair-and-maintenance/`](../domains/repair-and-mainte
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Maintenance Maintained Item | `maintenance.mixin` | none | Shared behaviour merged into 1 entity. | Maintenance |
+| Maintenance Maintained Item | `maintenance.mixin` | `none` | Shared behaviour merged into 1 entity. | Maintenance |
 
 #### Relationships (52)
 
@@ -3725,7 +3725,7 @@ Specified in [`../domains/customer-relationship-management/`](../domains/custome
 | customer relationship management in-app purchase Lead Industry | `crm.iap.lead.industry` | `crm_iap_lead_industry` | Customer Relationship Management In Application Purchase Lead Industry. | Lead Generation |
 | customer relationship management Lead Generation Rules | `crm.reveal.rule` | `crm_reveal_rule` | Persistent record with 18 stored columns; owns Lead; referenced by 2 relation fields. | Lead Generation From Website Visits |
 | customer relationship management Lead Mining Request | `crm.iap.lead.mining.request` | `crm_iap_lead_mining_request` | Persistent record with 15 stored columns; owns Country state, Lead; lifecycle states Draft, Error, Done; referenced by 1 relation field. | Lead Generation |
-| customer relationship management Partnership Analysis | `crm.partner.report.assign` | none, read from a stored query | Persistent record with 0 stored columns. | Resellers |
+| customer relationship management Partnership Analysis | `crm.partner.report.assign` | `none, read from a stored query` | Persistent record with 0 stored columns. | Resellers |
 | customer relationship management Recurring revenue plans | `crm.recurring.plan` | `crm_recurring_plan` | Persistent record with 4 stored columns; referenced by 1 relation field. | customer relationship management |
 | customer relationship management Reveal View | `crm.reveal.view` | `crm_reveal_view` | Persistent record with 3 stored columns; states of `reveal_state`: To Process, Not Found. | Lead Generation From Website Visits |
 | customer relationship management Stages | `crm.stage` | `crm_stage` | Persistent record with 7 stored columns; referenced by 2 relation fields. | customer relationship management |
@@ -3759,9 +3759,9 @@ Specified in [`../domains/customer-relationship-management/`](../domains/custome
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| campaign tracking parameter Mixin | `utm.mixin` | none | Shared behaviour merged into 5 entities. | campaign tracking parameter Trackers |
-| campaign tracking parameter Source Mixin | `utm.source.mixin` | none | Shared behaviour merged into 3 entities. | campaign tracking parameter Trackers |
-| Phone Blacklist Mixin | `mail.thread.phone` | none | Shared behaviour merged into 4 entities. | Phone Numbers Validation |
+| campaign tracking parameter Mixin | `utm.mixin` | `none` | Shared behaviour merged into 5 entities. | campaign tracking parameter Trackers |
+| campaign tracking parameter Source Mixin | `utm.source.mixin` | `none` | Shared behaviour merged into 3 entities. | campaign tracking parameter Trackers |
+| Phone Blacklist Mixin | `mail.thread.phone` | `none` | Shared behaviour merged into 4 entities. | Phone Numbers Validation |
 
 #### Relationships (110)
 
@@ -4074,8 +4074,8 @@ Specified in [`../domains/point-of-sale/`](../domains/point-of-sale/).
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Bus Mixin | `pos.bus.mixin` | none | Shared behaviour merged into 3 entities. | Point of Sale |
-| Point of Sale data loading mixin | `pos.load.mixin` | none | Shared behaviour merged into 68 entities. | Point of Sale |
+| Bus Mixin | `pos.bus.mixin` | `none` | Shared behaviour merged into 3 entities. | Point of Sale |
+| Point of Sale data loading mixin | `pos.load.mixin` | `none` | Shared behaviour merged into 68 entities. | Point of Sale |
 
 #### Relationships (162)
 
@@ -4271,7 +4271,7 @@ Specified in [`../domains/sales/`](../domains/sales/).
 | Quotation Template | `sale.order.template` | `sale_order_template` | Persistent record with 11 stored columns; owns Quotation Template Line; company scoped; referenced by 4 relation fields. | Sales |
 | Quotation Template Line | `sale.order.template.line` | `sale_order_template_line` | Persistent record with 9 stored columns; belongs to Quotation Template; referenced by 1 relation field. | Sales |
 | Quotation's Headers & Footers | `quotation.document` | `quotation_document` | Persistent record with 5 stored columns; belongs to Attachment; referenced by 4 relation fields. | Sales Portable Document Format Quotation Builder |
-| Sales Analysis Report | `sale.report` | none, read from a stored query | Persistent record with 0 stored columns; lifecycle states x; 3 state fields in all; company scoped. | Sales |
+| Sales Analysis Report | `sale.report` | `none, read from a stored query` | Persistent record with 0 stored columns; lifecycle states x; 3 state fields in all; company scoped. | Sales |
 | Sales Order | `sale.order` | `sale_order` | Persistent record with 73 stored columns; belongs to Companies, Contact; owns Event Booth, Expense, Point of Sale Order Lines and 4 further collections; lifecycle states x; 3 state fields in all; company scoped; referenced by 26 relation fields. | Sales |
 | Sales Order Line | `sale.order.line` | `sale_order_line` | Persistent record with 59 stored columns; belongs to Sales Order; owns Analytic Line, Event Booth, Event Booth Registration and 8 further collections; carries the state field `state`; 2 state fields in all; referenced by 25 relation fields. | Sales |
 | Sales Team | `crm.team` | `crm_team` | Persistent record with 13 stored columns; owns Point of Sale Configuration, Sales Team Member, Survey and 1 further collections; company scoped; referenced by 23 relation fields. | Sales Teams |
@@ -4457,7 +4457,7 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Forum Post | `forum.post` | `forum_post` | Persistent record with 27 stored columns; belongs to Forum; owns Forum Post, Post Vote; lifecycle states Active, Waiting Validation, Closed, Offensive, Flagged; referenced by 4 relation fields. | Forum |
 | Forum Tag | `forum.tag` | `forum_tag` | Persistent record with 10 stored columns; belongs to Forum; referenced by 1 relation field. | Forum |
 | Model Page | `website.controller.page` | `website_controller_page` | Persistent record with 8 stored columns; belongs to View; owns Website Menu; referenced by 1 relation field. | Website |
-| Multi Website Published Mixin | `website.published.multi.mixin` | none in the observed installation | Persistent record with 0 stored columns. | Website |
+| Multi Website Published Mixin | `website.published.multi.mixin` | `none in the observed installation` | Persistent record with 0 stored columns. | Website |
 | Page | `website.page` | `website_page` | Persistent record with 13 stored columns; belongs to View; owns Website Menu; referenced by 6 relation fields. | Website |
 | Partner Tags - These tags can be used on website to find customers by sector, or ... | `res.partner.tag` | `res_partner_tag` | Persistent record with 4 stored columns; referenced by 1 relation field. | Customer References |
 | Post Closing Reason | `forum.post.reason` | `forum_post_reason` | Persistent record with 2 stored columns; referenced by 1 relation field. | Forum |
@@ -4480,7 +4480,7 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Website Product Category | `product.public.category` | `product_public_category` | Persistent record with 16 stored columns; owns Website Product Category; referenced by 4 relation fields. | Electronic Commerce |
 | Website rewrite | `website.rewrite` | `website_rewrite` | Persistent record with 8 stored columns. | Website |
 | Website Snippet Filter | `website.snippet.filter` | `website_snippet_filter` | Persistent record with 9 stored columns. | Website |
-| Website Technical Page | `website.technical.page` | none, read from a stored query | Persistent record with 0 stored columns. | Website |
+| Website Technical Page | `website.technical.page` | `none, read from a stored query` | Persistent record with 0 stored columns. | Website |
 | Website Theme Menu | `theme.website.menu` | `theme_website_menu` | Persistent record with 9 stored columns; owns Website Menu; referenced by 2 relation fields. | Website |
 | Website Theme Page | `theme.website.page` | `theme_website_page` | Persistent record with 10 stored columns; belongs to Theme user interface View; owns Page; referenced by 2 relation fields. | Website |
 | Website Visitor | `website.visitor` | `website_visitor` | Persistent record with 9 stored columns; owns Discussion Channel, Event Registration, Track / Visitor Link and 1 further collections; referenced by 6 relation fields. | Website |
@@ -4501,18 +4501,18 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Assets Utils | `website.assets` | none | Shared behaviour definition reused through composition. | Website |
-| Cover Properties Website Mixin | `website.cover_properties.mixin` | none | Shared behaviour merged into 4 entities. | Website |
-| Field rich text History | `html.field.history.mixin` | none | Shared behaviour merged into 1 entity. | hypertext markup language Editor |
-| hypertext markup language Text Processor Abstract Model | `website.html.text.processor` | none | Shared behaviour definition reused through composition. | Website |
-| Multi Website Mixin | `website.multi.mixin` | none | Shared behaviour merged into 6 entities. | Website |
-| Portal Mixin | `portal.mixin` | none | Shared behaviour merged into 8 entities. | Customer Portal |
-| search engine optimization metadata | `website.seo.metadata` | none | Shared behaviour merged into 16 entities. | Website |
-| Theme Utils | `theme.utils` | none | Shared behaviour definition reused through composition. | Website |
-| Website page/record specific options | `website.page_options.mixin` | none | Shared behaviour merged into 2 entities. | Website |
-| Website page/record specific visibility options | `website.page_visibility_options.mixin` | none | Shared behaviour merged into 3 entities. | Website |
-| Website Published Mixin | `website.published.mixin` | none | Shared behaviour merged into 8 entities. | Website |
-| Website Searchable Mixin | `website.searchable.mixin` | none | Shared behaviour merged into 15 entities. | Website |
+| Assets Utils | `website.assets` | `none` | Shared behaviour definition reused through composition. | Website |
+| Cover Properties Website Mixin | `website.cover_properties.mixin` | `none` | Shared behaviour merged into 4 entities. | Website |
+| Field rich text History | `html.field.history.mixin` | `none` | Shared behaviour merged into 1 entity. | hypertext markup language Editor |
+| hypertext markup language Text Processor Abstract Model | `website.html.text.processor` | `none` | Shared behaviour definition reused through composition. | Website |
+| Multi Website Mixin | `website.multi.mixin` | `none` | Shared behaviour merged into 6 entities. | Website |
+| Portal Mixin | `portal.mixin` | `none` | Shared behaviour merged into 8 entities. | Customer Portal |
+| search engine optimization metadata | `website.seo.metadata` | `none` | Shared behaviour merged into 16 entities. | Website |
+| Theme Utils | `theme.utils` | `none` | Shared behaviour definition reused through composition. | Website |
+| Website page/record specific options | `website.page_options.mixin` | `none` | Shared behaviour merged into 2 entities. | Website |
+| Website page/record specific visibility options | `website.page_visibility_options.mixin` | `none` | Shared behaviour merged into 3 entities. | Website |
+| Website Published Mixin | `website.published.mixin` | `none` | Shared behaviour merged into 8 entities. | Website |
+| Website Searchable Mixin | `website.searchable.mixin` | `none` | Shared behaviour merged into 15 entities. | Website |
 
 #### Relationships (131)
 
@@ -4690,9 +4690,9 @@ Specified in [`../domains/projects-and-tasks/`](../domains/projects-and-tasks/).
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Burndown Chart | `project.task.burndown.chart.report` | none | Shared behaviour definition reused through composition. | Project |
-| Rating Mixin | `rating.mixin` | none | Shared behaviour merged into 4 entities. | Customer Rating |
-| Rating Parent Mixin | `rating.parent.mixin` | none | Shared behaviour merged into 2 entities. | Customer Rating |
+| Burndown Chart | `project.task.burndown.chart.report` | `none` | Shared behaviour definition reused through composition. | Project |
+| Rating Mixin | `rating.mixin` | `none` | Shared behaviour merged into 4 entities. | Customer Rating |
+| Rating Parent Mixin | `rating.parent.mixin` | `none` | Shared behaviour merged into 2 entities. | Customer Rating |
 
 #### Relationships (98)
 
@@ -4870,7 +4870,7 @@ Specified in [`../domains/attendances-and-working-time/`](../domains/attendances
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Resource Mixin | `resource.mixin` | none | Shared behaviour merged into 2 entities. | Resource |
+| Resource Mixin | `resource.mixin` | `none` | Shared behaviour merged into 2 entities. | Resource |
 
 #### Relationships (36)
 
@@ -5112,8 +5112,8 @@ Specified in [`../domains/human-resources-core/`](../domains/human-resources-cor
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Human Resources Manager Department Report | `hr.manager.department.report` | none | Shared behaviour merged into 4 entities. | Employees |
-| Skill level | `hr.individual.skill.mixin` | none | Shared behaviour merged into 3 entities. | Skills Management |
+| Human Resources Manager Department Report | `hr.manager.department.report` | `none` | Shared behaviour merged into 4 entities. | Employees |
+| Skill level | `hr.individual.skill.mixin` | `none` | Shared behaviour merged into 3 entities. | Skills Management |
 
 #### Relationships (165)
 
