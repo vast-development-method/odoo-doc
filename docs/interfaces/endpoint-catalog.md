@@ -102,41 +102,45 @@ Three token mechanisms grant access to one record without signing in, and they a
 
 ## Endpoints by domain
 
-| Domain section | Endpoints | Groups |
-|---|---|---|
-| Platform Foundation | 78 | 10 |
-| Identity, Authentication and Access Control | 11 | 2 |
-| Customer Portal | 18 | 3 |
-| General Ledger and Invoicing Documents | 12 | 4 |
-| Accounts Receivable Payment Actions | 3 | 1 |
-| Electronic Document Interchange | 5 | 1 |
-| Fiscal Localizations | 15 | 2 |
-| Calendar and Scheduling | 12 | 2 |
-| Attendance Recording | 13 | 2 |
-| Employee Services | 9 | 2 |
-| Time Off Approvals | 5 | 1 |
-| Employee Directory | 4 | 1 |
-| Online Job Positions | 6 | 1 |
-| Purchasing Portal | 5 | 1 |
-| Timesheet Portal | 2 | 1 |
-| Projects and Tasks | 12 | 3 |
-| Manufacturing Portal | 4 | 2 |
-| Inventory Operations | 3 | 1 |
-| Products and Catalogue | 4 | 1 |
-| Contacts and Organizations | 1 | 1 |
-| Spreadsheets and Dashboards | 6 | 1 |
-| Loyalty and Promotions | 5 | 1 |
-| Sales Quotations and Orders | 19 | 3 |
-| Customer Relationship Management | 9 | 3 |
-| Payment Providers | 62 | 2 |
-| Messaging and Collaboration | 141 | 12 |
-| Surveys, Certifications, Courses and Community Forum | 104 | 3 |
-| Site and Content Management | 90 | 9 |
-| Commerce Storefront | 66 | 4 |
-| Point of Sale | 41 | 3 |
-| Events | 38 | 3 |
-| Marketing Campaigns | 31 | 3 |
-| Automation and Integration Services | 21 | 5 |
+Each section below groups the endpoints of one part of the system. The last column names the folder of this repository
+that specifies the behaviour the endpoints invoke.
+
+| Domain section | Endpoints | Groups | Behaviour specified in |
+|---|---|---|---|
+| Platform Foundation | 78 | 10 | [platform runtime](../runtime/request-lifecycle.md), [architecture](../overview/architecture.md) |
+| Identity, Authentication and Access Control | 11 | 2 | [identity-and-access](../domains/identity-and-access/) |
+| Customer Portal | 18 | 3 | [sales](../domains/sales/), [general-ledger](../domains/general-ledger/), [projects-and-tasks](../domains/projects-and-tasks/) |
+| General Ledger and Invoicing Documents | 12 | 4 | [general-ledger](../domains/general-ledger/) |
+| Accounts Receivable Payment Actions | 3 | 1 | [accounts-receivable](../domains/accounts-receivable/) |
+| Electronic Document Interchange | 5 | 1 | [electronic-invoicing-and-document-exchange](../domains/electronic-invoicing-and-document-exchange/) |
+| Fiscal Localizations | 15 | 2 | [fiscal-localizations](../domains/fiscal-localizations/) |
+| Calendar and Scheduling | 12 | 2 | [calendar-and-scheduling](../domains/calendar-and-scheduling/) |
+| Attendance Recording | 13 | 2 | [attendances-and-working-time](../domains/attendances-and-working-time/) |
+| Employee Services | 9 | 2 | [lunch-ordering](../domains/lunch-ordering/), [human-resources-core](../domains/human-resources-core/) |
+| Time Off Approvals | 5 | 1 | [time-off](../domains/time-off/) |
+| Employee Directory | 4 | 1 | [human-resources-core](../domains/human-resources-core/) |
+| Online Job Positions | 6 | 1 | [recruitment](../domains/recruitment/) |
+| Purchasing Portal | 5 | 1 | [purchasing](../domains/purchasing/) |
+| Timesheet Portal | 2 | 1 | [timesheets](../domains/timesheets/) |
+| Projects and Tasks | 12 | 3 | [projects-and-tasks](../domains/projects-and-tasks/) |
+| Manufacturing Portal | 4 | 2 | [manufacturing](../domains/manufacturing/) |
+| Inventory Operations | 3 | 1 | [inventory-operations](../domains/inventory-operations/) |
+| Products and Catalogue | 4 | 1 | [products-and-catalog](../domains/products-and-catalog/) |
+| Contacts and Organizations | 1 | 1 | [contacts-and-organizations](../domains/contacts-and-organizations/) |
+| Spreadsheets and Dashboards | 6 | 1 | [spreadsheets-and-dashboards](../domains/spreadsheets-and-dashboards/) |
+| Loyalty and Promotions | 5 | 1 | [loyalty-and-promotions](../domains/loyalty-and-promotions/) |
+| Sales Quotations and Orders | 19 | 3 | [sales](../domains/sales/) |
+| Customer Relationship Management | 9 | 3 | [customer-relationship-management](../domains/customer-relationship-management/) |
+| Payment Providers | 62 | 2 | [payment-providers](../domains/payment-providers/) |
+| Messaging and Collaboration | 141 | 12 | [messaging-and-activities](../domains/messaging-and-activities/) |
+| Surveys, Certifications, Courses and Community Forum | 104 | 3 | [learning-surveys-and-gamification](../domains/learning-surveys-and-gamification/) |
+| Site and Content Management | 90 | 9 | [website-and-storefront](../domains/website-and-storefront/) |
+| Commerce Storefront | 66 | 4 | [website-and-storefront](../domains/website-and-storefront/) |
+| Point of Sale | 41 | 3 | [point-of-sale](../domains/point-of-sale/) |
+| Events | 38 | 3 | [events](../domains/events/) |
+| Marketing Campaigns | 31 | 3 | [marketing-and-mass-mailing](../domains/marketing-and-mass-mailing/) |
+| Automation and Integration Services | 21 | 5 | [automation-and-integration](../domains/automation-and-integration/) |
+
 ## Platform Foundation
 
 The platform foundation exposes the entry points of the desktop client, the session and authentication calls, the generic
@@ -1772,3 +1776,35 @@ consent, and stores the resulting credentials on the record that requested them.
 | Path patterns | Operation | Transport | Authentication | Methods | Site page | Parameters | Purpose and effect | Capability package |
 |---|---|---|---|---|---|---|---|---|
 | `/hw_proxy/scale_read` | `scale_read` | remote call | none | POST | no | none | Returns the current reading of the connected weighing scale to the point of sale station. | Hardware Proxy |
+
+## Reconciliation notes
+
+The two drafts that were merged into this catalog disagreed on a small number of points. Each disagreement was settled
+against the source of the system and against the condensed catalog
+[`../references/routes.md`](../references/routes.md); the resolutions are recorded here.
+
+1. **Endpoint and path counts.** One draft stated 906 handlers on 855 distinct endpoints with 51 folded extension
+   layers, and elsewhere 448 page-or-file and 406 remote-call endpoints, which do not add up. The counts were recomputed
+   from the rows of this catalog and from the condensed catalog: 855 endpoints, 1029 path patterns, 446 page-or-file,
+   403 remote-call and 6 structured-call endpoints, and seven rows carrying fourteen extension layers in total.
+2. **Authentication distribution.** The signed-in count was stated as 316 and the plug-in key count as 14. Both included
+   endpoints that the system keeps only for superseded plug-in versions and that this specification therefore does not
+   describe. The corrected counts are 314 signed in and 11 plug-in key.
+3. **Cross-site submission protection.** One draft stated that 794 endpoints verify the anti-forgery token and 66 do
+   not. That pair of numbers counted the endpoints that leave the setting at its default rather than the endpoints that
+   perform the check. The rule is restated by transport: the check applies to the page-or-file transport on every method
+   that is not a reading method, 65 page-or-file endpoints switch it off, the remote call transports do not use the
+   token, two remote call endpoints switch it on and one switches it off.
+4. **The desktop client entry path.** One draft wrote the desktop client entry path as `/system` and its offline page as
+   `/system/offline`. The path published by the system, and the one carried by the condensed catalog and by
+   [`remote-transport-contracts.md`](remote-transport-contracts.md), is `/app`, with `/app/<subpath:path>` and
+   `/app/offline`. This catalog now uses `/app`.
+5. **Endpoints kept only for superseded plug-in clients.** Five endpoints of the electronic mail plug-in
+   (`/mail_client_extension/modules/get`, `/mail_client_extension/lead/get_by_partner_id`,
+   `/mail_client_extension/lead/open`, `/mail_client_extension/lead/create_from_partner` and
+   `/mail_client_extension/log_single_mail_content`) are marked in the system as superseded and exist only so that older
+   plug-in builds keep working. They are not part of the current contract and are not catalogued here; their replacement
+   endpoints under `/mail_plugin/` are.
+6. **The operation column.** One draft presented the operation names as the handler identifiers a rebuild must
+   reproduce. They are not: nothing outside the server ever sees them. The column now states that they are this
+   specification's own names, spelled without abbreviations, and that the condensed catalog is keyed by path.
