@@ -104,7 +104,7 @@ Description: Point of Sale Orders
 | `l10n_fr_secure_sequence_number` | Inalteralbility No Gap Sequence # | integer |  | read only; not copied on duplication |
 | `l10n_fr_string_to_hash` | Localization Fr String To Hash | single line text |  | read only; computed by rule `_compute_string_to_hash` (not stored) |
 | `previous_order_id` | Previous Order | many to one | `pos.order` | read only; computed by rule `_compute_previous_order` and stored; not copied on duplication |
-| `pos_version` | Point of sale Version | single line text |  | read only; not copied on duplication; Help: Version of Odoo that created the order |
+| `pos_version` | Point of sale Version | single line text |  | read only; not copied on duplication; Help: Version of the system that created the order |
 | `l10n_id_qris_transaction_ids` | Localization Identifier Qris Transaction | many to many | `l10n_id.qris.transaction` | visible only to groups `account.group_account_invoice` |
 | `l10n_jo_edi_pos_return_reason` | Return Reason | single line text |  | Help: Return Reason reported to JoFotara |
 | `l10n_jo_edi_pos_enabled` | Localization Jo Electronic data interchange Point of sale Enabled | boolean |  | related through path `company_id.l10n_jo_edi_pos_enabled` |
@@ -257,7 +257,7 @@ State machine fields of this entity: `state`, `invoice_status`, `l10n_es_tbai_st
 | `write` | lifecycle override | self, vals | `l10n_fr_pos_cert`, `point_of_sale`, `pos_online_payment_self_order`, `pos_sale`, `pos_self_order` |  |  |
 | `_create_pm_change_log` | internal rule | self, vals | `point_of_sale` |  |  |
 | `_markup_list_message` | internal rule | self, message | `point_of_sale` |  |  |
-| `_get_order_name_from_pos_reference` | preparation rule | self, session | `point_of_sale` |  | Return the order name from the sequence prefix and the receipt reference (``pos_reference``). |
+| `_get_order_name_from_pos_reference` | preparation rule | self, session | `point_of_sale` |  | Return the order name from the sequence prefix and the receipt reference (`pos_reference`). |
 | `_compute_order_name` | computation | self, session | `point_of_sale` |  |  |
 | `get_reference_last_part` | operation | self | `point_of_sale` |  |  |
 | `action_stock_picking` | user action | self | `point_of_sale` |  |  |
@@ -390,7 +390,7 @@ State machine fields of this entity: `state`, `invoice_status`, `l10n_es_tbai_st
 | `recompute_prices` | operation | self | `pos_self_order` |  |  |
 | `_compute_line_price` | computation | self, line | `pos_self_order` |  |  |
 | `_compute_line_subtotals` | computation | self, line | `pos_self_order` |  | Recompute the price_subtotal and price_subtotal_incl of a line based on its price_unit, quantity, and taxes. In self order the price_unit is always computed server-side, so this method is called after the price_unit is set. |
-| `_compute_combo_price` | computation | self, parent_line | `pos_self_order` |  | This method is a python version of odoo/addons/point_of_sale/static/src/app/models/utils/compute_combo_items.js It is used to compute the price of combo items on the server side when an order is received from the POS frontend. In an accounting perspective, isn't correct but we still waiting the combo computation from accounting side. |
+| `_compute_combo_price` | computation | self, parent_line | `pos_self_order` |  | This method is a python version of system/addons/point_of_sale/static/src/app/models/utils/compute_combo_items.js It is used to compute the price of combo items on the server side when an order is received from the POS frontend. In an accounting perspective, isn't correct but we still waiting the combo computation from accounting side. |
 | `get_order_to_print` | operation | self | `pos_online_payment_self_order` |  |  |
 | `_compute_use_self_order_online_payment` | computation | self | `pos_online_payment_self_order` | depends: `config_id.self_order_online_payment_method_id` |  |
 | `_send_notification_online_payment_status` | internal rule | self, status | `pos_online_payment_self_order` |  |  |

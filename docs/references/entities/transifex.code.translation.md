@@ -15,7 +15,7 @@ Description: Code Translation
 | `value` | Translation Value | multi line text |  |  |
 | `module` | Module | single line text |  | Help: Module this term belongs to |
 | `lang` | Language | selection |  | values provided by rule `_get_languages` |
-| `transifex_url` | Transifex uniform resource locator | single line text |  | computed by rule `_compute_transifex_url` (not stored); Help: Propose a modification in the official version of Odoo |
+| `transifex_url` | Transifex uniform resource locator | single line text |  | computed by rule `_compute_transifex_url` (not stored); Help: Propose a modification in the official version of the system |
 
 ## Operations (5)
 

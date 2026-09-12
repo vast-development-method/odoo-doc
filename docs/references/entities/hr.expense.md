@@ -109,7 +109,7 @@ State machine fields of this entity: `state`, `approval_state`. Transitions are 
 | `_compute_product_description` | computation | self | `hr_expense` | depends_context: `lang`; depends: `product_id` |  |
 | `_compute_name` | computation | self | `hr_expense` | depends: `product_id` |  |
 | `_set_expense_currency_rate` | internal rule | self, date_today | `hr_expense` |  |  |
-| `_compute_currency_rate` | computation | self | `hr_expense` | depends: `currency_id`, `total_amount_currency`, `date` | We want the default odoo rate when the following change: - the currency of the expense - the total amount in foreign currency - the date of the expense this will cause the rate to be recomputed twice with possible changes but we don't have the required fields to store the override state in stable |
+| `_compute_currency_rate` | computation | self | `hr_expense` | depends: `currency_id`, `total_amount_currency`, `date` | We want the default system rate when the following change: - the currency of the expense - the total amount in foreign currency - the date of the expense this will cause the rate to be recomputed twice with possible changes but we don't have the required fields to store the override state in stable |
 | `_compute_is_multiple_currency` | computation | self | `hr_expense` | depends: `currency_id`, `company_currency_id` |  |
 | `_compute_from_product` | computation | self | `hr_expense` | depends: `product_id` |  |
 | `_compute_uom_id` | computation | self | `hr_expense` | depends: `product_id.uom_id` |  |
@@ -226,7 +226,7 @@ State machine fields of this entity: `state`, `approval_state`. Transitions are 
 | `_do_refuse` | UserError | You cannot cancel an expense linked to a posted journal entry | `hr_expense` |
 | `_post_wizard` | UserError | Only expense paid by the employee can be posted with the wizard | `hr_expense` |
 | `_prepare_payments_vals` | UserError | You need to add a manual payment method on the journal (%s) | `hr_expense` |
-| `_get_base_account` | UserError | the system had a look at your expense, its product, your company and the journal but came back with empty hands. Give the system a hand to find an account by setting up an expense account. %(expense)s %(expense_name)s. | `hr_expense` |
+| `_get_base_account` | UserError | The system had a look at your expense, its product, your company and the journal but came back with empty hands. Give the system a hand to find an account by setting up an expense account. %(expense)s %(expense_name)s. | `hr_expense` |
 | `_get_expense_account_destination` | UserError | The following expenses payment method leads to several accounts payable and this isn't supported: %(expenses)s | `hr_expense` |
 | `_get_expense_account_destination` | UserError | No work contact found for the employee %(name)s, please configure one. | `hr_expense` |
 

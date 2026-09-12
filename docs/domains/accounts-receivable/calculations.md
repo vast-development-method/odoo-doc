@@ -1510,7 +1510,7 @@ ones shown in the interface.
 
 | Stored model value | Label | Stored type value | Label |
 | --- | --- | --- | --- |
-| `odoo` | Full Reference | `invoice` | Based on Invoice |
+| `system` | Full Reference | `invoice` | Based on Invoice |
 | `euro` | European | `partner` | Based on Customer |
 | `number` | Numbers only | | |
 

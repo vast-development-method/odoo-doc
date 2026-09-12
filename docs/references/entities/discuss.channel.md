@@ -207,7 +207,7 @@ State machine fields of this entity: `livechat_status`. Transitions are specifie
 | `_message_receive_bounce` | messaging hook | self, email, partner | `mail` |  |  |
 | `_get_allowed_message_params` | preparation rule | self | `mail` |  |  |
 | `_get_allowed_message_partner_ids` | preparation rule | self, partner_ids | `mail` |  | Ensure only partners having access to the channel can be mentioned. |
-| `message_post` | messaging hook | self, message_type, partner_ids, **kwargs | `mail`, `website_livechat` |  | Override to mark the visitor as still connected. If the message sent is not from the operator (so if it's the visitor or odoobot sending closing chat notification, the visitor last action date is updated. |
+| `message_post` | messaging hook | self, message_type, partner_ids, **kwargs | `mail`, `website_livechat` |  | Override to mark the visitor as still connected. If the message sent is not from the operator (so if it's the visitor or system_robot sending closing chat notification, the visitor last action date is updated. |
 | `_message_post_after_hook` | messaging hook | self, message, msg_vals | `im_livechat`, `mail_bot`, `mail` |  | This method is called just before _notify_thread() method which is calling the _to_store() method. We need a 'chatbot.message' record before it happens to correctly display the message. It's created only if the mail channel is linked to a chatbot step. We also need to save the user answer if the current step is a question selection. |
 | `_message_update_content` | messaging hook | partner_ids, **kwargs | `mail` |  |  |
 | `_check_can_update_message_content` | validation | self, message | `mail` |  |  |

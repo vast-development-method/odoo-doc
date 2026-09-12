@@ -280,7 +280,7 @@ The distinction matters: an entity whose rule accepts an empty company can be sh
 |---|---|
 | Name | "Procurement: run scheduler" |
 | Interval | every 1 day |
-| Runs as | the system user |
+| Runs as | The system user |
 | Active | yes |
 
 It performs three tasks, in this order, and reports progress after each:

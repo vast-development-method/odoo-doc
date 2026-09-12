@@ -49,7 +49,7 @@ Description: Module
 | `icon` | Icon uniform resource locator | single line text |  |  |
 | `icon_image` | Icon | binary |  | computed by rule `_get_icon_image` (not stored) |
 | `icon_flag` | Flag | single line text |  | computed by rule `_get_icon_image` (not stored) |
-| `to_buy` | Odoo Enterprise Module | boolean |  | default  |
+| `to_buy` | the enterprise edition Module | boolean |  | default  |
 | `has_iap` | Has In-app purchase | boolean |  | computed by rule `_compute_has_iap` (not stored) |
 | `account_templates` | Account Templates | binary |  | computed by rule `_compute_account_templates` (not stored) |
 | `imported` | Imported Module | boolean |  |  |
@@ -70,8 +70,8 @@ Description: Module
 | `AGPL-3` | Affero GPL-3 |
 | `LGPL-3` | LGPL Version 3 |
 | `Other OSI approved licence` | Other OSI Approved License |
-| `OEEL-1` | Odoo Enterprise Edition License v1.0 |
-| `OPL-1` | Odoo Proprietary License v1.0 |
+| `OEEL-1` | the enterprise edition Edition License v1.0 |
+| `OPL-1` | Proprietary License, version 1.0 |
 | `Other proprietary` | Other Proprietary |
 
 ### `module_type` (Module Type)
@@ -155,22 +155,22 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `_get_imported_module_translations_for_webclient` | preparation rule | self, module, lang | `base_import_module` | model |  |
 | `action_open_install_request` | user action | self | `base_install_request` |  |  |
 | `action_view_delivery_methods` | user action | self | `delivery` |  |  |
-| `_compute_is_installed_on_current_website` | computation | self | `website` |  | Compute for every theme in ``self`` if the current website is using it or not.  This method does not take dependencies into account, because if it did, it would show the current website as having multiple different themes installed at the same time, which would be confusing for the user. |
-| `_get_module_data` | preparation rule | self, model_name | `website` |  | Return every theme template model of type ``model_name`` for every theme in ``self``.  :param model_name: string with the technical name of the model for which to get data.     (the name must be one of the keys present in ``_theme_model_names``) :return: recordset of theme template models (of type defined by ``model_name``) |
+| `_compute_is_installed_on_current_website` | computation | self | `website` |  | Compute for every theme in `self` if the current website is using it or not.  This method does not take dependencies into account, because if it did, it would show the current website as having multiple different themes installed at the same time, which would be confusing for the user. |
+| `_get_module_data` | preparation rule | self, model_name | `website` |  | Return every theme template model of type `model_name` for every theme in `self`.  :param model_name: string with the technical name of the model for which to get data.     (the name must be one of the keys present in `_theme_model_names`) :return: recordset of theme template models (of type defined by `model_name`) |
 | `_update_records` | internal rule | self, model_name, website | `website` |  | This method:  - Find and update existing records.      For each model, overwrite the fields that are defined in the template (except few     cases such as active) but keep inherited models to not lose customizations.  - Create new records from templates for those that didn't exist.  - Remove the models that existed before but are not in the template anymore.      See _theme_cleanup for more information.   There is a special 'while' loop around the 'for' to be able queue back models at the end of the iteration when they have unmet dependencies. Hopefully the dependency will be found after all m |
 | `_post_copy` | internal rule | self, old_rec, new_rec | `website` |  |  |
-| `_theme_load` | internal rule | self, website | `website` |  | For every type of model in ``self._theme_model_names``, and for every theme in ``self``: create/update real models for the website ``website`` based on the theme template models.  :param website: ``website`` model on which to load the themes |
-| `_theme_unload` | internal rule | self, website | `website` |  | For every type of model in ``self._theme_model_names``, and for every theme in ``self``: remove real models that were generated based on the theme template models for the website ``website``.  :param website: ``website`` model on which to unload the themes |
-| `_theme_cleanup` | internal rule | self, model_name, website | `website` |  | Remove orphan models of type ``model_name`` from the current theme and for the website ``website``.  We need to compute it this way because if the upgrade (or deletion) of a theme module removes a model template, then in the model itself the variable ``theme_template_id`` will be set to NULL and the reference to the theme being removed will be lost. However we do want the ophan to be deleted from the website when we upgrade or delete the theme from the website.  ``website.page`` and ``website.menu`` don't have ``key`` field so we don't clean them. TODO in master: add a field ``theme_id`` on th |
-| `_theme_get_upstream` | internal rule | self | `website` |  | Return installed upstream themes.  :return: recordset of themes ``ir.module.module`` |
-| `_theme_get_downstream` | internal rule | self | `website` |  | Return installed downstream themes that starts with the same name.  eg. For theme_A, this will return theme_A_sale, but not theme_B even if theme B     depends on theme_A.  :return: recordset of themes ``ir.module.module`` |
-| `_theme_get_stream_themes` | internal rule | self | `website` |  | Returns all the themes in the stream of the current theme.  First find all its downstream themes, and all of the upstream themes of both sorted by their level in hierarchy, up first.  :return: recordset of themes ``ir.module.module`` |
-| `_theme_get_stream_website_ids` | internal rule | self | `website` |  | Websites for which this theme (self) is in the stream (up or down) of their theme.  :return: recordset of websites ``website`` |
+| `_theme_load` | internal rule | self, website | `website` |  | For every type of model in `self._theme_model_names`, and for every theme in `self`: create/update real models for the website `website` based on the theme template models.  :param website: `website` model on which to load the themes |
+| `_theme_unload` | internal rule | self, website | `website` |  | For every type of model in `self._theme_model_names`, and for every theme in `self`: remove real models that were generated based on the theme template models for the website `website`.  :param website: `website` model on which to unload the themes |
+| `_theme_cleanup` | internal rule | self, model_name, website | `website` |  | Remove orphan models of type `model_name` from the current theme and for the website `website`.  We need to compute it this way because if the upgrade (or deletion) of a theme module removes a model template, then in the model itself the variable `theme_template_id` will be set to NULL and the reference to the theme being removed will be lost. However we do want the ophan to be deleted from the website when we upgrade or delete the theme from the website.  `website.page` and `website.menu` don't have `key` field so we don't clean them. |
+| `_theme_get_upstream` | internal rule | self | `website` |  | Return installed upstream themes.  :return: recordset of themes `ir.module.module` |
+| `_theme_get_downstream` | internal rule | self | `website` |  | Return installed downstream themes that starts with the same name.  eg. For theme_A, this will return theme_A_sale, but not theme_B even if theme B     depends on theme_A.  :return: recordset of themes `ir.module.module` |
+| `_theme_get_stream_themes` | internal rule | self | `website` |  | Returns all the themes in the stream of the current theme.  First find all its downstream themes, and all of the upstream themes of both sorted by their level in hierarchy, up first.  :return: recordset of themes `ir.module.module` |
+| `_theme_get_stream_website_ids` | internal rule | self | `website` |  | Websites for which this theme (self) is in the stream (up or down) of their theme.  :return: recordset of websites `website` |
 | `_theme_upgrade_upstream` | internal rule | self | `website` |  | Upgrade the upstream dependencies of a theme, and install it if necessary. |
-| `_theme_remove` | internal rule | self, website | `website` | model | Remove from ``website`` its current theme, including all the themes in the stream.  The order of removal will be reverse of installation to handle dependencies correctly.  :param website: ``website`` model for which the themes have to be removed |
-| `button_choose_theme` | user action | self | `website` |  | Remove any existing theme on the current website and install the theme ``self`` instead.  The actual loading of the theme on the current website will be done automatically on ``write`` thanks to the upgrade and/or install.  When installating a new theme, upgrade the upstream chain first to make sure we have the latest version of the dependencies to prevent inconsistencies.  :return: dict with the next action to execute |
+| `_theme_remove` | internal rule | self, website | `website` | model | Remove from `website` its current theme, including all the themes in the stream.  The order of removal will be reverse of installation to handle dependencies correctly.  :param website: `website` model for which the themes have to be removed |
+| `button_choose_theme` | user action | self | `website` |  | Remove any existing theme on the current website and install the theme `self` instead.  The actual loading of the theme on the current website will be done automatically on `write` thanks to the upgrade and/or install.  When installating a new theme, upgrade the upstream chain first to make sure we have the latest version of the dependencies to prevent inconsistencies.  :return: dict with the next action to execute |
 | `button_remove_theme` | user action | self | `website` |  | Remove the current theme of the current website. |
-| `button_refresh_theme` | user action | self | `website` |  | Refresh the current theme of the current website.  To refresh it, we only need to upgrade the modules. Indeed the (re)loading of the theme will be done automatically on ``write``. |
+| `button_refresh_theme` | user action | self | `website` |  | Refresh the current theme of the current website.  To refresh it, we only need to upgrade the modules. Indeed the (re)loading of the theme will be done automatically on `write`. |
 | `update_theme_images` | operation | self | `website` | model |  |
 | `get_themes_domain` | operation | self | `website` |  | Returns the 'ir.module.module' search domain matching all available themes. |
 | `_create_model_data` | internal rule | self, views | `website` | model | Creates model data records for newly created view records.  :param views: views for which model data must be created |
@@ -190,15 +190,15 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `button_install` | UserError | You are trying to install incompatible modules in category "%(category)s":%(module_list)s | `base` |
 | `button_install` | UserError | Modules "%(module)s" and "%(incompatible_module)s" are incompatible. | `base` |
 | `_button_immediate_function` | UserError | The method _button_immediate_install cannot be called on init or non loaded registries. Please use button_install instead. | `base` |
-| `_button_immediate_function` | UserError | the system is currently processing another module operation. Please try again later or contact your system administrator. | `base` |
-| `_button_immediate_function` | UserError | the system is currently processing another module operation. Please try again later or contact your system administrator. | `base` |
-| `_button_immediate_function` | UserError | the system is currently processing a scheduled action. Module operations are not possible at this time, please try again later or contact your system administrator. | `base` |
+| `_button_immediate_function` | UserError | The system is currently processing another module operation. Please try again later or contact your system administrator. | `base` |
+| `_button_immediate_function` | UserError | The system is currently processing another module operation. Please try again later or contact your system administrator. | `base` |
+| `_button_immediate_function` | UserError | The system is currently processing a scheduled action. Module operations are not possible at this time, please try again later or contact your system administrator. | `base` |
 | `button_uninstall` | UserError | Those modules cannot be uninstalled: %s | `base` |
 | `button_uninstall` | UserError | One or more of the selected modules have already been uninstalled, if you believe this to be an error, you may try again later or contact support. | `base` |
 | `button_upgrade` | UserError | Cannot upgrade module “%s”. It is not installed. | `base` |
 | `button_upgrade` | UserError | You try to upgrade the module %(module)s that depends on the module: %(dependency)s. But this module is not available in your system. | `base` |
 | `_import_module` | UserError | err | `base_import_module` |
-| `_import_module` | UserError | Studio customizations require the the system Studio app. | `base_import_module` |
+| `_import_module` | UserError | Studio customizations require the system Studio app. | `base_import_module` |
 | `_import_module` | UserError | The assets path in the manifest of imported module '%(module_name)s' cannot contain glob wildcards (e.g., *, **). | `base_import_module` |
 | `_import_zipfile` | AccessError | Only administrators can install data modules. | `base_import_module` |
 | `_import_zipfile` | UserError | Only zip files are supported. | `base_import_module` |

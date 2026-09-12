@@ -1052,9 +1052,9 @@ Lines are evaluated in order. For each line:
 
 | Mode | Amount of the counterpart line |
 |---|---|
-| `fixed` | ```formula line_amount = the numeric value of amount_string ``` A negative value produces a debit; a positive value produces a credit. |
-| `percentage` | ```formula line_amount = round_to( transaction currency , open_balance × amount_string_value ÷ 100 ) ``` |
-| `percentage_st_line` | ```formula line_amount = round_to( transaction currency , transaction_amount × amount_string_value ÷ 100 ) ``` Note that this reads the **transaction** amount, not the open balance, so two such lines of 50 % each always split the original amount, whatever the other lines did. |
+| `fixed` | `formula line_amount = the numeric value of amount_string ` A negative value produces a debit; a positive value produces a credit. |
+| `percentage` | `formula line_amount = round_to( transaction currency , open_balance × amount_string_value ÷ 100 ) ` |
+| `percentage_st_line` | `formula line_amount = round_to( transaction currency , transaction_amount × amount_string_value ÷ 100 ) ` Note that this reads the **transaction** amount, not the open balance, so two such lines of 50 % each always split the original amount, whatever the other lines did. |
 | `regex` | Apply the regular expression to the transaction label. If it does not match, the line produces nothing. Otherwise concatenate the capture groups in order, replace a comma by a decimal point, and read the result as a number. That number is the line amount. |
 
 After each line, `open_balance` is reduced by the line amount. When every line has been evaluated and `open_balance` is still not zero, the remainder stays on the suspense account and the transaction is only partially reconciled.

@@ -1176,7 +1176,7 @@ unit,
 **and** its responsible is empty,
 **and** it records the reordering rule,
 **and** it posts an origin-link note pointing at the rule (or, when the rule was created by
-the system with a manual trigger, the note "This production order has been created from
+The system with a manual trigger, the note "This production order has been created from
 Replenishment Report."),
 **and** it is confirmed **after** every reordering rule has run, not during.
 

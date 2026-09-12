@@ -185,18 +185,20 @@ package that ships them.
 
 1. **[entities.md](entities.md)** — every field of every entity above, with its identifier, its
    full name, its type, its default, its derivation and its constraints.
-2. **[state-machines.md](state-machines.md)** — the state-bearing fields this domain owns or
-   drives: the activity state of a currency, the lifecycle of a rate row, the state of an exchange
-   difference entry, the reconciliation status of a journal item seen from the currency side, the
-   currency and rate state of a draft document, the settlement state of a payment and the state of
-   the multi-currency capability.
-3. **[workflows.md](workflows.md)** — the operational sequences, step by step: activating a
-   currency, recording a rate, refreshing rates on a schedule, setting a company's main currency,
-   configuring the exchange journal and accounts, invoicing and billing in a foreign currency,
-   overriding a document rate, paying at a different rate, reconciling, unreconciling, recording
-   and matching a foreign currency bank transaction, converting between two foreign currencies,
-   changing a rounding factor, deactivating a currency and closing a period at consolidation
-   rates.
+2. **[state-machines.md](state-machines.md)** — the twelve state-bearing fields this domain owns
+   or drives: the activity state of a currency, its precision latch, the multi-currency capability
+   state of the platform, the lifecycle of a rate row, the currency and rate state of a document,
+   the state of an exchange difference entry, the reconciliation state of a journal item seen from
+   the currency side, its matching number, the settlement state of a payment, the payment state of
+   a document, the currency configuration state of a bank transaction and the main currency state
+   of a company.
+3. **[workflows.md](workflows.md)** — the nineteen operational procedures, step by step:
+   activating a currency, recording a rate, refreshing rates on a schedule, setting a company's
+   main currency, configuring the exchange journal and accounts, invoicing and billing in a foreign
+   currency, overriding a document rate, paying at a different rate, reconciling, creating the
+   exchange difference entry, unreconciling, recording and matching a foreign currency bank
+   transaction, changing a rounding factor, deactivating a currency, converting between two foreign
+   currencies, closing a period at consolidation rates and posting the unrealised revaluation.
 4. **[business-rules.md](business-rules.md)** — every validation, every invariant, every permission
    check and every exact error message, numbered `MCUR-nnn`.
 5. **[calculations.md](calculations.md)** — the arithmetic core: the rounding routine, the
@@ -294,3 +296,32 @@ built on them.
    *one* multiplication by a composed cross-rate and *one* rounding, not two roundings.
 
 Each of these is stated as arithmetic, with worked numbers, in [calculations.md](calculations.md).
+
+## Reconciliation notes
+
+These notes record how the two independently written drafts of this folder were brought together.
+Each of the other files of the folder carries its own notes on the points its subject settles.
+
+1. **The number of documents.** One draft was written to a ten-document standard with no separate
+   state-machine document and stated its state tables at the end of its workflow document; the
+   other was partial and carried three documents. This folder holds the eleven documents the
+   writing charter prescribes: the state tables have been moved into
+   [state-machines.md](state-machines.md) and expanded with stored values, labels, meanings and
+   exact refusal messages, and [workflows.md](workflows.md) points at them.
+2. **The scope statement.** Both drafts described the same domain in different words. The scope,
+   the capability table, the actor table and the two entity tables above merge them; nothing either
+   draft claimed for the domain has been dropped, and the boundaries with the general ledger, the
+   payments domain, the tax domain and the pricing domain are stated once, under "What this domain
+   is not".
+3. **Folder names.** One draft linked to sibling folders under working names that this repository
+   does not use. Every link in this folder now uses the folder keys of the repository, in
+   particular [../electronic-invoicing-and-document-exchange/](../electronic-invoicing-and-document-exchange/)
+   and [../messaging-and-activities/](../messaging-and-activities/) where messaging is concerned.
+4. **Rule identifiers.** One draft numbered its rules `MCUR-RULE-nnn`; the other stated its rules as
+   prose inside its entity and calculation sections. A single scheme, `MCUR-nnn`, is now used
+   throughout the folder, and [business-rules.md](business-rules.md) section 13 maps every former
+   reference onto it.
+5. **Where the reference data lives.** Both drafts carried the complete catalogue of the one
+   hundred and seventy shipped currencies. It is published once, in
+   [configuration.md](configuration.md) section 4.2, together with the complete demonstration rate
+   table and the currencies that country packages add or activate.

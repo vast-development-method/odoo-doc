@@ -13,9 +13,9 @@ is either a field of the Company or a system parameter written through the setti
 | Setting (storage name) | Where stored | Default | Meaning |
 |---|---|---|---|
 | Verify tax registration numbers (`vat_check_vies`) | a field of the Company; company-dependent on the settings screen | cleared | When set, writing a tax registration number calls the customs-union verification service and records the answer on the Party. Also switches on the per-Party "perform verification" computation. Shown in the accounting settings next to the customs-union setting, with the help text `Verify VAT numbers using the European VIES service` and the explanation `If this checkbox is ticked, the default fiscal position that applies will depend upon the output of the verification by the European VIES Service.` |
-| Geocoding provider (`geoloc_provider_id`) | the system parameter `base_geolocalize.geo_provider` | the first provider in the table | Which external service resolves an address into coordinates. Labelled `API` on the screen. |
+| Geocoding provider (`geoloc_provider_id`) | The system parameter `base_geolocalize.geo_provider` | the first provider in the table | Which external service resolves an address into coordinates. Labelled `API` on the screen. |
 | Geocoding provider technical name (`geoloc_provider_techname`) | derived, read-only | — | Mirrors the chosen provider's technical name so that the screen can reveal the key input only for the second provider. |
-| Geocoding service key (`geoloc_provider_googlemap_key`) | the system parameter `base_geolocalize.google_map_api_key` | empty | The key for the second provider. Labelled `Key`. Its help text points at the provider's own key documentation. |
+| Geocoding service key (`geoloc_provider_googlemap_key`) | The system parameter `base_geolocalize.google_map_api_key` | empty | The key for the second provider. Labelled `Key`. Its help text points at the provider's own key documentation. |
 
 The enrichment behaviour adds one derived, non-stored indicator to the settings screen:
 

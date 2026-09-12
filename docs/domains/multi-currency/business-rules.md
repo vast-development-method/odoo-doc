@@ -732,7 +732,7 @@ leaving it half done.
 
 ### MCUR-105: the account is chosen by the sign of the instruction
 
-A **positive** instruction amount — an excess of debit to be written off — uses the company's loss
+A **positive** instruction amount — an excess of debit that must be written off — uses the company's loss
 exchange account. A **zero or negative** instruction amount uses the company's gain exchange
 account. The sign of the instruction amount, and nothing else, chooses the account. Stated once
 more because it reads as counter-intuitive: a positive repair removes company-currency value from a
@@ -954,7 +954,7 @@ transacted currency at the line's date. An amount already entered is never overw
 Generating the journal items of a statement line without a counterpart account and without a
 suspense account on the journal is refused.
 
-Message: "You can't create a new statement line without a suspense account set on the *the journal
+Message: "You can't create a new statement line without a suspense account set on the *journal
 display name* journal."
 
 ### MCUR-156: the company currency amount comes from the bank account currency
@@ -1107,7 +1107,7 @@ word "and" and the currency's subunit label. The fractional part is read as a wh
 subunits, not as a fraction, because the subunit label already supplies the scale. When the
 reader's language has no spelling rules available, English is used; when no spelling facility is
 available at all, the result is the empty string and a warning is logged. The algorithm is in
-[calculations.md](calculations.md) section 20.
+[calculations.md](calculations.md) section 25.
 
 ### MCUR-215: the compact rendering stops at the fourth metric step
 

@@ -57,7 +57,7 @@ Description: Device Log
 | `_is_mobile` | internal rule | self, platform | `base` |  |  |
 | `_update_device` | internal rule | self, request | `base` | model | Must be called when we want to update the device for the current request. Passage through this method must leave a "trace" in the session.  :param request: Request or WebsocketRequest object |
 | `_gc_device_log` | background operation | self | `base` | autovacuum |  |
-| `__update_revoked` | internal rule | self | `base` | autovacuum | Set the field ``revoked`` to ``True`` for ``res.device.log`` for which the session file no longer exists on the filesystem. |
+| `__update_revoked` | internal rule | self | `base` | autovacuum | Set the field `revoked` to `True` for `res.device.log` for which the session file no longer exists on the filesystem. |
 
 ## Access rights
 

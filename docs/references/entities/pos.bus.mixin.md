@@ -19,6 +19,6 @@ Description: Bus Mixin
 |---|---|---|---|---|---|
 | `create` | lifecycle override | self, vals_list | `point_of_sale` | model_create_multi |  |
 | `_ensure_access_token` | internal rule | self | `point_of_sale` |  |  |
-| `_notify` | internal rule | self, *notifications, private | `point_of_sale` |  | Send a notification to the bus. ex: one notification: ``self._notify('STATUS', {'status': 'closed'})`` multiple notifications: ``self._notify(('STATUS', {'status': 'closed'}), ('TABLE_ORDER_COUNT', {'count': 2}))`` |
+| `_notify` | internal rule | self, *notifications, private | `point_of_sale` |  | Send a notification to the bus. ex: one notification: `self._notify('STATUS', {'status': 'closed'})` multiple notifications: `self._notify(('STATUS', {'status': 'closed'}), ('TABLE_ORDER_COUNT', {'count': 2}))` |
 
 Machine-readable definition: `../../../schemas/data/entities/pos.bus.mixin.json`.

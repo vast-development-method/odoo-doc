@@ -2,7 +2,7 @@
 
 This file lists every validation, constraint, invariant, error message, permission check, locking
 rule and edge-case behavior of the Financial Reporting domain. Error messages are given exactly as
-the system produces them, with placeholders written out in words.
+The system produces them, with placeholders written out in words.
 
 ---
 

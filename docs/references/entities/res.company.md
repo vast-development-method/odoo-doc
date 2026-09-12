@@ -153,7 +153,7 @@ Description: Companies
 | `account_interco_clearing_journal_id` | Intercompany Clearing Journal | many to one | `account.journal` | restricted by domain `[["type", "=", "general"]]`; must belong to the same company; Help: The accounting journal where Intercompany payments will be cleared |
 | `account_interco_payable_id` | Intercompany Clearing Payable Account | many to one | `account.account` | restricted by domain `[["account_type", "=", "liability_payable"], ["reconcile", "=", true]]`; Help: The account where Intercompany invoice payments will be cleared |
 | `account_interco_receivable_id` | Intercompany Clearing Receivable Account | many to one | `account.account` | restricted by domain `[["account_type", "=", "asset_receivable"], ["reconcile", "=", true]]`; Help: The account where Intercompany credit note payments will be cleared |
-| `account_peppol_contact_email` | Primary contact email | single line text |  | computed by rule `_compute_account_peppol_contact_email` and stored; Help: Primary contact email for Peppol connection related communications and notifications. In particular, this email is used by Odoo to reconnect your Peppol account in case of database change. |
+| `account_peppol_contact_email` | Primary contact email | single line text |  | computed by rule `_compute_account_peppol_contact_email` and stored; Help: Primary contact email for Peppol connection related communications and notifications. In particular, this email is used by the system to reconnect your Peppol account in case of database change. |
 | `account_peppol_migration_key` | Migration Key | single line text |  | visible only to groups `base.group_system` |
 | `account_peppol_phone_number` | Mobile number | single line text |  | computed by rule `_compute_account_peppol_phone_number` and stored; Help: This number is used for identification purposes only. |
 | `account_peppol_proxy_state` | PEPPOL status | selection |  | required; default `not_registered` |
@@ -238,7 +238,7 @@ Description: Companies
 | `withholding_tax_base_account_id` | Withholding Tax Base | many to one | `account.account` | Help: This account will be set on withholding tax base lines. |
 | `iap_enrich_auto_done` | Enrich Done | boolean |  |  |
 | `point_of_sale_update_stock_quantities` | Update quantities in stock | selection |  | default `real`; Help: At the session closing: A picking is created for the entire session when it's closed  In real time: Each order sent to the server create its own picking |
-| `point_of_sale_use_ticket_qr_code` | Self-service invoicing | boolean |  | default `True`; Help: Print information on the receipt to allow the customer to easily access the invoice anytime, from Odoo's portal. |
+| `point_of_sale_use_ticket_qr_code` | Self-service invoicing | boolean |  | default `True`; Help: Print information on the receipt to allow the customer to easily access the invoice anytime, from the system's portal. |
 | `point_of_sale_ticket_unique_code` | Generate a code on ticket | boolean |  | Help: Add a 5-digit code on the receipt to allow the user to request the invoice for an order on the portal. |
 | `point_of_sale_ticket_portal_url_display_mode` | Print | selection |  | required; default `qr_code_and_url`; Help: Choose how the URL to the portal will be print on the receipt. |
 | `l10n_gcc_dual_language_invoice` | GCC Formatted Invoices | boolean |  |  |
@@ -321,7 +321,7 @@ Description: Companies
 | `l10n_hr_mer_username` | MojEracun username | single line text |  | visible only to groups `account.group_account_manager` |
 | `l10n_hr_mer_password` | MojEracun password | single line text |  | visible only to groups `account.group_account_manager` |
 | `l10n_hr_mer_company_ident` | MojEracun CompanyId | single line text |  | visible only to groups `account.group_account_manager` |
-| `l10n_hr_mer_software_ident` | MojEracun SoftwareId | single line text |  | default `Saodoo-001`; Help: Default SoftwareID for Odoo is 'Saodoo-001' |
+| `l10n_hr_mer_software_ident` | MojEracun SoftwareId | single line text |  | default `Sasystem-001`; Help: Default SoftwareID for the system is 'Sasystem-001' |
 | `l10n_hr_mer_connection_state` | MojEracun connection status | selection |  | required; computed by rule `_compute_l10n_hr_mojeracun_state` and stored; default `inactive` |
 | `l10n_hr_mer_connection_mode` | MojEracun Operating mode | selection |  | default `test` |
 | `l10n_hr_mer_purchase_journal_id` | eracun Purchase Journal | many to one | `account.journal` | computed by rule `_compute_l10n_hr_mer_purchase_journal_id` and stored; restricted by domain `[["type", "=", "purchase"]]` |
@@ -767,7 +767,7 @@ Description: Companies
 
 | Value | Label |
 |---|---|
-| `iap` | Send via Odoo |
+| `iap` | Send via the system |
 | `twilio` | Send via Twilio |
 
 ## State fields
@@ -821,11 +821,11 @@ State machine fields of this entity: `account_peppol_proxy_state`, `l10n_dk_nemh
 | `_get_main_company` | preparation rule | self | `base` | model |  |
 | `__accessible_branches` | internal rule | self | `base` |  |  |
 | `_accessible_branches` | internal rule | self | `base` |  |  |
-| `_all_branches_selected` | internal rule | self | `base` |  | Return whether or all the branches of the companies in self are selected.  Is ``True`` if all the branches, and only those, are selected. Can be used when some actions only make sense for whole companies regardless of the branches. |
+| `_all_branches_selected` | internal rule | self | `base` |  | Return whether or all the branches of the companies in self are selected.  Is `True` if all the branches, and only those, are selected. Can be used when some actions only make sense for whole companies regardless of the branches. |
 | `action_all_company_branches` | user action | self | `base` |  |  |
 | `_get_public_user` | preparation rule | self | `base` |  |  |
 | `_get_company_partner_ids` | preparation rule | self | `base` |  |  |
-| `_get_zeep_cache__` | preparation rule | self | `base` |  | Return a cache bucket used by ``odoo.tools.zeep`` for XSDs/WSDLs. |
+| `_get_zeep_cache__` | preparation rule | self | `base` |  | Return a cache bucket used by `system.tools.zeep` for XSDs/WSDLs. |
 | `_get_zeep_client__` | preparation rule | self, url, *args, **kwargs | `base` |  | Return a Zeep Client which uses the ORM cache for XSDs/WSDLs. |
 | `_get_asset_style_b64` | preparation rule | self | `web` |  |  |
 | `_update_asset_style` | internal rule | self | `web` |  |  |
@@ -884,7 +884,7 @@ State machine fields of this entity: `account_peppol_proxy_state`, `l10n_dk_nemh
 | `_action_check_hash_integrity` | internal rule | self | `account` | model |  |
 | `_check_hash_integrity` | validation | self | `account` |  | Checks that all hashed moves have still the same data as when they were hashed and raises an error with the result. |
 | `_with_locked_records` | internal rule | self, records, allow_raising | `account` | model | To avoid sending the same records multiple times from different transactions, we use this generic method to lock the records passed as parameter.  :param records: The records to lock. :return: Whether we have locked all records (if there were records to lock) |
-| `compute_fiscalyear_dates` | operation | self, current_date | `account` |  | Returns the dates of the fiscal year containing the provided date for this company.  :return: ``{'date_from': ..., 'date_to': ...}`` |
+| `compute_fiscalyear_dates` | operation | self, current_date | `account` |  | Returns the dates of the fiscal year containing the provided date for this company.  :return: `{'date_from': ..., 'date_to': ...}` |
 | `_compute_company_vat_placeholder` | computation | self | `account` | depends: `country_id`, `account_fiscal_country_id` |  |
 | `_compute_company_registry_placeholder` | computation | self | `account` | depends: `country_id`, `account_fiscal_country_id` | Provides a dynamic placeholder on the company registry field for countries that may need it. Add your country and the value you want in the _ref_company_registry map in the partner.py file. |
 | `_set_category_defaults` | internal rule | self | `account`, `stock_account` |  |  |
@@ -1090,11 +1090,11 @@ State machine fields of this entity: `account_peppol_proxy_state`, `l10n_dk_nemh
 | `_l10n_ro_edi_log_message` | internal rule | self, message, func | `l10n_ro_edi` |  |  |
 | `_l10n_ro_edi_process_token_response` | internal rule | self, response_json | `l10n_ro_edi` |  | To be called just after processing the json response from https://logincert.anaf.ro/anaf-oauth2/v1/token This method reads and process the json, and writes the token fields on the company. |
 | `_l10n_ro_edi_refresh_access_token` | internal rule | self, session | `l10n_ro_edi` |  | Uses the saved client_id, client_secret, and refresh_token on the company (self) to make request to the SPV and renew the company's token fields. |
-| `_cron_l10n_ro_edi_refresh_access_token` | background operation | self | `l10n_ro_edi` |  | This CRON method will be run every 30 days to refresh the following fields on the company:   - ``l10n_ro_edi_access_token``  - ``l10n_ro_edi_refresh_token``  - ``l10n_ro_edi_access_expiry_date``  - ``l10n_ro_edi_refresh_expiry_date`` |
+| `_cron_l10n_ro_edi_refresh_access_token` | background operation | self | `l10n_ro_edi` |  | This CRON method will be run every 30 days to refresh the following fields on the company:   - `l10n_ro_edi_access_token`  - `l10n_ro_edi_refresh_token`  - `l10n_ro_edi_access_expiry_date`  - `l10n_ro_edi_refresh_expiry_date` |
 | `_cron_l10n_ro_edi_synchronize_invoices` | background operation | self | `l10n_ro_edi` |  | This CRON method will be run every 24 hours to synchronize the invoices and the bills with the ANAF |
 | `_l10n_sa_edi_inverse_building_number` | internal rule | self | `l10n_sa_edi` |  |  |
 | `_l10n_sa_edi_inverse_plot_identification` | internal rule | self | `l10n_sa_edi` |  |  |
-| `_l10n_sa_get_csr_invoice_type` | internal rule | self | `l10n_sa_edi` |  | Return the Invoice Type flag used in the CSR. 4-digit numerical input using 0 & 1 mapped to “TSCZ” where:     -   0: False/Not supported, 1: True/Supported     -   T: Tax Invoice (Standard), S: Simplified Invoice, C & Z will be used in the future and should         always be 0     For example: 1100 would mean the Solution will be generating Standard and Simplified invoices.     We can assume Odoo-powered EGS solutions will always generate both Standard & Simplified invoices :return: |
+| `_l10n_sa_get_csr_invoice_type` | internal rule | self | `l10n_sa_edi` |  | Return the Invoice Type flag used in the CSR. 4-digit numerical input using 0 & 1 mapped to “TSCZ” where:     -   0: False/Not supported, 1: True/Supported     -   T: Tax Invoice (Standard), S: Simplified Invoice, C & Z will be used in the future and should         always be 0     For example: 1100 would mean the Solution will be generating Standard and Simplified invoices.     We can assume the system-powered EGS solutions will always generate both Standard & Simplified invoices :return: |
 | `_l10n_sa_check_organization_unit` | internal rule | self | `l10n_sa_edi` |  | Check company Organization Unit according to ZATCA specifications Standards:     BR-KSA-39     BR-KSA-40 See https://zatca.gov.sa/ar/RulesRegulations/Taxes/Documents/20210528_ZATCA_Electronic_Invoice_XML_Implementation_Standard_vShared.pdf |
 | `_compute_org_number` | computation | self | `l10n_se` | depends: `vat` |  |
 | `_compute_l10n_tr_nilvera_purchase_journal_id` | computation | self | `l10n_tr_nilvera` |  |  |

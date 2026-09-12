@@ -248,9 +248,9 @@ State machine fields of this entity: `current_status`. Transitions are specified
 | `_restart_google_sync` | internal rule | self | `google_calendar` | model |  |
 | `_check_modify_event_permission` | validation | self, values | `google_calendar` |  | Check if event modification attempt by attendee is valid to avoid duplicate events creation. |
 | `_get_sync_domain` | preparation rule | self | `google_calendar` |  |  |
-| `_odoo_values` | internal rule | self, google_event, default_reminders | `google_calendar` | model |  |
-| `_odoo_attendee_commands` | internal rule | self, google_event | `google_calendar` | model |  |
-| `_odoo_reminders_commands` | internal rule | self, reminders | `google_calendar` | model |  |
+| `_system_values` | internal rule | self, google_event, default_reminders | `google_calendar` | model |  |
+| `_system_attendee_commands` | internal rule | self, google_event | `google_calendar` | model |  |
+| `_system_reminders_commands` | internal rule | self, reminders | `google_calendar` | model |  |
 | `_google_values` | internal rule | self | `google_calendar` |  |  |
 | `_cancel` | internal rule | self | `google_calendar` |  |  |
 | `_get_event_user` | preparation rule | self | `google_calendar` |  |  |
@@ -272,15 +272,15 @@ State machine fields of this entity: `current_status`. Transitions are specified
 | `_get_organizer_user_change_info` | preparation rule | self, values | `microsoft_calendar` | model | Return the sender user of the event and the partner ids listed on the event values. |
 | `_update_attendee_status` | internal rule | self, attendee_ids | `microsoft_calendar` |  | Merge current status from 'attendees_ids' with new attendees values for avoiding their info loss in write(). Create a dict getting the state of each attendee received from 'attendee_ids' variable and then update their state. :param attendee_ids: List of attendee commands carrying a dict with 'partner_id' and 'state' keys in its third position. |
 | `_get_microsoft_sync_domain` | preparation rule | self | `microsoft_calendar` |  |  |
-| `_microsoft_to_odoo_values` | internal rule | self, microsoft_event, default_reminders, default_values, with_ids | `microsoft_calendar` | model |  |
-| `_microsoft_to_odoo_recurrence_values` | internal rule | self, microsoft_event, default_values | `microsoft_calendar` | model |  |
-| `_odoo_attendee_commands_m` | internal rule | self, microsoft_event | `microsoft_calendar` | model |  |
-| `_odoo_reminders_commands_m` | internal rule | self, microsoft_event | `microsoft_calendar` | model |  |
+| `_microsoft_to_system_values` | internal rule | self, microsoft_event, default_reminders, default_values, with_ids | `microsoft_calendar` | model |  |
+| `_microsoft_to_system_recurrence_values` | internal rule | self, microsoft_event, default_values | `microsoft_calendar` | model |  |
+| `_system_attendee_commands_m` | internal rule | self, microsoft_event | `microsoft_calendar` | model |  |
+| `_system_reminders_commands_m` | internal rule | self, microsoft_event | `microsoft_calendar` | model |  |
 | `_get_attendee_status_o2m` | preparation rule | self, attendee | `microsoft_calendar` |  |  |
 | `_microsoft_values` | internal rule | self, fields_to_sync, initial_values | `microsoft_calendar` |  |  |
 | `_ensure_attendees_have_email` | internal rule | self | `microsoft_calendar` |  |  |
 | `_microsoft_values_occurence` | internal rule | self, initial_values | `microsoft_calendar` |  |  |
-| `_cancel_microsoft` | internal rule | self | `microsoft_calendar` |  | Cancel an Microsoft event. There are 2 cases:   1) the organizer is an Odoo user: he's the only one able to delete the Odoo event. Attendees can just decline.   2) the organizer is NOT an Odoo user: any attendee should remove the Odoo event. |
+| `_cancel_microsoft` | internal rule | self | `microsoft_calendar` |  | Cancel an Microsoft event. There are 2 cases:   1) the organizer is the system user: he's the only one able to delete the system event. Attendees can just decline.   2) the organizer is NOT the system user: any attendee should remove the system event. |
 | `_get_event_user_m` | preparation rule | self, user_id | `microsoft_calendar` |  | Get the user who will send the request to Microsoft (organizer if synchronized and current user otherwise). |
 | `_is_microsoft_insertion_blocked` | internal rule | self, sender_user | `microsoft_calendar` |  |  |
 

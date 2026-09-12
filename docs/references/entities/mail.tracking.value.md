@@ -43,7 +43,7 @@ Description: Mail Tracking Value
 | `_create_tracking_values_property` | internal rule | self, initial_value, col_name, col_info, record | `mail` | model | Generate the values for the <mail.tracking.values> corresponding to a property. |
 | `_tracking_value_format` | messaging hook | self | `mail` |  | Return structure and formatted data structure to be used by chatter to display tracking values. Order it according to asked display, aka ascending sequence (and field name).  :return: for each tracking value in self, their formatted display   values given as a dict; :rtype: list[dict] |
 | `_tracking_value_format_model` | messaging hook | self, model | `mail` |  | Return structure and formatted data structure to be used by chatter to display tracking values. Order it according to asked display, aka ascending sequence (and field name).  :returns: for each tracking value in self, their formatted display   values given as a dict; :rtype: list[dict] |
-| `_format_display_value` | internal rule | self, field_type, new | `mail` |  | Format value of 'mail.tracking.value', according to the field type.  :param str field_type: Odoo field type; :param bool new: if True, display the 'new' value. Otherwise display   the 'old' one. |
+| `_format_display_value` | internal rule | self, field_type, new | `mail` |  | Format value of 'mail.tracking.value', according to the field type.  :param str field_type: the system field type; :param bool new: if True, display the 'new' value. Otherwise display   the 'old' one. |
 | `_except_audit_log` | internal rule | self | `account` | ondelete |  |
 | `write` | lifecycle override | self, vals | `account` |  |  |
 

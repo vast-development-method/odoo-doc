@@ -522,7 +522,7 @@ Storage and transport identifiers used in this folder, with their full names.
 | `manufacture` | the rule action that creates a Manufacturing Order |
 | `mrp.unbuild` | the sequence code of the unbuild numbering |
 | `stock.lot.serial` | the shared sequence code for lot and serial numbers |
-| `mrp.workcenter_max_planning_iterations` | the system parameter bounding the slot search |
+| `mrp.workcenter_max_planning_iterations` | The system parameter bounding the slot search |
 | `property_stock_account_production_cost_id` | the product category's Production Account |
 | `account_production_wip_account_id` | the company's Production Work In Progress Account |
 | `account_production_wip_overhead_account_id` | the company's Production Work In Progress Overhead Account |

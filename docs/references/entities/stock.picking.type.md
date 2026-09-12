@@ -40,17 +40,17 @@ Description: Picking Type
 | `reservation_method` | Reservation Method | selection |  | required; default `at_confirm`; Help: How products in transfers of this operation type should be reserved. |
 | `reservation_days_before` | Days | integer |  | Help: Maximum number of days before scheduled date that products should be reserved. |
 | `reservation_days_before_priority` | Days when starred | integer |  | Help: Maximum number of days before scheduled date that priority picking products should be reserved. |
-| `auto_show_reception_report` | Show Reception Report at Validation | boolean |  | Help: If this checkbox is ticked, Odoo will automatically show the reception report (if there are moves to allocate to) when validating. |
-| `auto_print_delivery_slip` | Auto Print Delivery Slip | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the delivery slip of a picking when it is validated. |
-| `auto_print_return_slip` | Auto Print Return Slip | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the return slip of a picking when it is validated. |
-| `auto_print_product_labels` | Auto Print Product Labels | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the product labels of a picking when it is validated. |
+| `auto_show_reception_report` | Show Reception Report at Validation | boolean |  | Help: If this checkbox is ticked, the system will automatically show the reception report (if there are moves to allocate to) when validating. |
+| `auto_print_delivery_slip` | Auto Print Delivery Slip | boolean |  | Help: If this checkbox is ticked, the system will automatically print the delivery slip of a picking when it is validated. |
+| `auto_print_return_slip` | Auto Print Return Slip | boolean |  | Help: If this checkbox is ticked, the system will automatically print the return slip of a picking when it is validated. |
+| `auto_print_product_labels` | Auto Print Product Labels | boolean |  | Help: If this checkbox is ticked, the system will automatically print the product labels of a picking when it is validated. |
 | `product_label_format` | Product Label Format to auto-print | selection |  | default `2x7xprice` |
-| `auto_print_lot_labels` | Auto Print Lot/SN Labels | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the lot/SN labels of a picking when it is validated. |
+| `auto_print_lot_labels` | Auto Print Lot/SN Labels | boolean |  | Help: If this checkbox is ticked, the system will automatically print the lot/SN labels of a picking when it is validated. |
 | `lot_label_format` | Lot Label Format to auto-print | selection |  | default `4x12_lots` |
-| `auto_print_reception_report` | Auto Print Reception Report | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the reception report of a picking when it is validated and has assigned moves. |
-| `auto_print_reception_report_labels` | Auto Print Reception Report Labels | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the reception report labels of a picking when it is validated. |
-| `auto_print_packages` | Auto Print Packages | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the packages and their contents of a picking when it is validated. |
-| `auto_print_package_label` | Auto Print Package Label | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the package label when "Put in Pack" button is used. |
+| `auto_print_reception_report` | Auto Print Reception Report | boolean |  | Help: If this checkbox is ticked, the system will automatically print the reception report of a picking when it is validated and has assigned moves. |
+| `auto_print_reception_report_labels` | Auto Print Reception Report Labels | boolean |  | Help: If this checkbox is ticked, the system will automatically print the reception report labels of a picking when it is validated. |
+| `auto_print_packages` | Auto Print Packages | boolean |  | Help: If this checkbox is ticked, the system will automatically print the packages and their contents of a picking when it is validated. |
+| `auto_print_package_label` | Auto Print Package Label | boolean |  | Help: If this checkbox is ticked, the system will automatically print the package label when "Put in Pack" button is used. |
 | `package_label_to_print` | Package Label to Print | selection |  | default `pdf` |
 | `count_picking_draft` | Count Picking Draft | integer |  | computed by rule `_compute_picking_count` (not stored) |
 | `count_picking_ready` | Count Picking Ready | integer |  | computed by rule `_compute_picking_count` (not stored) |
@@ -114,13 +114,13 @@ Description: Picking Type
 | `count_mo_in_progress` | Number of Manufacturing Orders In Progress | integer |  | computed by rule `_get_mo_count` (not stored) |
 | `count_mo_to_close` | Number of Manufacturing Orders To Close | integer |  | computed by rule `_get_mo_count` (not stored) |
 | `use_create_components_lots` | Create New Lots/Serial Numbers for Components | boolean |  | default ; Help: Allow to create new lot/serial numbers for the components |
-| `auto_print_done_production_order` | Auto Print Done Production Order | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the production order of a MO when it is done. |
-| `auto_print_done_mrp_product_labels` | Auto Print Produced Product Labels | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the product labels of a MO when it is done. |
+| `auto_print_done_production_order` | Auto Print Done Production Order | boolean |  | Help: If this checkbox is ticked, the system will automatically print the production order of a MO when it is done. |
+| `auto_print_done_mrp_product_labels` | Auto Print Produced Product Labels | boolean |  | Help: If this checkbox is ticked, the system will automatically print the product labels of a MO when it is done. |
 | `mrp_product_label_to_print` | Product Label to Print | selection |  | default `pdf` |
-| `auto_print_done_mrp_lot` | Auto Print Produced Lot Label | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the lot/SN label of a MO when it is done. |
+| `auto_print_done_mrp_lot` | Auto Print Produced Lot Label | boolean |  | Help: If this checkbox is ticked, the system will automatically print the lot/SN label of a MO when it is done. |
 | `done_mrp_lot_label_to_print` | Lot/SN Label to Print | selection |  | default `pdf` |
-| `auto_print_mrp_reception_report` | Auto Print Allocation Report | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the allocation report of a MO when it is done and has assigned moves. |
-| `auto_print_mrp_reception_report_labels` | Auto Print Allocation Report Labels | boolean |  | Help: If this checkbox is ticked, Odoo will automatically print the allocation report labels of a MO when it is done. |
+| `auto_print_mrp_reception_report` | Auto Print Allocation Report | boolean |  | Help: If this checkbox is ticked, the system will automatically print the allocation report of a MO when it is done and has assigned moves. |
+| `auto_print_mrp_reception_report_labels` | Auto Print Allocation Report Labels | boolean |  | Help: If this checkbox is ticked, the system will automatically print the allocation report labels of a MO when it is done. |
 | `auto_print_generated_mrp_lot` | Auto Print Generated Lot/SN Label | boolean |  | Help: Automatically print the lot/SN label when the "Create a new serial/lot number" button is used. |
 | `generated_mrp_lot_label_to_print` | Generated Lot/SN Label to Print | selection |  | default `pdf` |
 | `analytic_costs` | Analytic Costs | boolean |  | Help: Validating stock pickings will generate analytic entries for the selected project. Products set for re-invoicing will also be billed to the customer. |

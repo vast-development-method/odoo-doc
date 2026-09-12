@@ -13,7 +13,7 @@ preconditions, the records it creates or updates, and its failure conditions.
 | Department manager | no extra group; recognised by being the Manager of a Department | Additionally sees the department card menu, and the department-scoped report filter grants them access to their own department's members and descendants. |
 | Human Resources Officer | the officer group | Full create, read, write and delete on Employee, Employee Version, Department, Job Position, Employee Tag, Departure Reason, Contract Type, Resource, Working Schedule and Working Schedule Attendance; sees every private employee field **except** the twelve administrator-only ones. |
 | Human Resources Administrator | the administrator group, which implies the officer group | Additionally: wage, contract dates, contract wage, salary structure type, contract type and the derived contract indicators; work locations; salary structure types; employee activity plans; unrestricted visibility of Employee Versions across companies; manual presence declarations. |
-| System Administrator | the system group | Read-only access to the private Employee, for support purposes. |
+| System Administrator | The system group | Read-only access to the private Employee, for support purposes. |
 
 ---
 

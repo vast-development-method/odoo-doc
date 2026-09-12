@@ -26,7 +26,7 @@ Description: Sequence
 | `number_next` | Next Number | integer |  | required; default `1`; Help: Next number of this sequence |
 | `number_next_actual` | Actual Next Number | integer |  | computed by rule `_get_number_next_actual` (not stored); writable through an inverse rule; Help: Next number that will be used. This number can be incremented frequently so the displayed value might already be obsolete |
 | `number_increment` | Step | integer |  | required; default `1`; Help: The next number of the sequence will be incremented by this number |
-| `padding` | Sequence Size | integer |  | required; default ; Help: Odoo will automatically adds some '0' on the left of the 'Next Number' to get the required padding size. |
+| `padding` | Sequence Size | integer |  | required; default ; Help: the system will automatically adds some '0' on the left of the 'Next Number' to get the required padding size. |
 | `company_id` | Company | many to one | `res.company` | default computed dynamically (lambda s: s.env.company) |
 | `use_date_range` | Use subsequences per date_range | boolean |  |  |
 | `date_range_ids` | Subsequences | one to many | `ir.sequence.date_range` | inverse field `sequence_id` |

@@ -33581,8 +33581,8 @@ Stores the entity User (`res.users`). 36 columns. 7 indexes. 10 foreign keys. sp
 | `rank_id` | `integer` | thirty-two bit integer | no |  | precision 32, scale 0 |
 | `next_rank_id` | `integer` | thirty-two bit integer | no |  | precision 32, scale 0 |
 | `last_lunch_location_id` | `integer` | thirty-two bit integer | no |  | precision 32, scale 0 |
-| `odoobot_state` | `character varying` | variable length text | no |  |  |
-| `odoobot_failed` | `boolean` | boolean | no |  |  |
+| `system_robot_state` | `character varying` | variable length text | no |  |  |
+| `system_robot_failed` | `boolean` | boolean | no |  |  |
 | `sale_team_id` | `integer` | thirty-two bit integer | no |  | precision 32, scale 0 |
 | `oauth_provider_id` | `integer` | thirty-two bit integer | no |  | precision 32, scale 0 |
 | `oauth_uid` | `character varying` | variable length text | no |  |  |

@@ -39,7 +39,7 @@ Description: Work Center Usage
 | `cycle_number` | Repetitions | integer |  | computed by rule `_compute_time_cycle` (not stored) |
 | `time_total` | Total Duration | float |  | computed by rule `_compute_time_cycle` (not stored) |
 | `show_time_total` | Show Total Duration? | boolean |  | computed by rule `_compute_time_cycle` (not stored) |
-| `cost_mode` | Cost based on | selection |  | default `actual`; changes are tracked in the message thread; Help: Determines the way Odoo calculates the cost of the operation: - Based on Actual time: the cost will be calculated based on tracked time and real employee costs. - Based on Estimated time: the cost will be calculated based on estimated time and costs. |
+| `cost_mode` | Cost based on | selection |  | default `actual`; changes are tracked in the message thread; Help: Determines the way the system calculates the cost of the operation: - Based on Actual time: the cost will be calculated based on tracked time and real employee costs. - Based on Estimated time: the cost will be calculated based on estimated time and costs. |
 | `cost` | Cost | float |  | computed by rule `_compute_cost` (not stored) |
 
 ## Selection values

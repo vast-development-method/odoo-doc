@@ -24,7 +24,7 @@ Description: Communication Bus
 | Operation | Kind | Arguments | Defined in packages | Triggers and dependencies | Documentation |
 |---|---|---|---|---|---|
 | `_gc_messages` | background operation | self | `bus` | autovacuum |  |
-| `_sendone` | internal rule | self, target, notification_type, message | `bus` | model | Low-level method to send ``notification_type`` and ``message`` to ``target``.  Using ``_bus_send()`` from ``bus.listener.mixin`` is recommended for simplicity and security.  When using ``_sendone`` directly, ``target`` (if str) should not be guessable by an attacker. |
+| `_sendone` | internal rule | self, target, notification_type, message | `bus` | model | Low-level method to send `notification_type` and `message` to `target`.  Using `_bus_send()` from `bus.listener.mixin` is recommended for simplicity and security.  When using `_sendone` directly, `target` (if str) should not be guessable by an attacker. |
 | `_ensure_hooks` | internal rule | self | `bus` |  |  |
 | `_poll` | internal rule | self, channels, last, ignore_ids | `bus` | model |  |
 | `_bus_last_id` | internal rule | self | `bus` |  |  |

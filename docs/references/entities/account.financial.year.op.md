@@ -13,7 +13,7 @@ Description: Opening Balance of Financial Year
 |---|---|---|---|---|
 | `company_id` | Company | many to one | `res.company` | required |
 | `opening_move_posted` | Opening Move Posted | boolean |  | computed by rule `_compute_opening_move_posted` (not stored) |
-| `opening_date` | Opening Date | date |  | required; related through path `company_id.account_opening_date`; Help: Date from which the accounting is managed in Odoo. It is the date of the opening entry. |
+| `opening_date` | Opening Date | date |  | required; related through path `company_id.account_opening_date`; Help: Date from which the accounting is managed in the system. It is the date of the opening entry. |
 | `fiscalyear_last_day` | Fiscalyear Last Day | integer |  | required; related through path `company_id.fiscalyear_last_day`; Help: The last day of the month will be used if the chosen day doesn't exist. |
 | `fiscalyear_last_month` | Fiscalyear Last Month | selection |  | required; related through path `company_id.fiscalyear_last_month`; Help: The last day of the month will be used if the chosen day doesn't exist. |
 

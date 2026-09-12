@@ -51,7 +51,7 @@ Description: Actions
 | `unlink` | lifecycle override | self | `base` |  | unlink ir.action.todo/ir.filters which are related to actions which will be deleted. NOTE: ondelete cascade will not work on ir.actions.actions so we will need to do it manually. |
 | `_unlink_check_home_action` | internal rule | self | `base` | ondelete |  |
 | `_get_eval_context` | preparation rule | self, action | `base` | model | evaluation context to pass to safe_eval |
-| `get_bindings` | operation | self, model_name | `base` | model | Retrieve the list of actions bound to the given model.  :return: a dict mapping binding types to a list of dict describing          actions, where the latter is given by calling the method          ``read`` on the action record. |
+| `get_bindings` | operation | self, model_name | `base` | model | Retrieve the list of actions bound to the given model.  :return: a dict mapping binding types to a list of dict describing          actions, where the latter is given by calling the method          `read` on the action record. |
 | `_get_bindings` | preparation rule | self, model_name | `base` |  |  |
 | `_for_xml_id` | internal rule | self, full_xml_id | `base` | model | Returns the action content for the provided xml_id  :param full_xml_id: the namespace-less id of the action (the @id     attribute from the XML file) :return: A read() view of the ir.actions.action safe for web use |
 | `_get_action_dict` | preparation rule | self | `base` |  | Returns the action content for the provided action record. |

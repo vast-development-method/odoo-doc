@@ -31,7 +31,7 @@ Description: Link SMS to mailing/sms tracking models
 
 | Operation | Kind | Arguments | Defined in packages | Triggers and dependencies | Documentation |
 |---|---|---|---|---|---|
-| `_action_update_from_provider_error` | internal rule | self, provider_error | `mass_mailing_sms`, `sms` |  | :param str provider_error: value returned by SMS service provider (IAP) or any string.     If provided, notification values will be derived from it.     (see ``_get_tracker_values_from_provider_error``) |
+| `_action_update_from_provider_error` | internal rule | self, provider_error | `mass_mailing_sms`, `sms` |  | :param str provider_error: value returned by SMS service provider (IAP) or any string.     If provided, notification values will be derived from it.     (see `_get_tracker_values_from_provider_error`) |
 | `_action_update_from_sms_state` | internal rule | self, sms_state, failure_type, failure_reason | `mass_mailing_sms`, `sms` |  |  |
 | `_update_sms_notifications` | internal rule | self, notification_status, failure_type, failure_reason | `sms` |  |  |
 | `_update_sms_traces` | internal rule | self, trace_status, failure_type, failure_reason | `mass_mailing_sms` |  |  |

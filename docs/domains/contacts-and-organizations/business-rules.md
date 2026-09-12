@@ -2,7 +2,7 @@
 
 Every validation, every constraint, every invariant, every error message, every permission check,
 every locking rule and every edge-case behaviour of the domain. Messages are reproduced exactly as
-the system produces them; placeholders are described in words.
+The system produces them; placeholders are described in words.
 
 ---
 

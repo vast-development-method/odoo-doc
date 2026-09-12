@@ -36,7 +36,7 @@ Description: Accounting Report Expression
 
 | Value | Label |
 |---|---|
-| `domain` | Odoo Domain |
+| `domain` | record filter |
 | `tax_tags` | Tax Tags |
 | `aggregation` | Aggregate Other Formulas |
 | `account_codes` | Prefix of Account Codes |

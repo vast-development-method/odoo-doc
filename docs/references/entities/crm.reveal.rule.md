@@ -23,7 +23,7 @@ Description: CRM Lead Generation Rules
 | `state_ids` | States | many to many | `res.country.state` | Help: Only visitors of following states will be converted into leads/opportunities. |
 | `regex_url` | uniform resource locator Expression | single line text |  | Help: Regex to track website pages. Leave empty to track the entire website, or / to target the homepage. Example: /page* to track all the pages which begin with /page |
 | `sequence` | Sequence | integer |  | Help: Used to order the rules with same URL and countries. Rules with a lower sequence number will be processed first. |
-| `industry_tag_ids` | Industries | many to many | `crm.iap.lead.industry` | Help: Leave empty to always match. Odoo will not create lead if no match |
+| `industry_tag_ids` | Industries | many to many | `crm.iap.lead.industry` | Help: Leave empty to always match. The system will not create lead if no match |
 | `filter_on_size` | Filter on Size | boolean |  | default `True`; Help: Filter companies based on their size. |
 | `company_size_min` | Company Size | integer |  | default  |
 | `company_size_max` | Company Size Max | integer |  | default `1000` |

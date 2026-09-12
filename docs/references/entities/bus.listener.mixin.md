@@ -14,6 +14,6 @@ Description: Can send messages via bus.bus
 |---|---|---|---|---|---|
 | `_bus_send` | internal rule | subchannel | `bus` |  | Send a notification to the webclient. |
 | `_bus_channel` | internal rule | self | `bus` |  |  |
-| `_bus_send_transient_message` | internal rule | self, channel, content | `mail` |  | Posts a fake message in the given ``channel``, only visible for ``self`` listeners. |
+| `_bus_send_transient_message` | internal rule | self, channel, content | `mail` |  | Posts a fake message in the given `channel`, only visible for `self` listeners. |
 
 Machine-readable definition: `../../../schemas/data/entities/bus.listener.mixin.json`.

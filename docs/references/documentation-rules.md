@@ -6,7 +6,7 @@ These rules are binding on every file in this repository. They exist so that the
 
 No file names the product, its vendor, its historic names, its hosted services, its assistant, its marketplace or its community. No file names a source file, a source folder, a version number or a release. No file uses the words that would let a reader identify the origin by search rather than by understanding.
 
-The system is referred to as "the system", "the platform" or "the application". A capability package is named by its full business name, never by the short identifier a package manager would use, except inside the machine-readable catalogues where a package's technical name is a key that tooling needs.
+The system is referred to as "The system", "the platform" or "the application". A capability package is named by its full business name, never by the short identifier a package manager would use, except inside the machine-readable catalogues where a package's technical name is a key that tooling needs.
 
 **Why.** A specification that leans on the reader recognising a product becomes a pointer to that product instead of a description of it. A reader who cannot look the product up must still be able to build the system. That constraint is what forces the specification to be complete.
 
@@ -50,6 +50,10 @@ Storage names, transport names, column names, association table names, route pat
 Every reproduced identifier carries its full name in words the first time it appears in a document. A field table always has a column for the identifier and a column for the full name. This is not a loophole for abbreviating prose: it is a precise, bounded allowance for strings that are part of the external contract.
 
 **Why.** An abbreviation is a compression that assumes shared context. A reader rebuilding from scratch has no shared context. But an identifier that crosses a system boundary is data, not prose, and altering it would break the very compatibility the specification exists to preserve.
+
+### Renamed identifiers
+
+A handful of stored identifiers carried the vendor's name. Because this repository is vendor-neutral in every file, those identifiers are reproduced with the vendor's name replaced by the word *system*, consistently in every document and every catalogue, so that a reader can still recognise the same identifier wherever it appears. The renamed identifiers are: the robot user and the fields, states and templates named after it (`system_robot`, `system_robot_state`); the invoice reference style whose stored value was the vendor's name (`system`, the full-reference numbering style); the web client route prefix (`/app`); the spreadsheet function prefix (`SYSTEM.`); the operation names of the calendar synchronisation that carried the vendor's name (for example `_sync_system2google`); the report external identifier `account_edi_ubl_cii.account_invoices_generated_by_system`; and the environment variable `SYSTEM_NOTIFY_CRON_CHANGES`. Addresses of the vendor's own web services are replaced by `https://example.com/`. A rebuild chooses its own names for these; the specification only requires that each be one stable identifier used consistently.
 
 ## Rule four: current behaviour only
 

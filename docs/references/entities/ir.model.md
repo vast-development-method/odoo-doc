@@ -84,7 +84,7 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `name_create` | lifecycle override | self, name | `base` | model | Infer the model from the name. E.g.: 'My New Model' should become 'x_my_new_model'. |
 | `_reflect_model_params` | internal rule | self, model | `base`, `mail` |  | Return the values to write to the database for the given model. |
 | `_reflect_models` | internal rule | self, model_names | `base` |  | Reflect the given models. |
-| `_instanciate_attrs` | internal rule | self, model_data | `base`, `mail` | model | Return the attributes to instanciate a custom model definition class corresponding to ``model_data``. |
+| `_instanciate_attrs` | internal rule | self, model_data | `base`, `mail` | model | Return the attributes to instanciate a custom model definition class corresponding to `model_data`. |
 | `_is_manual_name` | internal rule | self, name | `base` | model |  |
 | `_check_manual_name` | validation | self, name | `base` | model |  |
 | `display_name_for` | operation | self, models | `web` | model | Returns the display names from provided models which the current user can access. The result is the same whether someone tries to access an inexistent model or a model they cannot access. :models list(str): list of technical model names to lookup (e.g. `["res.partner"]`) :return: list of dicts of the form `{ "model", "display_name" }` (e.g. `{ "model": "res_partner", "display_name": "Contact"}`) |

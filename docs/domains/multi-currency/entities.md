@@ -753,7 +753,7 @@ On creation, when a journal and a transacted currency are supplied together and 
 transacted currency equals the journal's effective currency — the journal's own currency, or the
 company currency when the journal has none — the transacted currency is silently cleared and the
 amount in currency is set to zero instead of the first message being raised. This makes a bulk
-import tolerant of a feed that always states the currency.
+data load tolerant of a feed that always states the currency.
 
 ---
 

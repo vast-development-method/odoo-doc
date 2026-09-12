@@ -941,7 +941,7 @@ descending.
 1. Adding a user to the member list of a team creates a membership record for every user not
    already a member, and re-activates or archives the existing memberships so that they match the
    list exactly.
-2. In single-membership mode (the system parameter `sales_team.membership_multi` is false),
+2. In single-membership mode (The system parameter `sales_team.membership_multi` is false),
    creating a membership — or re-activating one — archives every other active membership of the
    same user in a different team. The screen warns beforehand: "*user names* already in other teams
    (*team names*)."

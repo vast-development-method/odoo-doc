@@ -30,7 +30,7 @@ Description: Payment Method
 | `support_tokenization` | Tokenization | boolean |  | Help: Tokenization is the process of saving the payment details as a token that can later be reused without having to enter the payment details again. |
 | `support_express_checkout` | Express Checkout | boolean |  | Help: Express checkout allows customers to pay faster by using a payment method that provides all required billing and shipping information, thus allowing to skip the checkout process. |
 | `support_manual_capture` | Manual Capture | selection |  | required; default `none`; Help: The payment is authorized and captured in two steps instead of one. |
-| `support_refund` | Refund | selection |  | required; default `none`; Help: Refund is a feature allowing to refund customers directly from the payment in Odoo. |
+| `support_refund` | Refund | selection |  | required; default `none`; Help: Refund is a feature allowing to refund customers directly from the payment in the system. |
 | `supported_country_ids` | Countries | many to many | `res.country` | Help: The list of countries in which this payment method can be used (if the provider allows it). In other countries, this payment method is not available to customers. |
 | `supported_currency_ids` | Currencies | many to many | `res.currency` | Help: The list of currencies for that are supported by this payment method (if the provider allows it). When paying with another currency, this payment method is not available to customers. |
 | `l10n_ec_sri_payment_id` | SRI Payment Method | many to one | `l10n_ec.sri.payment` |  |

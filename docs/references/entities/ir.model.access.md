@@ -29,8 +29,8 @@ Description: Model Access
 
 | Operation | Kind | Arguments | Defined in packages | Triggers and dependencies | Documentation |
 |---|---|---|---|---|---|
-| `group_names_with_access` | operation | self, model_name, access_mode | `base` | model | Return the names of visible groups which have been granted  ``access_mode`` on the model ``model_name``.  :rtype: list |
-| `_get_access_groups` | preparation rule | self, model_name, access_mode | `base` | model | Return the group expression object that represents the users who have ``access_mode`` to the model ``model_name``. |
+| `group_names_with_access` | operation | self, model_name, access_mode | `base` | model | Return the names of visible groups which have been granted  `access_mode` on the model `model_name`.  :rtype: list |
+| `_get_access_groups` | preparation rule | self, model_name, access_mode | `base` | model | Return the group expression object that represents the users who have `access_mode` to the model `model_name`. |
 | `_get_allowed_models` | preparation rule | self, mode | `base` |  |  |
 | `check` | operation | self, model, mode, raise_exception | `base` | model |  |
 | `_make_access_error` | internal rule | self, model, mode | `base` |  | Return the exception corresponding to an access error. |
