@@ -89,13 +89,13 @@ Description: Languages
 | `_activate_lang` | internal rule | self, code | `base` |  | Activate languages :param code: code of the language to activate :return: the language matching 'code' activated |
 | `_activate_and_install_lang` | internal rule | self, code | `base` |  | Activate languages and update their translations :param code: code of the language to activate :return: the language matching 'code' activated |
 | `_create_lang` | internal rule | self, lang, lang_name | `base` |  | Create the given language and make it active. |
-| `install_lang` | operation | self | `base` | model | This method is called from odoo/addons/base/data/res_lang_data.xml to load some language and set it as the default for every partners. The language is set via tools.config by the '_initialize_db' method on the 'db' object. This is a fragile solution and something else should be found. |
-| `CACHED_FIELDS` | operation | self | `base` |  | Return fields to cache for the active languages Please promise all these fields don't depend on other models and context and are not translated. Warning: Don't add method names of ``dict`` to CACHED_FIELDS for sake of the implementation of LangData |
-| `_get_data` | preparation rule | self, **kwargs | `base` |  | Get the language data for the given field value in kwargs For example, get_data(code='en_US') will return the LangData for the res.lang record whose 'code' field value is 'en_US'  :param dict kwargs: ``{field_name: field_value}``         field_name is the only key in kwargs and in ``self.CACHED_FIELDS``         Try to reuse the used ``field_name``: 'id', 'code', 'url_code' :return: Valid LangData if (field_name, field_value) pair is for an         **active** language. Otherwise, Dummy LangData which will return         ``False`` for all ``self.CACHED_FIELDS`` :raise: UserError if field_name is |
+| `install_lang` | operation | self | `base` | model | This method is called from system/addons/base/data/res_lang_data.xml to load some language and set it as the default for every partners. The language is set via tools.config by the '_initialize_db' method on the 'db' object. This is a fragile solution and something else should be found. |
+| `CACHED_FIELDS` | operation | self | `base` |  | Return fields to cache for the active languages Please promise all these fields don't depend on other models and context and are not translated. Warning: Don't add method names of `dict` to CACHED_FIELDS for sake of the implementation of LangData |
+| `_get_data` | preparation rule | self, **kwargs | `base` |  | Get the language data for the given field value in kwargs For example, get_data(code='en_US') will return the LangData for the res.lang record whose 'code' field value is 'en_US'  :param dict kwargs: `{field_name: field_value}`         field_name is the only key in kwargs and in `self.CACHED_FIELDS`         Try to reuse the used `field_name`: 'id', 'code', 'url_code' :return: Valid LangData if (field_name, field_value) pair is for an         **active** language. Otherwise, Dummy LangData which will return         `False` for all `self.CACHED_FIELDS` :raise: UserError if field_name is |
 | `_lang_get` | internal rule | self, code | `base` |  | Return the language using this code if it is active |
-| `_get_code` | preparation rule | self, code | `base` |  | Return the given language code if active, else return ``False`` |
+| `_get_code` | preparation rule | self, code | `base` |  | Return the given language code if active, else return `False` |
 | `get_installed` | operation | self | `base` | model; readonly | Return installed languages' (code, name) pairs sorted by name. |
-| `_get_active_by` | preparation rule | self, field | `base` |  | Return a LangDataDict mapping active languages' **unique** **required** ``self.CACHED_FIELDS`` values to their LangData. Its items are ordered by languages' names Try to reuse the used ``field``: 'id', 'code', 'url_code' |
+| `_get_active_by` | preparation rule | self, field | `base` |  | Return a LangDataDict mapping active languages' **unique** **required** `self.CACHED_FIELDS` values to their LangData. Its items are ordered by languages' names Try to reuse the used `field`: 'id', 'code', 'url_code' |
 | `action_unarchive` | lifecycle override | self | `base` |  |  |
 | `create` | lifecycle override | self, vals_list | `base` | model_create_multi |  |
 | `write` | lifecycle override | self, vals | `base`, `survey`, `website` |  | When languages are disabled, clear corresponding survey languages. |
@@ -106,8 +106,8 @@ Description: Languages
 | `action_activate_langs` | user action | self | `base`, `website` |  | Activate the selected languages |
 | `_get_frontend` | preparation rule | self | `http_routing`, `website` |  | Return the available languages for current request :return: LangDataDict({code: LangData}) |
 | `get_locales_for_spreadsheet` | operation | self | `spreadsheet` | readonly; model | Return the list of locales available for a spreadsheet. |
-| `_get_user_spreadsheet_locale` | preparation rule | self | `spreadsheet` | model | Convert the odoo lang to a spreadsheet locale. |
-| `_odoo_lang_to_spreadsheet_locale` | internal rule | self | `spreadsheet` |  | Convert an odoo lang to a spreadsheet locale. |
+| `_get_user_spreadsheet_locale` | preparation rule | self | `spreadsheet` | model | Convert the system lang to a spreadsheet locale. |
+| `_system_lang_to_spreadsheet_locale` | internal rule | self | `spreadsheet` |  | Convert an system lang to a spreadsheet locale. |
 | `_load_pos_data_fields` | internal rule | self, config | `point_of_sale` | model |  |
 
 ## Validation and error messages (13)

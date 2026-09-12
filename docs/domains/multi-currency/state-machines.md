@@ -390,7 +390,7 @@ undone.
 
 | Stored value | Label | Meaning |
 |---|---|---|
-| — | Not created | No rate movement had to be written off, or the matching produced only instructions that were zero at their own precision. |
+| — | Not created | No rate movement needed a write-off, or the matching produced only instructions that were zero at their own precision. |
 | `draft` | Draft | The entry exists with the entry number `/`, so that no number is consumed from the exchange journal's sequence before it is posted. At least one of the two matched items belongs to an entry that is itself in draft. |
 | `posted` | Posted | Both matched items belong to posted entries, so the exchange difference entry was posted immediately at creation, without the soft posting delay, and took a number from the exchange journal's sequence. |
 | `cancel` | Cancelled | Reached only through the general ledger's own cancellation path. The reversal produced when a matching is undone does **not** cancel the original: it is a second, opposite entry. |

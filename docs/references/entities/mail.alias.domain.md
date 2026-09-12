@@ -16,7 +16,7 @@ Description: Email Domain
 
 | Field (storage name) | Full name | Type | Target | Meaning and rules |
 |---|---|---|---|---|
-| `name` | Name | single line text |  | required; Help: Email domain e.g. 'example.com' in 'odoo@example.com' |
+| `name` | Name | single line text |  | required; Help: Email domain e.g. 'example.com' in 'system@example.com' |
 | `company_ids` | Companies | one to many | `res.company` | inverse field `alias_domain_id`; Help: Companies using this domain as default for sending mails |
 | `sequence` | Sequence | integer |  | default `10` |
 | `bounce_alias` | Bounce Alias | single line text |  | required; default `bounce`; Help: Local-part of email used for Return-Path used when emails bounce e.g. 'bounce' in 'bounce@example.com' |
@@ -47,7 +47,7 @@ Description: Email Domain
 | `_check_default_from_not_used_by_users` | validation | self | `mail` |  | Check that the default from is not used by a personal mail servers. |
 | `_sanitize_configuration` | internal rule | self, config_values | `mail` | model | Tool sanitizing configuration values for domains |
 | `_find_aliases` | internal rule | self, email_list | `mail` | model | Utility method to find both alias domains aliases (bounce, catchall or default from) and mail aliases from an email list.  :param email_list: list of normalized emails; normalization / removing     wrong emails is considered as being caller's job |
-| `_migrate_icp_to_domain` | internal rule | self | `mail` | model | Compatibility layer helping going from pre-v17 ICP to alias domains. Mainly used when base mail configuration is done with 'base' module only and 'mail' is installed afterwards: configuration should not be lost (odoo.sh use case). |
+| `_migrate_icp_to_domain` | internal rule | self | `mail` | model | Compatibility layer helping going from pre-v17 ICP to alias domains. Mainly used when base mail configuration is done with 'base' module only and 'mail' is installed afterwards: configuration should not be lost (system.sh use case). |
 
 ## Validation and error messages (7)
 

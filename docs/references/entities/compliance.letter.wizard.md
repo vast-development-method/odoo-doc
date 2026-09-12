@@ -19,7 +19,7 @@ Description: Compliance Letter for EXO Number
 |---|---|---|---|---|---|
 | `generate_letter` | operation | self | `l10n_mt_pos` |  |  |
 | `_get_formatted_date` | preparation rule | self | `l10n_mt_pos` |  | Returns the formatted date as 'Date (Month, xxth, 20XX)'. |
-| `_get_odoo_version` | preparation rule | self | `l10n_mt_pos` |  |  |
+| `_get_system_version` | preparation rule | self | `l10n_mt_pos` |  |  |
 
 ## Validation and error messages (1)
 

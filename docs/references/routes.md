@@ -49,7 +49,7 @@ Every route exposed over Hypertext Transfer Protocol.
 | `/kpi/summary` | jsonrpc | none |  |  | `base_setup` | `KpiController.kpi_summary` | Retrieve the KPI summaries from a batch of databases hosted on the same server. The result of this call will only include the databases:     - that have been found on this server     - where the provided API key could be verified     - that are on the same the system version as the current the syste |
 | `/base_setup/data` | jsonrpc | user |  |  | `base_setup` | `BaseSetup.base_setup_data` |  |
 | `/base_setup/demo_active` | jsonrpc | user |  |  | `base_setup` | `BaseSetup.base_setup_is_demo` |  |
-| `/base_vat/1/webhook_update_vies` | http | public |  |  | `base_vat` | `BaseVatWebhookController.webhook_update_vies` | Webhook called by IAP when it updates a status from the pending state. The webhook_token is computed by the the system db (in _compute_vies_valid) and stored on IAP such that only IAP can call this webhook. |
+| `/base_vat/1/webhook_update_vies` | http | public |  |  | `base_vat` | `BaseVatWebhookController.webhook_update_vies` | Webhook called by IAP when it updates a status from the pending state. The webhook_token is computed by the system db (in _compute_vies_valid) and stored on IAP such that only IAP can call this webhook. |
 | `/board/add_to_dashboard` | jsonrpc | user |  |  | `board` | `Board.add_to_dashboard` |  |
 | `/bus/get_model_definitions` | http | user | ["POST"] |  | `bus` | `BusController.get_model_definitions` |  |
 | `/bus/has_missed_notifications` | jsonrpc | public |  |  | `bus` | `BusController.has_missed_notifications` |  |
@@ -154,7 +154,7 @@ Every route exposed over Hypertext Transfer Protocol.
 | `/im_livechat/external_lib.<any(css,js):ext>` | http | public |  |  | `im_livechat` | `LivechatController.external_lib` | Preserve compatibility with legacy livechat imports. Only serves javascript since the css will be fetched by the shadow DOM of the livechat to avoid conflicts. |
 | `/im_livechat/assets_embed.<any(css, js):ext>` | http | public |  |  | `im_livechat` | `LivechatController.assets_embed` |  |
 | `/im_livechat/font-awesome` | http | none |  |  | `im_livechat` | `LivechatController.fontawesome` |  |
-| `/im_livechat/odoo_ui_icons` | http | none |  |  | `im_livechat` | `LivechatController.odoo_ui_icons` |  |
+| `/im_livechat/system_ui_icons` | http | none |  |  | `im_livechat` | `LivechatController.system_ui_icons` |  |
 | `/im_livechat/emoji_bundle` | http | public |  |  | `im_livechat` | `LivechatController.get_emoji_bundle` |  |
 | `/im_livechat/support/<int:channel_id>` | http | public |  |  | `im_livechat` | `LivechatController.support_page` |  |
 | `/im_livechat/loader/<int:channel_id>` | http | public |  |  | `im_livechat` | `LivechatController.loader` |  |
@@ -407,7 +407,7 @@ Every route exposed over Hypertext Transfer Protocol.
 | `expression` | http | public | ["POST"] |  | `payment_paypal` | `PaypalController.paypal_webhook` | Process the payment data sent by PayPal to the webhook.  See https://developer.paypal.com/docs/api/webhooks/v1/.  :return: An empty string to acknowledge the notification. :rtype: str |
 | `expression` | http | public | ["POST"] |  | `payment_payu` | `PayuController.payu_return_from_checkout` | Process the payment data sent by PayU after redirection from checkout.  The route is flagged with `save_session=False` to prevent the system from assigning a new session to the user if they are redirected to this route with a POST request. Indeed, as the session cookie is created without a `SameSite |
 | `expression` | http | public | ["POST"] |  | `payment_payu` | `PayuController.payu_webhook` | Process the payment data sent by PayU through the webhook.  :return: An empty response to acknowledge the notification. :rtype: the system.http.Response |
-| `expression` | http | user | ["GET"] | True | `payment_payu` | `PayUOnboardingController.payu_return_from_authorization` | Handle the PayU OAuth callback.  :param dict data: The authorization code and merchant ID received from PayU, in addition to                   the the system provider id and CSRF token sent back by the proxy :raise Forbidden: If the received CSRF token cannot be verified :raise ValidationError: If t |
+| `expression` | http | user | ["GET"] | True | `payment_payu` | `PayUOnboardingController.payu_return_from_authorization` | Handle the PayU OAuth callback.  :param dict data: The authorization code and merchant ID received from PayU, in addition to                   the system provider id and CSRF token sent back by the proxy :raise Forbidden: If the received CSRF token cannot be verified :raise ValidationError: If t |
 | `expression` | http | public | ["POST"] |  | `payment_razorpay` | `RazorpayController.razorpay_return_from_checkout` | Process the payment data sent by Razorpay after redirection from checkout.  The route is configured with save_session=False to prevent the system from creating a new session when the user is redirected here via a POST request. Indeed, as the session cookie is created without a `SameSite` attribute,  |
 | `expression` | http | public | ["POST"] |  | `payment_razorpay` | `RazorpayController.razorpay_webhook` | Process the payment data sent by Razorpay to the webhook.  :return: An empty string to acknowledge the notification. :rtype: str |
 | `expression` | http | user | ["GET"] | True | `payment_razorpay` | `RazorpayController.razorpay_return_from_authorization` | Exchange the authorization code for an access token and redirect to the provider form.  :param dict data: The authorization code received from Razorpay, in addition to the provided                   provider id and CSRF token that were sent back by the proxy. :raise Forbidden: If the received CSRF t |
@@ -572,7 +572,7 @@ Every route exposed over Hypertext Transfer Protocol.
 | `/survey/<model("survey.survey"):survey>/certification_preview` | http | user |  | True | `survey` | `Survey.show_certification_pdf` |  |
 | `/survey/<model("survey.survey"):survey>/get_certification_preview` | http | user | ["GET"] | True | `survey` | `Survey.survey_get_certification_preview` |  |
 | `/survey/<int:survey_id>/get_certification` | http | user | ["GET"] | True | `survey` | `Survey.survey_get_certification` | The certification document can be downloaded as long as the user has succeeded the certification |
-| `/survey/results/<model("survey.survey"):survey>` | http | user |  | True | `survey` | `Survey.survey_report` | Display survey Results & Statistics for given survey.  New structure: {     'survey': current survey browse record,     'question_and_page_data': see ``SurveyQuestion._prepare_statistics()``,     'survey_data'= see ``SurveySurvey._prepare_statistics()``     'search_filters': [],     'search_finished |
+| `/survey/results/<model("survey.survey"):survey>` | http | user |  | True | `survey` | `Survey.survey_report` | Display survey Results & Statistics for given survey.  New structure: {     'survey': current survey browse record,     'question_and_page_data': see `SurveyQuestion._prepare_statistics()`,     'survey_data'= see `SurveySurvey._prepare_statistics()`     'search_filters': [],     'search_finished |
 | `/survey/session/manage/<string:survey_token>` | http | user |  | True | `survey` | `UserInputSession.survey_session_manage` | Main route used by the host to 'manager' the session. - If the state of the session is 'ready'   We render a template allowing the host to showcase the different options of the session   and to actually start the session.   If there are no questions, a "void content" is displayed instead to avoid di |
 | `/survey/session/next_question/<string:survey_token>` | jsonrpc | user |  | True | `survey` | `UserInputSession.survey_session_next_question` | This route is called when the host goes to the next question of the session.  It's not a regular 'request.render' route because we handle the transition between questions using a AJAX call to be able to display a bioutiful fade in/out effect.  It triggers the next question of the session.  We artifi |
 | `/survey/session/results/<string:survey_token>` | jsonrpc | user |  | True | `survey` | `UserInputSession.survey_session_results` | This route is called when the host shows the current question's results.  It's not a regular 'request.render' route because we handle the display of results using an AJAX request to be able to include the results in the currently displayed page. |
@@ -636,8 +636,8 @@ Every route exposed over Hypertext Transfer Protocol.
 | `/web/export/xlsx` | http | user |  |  | `web` | `ExcelExport.web_export_xlsx` |  |
 | `/` | http | none |  |  | `web` | `Home.index` |  |
 | `/web` | http | none |  |  | `web` | `Home.web_client` |  |
-| `/odoo` | http | none |  |  | `web` | `Home.web_client` |  |
-| `/odoo/<path:subpath>` | http | none |  |  | `web` | `Home.web_client` |  |
+| `/app` | http | none |  |  | `web` | `Home.web_client` |  |
+| `/app/<path:subpath>` | http | none |  |  | `web` | `Home.web_client` |  |
 | `/scoped_app/<path:subpath>` | http | none |  |  | `web` | `Home.web_client` |  |
 | `/web/webclient/load_menus` | http | user | ["GET"] |  | `web` | `Home.web_load_menus` | Loads the menus for the webclient :param lang: language in which the menus should be loaded (only works if language is installed) :return: the menus (including the images in Base64) |
 | `/web/login` | http | none |  |  | `web` | `Home.web_login` |  |
@@ -677,7 +677,7 @@ Every route exposed over Hypertext Transfer Protocol.
 | `/web/bundle/<string:bundle_name>` | http | public | ["GET"] |  | `web` | `WebClient.bundle` | Request the definition of a bundle, including its javascript and css bundled assets |
 | `/web/manifest.webmanifest` | http | public | ["GET"] |  | `web` | `WebManifest.webmanifest` | Returns a WebManifest describing the metadata associated with a web application. Using this metadata, user agents can provide developers with means to create user experiences that are more comparable to that of a native application. |
 | `/web/service-worker.js` | http | public | ["GET"] |  | `web` | `WebManifest.service_worker` |  |
-| `/odoo/offline` | http | public | ["GET"] |  | `web` | `WebManifest.offline` | Returns the offline page delivered by the service worker |
+| `/app/offline` | http | public | ["GET"] |  | `web` | `WebManifest.offline` | Returns the offline page delivered by the service worker |
 | `/scoped_app` | http | public | ["GET"] |  | `web` | `WebManifest.scoped_app` | Returns the app shortcut page to install the app given in parameters |
 | `/scoped_app_icon_png` | http | public | ["GET"] |  | `web` | `WebManifest.scoped_app_icon_png` | Returns an app icon created with a fixed size in PNG. It is required for Safari PWAs |
 | `/web/manifest.scoped_app_manifest` | http | public | ["GET"] |  | `web` | `WebManifest.scoped_app_manifest` | Returns a WebManifest dedicated to the scope of the given app. A custom scope and start url are set to make sure no other installed PWA can overlap the scope (e.g. /the system) |
@@ -687,7 +687,7 @@ Every route exposed over Hypertext Transfer Protocol.
 | `/web_unsplash/save_unsplash` | jsonrpc | user |  |  | `web_unsplash` | `Web_Unsplash.save_unsplash` |  |
 | `/website/fetch_dashboard_data` | jsonrpc | user |  |  | `website` | `WebsiteBackend.fetch_dashboard_data` |  |
 | `/website/iframefallback` | http | user |  | True | `website` | `WebsiteBackend.get_iframe_fallback` |  |
-| `/website/check_new_content_access_rights` | jsonrpc | user |  |  | `website` | `WebsiteBackend.check_create_access_rights` | TODO: In master, remove this route and method and find a better way to do this. This route is only here to ensure that the "New Content" modal displays the correct elements for each user, and there might be a way to do it with the framework rather than having a dedicated controller route. (maybe by  |
+| `/website/check_new_content_access_rights` | jsonrpc | user |  |  | `website` | `WebsiteBackend.check_create_access_rights` | Returns, for each kind of content, whether the current user may create it."New Content" modal displays the correct elements for each user, and there might be a way to do it with the framework rather than having a dedicated controller route. (maybe by  |
 | `/website/track_installing_modules` | jsonrpc | user |  |  | `website` | `WebsiteBackend.website_track_installing_modules` | During the website configuration, this route allows to track the website features being installed and their dependencies in order to show the progress between installed and yet to install features. |
 | `/web/assets/<int:website_id>/<unique>/<string:filename>` | http | public |  |  | `website` | `WebsiteBinary.content_assets_website` |  |
 | `/website/form` | http | public | ["POST"] |  | `website` | `WebsiteForm.website_form_empty` |  |

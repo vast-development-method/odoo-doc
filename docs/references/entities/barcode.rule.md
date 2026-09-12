@@ -25,7 +25,7 @@ Description: Barcode Rule
 | `pattern` | Barcode Pattern | single line text |  | required; default `.*`; Help: The barcode matching pattern |
 | `alias` | Alias | single line text |  | required; default `0`; Help: The matched pattern will alias to this barcode |
 | `is_gs1_nomenclature` | Is Global Standards One Nomenclature | boolean |  | related through path `barcode_nomenclature_id.is_gs1_nomenclature` |
-| `gs1_content_type` | Global Standards One Content Type | selection |  | Help: The GS1 content type defines what kind of data the rule will process the barcode as:        * Date: the barcode will be converted into a Odoo datetime;        * Measure: the barcode's value is related to a specific unit;        * Numeric Identifier: fixed length barcode following a specific encoding;        * Alpha-Numeric Name: variable length barcode. |
+| `gs1_content_type` | Global Standards One Content Type | selection |  | Help: The GS1 content type defines what kind of data the rule will process the barcode as:        * Date: the barcode will be converted into the system datetime;        * Measure: the barcode's value is related to a specific unit;        * Numeric Identifier: fixed length barcode following a specific encoding;        * Alpha-Numeric Name: variable length barcode. |
 | `gs1_decimal_usage` | Decimal | boolean |  | Help: If True, use the last digit of AI to determine where the first decimal is |
 | `associated_uom_id` | Associated Unit of measure | many to one | `uom.uom` |  |
 

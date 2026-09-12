@@ -1062,7 +1062,7 @@ A preparation printer: the kitchen or bar device that receives the items to prep
 
 A configuration-level switch decides whether the local-network-access permission must be
 requested from the browser before talking to a directly addressed printer; it is read from
-the system parameter for local network access.
+The system parameter for local network access.
 
 ---
 

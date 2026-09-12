@@ -57,7 +57,7 @@ Description: Product Feed
 | `_prepare_gmc_price_info` | preparation rule | self, product | `website_sale` |  | Prepare price-related information for Google Merchant Center.  Note: If the product is flagged to prevent zero price sales, an empty dictionary is returned.  :return: A dictionary containing nothing if the product is "prevent zero price sale", or:     - List price,     - Sale price (if applicable), and     - Comparison prices (e.g., $100 / ml) if "Product Reference Price" is enabled. :rtype: dict |
 | `_prepare_gmc_stock_info` | preparation rule | self, _product | `website_sale_stock`, `website_sale` |  | Intended to be overridden in stock. |
 | `_prepare_gmc_additional_info` | preparation rule | self, product | `website_sale` |  |  |
-| `_notify_website_manager` | internal rule | self, **kwargs | `website_sale` |  | Send a notification to the website manager using OdooBot.  This method wraps around `message_notify` to notify the manager of the feed's website.  :param dict kwargs: Additional arguments passed to `message_notify`. :return: The created `mail.message` record. :rtype: mail.message |
+| `_notify_website_manager` | internal rule | self, **kwargs | `website_sale` |  | Send a notification to the website manager using System Robot.  This method wraps around `message_notify` to notify the manager of the feed's website.  :param dict kwargs: Additional arguments passed to `message_notify`. :return: The created `mail.message` record. :rtype: mail.message |
 
 ## Validation and error messages (1)
 

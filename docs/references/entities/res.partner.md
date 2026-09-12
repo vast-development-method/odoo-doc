@@ -481,7 +481,7 @@ Description: Contact
 | `AS` | AS2 exchange |
 | `AU` | File Transfer Protocol |
 | `EM` | Electronic mail |
-| `odemo` | Odoo Demo ID |
+| `odemo` | the demonstration data set ID |
 
 ### `peppol_verification_state` (Peppol status)
 
@@ -681,7 +681,7 @@ State machine fields of this entity: `peppol_verification_state`, `nemhandel_ver
 | `_write_company_type` | internal rule | self | `base` |  |  |
 | `onchange_company_type` | on change | self | `base` | onchange: `company_type` |  |
 | `_check_barcode_unicity` | validation | self | `base` | constrains: `barcode` |  |
-| `_convert_fields_to_values` | internal rule | self, field_names | `base` |  | Returns dict of write() values for synchronizing ``field_names`` |
+| `_convert_fields_to_values` | internal rule | self, field_names | `base` |  | Returns dict of write() values for synchronizing `field_names` |
 | `_address_fields` | internal rule | self | `base_address_extended`, `base`, `l10n_eg_edi_eta`, `l10n_sa_edi` | model | Returns the list of address fields that are synced from the parent. |
 | `_formatting_address_fields` | internal rule | self | `base`, `l10n_pe` | model | Returns the list of address fields usable to format addresses. |
 | `_get_address_values` | preparation rule | self | `base` |  | Get address values from record if at least one value is set. Otherwise it is considered empty and nothing is returned. |
@@ -708,8 +708,8 @@ State machine fields of this entity: `peppol_verification_state`, `nemhandel_ver
 | `open_commercial_entity` | operation | self | `base`, `point_of_sale` |  | Utility method used to add an "Open Company" button in partner views |
 | `_compute_display_name` | computation | self | `base`, `im_livechat`, `l10n_tr_nilvera_einvoice_extended`, `website` | depends: `complete_name`, `email`, `vat`, `state_id`, `country_id`, `commercial_company_name`; depends_context: `show_address`, `partner_show_db_id`, `show_email`, `show_vat`, `lang`, `formatted_display_name`; depends_context: `im_livechat_hide_partner_company`; depends: `website_id`; depends_context: `display_website`; depends: `l10n_tr_tax_office_id` |  |
 | `name_create` | lifecycle override | self, name | `base` | model | Override of orm's name_create method for partners. The purpose is to handle some basic formats to create partners using the name_create. If only an email address is received and that the regex cannot find a name, the name will have the email value. If 'force_email' key in context: must find the email address. |
-| `find_or_create` | operation | self, email, assert_valid_email | `base`, `mail` | model | Find a partner with the given ``email`` or use :meth:`name_create` to create a new one.  :param str email: email-like string, which should contain at least one email,     e.g. ``"Raoul Grosbedon <r.g@grosbedon.fr>"`` :param bool assert_valid_email: raise if no valid email is found :return: newly created record |
-| `address_get` | operation | self, adr_pref | `base` |  | Find contacts/addresses of the right type(s) by doing a depth-first-search through descendants within company boundaries (stop at entities flagged ``is_company``) then continuing the search at the ancestors that are within the same company boundaries. Defaults to partners of type ``'default'`` when the exact type is not found, or to the provided partner itself if no type ``'default'`` is found either. |
+| `find_or_create` | operation | self, email, assert_valid_email | `base`, `mail` | model | Find a partner with the given `email` or use :meth:`name_create` to create a new one.  :param str email: email-like string, which should contain at least one email,     e.g. `"Raoul Grosbedon <r.g@grosbedon.fr>"` :param bool assert_valid_email: raise if no valid email is found :return: newly created record |
+| `address_get` | operation | self, adr_pref | `base` |  | Find contacts/addresses of the right type(s) by doing a depth-first-search through descendants within company boundaries (stop at entities flagged `is_company`) then continuing the search at the ancestors that are within the same company boundaries. Defaults to partners of type `'default'` when the exact type is not found, or to the provided partner itself if no type `'default'` is found either. |
 | `view_header_get` | operation | self, view_id, view_type | `base` | model |  |
 | `_get_default_address_format` | preparation rule | self | `base` | model |  |
 | `_get_address_format` | preparation rule | self | `base`, `l10n_pl_edi`, `snailmail` | model |  |
@@ -755,7 +755,7 @@ State machine fields of this entity: `peppol_verification_state`, `nemhandel_ver
 | `_signup_retrieve_partner` | internal rule | self, token, check_validity, raise_exception | `auth_signup` | model | find the partner corresponding to a token, and possibly check its validity  :param token: the token to resolve :param bool check_validity: if True, also check validity :param bool raise_exception: if True, raise exception instead of returning False :return: partner (browse record) or False (if raise_exception is False) |
 | `_signup_retrieve_info` | internal rule | self, token | `auth_signup` | model | retrieve the user info about the token  :rtype: dict \| None :return: a dictionary with the user information if the token is valid,     None otherwise:          db             the name of the database         token             the token, if token is valid         name             the name of the partner, if token is valid         login             the user login, if the user already exists         email             the partner email, if the user does not exist |
 | `_get_login_date` | preparation rule | self | `auth_signup` |  |  |
-| `_generate_signup_token` | internal rule | self, expiration | `auth_signup` |  | Generate the signup token for the partner in self.  Assume that :attr:`signup_type` is either ``'signup'`` or ``'reset'``.  :param expiration: the time in hours before the expiration of the token :return: the signed payload/token that can be used to reset the          password/signup.  Since ``last_login_date`` is part of the payload, this token is invalidated as soon as the user logs in. |
+| `_generate_signup_token` | internal rule | self, expiration | `auth_signup` |  | Generate the signup token for the partner in self.  Assume that :attr:`signup_type` is either `'signup'` or `'reset'`.  :param expiration: the time in hours before the expiration of the token :return: the signed payload/token that can be used to reset the          password/signup.  Since `last_login_date` is part of the payload, this token is invalidated as soon as the user logs in. |
 | `_get_partner_from_token` | preparation rule | self, token | `auth_signup` | model |  |
 | `_get_frontend_writable_fields` | preparation rule | self | `account_peppol`, `account`, `l10n_ar`, `l10n_br`, `l10n_it_edi`, `l10n_latam_base`, `l10n_my_edi`, `l10n_pe`, `l10n_sa_edi`, `portal`, `website_sale` | model | Define the fields a portal/public user can change on their contact and address records.  :rtype: set |
 | `_can_edit_country` | internal rule | self | `account`, `portal`, `sale` |  | Can't edit `country_id` if there is (non draft) issued invoices. |
@@ -838,7 +838,7 @@ State machine fields of this entity: `peppol_verification_state`, `nemhandel_ver
 | `_log_verification_state_update` | internal rule | self, company, old_value, new_value | `account_peppol`, `l10n_fr_pdp` |  |  |
 | `_get_participant_info` | preparation rule | self, edi_identification | `account_peppol` | model |  |
 | `_check_peppol_participant_exists` | validation | self, participant_info, edi_identification | `account_peppol` | model |  |
-| `_peppol_lookup_participant` | internal rule | self, edi_identification | `account_peppol` | model | NAPTR DNS peppol participant lookup through Odoo's Peppol proxy |
+| `_peppol_lookup_participant` | internal rule | self, edi_identification | `account_peppol` | model | NAPTR DNS peppol participant lookup through the system's Peppol proxy |
 | `_check_document_type_support` | validation | self, participant_info, ubl_cii_format, process_type | `account_peppol` |  |  |
 | `_update_peppol_state_per_company` | internal rule | self, vals | `account_peppol` |  |  |
 | `button_account_peppol_check_partner_endpoint` | user action | self, company | `account_peppol_response`, `account_peppol`, `l10n_fr_pdp` |  | A basic check for whether a participant is reachable at the given Peppol participant ID - peppol_eas:peppol_endpoint (ex: '9999:test') The SML (Service Metadata Locator) assigns a DNS name to each peppol participant. This DNS name resolves into the SMP (Service Metadata Publisher) of the participant. The DNS address is of the following form: strip-trailing(base32(sha256(lowercase(ID-VALUE))),"=") + "." + ID-SCHEME + "." + SML-ZONE-NAME The lookup should be done on NAPTR DNS from 2025-11-01 (ref:https://peppol.helger.com/public/locale-en_US/menuitem-docs-doc-exchange) |
@@ -1010,7 +1010,7 @@ State machine fields of this entity: `peppol_verification_state`, `nemhandel_ver
 | `_compute_is_using_nemhandel` | computation | self | `l10n_dk_nemhandel` | depends_context: `allowed_company_ids`; depends: `invoice_edi_format` |  |
 | `_check_nemhandel_send_oioubl` | validation | self | `l10n_dk_nemhandel` | constrains: `invoice_edi_format`, `invoice_sending_method` |  |
 | `_get_nemhandel_participant_info` | preparation rule | self, edi_identification | `l10n_dk_nemhandel` | model |  |
-| `_nemhandel_lookup_participant` | internal rule | self, edi_identification | `l10n_dk_nemhandel` | model | NAPTR DNS nemhandel participant lookup through Odoo's Nemhandel proxy |
+| `_nemhandel_lookup_participant` | internal rule | self, edi_identification | `l10n_dk_nemhandel` | model | NAPTR DNS nemhandel participant lookup through the system's Nemhandel proxy |
 | `_l10n_dk_nemhandel_log_verification_state_update` | internal rule | self, company, old_value, new_value | `l10n_dk_nemhandel` |  |  |
 | `_check_nemhandel_participant_exists` | validation | self, participant_info, edi_identification | `l10n_dk_nemhandel` | model |  |
 | `_update_nemhandel_state_per_company` | internal rule | self, vals | `l10n_dk_nemhandel` |  |  |
@@ -1019,7 +1019,7 @@ State machine fields of this entity: `peppol_verification_state`, `nemhandel_ver
 | `_compute_nemhandel_response_support` | computation | self | `l10n_dk_nemhandel_response` | depends: `nemhandel_supported_documents`, `nemhandel_verification_state` |  |
 | `_nemhandel_fill_participant_supported_documents` | internal rule | self | `l10n_dk_nemhandel_response` |  |  |
 | `_compute_l10n_ec_vat_validation` | computation | self | `l10n_ec` | depends: `vat`, `country_id`, `l10n_latam_identification_type_id` |  |
-| `_l10n_ec_get_identification_type` | internal rule | self | `l10n_ec` |  | Maps Odoo identification types to Ecuadorian ones. Useful for document type domains, electronic documents, ats, others. |
+| `_l10n_ec_get_identification_type` | internal rule | self | `l10n_ec` |  | Maps the system identification types to Ecuadorian ones. Useful for document type domains, electronic documents, ats, others. |
 | `_l10n_es_is_foreign` | internal rule | self | `l10n_es` |  |  |
 | `_l10n_es_edi_get_partner_info` | internal rule | self | `l10n_es` |  | Used in SII and Veri*factu |
 | `_validate_l10n_es_edi_facturae_ac_physical_gln` | validation | self | `l10n_es_edi_facturae` | constrains: `l10n_es_edi_facturae_ac_physical_gln` |  |

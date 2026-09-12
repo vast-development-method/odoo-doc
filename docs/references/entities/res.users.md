@@ -53,7 +53,7 @@ Description: User
 | `is_in_call` | Is in call | boolean |  | related through path `partner_id.is_in_call` |
 | `role_ids` | User Roles | many to many | `res.role` | association table `res_role_res_users_rel`; Help: Users are notified whenever one of their roles is @-mentioned in a conversation. |
 | `can_edit_role` | Can Edit Role | boolean |  | computed by rule `_compute_can_edit_role` (not stored) |
-| `notification_type` | Notification | selection |  | required; computed by rule `_compute_notification_type` and stored; writable through an inverse rule; default `email`; Help: Policy on how to handle Chatter notifications: - By Emails: notifications are sent to your email address - In Odoo: notifications appear in your Odoo Inbox |
+| `notification_type` | Notification | selection |  | required; computed by rule `_compute_notification_type` and stored; writable through an inverse rule; default `email`; Help: Policy on how to handle Chatter notifications: - By Emails: notifications are sent to your email address - In the system: notifications appear in your system inbox |
 | `presence_ids` | Presence | one to many | `mail.presence` | visible only to groups `base.group_system`; inverse field `user_id` |
 | `out_of_office_from` | Out Of Office From | date and time |  |  |
 | `out_of_office_to` | Out Of Office To | date and time |  |  |
@@ -149,8 +149,8 @@ Description: User
 | `favorite_project_ids` | Favorite Projects | many to many | `project.project` | not copied on duplication; association table `project_favorite_user_rel` |
 | `last_lunch_location_id` | Last Lunch Location | many to one | `lunch.location` | not copied on duplication; visible only to groups `lunch.group_lunch_user` |
 | `favorite_lunch_product_ids` | Favorite Lunch Product | many to many | `lunch.product` | not copied on duplication; visible only to groups `lunch.group_lunch_user`; association table `lunch_product_favorite_user_rel` |
-| `odoobot_state` | OdooBot Status | selection |  | read only |
-| `odoobot_failed` | Odoobot Failed | boolean |  | read only |
+| `system_robot_state` | System Robot Status | selection |  | read only |
+| `system_robot_failed` | System Robot Failed | boolean |  | read only |
 | `microsoft_calendar_rtoken` | Microsoft Refresh Token | single line text |  | not copied on duplication; visible only to groups `base.group_system` |
 | `microsoft_calendar_token` | Microsoft User token | single line text |  | not copied on duplication; visible only to groups `base.group_system` |
 | `microsoft_calendar_token_validity` | Microsoft Token Validity | date and time |  | not copied on duplication |
@@ -174,7 +174,7 @@ Description: User
 | Value | Label |
 |---|---|
 | `email` | By Emails |
-| `inbox` | In Odoo |
+| `inbox` | In the system |
 
 ### `manual_im_status` (IM status manually set by the user)
 
@@ -207,7 +207,7 @@ Description: User
 | `private` | Private by default |
 | `confidential` | Internal users only |
 
-### `odoobot_state` (OdooBot Status)
+### `system_robot_state` (System Robot Status)
 
 | Value | Label |
 |---|---|
@@ -222,14 +222,14 @@ Description: User
 
 ## State fields
 
-State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state`. Transitions are specified in the domain documents.
+State machine fields of this entity: `manual_im_status`, `state`, `system_robot_state`. Transitions are specified in the domain documents.
 
 ## Database constraints and indexes (4)
 
 | Name | Kind | Definition | Message | Package |
 |---|---|---|---|---|
 | `_login_key` | Constraint | `UNIQUE (login)` | You can not have two users with the same login! | `base` |
-| `_notification_type` | Constraint | `CHECK (notification_type = 'email' OR NOT share)` | Only internal user can receive notifications in Odoo | `mail` |
+| `_notification_type` | Constraint | `CHECK (notification_type = 'email' OR NOT share)` | Only internal user can receive notifications in the system | `mail` |
 | `_uniq_users_oauth_provider_oauth_uid` | Constraint | `unique(oauth_provider_id, oauth_uid)` | OAuth UID must be unique per provider | `auth_oauth` |
 | `_login_key` | Constraint | `unique (login, website_id)` | You can not have two users with the same login! | `website` |
 
@@ -247,7 +247,7 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `_set_password` | internal rule | self | `auth_password_policy`, `base` |  |  |
 | `_set_encrypted_password` | internal rule | self, uid, pw | `base` |  |  |
 | `_rpc_api_keys_only` | internal rule | self | `auth_totp_mail`, `auth_totp`, `base` |  | To be overridden if RPC access needs to be restricted to API keys, e.g. for 2FA |
-| `_check_credentials` | validation | self, credential, env | `auth_ldap`, `auth_oauth`, `auth_passkey`, `auth_totp_mail`, `auth_totp`, `base`, `website_sale_wishlist` |  | Validates the current user's password.  Override this method to plug additional authentication methods.  Overrides should:  * call ``super`` to delegate to parents for credentials-checking * catch :class:`~odoo.exceptions.AccessDenied` and perform their   own checking * (re)raise :class:`~odoo.exceptions.AccessDenied` if the   credentials are still invalid according to their own   validation method * return the ``auth_info``  When trying to check for credentials validity, call :meth:`_check_credentials` instead.  Credentials are considered to be untrusted user input, for more information pleas |
+| `_check_credentials` | validation | self, credential, env | `auth_ldap`, `auth_oauth`, `auth_passkey`, `auth_totp_mail`, `auth_totp`, `base`, `website_sale_wishlist` |  | Validates the current user's password.  Override this method to plug additional authentication methods.  Overrides should:  * call `super` to delegate to parents for credentials-checking * catch the AccessDenied error and perform their   own checking * (re)raise the AccessDenied error if the   credentials are still invalid according to their own   validation method * return the `auth_info`  When trying to check for credentials validity, call :meth:`_check_credentials` instead.  Credentials are considered to be untrusted user input, for more information pleas |
 | `_compute_email_domain_placeholder` | computation | self | `base` | depends_context: `uid` |  |
 | `_compute_password` | computation | self | `base` |  |  |
 | `_set_new_password` | internal rule | self | `base` |  |  |
@@ -286,7 +286,7 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `_get_email_domain` | preparation rule | self, email | `base`, `website` | model |  |
 | `_get_login_order` | preparation rule | self | `base`, `website` | model |  |
 | `_login` | internal rule | self, credential, user_agent_env | `auth_ldap`, `auth_passkey`, `base` |  |  |
-| `authenticate` | operation | self, credential, user_agent_env | `auth_totp_mail`, `base`, `website` |  | Verifies and returns the user ID corresponding to the given ``credential``, or False if there was no matching user.  :param dict credential: a dictionary where the `type` key defines the authentication method and     additional keys are passed as required per authentication method.     For example:     - { 'type': 'password', 'login': 'username', 'password': '123456' }     - { 'type': 'webauthn', 'webauthn_response': '{json data}' } :param dict user_agent_env: environment dictionary describing any     relevant environment attributes :return: auth_info :rtype: dict |
+| `authenticate` | operation | self, credential, user_agent_env | `auth_totp_mail`, `base`, `website` |  | Verifies and returns the user ID corresponding to the given `credential`, or False if there was no matching user.  :param dict credential: a dictionary where the `type` key defines the authentication method and     additional keys are passed as required per authentication method.     For example:     - { 'type': 'password', 'login': 'username', 'password': '123456' }     - { 'type': 'webauthn', 'webauthn_response': '{json data}' } :param dict user_agent_env: environment dictionary describing any     relevant environment attributes :return: auth_info :rtype: dict |
 | `_check_uid_passwd` | validation | self, uid, passwd | `base` | model | Verifies that the given (uid, password) is authorized and raise an exception if it is not. |
 | `_get_session_token_fields` | preparation rule | self | `auth_oauth`, `auth_passkey`, `auth_totp`, `base` |  |  |
 | `_get_session_token_query_params` | preparation rule | self | `auth_passkey`, `base` |  |  |
@@ -294,19 +294,19 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `_session_token_get_values` | internal rule | self | `base` |  |  |
 | `_session_token_hash_compute` | internal rule | self, sid, field_values | `base` |  |  |
 | `_legacy_session_token_hash_compute` | internal rule | self, sid | `base` |  |  |
-| `change_password` | operation | self, old_passwd, new_passwd | `auth_ldap`, `auth_totp`, `base` | model | Change current user password. Old password must be provided explicitly to prevent hijacking an existing user session, or for cases where the cleartext password is not used to authenticate requests.  :return: True :raise: odoo.exceptions.AccessDenied when old password is wrong :raise: odoo.exceptions.UserError when new password is not set or empty |
+| `change_password` | operation | self, old_passwd, new_passwd | `auth_ldap`, `auth_totp`, `base` | model | Change current user password. Old password must be provided explicitly to prevent hijacking an existing user session, or for cases where the cleartext password is not used to authenticate requests.  :return: True :raise: AccessDenied error when old password is wrong :raise: UserError error when new password is not set or empty |
 | `_change_password` | internal rule | self, new_passwd | `base` |  |  |
-| `_deactivate_portal_user` | internal rule | self, **post | `base`, `mail`, `phone_validation` |  | Try to remove the current portal user.  This is used to give the opportunity to portal users to de-activate their accounts. Indeed, as the portal users can easily create accounts, they will sometimes wish it removed because they don't use this Odoo portal anymore.  Before this feature, they would have to contact the website or the support to get their account removed, which could be tedious. |
+| `_deactivate_portal_user` | internal rule | self, **post | `base`, `mail`, `phone_validation` |  | Try to remove the current portal user.  This is used to give the opportunity to portal users to de-activate their accounts. Indeed, as the portal users can easily create accounts, they will sometimes wish it removed because they don't use this portal anymore.  Before this feature, they would have to contact the website or the support to get their account removed, which could be tedious. |
 | `preference_save` | operation | self | `base` |  |  |
 | `action_change_password_wizard` | user action | self | `base` |  |  |
 | `preference_change_password` | operation | self | `base` |  |  |
 | `api_key_wizard` | operation | self | `base` |  |  |
 | `action_revoke_all_devices` | user action | self | `base` |  |  |
 | `_action_revoke_all_devices` | internal rule | self | `base` |  |  |
-| `has_groups` | operation | self, group_spec | `base` | readonly | Return whether user ``self`` satisfies the given group restrictions ``group_spec``, i.e., whether it is member of at least one of the groups, and is not a member of any of the groups preceded by ``!``.  Note that the group ``"base.group_no_one"`` is only effective in debug mode, just like method :meth:`~.has_group` does.  :param str group_spec: comma-separated list of fully-qualified group     external IDs, optionally preceded by ``!``.     Example:``"base.group_user,base.group_portal,!base.group_system"``. |
-| `has_group` | operation | self, group_ext_id | `base` | readonly | Return whether user ``self`` belongs to the given group (given by its fully-qualified external ID).  Note that the group ``"base.group_no_one"`` is only effective in debug mode: the method returns ``True`` if the user belongs to the group and the current request is in debug mode. |
-| `_has_group` | internal rule | self, group_ext_id | `base` |  | Return whether user ``self`` belongs to the given group.  :param str group_ext_id: external ID (XML ID) of the group.    Must be provided in fully-qualified form (``module.ext_id``), as there    is no implicit module to use.. :return: True if user ``self`` is a member of the group with the    given external ID (XML ID), else False. |
-| `_get_group_ids` | preparation rule | self | `base` |  | Return ``self``'s group ids (as a tuple). |
+| `has_groups` | operation | self, group_spec | `base` | readonly | Return whether user `self` satisfies the given group restrictions `group_spec`, i.e., whether it is member of at least one of the groups, and is not a member of any of the groups preceded by `!`.  Note that the group `"base.group_no_one"` is only effective in debug mode, just like method :meth:`~.has_group` does.  :param str group_spec: comma-separated list of fully-qualified group     external IDs, optionally preceded by `!`.     Example:`"base.group_user,base.group_portal,!base.group_system"`. |
+| `has_group` | operation | self, group_ext_id | `base` | readonly | Return whether user `self` belongs to the given group (given by its fully-qualified external ID).  Note that the group `"base.group_no_one"` is only effective in debug mode: the method returns `True` if the user belongs to the group and the current request is in debug mode. |
+| `_has_group` | internal rule | self, group_ext_id | `base` |  | Return whether user `self` belongs to the given group.  :param str group_ext_id: external ID (XML ID) of the group.    Must be provided in fully-qualified form (`module.ext_id`), as there    is no implicit module to use.. :return: True if user `self` is a member of the group with the    given external ID (XML ID), else False. |
+| `_get_group_ids` | preparation rule | self | `base` |  | Return `self`'s group ids (as a tuple). |
 | `_action_show` | internal rule | self | `base` |  | If self is a singleton, directly access the form view. If it is a recordset, open a list view |
 | `action_show_groups` | user action | self | `base` |  |  |
 | `action_show_accesses` | user action | self | `base` |  |  |
@@ -318,7 +318,7 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `_is_admin` | internal rule | self | `base` |  |  |
 | `_is_superuser` | internal rule | self | `base` |  |  |
 | `get_company_currency_id` | operation | self | `base` | model |  |
-| `_crypt_context` | internal rule | self | `base` |  | Passlib CryptContext instance used to encrypt and verify passwords. Can be overridden if technical, legal or political matters require different kdfs than the provided default.  The work factor of the default KDF can be configured using the ``password.hashing.rounds`` ICP. |
+| `_crypt_context` | internal rule | self | `base` |  | Passlib CryptContext instance used to encrypt and verify passwords. Can be overridden if technical, legal or political matters require different kdfs than the provided default.  The work factor of the default KDF can be configured using the `password.hashing.rounds` ICP. |
 | `_assert_can_auth` | internal rule | self, user | `base` |  | Checks that the current environment even allows the current auth request to happen.  The baseline implementation is a simple linear login cooldown: after a number of failures trying to log-in, the user (by login) is put on cooldown. During the cooldown period, login *attempts* are ignored and logged.  :param user: user id or login, for logging purpose  .. warning::      The login counter is not shared between workers and not     specifically thread-safe, the feature exists mostly for     rate-limiting on large number of login attempts (brute-forcing     passwords) so that should not be much of |
 | `_on_login_cooldown` | internal rule | self, failures, previous | `base` |  | Decides whether the user trying to log in is currently "on cooldown" and not even allowed to attempt logging in.  The default cooldown function simply puts the user on cooldown for <login_cooldown_duration> seconds after each failure following the <login_cooldown_after>th (0 to disable).  Can be overridden to implement more complex backoff strategies, or e.g. wind down or reset the cooldown period as the previous failure recedes into the far past.  :param int failures: number of recorded failures (since last success) :param previous: timestamp of previous failure :type previous:  datetime.date |
 | `_register_hook` | internal rule | self | `base` |  |  |
@@ -439,10 +439,10 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `action_karma_report` | user action | self | `gamification` |  |  |
 | `_get_google_calendar_token` | preparation rule | self | `google_calendar` |  |  |
 | `_get_google_sync_status` | preparation rule | self | `google_calendar` |  | Returns the calendar synchronization status (active, paused or stopped). |
-| `_check_pending_odoo_records` | validation | self | `google_calendar` |  | Returns True if sync is active and there are records to be synchronized to Google. |
+| `_check_pending_system_records` | validation | self | `google_calendar` |  | Returns True if sync is active and there are records to be synchronized to Google. |
 | `_sync_google_calendar` | internal rule | self, calendar_service | `google_calendar` |  |  |
-| `_sync_google_calendar_filter_remote_events` | internal rule | self, google_events | `google_calendar` |  | Filter out events coming from google which should not be synced into odoo. |
-| `_sync_single_event` | internal rule | self, calendar_service, odoo_event, event_id | `google_calendar` |  |  |
+| `_sync_google_calendar_filter_remote_events` | internal rule | self, google_events | `google_calendar` |  | Filter out events coming from google which should not be synced into system. |
+| `_sync_single_event` | internal rule | self, calendar_service, system_event, event_id | `google_calendar` |  |  |
 | `_sync_request` | internal rule | self, calendar_service, event_id | `google_calendar` |  |  |
 | `_sync_all_google_calendar` | internal rule | self | `google_calendar` | model | Cron job |
 | `is_google_calendar_synced` | operation | self | `google_calendar` |  | True if Google Calendar settings are filled (Client ID / Secret) and user calendar is synced meaning we can make API calls, false otherwise. |
@@ -482,7 +482,7 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `_load_pos_data_read` | internal rule | self, records, config | `point_of_sale` | model |  |
 | `_has_cash_move_permission` | internal rule | self | `point_of_sale` |  |  |
 | `_has_cash_delete_permission` | internal rule | self | `point_of_sale` |  |  |
-| `_init_odoobot` | internal rule | self | `mail_bot` |  |  |
+| `_init_system_robot` | internal rule | self | `mail_bot` |  |  |
 | `_set_microsoft_auth_tokens` | internal rule | self, access_token, refresh_token, ttl | `microsoft_account` |  |  |
 | `_microsoft_calendar_authenticated` | internal rule | self | `microsoft_calendar` |  |  |
 | `_get_microsoft_calendar_token` | preparation rule | self | `microsoft_calendar` |  |  |
@@ -496,7 +496,7 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `unpause_microsoft_synchronization` | operation | self | `microsoft_calendar` |  |  |
 | `pause_microsoft_synchronization` | operation | self | `microsoft_calendar` |  |  |
 | `_has_setup_microsoft_credentials` | internal rule | self | `microsoft_calendar` | model | Checks if both Client ID and Client Secret are defined in the database. |
-| `_set_ICP_first_synchronization_date` | internal rule | self, now | `microsoft_calendar` |  | Set the first synchronization date as an ICP parameter when applicable (param not defined yet and calendar never synchronized before). This parameter is used for not synchronizing previously created Odoo events and thus avoid spamming invitations for those events. |
+| `_set_ICP_first_synchronization_date` | internal rule | self, now | `microsoft_calendar` |  | Set the first synchronization date as an ICP parameter when applicable (param not defined yet and calendar never synchronized before). This parameter is used for not synchronizing previously created system events and thus avoid spamming invitations for those events. |
 | `_generate_onboarding_todo` | internal rule | self | `project_todo` |  |  |
 | `_can_manage_unsplash_settings` | internal rule | self | `web_unsplash` |  |  |
 | `open_website_url` | operation | self | `website_forum` |  |  |
@@ -607,7 +607,7 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `im_livechat.res_users_form_view` | xpath | `base.view_users_form` | `has_access_livechat`, `livechat_username`, `livechat_lang_ids`, `livechat_expertise_ids` |  |  | `im_livechat` |
 | `mail.view_users_form_simple_modif_mail` | data | `base.view_users_form_simple_modif` | `notification_type`, `outgoing_mail_server_id`, `outgoing_mail_server_type`, `signature`, `out_of_office_from`, `out_of_office_to`, `out_of_office_message` |  |  | `mail` |
 | `mail.view_users_form_mail` | data | `base.view_users_form` | `notification_type`, `outgoing_mail_server_id`, `outgoing_mail_server_type`, `signature`, `out_of_office_from`, `out_of_office_to`, `out_of_office_message` |  |  | `mail` |
-| `mail_bot.res_users_view_form` | data | `mail.view_users_form_mail` | `notification_type`, `odoobot_state` |  |  | `mail_bot` |
+| `mail_bot.res_users_view_form` | data | `mail.view_users_form_mail` | `notification_type`, `system_robot_state` |  |  | `mail_bot` |
 | `mail_bot_hr.res_users_view_form_simple_modif` | widget | `hr.res_users_view_form_simple_modif` |  |  |  | `mail_bot_hr` |
 | `mail_bot_hr.res_users_view_form_preferences` | sheet | `hr.res_users_view_form_preferences` |  |  |  | `mail_bot_hr` |
 | `microsoft_calendar.view_users_form` | xpath | `calendar.res_users_view_form` |  |  |  | `microsoft_calendar` |
@@ -658,7 +658,7 @@ State machine fields of this entity: `manual_im_status`, `state`, `odoobot_state
 | `auth_signup.mail_template_data_unregistered_users` | Settings: Unregistered User Reminder | Reminder for unregistered users |
 | `auth_signup.mail_template_user_signup_account_created` | Settings: New Portal Sign Up | Welcome to {{ object.company_id.name }}! |
 | `auth_signup.portal_set_password_email` | Settings: New Portal User Invite | Your account at {{ object.company_id.name }} |
-| `auth_totp_mail.mail_template_totp_invite` | Settings: 2Fa Invitation | Invitation to activate two-factor authentication on your the system account |
+| `auth_totp_mail.mail_template_totp_invite` | Settings: 2Fa Invitation | Invitation to activate two-factor authentication on your account |
 | `auth_totp_mail.mail_template_totp_mail_code` | Settings: 2Fa New Login | Your two-factor authentication code |
 | `gamification.mail_template_data_new_rank_reached` | Gamification: New Rank Reached | New rank: {{ object.rank_id.name }} |
 | `website_profile.validation_email` | Forum: Email Verification | {{ object.company_id.name }} Profile validation |

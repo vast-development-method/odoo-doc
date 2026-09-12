@@ -158,7 +158,7 @@ Description: Account EDI proxy user
 | `_cron_pdp_get_regulatory_documents` | background operation | self | `l10n_fr_pdp` |  |  |
 | `_cron_pdp_send_lifecycles` | background operation | self | `l10n_fr_pdp` |  |  |
 | `_l10n_gr_edi_proxy_request` | internal rule | self, route, params | `l10n_gr_edi_e_invoo` |  |  |
-| `_toggle_proxy_user_active` | internal rule | self | `l10n_it_edi` |  | Toggle the value of the ``active`` boolean field of the proxy_user, and handle sending the reactivate/deactivate requests to the IAP side. |
+| `_toggle_proxy_user_active` | internal rule | self | `l10n_it_edi` |  | Toggle the value of the `active` boolean field of the proxy_user, and handle sending the reactivate/deactivate requests to the IAP side. |
 | `_l10n_my_edi_contact_proxy` | internal rule | self, endpoint, params | `l10n_my_edi` |  |  |
 
 ## Validation and error messages (35)

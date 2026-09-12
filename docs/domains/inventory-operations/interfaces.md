@@ -273,7 +273,7 @@ Each entry gives the entity, the operation name as it is reproduced, its inputs 
 
 | Path | Method | Authentication | Purpose |
 |---|---|---|---|
-| `/stock/<output_format>/<report_name>` | HyperText Transfer Protocol GET | signed-in user | Renders the traceability tree. The request carries `data` (the serialised tree the screen built), `active_id`, `active_model` and an optional `context`, all as text parameters. Only the `pdf` output format is implemented; it answers with the portable-document-format bytes, content type `application/pdf` and the attachment file name `stock_traceability.pdf`. Any failure is answered as a serialised error with code 0 and the message "Odoo Server Error", wrapped in an internal-server-error response. The traceability record used is the most recent one created by the calling user. |
+| `/stock/<output_format>/<report_name>` | HyperText Transfer Protocol GET | signed-in user | Renders the traceability tree. The request carries `data` (the serialised tree the screen built), `active_id`, `active_model` and an optional `context`, all as text parameters. Only the `pdf` output format is implemented; it answers with the portable-document-format bytes, content type `application/pdf` and the attachment file name `stock_traceability.pdf`. Any failure is answered as a serialised error with code 0 and the message "The system Server Error", wrapped in an internal-server-error response. The traceability record used is the most recent one created by the calling user. |
 
 The domain exposes no public (unauthenticated) route.
 

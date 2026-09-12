@@ -91,7 +91,7 @@ Description: Event Recurrence Rule
 | `_write_from_google` | internal rule | self, gevent, vals | `google_calendar` |  |  |
 | `_create_from_google` | internal rule | self, gevents, vals_list | `google_calendar` |  |  |
 | `_get_sync_domain` | preparation rule | self | `google_calendar` |  |  |
-| `_odoo_values` | internal rule | self, google_recurrence, default_reminders | `google_calendar` | model |  |
+| `_system_values` | internal rule | self, google_recurrence, default_reminders | `google_calendar` | model |  |
 | `_google_values` | internal rule | self | `google_calendar` |  |  |
 | `_get_event_user` | preparation rule | self | `google_calendar` |  |  |
 | `_is_google_insertion_blocked` | internal rule | self, sender_user | `google_calendar` |  |  |
@@ -102,7 +102,7 @@ Description: Event Recurrence Rule
 | `_write_from_microsoft` | internal rule | self, microsoft_event, vals | `microsoft_calendar` |  |  |
 | `_get_microsoft_sync_domain` | preparation rule | self | `microsoft_calendar` |  |  |
 | `_cancel_microsoft` | internal rule | self | `microsoft_calendar` |  |  |
-| `_microsoft_to_odoo_values` | internal rule | self, microsoft_recurrence, default_reminders, default_values, with_ids | `microsoft_calendar` | model |  |
+| `_microsoft_to_system_values` | internal rule | self, microsoft_recurrence, default_reminders, default_values, with_ids | `microsoft_calendar` | model |  |
 | `_microsoft_values` | internal rule | self, fields_to_sync, initial_values | `microsoft_calendar` |  | Get values to update the whole Outlook event recurrence. (done through the first event of the Outlook recurrence). |
 | `_ensure_attendees_have_email` | internal rule | self | `microsoft_calendar` |  |  |
 | `_get_event_user_m` | preparation rule | self, user_id | `microsoft_calendar` |  | Get the user who will send the request to Microsoft (organizer if synchronized and current user otherwise). |

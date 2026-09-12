@@ -860,7 +860,7 @@ Every user-facing validation or error message, with the entity and operation tha
 | [`hr.expense`](entities/hr.expense.md) | `_do_refuse` | UserError | You cannot cancel an expense linked to a posted journal entry |
 | [`hr.expense`](entities/hr.expense.md) | `_post_wizard` | UserError | Only expense paid by the employee can be posted with the wizard |
 | [`hr.expense`](entities/hr.expense.md) | `_prepare_payments_vals` | UserError | You need to add a manual payment method on the journal (%s) |
-| [`hr.expense`](entities/hr.expense.md) | `_get_base_account` | UserError | the system had a look at your expense, its product, your company and the journal but came back with empty hands. Give the system a hand to find an account by setting up an expense account. %(expense)s %(expense_name)s. |
+| [`hr.expense`](entities/hr.expense.md) | `_get_base_account` | UserError | The system had a look at your expense, its product, your company and the journal but came back with empty hands. Give the system a hand to find an account by setting up an expense account. %(expense)s %(expense_name)s. |
 | [`hr.expense`](entities/hr.expense.md) | `_get_expense_account_destination` | UserError | The following expenses payment method leads to several accounts payable and this isn't supported: %(expenses)s |
 | [`hr.expense`](entities/hr.expense.md) | `_get_expense_account_destination` | UserError | No work contact found for the employee %(name)s, please configure one. |
 | [`hr.expense.post.wizard`](entities/hr.expense.post.wizard.md) | `action_post_entry` | UserError | You don't have the rights to create accounting entries. |
@@ -966,8 +966,8 @@ Every user-facing validation or error message, with the entity and operation tha
 | [`ir.actions.report`](entities/ir.actions.report.md) | `_run_wkhtmltoimage` | UserError | wkhtmltoimage 0.12.0^ is required in order to render images from html |
 | [`ir.actions.report`](entities/ir.actions.report.md) | `_run_wkhtmltopdf` | UserError | message |
 | [`ir.actions.report`](entities/ir.actions.report.md) | `_run_wkhtmltopdf` | UserError | Tried to convert multiple documents in wkhtmltopdf using unpatched QT |
-| [`ir.actions.report`](entities/ir.actions.report.md) | `_handle_merge_pdfs_error` | UserError | the system is unable to merge the generated PDFs. |
-| [`ir.actions.report`](entities/ir.actions.report.md) | `_merge_pdfs` | UserError | the system is unable to merge the generated PDFs. |
+| [`ir.actions.report`](entities/ir.actions.report.md) | `_handle_merge_pdfs_error` | UserError | The system is unable to merge the generated PDFs. |
+| [`ir.actions.report`](entities/ir.actions.report.md) | `_merge_pdfs` | UserError | The system is unable to merge the generated PDFs. |
 | [`ir.actions.report`](entities/ir.actions.report.md) | `_render_qweb_pdf_prepare_streams` | UserError | Unable to find Wkhtmltopdf on this system. The PDF can not be created. |
 | [`ir.actions.report`](entities/ir.actions.report.md) | `_render_qweb_pdf_prepare_streams` | UserError | Report template “%s” has an issue, please contact your administrator.   Cannot separate file to save as attachment because the report's template does not contain the attributes 'data-oe-model' and 'data-oe-id' as part of the div with 'article' classname. |
 | [`ir.actions.report`](entities/ir.actions.report.md) | `_render_qweb_pdf_prepare_streams` | UserError | No original purchase document could be found for any of the selected purchase documents. |
@@ -1131,15 +1131,15 @@ Every user-facing validation or error message, with the entity and operation tha
 | [`ir.module.module`](entities/ir.module.module.md) | `button_install` | UserError | You are trying to install incompatible modules in category "%(category)s":%(module_list)s |
 | [`ir.module.module`](entities/ir.module.module.md) | `button_install` | UserError | Modules "%(module)s" and "%(incompatible_module)s" are incompatible. |
 | [`ir.module.module`](entities/ir.module.module.md) | `_button_immediate_function` | UserError | The method _button_immediate_install cannot be called on init or non loaded registries. Please use button_install instead. |
-| [`ir.module.module`](entities/ir.module.module.md) | `_button_immediate_function` | UserError | the system is currently processing another module operation. Please try again later or contact your system administrator. |
-| [`ir.module.module`](entities/ir.module.module.md) | `_button_immediate_function` | UserError | the system is currently processing another module operation. Please try again later or contact your system administrator. |
-| [`ir.module.module`](entities/ir.module.module.md) | `_button_immediate_function` | UserError | the system is currently processing a scheduled action. Module operations are not possible at this time, please try again later or contact your system administrator. |
+| [`ir.module.module`](entities/ir.module.module.md) | `_button_immediate_function` | UserError | The system is currently processing another module operation. Please try again later or contact your system administrator. |
+| [`ir.module.module`](entities/ir.module.module.md) | `_button_immediate_function` | UserError | The system is currently processing another module operation. Please try again later or contact your system administrator. |
+| [`ir.module.module`](entities/ir.module.module.md) | `_button_immediate_function` | UserError | The system is currently processing a scheduled action. Module operations are not possible at this time, please try again later or contact your system administrator. |
 | [`ir.module.module`](entities/ir.module.module.md) | `button_uninstall` | UserError | Those modules cannot be uninstalled: %s |
 | [`ir.module.module`](entities/ir.module.module.md) | `button_uninstall` | UserError | One or more of the selected modules have already been uninstalled, if you believe this to be an error, you may try again later or contact support. |
 | [`ir.module.module`](entities/ir.module.module.md) | `button_upgrade` | UserError | Cannot upgrade module “%s”. It is not installed. |
 | [`ir.module.module`](entities/ir.module.module.md) | `button_upgrade` | UserError | You try to upgrade the module %(module)s that depends on the module: %(dependency)s. But this module is not available in your system. |
 | [`ir.module.module`](entities/ir.module.module.md) | `_import_module` | UserError | err |
-| [`ir.module.module`](entities/ir.module.module.md) | `_import_module` | UserError | Studio customizations require the the system Studio app. |
+| [`ir.module.module`](entities/ir.module.module.md) | `_import_module` | UserError | Studio customizations require the system Studio app. |
 | [`ir.module.module`](entities/ir.module.module.md) | `_import_module` | UserError | The assets path in the manifest of imported module '%(module_name)s' cannot contain glob wildcards (e.g., *, **). |
 | [`ir.module.module`](entities/ir.module.module.md) | `_import_zipfile` | AccessError | Only administrators can install data modules. |
 | [`ir.module.module`](entities/ir.module.module.md) | `_import_zipfile` | UserError | Only zip files are supported. |
@@ -2366,7 +2366,7 @@ Every user-facing validation or error message, with the entity and operation tha
 | [`stock.move`](entities/stock.move.md) | `_add_mls_related_to_order` | UserError | '\n'.join(error_message_lines) |
 | [`stock.move`](entities/stock.move.md) | `_check_negative_quantity` | ValidationError | Please enter a positive quantity. |
 | [`stock.move`](entities/stock.move.md) | `_check_access_if_subcontractor` | AccessError | Portal users cannot create a stock move with a state 'Done' or change the current state to 'Done'. |
-| [`stock.move`](entities/stock.move.md) | `_get_valuation_price_and_qty` | UserError | the system is not able to generate the anglo saxon entries. The total valuation of %s is zero. |
+| [`stock.move`](entities/stock.move.md) | `_get_valuation_price_and_qty` | UserError | The system is not able to generate the anglo saxon entries. The total valuation of %s is zero. |
 | [`stock.move`](entities/stock.move.md) | `_prepare_analytic_lines` | ValidationError | '%(missing_plan_names)s' analytic plan(s) required on the project '%(project_name)s' linked to the manufacturing order. |
 | [`stock.move`](entities/stock.move.md) | `_prepare_analytic_lines` | ValidationError | '%(missing_plan_names)s' analytic plan(s) required on the project '%(project_name)s' linked to the stock picking. |
 | [`stock.move.line`](entities/stock.move.line.md) | `_check_lot_product` | ValidationError | This lot %(lot_name)s is incompatible with this product %(product_name)s |

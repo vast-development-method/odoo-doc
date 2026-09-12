@@ -453,7 +453,7 @@
         "options": {}
        }
       ],
-      "documentation": "Acquire for update the job with id ``job_id``.\n\nThe job should not have been processed yet by the current\nworker. Another worker may process the job again, may that job\nbecome ready again quickly enough (e.g. self-triggering, high\nfrequency, or partially done jobs).\n\nNote: It is possible that this function raises a\n      ``psycopg2.errors.SerializationFailure`` in case the job\n      has been processed in another worker. In such case it is\n      advised to roll back the transaction and to go on with the\n      other jobs.",
+      "documentation": "Acquire for update the job with id `job_id`.\n\nThe job should not have been processed yet by the current\nworker. Another worker may process the job again, may that job\nbecome ready again quickly enough (e.g. self-triggering, high\nfrequency, or partially done jobs).\n\nNote: It is possible that this function raises a\n      `psycopg2.errors.SerializationFailure` in case the job\n      has been processed in another worker. In such case it is\n      advised to roll back the transaction and to go on with the\n      other jobs.",
       "size_in_lines": 79,
       "calls_previous_definition": false,
       "validation_messages": []
@@ -471,7 +471,7 @@
      {
       "package": "base",
       "decorators": [],
-      "documentation": "Notify ``message`` to some administrator.\n\nThe base implementation of this method does nothing. It is\nsupposed to be overridden with some actual communication\nmechanism.",
+      "documentation": "Notify `message` to some administrator.\n\nThe base implementation of this method does nothing. It is\nsupposed to be overridden with some actual communication\nmechanism.",
       "size_in_lines": 9,
       "calls_previous_definition": false,
       "validation_messages": []
@@ -504,7 +504,7 @@
         "options": {}
        }
       ],
-      "documentation": "Execute the cron's server action in a dedicated transaction.\n\nIn case the previous process actually timed out, the cron's\nserver action is not executed and the cron is considered\n``'failed'``.\n\nThe server action can use the progress API via the method\n:meth:`_commit_progress` to report how many records are done\nin each batch.\nThose progress notifications are used to determine the job's\n``CompletionStatus`` and to determine the next time the cron\nwill be executed:\n\n- ``'fully done'``: the cron is rescheduled later, it'll be\n  executed again after its regular time interval or upon a new\n  trigger.\n\n- ``'partially done'``: the cron is rescheduled ASAP, it'll be\n  executed again by this or another cron worker once the other\n  ready cron jobs have been executed.\n\n- ``'failed'``: the cron is deactivated if it failed too many\n  times over a given time span; otherwise it is rescheduled\n  later.",
+      "documentation": "Execute the cron's server action in a dedicated transaction.\n\nIn case the previous process actually timed out, the cron's\nserver action is not executed and the cron is considered\n`'failed'`.\n\nThe server action can use the progress API via the method\n:meth:`_commit_progress` to report how many records are done\nin each batch.\nThose progress notifications are used to determine the job's\n`CompletionStatus` and to determine the next time the cron\nwill be executed:\n\n- `'fully done'`: the cron is rescheduled later, it'll be\n  executed again after its regular time interval or upon a new\n  trigger.\n\n- `'partially done'`: the cron is rescheduled ASAP, it'll be\n  executed again by this or another cron worker once the other\n  ready cron jobs have been executed.\n\n- `'failed'`: the cron is deactivated if it failed too many\n  times over a given time span; otherwise it is rescheduled\n  later.",
       "size_in_lines": 57,
       "calls_previous_definition": false,
       "validation_messages": []
@@ -528,7 +528,7 @@
         "options": {}
        }
       ],
-      "documentation": "Execute the job's server action multiple times until it\ncompletes. The completion status is returned.\n\nIt is considered completed when either:\n\n- the server action doesn't use the progress API, or returned\n  and notified that all records has been processed: ``'fully done'``;\n\n- the server action returned and notified that there are\n  remaining records to process, but this cron worker ran this\n  server action 10 times already: ``'partially done'``;\n\n- the server action was able to commit and notify some work done,\n  but later crashed due to an exception: ``'partially done'``;\n\n- the server action failed due to an exception and no progress\n  was notified: ``'failed'``.",
+      "documentation": "Execute the job's server action multiple times until it\ncompletes. The completion status is returned.\n\nIt is considered completed when either:\n\n- the server action doesn't use the progress API, or returned\n  and notified that all records has been processed: `'fully done'`;\n\n- the server action returned and notified that there are\n  remaining records to process, but this cron worker ran this\n  server action 10 times already: `'partially done'`;\n\n- the server action was able to commit and notify some work done,\n  but later crashed due to an exception: `'partially done'`;\n\n- the server action failed due to an exception and no progress\n  was notified: `'failed'`.",
       "size_in_lines": 111,
       "calls_previous_definition": false,
       "validation_messages": []
@@ -553,7 +553,7 @@
         "options": {}
        }
       ],
-      "documentation": "Update cron ``failure_count`` and ``first_failure_date`` given\nthe job's completion status. Deactivate the cron when BOTH the\ncounter reaches ``MIN_FAILURE_COUNT_BEFORE_DEACTIVATION`` AND\nthe time delta reaches ``MIN_DELTA_BEFORE_DEACTIVATION``.\n\nOn ``'fully done'`` and ``'partially done'``, the counter and\nfailure date are reset.\n\nOn ``'failed'`` the counter is increased and the first failure\ndate is set if the counter was 0. In case both thresholds are\nreached, ``active`` is set to ``False`` and both values are\nreset.",
+      "documentation": "Update cron `failure_count` and `first_failure_date` given\nthe job's completion status. Deactivate the cron when BOTH the\ncounter reaches `MIN_FAILURE_COUNT_BEFORE_DEACTIVATION` AND\nthe time delta reaches `MIN_DELTA_BEFORE_DEACTIVATION`.\n\nOn `'fully done'` and `'partially done'`, the counter and\nfailure date are reset.\n\nOn `'failed'` the counter is increased and the first failure\ndate is set if the counter was 0. In case both thresholds are\nreached, `active` is set to `False` and both values are\nreset.",
       "size_in_lines": 52,
       "calls_previous_definition": false,
       "validation_messages": []
@@ -742,7 +742,7 @@
      {
       "package": "base",
       "decorators": [],
-      "documentation": "Schedule a cron job to be executed soon independently of its\n``nextcall`` field value.\n\nBy default, the cron is scheduled to be executed the next time\nthe cron worker wakes up, but the optional `at` argument may be\ngiven to delay the execution later, with a precision down to 1\nminute.\n\nThe method may be called with a datetime or an iterable of\ndatetime. The actual implementation is in :meth:`~._trigger_list`,\nwhich is the recommended method for overrides.\n\n:param at:\n    When to execute the cron, at one or several moments in time\n    instead of as soon as possible.\n:return: the created triggers records",
+      "documentation": "Schedule a cron job to be executed soon independently of its\n`nextcall` field value.\n\nBy default, the cron is scheduled to be executed the next time\nthe cron worker wakes up, but the optional `at` argument may be\ngiven to delay the execution later, with a precision down to 1\nminute.\n\nThe method may be called with a datetime or an iterable of\ndatetime. The actual implementation is in :meth:`~._trigger_list`,\nwhich is the recommended method for overrides.\n\n:param at:\n    When to execute the cron, at one or several moments in time\n    instead of as soon as possible.\n:return: the created triggers records",
       "size_in_lines": 28,
       "calls_previous_definition": false,
       "validation_messages": []
@@ -783,7 +783,7 @@
         "options": {}
        }
       ],
-      "documentation": "Wake up the cron workers\nThe ODOO_NOTIFY_CRON_CHANGES environment variable allows to force the notifydb on both\nIrCron modification and on trigger creation (regardless of call_at)",
+      "documentation": "Wake up the cron workers\nThe SYSTEM_NOTIFY_CRON_CHANGES environment variable allows to force the notifydb on both\nIrCron modification and on trigger creation (regardless of call_at)",
       "size_in_lines": 8,
       "calls_previous_definition": false,
       "validation_messages": []
@@ -801,7 +801,7 @@
      {
       "package": "base",
       "decorators": [],
-      "documentation": "Create a progress record for the given cron and add it to its\ncontext.\n\n:param int timed_out_counter: the number of times the cron has\n    consecutively timed out\n:return: a pair ``(cron, progress)``, where the progress has\n    been injected inside the cron's context",
+      "documentation": "Create a progress record for the given cron and add it to its\ncontext.\n\n:param int timed_out_counter: the number of times the cron has\n    consecutively timed out\n:return: a pair `(cron, progress)`, where the progress has\n    been injected inside the cron's context",
       "size_in_lines": 19,
       "calls_previous_definition": false,
       "validation_messages": []
@@ -829,7 +829,7 @@
         "options": {}
        }
       ],
-      "documentation": "Log the progress of the cron job.\nUse ``_commit_progress()`` instead.\n\n:param int done: the number of tasks already processed\n:param int remaining: the number of tasks left to process\n:param bool deactivate: whether the cron will be deactivated",
+      "documentation": "Log the progress of the cron job.\nUse `_commit_progress()` instead.\n\n:param int done: the number of tasks already processed\n:param int remaining: the number of tasks left to process\n:param bool deactivate: whether the cron will be deactivated",
       "size_in_lines": 20,
       "calls_previous_definition": false,
       "validation_messages": []

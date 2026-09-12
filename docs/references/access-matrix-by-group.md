@@ -3315,8 +3315,8 @@ These apply to every user regardless of group and combine with a logical conjunc
 | stock_landed_cost multi-company | `` | `[('company_id', 'in', company_ids)]` | True | True | True | True |
 | stock.picking.batch multi-company | `stock.picking.batch` | `[('company_id', 'in', company_ids)]` | True | True | True | True |
 | Website menu: group_ids | `website.menu` | `['\|', ('group_ids', '=', False), ('group_ids', 'in', user.all_group_ids.ids)]` | True | True | True | True |
-|  | `` | `` | True | True | True | True |
-|  | `` | `` | True | True | True | True |
+|  | ` | ` | True | True | True | True |
+|  | ` | ` | True | True | True | True |
 | product pricelist company rule | `product.pricelist` | `['\|', ('company_id', 'in', [False, website.company_id.id]), ('company_id', 'in', company_ids)]` | True | True | True | True |
 | product pricelist item company rule | `product.pricelist.item` | `['\|', ('company_id', 'in', [False, website.company_id.id]), ('company_id', 'in', company_ids)]` | True | True | True | True |
 | Channel: always visible (sub rules exist) | `slide.channel` | `[(1, '=', 1)]` | True | True | True | True |

@@ -27,7 +27,7 @@ Description: Chatbot Script Answer
 | Operation | Kind | Arguments | Defined in packages | Triggers and dependencies | Documentation |
 |---|---|---|---|---|---|
 | `_compute_display_name` | computation | self | `im_livechat` | depends: `script_step_id`; depends_context: `chatbot_script_answer_display_short_name` |  |
-| `_search_display_name` | search rule | self, operator, value | `im_livechat` | model | Search the records whose name or step message are matching the ``name`` pattern. |
+| `_search_display_name` | search rule | self, operator, value | `im_livechat` | model | Search the records whose name or step message are matching the `name` pattern. |
 | `_to_store_defaults` | internal rule | self, target | `im_livechat` |  |  |
 
 ## Access rights

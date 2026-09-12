@@ -35,7 +35,7 @@ Description: User Settings
 | `google_calendar_token` | User token | single line text |  | not copied on duplication; visible only to groups `base.group_system` |
 | `google_calendar_token_validity` | Token Validity | date and time |  | not copied on duplication; visible only to groups `base.group_system` |
 | `google_calendar_sync_token` | Next Sync Token | single line text |  | not copied on duplication; visible only to groups `base.group_system` |
-| `google_calendar_cal_id` | Calendar identifier | single line text |  | not copied on duplication; visible only to groups `base.group_system`; Help: Last Calendar ID who has been synchronized. If it is changed, we remove all links between GoogleID and Odoo Google Internal ID |
+| `google_calendar_cal_id` | Calendar identifier | single line text |  | not copied on duplication; visible only to groups `base.group_system`; Help: Last Calendar ID who has been synchronized. If it is changed, we remove all links between GoogleID and the system Google Internal ID |
 | `google_synchronization_stopped` | Google Synchronization stopped | boolean |  | not copied on duplication; visible only to groups `base.group_system` |
 | `microsoft_calendar_sync_token` | Microsoft Next Sync Token | single line text |  | not copied on duplication; visible only to groups `base.group_system` |
 | `microsoft_synchronization_stopped` | Outlook Synchronization stopped | boolean |  | not copied on duplication; visible only to groups `base.group_system` |

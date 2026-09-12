@@ -49,7 +49,7 @@ Description: Mass Mailing
 | `mailing_on_mailing_list` | Based on Mailing Lists | boolean |  | computed by rule `_compute_mailing_on_mailing_list` (not stored) |
 | `mailing_domain` | Domain | single line text |  | computed by rule `_compute_mailing_domain` and stored |
 | `mail_server_available` | Mail Server Available | boolean |  | computed by rule `_compute_mail_server_available` (not stored); Help: Technical field used to know if the user has activated the outgoing mail server option in the settings |
-| `mail_server_id` | Mail Server | many to one | `ir.mail_server` | default computed dynamically (_get_default_mail_server_id); indexed (btree_not_null); Help: Use a specific mail server in priority. Otherwise Odoo relies on the first outgoing mail server available (based on their sequencing) as it does for normal mails. |
+| `mail_server_id` | Mail Server | many to one | `ir.mail_server` | default computed dynamically (_get_default_mail_server_id); indexed (btree_not_null); Help: Use a specific mail server in priority. Otherwise the system relies on the first outgoing mail server available (based on their sequencing) as it does for normal mails. |
 | `contact_list_ids` | Mailing Lists | many to many | `mailing.list` | association table `mail_mass_mailing_list_rel` |
 | `use_exclusion_list` | Use Exclusion List | boolean |  | default `True`; not copied on duplication; Help: Prevent sending messages to blacklisted contacts. Disable only when absolutely necessary. |
 | `mailing_filter_id` | Favorite Filter | many to one | `mailing.filter` | computed by rule `_compute_mailing_filter_id` and stored; restricted by domain `[('mailing_model_name', '=', mailing_model_name)]` |
@@ -258,7 +258,7 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `_get_seen_list_sms` | preparation rule | self | `mass_mailing_sms` |  | Returns a set of emails already targeted by current mailing/campaign (no duplicates) |
 | `_send_sms_get_composer_values` | internal rule | self, res_ids | `mass_mailing_sms` |  |  |
 | `action_send_sms` | user action | self, res_ids | `mass_mailing_sms` |  |  |
-| `get_sms_link_replacements_placeholders` | operation | self | `mass_mailing_sms` |  | Get placeholders for replaced links in sms widget for accurate computation of sms counts.  Reminders and assumptions:  * Links wille be transformed to the format ``"[base_url]/r/[link_tracker_code]/s/[sms_id]"``. * unsubscribe is formatted as: ``"STOP SMS : [base_url]/sms/[mailing_id]/[trace_code]"``.  :returns: Character counts used for links, formatted as ``{link: str, unsubscribe: str}``. |
+| `get_sms_link_replacements_placeholders` | operation | self | `mass_mailing_sms` |  | Get placeholders for replaced links in sms widget for accurate computation of sms counts.  Reminders and assumptions:  * Links wille be transformed to the format `"[base_url]/r/[link_tracker_code]/s/[sms_id]"`. * unsubscribe is formatted as: `"STOP SMS : [base_url]/sms/[mailing_id]/[trace_code]"`.  :returns: Character counts used for links, formatted as `{link: str, unsubscribe: str}`. |
 | `_compute_sale_quotation_count` | computation | self | `mass_mailing_sale` | depends: `mailing_domain` |  |
 | `_compute_sale_invoiced_amount` | computation | self | `mass_mailing_sale` | depends: `mailing_domain` |  |
 | `action_redirect_to_quotations` | user action | self | `mass_mailing_sale` |  |  |

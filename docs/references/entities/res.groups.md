@@ -104,7 +104,7 @@ Description: Access Groups
 | `_remove_group` | internal rule | self, implied_group | `base` |  | Remove the given group from the implied groups of the current group :param implied_group: the implied group to remove |
 | `_compute_view_group_hierarchy` | computation | self | `base` |  |  |
 | `_get_view_group_hierarchy` | preparation rule | self | `base` | model |  |
-| `_get_group_definitions` | preparation rule | self | `base` | model | Return the definition of all the groups as a :class:`~odoo.tools.SetDefinitions`. |
+| `_get_group_definitions` | preparation rule | self | `base` | model | Return the definition of all the groups as a :class:`~system.tools.SetDefinitions`. |
 | `_is_feature_enabled` | internal rule | self, group_reference | `base` | model |  |
 | `_compute_all_users_count` | computation | self | `base` | depends: `all_user_ids` |  |
 | `action_show_all_users` | user action | self | `base` |  |  |

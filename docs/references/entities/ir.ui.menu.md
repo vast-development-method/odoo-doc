@@ -23,7 +23,7 @@ Description: Menu
 | `child_id` | Child identifiers | one to many | `ir.ui.menu` | inverse field `parent_id` |
 | `parent_id` | Parent Menu | many to one | `ir.ui.menu` | indexed; on delete of the target: restrict |
 | `parent_path` | Parent Path | single line text |  | indexed |
-| `group_ids` | Groups | many to many | `res.groups` | association table `ir_ui_menu_group_rel`; Help: If you have groups, the visibility of this menu will be based on these groups. If this field is empty, Odoo will compute visibility based on the related object's read access. |
+| `group_ids` | Groups | many to many | `res.groups` | association table `ir_ui_menu_group_rel`; Help: If you have groups, the visibility of this menu will be based on these groups. If this field is empty, the system will compute visibility based on the related object's read access. |
 | `complete_name` | Full Path | single line text |  | computed by rule `_compute_complete_name` (not stored); recursive dependency |
 | `web_icon` | Web Icon File | single line text |  |  |
 | `action` | Action | reference |  |  |
@@ -46,7 +46,7 @@ Description: Menu
 | Operation | Kind | Arguments | Defined in packages | Triggers and dependencies | Documentation |
 |---|---|---|---|---|---|
 | `_compute_complete_name` | computation | self | `base` | depends: `name`, `parent_id.complete_name` |  |
-| `_get_full_name` | preparation rule | self, level | `base` |  | Return the full name of ``self`` (up to a certain level). |
+| `_get_full_name` | preparation rule | self, level | `base` |  | Return the full name of `self` (up to a certain level). |
 | `_read_image` | internal rule | self, path | `base` |  |  |
 | `_check_parent_id` | validation | self | `base` | constrains: `parent_id` |  |
 | `_visible_menu_ids` | internal rule | self, debug | `base` | model | Return the ids of the menu items visible to the user. |
@@ -54,7 +54,7 @@ Description: Menu
 | `_compute_display_name` | computation | self | `base` | depends: `parent_id` |  |
 | `create` | lifecycle override | self, vals_list | `base` | model_create_multi |  |
 | `write` | lifecycle override | self, vals | `base` |  |  |
-| `_compute_web_icon_data` | computation | self, web_icon | `base` |  | Returns the image associated to ``web_icon``.  :param str web_icon: a comma-separated value string for either:    * an image icon: ``f"{module},{path}"``   * a built icon: ``f"{icon_class},{icon_color},{background_color}"``  The ``web_icon_data`` computed field uses :meth:`_read_image` for image web icons, and is ``False`` for built icons. |
+| `_compute_web_icon_data` | computation | self, web_icon | `base` |  | Returns the image associated to `web_icon`.  :param str web_icon: a comma-separated value string for either:    * an image icon: `f"{module},{path}"`   * a built icon: `f"{icon_class},{icon_color},{background_color}"`  The `web_icon_data` computed field uses :meth:`_read_image` for image web icons, and is `False` for built icons. |
 | `unlink` | lifecycle override | self | `base` |  |  |
 | `copy` | lifecycle override | self, default | `base` |  |  |
 | `get_user_roots` | operation | self | `base` | model | Return all root menu ids visible for the user.  :return: the root menu ids :rtype: list(int) |

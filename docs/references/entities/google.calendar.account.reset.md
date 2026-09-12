@@ -23,7 +23,7 @@ Description: Google Calendar Account Reset
 |---|---|
 | `dont_delete` | Leave them untouched |
 | `delete_google` | Delete from the current Google Calendar account |
-| `delete_odoo` | Delete from Odoo |
+| `delete_system` | Delete from the system |
 | `delete_both` | Delete from both |
 
 ### `sync_policy` (Next Synchronization)

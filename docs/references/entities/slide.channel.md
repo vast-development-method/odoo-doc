@@ -140,7 +140,7 @@ Description: Course
 
 | Operation | Kind | Arguments | Defined in packages | Triggers and dependencies | Documentation |
 |---|---|---|---|---|---|
-| `_default_cover_properties` | preparation rule | self | `website_slides` |  | Cover properties defaults are overridden to keep a consistent look for the slides channels headers across Odoo versions (pre-customization, with purple gradient fitting the homepage images, etc). Furthermore, as adding padding to the cover would not look great, its height is set to fit to content (snippet option to change this also disabled on the view). |
+| `_default_cover_properties` | preparation rule | self | `website_slides` |  | Cover properties defaults are overridden to keep a consistent look for the slides channels headers across the system versions (pre-customization, with purple gradient fitting the homepage images, etc). Furthermore, as adding padding to the cover would not look great, its height is set to fit to content (snippet option to change this also disabled on the view). |
 | `_default_access_token` | preparation rule | self | `website_slides` |  |  |
 | `_get_default_enroll_msg` | preparation rule | self | `website_slides` |  |  |
 | `_compute_enroll` | computation | self | `website_slides` | depends: `visibility` |  |

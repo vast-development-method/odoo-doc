@@ -182,7 +182,7 @@ The printable documents themselves are catalogued in [interfaces.md](interfaces.
 
 | Group | Full name | Privilege category | Implied by | Granted to |
 |---|---|---|---|---|
-| `product.group_product_manager` | Products — Create | "Products" privilege, in the master-data category, sequence 9, placeholder "View", described as "Helps you manage your product catalog." | the system administration group | the root user and the administrator user |
+| `product.group_product_manager` | Products — Create | "Products" privilege, in the master-data category, sequence 9, placeholder "View", described as "Helps you manage your product catalog." | The system administration group | the root user and the administrator user |
 | `product.group_product_variant` | Manage Product Variants | none | — | every internal user, as soon as the product matrix capability is installed |
 | `product.group_product_pricelist` | Basic Pricelists | none | — | granted by the pricelist setting, and automatically when multi-currency is activated |
 | `product_expiry.group_expiry_date_on_delivery_slip` | Include expiration dates on delivery slip | none | — | granted by the corresponding setting |

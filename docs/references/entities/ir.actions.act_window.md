@@ -21,7 +21,7 @@ Description: Action Window
 | `view_id` | View Ref. | many to one | `ir.ui.view` | on delete of the target: set null |
 | `domain` | Domain Value | single line text |  | Help: Optional domain filtering of the destination data, as a Python expression |
 | `context` | Context Value | single line text |  | required; default `{}`; Help: Context dictionary as Python expression, empty by default (Default: {}) |
-| `res_id` | Record identifier | integer |  | Help: Database ID of record to open in form view, when ``view_mode`` is set to 'form' only |
+| `res_id` | Record identifier | integer |  | Help: Database ID of record to open in form view, when `view_mode` is set to 'form' only |
 | `res_model` | Destination Model | single line text |  | required; Help: Model name of the object to open in the view window |
 | `target` | Target Window | selection |  | default `current` |
 | `view_mode` | View Mode | single line text |  | required; default `list,form`; Help: Comma-separated list of allowed view modes, such as 'form', 'list', 'calendar', etc. (Default: list,form) |

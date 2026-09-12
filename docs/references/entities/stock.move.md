@@ -133,7 +133,7 @@ Description: Stock Move
 | `cost_share` | Cost Share (%) | float |  | Help: The percentage of the final production cost for this by-product. The total of all by-products' cost share must be smaller or equal to 100. |
 | `product_qty_available` | Product On Hand Quantity | float |  | related through path `product_id.qty_available` |
 | `product_virtual_available` | Product Forecasted Quantity | float |  | related through path `product_id.virtual_available` |
-| `manual_consumption` | Manual Consumption | boolean |  | computed by rule `_compute_manual_consumption` and stored; Help: When activated, then the registration of consumption for that component is recorded manually exclusively. If not activated, and any of the components consumption is edited manually on the manufacturing order, Odoo assumes manual consumption also. |
+| `manual_consumption` | Manual Consumption | boolean |  | computed by rule `_compute_manual_consumption` and stored; Help: When activated, then the registration of consumption for that component is recorded manually exclusively. If not activated, and any of the components consumption is edited manually on the manufacturing order, the system assumes manual consumption also. |
 | `use_expiration_date` | Use Expiration Date | boolean |  | related through path `product_id.use_expiration_date` |
 | `is_subcontract` | The move is a subcontract receipt | boolean |  |  |
 | `show_subcontracting_details_visible` | Show Subcontracting Details Visible | boolean |  | computed by rule `_compute_show_subcontracting_details_visible` (not stored) |
@@ -453,7 +453,7 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `_add_mls_related_to_order` | UserError | '\n'.join(error_message_lines) | `point_of_sale` |
 | `_check_negative_quantity` | ValidationError | Please enter a positive quantity. | `mrp` |
 | `_check_access_if_subcontractor` | AccessError | Portal users cannot create a stock move with a state 'Done' or change the current state to 'Done'. | `mrp_subcontracting` |
-| `_get_valuation_price_and_qty` | UserError | the system is not able to generate the anglo saxon entries. The total valuation of %s is zero. | `purchase_mrp` |
+| `_get_valuation_price_and_qty` | UserError | The system is not able to generate the anglo saxon entries. The total valuation of %s is zero. | `purchase_mrp` |
 | `_prepare_analytic_lines` | ValidationError | '%(missing_plan_names)s' analytic plan(s) required on the project '%(project_name)s' linked to the manufacturing order. | `project_mrp_account` |
 | `_prepare_analytic_lines` | ValidationError | '%(missing_plan_names)s' analytic plan(s) required on the project '%(project_name)s' linked to the stock picking. | `project_stock_account` |
 

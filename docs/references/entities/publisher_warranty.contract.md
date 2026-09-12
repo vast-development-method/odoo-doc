@@ -14,7 +14,7 @@ Description: Publisher Warranty Contract
 |---|---|---|---|---|---|
 | `_get_message` | preparation rule | self | `mail`, `website_mail` | model |  |
 | `_get_sys_logs` | preparation rule | self | `mail` | model | Utility method to send a publisher warranty get logs messages. |
-| `update_notification` | operation | self, cron_mode | `mail` |  | Send a message to Odoo's publisher warranty server to check the validity of the contracts, get notifications, etc...  @param cron_mode: If true, catch all exceptions (appropriate for usage in a cron). @type cron_mode: boolean |
+| `update_notification` | operation | self, cron_mode | `mail` |  | Send a message to the system's publisher warranty server to check the validity of the contracts, get notifications, etc...  @param cron_mode: If true, catch all exceptions (appropriate for usage in a cron). @type cron_mode: boolean |
 
 ## Validation and error messages (1)
 

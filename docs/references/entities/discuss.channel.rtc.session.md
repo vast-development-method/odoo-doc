@@ -42,7 +42,7 @@ Description: Mail RTC session
 | `unlink` | lifecycle override | self | `mail` |  |  |
 | `_bus_channel` | internal rule | self | `mail` |  |  |
 | `_update_and_broadcast` | internal rule | self, values | `mail` |  | Updates the session and notifies all members of the channel of the change. |
-| `_gc_inactive_sessions` | background operation | self | `mail` | autovacuum | Garbage collect sessions that aren't active anymore, this can happen when the server or the user's browser crash or when the user's odoo session ends. |
+| `_gc_inactive_sessions` | background operation | self | `mail` | autovacuum | Garbage collect sessions that aren't active anymore, this can happen when the server or the user's browser crash or when the user's system session ends. |
 | `action_disconnect` | user action | self | `mail` |  |  |
 | `_delete_inactive_rtc_sessions` | internal rule | self | `mail` |  | Deletes the inactive sessions from self. |
 | `_notify_peers` | internal rule | self, notifications | `mail` |  | Used for peer-to-peer communication, guarantees that the sender is the current guest or partner.  :param notifications: list of tuple with the following elements:     - target_session_ids: a list of discuss.channel.rtc.session ids     - content: a string with the content to be sent to the targets |

@@ -1349,7 +1349,7 @@ foreign currency.
 
 **Inputs:** the results of section 13 before the running residuals are updated.
 **Output:** for the debit item, for the credit item, or for both, an instruction naming which
-column is to be written off and by how much.
+column must be written off and by how much.
 
 The whole computation is skipped when the operation context suppresses exchange differences
 (`MCUR-101`).

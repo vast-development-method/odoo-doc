@@ -284,7 +284,7 @@ These are the named business operations a client binds to a button. A rebuild mu
 | `crm.lead` | `action_reschedule_meeting` | self | `crm` |  |
 | `crm.lead` | `action_restore` | self | `crm` | Restoring a lost lead means that it should go back to its normal life cycle. This should reactivate the lead but also force the recompute of its probability, for the stage where the lead is currently at. During toggle_active, when reactivating a lost lead,only the automated probability will be recom |
 | `crm.lead` | `action_sale_quotations_new` | self | `sale_crm` |  |
-| `crm.lead` | `action_schedule_meeting` | self, smart_calendar | `crm` | Open meeting's calendar view to schedule meeting on current opportunity.  :param bool smart_calendar: to set to False if the view should not try to choose relevant   mode and initial date for calendar view, see ``_get_opportunity_meeting_view_parameters`` :returns: dictionary value for created Meeti |
+| `crm.lead` | `action_schedule_meeting` | self, smart_calendar | `crm` | Open meeting's calendar view to schedule meeting on current opportunity.  :param bool smart_calendar: to set to False if the view should not try to choose relevant   mode and initial date for calendar view, see `_get_opportunity_meeting_view_parameters` :returns: dictionary value for created Meeti |
 | `crm.lead` | `action_set_automated_probability` | self | `crm` | Update the automated probability and align probability to that value |
 | `crm.lead` | `action_set_lost` | self, **additional_values | `crm` | Lost semantic: probability = 0 AND active = False |
 | `crm.lead` | `action_set_won` | self | `crm` | Won semantic: stage.is_won (AND probability = 100 but implied) |
@@ -495,7 +495,7 @@ These are the named business operations a client binds to a button. A rebuild mu
 | `ir.actions.server` | `action_open_parent_action` | self | `base` |  |
 | `ir.actions.server` | `action_open_scheduled_action` | self | `base` |  |
 | `ir.actions.todo` | `action_launch` | self | `base` | Launch Action of Wizard |
-| `ir.actions.todo` | `action_open` | self | `base` | Sets configuration wizard in TODO state |
+| `ir.actions.todo` | `action_open` | self | `base` | Sets configuration wizard in |
 | `ir.attachment` | `action_get` | self | `base` |  |
 | `ir.attachment` | `action_preview_attachment` | self | `hr_fleet` |  |
 | `ir.cron` | `action_open_automation` | self | `base_automation` |  |
@@ -504,13 +504,13 @@ These are the named business operations a client binds to a button. A rebuild mu
 | `ir.mail_server` | `action_retrieve_max_email_size` | self | `base` |  |
 | `ir.module.module` | `action_open_install_request` | self | `base_install_request` |  |
 | `ir.module.module` | `action_view_delivery_methods` | self | `delivery` |  |
-| `ir.module.module` | `button_choose_theme` | self | `website` | Remove any existing theme on the current website and install the theme ``self`` instead.  The actual loading of the theme on the current website will be done automatically on ``write`` thanks to the upgrade and/or install.  When installating a new theme, upgrade the upstream chain first to make sure |
+| `ir.module.module` | `button_choose_theme` | self | `website` | Remove any existing theme on the current website and install the theme `self` instead.  The actual loading of the theme on the current website will be done automatically on `write` thanks to the upgrade and/or install.  When installating a new theme, upgrade the upstream chain first to make sure |
 | `ir.module.module` | `button_immediate_install` | self | `base` | Installs the selected module(s) immediately and fully, returns the next res.config action to execute  :returns: next res.config item to execute :rtype: dict[str, object] |
 | `ir.module.module` | `button_immediate_install_app` | self | `base_import_module` |  |
 | `ir.module.module` | `button_immediate_uninstall` | self | `base` | Uninstall the selected module(s) immediately and fully, returns the next res.config action to execute |
 | `ir.module.module` | `button_immediate_upgrade` | self | `base` | Upgrade the selected module(s) immediately and fully, return the next res.config action to execute |
 | `ir.module.module` | `button_install` | self | `base` |  |
-| `ir.module.module` | `button_refresh_theme` | self | `website` | Refresh the current theme of the current website.  To refresh it, we only need to upgrade the modules. Indeed the (re)loading of the theme will be done automatically on ``write``. |
+| `ir.module.module` | `button_refresh_theme` | self | `website` | Refresh the current theme of the current website.  To refresh it, we only need to upgrade the modules. Indeed the (re)loading of the theme will be done automatically on `write`. |
 | `ir.module.module` | `button_remove_theme` | self | `website` | Remove the current theme of the current website. |
 | `ir.module.module` | `button_reset_state` | self | `base` |  |
 | `ir.module.module` | `button_uninstall` | self | `base` |  |
@@ -1043,9 +1043,9 @@ These are the named business operations a client binds to a button. A rebuild mu
 | `res.company` | `action_save_onboarding_company_data` | self | `account` |  |
 | `res.company` | `action_save_onboarding_sale_tax` | self | `account` | Set the onboarding step as done |
 | `res.company` | `action_update_state_as_per_gstin` | self | `l10n_in` |  |
-| `res.config` | `action_cancel` | self | `base` | Action handler for the ``cancel`` event. That event isn't generated by the res.config.view.base inheritable view, the inherited view has to overload one of the buttons (or add one more).  Sets the status of the todo the event was sent from to ``cancel``, calls ``cancel`` and -- unless ``cancel`` ret |
-| `res.config` | `action_next` | self | `base` | Action handler for the ``next`` event.  Sets the status of the todo the event was sent from to ``done``, calls ``execute`` and -- unless ``execute`` returned an action dictionary -- executes the action provided by calling ``next``. |
-| `res.config` | `action_skip` | self | `base` | Action handler for the ``skip`` event.  Sets the status of the todo the event was sent from to ``skip``, calls ``cancel`` and -- unless ``cancel`` returned an action dictionary -- executes the action provided by calling ``next``. |
+| `res.config` | `action_cancel` | self | `base` | Action handler for the `cancel` event. That event isn't generated by the res.config.view.base inheritable view, the inherited view has to overload one of the buttons (or add one more).  Sets the status of the todo the event was sent from to `cancel`, calls `cancel` and -- unless `cancel` ret |
+| `res.config` | `action_next` | self | `base` | Action handler for the `next` event.  Sets the status of the todo the event was sent from to `done`, calls `execute` and -- unless `execute` returned an action dictionary -- executes the action provided by calling `next`. |
+| `res.config` | `action_skip` | self | `base` | Action handler for the `skip` event.  Sets the status of the todo the event was sent from to `skip`, calls `cancel` and -- unless `cancel` returned an action dictionary -- executes the action provided by calling `next`. |
 | `res.config.settings` | `action_crm_assign_leads` | self | `crm` |  |
 | `res.config.settings` | `action_eu_oss_tax_mapping` | self | `account` |  |
 | `res.config.settings` | `action_l10n_my_edi_allow_processing` | self | `l10n_my_edi` | We always expect the user to give his consent by pressing the button, in any mode, to enable the edi. |
@@ -1398,7 +1398,7 @@ These are the named business operations a client binds to a button. A rebuild mu
 | `account_edi_proxy_client.user` | `_cron_peppol_get_participant_status` | `account_peppol` |  |
 | `account_edi_proxy_client.user` | `_cron_peppol_webhook_keepalive` | `account_peppol` |  |
 | `base.automation` | `_cron_process_time_based_actions` | `base_automation` | Execute the time-based automations. |
-| `base.automation` | `_process` | `base_automation` | Process automation ``self`` on the ``records`` that have not been done yet. |
+| `base.automation` | `_process` | `base_automation` | Process automation `self` on the `records` that have not been done yet. |
 | `base.partner.merge.automatic.wizard` | `_process_query` | `base` | Execute the select request and write the result in this wizard :param query : the SQL query used to fill the wizard line |
 | `bus.bus` | `_gc_messages` | `bus` |  |
 | `card.card` | `_gc_card` | `marketing_card` | Remove cards. Social networks are expected to cache the images on their side. |
@@ -1444,16 +1444,16 @@ These are the named business operations a client binds to a button. A rebuild mu
 | `ir.actions.server.history` | `_gc_histories` | `base` |  |
 | `ir.asset` | `_process_command` | `base` | Parses a given command to return its directive, target and path definition. |
 | `ir.asset` | `_process_path` | `base` | This sub function is meant to take a directive and a set of arguments and apply them to the current asset_paths list accordingly.  It is nested inside `_get_asset_paths` since we need the current list of addons, extensions and asset_paths.  :param directive: string :param target: string or None or F |
-| `ir.attachment` | `_cron_migrate_local_to_cloud_storage` | `cloud_storage_migration` | The Http server only reschedules the cron job asap without migrating any attachment. The cron server will continue the migrating process stopped at the last time by using ``cloud_storage_migration_min_attachment_id`` |
+| `ir.attachment` | `_cron_migrate_local_to_cloud_storage` | `cloud_storage_migration` | The Http server only reschedules the cron job asap without migrating any attachment. The cron server will continue the migrating process stopped at the last time by using `cloud_storage_migration_min_attachment_id` |
 | `ir.attachment` | `_gc_doc_index` | `api_doc` | Garbage collect the outdated /doc/index.json attachments. |
 | `ir.attachment` | `_gc_file_store` | `base` | Perform the garbage collection of the filestore. |
 | `ir.attachment` | `_gc_file_store_unsafe` | `base` |  |
 | `ir.autovacuum` | `_gc_orm_signaling` | `base` |  |
-| `ir.autovacuum` | `_run_vacuum_cleaner` | `base` | Perform a complete database cleanup by safely calling every ``@api.autovacuum`` decorated method. |
-| `ir.cron` | `_process_job` | `base` | Execute the cron's server action in a dedicated transaction.  In case the previous process actually timed out, the cron's server action is not executed and the cron is considered ``'failed'``.  The server action can use the progress API via the method :meth:`_commit_progress` to report how many reco |
+| `ir.autovacuum` | `_run_vacuum_cleaner` | `base` | Perform a complete database cleanup by safely calling every `@api.autovacuum` decorated method. |
+| `ir.cron` | `_process_job` | `base` | Execute the cron's server action in a dedicated transaction.  In case the previous process actually timed out, the cron's server action is not executed and the cron is considered `'failed'`.  The server action can use the progress API via the method :meth:`_commit_progress` to report how many reco |
 | `ir.cron` | `_process_jobs` | `base` | Execute every job ready to be run on this database. |
 | `ir.cron` | `_process_jobs_loop` | `base` | Process ready jobs to run on this database.  The `cron_cr` is used to lock the currently processed job and relased by committing after each job. |
-| `ir.cron` | `_run_job` | `base` | Execute the job's server action multiple times until it completes. The completion status is returned.  It is considered completed when either:  - the server action doesn't use the progress API, or returned   and notified that all records has been processed: ``'fully done'``;  - the server action ret |
+| `ir.cron` | `_run_job` | `base` | Execute the job's server action multiple times until it completes. The completion status is returned.  It is considered completed when either:  - the server action doesn't use the progress API, or returned   and notified that all records has been processed: `'fully done'`;  - the server action ret |
 | `ir.cron.progress` | `_gc_cron_progress` | `base` |  |
 | `ir.cron.trigger` | `_gc_cron_triggers` | `base` |  |
 | `ir.http` | `_gc_sessions` | `base` |  |
@@ -1477,7 +1477,7 @@ These are the named business operations a client binds to a button. A rebuild mu
 | `mail.notification` | `_gc_notifications` | `mail` |  |
 | `mail.presence` | `_gc_bus_presence` | `mail` |  |
 | `mail.render.mixin` | `_process_scheduled_date` | `mail` |  |
-| `mail.thread` | `_process_attachments_for_post` | `mail` | Preprocess attachments for MailTread.message_post() or MailMail.create(). Purpose is to    * transfer attachments given by ``attachment_ids`` from the composer     to the record (if any);   * limit attachments manipulation when being a shared user: only those     created by the user and linked to th |
+| `mail.thread` | `_process_attachments_for_post` | `mail` | Preprocess attachments for MailTread.message_post() or MailMail.create(). Purpose is to    * transfer attachments given by `attachment_ids` from the composer     to the record (if any);   * limit attachments manipulation when being a shared user: only those     created by the user and linked to th |
 | `mail.thread` | `_process_attachments_for_template_post` | `mail` | Model specific management of attachments used with template attachments generation in addition to reports. Only usage currently is for EDI in accounting.  :param mail.template mail_template: a mail.template record used to generate   message or emails on self;  :return: a dictionary based on self.ids |
 | `mailing.mailing` | `_process_mass_mailing_queue` | `mass_mailing` |  |
 | `payment.transaction` | `_cron_post_process` | `payment` | Trigger the post-processing of the transactions that were not handled by the client in the `poll_status` controller method.  :return: None |
@@ -1499,7 +1499,7 @@ These are the named business operations a client binds to a button. A rebuild mu
 | `product.wishlist` | `_gc_sessions` | `website_sale_wishlist` | Remove wishlists for unexisting sessions. |
 | `res.company` | `_cron_l10n_gr_edi_fetch_invoices` | `l10n_gr_edi` | Receive issued myDATA Invoices and create draft Vendor Bills based on the received XML. |
 | `res.company` | `_cron_l10n_pl_edi_refresh_tokens` | `l10n_pl_edi` | Automatically performs a full KSeF authentication to renew both the access token and the refresh token for active companies. |
-| `res.company` | `_cron_l10n_ro_edi_refresh_access_token` | `l10n_ro_edi` | This CRON method will be run every 30 days to refresh the following fields on the company:   - ``l10n_ro_edi_access_token``  - ``l10n_ro_edi_refresh_token``  - ``l10n_ro_edi_access_expiry_date``  - ``l10n_ro_edi_refresh_expiry_date`` |
+| `res.company` | `_cron_l10n_ro_edi_refresh_access_token` | `l10n_ro_edi` | This CRON method will be run every 30 days to refresh the following fields on the company:   - `l10n_ro_edi_access_token`  - `l10n_ro_edi_refresh_token`  - `l10n_ro_edi_access_expiry_date`  - `l10n_ro_edi_refresh_expiry_date` |
 | `res.company` | `_cron_l10n_ro_edi_synchronize_invoices` | `l10n_ro_edi` | This CRON method will be run every 24 hours to synchronize the invoices and the bills with the ANAF |
 | `res.company` | `_cron_mer_archive_signed_xmls` | `l10n_hr_edi` |  |
 | `res.company` | `_cron_mer_get_new_documents` | `l10n_hr_edi` |  |

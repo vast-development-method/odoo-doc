@@ -18,7 +18,7 @@ Description: Tours
 |---|---|---|---|---|
 | `name` | Name | single line text |  | required |
 | `step_ids` | Step | one to many | `web_tour.tour.step` | inverse field `tour_id` |
-| `url` | Starting uniform resource locator | single line text |  | default `/odoo` |
+| `url` | Starting uniform resource locator | single line text |  | default `/app` |
 | `sharing_url` | Sharing uniform resource locator | single line text |  | computed by rule `_compute_sharing_url` (not stored) |
 | `rainbow_man_message` | Rainbow Man Message | rich text |  | default `<b>Good job!</b> You went through all steps of this tour.`; translatable |
 | `sequence` | Sequence | integer |  | default `1000` |

@@ -123,7 +123,7 @@ Description: Product Unit of Measure
 | `_check_factor` | validation | self | `uom` | constrains: `relative_factor`, `relative_uom_id` |  |
 | `_unlink_except_master_data` | internal rule | self | `uom` | ondelete |  |
 | `round` | operation | self, value, rounding_method | `uom` |  | Round the value using the 'Product Unit' precision |
-| `compare` | operation | self, value1, value2 | `uom` |  | Compare two measures after rounding them with the 'Product Unit' precision  :param value1: origin value to compare :param value2: value to compare to :return: -1, 0 or 1, if ``value1`` is lower than, equal to, or greater than ``value2``. |
+| `compare` | operation | self, value1, value2 | `uom` |  | Compare two measures after rounding them with the 'Product Unit' precision  :param value1: origin value to compare :param value2: value to compare to :return: -1, 0 or 1, if `value1` is lower than, equal to, or greater than `value2`. |
 | `is_zero` | operation | self, value | `uom` |  | Check if the value is zero after rounding with the 'Product Unit' precision |
 | `_compute_display_name` | computation | self | `uom` | depends: `name`, `relative_factor`, `relative_uom_id`; depends_context: `formatted_display_name` |  |
 | `_compute_quantity` | computation | self, qty, to_unit, round, rounding_method, raise_if_failure | `uom` |  | Convert the given quantity from the current UoM `self` into a given one :param qty: the quantity to convert :param to_unit: the destination UomUom record (uom.uom) :param raise_if_failure: only if the conversion is not possible     - if true, raise an exception if the conversion is not possible (different UomUom category),     - otherwise, return the initial quantity |

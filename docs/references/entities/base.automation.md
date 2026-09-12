@@ -126,12 +126,12 @@ Description: Automation Rule
 | `_get_actions` | preparation rule | self, records, triggers | `base_automation` |  | Return the automations of the given triggers for records' model. The returned automations' context contain an object to manage processing. |
 | `_get_eval_context` | preparation rule | self, payload | `base_automation` |  | Prepare the context used when evaluating python code :returns: dict -- evaluation context given to safe_eval |
 | `_get_cron_interval` | preparation rule | self, automations | `base_automation` |  | Return the expected time interval used by the cron, in minutes or hours. |
-| `_filter_pre` | internal rule | self, records, feedback | `base_automation` |  | Filter the records that satisfy the precondition of automation ``self``. |
+| `_filter_pre` | internal rule | self, records, feedback | `base_automation` |  | Filter the records that satisfy the precondition of automation `self`. |
 | `_filter_post` | internal rule | self, records, feedback | `base_automation` |  |  |
-| `_filter_post_export_domain` | internal rule | self, records, feedback | `base_automation` |  | Filter the records that satisfy the postcondition of automation ``self``. |
+| `_filter_post_export_domain` | internal rule | self, records, feedback | `base_automation` |  | Filter the records that satisfy the postcondition of automation `self`. |
 | `_add_postmortem` | internal rule | self, e | `base_automation` | model |  |
-| `_process` | background operation | self, records, domain_post | `base_automation` |  | Process automation ``self`` on the ``records`` that have not been done yet. |
-| `_check_trigger_fields` | validation | self, record | `base_automation` |  | Return whether any of the trigger fields has been modified on ``record``. |
+| `_process` | background operation | self, records, domain_post | `base_automation` |  | Process automation `self` on the `records` that have not been done yet. |
+| `_check_trigger_fields` | validation | self, record | `base_automation` |  | Return whether any of the trigger fields has been modified on `record`. |
 | `_register_hook` | internal rule | self | `base_automation` |  | Patch models that should trigger action rules based on creation, modification, deletion of records and form onchanges. |
 | `_unregister_hook` | internal rule | self | `base_automation` |  | Remove the patches installed by _register_hook() |
 | `_get_calendar` | preparation rule | self, automation, record | `base_automation` | model |  |

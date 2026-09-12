@@ -80,7 +80,7 @@ Description: Attachment
 | `_file_read` | internal rule | self, fname, size | `base` | model |  |
 | `_file_write` | internal rule | self, bin_value, checksum | `base` | model |  |
 | `_file_delete` | internal rule | self, fname | `base` | model |  |
-| `_mark_for_gc` | internal rule | self, fname | `base` |  | Add ``fname`` in a checklist for the filestore garbage collection. |
+| `_mark_for_gc` | internal rule | self, fname | `base` |  | Add `fname` in a checklist for the filestore garbage collection. |
 | `_gc_file_store` | background operation | self | `base` | autovacuum | Perform the garbage collection of the filestore. |
 | `_gc_file_store_unsafe` | background operation | self | `base` |  |  |
 | `_compute_datas` | computation | self | `base` | depends: `store_fname`, `db_datas`, `file_size`; depends_context: `bin_size` |  |
@@ -158,7 +158,7 @@ Description: Attachment
 | `_generate_cloud_storage_google_url` | internal rule | self, blob_name | `cloud_storage_google` |  |  |
 | `_generate_cloud_storage_google_signed_url` | internal rule | self, bucket_name, blob_name, **kwargs | `cloud_storage_google` |  |  |
 | `_migrate_local_to_cloud_storage` | internal rule | self, session | `cloud_storage_migration` |  | Migrate attachment from local binary storage to cloud storage |
-| `_cron_migrate_local_to_cloud_storage` | background operation | self | `cloud_storage_migration` |  | The Http server only reschedules the cron job asap without migrating any attachment. The cron server will continue the migrating process stopped at the last time by using ``cloud_storage_migration_min_attachment_id`` |
+| `_cron_migrate_local_to_cloud_storage` | background operation | self | `cloud_storage_migration` |  | The Http server only reschedules the cron job asap without migrating any attachment. The cron server will continue the migrating process stopped at the last time by using `cloud_storage_migration_min_attachment_id` |
 | `_prevent_delete_from_submitted_expense` | internal rule | self | `hr_expense` | ondelete |  |
 | `action_preview_attachment` | user action | self | `hr_fleet` |  |  |
 | `init` | lifecycle override | self | `hr_recruitment` |  |  |

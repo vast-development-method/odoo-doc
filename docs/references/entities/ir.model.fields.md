@@ -113,7 +113,7 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `_in_modules` | computation | self | `base` | depends |  |
 | `_check_domain` | validation | self | `base` | constrains: `domain` |  |
 | `_check_name` | validation | self | `base` | constrains: `name` |  |
-| `_related_field` | internal rule | self | `base` |  | Return the ``ir.model.fields`` record corresponding to ``self.related``. |
+| `_related_field` | internal rule | self | `base` |  | Return the `ir.model.fields` record corresponding to `self.related`. |
 | `_check_related` | validation | self | `base` | constrains: `related` |  |
 | `_onchange_related` | on change | self | `base` | onchange: `related` |  |
 | `_onchange_relation` | on change | self | `base` | onchange: `relation` |  |
@@ -129,7 +129,7 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `_get` | internal rule | self, model_name, name | `base` |  | Return the (sudoed) `ir.model.fields` record with the given model and name. The result may be an empty recordset if the model is not found. |
 | `_get_ids` | preparation rule | self, model_name | `base` |  |  |
 | `_drop_column` | internal rule | self | `base` |  |  |
-| `_prepare_update` | preparation rule | self | `base` |  | Check whether the fields in ``self`` may be modified or removed. This method prevents the modification/deletion of many2one fields that have an inverse one2many, for instance. |
+| `_prepare_update` | preparation rule | self | `base` |  | Check whether the fields in `self` may be modified or removed. This method prevents the modification/deletion of many2one fields that have an inverse one2many, for instance. |
 | `unlink` | lifecycle override | self | `base`, `mail` |  | When unlinking fields populate tracking value table with relevant information. That way if a field is removed (custom tracked, migration or any other reason) we keep the tracking and its relevant information. Do it only when unlinking fields so that we don't duplicate field information for most tracking. |
 | `create` | lifecycle override | self, vals_list | `base` | model_create_multi |  |
 | `write` | lifecycle override | self, vals | `base_sparse_field`, `base` |  |  |
@@ -138,7 +138,7 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `_reflect_fields` | internal rule | self, model_names | `base_sparse_field`, `base` |  | Reflect the fields of the given models. |
 | `_all_manual_field_data` | internal rule | self | `base` |  |  |
 | `_get_manual_field_data` | preparation rule | self, model_name | `base` |  | Return the given model's manual field data. |
-| `_instanciate_attrs` | internal rule | self, field_data | `base_sparse_field`, `base`, `mail` |  | Return the parameters for a field instance for ``field_data``. |
+| `_instanciate_attrs` | internal rule | self, field_data | `base_sparse_field`, `base`, `mail` |  | Return the parameters for a field instance for `field_data`. |
 | `_is_manual_name` | internal rule | self, name | `base` | model |  |
 | `get_field_string` | operation | self, model_name | `base` | model | Return the translation of fields strings in the context's language. Note that the result contains the available translations only.  :param model_name: the name of a model :return: the model's fields' strings as a dictionary `{field_name: field_string}` |
 | `get_field_help` | operation | self, model_name | `base` | model | Return the translation of fields help in the context's language. Note that the result contains the available translations only.  :param model_name: the name of a model :return: the model's fields' help as a dictionary `{field_name: field_help}` |

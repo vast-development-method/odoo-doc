@@ -37,7 +37,7 @@ Description: Incoming Mail Server
 | `priority` | Server Priority | integer |  | default `5`; Help: Defines the order of processing, lower values mean higher priority |
 | `message_ids` | Messages | one to many | `mail.mail` | read only; inverse field `fetchmail_server_id` |
 | `configuration` | Configuration | multi line text |  | read only |
-| `script` | Script | single line text |  | read only; default `/mail/static/scripts/odoo-mailgate.py` |
+| `script` | Script | single line text |  | read only; default `/mail/static/scripts/system-mailgate.py` |
 
 ## Selection values
 

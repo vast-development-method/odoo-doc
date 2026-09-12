@@ -23,7 +23,7 @@ Description: Microsoft Calendar Account Reset
 |---|---|
 | `dont_delete` | Leave them untouched |
 | `delete_microsoft` | Delete from the current Microsoft Calendar account |
-| `delete_odoo` | Delete from Odoo |
+| `delete_system` | Delete from the system |
 | `delete_both` | Delete from both |
 
 ### `sync_policy` (Next Synchronization)

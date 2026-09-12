@@ -603,7 +603,7 @@ resets a live installation's administrator, company name or currency.
 |---|---|---|---|---|
 | Auto-vacuum internal data | every 1 day | 3 | — | Runs every registered automatic clean-up, including: keeping only the newest sign-in log row per account; deleting expired application keys; de-duplicating device log rows; marking as revoked the device log rows whose session no longer exists. |
 | Portal Users Deletion | every 1 day | 8 | — | Processes the account deletion queue in batches of **50** (workflow 14 of [workflows.md](workflows.md)). |
-| Users: Notify About Unregistered Users | every 1 day | 6 | the system account | Mails each inviter about the accounts they created 5 days ago that have never signed in, in batches of **100**. |
+| Users: Notify About Unregistered Users | every 1 day | 6 | The system account | Mails each inviter about the accounts they created 5 days ago that have never signed in, in batches of **100**. |
 | Data Recycle: Clean Records | every 1 day | — (active) | — | Runs every recycling rule's collection with per-batch commits, then sends the due notifications. |
 
 ### 9.1 The automatic clean-ups in detail

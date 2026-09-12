@@ -784,7 +784,7 @@ optional target unit, an optional target currency, an optional company, an optio
 **Evaluation order matters**: the extra price is added *before* the unit conversion, so for the
 sales price the extra **is** converted when a unit is given here — the opposite of the variant's own
 sales-price field of section 7.1, which converts first and adds afterwards. Both behaviours exist in
-the system and an implementation must reproduce both.
+The system and an implementation must reproduce both.
 
 ---
 

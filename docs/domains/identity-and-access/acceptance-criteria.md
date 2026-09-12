@@ -20,7 +20,7 @@ satisfies all of them reproduces the domain's behaviour.
 | Company 1 | *Alpha*, root, currency the United States dollar, sequence 10 |
 | Company 2 | *Beta*, root, currency the euro, sequence 20 |
 | Company 3 | *Alpha North*, parent company 1, currency the United States dollar |
-| Account 1 | the system account, permanently elevated |
+| Account 1 | The system account, permanently elevated |
 | Account 2 | the administrator, login `admin`, holds *Role / Administrator* |
 | Account 40 | *Sofia Lang*, login `sofia@alpha.test`, internal, permitted in company 1, default company 1 |
 | Account 41 | *Marc Ruiz*, login `marc@alpha.test*`, internal, permitted in companies 1 and 2, default company 1 |

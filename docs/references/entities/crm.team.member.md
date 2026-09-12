@@ -59,7 +59,7 @@ Description: Sales Team Member
 | `_get_lead_from_date` | preparation rule | self, date_from, active_test | `crm` |  |  |
 | `_constrains_assignment_domain` | validation | self | `crm` | constrains: `assignment_domain` |  |
 | `_constrains_assignment_domain_preferred` | validation | self | `crm` | constrains: `assignment_domain_preferred` |  |
-| `_get_assignment_quota` | preparation rule | self, force_quota | `crm` |  | Return the remaining daily quota based on the assignment_max and the lead already assigned in the past 24h  :param bool force_quota: see ``CrmTeam._action_assign_leads()``; |
+| `_get_assignment_quota` | preparation rule | self, force_quota | `crm` |  | Return the remaining daily quota based on the assignment_max and the lead already assigned in the past 24h  :param bool force_quota: see `CrmTeam._action_assign_leads()`; |
 
 ## Validation and error messages (4)
 

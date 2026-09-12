@@ -62,7 +62,7 @@ On a journal of the sale kind:
 | Setting (storage name) | Type | Default | Effect |
 | --- | --- | --- | --- |
 | Communication Type (`invoice_reference_type`) | selection, required | `invoice` | `partner` (Based on Customer) or `invoice` (Based on Invoice). Together with the next field it chooses the payment reference generator. |
-| Communication Standard (`invoice_reference_model`) | selection, required | see below | `odoo` (Full Reference, for example `INV/2024/00001`), `euro` (European, for example `RF83INV202400001`), `number` (Numbers only, for example `202400001`). The default is the first value whose name begins with the company country's code in lower case, and `odoo` when none matches. |
+| Communication Standard (`invoice_reference_model`) | selection, required | see below | `system` (Full Reference, for example `INV/2024/00001`), `euro` (European, for example `RF83INV202400001`), `number` (Numbers only, for example `202400001`). The default is the first value whose name begins with the company country's code in lower case, and `system` when none matches. |
 | Dedicated Credit Note Sequence (`refund_sequence`) | boolean | true for sale and purchase journals | Numbers credit notes in their own series, prefixed with `R` at the start. |
 | Dedicated Payment Sequence (`payment_sequence`) | boolean | computed per journal kind | Numbers payments in their own series, prefixed with `P`. |
 | Dedicated Debit Note Sequence (`debit_sequence`) | boolean | true for sale and purchase journals | Numbers debit notes in their own series, prefixed with `D`. |

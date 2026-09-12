@@ -44,7 +44,7 @@ State machine fields of this entity: `state`. Transitions are specified in the d
 | `ensure_one_open_todo` | operation | self | `base` | model |  |
 | `unlink` | lifecycle override | self | `base` |  |  |
 | `action_launch` | user action | self | `base` |  | Launch Action of Wizard |
-| `action_open` | user action | self | `base` |  | Sets configuration wizard in TODO state |
+| `action_open` | user action | self | `base` |  | Sets configuration wizard in |
 
 ## Access rights
 

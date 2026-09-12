@@ -334,7 +334,7 @@ State machine fields of this entity: `state`, `invoice_status`, `delivery_status
 | `message_post` | messaging hook | self, **kwargs | `sale` |  |  |
 | `_notify_get_recipients_groups` | internal rule | self, message, model_description, msg_vals | `sale`, `website_sale` |  |  |
 | `_notify_by_email_prepare_rendering_context` | internal rule | self, message, msg_vals, model_description, force_email_company, force_email_lang, force_record_name | `sale` |  |  |
-| `_phone_get_number_fields` | internal rule | self | `sale` |  | No phone or mobile field is available on sale model. Instead SMS will fallback on partner-based computation using ``_mail_get_partner_fields``. |
+| `_phone_get_number_fields` | internal rule | self | `sale` |  | No phone or mobile field is available on sale model. Instead SMS will fallback on partner-based computation using `_mail_get_partner_fields`. |
 | `_track_subtype` | messaging hook | self, init_values | `sale` |  |  |
 | `_get_model_description` | preparation rule | self, model_name | `sale` |  |  |
 | `_force_lines_to_invoice_policy_order` | internal rule | self | `sale` |  | Force the qty_to_invoice to be computed as if the invoice_policy was set to "Ordered quantities", independently of the product configuration.  This is needed for the automatic invoice logic, as we want to automatically invoice the full SO when it's paid. |

@@ -31,8 +31,8 @@ Description: System Parameter
 
 | Operation | Kind | Arguments | Defined in packages | Triggers and dependencies | Documentation |
 |---|---|---|---|---|---|
-| `init` | lifecycle override | self, force | `auth_oauth`, `base` |  | Initializes the parameters listed in _default_parameters. It overrides existing parameters if force is ``True``. |
-| `get_param` | operation | self, key, default | `base` | model | Retrieve the value for a given key.  :param string key: The key of the parameter value to retrieve. :param string default: default value if parameter is missing. :return: The value of the parameter, or ``default`` if it does not exist. :rtype: string |
+| `init` | lifecycle override | self, force | `auth_oauth`, `base` |  | Initializes the parameters listed in _default_parameters. It overrides existing parameters if force is `True`. |
+| `get_param` | operation | self, key, default | `base` | model | Retrieve the value for a given key.  :param string key: The key of the parameter value to retrieve. :param string default: default value if parameter is missing. :return: The value of the parameter, or `default` if it does not exist. :rtype: string |
 | `_get_param` | preparation rule | self, key | `base` | model |  |
 | `set_param` | operation | self, key, value | `base`, `mail` | model | Sets the value of a parameter.  :param string key: The key of the parameter value to set. :param string value: The value to set. :return: the previous value of the parameter or False if it did          not exist. :rtype: string |
 | `create` | lifecycle override | self, vals_list | `base`, `crm`, `mail`, `sale` | model_create_multi |  |

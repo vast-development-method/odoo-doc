@@ -34,7 +34,7 @@ Description: Model Constraint
 |---|---|---|---|---|---|
 | `unlink` | lifecycle override | self | `base` |  |  |
 | `copy_data` | lifecycle override | self, default | `base` |  |  |
-| `_reflect_constraint` | internal rule | self, model, conname, type, definition, module, message | `base` |  | Reflect the given constraint, and return its corresponding record if a record is created or modified; returns ``None`` otherwise. The reflection makes it possible to remove a constraint when its corresponding module is uninstalled. ``type`` is either 'f', 'i', or 'u' depending on the constraint being a foreign key or not. |
+| `_reflect_constraint` | internal rule | self, model, conname, type, definition, module, message | `base` |  | Reflect the given constraint, and return its corresponding record if a record is created or modified; returns `None` otherwise. The reflection makes it possible to remove a constraint when its corresponding module is uninstalled. `type` is either 'f', 'i', or 'u' depending on the constraint being a foreign key or not. |
 | `_reflect_constraints` | internal rule | self, model_names | `base` |  | Reflect the table objects of the given models. |
 | `_reflect_model` | internal rule | self, model | `base` |  | Reflect the _table_objects of the given model. |
 

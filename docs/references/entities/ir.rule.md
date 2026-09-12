@@ -41,7 +41,7 @@ Description: Record Rule
 | `_compute_global` | computation | self | `base` | depends: `groups` |  |
 | `_check_model_name` | validation | self | `base` | constrains: `model_id` |  |
 | `_check_domain` | validation | self | `base` | constrains: `active`, `domain_force`, `model_id` |  |
-| `_compute_domain_keys` | computation | self | `base`, `website` |  | Return the list of context keys to use for caching ``_compute_domain``. |
+| `_compute_domain_keys` | computation | self | `base`, `website` |  | Return the list of context keys to use for caching `_compute_domain`. |
 | `_get_failing` | preparation rule | self, for_records, mode | `base` |  | Returns the rules for the mode for the current user which fail on the specified records.  Can return any global rule and/or all local rules (since local rules are OR-ed together, the entire group succeeds or fails, while global rules get AND-ed and can each fail) |
 | `_get_rules` | preparation rule | self, model_name, mode | `base` |  | Returns all the rules matching the model for the mode for the current user. |
 | `_compute_domain` | computation | self, model_name, mode | `base` | model |  |

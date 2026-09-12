@@ -44,7 +44,7 @@ Description: Config Settings
 | `profiling_enabled_until` | Profiling enabled until | date and time |  |  |
 | `external_email_server_default` | Use Custom Email Servers | boolean |  |  |
 | `fail_counter` | Fail Mail | integer |  | computed by rule `_compute_fail_counter` (not stored) |
-| `alias_domain_id` | Alias Domain | many to one | `mail.alias.domain` | related through path `company_id.alias_domain_id`; Help: If you have setup a catch-all email domain redirected to the Odoo server, enter the domain name here. |
+| `alias_domain_id` | Alias Domain | many to one | `mail.alias.domain` | related through path `company_id.alias_domain_id`; Help: If you have setup a catch-all email domain redirected to the system server, enter the domain name here. |
 | `module_google_gmail` | Support Gmail Authentication | boolean |  |  |
 | `module_microsoft_outlook` | Support Outlook Authentication | boolean |  |  |
 | `restrict_template_rendering` | Restrict Template Rendering | boolean |  | Help: Users will still be able to render templates. However only Mail Template Editors will be able to create new dynamic templates or modify existing ones. |
@@ -330,7 +330,7 @@ Description: Config Settings
 | `hr_expense_use_mailgateway` | Let your employees record expenses by email | boolean |  |  |
 | `module_hr_payroll_expense` | Reimburse Expenses in Payslip | boolean |  |  |
 | `module_hr_expense_extract` | Send bills to optical character recognition to generate expenses | boolean |  |  |
-| `module_hr_expense_stripe` | Link your stripe issuing account to manage company credit cards for your employees through Odoo | boolean |  |  |
+| `module_hr_expense_stripe` | Link your stripe issuing account to manage company credit cards for your employees through the system | boolean |  |  |
 | `expense_journal_id` | Expense Journal | many to one | `account.journal` | related through path `company_id.expense_journal_id`; restricted by domain `[('type', '=', 'purchase')]`; must belong to the same company |
 | `company_expense_allowed_payment_method_line_ids` | Company Expense Allowed Payment Method Line | many to many | `account.payment.method.line` | related through path `company_id.company_expense_allowed_payment_method_line_ids`; must belong to the same company |
 | `module_maintenance_worksheet` | Custom Maintenance Worksheets | boolean |  |  |
@@ -638,7 +638,7 @@ Description: Config Settings
 | `company_lunch_minimum_threshold` | Maximum Allowed Overdraft | float |  | related through path `company_id.lunch_minimum_threshold` |
 | `company_lunch_notify_message` | Lunch notification message | rich text |  | related through path `company_id.lunch_notify_message` |
 | `group_mass_mailing_campaign` | Mailing Campaigns | boolean |  | Help: This is useful if your marketing campaigns are composed of several emails |
-| `mass_mailing_outgoing_mail_server` | Dedicated Server | boolean |  | Help: Use a specific mail server in priority. Otherwise Odoo relies on the first outgoing mail server available (based on their sequencing) as it does for normal mails. |
+| `mass_mailing_outgoing_mail_server` | Dedicated Server | boolean |  | Help: Use a specific mail server in priority. Otherwise the system relies on the first outgoing mail server available (based on their sequencing) as it does for normal mails. |
 | `mass_mailing_mail_server_id` | Mail Server | many to one | `ir.mail_server` |  |
 | `show_blacklist_buttons` | Blacklist Option when Unsubscribing | boolean |  | Help: Allow the recipient to manage themselves their state in the blacklist via the unsubscription page. |
 | `mass_mailing_reports` | 24H Stat Mailing Reports | boolean |  | Help: Check how well your mailing is doing a day after it has been sent. |
@@ -834,7 +834,7 @@ State machine fields of this entity: `account_peppol_proxy_state`, `l10n_dk_nemh
 | `_compute_display_name` | computation | self | `base` |  | Override display_name method to return an appropriate configuration wizard name, and not the generated name. |
 | `get_option_path` | operation | self, menu_xml_id | `base` | model | Fetch the path to a specified configuration view and the action id to access it.  :param string menu_xml_id: the xml id of the menuitem where the view is located,     structured as follows: module_name.menuitem_xml_id (e.g.: "sales_team.menu_sale_config") :return: a 2-value tuple where    - t[0]: string: full path to the menuitem (e.g.: "Settings/Configuration/Sales")   - t[1]: int or long: id of the menuitem's action |
 | `get_option_name` | operation | self, full_field_name | `base` | model | Fetch the human readable name of a specified configuration option.  :param string full_field_name: the full name of the field, structured as follows:     model_name.field_name (e.g.: "sale.config.settings.fetchmail_lead") :return: human readable name of the field (e.g.: "Create leads from incoming mails") :rtype: str |
-| `get_config_warning` | operation | self, msg | `base` | model | Helper: return a Warning exception with the given message where the ``%(field:xxx)s`` and/or ``%(menu:yyy)s`` are replaced by the human readable field's name and/or menuitem's full path.  Usage: ------ Just include in your error message ``%(field:model_name.field_name)s`` to obtain the human readable field's name, and/or %(menu:module_name.menuitem_xml_id)s to obtain the menuitem's full path.  Example of use: ---------------  .. code-block:: python      raise env['ir..config.settings'](_(         "Error: this action is prohibited. You should check the "         "field %(field:sale.config.setti |
+| `get_config_warning` | operation | self, msg | `base` | model | Helper: return a Warning exception with the given message where the `%(field:xxx)s` and/or `%(menu:yyy)s` are replaced by the human readable field's name and/or menuitem's full path.  Usage: ------ Just include in your error message `%(field:model_name.field_name)s` to obtain the human readable field's name, and/or %(menu:module_name.menuitem_xml_id)s to obtain the menuitem's full path.  Example of use: ---------------  .. code-block:: python      raise env['ir..config.settings'](_(         "Error: this action is prohibited. You should check the "         "field %(field:sale.config.setti |
 | `create` | lifecycle override | self, vals_list | `base`, `event`, `hr_presence`, `l10n_hu_edi`, `point_of_sale`, `pos_hr` | model_create_multi |  |
 | `action_open_template_user` | user action | self | `base` |  |  |
 | `open_company` | operation | self | `base_setup` |  |  |

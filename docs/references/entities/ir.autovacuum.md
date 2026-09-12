@@ -11,7 +11,7 @@ Description: Automatic Vacuum
 
 | Operation | Kind | Arguments | Defined in packages | Triggers and dependencies | Documentation |
 |---|---|---|---|---|---|
-| `_run_vacuum_cleaner` | background operation | self | `base` |  | Perform a complete database cleanup by safely calling every ``@api.autovacuum`` decorated method. |
+| `_run_vacuum_cleaner` | background operation | self | `base` |  | Perform a complete database cleanup by safely calling every `@api.autovacuum` decorated method. |
 | `_gc_orm_signaling` | background operation | self | `base` | autovacuum |  |
 
 ## Scheduled jobs

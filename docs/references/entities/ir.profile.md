@@ -46,8 +46,8 @@ Description: Profiling results
 | `_generate_speedscope` | internal rule | self, params | `base` |  |  |
 | `_add_outputs` | internal rule | self, sp, suffix, params | `base` |  |  |
 | `_compute_speedscope_url` | computation | self | `base` | depends: `speedscope` |  |
-| `_enabled_until` | internal rule | self | `base` |  | If the profiling is enabled, return until when it is enabled. Otherwise return ``None``. |
-| `set_profiling` | operation | self, profile, collectors, params | `base` | model | Enable or disable profiling for the current user.  :param profile: ``True`` to enable profiling, ``False`` to disable it. :param list collectors: optional list of collectors to use (string) :param dict params: optional parameters set on the profiler object |
+| `_enabled_until` | internal rule | self | `base` |  | If the profiling is enabled, return until when it is enabled. Otherwise return `None`. |
+| `set_profiling` | operation | self, profile, collectors, params | `base` | model | Enable or disable profiling for the current user.  :param profile: `True` to enable profiling, `False` to disable it. :param list collectors: optional list of collectors to use (string) :param dict params: optional parameters set on the profiler object |
 | `action_view_speedscope` | user action | self | `base` |  |  |
 
 ## Validation and error messages (2)

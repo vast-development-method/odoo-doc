@@ -341,7 +341,7 @@ State machine fields of this entity: `hr_presence_state`, `activity_state`, `att
 | `search_fetch` | operation | self, domain, field_names, offset, limit, order | `hr` | model |  |
 | `fetch` | operation | self, field_names | `hr` |  |  |
 | `_check_access` | validation | self, operation | `hr` |  |  |
-| `_check_private_fields` | validation | self, field_names | `hr` |  | Check whether ``field_names`` contain private fields. |
+| `_check_private_fields` | validation | self, field_names | `hr` |  | Check whether `field_names` contain private fields. |
 | `_copy_cache_from` | internal rule | self, public, field_names | `hr` |  |  |
 | `notify_expiring_contract_work_permit` | operation | self | `hr` | model |  |
 | `get_view` | lifecycle override | self, view_id, view_type, **options | `hr` | model |  |
