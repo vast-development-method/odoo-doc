@@ -628,14 +628,14 @@ keep the indirection rather than hard-coding the archived flag.
 | Entity | Group | Read | Write | Create | Delete |
 |---|---|---|---|---|---|
 | Work Entry | Human Resources Officer | yes | yes | yes | **no** |
-| Work Entry | Settings | yes | yes | yes | yes |
+| Work Entry | Settings Administrator | yes | yes | yes | yes |
 | Work Entry Type | Human Resources Officer | yes | no | no | no |
-| Work Entry Type | Human Resources Manager | yes | yes | yes | yes |
+| Work Entry Type | Human Resources Administrator | yes | yes | yes | yes |
 | Work Entry Employee Filter | Human Resources Officer | yes | yes | yes | yes |
-| Work Entry Regeneration Wizard | Human Resources Manager | yes | yes | yes | yes |
+| Work Entry Regeneration Wizard | Human Resources Administrator | yes | yes | yes | yes |
 
 The single most consequential line is the first: **a human resources officer cannot delete a work
-entry.** Officers archive instead, which cancels. Only a member of the settings group can delete one,
+entry.** Officers archive instead, which cancels. Only a member of the Settings Administrator group can delete one,
 and even then `WKE-035` protects validated entries. A rebuild that grants deletion to officers changes
 the domain's safety properties.
 
@@ -674,9 +674,9 @@ and the regeneration triggered by a version change all likewise run with elevate
 | Field | Entity | Visible to |
 |---|---|---|
 | Generated From, Generated To, Last Generation Date | Employee Version | Human Resources Officer and above |
-| Generation source, invalid-source indicator | Employee Version | Human Resources Manager only |
-| Generation source, invalid-source indicator | Employee | Human Resources Manager only |
-| Has work entries | Employee | the Settings group and Human Resources Officer |
+| Generation source, invalid-source indicator | Employee Version | Human Resources Administrator only |
+| Generation source, invalid-source indicator | Employee | Human Resources Administrator only |
+| Has work entries | Employee | the Settings Administrator group and Human Resources Officer |
 | Work entry kind on a working schedule line | Working Schedule Line | Human Resources Officer and above |
 | Work entry kind on a working time exclusion | Working Time Exclusion | Human Resources Officer and above |
 

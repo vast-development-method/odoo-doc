@@ -12,7 +12,7 @@ defined here only to the depth this folder needs, with a link to the folder that
 **Absence entry.** A Work Entry whose Work Entry Type carries the absence flag. An absence entry
 means *the employee did not work these hours, and the reason is recorded*. Its duration is not the
 clock span of the interval it came from: it is the theoretical duration the working schedule
-prescribed for that span. See [calculations.md, chapter 8](calculations.md#8-the-post-processing-pass-from-intervals-to-day-rows).
+prescribed for that span. See [calculations.md, chapter 8](calculations.md#8-the-post-processing-pass-intervals-to-day-rows).
 
 **Absence companion.** The capability package that bridges the Work Entries domain to the
 [Time Off](../time-off/README.md) domain. It adds the absence link on a Work Entry, the work entry
@@ -33,7 +33,7 @@ it: refusal, reversion to an earlier approval step, and cancellation by the requ
 **Acting company.** The company under whose authority an operation runs. Generation deliberately
 switches the acting company for each group of versions it processes, so that the Working Time
 Exclusions it reads belong to that company and are never mixed across companies. See
-[calculations.md, chapter 3](calculations.md#3-entry-points-the-company-and-time-zone-grouping).
+[calculations.md, chapter 3](calculations.md#3-entry-points-and-the-company-and-time-zone-grouping).
 
 **Attendance interval.** An interval produced by expanding a Working Schedule over a window: a start
 instant, a stop instant and the Working Schedule Line that produced it. It is the raw material of
@@ -125,7 +125,7 @@ payroll capability reads it; this domain only stores it.
 **Flexible-hours schedule.** A Working Schedule marked as flexible: the employee owes a number of
 hours per day and per week but not at fixed clock times. Generation treats an absence on such a
 schedule differently depending on whether it falls inside one calendar day or spans several. See
-[calculations.md, section 5.3](calculations.md#53-branch-b-a-flexible-hours-schedule).
+[calculations.md, section 5.3](calculations.md#532-branch-b-a-flexible-hours-schedule).
 
 **Forced regeneration.** A generation run with the force flag set. It ignores the generated-through
 markers, nullifies every non-validated entry already present in the range, and writes the range
@@ -152,7 +152,7 @@ is forced.
 
 **Generation.** The act of deriving Work Entries from a Working Schedule, the exclusions that overlay
 it and the validated absences of the employee, for a period and a set of versions. Specified end to
-end in [calculations.md, chapters 3 to 12](calculations.md#3-entry-points-the-company-and-time-zone-grouping).
+end in [calculations.md, chapters 3 to 12](calculations.md#3-entry-points-and-the-company-and-time-zone-grouping).
 
 **Generation source.** The selection `work_entry_source` on an Employee Version, required, default
 `calendar` "Working Schedule". It names where the day book comes from. `calendar` is the only value
@@ -171,7 +171,7 @@ figure.
 **Half day.** The unit in which a Working Schedule Line contributes to a day count. A morning or
 afternoon line counts as half a day when its span is at most three quarters of the schedule's
 hours-per-day figure, and as a whole day otherwise. A full-day line always counts as one day; a break
-line counts as zero. See [calculations.md, chapter 11](calculations.md#11-the-half-day-rule-and-the-day-count).
+line counts as zero. See [calculations.md, chapter 11](calculations.md#11-the-half-day-rounding-rule-and-the-day-count).
 
 ---
 
@@ -236,7 +236,7 @@ time, zero point seven five is seventy-five percent of pay. Displayed as a perce
 span that crosses local midnight, assigns each row its calendar date in the schedule's time zone,
 computes each row's duration, drops rows of zero duration and merges rows sharing a date, a kind, an
 employee, a version and a company. Specified in
-[calculations.md, chapter 8](calculations.md#8-the-post-processing-pass-from-intervals-to-day-rows).
+[calculations.md, chapter 8](calculations.md#8-the-post-processing-pass-intervals-to-day-rows).
 
 ---
 
@@ -315,7 +315,7 @@ whole generation engine.
 
 **Window.** In this folder, always a range of instants, as opposed to a **period**, which is a range
 of calendar dates. Generation is handed a period and converts it into a window; the conversion point
-is stated exactly in [calculations.md, chapter 3](calculations.md#3-entry-points-the-company-and-time-zone-grouping)
+is stated exactly in [calculations.md, chapter 3](calculations.md#3-entry-points-and-the-company-and-time-zone-grouping)
 because it is a frequent source of off-by-one behaviour.
 
 **Work entry.** One line of the day book: one employee, one calendar date, one kind, one duration in

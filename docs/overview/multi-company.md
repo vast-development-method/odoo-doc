@@ -966,7 +966,7 @@ Companies 1 (root), 2 and 3 (branches of 1) and 4 (unrelated root). Unless state
 
 ## 18. Reconciliation notes
 
-Four behaviours in this document contradict the reading a careful person would most naturally arrive at, and two decisions about naming and ownership are recorded with them. Each was verified against the running system.
+Four behaviours in this document contradict the reading a careful person would most naturally arrive at, and two decisions about naming and ownership are recorded with them. Each is recorded as observed.
 
 1. **The meaning of an empty activation list.** When the context carries no activation, the environment does **not** fall back to the user's default company for both values. The behaviour is asymmetric: the current company is the default company, but the activated companies are **all** the user's companies. [Section 2.2](#22-deriving-the-current-company-and-the-activated-companies) states the asymmetry and explains why it is deliberate; criterion AC-MC-1 asserts it.
 2. **The shape of the company rule.** "The record's company is empty or among the allowed companies" is one canonical shape out of five, not the canonical shape. Shapes B, C, D and E are all in use, and the difference between them is what makes branches work. [Section 5.2](#52-the-five-canonical-shapes) enumerates all five with a worked evaluation, and keeps the one-shape statement as shape A.

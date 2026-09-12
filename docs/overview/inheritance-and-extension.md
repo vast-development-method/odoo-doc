@@ -1532,7 +1532,7 @@ These are not enforced; they are the conditions under which the mechanisms above
 
 ## 21. Reconciliation notes
 
-Six points in this document are easy to get wrong, and in four of them the natural assumption is the opposite of the observed behaviour. Each was verified against the running system.
+Six points in this document are easy to get wrong, and in four of them the natural assumption is the opposite of the observed behaviour. Each is recorded as observed.
 
 1. **Precedence among several named sources.** When a definition names several sources and two of them declare the same field, the *last* named source does **not** win. The base list is built by adding the definition first and then each named source in declaration order, and the composition order preserves that order, so the **first** named source has the highest precedence. This is also what makes adoption of an abstract behaviour work, since the adopting entity lists its own name before the abstract entity. [Section 3.2](#32-ordering-of-named-sources), [section 6.1](#61-the-composition-order) and the row of [section 16](#16-resolution-order) state the rule, and acceptance criterion AC-EXT-9 asserts it.
 2. **The foundation entity's transport name.** The implicit ancestor of every entity is not a notional construct with an invented name: its transport name is `base`, the same word as the foundation package's technical name, and both are reproduced identifiers. This document uses `base`.

@@ -13,7 +13,7 @@ changes the navigation of the whole human resources application.
 
 | Way in | Who sees it | What it opens |
 |---|---|---|
-| The "Work Entries" button on the employee form | Human Resources Manager, and only when the employee has at least one work entry in any state | The work entries of that employee, calendar first |
+| The "Work Entries" button on the employee form | Human Resources Administrator, and only when the employee has at least one work entry in any state | The work entries of that employee, calendar first |
 | The navigation path `work-entries` | Anybody with read access who has the address | The work entry window action |
 | A payroll capability's own menu | Payroll users | The same window actions, bound into that capability's menu tree |
 | The conflict window action, from a dashboard tile or an automation | Human Resources Officer | The work entries filtered to the conflict state |
@@ -120,8 +120,8 @@ not. That behaviour is deliberate and is covered by a test.
 
 ### 3.5 The contextual operation on the list and the form
 
-One contextual operation is offered on both, named "Set to Draft", at order fifty. It is intended to
-return the selection to the `draft` state.
+One contextual operation is offered on both, named "Set to Draft", at order fifty. Its intent is to
+put the selection back into the `draft` state.
 
 In the specified system the operation names an implementation that no package provides, so invoking it
 fails. This is recorded as a **compatibility finding**; a corrected behaviour would write the state
@@ -235,15 +235,24 @@ entries are excluded from every deletion.
 
 ### 5.4 The quick replacement
 
-A shortcut button carries a kind and no duration. For each selected day:
+A shortcut button carries a kind and a duration of minus one, which is the marker meaning *keep each
+day's own total*. The procedure is:
 
-1. If the day already holds entries, one new entry is created carrying the chosen kind and the **sum
-   of the durations of that day's existing entries**, and the day's previous entries are deleted.
-2. If the day holds nothing, a forced generation of that single day is run for the employee, and the
-   chosen kind is written onto the first entry it produced.
+1. For each selected day, total the durations of that day's selected entries.
+2. If that total is greater than zero, queue one new entry for that day carrying the chosen kind and
+   that total.
+3. If the day holds nothing, run a forced generation of that single day for the employee and remember
+   the first entry it produced.
+4. Write the chosen kind onto every entry remembered in step 3.
+5. Create every entry queued in step 2, in one operation.
+6. If at least one entry was created **and** the selection was not empty, delete every selected entry
+   — across the whole selection, not day by day.
+7. Reload the calendar.
 
 The two branches exist because a day with no entries has no duration to preserve, and generating it is
-the only way to discover what the schedule prescribed.
+the only way to discover what the schedule prescribed. Note that step 6 deletes the whole selection
+rather than only the days that were replaced; a day whose entries were all validated is never in the
+selection, because validated days are filtered out before any of this runs.
 
 ### 5.5 The reset
 
@@ -266,7 +275,7 @@ column.
 
 The name as the title, with the placeholder "Work Entry Type Name". A ribbon reading "Archived" when
 the kind is archived. On the left: the payroll code, the display code, the external code, the order —
-visible only to the technical group — and the colour as a colour picker. On the right: the country
+visible only to the technical-features group — and the colour as a colour picker. On the right: the country
 with creation and opening suppressed, the pay rate rendered as a percentage, and the extra-hours flag
 labelled "Added to Monthly Pay". Below, a group headed "Time Off Options" into which the bridging
 packages insert their own fields.
@@ -354,7 +363,7 @@ when the period still holds conflicts.
 
 | View | Domain | What this domain adds |
 |---|---|---|
-| Employee form | Human resources core | The "Work Entries" button, shown only when the employee has entries and only to a human resources manager, and the generation source carried invisibly next to the schedule |
+| Employee form | Human resources core | The "Work Entries" button, shown only when the employee has entries and only to a human resources administrator, and the generation source carried invisibly next to the schedule |
 | Contract template form | Human resources core | The generation source carried invisibly, so that it can be copied from a template |
 | Working schedule line list and form | Attendances and working time | The work entry kind, after the week type on the list and after the day period on the form |
 | Working time exclusion list, form and search | Attendances and working time | The work entry kind after the resource on the form, after the last date on the list, and in the search view as both a field and a grouping, all restricted to human resources officers |
@@ -390,8 +399,8 @@ follow from the rules and a rebuild must reproduce them:
    [`WKE-027`](business-rules.md#5-the-four-conflict-conditions) is far faster and leaves the day book
    unchecked; the checks must then be run afterwards.
 3. The payroll-code uniqueness of rule [`WKE-006`](business-rules.md#2-the-work-entry-type-catalogue)
-   is a write-time validation and is **not** re-checked by a loader that bypasses the write path, so an
-   import of kinds can leave duplicate codes behind.
+   is a write-time validation and is **not** re-checked by a loader that bypasses the write path, so
+   loading kinds that way can leave duplicate codes behind.
 
 **Export.** The list, the pivot and the generic export all read the same fields. The fields a payroll
 integration needs are: the employee, the date, the payroll code of the kind, the duration in hours, the

@@ -4,8 +4,9 @@
 
 A **Work Entry** is one line of the payroll-facing day book of an employee: *on this
 calendar date, this person accumulated this many hours of this kind of time*. The kind is
-a **Work Entry Type** — ordinary attendance, overtime, paid time off, sick time off,
-unpaid absence, public holiday, out of contract, and so on. The day book is what a payroll
+a **Work Entry Type** — ordinary attendance, overtime, home working, paid time off, sick
+time off, compensatory time off, unpaid absence, public holiday and out of contract are the
+kinds the platform ships, and an administrator may add more. The day book is what a payroll
 run consumes: it is the bridge between "the employee was contracted to work a schedule"
 and "the employee is paid for so many hours at so many rates".
 
@@ -56,12 +57,12 @@ human. Every conflict condition is enumerated in
 | Forced regeneration of a date range for a set of employees | [workflows.md](workflows.md#6-regenerating-a-range-by-hand) |
 | Automatic regeneration when the schedule or the generation source of a version changes | [workflows.md](workflows.md#7-regeneration-triggered-by-a-version-change) |
 | Validation (locking entries into a payslip) and the refusal to validate conflicting entries | [workflows.md](workflows.md#8-validating-work-entries), [state-machines.md](state-machines.md) |
-| Cancellation, archiving, deletion protection | [state-machines.md](state-machines.md#4-transition-table), [business-rules.md](business-rules.md#8-deletion-and-archiving-rules) |
+| Cancellation, archiving, deletion protection | [state-machines.md](state-machines.md#13-transition-table), [business-rules.md](business-rules.md#8-deletion-and-archiving-rules) |
 | Splitting one work entry into two | [workflows.md](workflows.md#10-splitting-a-work-entry) |
 | The four conflict conditions and the recheck window | [business-rules.md](business-rules.md#5-the-four-conflict-conditions) |
 | The interaction with validated, refused and cancelled absence requests | [workflows.md](workflows.md#11-an-absence-is-validated), [workflows.md](workflows.md#12-an-absence-is-refused-or-cancelled) |
 | The calendar view data contract, multi-create, multi-select and the per-user employee filter | [interfaces.md](interfaces.md#4-the-work-entry-calendar-and-its-data-contract) |
-| Shipped work entry kinds, including the country-specific catalogue | [configuration.md](configuration.md#3-shipped-work-entry-types) |
+| Shipped work entry kinds, including the country-specific catalogue | [configuration.md](configuration.md#3-the-shipped-catalogue-of-work-entry-kinds) |
 | Security groups, access matrix, record rules | [configuration.md](configuration.md#6-security) |
 | The daily scheduled job that fills the current and next month | [configuration.md](configuration.md#7-scheduled-jobs) |
 
@@ -195,3 +196,23 @@ hold, each of which is written out in full in
   range of instants. The generation engine is handed dates and turns them into a window;
   the point at which it does so is stated exactly, because it is a frequent source of
   off-by-one behaviour.
+
+## 9. The files of this folder
+
+| File | Content |
+|---|---|
+| [README.md](README.md) | This file: the scope, the capabilities, the entity list, the reading order, the dependencies, the mandatory scenarios and the conventions. |
+| [entities.md](entities.md) | Every entity in full: purpose, grain, complete field table with identifier, full name, type, target, required, default, computed rule and meaning; relations, uniqueness, ordering, display name, archival, company behaviour, and the fields this domain adds to the Employee Version, the Employee, the three working-time entities and the two absence entities. |
+| [state-machines.md](state-machines.md) | The four states of a Work Entry with their stored values, the ten transitions with guards and side effects, the exact refusal messages, the coupling between the state and the archived flag, a state diagram, what each state permits, the order of the four conflict passes, and the two neighbouring machines. |
+| [workflows.md](workflows.md) | Seventeen end-to-end procedures, from setting up the catalogue to handing the day book to payroll, each with the records it changes and the conditions under which it fails. |
+| [business-rules.md](business-rules.md) | Sixty-seven numbered rules with the identifiers `WKE-001` to `WKE-067`: validations, constraints, invariants, conflict conditions, permission checks, locking rules, every exact message, and the table of identifiers. |
+| [calculations.md](calculations.md) | The generation algorithm end to end in sixteen chapters, with the interval partition, the kind precedence ladder, the post-processing pass, the marker arithmetic, the half-day rule, the conflict arithmetic, the regeneration range arithmetic and a full two-week worked example. |
+| [accounting-effects.md](accounting-effects.md) | The reasoned statement that this domain posts nothing, what it supplies to the capability that does, the ledger effects it triggers indirectly, and the audit trail it provides. |
+| [configuration.md](configuration.md) | The capability packages, the master data prerequisites, the complete shipped catalogue of one hundred and eighteen work entry kinds, the shipped links from absence kinds, the settings, the security matrix, the three record rules, the field-level restrictions and the daily scheduled job. |
+| [interfaces.md](interfaces.md) | Every window action, view, filter and grouping; the calendar and its data contract; multiple creation, multiple selection and quick replacement; the regeneration wizard form; the named operations; the client components; the contributions to other domains' views; and the import and export paths. |
+| [acceptance-criteria.md](acceptance-criteria.md) | Seventy numbered Given, When and Then scenarios with concrete records, inputs and results, of which the six of [chapter 6](#6-mandatory-scenarios) are mandatory. |
+| [glossary.md](glossary.md) | Every term of the domain, defined. |
+
+There are no extra topic files: the domain's one large algorithm is kept inside
+[calculations.md](calculations.md) so that the generation procedure and its worked examples stay in
+one place.

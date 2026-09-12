@@ -8,25 +8,50 @@ the generic import mechanism, and the fifth the domain-specific data files.
 
 ## Part 1: the document rendering model
 
+This part states the parts of the rendering model a reader of the document catalogue needs in order to read Part 2: what
+a report definition holds, how a print request becomes a file, which language the file is rendered in, which layout
+surrounds it and which paper geometry it is laid out on. The rendering model itself — the template grammar, the field
+converters, the splitting of one rendered document into one file per record, the barcode generator, the label layouts
+and the failure codes of the conversion — is specified in
+[`../runtime/report-rendering.md`](../runtime/report-rendering.md), and that document is the authority wherever the two
+overlap. The pointers below name the section of it that carries each topic in full.
+
 ### The report definition
 
-A printed document is defined by a **report definition** record with the following fields.
+A printed document is defined by a **report definition** record. Its transport name is `ir.actions.report` and its full
+name is Report Action; the complete entity, its resolution rules, the way a print entry is produced and the letterhead
+detour taken on the first print of a fresh installation are specified in
+[`../runtime/report-rendering.md`](../runtime/report-rendering.md), section 3. The fields are reproduced here because
+every entry of the catalogue in Part 2 is read against them.
 
-| Field | Data type | Meaning |
-|---|---|---|
-| `name` | text, required | The label shown in the print menu and used as the default file name. |
-| `entity` | text, required | The entity whose records the document is printed for. |
-| `output_kind` | selection: `portable_document`, `rich_text`, `plain_text` | The form of the produced file. A formatted document is always rendered first; the portable form is then produced by the document converter, the rich text form is returned as rendered, and the plain text form is returned without the surrounding layout. |
-| `template` | text, required | The document template that renders one record. |
-| `file_name_rule` | text | An expression evaluated per record that produces the file name shown to the user. When empty the report name and the record display name are used. |
-| `attachment_name_rule` | text | An expression evaluated per record that produces the name under which the rendered document is stored as an attachment of the record. When empty nothing is stored. |
-| `reuse_saved_attachment` | boolean | When true and an attachment with that name already exists on the record, the stored file is returned instead of rendering again. This is what makes a posted invoice always print byte-identical. |
-| `available_in_print_menu_of` | entity reference | The entity on whose records the document appears in the print menu. When empty the document is only reachable from a button or an action. |
-| `paper_format` | reference | The paper format to apply. When empty the paper format of the company applies, and when that is empty the installation default applies. |
-| `groups` | list of access groups | When set, only members of one of these groups see the document in the print menu and may render it. |
-| `filter_condition` | condition | Restricts which records of the entity the document may be printed for. |
+| Identifier | Full name | Type | Required | Default | Meaning |
+|---|---|---|---|---|---|
+| `name` | Name | Text, translatable | yes | none | The label shown in the print menu, and the file name when no name expression exists. |
+| `model` | Model Name | Text | yes | none | The transport name of the entity whose records the document is printed for. |
+| `model_id` | Model | Many-to-one to Entity, computed with a search rule | no | derived | The same entity as a link, so that the configuration screen can offer a selector. |
+| `report_type` | Report Type | Selection: `qweb-html`, `qweb-pdf`, `qweb-text` | yes | `qweb-pdf` | The form of the produced file. The three stored values are reproduced exactly as they are stored; their labels are `HTML`, `PDF` and `Text`. A formatted document is always rendered first: `qweb-pdf` then produces the paginated form through the document converter and downloads it, `qweb-html` returns the rendered form as a page shown in place, and `qweb-text` returns unformatted text without the surrounding layout. |
+| `report_name` | Template Name | Text | yes | none | The external identifier of the document template that renders one record. |
+| `report_file` | Report File | Text, stored, writable | no | empty | The path of the file the template is declared in. |
+| `print_report_name` | Printed Report Name | Text, translatable | no | empty | An expression evaluated per record that produces the file name shown to the user. When empty, the report name and the record display name are used. |
+| `attachment` | Save as Attachment Prefix | Text | no | empty | An expression evaluated per record that produces the name under which the rendered document is stored as an attachment of the record. Empty means the result is not stored. |
+| `attachment_use` | Reload from Attachment | Boolean | no | false | When true and an attachment with that name already exists on the record, the stored file is returned instead of rendering again. This is what makes a posted invoice always print identically. |
+| `binding_model_id` | Action Binding | Many-to-one to Entity | no | empty | The entity on whose records the document appears in the print menu. When empty, the document is only reachable from a button or from an action. |
+| `binding_type` | Action Binding Type | Selection: `action`, `report` | no | `report` | Which menu of the interface the entry appears in: the action menu or the print menu. A report definition defaults to `report`. |
+| `binding_view_types` | Binding View Types | Text listing view kinds | no | `list,form` | The view kinds whose print menu offers the entry. |
+| `multi` | On Multiple Doc. | Boolean | no | false | When true, the entry is not offered on a single-record screen. |
+| `paperformat_id` | Paper Format | Many-to-one to Paper Format, indexed when not empty | no | empty | The paper format to apply. When empty the paper format of the company applies, and when that is empty the installation default applies. |
+| `group_ids` | Groups | Many-to-many to Access Group, through the association table `res_groups_report_rel` | no | empty | When set, only members of one of these groups see the document in the print menu and may render it. |
+| `domain` | Filter domain | Text holding a condition | no | empty | Restricts which records of the entity the document may be printed for. |
+
+Every identifier and every stored selection value in the table is reproduced exactly as the system stores it, because a
+replacement that has to import an existing database writes these column names and these values.
 
 ### Rendering pipeline
+
+The steps below are the print request as a person experiences it. The internal stages — the rendering context, the
+splitting of one rendered document into one file per record, the geometry arguments handed to the converter, the merge
+of several files and the failure codes of the conversion — are specified in
+[`../runtime/report-rendering.md`](../runtime/report-rendering.md), section 4.
 
 1. The caller supplies the report and the record identifiers, either through the print menu of a list or form, through a
    button that returns a print action, or through the rendering endpoints described in
@@ -54,7 +79,9 @@ printed.
 
 ### Language of a printed document
 
-The rendering language is decided per record, in this order:
+The per-recipient language rule of the renderer is specified in
+[`../runtime/report-rendering.md`](../runtime/report-rendering.md), section 4.14; the decision as it applies to the
+documents catalogued in Part 2 is this. The rendering language is decided per record, in this order:
 
 1. The language explicitly passed in the print context, when one is passed.
 2. The language of the partner the document is addressed to, when the document has one (customer of an invoice, vendor
@@ -71,7 +98,9 @@ formatted with the conventions of that language, while the currency and the deci
 
 ### Shared layouts
 
-Four page layouts are shipped and one is selected per company. They differ only in decoration; each renders the same
+The layout templates, the company branding fields they read, the address block and the page-numbering rule are
+specified in [`../runtime/report-rendering.md`](../runtime/report-rendering.md), section 6. Four page layouts are
+shipped and one is selected per company. They differ only in decoration; each renders the same
 blocks.
 
 | Block | Content |
@@ -89,7 +118,10 @@ label output.
 
 ### Paper formats
 
-The installation ships eighteen named paper formats besides the one a company may define for itself. Page shrinking is
+The Paper Format entity, its field table, its refusal message and the named page sizes it offers are specified in
+[`../runtime/report-rendering.md`](../runtime/report-rendering.md), section 5, whose own table lists five of the
+formats. The table below lists every format of the whole installation, those contributed by the business capability
+packages included. The installation ships eighteen named paper formats besides the one a company may define for itself. Page shrinking is
 disabled on the label and ticket formats, in order that a label prints at its exact size.
 
 | Paper format | Page | Orientation | Margins top / bottom / left / right (millimetres) | Header spacing | Header rule | Resolution (dots per inch) |
@@ -1078,3 +1110,25 @@ entity, output kind, template, file-name rule and attachment rule. The points th
    scenarios with stable identifiers, and nine further scenarios were added to cover access enforcement, group-restricted
    reports, paper format selection, layout selection, page numbering, the re-importable round trip, formula protection,
    the two kinds of empty cell on import, and the structured invoice download.
+5. **The field table of the report definition.** One draft named the fields of the report definition with invented,
+   readable spellings — an entity field, an output-kind field, a template field, a file-name rule, an attachment-name
+   rule, a reuse flag, a print-menu binding, a paper-format field, a groups field and a filter condition — and presented
+   the output kind as a selection over three descriptive values. None of those spellings is stored, and a replacement
+   importing an existing database from that table would have written the wrong column names and the wrong stored
+   values. The table now reproduces the stored identifiers `name`, `model`, `model_id`, `report_type`, `report_name`,
+   `report_file`, `print_report_name`, `attachment`, `attachment_use`, `binding_model_id`, `binding_type`,
+   `binding_view_types`, `multi`, `paperformat_id`, `group_ids` and `domain`, carries a column for the full name of
+   each as the documentation rules require of a field table, and gives the stored selection values of the output form
+   as `qweb-html`, `qweb-pdf` and `qweb-text` with `qweb-pdf` as the default. The same identifiers and the same values
+   are used by [`../runtime/report-rendering.md`](../runtime/report-rendering.md), section 3, and both were verified
+   against the source of the system.
+6. **Part 1 and the runtime document.** The rendering model is the subject of
+   [`../runtime/report-rendering.md`](../runtime/report-rendering.md). Part 1 of this document previously restated parts
+   of it without linking to it once, which is how the invented field names entered. Part 1 now opens by naming that
+   document as the authority for the rendering model, and each of its five subsections points at the section of it that
+   carries the topic in full: section 3 for the report definition, section 4 for the pipeline, section 4.14 for the
+   language per recipient, section 5 for paper formats and section 6 for the layouts, headers and footers. What Part 1
+   keeps is what a reader of the document catalogue in Part 2 needs in order to read an entry: the configurable fields
+   of a definition, the order of the steps, the language decision, the blocks of the shared layout and the geometry of
+   the eighteen paper formats of the whole installation, of which the runtime document's own table lists five. The two
+   documents agree on every value they both state.

@@ -1612,7 +1612,7 @@ The bundle names below are reproduced because other packages target them by name
 
 ## 25. Reconciliation notes
 
-Four behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below was verified against the running system.
+Four behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below is recorded as observed.
 
 1. **What the empty automatic-installation list means.** An empty trigger list does not mean "never automatic"; it means the opposite. The condition over an empty set is vacuously satisfied, so the package is always installed automatically, and its own dependencies are pulled in with it. This is what makes the foundation package install itself on an empty database. [Section 11.1](#111-declaration) and [section 4.6](#46-bootstrapping-an-empty-database) state the reading.
 2. **When external prerequisites are checked.** They are not checked while the manifest is read — that would hide a package from the list because the host lacks a component. They are checked when the package is about to change state, and the three refusals differ by transition. [Section 2.10](#210-external-prerequisites) states it, and criterion AC-PKG-40 asserts it.

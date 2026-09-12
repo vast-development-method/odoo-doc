@@ -1085,7 +1085,7 @@ Records created offline receive a locally generated marker rather than a server 
 
 ## 20. Reconciliation notes
 
-Three topics could reasonably have been specified here and are specified elsewhere instead, and two further decisions are recorded so that a reader who expects to find a subject in this document knows where it went. Everything stated here was verified against the running system.
+Three topics could reasonably have been specified here and are specified elsewhere instead, and two further decisions are recorded so that a reader who expects to find a subject in this document knows where it went. Everything stated here is recorded as observed.
 
 1. **What belongs here and what belongs with the views.** The grammar of a view description, the widget catalogue, the resolution passes and the actions are specified in [views and actions](views-and-actions.md), because they are what the server produces. This document specifies what the client does with them, and repeats none of the grammar.
 2. **Where the asset bundles are specified.** A bundle's content is decided by which packages are installed and in what order, so it is specified in [the package system, section 22](package-system.md#22-client-asset-bundles). [Section 2.1](#21-the-startup-sequence) names the step at which the bundles are loaded and nothing more.

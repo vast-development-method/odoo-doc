@@ -13,7 +13,9 @@ Nothing here prescribes a programming language, a framework, a database product 
 The plan is written at two grains and the two agree.
 
 - A **step** is a delivery unit: one team, one coherent body of behavior, one gate. There are twenty of them, numbered 1 to 20, and their order is forced by dependency.
-- A **stage** is a coarse phase of the rebuild that groups the steps which share one risk. There are ten of them. A stage exists so that a programme can be reported and financed at a level above the step, and so that the properties that must hold across several steps — recomputation, access enforcement, rounding discipline, quantity conservation — have somewhere to be asserted.
+- A **stage** is a coarse phase of the rebuild that groups the steps which share one risk. There are ten of them. A stage exists so that a program can be reported and financed at a level above the step, and so that the properties that must hold across several steps — recomputation, access enforcement, rounding discipline, quantity conservation — have somewhere to be asserted.
+
+Step 1 is one delivery unit but closes three stage gates, because the platform, identity and access, and the presentation and transport contracts are mutually dependent — the shipped access rules are records loaded by the package loader, and the loader stores its own records through the registry it defines — while each of the three carries an acceptance property that has to be asserted on its own.
 
 Steps 1 to 3, which are stages one to five up to and including master data, build a platform and a set of shared records that contain no business decision at all. They are the largest source of risk, because every later step assumes their semantics exactly. Steps 4 to 20 add business capability, much of it in parallel once the master data of step 3 exists.
 
@@ -297,7 +299,7 @@ None of its own. The document layout, headers, footers and page formats configur
 
 ### Interfaces to deliver
 
-The contact autocomplete and enrichment service contracts. The notification bus channel contract of [`../runtime/notification-bus.md`](../runtime/notification-bus.md), which every later screen that waits for events uses. The calendar synchronization connectors of [`../interfaces/external-integrations.md`](../interfaces/external-integrations.md).
+The contact autocomplete and enrichment service contracts of [`../interfaces/external-integrations.md`](../interfaces/external-integrations.md). The notification bus channel contract of [`../runtime/notification-bus.md`](../runtime/notification-bus.md), which every later screen that waits for events uses. The calendar synchronization connectors of [`../interfaces/external-integrations.md`](../interfaces/external-integrations.md).
 
 ### Domain folders to read
 
@@ -1258,7 +1260,7 @@ The six spreadsheet endpoints, the twenty-two automation and integration endpoin
 1. [`../domains/spreadsheets-and-dashboards/`](../domains/spreadsheets-and-dashboards/) in full.
 2. [`../domains/automation-and-integration/`](../domains/automation-and-integration/) in full.
 3. [`../domains/electronic-invoicing-and-document-exchange/`](../domains/electronic-invoicing-and-document-exchange/) in full.
-4. [fiscal localizations](../domains/fiscal-localizations/) in full, including its per-country material.
+4. [fiscal localizations](../domains/fiscal-localizations/) in full, including every per-country file that folder publishes under `countries/`, one file per jurisdiction, because each country package differs from the base only in its data and in a small number of rule overrides that the per-country file states.
 
 ### Notes on order inside the step
 
@@ -1321,7 +1323,7 @@ A step is not complete until its shipped records exist, because later steps, the
 | 2 | Currency | 186 | Every currency with its symbol, decimal places, rounding step and display position. |
 | 2 | Bank | 115 | The shipped bank directory. |
 | 2 | Language | 6 | The languages activated by default. |
-| 2 | Contact | 27 | The shipped demonstration and system contacts, including the default company contact. |
+| 2 | Contact | 23 | The shipped demonstration and system contacts, including the default company contact. |
 | 2 | Company | 3 | The default company and the two companies used by multi-company behavior. |
 | 2 | Contact Tag | 21, Industry 23, Partner Grade 3, Partner Activation 3 | Segmentation data for contacts. |
 | 2 | Calendar Reminder | 7 | The reminder offsets offered on an event. |
@@ -1414,7 +1416,7 @@ Currency amounts do not use these precisions: they use the decimal places and th
 
 - **The equivalence suite.** Every worked example in a `calculations.md` file, every record of the mathematics catalogs under [`../../schemas/mathematics/`](../../schemas/mathematics/) and every scenario in an `acceptance-criteria.md` file is a test. Encode them as the behavior is implemented, never afterwards: a suite written after the fact tests what was built instead of what was specified. The plan is in the [equivalence test plan](equivalence-test-plan.md).
 - **The invariant check.** From step 4 onward, run the invariants of the equivalence test plan after every test: that every posted entry balances, that the valuation account equals the sum of the layers, that reconciled amounts net to zero, that quantities are conserved. A rebuild that drifts here drifts silently, and the drift is attributed to the wrong change weeks later.
-- **The conformance level.** Decide early which level of [conformance profiles](conformance-profiles.md) the programme is claiming, per domain, because the transport, identifier and storage decisions of steps 1 and 6 follow from it, and because the test layers that a gate requires depend on it.
+- **The conformance level.** Decide early which level of [conformance profiles](conformance-profiles.md) the program is claiming, per domain, because the transport, identifier and storage decisions of steps 1 and 6 follow from it, and because the test layers that a gate requires depend on it.
 - **Coverage tracking.** Record which specified artifacts are implemented and which are verified, using the structure of [coverage and evidence](coverage-and-evidence.md), and keep the record current. An overstated claim costs more to correct than a modest one costs to raise.
 - **The rule identifier list.** Every operation a step delivers names, before it is built, the numbered rules of its domain's `business-rules.md` that it must enforce. That list is the input to the coverage matrix of [traceability rules](traceability-rules.md).
 
@@ -1424,17 +1426,3 @@ Currency amounts do not use these precisions: they use the decimal places and th
 
 It does not schedule the work in time, because duration depends on team size, on the language chosen and on how much of the platform an existing foundation provides. It does not prescribe a code structure for the rebuild, because the folder structure of this specification reflects the business, not a code layout: a rebuild is free to organize itself differently while making the same decisions. It does not order the country packages among themselves; step 20 states why. It says nothing about hosting, process supervision, scaling or server sizing, which are outside the scope of this repository.
 
----
-
-## Reconciliation notes
-
-The two versions merged into this document ordered the same rebuild at two different grains, and a small number of details had to be settled.
-
-1. **Ten steps against twenty.** One version ordered the rebuild in ten steps, the other in twenty. Both orderings are kept and neither was dropped: the twenty are the delivery units and carry the entity, operation, report, job and interface lists; the ten are the stages of section 1.7, which group them and carry the properties that must hold across several steps. The mapping between them is stated in sections 1.6 and 1.7, and the gates of both are in [milestones](milestones.md).
-2. **Platform, identity and presentation in one step or three.** One version delivered them as three separate steps; the other as one. They are kept as one delivery step, because the three are mutually dependent — the shipped access rules are records loaded by the package loader, and the loader stores its own records through the registry it defines — and as three stage gates, so that the separate acceptance properties of each are still asserted separately.
-3. **The parallel-track table.** The step numbers of that table came from an earlier numbering and contradicted the step map in the same document: they named a financial track of "4, 5, 19", a people track of "12, 13" and a presentation track of "14 to 18", and announced four tracks while listing five. The table has been recomputed against the step map: five tracks, financial 4 to 6, supply chain 7 to 12, sales and service 11, 13 and 14, people 15 and 16, presentation 17 to 19.
-4. **Folder names.** One version cited the folders of a working branch. Every reading list now names the final folders: messaging and activities, marketing and mass mailing, learning, questionnaires and recognition, website and storefront, automation and integration, and electronic invoicing and document exchange. The employee-services folder of that branch is split three ways, as the charter of this repository requires: meals to [lunch ordering](../domains/lunch-ordering/), challenges, goals, badges and ranks to [learning, questionnaires and recognition](../domains/learning-surveys-and-gamification/), and the digest to [human resources core](../domains/human-resources-core/).
-5. **A referenced file that does not exist.** One version pointed step 20 at a separate document of industry configuration blueprints. No such document belongs to this repository, so what a blueprint is, what activating one does and what activating one twice does are stated in step 20 itself.
-6. **Catalog names.** One version cited a route catalog under a name this repository does not use. The routes are in [`../../schemas/interfaces/routes.json`](../../schemas/interfaces/routes.json) and are narrated in the [endpoint catalog](../interfaces/endpoint-catalog.md); the printable documents are in [`../../schemas/interfaces/report-actions.json`](../../schemas/interfaces/report-actions.json).
-7. **Topic files inside domain folders.** One version's reading lists named optional topic files of the domain folders. Those topics are named in words and the links point at the folder or at the one of the eleven standard files that owns the topic, so that a reading list stays correct however a domain folder distributes its optional files.
-8. **The seven decimal precisions.** Both versions state that the precisions are configuration records rather than constants. The values in section 6 were checked against the shipped precision catalog: Payment Terms six places, and Percentage Analytic, Product Price, Discount, Stock Weight, Volume and Product Unit two places each. They agree.

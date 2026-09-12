@@ -361,8 +361,8 @@ tracking identifier, and the notification rows of the underlying message.
 
 ## Payment providers
 
-The payment integrations are specified as a domain of their own; see
-[`../domains/payment-providers/README.md`](../domains/payment-providers/README.md) for the transaction state machine,
+The payment integrations are specified as a domain of their own; see the payment providers domain, whose entry is
+carried by the domain index [`../domains/README.md`](../domains/README.md), for the transaction state machine,
 the tokenization rules, the refund and capture flows and the per-provider peculiarities, and
 [`endpoint-catalog.md`](endpoint-catalog.md) for the return and notification addresses. The integration contract common
 to all of them is summarized here.
@@ -1126,7 +1126,7 @@ Beyond the purchased data services, three small exchanges exist with the account
 ## Reconciliation notes
 
 The drafts merged into this document were checked against the source of the system and against the generated catalogue
-[`../references/routes.md`](../references/routes.md), which lists the endpoints the external systems call. Two points
+[`../references/routes.md`](../references/routes.md), which lists the endpoints the external systems call. Three points
 were settled.
 
 1. **Address autocompletion was missing.** The plan for this document lists address autocompletion among the
@@ -1136,3 +1136,6 @@ were settled.
    typed length, the timeout and the session reference that makes one lookup one billed request.
 2. **Three touchpoints were absent from the summary table.** Address autocompletion, the network position lookup and the
    publisher account services are specified in the body but were not listed in the summary; they are now.
+3. **The link to the payment domain.** The payment integrations are the subject of a domain folder of their own. The
+   reference to it is made through the domain index [`../domains/README.md`](../domains/README.md), which carries the
+   entry of every domain, so that every cross-reference in this file resolves to a file of this repository.
