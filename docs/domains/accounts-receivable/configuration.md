@@ -65,7 +65,7 @@ On a journal of the sale kind:
 | Communication Standard (`invoice_reference_model`) | selection, required | see below | `system` (Full Reference, for example `INV/2024/00001`), `euro` (European, for example `RF83INV202400001`), `number` (Numbers only, for example `202400001`). The default is the first value whose name begins with the company country's code in lower case, and `system` when none matches. |
 | Dedicated Credit Note Sequence (`refund_sequence`) | boolean | true for sale and purchase journals | Numbers credit notes in their own series, prefixed with `R` at the start. |
 | Dedicated Payment Sequence (`payment_sequence`) | boolean | computed per journal kind | Numbers payments in their own series, prefixed with `P`. |
-| Dedicated Debit Note Sequence (`debit_sequence`) | boolean | true for sale and purchase journals | Numbers debit notes in their own series, prefixed with `D`. |
+| Dedicated Debit Note Sequence (`debit_sequence`) | boolean | true for sale and purchase journals | Numbers debit notes in their own series, prefixed with `D`. It is not a plain stored flag: it is **computed and stored with a manual override**, and its rule is re-evaluated whenever the journal's kind changes, setting it to true for a sale or purchase journal and to false for any other kind. A manual choice therefore survives every change except a change of kind, which silently overwrites it — changing a journal from the sale kind to the bank kind clears a manually ticked box. The field is hidden on the journal form unless the kind is sale or purchase. |
 | Invoice report (`invoice_template_pdf_report_id`) | many-to-one to Report | empty | The printable layout proposed for documents of this journal, when the partner does not impose one. |
 | Number pattern (`sequence_override_regex`) | text | empty | A pattern that overrides all five built-in numbering grammars for this journal. It may name the parts: a first separator, the year, a second separator, the month, a third separator, the incrementing number and a suffix. Only a member of the accountant group may type a number that does not match it; doing so clears the pattern. |
 | Secure Posted Entries with Hash (`restrict_mode_hash_table`) | boolean | false | Hashes entries on posting, which makes them unresettable. |
@@ -128,6 +128,8 @@ identifier, according to the journal's reference model and type. See
 
 ## 5. Default records shipped
 
+### 5.1 Reports, templates, page geometry and actions
+
 | Record | Purpose |
 | --- | --- |
 | Printable layout **Invoice with payments** (report `account.report_invoice_with_payments`) | The default customer document layout, including the payment history block. Marked as an invoice layout. Visible to the invoicing and read-only accounting groups. Bound to the journal entry entity as a printing action. |
@@ -140,8 +142,67 @@ identifier, according to the journal's reference model and type. See
 | Mail template **Journal Notification** | Sent to a journal's invoice subscribers. Subject: *the company name* ` - New invoice in ` *the journal name or* `Invoices` ` journal`. |
 | Mail template **Payment: Payment Receipt** | Sent to acknowledge a payment. |
 | Paper format **A4 - statement** | The default page geometry. |
-| Payment term **Immediate Payment** (shipped by the chart templates) | One percent line of one hundred at zero days. |
-| Incoterms | The standard international commercial terms list. |
+| Server action **Share** | Bound to the journal entry entity, offered on the **form** view only, and available on customer documents as well as on plain entries. Choosing it calls the document's share operation, which produces a shareable address of the document for an external reader. Its name is exactly "Share". |
+
+### 5.2 The ten shipped payment terms
+
+These ten payment terms are shipped unconditionally by the accounting capability itself, not by a
+country chart template; a chart template may ship further country-specific terms **on top** of them.
+Every one of them carries a note, which is the text printed on the document when the term asks to be
+displayed. All the lines below use the percent kind; the balance rule of
+[`entities.md`](entities.md) section 4 applies to the last line of each term.
+
+| Name | Note | Lines (kind, amount, delay) | Early payment discount |
+| --- | --- | --- | --- |
+| Immediate Payment | Payment terms: Immediate Payment | one line: percent, 100, `days_after` 0 days | none |
+| 15 Days | Payment terms: 15 Days | one line: percent, 100, `days_after` 15 days | none |
+| 21 Days | Payment terms: 21 Days | one line: percent, 100, `days_after` 21 days | none |
+| 30 Days | Payment terms: 30 Days | one line: percent, 100, `days_after` 30 days | none |
+| 45 Days | Payment terms: 45 Days | one line: percent, 100, `days_after` 45 days | none |
+| End of Following Month | Payment terms: End of Following Month | one line: percent, 100, `days_after_end_of_next_month` 0 days | none |
+| 10 Days after End of Next Month | Payment terms: 10 Days after End of Next Month | one line: percent, 100, `days_after_end_of_next_month` 10 days | none |
+| 30% Now, Balance 60 Days | Payment terms: 30% Now, Balance 60 Days | two lines: percent, 30, `days_after` 0 days; then percent, 70, `days_after` 60 days | none |
+| 2/7 Net 30 | Payment terms: 30 Days, 2% Early Payment Discount under 7 days | one line: percent, 100, `days_after` 30 days | yes: displayed on the invoice, discount of 2 per cent, granted within 7 days |
+| 90 days, on the 10th | Payment terms: 90 days, on the 10th | one line: percent, 100, `days_end_of_month_on_the` 90 days, day of the following month 10 | none |
+
+The delay kinds are the stored values of the payment term line's delay field, defined with their
+arithmetic in [`entities.md`](entities.md) section 4.3 and
+[`calculations.md`](calculations.md) section 2. Only the term named 2/7 Net 30 sets the
+early-payment-discount fields; the other nine leave them off.
+
+### 5.3 The eleven shipped international commercial terms
+
+Eleven records are shipped, each with a three-letter code and a name in capital letters. The document
+fields that point at them are in [`entities.md`](entities.md) section 1.11.
+
+| Code | Name |
+| --- | --- |
+| `EXW` | EX WORKS |
+| `FCA` | FREE CARRIER |
+| `FAS` | FREE ALONGSIDE SHIP |
+| `FOB` | FREE ON BOARD |
+| `CFR` | COST AND FREIGHT |
+| `CIF` | COST, INSURANCE AND FREIGHT |
+| `CPT` | CARRIAGE PAID TO |
+| `CIP` | CARRIAGE AND INSURANCE PAID TO |
+| `DPU` | DELIVERED AT PLACE UNLOADED |
+| `DAP` | DELIVERED AT PLACE |
+| `DDP` | DELIVERED DUTY PAID |
+
+### 5.4 The shipped decimal precision record
+
+One decimal precision record is shipped by the accounting capability in this area:
+
+| Name | Digits | What is evaluated at this precision |
+| --- | --- | --- |
+| Payment Terms | 6 | The percentage carried by a payment term line, and the check that the percentages of a term's percent lines add up to one hundred. |
+
+Six digits means that a percentage such as 33.333333 is kept exactly and that the sum check accepts
+33.333333 + 33.333333 + 33.333334 = 100.000000 while refusing a sum that differs in the sixth
+decimal. The check itself and its refusal message are in
+[`business-rules.md`](business-rules.md) section 10.1.
+
+### 5.5 What a country chart template adds
 
 Chart templates additionally ship, per country: the receivable and payable accounts, the default
 sale taxes, the cash discount accounts, the exchange accounts and often extra payment terms and cash
@@ -196,9 +257,22 @@ Rows are entities, columns are the four operations. A blank means the group has 
 | Invoice Analysis | Show Accounting Features - Readonly | no | yes | no | no |
 | Invoice Analysis | Administrator | no | yes | no | no |
 | Invoice Reversal Wizard (`account.move.reversal`) | Invoicing | yes | yes | yes | no |
+| Debit Note Wizard (`account.debit.note`) | Invoicing | yes | yes | yes | no |
 | Validate Entries Wizard (`validate.account.move`) | Invoicing | yes | yes | yes | no |
 | Invoice Send Wizard (`account.move.send.wizard`) | Invoicing | yes | yes | yes | yes |
 | Invoice Batch Send Wizard (`account.move.send.batch.wizard`) | Invoicing | yes | yes | yes | yes |
+| Payment Transaction (`payment.transaction`) | Invoicing | yes | yes | yes | no |
+| Payment Link Wizard (`payment.link.wizard`) | Invoicing | yes | yes | yes | no |
+| Payment Refund Wizard (`payment.refund.wizard`) | Invoicing | yes | yes | yes | no |
+
+The Debit Note Wizard row is the *only* access entry that entity has: no other group, not even the
+administrator group, is granted anything on it directly, so a user outside the invoicing group cannot
+open the create-debit-note dialogue at all.
+
+The last three rows are granted by the online-payment capability. They give a billing user the right
+to create, read and update a payment transaction, a payment link and a payment refund, and never the
+right to delete one: a transaction is part of the audit record of a settlement and is cancelled or
+voided rather than removed.
 
 Note that the Administrator group's *direct* entries on the journal entry and journal item entities
 are read-only; its write access comes from the invoicing group it implies.
@@ -222,6 +296,9 @@ accounting groups.
 | Portal Invoice Lines | Journal Item | the portal group | the document's status is neither cancelled nor draft, the document type is one of the same four, and the document's partner is the user's commercial entity or one of its children |
 | Account payment term company rule | Payment Term | everyone | the term has no company, or its company is an ancestor of one of the user's allowed companies |
 | Invoice Analysis multi-company | Invoice Analysis | everyone | the company is among the user's allowed companies |
+| Readonly Invoice Send and Print (single) | Invoice Send Wizard | the invoicing group | unrestricted; like the two rules above it, it *adds* access rather than restricting it, so an invoicing user may work on any single-document send dialogue |
+| Readonly Invoice Send and Print (batch) | Invoice Batch Send Wizard | the invoicing group | unrestricted, with the same effect for the batch dialogue |
+| Access every token | Payment Token | the invoicing group | unrestricted. This rule exists to *reset* the restricting rule that otherwise limits a stored payment token to the customer who created it, so a billing user sees every stored token of every customer. The token entity itself belongs to [`../payment-providers/`](../payment-providers/README.md). |
 
 Note the portal rules exclude sales receipts and purchase receipts: a receipt is not visible in the
 portal even though the portal controller's list domain includes the receipt types. The record rule

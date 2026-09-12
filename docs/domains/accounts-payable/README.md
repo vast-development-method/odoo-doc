@@ -37,6 +37,15 @@ Where a behaviour is shared with customer invoicing — the dynamic line synchro
 | Intercompany clearing when another company of the group pays the bill | `accounting-effects.md`, `workflows.md`, `configuration.md` |
 | The invoice analysis report entity with every column and its computation | `entities.md`, `calculations.md` |
 | Every journal item produced by every transition, with account, side, amount and currency | `accounting-effects.md` |
+| The ten payment terms shipped with the accounting capability package | `configuration.md` |
+| The discount-allocation and early-payment-discount line pairs a bill produces, and the shared algorithm they rest on | `accounting-effects.md`, `entities.md` |
+| The auto-complete picker that copies an earlier bill's lines onto a draft | `workflows.md`, `entities.md` |
+| The manually-modified flag: every write that sets it, and the five operations that suppress it | `business-rules.md`, `entities.md`, `glossary.md` |
+| The purchase-order linking and the subscriber notification that close the decoding contract | `workflows.md`, `interfaces.md` |
+| The debit-note overrides of the printed document, the debit-note search filters and the debit-note smart button | `interfaces.md` |
+| Server actions bound to the journal entry and to the payment | `interfaces.md`, `configuration.md` |
+| Portal access granted by naming an extra recipient on a chatter message | `business-rules.md`, `interfaces.md` |
+| Relations that cross a domain boundary, with the field that carries each and the event that crosses it | `entities.md` |
 
 ## Entities
 
@@ -111,7 +120,7 @@ A purchase document is a single record that carries **two layers at once**:
 1. A **commercial layer** — the supplier, the supplier's own reference, the dates, the payment terms, the bank account to pay to, and a list of what was bought at what price.
 2. An **accounting layer** — a balanced set of journal items.
 
-The two layers are kept in step by a **synchronizer** that runs inside every save. It reads the commercial layer and rebuilds the dynamic journal items — tax lines, payable term lines, cash rounding lines, early payment discount lines and private-share lines — so that they always match. Understanding that synchronizer is the key to the whole domain, and the order in which it rebuilds each kind of line is given in `workflows.md` §1 step 6.
+The two layers are kept in step by a **synchronizer** that runs inside every save. It reads the commercial layer and rebuilds the dynamic journal items — tax lines, payable term lines, cash rounding lines, early payment discount lines and private-share lines — so that they always match. Understanding that synchronizer is the key to the whole domain, and the order in which it rebuilds each kind of line is given in `workflows.md` §1 step 7.
 
 Reading the domain in the order given above therefore means: first the vocabulary, then the two layers as data, then the states they move through, then the arithmetic that derives one layer from the other, then the ledger consequences, and only then the operational sequences.
 

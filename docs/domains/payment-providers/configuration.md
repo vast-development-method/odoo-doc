@@ -63,7 +63,7 @@ The Payment Engine package ships one further Payment Provider record that no con
 | `name` | `SEPA Direct Debit`, the name of the euro-area direct debit scheme; the four-letter short form stands for Single Euro Payments Area and is the name the scheme uses for itself |
 | `sequence` | 20 |
 | `image_128` | the direct debit logo of that scheme |
-| `payment_methods` | exactly one method, the one whose code is `sepa_direct_debit` |
+| `payment_method_ids` | exactly one method, the one whose code is `sepa_direct_debit` |
 | `code` | `none` |
 | `state` | `disabled` |
 | `is_published` | false |
@@ -104,7 +104,7 @@ One method is special: the method whose code is `unknown` and whose name is `Pay
 | `alipay` | Alipay | no | no | `none` | `partial` | (all) | (all) |
 | `amazon_pay` | Amazon Pay | yes | no | `partial` | `partial` | (all) | a fixed list |
 | `bancontact` | Bancontact | no | no | `none` | `partial` | Belgium | euro |
-| `bank_account` | Bank Account | no | no | `none` | `none` | (all) | (all) |
+| `bank_account_id` | Bank Account | no | no | `none` | `none` | (all) | (all) |
 | `bank_transfer` | Bank Transfer | no | no | `none` | `none` | (all) | (all) |
 | `unknown` | Payment method | yes | yes | `partial` | `partial` | (all) | (all) |
 
@@ -156,7 +156,7 @@ The job is switched on and off automatically: it is active whenever at least one
 Before a provider can be put in service, the following must exist:
 
 1. **A company** with a country and a currency. The country drives the guided setup and several connectors' restrictions; the currency is the unit of `maximum_amount`.
-2. **A bank journal** in that company. Without it the provider has no `journal` and no Payment can be created. The journal is picked automatically as the first bank journal of the company.
+2. **A bank journal** in that company. Without it the provider has no `journal_id` and no Payment can be created. The journal is picked automatically as the first bank journal of the company.
 3. **A chart of accounts** with an outstanding receipts account (and an outstanding payments account for refunds), or, failing that, an internal transfer account on the company.
 4. **An accounting payment method** for the provider's code. It is created automatically when the connector package is installed.
 5. **The payment methods** the provider supports, which are shipped inactive and activated by the provider activation step.
@@ -223,6 +223,10 @@ The generic endpoints are listed in `interfaces.md`, section 2. Every connector 
 | Manage payment methods card | The entry added to the customer portal home; shown only when at least one method allowing tokenization is compatible or the customer already has tokens. |
 | Express checkout template | The container of the express checkout buttons. |
 | One redirect form template and one inline form template per connector | Registered on the provider record through the four template fields. |
+| Donation page | The payment page rendered instead of the pay page when the donation flag is set; it carries the donor detail fields and the donation amount controls, and its submit button reads `Donate`. Shipped by the Website Payment package. |
+| Donation block and donation button block | The two page-editor blocks that a website editor drops on a public page; the button block carries the recipient electronic mail address, the custom-amount mode, the prefilled amounts with one description each, the minimum amount, the maximum amount, the slider step and the default amount. Shipped by the Website Payment package. |
+| Supported payment methods block | The page-editor block that lists the payment methods the website advertises, fed by the endpoint of `interfaces.md` section 2.3. Shipped by the Website Payment package. |
+| Donation message body | The shared body of the donation notification and the donation confirmation. Shipped by the Website Payment package, flagged as not updated by a later package upgrade. |
 
 ---
 
@@ -232,12 +236,14 @@ The generic endpoints are listed in `interfaces.md`, section 2. Every connector 
 |---|---|---|
 | Which providers to put in service, and in which state | `state` on each provider | Availability of the whole payment offer (PAY-RULE-076). |
 | Whether each provider is visible to anonymous visitors | `is_published` | PAY-RULE-077. |
-| Which payment methods to activate per provider | `active` on the method, `payment_methods` on the provider | PAY-RULE-087. |
+| Which payment methods to activate per provider | `active` on the method, `payment_method_ids` on the provider | PAY-RULE-087. |
 | Whether customers may save their payment details | `allow_tokenization` | Tokens, recurring charges, one-click payments. |
 | Whether payments are captured manually | `capture_manually` | The transaction stops at `authorized`; an employee must capture or void it. Incompatible methods must be deactivated first (PAY-RULE-006). |
 | Whether express checkout is offered | `allow_express_checkout` | The express buttons appear on the cart. |
-| The countries, currencies and maximum amount | `available_countries`, `available_currencies`, `maximum_amount` | The availability filters. |
-| The journal and the outstanding account | `journal`, then the outstanding account on the payment method line | Where the money is held between the payment and the payout. |
-| The four customer messages | `pending_message`, `authentication_message`, `done_message`, `cancel_message`, plus `pre_message` | What the customer reads on the status and confirmation pages. |
+| The countries, currencies and maximum amount | `available_country_ids`, `available_currency_ids`, `maximum_amount` | The availability filters. |
+| The journal and the outstanding account | `journal_id`, then the outstanding account on the payment method line | Where the money is held between the payment and the payout. |
+| Whether a provider is restricted to one website | `website_id` on the provider | The provider is filtered out of every payment form served for another website (PAY-RULE-083). |
+| The recipient of donation notifications, the amounts offered and the minimum amount | The donation block, on the website page | Who is told that a donation was made, what the donor may choose, and the amount below which the donation is refused. |
+| The four customer messages | `pending_msg`, `auth_msg`, `done_msg`, `cancel_msg`, plus `pre_msg` | What the customer reads on the status and confirmation pages. |
 | For a wire transfer provider, the bank account details | the Recompute pending message operation | The transfer instructions the customer reads. |
-| The communication printed on sales orders paid offline | `sales_order_reference_type` | The reference the customer puts on the transfer. |
+| The communication printed on sales orders paid offline | `so_reference_type` | The reference the customer puts on the transfer. |

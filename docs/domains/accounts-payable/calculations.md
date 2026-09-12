@@ -639,8 +639,10 @@ For each such product line, with `sign` the direction sign and `rate` the docume
 percentage                     = 1 − deductibility ÷ 100
 non_deductible_subtotal        = round_to(document_currency, line_subtotal × percentage)
 non_deductible_base            = round_to(document_currency, sign × non_deductible_subtotal)
-non_deductible_base_company    = round_to(company_currency, sign × non_deductible_subtotal ÷ rate)   (0 when rate is 0)
+non_deductible_base_converted  = round_to(company_currency, sign × non_deductible_subtotal ÷ rate)   (0 when rate is 0)
 ```
+
+`rate` is the document rate, the number of units of the document currency per unit of company currency, so dividing by it converts a document-currency amount into company currency. Both quantities are computed for every partly deductible product line.
 
 and a line is created with:
 
@@ -649,8 +651,8 @@ and a line is created with:
 | account | **the same account as the product line** |
 | display type | `non_deductible_product` |
 | label | the product line's label |
-| balance | `− non_deductible_base_company` |
-| amount in currency | `− non_deductible_base` |
+| balance | `− non_deductible_base` — the amount **rounded in the document currency and not converted** |
+| amount in currency | `− non_deductible_base_converted` — the amount **converted to company currency and rounded there** |
 | taxes | the product line's taxes **excluding fixed-amount taxes** |
 | sequence | the product line's sequence plus one |
 
@@ -661,10 +663,16 @@ Then one aggregate line is created:
 | account | the journal's **private share account**, falling back to the journal's default account |
 | display type | `non_deductible_product_total` |
 | label | *private part* — replaced at posting by *«document number» - private part* |
-| balance | the sum of the `non_deductible_base_company` values |
-| amount in currency | the sum of the `non_deductible_base` values |
+| balance | the sum of the `non_deductible_base` values |
+| amount in currency | the sum of the `non_deductible_base_converted` values |
 | taxes | none |
 | sequence | one more than the highest sequence on the document |
+
+**Compatibility finding — the two currencies are exchanged on these two line kinds.** Everywhere else in this domain a journal item's *balance* holds the amount in the **company** currency and its *amount in currency* holds the amount in the **document** currency (`accounting-effects.md` §1). On the `non_deductible_product` and `non_deductible_product_total` lines the two assignments are the other way round, exactly as written in the tables above: the un-converted document-currency amount is written to the balance, and the converted company-currency amount is written to the amount in currency. Recorded as observed.
+
+The two coincide whenever the document rate is 1 — that is, on every document written in the company currency, which is the ordinary case and the case of the worked example below — so the exchange is invisible there. On a foreign-currency bill the two figures are transposed with respect to every other line of the same entry, and the entry no longer balances in either column by itself.
+
+A corrected behaviour would write `− non_deductible_base_converted` to the balance and `− non_deductible_base` to the amount in currency, and correspondingly for the aggregate line, so that the private-share lines follow the same convention as the product, tax, rounding and payable term lines. A rebuild that implements the correction produces identical entries for every document in the company currency, and balanced entries — rather than transposed ones — for foreign-currency documents.
 
 Finally the tax engine produces, from the negative base lines above, a **non-deductible tax line**:
 
@@ -679,10 +687,13 @@ The net effect: the private fraction of the expense is moved out of the expense 
 **Worked example.** A bill line: 1 unit of "Mobile subscription", 100.00 Euro, tax 20 % purchase, deductibility 75 %.
 
 ```formula
-percentage              = 1 − 0.75 = 0.25
-non_deductible_subtotal = round_to(Euro, 100.00 × 0.25) = 25.00
-non_deductible_base     = round_to(Euro, +1 × 25.00) = 25.00
+percentage                    = 1 − 0.75 = 0.25
+non_deductible_subtotal       = round_to(Euro, 100.00 × 0.25) = 25.00
+non_deductible_base           = round_to(Euro, +1 × 25.00) = 25.00
+non_deductible_base_converted = round_to(Euro, +1 × 25.00 ÷ 1.00) = 25.00
 ```
+
+The document is in the company currency, so the rate is 1.00 and the two quantities are equal: the exchange described in the compatibility finding above has no visible effect here.
 
 Lines produced, beyond the ordinary expense line of 100.00 debit and the ordinary tax line of 20.00 debit:
 
@@ -693,6 +704,18 @@ Lines produced, beyond the ordinary expense line of 100.00 debit and the ordinar
 | `non_deductible_tax` | the private share account | +5.00 | +5.00 (debit) |
 
 and the deductible tax line falls from 20.00 to 15.00, because the tax engine now sees a negative base of 25.00 carrying the same 20 % tax. The payable term line is unchanged at 120.00 credit: the supplier is still owed the full amount.
+
+**Worked example in a foreign currency, showing the observed transposition.** The same line, but the bill is written in United States dollars with a document rate of **1.25** dollars per euro; the company currency is still the euro, both currencies round to 0.01.
+
+```formula
+non_deductible_subtotal       = round_to(dollar, 100.00 × 0.25) = 25.00 dollars
+non_deductible_base           = round_to(dollar, +1 × 25.00)    = 25.00 dollars
+non_deductible_base_converted = round_to(euro,  +1 × 25.00 ÷ 1.25) = 20.00 euros
+```
+
+Observed assignment on the `non_deductible_product` line: **balance −25.00** and **amount in currency −20.00**. Observed assignment on the `non_deductible_product_total` line: **balance +25.00** and **amount in currency +20.00**. Both are the transpose of the convention every other line of the same entry follows, where the balance would be −20.00 euros and the amount in currency −25.00 dollars.
+
+Under the corrected behaviour the two lines read: `non_deductible_product` balance −20.00 euros, amount in currency −25.00 dollars; `non_deductible_product_total` balance +20.00 euros, amount in currency +25.00 dollars.
 
 ---
 
@@ -758,10 +781,10 @@ The warning fires when the vendor has not silenced date warnings **and**
 
 Its text is:
 
-> The billing frequency for «vendor display name» appears unusual. Based on your historical data, the expected next invoice date is not before «last invoice date + (date_diff_mean − wiggle_room_date) days». (every «date_diff_mean» (± «wiggle_room_date») days).
+> The billing frequency for «vendor display name» appears unusual. Based on your historical data, the expected next invoice date is not before «last invoice date + (date_diff_mean − wiggle_room_date) days» (every «date_diff_mean» (± «wiggle_room_date») days).
 > Please verify if this date is accurate.
 
-(the two numbers are rendered as integers).
+It is a single sentence: there is **no** full stop between the date and the opening parenthesis, and the only line break is the one before *Please verify*. The date is rendered in the reader's date format; the two numbers are rendered as integers (the fractional parts of the mean and of the allowance are dropped, not rounded).
 
 ### 12.3 The amount warning
 
@@ -798,6 +821,8 @@ Each journal owns a cheque sequence with no-gap implementation, padding 5 and in
 check_next_number = the sequence's next value, rendered with the sequence's padding
 check_next_number = 1, when the journal has no cheque sequence
 ```
+
+The value is **not stored**, and its computation depends on the journal's *Manual Numbering* flag and on nothing else. So the displayed preview is recomputed when that flag is written, and **not** when a cheque consumes the sequence: a value read from a record that has been in memory since before a cheque was numbered is stale until the record is read again. Writing the field is the inverse described in §13.3.
 
 Writing that field:
 
@@ -922,10 +947,12 @@ For page *i* (zero-based) carrying stub lines *p*:
 | amount | on page 0, the payment amount formatted in the payment currency; **on every later page, the literal text `VOID`** |
 | amount in words | on page 0, the filled amount-in-words line of §7.3; **on every later page, the literal text `VOID`** |
 | memo | the payment memo |
-| stub cropped | true when single-page mode dropped lines |
+| stub cropped | the flag of §14.5: true when the multi-page stub option is **off** and the payment's entry reconciles **more than nine documents**. It is not a statement that lines were dropped — see the note below |
 | stub lines | *p* |
 
 So when a stub spills over several pages, **only the first page carries a negotiable cheque**; the others are explicitly voided.
+
+**What the cropped flag counts, and what it does not.** The flag counts **documents reconciled by the payment's entry**. The stub, however, is a list of **lines**, and it carries a bucket header line before each of the *Bills* and *Refunds* buckets whenever both buckets are non-empty (§14.4). The two counts therefore differ by the number of header lines emitted. A payment that settles exactly nine documents split over both buckets produces eleven stub lines, of which single-page mode keeps only eight — three lines are dropped — yet the flag stays false, because nine is not more than nine. Conversely a payment settling ten documents in one bucket produces ten lines, drops two and sets the flag. A layout must therefore treat the flag as "the payment settled more documents than a single page is meant to show", not as "lines were dropped", and a rebuild that wants an ellipsis on every cropped page has to compare the number of stub lines it kept with the number it had.
 
 ---
 

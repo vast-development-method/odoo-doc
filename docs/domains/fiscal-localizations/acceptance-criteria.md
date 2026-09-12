@@ -1194,3 +1194,468 @@ Rule FLOC-RULE-135.
 **then** the default period is the current two-month period, and the choices are monthly,
 two-monthly, quarterly, four-monthly, half-yearly and yearly.
 Rule FLOC-RULE-125.
+
+---
+
+## 16. Rounding
+
+**16.1 Round per Tax and Round per Line agree on three lines of 33.33.**
+**Given** a company whose tax rounding method is "Round per Tax", three invoice lines of 33.33 each
+and a 21 percent tax, in a currency with two decimal places,
+**when** the invoice is computed,
+**then** the tax is round(99.99 × 0.21, 2) = round(20.9979, 2) = 21.00,
+**and** with the method "Round per Line" the tax is round(6.9993, 2) × 3 = 7.00 × 3 = 21.00.
+Rule FLOC-RULE-138; formula, calculations section 14.
+
+**16.2 The two methods diverge on three lines of 10.03.**
+**Given** the same company and three lines of 10.03 with the same tax,
+**when** the invoice is computed,
+**then** "Round per Tax" gives round(30.09 × 0.21, 2) = round(6.3189, 2) = 6.32,
+**and** "Round per Line" gives round(2.1063, 2) × 3 = 2.11 × 3 = 6.33,
+**and** the one-cent difference is the reason a country package writes the required method into its
+template.
+Formula, calculations section 14.
+
+**16.3 The two methods agree on three lines of 10.05.**
+**Given** three lines of 10.05 with the same tax,
+**when** the invoice is computed,
+**then** both methods give 6.33.
+Formula, calculations section 14.
+
+**16.4 Every amount is rounded to its own currency.**
+**Given** a withholding line whose currency has two decimal places and a company currency with none,
+**when** the line is converted,
+**then** the line amount is rounded to two places and the company-currency amount to zero places.
+Rule FLOC-RULE-139.
+
+**16.5 An integer report column applies the report's integer rounding.**
+**Given** a report column declared as an integer figure, a computed value of 1,234.56 and the
+integer rounding setting "Nearest",
+**when** the report is rendered,
+**then** the cell shows 1,235; with the setting "Up" it shows 1,235 and with the setting "Down" it
+shows 1,234.
+Rule FLOC-RULE-140.
+
+**16.6 A ratio is never rounded first.**
+**Given** the proration of scenario 9.15,
+**when** the withheld amount is recomputed,
+**then** the multiplication and the division are carried out at full precision and one rounding is
+applied at the end.
+Formula, calculations section 14.
+
+---
+
+## 17. State machine coverage
+
+**17.1 The generic exchange machine, ordinary path.**
+**Given** an eligible posted invoice in a country whose flow follows the generic machine,
+**when** it is transmitted and the polling job receives an acceptance,
+**then** the state moves from empty to the to-send state, to the sent state, to the accepted state,
+**and** the registration number, the visual code and any signature are stored, and a confirmation is
+posted in the discussion thread.
+State machine section 5.
+
+**17.2 The generic exchange machine, refusal and correction.**
+**Given** the same invoice,
+**when** the polling job receives a refusal,
+**then** the state becomes the rejected state, the errors are stored and posted, and after the
+invoice is corrected and resent the state returns to the to-send state.
+State machine section 5.
+
+**17.3 The Italian machine, delivery to a public body.**
+**Given** an Italian invoice to a public-sector counterpart whose exchange state is `processing`,
+**when** the polling job reports the outcome `EC01`,
+**then** the state becomes `accepted_by_pa_partner`,
+**and** with the outcome `EC02` it becomes `rejected_by_pa_partner` and a credit note is required,
+**and** when no answer arrives within fifteen days the state becomes
+`accepted_by_pa_partner_after_expiry`.
+State machine section 6.
+
+**17.4 The Italian machine, rejection clears the payload.**
+**Given** an Italian invoice in `processing` with an attached payload and a transaction reference,
+**when** a refusal notice arrives,
+**then** the state becomes `rejected`, the transaction reference is cleared and the payload
+attachment is removed.
+State machine section 6.
+
+**17.5 A state the map does not cover clears the field.**
+**Given** an Italian invoice in `processing`,
+**when** the polling job reports a status the map does not cover,
+**then** the state is cleared to empty so that the invoice can be sent again.
+State machine section 6.
+
+**17.6 The declaration of intent refuses use before validation.**
+**Given** a declaration of intent in the state `draft`,
+**when** an invoice names it,
+**then** the invoice is refused with "The Declaration of Intent is in draft.",
+**and** after the declaration is validated to `active` the invoice is accepted,
+**and** once the declaration is `revoked` a new invoice is refused with "The Declaration of Intent
+must be active.".
+State machine section 7.
+
+**17.7 The declaration of intent threshold warning.**
+**Given** a declaration of intent with a threshold of 50,000.00, 45,000.00 already invoiced and
+2,000.00 ordered but not yet invoiced,
+**when** an invoice of 5,000.00 naming it is prepared,
+**then** the remaining amount is 50,000.00 − 45,000.00 − 2,000.00 = 3,000.00, the invoice exceeds it
+by 2,000.00, and a warning is shown that names the declaration, the threshold and the excess,
+**and** the invoice is not blocked.
+State machine section 7.
+
+**17.8 The Hungarian machine, send timeout then confirmation.**
+**Given** a Hungarian invoice being uploaded,
+**when** the transport does not answer in time,
+**then** the state becomes `send_timeout` and the chain index becomes the unknown marker −1,
+**and** when the status query later reports success the state becomes `confirmed`.
+State machine section 9.
+
+**17.9 The Hungarian machine, annulment.**
+**Given** a Hungarian invoice in `confirmed`,
+**when** a technical annulment is requested and transmitted,
+**then** the state becomes `cancel_sent`, then `cancel_pending` when the administration
+acknowledges without approving, then `cancelled` when the annulment is approved,
+**and** every invoice of the same chain that carries a state is cancelled with it and their chain
+index becomes 0.
+State machine section 9.
+
+**17.10 A transmitted Hungarian invoice cannot be reset.**
+**Given** a Hungarian invoice in `confirmed`,
+**when** a reset to draft is attempted,
+**then** it is refused with "Cannot reset to draft or cancel invoice `<name>` because an electronic
+document was already sent to NAV!".
+State machine section 9.
+
+**17.11 The Basque Country machine, missing certificate.**
+**Given** a company with the Basque regime enabled and no signing certificate,
+**when** a registration document is transmitted,
+**then** it is refused with "Please configure the certificate for TicketBAI." and the document stays
+in `to_send`.
+State machine section 10.
+
+**17.12 The Basque Country machine, cancellation.**
+**Given** an invoice whose registration document is `accepted` and whose derived state is `sent`,
+**when** a cancellation document is produced and accepted,
+**then** the invoice's derived state becomes `cancelled`.
+State machine section 10.
+
+**17.13 The verifiable-invoice machine, batch answer.**
+**Given** three submission records in the waiting state, sent as one shipment,
+**when** the administration answers `Correcto` for the first, `AceptadoConErrores` for the second and
+`Incorrecto` for the third,
+**then** their states become `accepted`, `registered_with_errors` and `rejected` respectively,
+**and** the invoice of the third shows the derived state `rejected`.
+State machine section 11.
+
+**17.14 The verifiable-invoice machine cancels the ledger entry.**
+**Given** an invoice whose derived verifiable state becomes `cancelled` and whose ledger entry is
+still posted,
+**when** the state is written,
+**then** the ledger entry is cancelled.
+State machine section 11.
+
+**17.15 The Greek machine does not copy a failure onto the invoice.**
+**Given** a Greek invoice with no state,
+**when** a transmission fails and a document in `invoice_error` is written,
+**then** the invoice's derived state stays empty and the failure is visible only on the document and
+in the discussion thread.
+State machine section 12.
+
+**17.16 The Croatian statuses are independent.**
+**Given** a Croatian invoice whose fiscalisation status is `0` and whose intermediary status is
+`50`,
+**when** the addendum is read,
+**then** the invoice is fiscalised with the tax administration and undelivered to the counterpart,
+so the seller must deliver a copy by other means, which the delivery channel type `1` records.
+State machine section 13.
+
+**17.17 The Danish machine refuses a late cancellation.**
+**Given** an invoice whose network state is `processing`,
+**when** the electronic document is cancelled,
+**then** it is refused with "Cannot cancel an entry that has already been sent to Nemhandel".
+State machine section 14.
+
+**17.18 A Danish business response.**
+**Given** a delivered inbound invoice,
+**when** the company approves it,
+**then** a response record with the code `BusinessAccept` is created in `processing`, and when the
+network confirms delivery the record becomes `done` and the invoice's own state becomes
+`BusinessAccept`.
+State machine section 14.
+
+**17.19 The Romanian machine without an index.**
+**Given** a Romanian invoice accepted by the portal with no index returned,
+**when** the state is written,
+**then** it becomes `invoice_not_indexed`, and when the indexing job finds the index it becomes
+`invoice_sent`.
+State machine section 15.
+
+**17.20 The Romanian machine on validation.**
+**Given** a Romanian invoice in `invoice_sent`,
+**when** the status job reports validation,
+**then** the state becomes `invoice_validated`, the signature, certificate and download keys are
+stored, "This invoice has been accepted by the SPV." is posted and the superseded `invoice_sent`
+document records are removed.
+State machine section 15.
+
+**17.21 The Polish machine maps the answer codes.**
+**Given** a Polish invoice in `sent`,
+**when** the status job receives the code 200,
+**then** the state becomes `accepted`, the national number is stored and "KSeF Status: Success (Code:
+200). Invoice accepted." is posted,
+**and** with the code 440 the state becomes `rejected` and "KSeF Status: Rejected (Code: 440).
+Duplicate invoice." is posted,
+**and** with an unmapped code the state does not change and "Unknown status received from KSeF
+(Code: `<code>`): `<description>`" is written into the header.
+State machine section 16.
+
+**17.22 A rejected Polish invoice is cleared on reset.**
+**Given** a Polish invoice in `rejected`,
+**when** it is reset to draft,
+**then** the status, the national number, the reference, the session identifier and the header are
+all cleared.
+State machine section 16.
+
+**17.23 Bank account verification reuses the day's result.**
+**Given** a supplier with a tax identification number and a bank account, checked this morning with
+the result `valid`,
+**when** a second payment to the same account is registered today,
+**then** the existing record is reused and the register is not called again.
+State machine section 16.2.
+
+**17.24 A supplier without a number is not checked.**
+**Given** a supplier with no tax identification number,
+**when** a payment is registered,
+**then** a record with the status `incomplete_partner` is written and no call is made.
+State machine section 16.2.
+
+**17.25 The Malaysian machine refuses a late cancellation.**
+**Given** a Malaysian document validated 80 hours ago,
+**when** a cancellation is requested,
+**then** it is refused with "It has been more than 72h since the document validation, you can no
+longer cancel it.\nInstead, you should issue a debit or credit note.".
+State machine section 17.
+
+**17.26 The Malaysian machine cancels the invoices of an invalid document.**
+**Given** a Malaysian document in `in_progress` carrying two invoices,
+**when** the portal answers `invalid`,
+**then** the document's state becomes `invalid` and both invoices are cancelled.
+State machine section 17.
+
+**17.27 The Indian way bill can be reset only from two states.**
+**Given** a way bill in `generated`,
+**when** a reset to pending is attempted,
+**then** it is refused with "Only Delivery Challan and Cancelled E-waybill can be reset to
+pending.",
+**and** a way bill in `cancel` or in `challan` is reset to `pending` successfully.
+State machine section 18.
+
+**17.28 Printing before generation is refused.**
+**Given** a way bill in `pending`,
+**when** the permit is printed,
+**then** it is refused with "Please generate the E-Waybill to print it." or, where the delivery-note
+route exists, with "Please generate the E-Waybill or mark the document as a Challan to print it.".
+State machine section 18.
+
+**17.29 The Indonesian payment code expires.**
+**Given** a payment code created 36 minutes ago and still unpaid,
+**when** the clean-up job runs,
+**then** the record is removed, because a code older than thirty-five minutes can no longer be paid.
+State machine section 19.2.
+
+**17.30 A payment code for an unsupported record kind.**
+**Given** a record kind the mechanism does not cover,
+**when** a payment code is generated for it,
+**then** it is refused with "QRIS capability is not extended to model %s yet!", the placeholder
+carrying the technical name of the record kind.
+State machine section 19.2.
+
+**17.31 The Turkish counterpart lookup drives the document kind.**
+**Given** a Turkish counterpart whose status is `earchive`,
+**when** an invoice is issued to it,
+**then** an archive invoice is produced and delivered by other means,
+**and** for a counterpart whose status is `einvoice` an electronic invoice is sent through the
+network to one of its registered aliases.
+State machine section 20.
+
+**17.32 The Vietnamese machine reports a payment change.**
+**Given** a Vietnamese invoice in `sent`,
+**when** the ledger's payment state changes,
+**then** the invoice's state becomes `payment_state_to_update`,
+**and** after the update is transmitted the state returns to `sent`.
+State machine section 21.
+
+**17.33 A cancelled Vietnamese invoice can be reissued.**
+**Given** a Vietnamese invoice in `canceled` whose ledger entry is cancelled,
+**when** the entry is reset to draft,
+**then** every field of the flow is cleared and the state becomes empty, so the document may be
+issued again.
+State machine section 21.
+
+**17.34 The Taiwanese refund needs the buyer's agreement.**
+**Given** a Taiwanese credit note whose refund state is `to_be_agreed`,
+**when** the buyer agrees,
+**then** the state becomes `agreed` and the credit note may be issued,
+**and** when the buyer refuses, the state becomes `disagreed` and the credit note cannot be issued
+through the service.
+State machine section 22.
+
+**17.35 Demonstration mode marks a Jordanian invoice without transmitting.**
+**Given** a Jordanian company in demonstration mode and an invoice in `to_send`,
+**when** it is sent,
+**then** the payload is produced and attached, nothing leaves the system and the state becomes
+`demo`.
+State machine section 23.
+
+**17.36 The French reporting flow refuses a send with invalid documents.**
+**Given** a flow in `ready` containing two documents with validation errors, on a day that is not
+the last day of the grace period,
+**when** the flow is sent,
+**then** it is refused with "This flow still contains invoices with validation errors. Fix them or
+use the 'Send without invalid invoices' button.",
+**and** when the "send without the invalid ones" option is used, the flow is sent, the valid
+documents are recorded against it and a rectificative flow is opened for the two invalid ones.
+State machine section 25.1.
+
+**17.37 The French reporting period status.**
+**Given** a flow whose due period runs from 5 April to 15 April,
+**when** the status is computed on 1 April, on 10 April and on 20 April,
+**then** it is `open`, `grace` and `closed` respectively.
+State machine section 25.2; rule FLOC-RULE-136.
+
+**17.38 The French reporting status of an invoice.**
+**Given** a posted reportable invoice covered by a flow whose period has not ended,
+**when** its reporting status is computed,
+**then** it is `pending`,
+**and** when the period has ended the invoice shows the flow's own state,
+**and** an entry with no reporting kind shows `out_of_scope`,
+**and** an entry with a blocking error shows `error`.
+State machine section 25.3.
+
+**17.39 A duplicate French flow is not sent twice.**
+**Given** a flow whose content is identical to the previous flow of the same scope,
+**when** it is sent,
+**then** nothing is transmitted and "This flow is identical to the previous flow `<name>`." is
+posted once.
+State machine section 25.1.
+
+**17.40 A Latin America cheque is handed, then debited.**
+**Given** an own cheque of 1,500.00 issued by a posted outbound payment,
+**when** the payment is posted,
+**then** the cheque's issue state is `handed` and a liquidity item of 1,500.00 exists with the
+cheque's payment date as its maturity date,
+**and** when the bank statement line is reconciled against it, the issue state becomes `debited`.
+State machine section 27.
+
+**17.41 A Latin America cheque is voided.**
+**Given** the same cheque in `handed`, reconciled against a customer invoice,
+**when** the void action is run,
+**then** the payment is unreconciled from the invoice, a reversing entry named "Void check" is
+created and posted in the journal of the outstanding item with one line on the payment's destination
+account and one line on the outstanding account, both for 1,500.00 with the cheque's maturity date,
+currency and counterpart,
+**and** the reversing entry is reconciled against the cheque's item and against the payment's
+receivable line,
+**and** the cheque's issue state becomes `voided`.
+State machine section 27.
+
+**17.42 A payment carrying several cheques is split.**
+**Given** an outbound payment of 3,000.00 carrying three own cheques of 1,000.00 each with different
+payment dates,
+**when** the payment is posted,
+**then** a splitting entry is posted with one liquidity item per cheque, each named "Check
+`<number>` - `<the payment's own display suffix>`" and carrying that cheque's payment date as its
+maturity date, plus one counterpart line of 3,000.00,
+**and** the counterpart line is reconciled against the payment's own liquidity item.
+State machine section 27.
+
+**17.43 A cheque number is padded.**
+**Given** a cheque whose number is typed as `45`,
+**when** the field is left,
+**then** the stored number is `00000045`.
+Entities section 3.15.
+
+**17.44 Two issued own cheques may not share a number.**
+**Given** an issued own cheque numbered `00000045` on a given payment method line,
+**when** a second cheque with the same number is issued on the same method line,
+**then** the save is refused by the uniqueness index,
+**and** for a newly received third-party cheque the same combination only raises the warning "Other
+checks were found with same number, issuer and bank. Please double check you are not encoding the
+same check more than once. List of other payments/checks: `<names>`".
+State machine section 27.
+
+**17.45 A cheque cannot be received twice.**
+**Given** a third-party cheque already in hand in a journal,
+**when** an inbound payment that is not a transfer names it again,
+**then** the payment is refused with "Some checks are already in hand and can't be received again.
+Checks: `<names>`".
+State machine section 27.
+
+**17.46 A payment with a debited cheque cannot be reopened.**
+**Given** a payment carrying a cheque whose issue state is `debited`,
+**when** the payment is cancelled or reset to draft,
+**then** it is refused with "You can't cancel or re-open a payment with checks if some check has
+been debited or been voided. Checks:" followed by one line per cheque giving its number and its
+issue state.
+State machine section 27.
+
+**17.47 A mass transfer needs one journal and one currency.**
+**Given** three third-party cheques, two in one journal and one in another,
+**when** the mass transfer wizard is opened on all three,
+**then** it is refused with "All selected checks must be on the same journal and on hand",
+**and** with cheques in two currencies the refusal is "All the selected checks must use the same
+currency".
+State machine section 27.
+
+**17.48 A cheque of a draft payment cannot be moved.**
+**Given** a cheque whose creating payment is still draft,
+**when** a payment that would move it is posted,
+**then** it is refused with "Selected checks \"`<names>`\" are not posted".
+State machine section 27.
+
+**17.49 A cheque payment needs an outstanding account.**
+**Given** a payment whose method code is `own_checks` and whose journal has no outstanding account,
+**when** the payment is posted,
+**then** it is refused with "A payment with any Third Party Check or Own Check payment methods needs
+an outstanding account".
+State machine section 27.
+
+**17.50 The activity state of a country record.**
+**Given** an India Electronic Way Bill with an activity due yesterday,
+**when** its activity state is read,
+**then** it is `overdue`; with an activity due today it is `today` and with one due tomorrow it is
+`planned`; with no open activity it is empty.
+State machine section 29.
+
+---
+
+## 18. Country scenarios
+
+Each country file carries its own numbered scenarios for the taxes, the fiscal positions, the
+identification rules, the documents and the exchange flow of that country. The counts are:
+
+| Country file | Scenarios |
+|---|---|
+| [Argentina](countries/argentina.md) | 8 |
+| [Austria](countries/austria.md) | 3 |
+| [Belgium](countries/belgium.md) | 4 |
+| [Brazil](countries/brazil.md) | 7 |
+| [Chile](countries/chile.md) | 5 |
+| [Colombia](countries/colombia.md) | 3 |
+| [Ecuador](countries/ecuador.md) | 4 |
+| [France](countries/france.md) | 6 |
+| [Germany](countries/germany.md) | 5 |
+| [India](countries/india.md) | 10 |
+| [Italy](countries/italy.md) | 7 |
+| [Luxembourg](countries/luxembourg.md) | 3 |
+| [Mexico](countries/mexico.md) | 6 |
+| [Netherlands](countries/netherlands.md) | 3 |
+| [Peru](countries/peru.md) | 5 |
+| [Portugal](countries/portugal.md) | 3 |
+| [Spain](countries/spain.md) | 6 |
+| [Switzerland](countries/switzerland.md) | 4 |
+| [United Kingdom](countries/united-kingdom.md) | 5 |
+| [Uruguay](countries/uruguay.md) | 4 |
+
+The remaining country files, and the catalogue of every shipped package, carry the configuration a
+rebuild must reproduce for the countries that have no flow of their own; they are listed in
+[country-packages.md](country-packages.md).

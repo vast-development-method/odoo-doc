@@ -80,11 +80,11 @@ The direction predicates are defined exhaustively as:
 | `duplicated_ref_ids` | many-to-many → Journal Entry | Computed, never stored: the documents that may be duplicates of this one. Depends on the vendor reference, the type, the partner, the bill date, the tax totals and the currency. Only records the reader is allowed to read are returned. |
 | `is_draft_duplicated_ref_ids` | boolean | Computed: at least one of the detected duplicates is still a draft (so it can be deleted). |
 | `is_exact_move_duplicate` | boolean | Computed: this is a purchase document and at least one detected duplicate matches it on reference **and** compatible type **and** partner **and** bill date **and** total. Drives the red rather than the amber warning. |
-| `invoice_vendor_bill_id` | many-to-one → Journal Entry | Not stored, company-checked: a picker used to auto-complete the current draft from an earlier bill or refund. |
+| `invoice_vendor_bill_id` | many-to-one → Journal Entry | *Vendor Bill*. Not stored, company-checked: a transient picker, labelled *Auto-Complete* on the form and shown only while the document is being edited, used to auto-complete the current draft from an earlier bill or refund. Choosing a value runs the auto-complete procedure of `workflows.md` §1 step 6 and then empties the picker again. |
 | `invoice_source_email` | text | The electronic mail address the document arrived from. Tracked. |
 | `invoice_origin` | text | Free text naming the document(s) that generated this one. Read-only, tracked, not copied. Parsed on comma and whitespace boundaries by the purchase order matching hook. |
 | `invoice_partner_display_name` | text | Computed, stored: the vendor's display name, used for grouping. |
-| `is_manually_modified` | boolean | Set when a user edits a document that a decoder had filled. Consulted by the automatic-posting learning rule. |
+| `is_manually_modified` | boolean | **Manually modified.** Stored, no default computation. Forced to false immediately after creation, and set to true by **every** write that neither carries a value for it nor is made under the suppression marker — see `business-rules.md` §19 for the complete rule and for the list of operations that carry the marker. Consulted by the automatic-posting learning rule (`workflows.md` §8.3 condition 9). |
 | `quick_edit_mode` | boolean | Computed: true when the company's *quick encoding* setting covers this journal's type. For a purchase journal that means the setting is `in_invoices` or `out_and_in_invoices`. |
 | `quick_edit_total_amount` | monetary | The tax-inclusive total the user types in quick encoding mode; the system then proposes one line that matches it. |
 | `quick_encoding_vals` | structured value | Computed, not exportable: the proposed line. |
@@ -154,7 +154,9 @@ A Journal Item is one line of the document. On a purchase document five kinds co
 | `rounding` | The cash rounding adjustment |
 | `non_deductible_product`, `non_deductible_product_total`, `non_deductible_tax` | The private-share lines produced when an expense line is only partly deductible |
 | `line_section`, `line_subsection`, `line_note` | Presentation-only lines carrying no amounts and no account |
-| `epd`, `discount`, `cogs` | Early payment discount, discount allocation and cost-of-goods lines; produced by other domains |
+| `epd` | The pair of early-payment-discount lines produced on a document whose payment term grants a discount computed in the `mixed` mode. Produced by the **core Accounting package's own line synchronizer**, on vendor bills exactly as on customer invoices. Itemised in `accounting-effects.md` §2.2; the shared arithmetic is in [`../accounts-receivable/calculations.md`](../accounts-receivable/calculations.md) §4.3 |
+| `discount` | The pair of discount-allocation lines produced on a product line that carries a discount percentage, when the company has named a discount allocation account for this document direction. Produced by the **core Accounting package's own line synchronizer**, on vendor bills exactly as on customer invoices. Itemised in `accounting-effects.md` §2.2; the shared arithmetic is in [`../accounts-receivable/calculations.md`](../accounts-receivable/calculations.md) §5 |
+| `cogs` | Cost-of-goods lines; produced by [`../inventory-valuation-and-costing/`](../inventory-valuation-and-costing/) and never by this domain |
 
 ### 2.2 Field table — fields that matter on a purchase document
 
@@ -266,7 +268,7 @@ Quantities are restated in the **reference unit of the product template** rather
 unit_factor = factor(line_unit) ÷ factor(template_unit)
 ```
 
-If the line has no unit the numerator is 1. If the template has no unit, or its factor is zero, the whole expression is undefined and the resulting column is empty rather than zero.
+If the line has no unit the numerator is 1, and if the product template has no unit the denominator is likewise 1: in both cases the missing factor is read as 1 and the column is computed normally. The expression is undefined **only** when the template does have a unit and that unit's factor is zero; the resulting column is then empty rather than zero.
 
 ### 3.6 Column by column
 
@@ -410,7 +412,7 @@ The method is added to the **default outbound methods of every newly created jou
 | `alias_name` | text | The local part of the electronic mail address at which the journal receives documents. Only sale and purchase journals may have one; it is forced empty for other types. |
 | `check_manual_sequencing` | boolean | *(Check Printing.)* **Manual Numbering**, default false. True means the stationery is blank and the system numbers the cheques. |
 | `check_sequence_id` | many-to-one → Sequence | *(Check Printing.)* Read-only, not copied. The cheque numbering sequence. Created automatically for every journal that has none. |
-| `check_next_number` | text | *(Check Printing.)* Computed with an inverse: the next number the cheque sequence would produce, formatted with its padding. Writing it moves the sequence forward. |
+| `check_next_number` | text | *(Check Printing.)* Computed with an inverse: the next number the cheque sequence would produce, formatted with its padding, falling back to 1 when the journal has no cheque sequence. Writing it moves the sequence forward and resets the sequence padding to the length of what was written; the refusals are in `business-rules.md` §10.1. **Its computation depends on the Manual Numbering flag and on nothing else**: the displayed preview is refreshed when that flag is written, and not when a cheque consumes the sequence, so a value read after a cheque has been numbered may be stale until the record is re-read. Not stored. |
 | `bank_check_printing_layout` | selection | *(Check Printing.)* A per-journal override of the company cheque layout. The selection is the company's layout selection **minus** the value `disabled`. |
 | `restrict_mode_hash_table` | boolean | Secures posted entries with a hash chain; blocks resetting to draft. |
 | `sequence_override_regex` | text | Overrides the numbering grammar; see `../general-ledger/`. |
@@ -619,7 +621,7 @@ Transient. Raises an additional charge linked to an existing document.
 | `date` | date | **Debit Note Date**. Required, default today. |
 | `reason` | text | Free text appended to the reference. |
 | `journal_id` | many-to-one → Journal | *Use Specific Journal*. When empty, the source document's journal is reused. |
-| `copy_lines` | boolean | **Copy Lines**: reproduce the source lines on the debit note. Never honoured when the source is a credit note. |
+| `copy_lines` | boolean | **Copy Lines**: reproduce the source lines on the debit note. Default false. The dialogue **hides** the switch when the common type of the sources is `in_refund` or `out_refund`, so a credit-note source normally leaves it at false and no line is copied. Its help text reads *In case you need to do corrections for every line, it can be in handy to copy them.  We won't copy them for debit notes from credit notes. * — but the guard meant to enforce that second sentence never matches, so a caller that sets the switch on a credit-note source **does** get the lines copied. See the compatibility finding in `business-rules.md` §11. |
 | `move_type` | text | Computed: the common type of the sources, or empty when they differ. |
 | `journal_type` | text | Computed: `purchase` when the common type is `in_refund` or `in_invoice`, otherwise `sale`. |
 | `country_code` | text | Related to the source company's country code; used only to show country-specific fields. |
@@ -690,7 +692,7 @@ Creating a partner from a purchase document context sets its supplier rank to 1 
 Only three aspects matter here.
 
 - **Active flag**: an archived account may not be used on a document being posted.
-- **Allow outgoing payment** (*trusted*): a company account that is not trusted blocks the posting of an **inbound** document. On a purchase document the account belongs to the supplier, so this rule does not fire; it is stated here because the same posting routine serves both directions.
+- **Allow outgoing payment** (*trusted*): an account that is not trusted for outgoing payments blocks the posting of an **inbound** document, that is, of a document whose type is `out_invoice`, `out_receipt` or **`in_refund`**. On the payable side the inbound type is the **vendor credit note**, so the rule does fire there — the money flows towards the company and the recipient account is the company's own. It never fires on a vendor bill or a purchase receipt, which are outbound. The three outcomes (silent clearing for automated callers, a redirecting warning for a user who may grant trust, a plain refusal for one who may not) are in `business-rules.md` §3.3.
 - **Currency**: participates in the ranking of candidate accounts (see `calculations.md` §3).
 
 ---
@@ -798,7 +800,28 @@ flowchart LR
 
 ---
 
-## 22. Ordering summary
+## 22. Relations with other domains
+
+The relations above stay inside this folder. The relations below cross a folder boundary. Each row states which side depends on which, the field that carries the relation, and the event at which the boundary is crossed.
+
+| Relation | Direction of dependence | Field that carries it | Event that crosses the boundary | Sibling folder |
+|---|---|---|---|---|
+| The early-payment-discount lines of a bill | this domain depends on the shared algorithm | the document's payment term (`invoice_payment_term_id`), whose early-discount flag, percentage, day count and computation mode drive the pair of `epd` lines | saving a draft bill whose payment term grants a discount in the `mixed` mode; the synchronizer rebuilds the pair at that moment | [`../accounts-receivable/calculations.md`](../accounts-receivable/calculations.md) §4.3 holds the arithmetic; the payable ledger items are in `accounting-effects.md` §2.2 |
+| The discount-allocation lines of a bill | this domain depends on the shared algorithm and on a company setting owned by the receivable folder's configuration | the product line's discount percentage together with the company's *Vendor Bills Discounts Account* (`account_discount_income_allocation_id`) | saving a draft bill that carries a discounted product line while that account is set | [`../accounts-receivable/calculations.md`](../accounts-receivable/calculations.md) §5 holds the arithmetic; the payable ledger items are in `accounting-effects.md` §2.2 |
+| Cost-of-goods lines on a purchase document | that domain depends on this one | the journal item's display type `cogs` | posting a document under an inventory valuation model that recognises the cost of goods at the document | [`../inventory-valuation-and-costing/`](../inventory-valuation-and-costing/) |
+| The journal-subscriber notification sent after decoding | this domain depends on the mail machinery | the journal's notification-address list, and the document's portal access token (`access_token`), which is written before the mail is composed | a **newly created** purchase document finishes the decoding contract (`workflows.md` §5) | [`../messaging-and-activities/`](../messaging-and-activities/) owns the template and the sending; the trigger and the attachment set are in `interfaces.md` §9 |
+| Portal access granted by naming an extra recipient | this domain depends on the portal | the document's portal access token (`access_token`) and the recipient list of the chatter message | posting a chatter message on a purchase document with a partner named as an extra recipient | [`../customer-portal/`](../customer-portal/) owns the portal page; the grant is in `interfaces.md` §9.2 and `business-rules.md` §19 |
+| Purchase-order matching from the decoding path | this domain calls, that domain implements | the document's origin field (`invoice_origin`) and the lines the decoder added | the decoder finishes and the document had no invoice lines beforehand (`workflows.md` §5) | [`../purchasing/`](../purchasing/) |
+| The concrete decoders | this domain defines the contract, those packages implement it | the file-data records handed to the decoding operation | a file is uploaded, mailed in, or posted on a document by an internal user | [`../electronic-invoicing-and-document-exchange/`](../electronic-invoicing-and-document-exchange/) |
+| Intercompany clearing of a bill paid by a sister company | this domain reads the paying company's configuration | the paying company's clearing journal and its two clearing accounts | the settling payment is posted | [`../payments-and-bank-reconciliation/`](../payments-and-bank-reconciliation/) owns the payment; the entries are in `accounting-effects.md` §8 |
+| The payable term line as a reconciliation target | that domain depends on this one | the term line's account, maturity date and residual | registering, matching or unmatching an outgoing payment | [`../payments-and-bank-reconciliation/`](../payments-and-bank-reconciliation/) |
+| Analytic lines of an expense line | that domain depends on this one | the journal item's analytic distribution | posting and resetting to draft | [`../analytic-accounting/`](../analytic-accounting/) |
+| Cash-basis tax recognition on a bill | that domain depends on this one | the payable term line's reconciliation | each partial reconciliation of a payable term line | [`../taxes/`](../taxes/) |
+| Exchange differences on a foreign-currency bill | that domain depends on this one | the payable term line's residual in company currency | reconciling the term line at a different rate | [`../multi-currency/`](../multi-currency/) |
+
+---
+
+## 23. Ordering summary
 
 | Entity | Order |
 |---|---|

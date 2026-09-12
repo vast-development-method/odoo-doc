@@ -14,7 +14,7 @@ Every operational flow of the Payment Providers domain, end to end: actors, prec
 1. The administrator opens the Payment Providers screen and clicks **Install** on the card of the provider whose package is not installed. The card is blue while the package is not installed.
 2. The package is installed. Its installation hook runs the provider setup step with the provider's code (and, for a custom provider, its custom mode).
 3. The setup step searches for the provider records matching that code, takes the first one as the reference record, and lists the companies of the database that have no provider with that code and that are not branches of another company.
-4. For each such company, the reference record is copied with `company` set to that company. The copy has no credentials, `state` equal to `disabled`, `is_published` false, and no journal.
+4. For each such company, the reference record is copied with `company_id` set to that company. The copy has no credentials, `state` equal to `disabled`, `is_published` false, and no journal.
 5. The Accounting Payments package extends the setup step: when the code is neither `none` nor `custom` and no accounting payment method exists with that code, it creates one with the provider's display label as name, the code, and the inbound direction.
 6. The screen reloads.
 
@@ -28,7 +28,7 @@ Every operational flow of the Payment Providers domain, end to end: actors, prec
 1. Open the provider form. The **Credentials** page shows only the fields of this provider's code; it is hidden entirely when the code is `none`.
 2. Fill every credential field. Fields marked secret are only visible to the Administrator access group.
 3. On the **Configuration** page, optionally:
-   - restrict the offer with `maximum_amount`, `available_currencies` and `available_countries`;
+   - restrict the offer with `maximum_amount`, `available_currency_ids` and `available_country_ids`;
    - switch on `allow_tokenization` (only shown when `support_tokenization` is true);
    - switch on `capture_manually` (only shown when `support_manual_capture` is set);
    - switch on `allow_express_checkout` (only shown when `support_express_checkout` is true).
@@ -41,7 +41,7 @@ Every operational flow of the Payment Providers domain, end to end: actors, prec
    4. run the connector's own checks (for instance: a Mercado Pago provider may not be enabled without an access token, a demo provider may never be enabled, a Toss Payments provider may only carry the Korean won);
    5. activate the provider's default payment methods, and their brands, among the methods that are compatible with manual capture (see 1.3);
    6. switch the post-processing scheduled job on, because at least one provider is now not disabled.
-7. The Accounting Payments package computes `journal`: the first bank journal of the company, and creates or re-points the accounting payment method line of the provider to that journal with the right outstanding account.
+7. The Accounting Payments package computes `journal_id`: the first bank journal of the company, and creates or re-points the accounting payment method line of the provider to that journal with the right outstanding account.
 
 **Postconditions**: the provider is enabled, published, has a journal and a payment method line, and its default payment methods are active.
 
@@ -102,7 +102,7 @@ Every operational flow of the Payment Providers domain, end to end: actors, prec
 
 1. The package removal hook runs the provider removal step with the provider's code.
 2. The Accounting Payments package first checks whether any Payment uses the accounting payment method of that code. If one does, the uninstallation is refused with `You cannot uninstall this module as payments using this payment method already exist.`
-3. Every provider record with that code is written with the removal values: `code` becomes `none`, `state` becomes `disabled`, `is_published` becomes false, and `redirect_form_view`, `inline_form_view`, `token_inline_form_view` and `express_checkout_form_view` are emptied. For custom providers, `custom_mode` is emptied as well.
+3. Every provider record with that code is written with the removal values: `code` becomes `none`, `state` becomes `disabled`, `is_published` becomes false, and `redirect_form_view_id`, `inline_form_view_id`, `token_inline_form_view_id` and `express_checkout_form_view_id` are emptied. For custom providers, `custom_mode` is emptied as well.
 4. Because `state` changes away from `test` or `enabled`, every token of those providers is archived and the payment methods that lose their last enabled provider are deactivated.
 5. The accounting payment method of that code is deleted.
 
@@ -418,7 +418,7 @@ See section 6.
       - otherwise, when `remaining_to_capture` has reached zero and the void checkbox is not ticked: stop iterating.
 6. Capturing an amount:
    1. refuse when the provider is disabled (`Making a request to the provider is not possible because the provider is disabled.`);
-   2. create a child transaction with that amount, the same provider, payment method, currency, token, contact and operation as the source, the source as `source_transaction`, and a reference computed from the prefix `P-` followed by the source reference;
+   2. create a child transaction with that amount, the same provider, payment method, currency, token, contact and operation as the source, the source as `source_transaction_id`, and a reference computed from the prefix `P-` followed by the source reference;
    3. log the child's "sent" message on the linked documents;
    4. send the capture request; a failure sets the child to `error` with the provider's message.
 7. The provider answers, synchronously or by notification. When the answer confirms the capture, the child goes to `done`.
@@ -459,7 +459,7 @@ While the sum is lower than the source amount, the source stays `authorized`, in
 2. From a Payment, the refund wizard first computes the refundable amount: the payment amount minus the absolute value of the sum of the amounts of the refund payments already linked to it. It refuses an amount that is not strictly positive or that exceeds it.
 3. Refunding an amount:
    1. refuse when the provider is disabled;
-   2. create a child transaction with the amount **negated**, the operation `refund`, the source as `source_transaction`, and a reference computed from the prefix `R-` followed by the source reference;
+   2. create a child transaction with the amount **negated**, the operation `refund`, the source as `source_transaction_id`, and a reference computed from the prefix `R-` followed by the source reference;
    3. log `The refund <link> of <formatted amount> has been initiated.` with the amount shown positive;
    4. send the refund request; a failure sets the refund transaction to `error`.
 4. When the provider confirms, the refund transaction goes to `done`; the post-processing job is woken immediately, because no browser polls for a refund.
@@ -483,14 +483,14 @@ Adyen, Razorpay and Stripe all recognise a refund that was started on the provid
 1. The portal page of the invoice offers the payment form when the invoice may be paid online (see `entities.md`, section 8.9).
 2. The form's transaction route is the invoice transaction route, and its landing route is the portal page of the invoice with its access token.
 3. The transaction route checks the document access with the supplied token; a failure answers `The access token is invalid.`
-4. The transaction is created with the invoice linked through `invoices`, and its reference prefix is computed from the invoice names (see `calculations.md`, section "Reference generation").
+4. The transaction is created with the invoice linked through `invoice_ids`, and its reference prefix is computed from the invoice names (see `calculations.md`, section "Reference generation").
 5. When the transaction is confirmed, post-processing posts the invoice if it is still a draft, creates the Payment and reconciles it with the invoice.
 
 A second route pays every overdue invoice of the logged-in customer at once: it refuses an anonymous visitor with `Please log in to pay your overdue invoices` and refuses a set of invoices that do not share one currency with `Impossible to pay all the overdue invoices if they don't share the same currency.`
 
 ## 6.2 Pay a sales order from the portal
 
-Same shape as 6.1, with the sales order linked through `sale_orders` and the reference prefix computed from the order names. Confirmation of the order happens in post-processing (4.1.4).
+Same shape as 6.1, with the sales order linked through `sale_order_ids` and the reference prefix computed from the order names. Confirmation of the order happens in post-processing (4.1.4).
 
 ## 6.3 Pay with a wire transfer or another custom mode
 
@@ -538,6 +538,35 @@ Same shape as 6.1, with the sales order linked through `sale_orders` and the ref
 2. Adjust the amount. The warning message rules of `entities.md`, section 6.2, apply.
 3. The wizard computes the link (see `entities.md`, section 6.3) and offers it for copying.
 4. The customer opens the link, which lands on the pay page or the document's portal page with the amount, the currency, the contact, the company and a signed access token.
+
+## 6.7 Donate from a website page
+
+**Actor**: any visitor of a public website page that carries the donation block.
+
+The Website Payment capability package adds a donation block to the page editor and two endpoints. The block is a form whose action is the donation pay page and whose method is a post; the editor sets on it a recipient electronic mail address, a custom-amount mode, a list of prefilled amounts, one description per prefilled amount, a minimum amount, a maximum amount, a slider step and a default amount.
+
+1. **The visitor picks an amount.** The block either shows the prefilled amount buttons with their descriptions and a free-amount box, or a slider between the minimum and the maximum with the configured step, according to the custom-amount mode. The visitor submits the form.
+2. **The post is turned into a page address.** The donation pay endpoint receives the post, stores the amount, the currency, the donation options and the list of descriptions in the visitor's session, and answers with a redirection to the same address using the "see other" status, so that a refresh of the page does not repeat the post.
+3. **The page is served.** The endpoint reads back from the session whatever was not passed again on the address, then applies three defaults: the currency falls back to the accounting currency of the active company; the amount falls back to 25; the donation options fall back to a free custom amount. For a visitor who is not signed in, the endpoint sets the paying contact to the public contact of the request and computes a signed access token over that contact, the amount and the currency, exactly as the ordinary pay page does (see [calculations.md](calculations.md) section 11).
+4. **The payment form is rendered from the donation template** instead of the ordinary pay template, with these extra values: the donation flag, the paying contact, the label of the submit button, which is `Donate`, the transaction-creation address, which carries the minimum amount as the last part of its path, the donor details taken from the signed-in contact when there is one, the list of countries, the donation options and the prefilled amounts with their descriptions. For a visitor who is not signed in, the "save my payment details" box is hidden for every provider, so that no token can be created for the public contact.
+5. **The visitor confirms.** The donation transaction endpoint is called with the amount, the currency, the contact, the access token, the donor details, an optional donor comment and the recipient electronic mail address. It refuses an amount below the minimum with `Donation amount must be at least %.2f.`, where the placeholder is the minimum amount rendered with two decimals; it refuses missing donor details with `Name is required.`, `Email is required.` and `Country is required.`, in that order.
+6. **The transaction is created** by the ordinary transaction-creation service, with three additions: for a visitor who is not signed in, the paying contact is the website's public contact and the tokenize flag is forced off; the donation flag is set on the transaction; and, for a visitor who is not signed in, the contact snapshot fields for name, electronic mail address, country and language are overwritten with the donor details and the language of the request. For a signed-in visitor whose contact has no country, the country of the donor details is written to the snapshot.
+7. **The access token is recomputed** over the contact, the amount actually chosen and the currency, because the visitor may have changed the amount on the payment page, and the landing address of the transaction is updated with it.
+8. **An internal notification is sent immediately**, before the payment is even attempted, to the recipient electronic mail address configured on the block, with the subject `A donation has been made on your website` and the donation body rendered in the language of the recipient's user account, or in the language of the company contact when no user matches that address. The body carries the donor name, the donor electronic mail address, the donation date, the amount with the currency symbol, the donor comment when there is one, the provider code and the transaction reference.
+9. **The processing values are returned** and the ordinary payment flow of section 2 continues unchanged.
+10. **On confirmation**, the post-processing of a transaction whose state is `done` and whose donation flag is set does two more things than an ordinary transaction: it sends the donation confirmation message to the donor, with the subject `Donation confirmation`, in the language of the contact snapshot, whose body opens with `Dear ` and the donor name and thanks the donor for the donation, stating the amount and the creation date, and then carries the same detail table as the internal notification; and it writes a log entry on the Payment reading `Payment received from donation with following details:` followed by one line per filled value among the company, the contact, the contact name, the contact country and the contact electronic mail address, each prefixed by the label of that field.
+
+The donation flag is also mirrored on the Payment, so that a donation can be told apart in the accounting screens.
+
+## 6.8 Show the payment methods a website supports
+
+**Actor**: any visitor of a public website page that carries the supported payment methods block.
+
+1. The block calls the supported payment methods endpoint with an optional limit.
+2. The endpoint computes the compatible providers of the website's own company, as the public user of the website so that an editor sees exactly what a visitor will see, for a zero amount, no currency and no country, restricted to the website. The company of the website is used rather than the company of the caller, because the block advertises the site and not the visitor.
+3. It then selects the payment methods to show: every brand whose primary method is active and whose primary method has at least one of those providers, plus every primary method that has no brand at all and has at least one of those providers. The limit, when given, caps the number of records.
+4. For each selected method it returns the name and the address of the method image.
+5. The answer is marked as not cacheable for an internal user, so that an editor always sees the current list, and cacheable for seven days with one further day of stale reuse for everybody else.
 
 ---
 
@@ -609,18 +638,18 @@ The transaction service creates:
 | Field | Value |
 |---|---|
 | `reference` | `S00042` (no other transaction carries that reference yet) |
-| `provider` | Acme Card Gateway |
-| `payment_method` | Card |
+| `provider_id` | Acme Card Gateway |
+| `payment_method_id` | Card |
 | `amount` | 120.00 |
-| `currency` | `EUR` |
-| `partner` | Norbert Buyer |
-| `partner_name`, `partner_email`, `partner_address`, `partner_zip`, `partner_city`, `partner_country`, `partner_phone`, `partner_language`, `partner_state` | copied from the contact |
+| `currency_id` | `EUR` |
+| `partner_id` | Norbert Buyer |
+| `partner_name`, `partner_email`, `partner_address`, `partner_zip`, `partner_city`, `partner_country_id`, `partner_phone`, `partner_lang`, `partner_state_id` | copied from the contact |
 | `operation` | `online_redirect` |
 | `state` | `draft` |
 | `is_live` | true (the provider is `enabled`) |
 | `tokenize` | false |
 | `landing_route` | the portal page of `S00042`, with the transaction identifier and an access token appended |
-| `sale_orders` | `S00042` |
+| `sale_order_ids` | `S00042` |
 
 The message `The transaction S00042 of €120.00 has been initiated.` is logged on `S00042`.
 
@@ -650,15 +679,15 @@ Post-processing runs for the pending state: `S00042` moves from draft to sent, a
 |---|---|
 | `amount` | 120.00 |
 | `payment_type` | `inbound` |
-| `currency` | `EUR` |
-| `partner` | the commercial contact of Norbert Buyer |
+| `currency_id` | `EUR` |
+| `partner_id` | the commercial contact of Norbert Buyer |
 | `partner_type` | `customer` |
-| `journal` | Bank |
-| `payment_method_line` | the inbound line of Bank whose provider is Acme Card Gateway |
-| `payment_transaction` | the transaction |
+| `journal_id` | Bank |
+| `payment_method_line_id` | the inbound line of Bank whose provider is Acme Card Gateway |
+| `payment_transaction_id` | the transaction |
 | `memo` | `S00042 - <provider reference>` |
-| `invoices` | `INV/2026/00017` |
-| `destination_account` | the receivable account of the invoice's payment term line |
+| `invoice_ids` | `INV/2026/00017` |
+| `destination_account_id` | the receivable account of the invoice's payment term line |
 
 4. The Payment is posted; its journal entry debits `101401 Outstanding Receipts` 120.00 and credits the receivable account 120.00; the receivable line is reconciled with the invoice's receivable line, and the invoice becomes fully paid.
 5. `The payment related to transaction S00042 has been posted: BNK1/2026/00031` is logged on the invoice, the order and the Payment.
@@ -698,9 +727,9 @@ A child transaction is created:
 |---|---|
 | `reference` | `P-S00043` |
 | `amount` | 80.00 |
-| `currency` | `EUR` |
+| `currency_id` | `EUR` |
 | `operation` | `online_redirect` (copied from the source) |
-| `source_transaction` | `S00043` |
+| `source_transaction_id` | `S00043` |
 | `state` | `draft` |
 
 `The transaction P-S00043 of €80.00 has been initiated.` is logged. The capture request is sent. `remaining_to_capture` becomes 0.00 and `source_remaining` becomes 40.00. The void checkbox is not ticked and `remaining_to_capture` is zero, therefore the loop stops.
@@ -722,7 +751,7 @@ A second child is created:
 | `reference` | `P-S00043-1` (the prefix `P-S00043` already exists, therefore the sequence number 1 is appended) |
 | `amount` | 40.00 |
 | `operation` | `online_redirect` |
-| `source_transaction` | `S00043` |
+| `source_transaction_id` | `S00043` |
 | `state` | `draft` |
 
 **Step 6. The provider confirms the void.**
@@ -761,10 +790,10 @@ A refund transaction is created:
 |---|---|
 | `reference` | `R-S00042` |
 | `amount` | −30.00 |
-| `currency` | `EUR` |
+| `currency_id` | `EUR` |
 | `operation` | `refund` |
-| `source_transaction` | `S00042` |
-| `token` | the token of the source transaction, when there was one |
+| `source_transaction_id` | `S00042` |
+| `token_id` | the token of the source transaction, when there was one |
 | `state` | `draft` |
 
 `The refund R-S00042 of €30.00 has been initiated.` is logged on the invoice and the order (the amount is shown positive).
@@ -787,9 +816,9 @@ The amount handed to the provider is the negated stored amount, 30.00, converted
 | `amount` | 30.00 (the absolute value of the transaction amount) |
 | `payment_type` | `outbound` (because the transaction amount is negative) |
 | `partner_type` | `customer` |
-| `journal` | Bank |
-| `payment_transaction` | `R-S00042` |
-| `source_payment` | `BNK1/2026/00031` |
+| `journal_id` | Bank |
+| `payment_transaction_id` | `R-S00042` |
+| `source_payment_id` | `BNK1/2026/00031` |
 | `memo` | `R-S00042 - <provider reference>` |
 
 The journal entry credits `101401 Outstanding Receipts` 30.00 and debits the receivable account 30.00. Because the refund transaction's operation differs from the source's, the reconciliation uses the refund transaction's own invoices, which are empty, therefore no automatic reconciliation happens; an accountant matches the refund against a credit note afterwards.

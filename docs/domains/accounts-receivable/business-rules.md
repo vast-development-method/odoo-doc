@@ -227,7 +227,9 @@ then logs the deletion on the document's message thread with the tracked values:
   > is removed or set to "/". This might create a gap in the sequence.
 
 When the journal is changed on a document that has never been posted and no number is supplied, the
-number is cleared and recomputed.
+number is cleared and recomputed. Changing the journal also schedules the company and the currency
+for re-derivation; the complete list of these chained recomputations is in
+[`entities.md`](entities.md) section 1.14.
 
 ### 5.4 Readonly fields on a posted document
 
@@ -246,9 +248,44 @@ When the journal defines a number pattern and the number being written does not 
 
 A user in the accountant group is allowed through; doing so clears the journal's pattern.
 
+### 5.6 The document must keep a company
+
+Checked on the form the moment the company field is edited, and again whenever the company is written.
+Clearing the company is refused with:
+
+> We can't leave this document without any company. Please select a company for this document.
+
+This is deliberately not a stored constraint. A stored constraint is evaluated when the record is
+saved, and by then the field rules that need the company — the journal, the currency, the accounts,
+the taxes and the rate — have already run and would have failed first. The check therefore fires
+while the form is still open, before anything is saved.
+
+The same rule then performs the second half of its work: when the journal presently on the document
+does not belong to the newly chosen company (nor to one of that company's ancestors), the journal is
+scheduled for re-derivation, so the document leaves the field with a journal of the right company.
+When the present journal is already valid for the new company it is left alone.
+
+### 5.7 Decoding an attachment dropped on a document
+
+A file dropped on a draft document may be offered to the decoding path that turns a received document
+into lines. The document refuses to be decoded when it already carries invoice lines, and the reason
+returned — shown to the user as the explanation for why nothing was decoded — is:
+
+> The invoice already contains lines.
+
+The condition is exactly "the document has at least one invoice line"; the document's status, its
+type and the nature of the file are not examined by this particular refusal. On the receivable side
+the practical consequence is that a file dropped on a document that already has lines is kept as a
+plain attachment. The rest of the decoding path belongs to
+[`../electronic-invoicing-and-document-exchange/workflows.md`](../electronic-invoicing-and-document-exchange/workflows.md)
+and, for received vendor documents, to
+[`../accounts-payable/workflows.md`](../accounts-payable/workflows.md).
+
 ---
 
-## 6. Rules on deleting a document
+## 6. Rules on deleting a document or a contact
+
+### 6.1 Deleting a document
 
 1. A document that has consumed a number and is not the last in its numbering chain may not be
    deleted, unless the user is in the accountant group, or quick-encoding mode is on for the company,
@@ -264,6 +301,20 @@ A user in the accountant group is allowed through; doing so clears the journal's
    The numbering gap flag is refreshed first. When a forced deletion removes documents that were
    posted before under a restrictive audit trail, a technical log entry records the user, the
    documents, their totals, their partners and their per-account balances.
+
+### 6.2 Deleting a contact that a document names
+
+Deleting a contact is refused as soon as at least one journal entry names that contact as its partner
+and that entry's status is draft or posted. Cancelled entries do not protect a contact. The count is
+taken with elevated rights, so a contact is protected by documents the deleting user cannot even see.
+The message is:
+
+> The partner cannot be deleted because it is used in Accounting
+
+There is no full stop at the end; the text is reproduced exactly. The check applies to every contact,
+whether it is a company, an individual or a child contact of a company, and it is evaluated once for
+the whole set being deleted, so deleting several contacts at once is refused as soon as any one of
+them is named by a document.
 
 ---
 
@@ -378,12 +429,21 @@ See [`state-machines.md`](state-machines.md) section 3.4. Summarised:
 | The document must be a sale document | You can only generate sales documents. |
 | The chosen printable layout must be an invoice layout | The sending of invoices is not set up properly, make sure the report used is set for invoices. |
 | A printable layout must exist for the document type | There is no template that applies to this move type. |
+| At least one printable layout must apply to invoices at all | There is no template that applies to invoices. |
 | Batch sending needs the background job enabled — for an administrator | Batch invoice sending is unavailable. Please, activate the cron to enable batch sending of invoices. *(with a link to the job configuration)* |
 | Batch sending needs the background job enabled — for anyone else | Batch invoice sending is unavailable. Please, contact your system administrator to activate the cron to enable batch sending of invoices. |
 | In single-document mode every recipient must have an e-mail address (a blocking alert) | Partner(s) should have an email address. |
 
 In batch mode the missing-e-mail condition is a warning rather than a blocker, with the action
 "View Partner(s)".
+
+**Where the last rule fires.** "There is no template that applies to invoices." is not raised at send
+time. It is raised while the set of printable layouts available to invoices is being computed — the
+set of layouts declared for the journal entry entity, flagged as invoice layouts, whose own record
+filter accepts a customer invoice, a customer credit note and a sales receipt all three at once. That
+set feeds two places: the layout selector on the contact form and the layout selector of the sending
+dialogue. A company whose only layouts are excluded by their own filters therefore cannot open either
+selector; the refusal appears when the form or the dialogue is opened, not when Send is pressed.
 
 ---
 
@@ -405,7 +465,10 @@ In batch mode the missing-e-mail condition is a warning rather than a blocker, w
 | No selected document is already the source of a debit note | You can't make a debit note for an invoice that is already linked to a debit note. |
 | Every selected document is a customer invoice, a customer credit note, a vendor bill or a vendor credit note | You can make a debit note only for a Customer Invoice, a Customer Credit Note, a Vendor Bill or a Vendor Credit Note. |
 
-The "copy lines" option is hidden, and the lines are never copied, when the source is a credit note.
+The "copy lines" option is *hidden* when the selected sources share one document type and that type
+is a credit note, but hiding it does not force it off, and it is not hidden when the sources have
+mixed types. The lines are copied whenever the option is on, whatever the source's type — see the
+compatibility finding in [`accounting-effects.md`](accounting-effects.md) section 5.
 
 ---
 

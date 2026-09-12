@@ -84,13 +84,15 @@ shows.
 | Invoice Reversal Wizard | `account.move.reversal` | not stored | Creates credit notes from posted customer invoices in one of three methods. |
 | Debit Note Wizard | `account.debit.note` | not stored | Creates a customer debit note from a posted customer invoice. |
 | Invoice Analysis Line | `account.invoice.report` | database view `account_invoice_report` | Read-only reporting projection over posted invoice lines. |
-| Payment Provider (receivable hook) | `payment.provider` | `payment_provider` | Carries the flag that lets a customer pay an invoice from the portal. |
+| Payment Provider (receivable hook) | `payment.provider` | `payment_provider` | Extended here with one field only: the bank journal in which a successful online payment is posted. The provider itself belongs to [`../payment-providers/`](../payment-providers/README.md); the switch that allows portal payment is not a field on it but the system parameter documented in [`configuration.md`](configuration.md) section 3. |
+| Payment Link Wizard (receivable hook) | `payment.link.wizard` | not stored | Extended here with the amount due, the open instalments and their preview, and the early payment discount notice; it composes the portal payment address and is the producer of the portal-link quick response code. |
 
 ## Reading order
 
 1. [`glossary.md`](glossary.md) — read the vocabulary first; the rest of the domain uses it
    without re-explaining it.
-2. [`entities.md`](entities.md) — the field-by-field definition of every entity.
+2. [`entities.md`](entities.md) — the field-by-field definition of every entity, ending with the
+   relations this domain has with the other domains.
 3. [`state-machines.md`](state-machines.md) — the document status, the payment status and the
    sending status, with their transitions.
 4. [`calculations.md`](calculations.md) — the dynamic line synchronisation, the payment term

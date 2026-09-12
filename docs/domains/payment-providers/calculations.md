@@ -38,9 +38,9 @@ The second search cannot rely on alphabetical ordering, because both the prefix 
 | Package | Key looked for in the create values | Prefix produced |
 |---|---|---|
 | base | none | empty |
-| Accounting Payments | `invoices` | The names of the referenced invoices, joined by the separator, skipping invoices with no name. When the create values also carry a next-installment name, that name replaces the whole prefix. If any referenced identifier does not resolve to an existing invoice, the prefix is empty. |
-| Sales | `sale_orders` | The names of the referenced orders, joined by the separator. If any referenced identifier does not resolve, control passes to the next rule. |
-| Point of Sale Online Payment | `point_of_sale_order` | The order's own point of sale reference. |
+| Accounting Payments | `invoice_ids` | The names of the referenced invoices, joined by the separator, skipping invoices with no name. When the create values also carry a next-installment name, that name replaces the whole prefix. If any referenced identifier does not resolve to an existing invoice, the prefix is empty. |
+| Sales | `sale_order_ids` | The names of the referenced orders, joined by the separator. If any referenced identifier does not resolve, control passes to the next rule. |
+| Point of Sale Online Payment | `pos_order_id` | The order's own point of sale reference. |
 
 The rules are chained: the point of sale rule runs first, then the accounting rule, then the sales rule, then the empty base rule; the first one that produces a non-empty prefix wins.
 
@@ -310,7 +310,7 @@ support_refund = "none"       when provider.support_refund = "none" or method.su
 
 ## 7. Token display name
 
-**Inputs**: `payment_details`, `created_on`, a maximum length (default 34, which fits the longest international bank account numbers) and a padding flag (default true).
+**Inputs**: `payment_details`, `create_date`, a maximum length (default 34, which fits the longest international bank account numbers) and a padding flag (default true).
 
 1. When the creation moment is empty, the display name is the empty text and the procedure ends.
 2. Compute the padding length as the maximum length minus the number of characters of the payment details, counting zero characters when the payment details are empty.
@@ -624,7 +624,7 @@ The four branches are evaluated in that order and the first that matches wins, t
 
 **Worked example.** Six cards of one provider list, in the order the list produces them:
 
-| Provider | Package | Package state | `state` | Branch that matches | `color_index` |
+| Provider | Package | Package state | `state` | Branch that matches | `color` |
 |---|---|---|---|---|---|
 | Stripe | Payment Provider: Stripe | installed | `enabled` | fourth | 7 |
 | Adyen | Payment Provider: Adyen | installed | `test` | third | 2 |

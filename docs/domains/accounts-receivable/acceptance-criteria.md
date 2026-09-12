@@ -895,10 +895,36 @@ the "copy lines" option on,
 
 ### J3. A debit note from a credit note
 
-**Given** a posted customer credit note,
-**When** a debit note is created from it,
-**Then** the debit note's type is **Customer Invoice**,
-**and** its lines are always empty, whatever the "copy lines" option says.
+**Given** a single posted customer credit note of 500.00 with two product lines,
+**When** the create-debit-note dialogue is opened on it,
+**Then** the "copy lines" checkbox is **not shown**, because the one common source type is a credit
+note,
+**and** the option keeps its default value, which is off,
+**and** confirming produces a draft document whose type is **Customer Invoice**, linked to the credit
+note as its original invoice debited, with **no line at all**.
+
+### J3b. A credit-note source with the copy-lines option forced on
+
+**Given** the same posted customer credit note,
+**When** the create-debit-note operation is run with the "copy lines" option set to on — which a
+caller may do, and which a user reaches through the mixed selection of J3c,
+**Then** the two product lines of the credit note **are copied** into the debit note, which is a
+draft customer invoice of 500.00.
+
+This is the observed behaviour and it contradicts the option's own help text; it is recorded as a
+compatibility finding in [`accounting-effects.md`](accounting-effects.md) section 5.
+
+### J3c. A mixed selection shows the checkbox again
+
+**Given** a posted customer invoice of 1 000.00 and a posted customer credit note of 500.00, both for
+Acme Industries, selected together,
+**When** the create-debit-note dialogue is opened,
+**Then** the wizard's common document type is empty, because the two sources differ,
+**and** the "copy lines" checkbox is therefore **shown** and may be ticked,
+**and** the journal selector offers sale journals, because an empty common type falls back to the
+sale kind,
+**and** ticking the option and confirming produces two draft customer invoices, one of 1 000.00 with
+the invoice's lines copied and one of 500.00 with the credit note's lines copied.
 
 ### J4. Debit note validation
 
@@ -1210,11 +1236,54 @@ invoices, customer credit notes, vendor bills and vendor credit notes.
 **Then** the payment form is not shown and the page states:
 > There are pending transactions for this invoice.
 
+### N6b. A partly paid invoice is told there is nothing to pay
+
+**Given** a posted customer invoice of 1 000.00 in euros,
+**and** one online payment transaction of 400.00 that has reached the done state, leaving a residual
+of 600.00 and the payment status `partial`,
+**When** the portal user opens the document page,
+**Then** the payment form is not shown,
+**and** the page states exactly one sentence:
+> There is no amount to be paid.
+
+**because** the sentence's condition is "at least one pending, authorised or done transaction exists,
+or the residual is zero", and the first half holds even though 600.00 is still owed. The sentences of
+the other five conditions are not appended: the parameter is on, the status is posted, the residual
+is not zero, the type is a customer invoice, and the done transaction is neither pending nor
+authorised.
+
 ### N8. A tampered custom amount
 
 **Given** a portal address carrying an amount and a signed token that do not match,
 **When** the page is requested,
-**Then** the visitor is redirected to the portal home.
+**Then** the visitor is redirected to the portal home,
+**because** the signed token covers the pair (document identifier, amount) and nothing else, so
+changing the amount in the address invalidates it.
+
+### N8b. A successful transaction posts a draft invoice
+
+**Given** a **draft** customer invoice of 1 000.00 in euros for Acme Industries, linked to an online
+payment transaction of 1 000.00,
+**and** a provider whose payment journal is the bank journal `BNK1`,
+**When** the transaction reaches the done state and post-processes itself,
+**Then** the invoice is posted first, through the ordinary posting operation with every guard of
+[`state-machines.md`](state-machines.md) section 1.4,
+**and** a payment of 1 000.00 is then created in `BNK1`, inbound, for the commercial entity of the
+transaction's partner, with the memo built from the transaction reference and the provider's own
+reference,
+**and** that payment is reconciled against the invoice's receivable line, bringing the residual to
+0.00 and the payment status to `paid` (or `in_payment` when the company asks for that distinction),
+**and** the invoice's thread carries "The payment related to transaction" followed by a link to the
+transaction, "has been posted:" and a link to the payment.
+
+### N8c. A validation transaction creates no payment
+
+**Given** the same draft invoice and a transaction whose operation is a validation,
+**When** the transaction reaches the done state,
+**Then** the invoice is still posted,
+**and** **no** payment is created and nothing is reconciled, so the residual stays at 1 000.00 and the
+payment status stays `not_paid`,
+**and** no message about a posted payment is written, because there is no payment.
 
 ### N9. Batch payment of overdue invoices
 

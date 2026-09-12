@@ -142,7 +142,15 @@ Every endpoint of this domain is reachable without authentication unless the aut
 | `/invoice/transaction/<invoice identifier>` | none | service | public | Create a transaction that pays one invoice. Verifies the document access token; answers `The access token is invalid.` on failure. Allows the extra parameter "next installment name". |
 | `/invoice/transaction/overdue` | none | service | public | Create one transaction that pays every overdue invoice of the logged-in customer. Errors: `Please log in to pay your overdue invoices`; `Impossible to pay all the overdue invoices if they don't share the same currency.` |
 
-## 2.3 Connector endpoints
+## 2.3 Endpoints added by the Website Payment package
+
+| Path | Method | Kind | Authentication | Purpose |
+|---|---|---|---|---|
+| `/donation/pay` | `GET` and `POST` | page | public | Render the donation payment page. On a post, store the amount, the currency, the donation options and the descriptions in the session and answer with a "see other" redirection to the same path. On a get, read the missing values back from the session, default the currency to the accounting currency of the active company, the amount to 25 and the donation options to a free custom amount, set the paying contact to the public contact and compute the access token for a visitor who is not signed in, then render the donation template. Not listed in the site map; listed in the site's content index under the name `Donation Payment`. |
+| `/donation/transaction/<minimum amount>` | none | service | public | Create a donation transaction. Refuses an amount below the minimum with `Donation amount must be at least %.2f.`; refuses missing donor details with `Name is required.`, `Email is required.` and `Country is required.`. Allows four extra parameters beyond the generic ones: the donor comment, the recipient electronic mail address, the donor details and the reference prefix. Sends the internal donation notification and returns the processing values. |
+| `/website_payment/snippet/supported_payment_methods` | `GET` | service | public | Return the payment methods that the current website advertises, as a list of names and image addresses. Optional input: a limit. Read-only. The answer is not cacheable for an internal user and cacheable for seven days, with one further day of stale reuse, for everybody else. |
+
+## 2.4 Connector endpoints
 
 Every connector adds between one and four endpoints, in these shapes:
 
@@ -165,7 +173,7 @@ Screens are described as workflows on views. No client technology is implied.
 
 ### 3.1.1 Card view (the default)
 
-- One card per provider, coloured by `color_index`: blue when the package is not installed, yellow when disabled, orange in test mode, green when enabled.
+- One card per provider, coloured by `color`: blue when the package is not installed, yellow when disabled, orange in test mode, green when enabled.
 - Each card shows the logo, the name, and, when the package is not installed, an **Install** button; when the package is additionally flagged as requiring a separate commercial licence (`module_to_buy` true), the button is replaced by an **Upgrade** link that opens the supplier's pricing page in a new window.
 - Creation and quick creation are disabled.
 
@@ -182,8 +190,8 @@ Columns: a drag handle bound to `sequence`, the name, the code (technical users 
 - **Main group** (hidden unless the package is installed or absent): the code (technical users only, read-only once the record exists), the state as a radio group, the company (multi-company databases only).
 - **Credentials page**: hidden when the code is `none`; filled by the connector with its own fields, the secret ones visible only to administrators, and with the connector's own buttons (Connect, Create webhook, Generate client key, Set account currency, Verify domain, Synchronise payment methods, Reset credentials).
 - **Configuration page**, group "Payment Form": the supported payment methods as read-only tags (hidden while disabled), a link **Enable Payment Methods**, then `allow_tokenization`, `capture_manually` and `allow_express_checkout`, each shown only when the matching support flag says the connector implements it.
-- **Configuration page**, group "Availability": `maximum_amount`; `available_currencies` as tags with the placeholder `Select currencies. Leave empty not to restrict any.`, visible to administrators only; `available_countries` as tags with the placeholder `Select countries. Leave empty to make available everywhere.`
-- **Messages page**: `pre_message`, `pending_message`, `authentication_message` (only when manual capture is supported), `done_message`, `cancel_message`.
+- **Configuration page**, group "Availability": `maximum_amount`; `available_currency_ids` as tags with the placeholder `Select currencies. Leave empty not to restrict any.`, visible to administrators only; `available_country_ids` as tags with the placeholder `Select countries. Leave empty to make available everywhere.`
+- **Messages page**: `pre_msg`, `pending_msg`, `auth_msg` (only when manual capture is supported), `done_msg`, `cancel_msg`.
 
 ### 3.1.4 Search view
 
@@ -291,7 +299,9 @@ Behaviour:
 | Payment methods synchronised | Transient notification | The administrator | `Successfully synchronized with Paymob` with `Payment methods have been successfully set up!`, or `Payment methods not found` with `Not all enabled payment methods were found on your account.` |
 | Quotation payment succeeded | Email | The customer | Post-processing of a pending, authorized or confirmed transaction linked to a sales order that was not confirmed by it. Owned by [../sales/](../sales/README.md). |
 | Invoice sent | Email | The customer | Automatic invoicing after a confirmed transaction, immediately or through the sending job. Owned by [../sales/](../sales/README.md). |
-| Donation receipt | Email | The customer and the company | A confirmed transaction flagged as a donation. Owned by [../website-and-storefront/](../website-and-storefront/README.md). |
+| Donation notification | Email | The recipient address configured on the donation block | Creation of a donation transaction, before the payment is attempted. Subject: `A donation has been made on your website`. Rendered in the language of the user whose electronic mail address matches the recipient, or in the language of the company contact when none matches. |
+| Donation confirmation | Email | The donor | Post-processing of a confirmed transaction whose donation flag is set. Subject: `Donation confirmation`. Rendered in the language recorded in the contact snapshot of the transaction. |
+| Donation details logged on the Payment | Log entry on the Payment | The followers of the Payment | Post-processing of a confirmed donation transaction: `Payment received from donation with following details:` followed by one line per filled value among the company, the contact, the contact name, the contact country and the contact electronic mail address. |
 | Point of sale screen refresh | Live channel message | The point of sale screens of the configuration | An online point of sale payment was registered. The message carries only the order identifier, never any payment detail. |
 
 ---
@@ -308,6 +318,8 @@ Behaviour:
 # 6. Printed documents and exported files
 
 This domain produces none. The provider's own receipt, when it exists, is produced by the provider. The payment receipt that an accountant may print belongs to [../payments-and-bank-reconciliation/](../payments-and-bank-reconciliation/README.md).
+
+The single message template of this domain is the donation body, shared by the donation notification and the donation confirmation. It is rendered inside the light notification frame and contains: a heading, `Donation notification` for the internal notification and `Donation` for the donor's copy; for the donor's copy only, a salutation `Dear ` followed by the donor name and a paragraph thanking the donor for a donation of the amount, rendered as money in the transaction currency, made on the creation date, followed by `We appreciate your support for our organization as such.` and `Regards.`; and, in both copies, a detail table with the rows `Donor Name:`, `Donor Email:`, `Donation Date:`, `Amount(` followed by the currency symbol and `):`, `Comment:` (internal notification only, and only when a comment was given), `Payment Method:` carrying the provider code, and `Payment ID:` carrying the transaction reference.
 
 The only report-like screen fragment is the **availability report**, which is not a printed document but a diagnostic block rendered inside the payment form for administrators. Its content is:
 

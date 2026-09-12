@@ -35,6 +35,7 @@ is duplicated, tracked in the message thread, and defaults to `draft`.
 stateDiagram-v2
     [*] --> draft: create
     draft --> posted: post
+    draft --> posted: a linked payment transaction reaches the done state
     draft --> cancel: cancel
     posted --> draft: reset to draft
     posted --> cancel: cancel (resets to draft first)
@@ -48,6 +49,7 @@ stateDiagram-v2
 | --- | --- | --- | --- | --- |
 | — | `draft` | Create a document | The journal must exist and be of a kind valid for the document type. | The number is left empty or `/`; the dynamic line synchronisation runs for the first time and builds the tax lines, the discount allocation lines, the cash rounding line, the early payment discount lines and the payment term lines. |
 | `draft` | `posted` | The **Confirm** button, the mass posting action, the scheduled auto-post job, or a caller that posts programmatically | Every rule of section 1.4. | See section 1.5. |
+| `draft` | `posted` | An online payment transaction linked to this document reaches the done state | Every rule of section 1.4, unchanged — the external event does not relax a single guard, so a document that would refuse to post by hand refuses here too and the refusal surfaces in the transaction's post-processing | See section 1.5, plus the sequence of section 1.9. |
 | `draft` | `cancel` | The **Cancel** button | The document must be draft (a posted document is first reset to draft by the same action). | All reconciliations of the document's lines are undone; every payment whose entry is this document is set to cancelled; auto-post is turned off; the status becomes cancelled. |
 | `posted` | `draft` | The **Reset to Draft** button | Every rule of section 1.6. | The analytic lines created at posting are deleted; the sending data is cleared; the generated document file is detached and renamed; the next draft copy of a recurring chain is deleted. |
 | `posted` | `cancel` | The **Cancel** button | The reset-to-draft rules must pass first. | The reset-to-draft effects, then the cancel effects. |
@@ -197,6 +199,34 @@ A scheduled job runs daily. It selects every draft document whose auto-post valu
 whose accounting date is on or before today, and posts them in the non-soft mode. For a recurring
 value (monthly, quarterly, yearly) the posting also copies the document forward by one period until
 the auto-post end date is reached.
+
+---
+
+### 1.9 Posting caused by a successful payment transaction
+
+An online payment transaction that reaches the done state post-processes itself, and the first thing
+its post-processing does is post the documents it is linked to. The order matters, because each step
+depends on the previous one:
+
+1. **Post.** Every linked document that is still draft is posted, through the ordinary posting
+   operation with all the guards of section 1.4 and all the effects of section 1.5. A document
+   already posted is left alone.
+2. **Create the payment**, unless one of three cases applies: the transaction's operation is a
+   validation (a validation reserves and releases a token and settles nothing, so there is nothing to
+   reconcile); the transaction already has a payment; or one of the transaction's child transactions
+   is already done or cancelled, which happens with a partial capture or a partial void, where the
+   children carry the settlement instead of the parent.
+3. **Reconcile.** Creating the payment reconciles it against the documents linked to the transaction,
+   which is what moves their payment status. The ledger items are in
+   [`accounting-effects.md`](accounting-effects.md) section 6.5.
+4. **Write the message.** When the transaction has a payment, a message is written on every document
+   the transaction is linked to; its text is in [`interfaces.md`](interfaces.md) section 7.3.
+
+A transaction that reaches the cancelled state instead cancels its payment, and posts nothing.
+
+Because posting happens before the payment is created, a guard failure at step 1 stops the whole
+sequence: no payment is created and nothing is reconciled, while the transaction itself stays done at
+the provider. The compensating action is to fix the document and re-run the post-processing.
 
 ---
 

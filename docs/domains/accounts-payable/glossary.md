@@ -232,7 +232,7 @@ Every term used in this folder, defined in full. Reproduced identifiers appear i
 
 **Liquidity line** — On a payment, the journal item on the bank or outstanding account.
 
-**Manually modified** — A flag set when a user edits a document that a decoder had filled. The automatic-posting learning rule counts consecutive documents that do **not** carry it.
+**Manually modified** — A flag whose purpose is to mark a document that a person edited after a decoder had filled it, and whose actual rule is wider: **every** write on the document sets it, unless the write names the flag itself or is made under the suppression marker carried by five operations. It is forced false immediately after creation. The automatic-posting learning rule counts consecutive documents that do **not** carry it. The complete rule is in `business-rules.md` §19.
 
 **Mixed expense** — A purchase whose deductibility is below 100 %: partly business, partly private.
 

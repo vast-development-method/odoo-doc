@@ -33,15 +33,19 @@ Shown under *Accounting → Configuration → Settings*, in the **Print Checks**
 
 ### 1.3 Intercompany clearing settings
 
-*(Intercompany Payment Clearing package; shown in the settings form.)*
+*(Intercompany Payment Clearing package.)* The three settings sit together in one block of the settings form, inside the default-accounts group. The block is titled **Intercompany Clearing** and is **shown only to members of the multi-company group**; a single-company installation never sees it, and the mechanism therefore stays unconfigured there.
 
-| Setting (storage name) | Type | Domain | Effect |
-|---|---|---|---|
-| *Intercompany Clearing Journal* (`account_interco_clearing_journal_id`) | journal | type is `general` | Where the two clearing entries are booked. Its presence is what enables the whole mechanism |
-| *Intercompany Clearing Payable Account* (`account_interco_payable_id`) | account | account type is payable **and** the account is reconcilable | Where a bill paid by a sister company is cleared |
-| *Intercompany Clearing Receivable Account* (`account_interco_receivable_id`) | account | account type is receivable **and** the account is reconcilable | The mirror on the paying company's side |
+| Setting (storage name) | Label shown in the block | Type | Domain | Effect |
+|---|---|---|---|---|
+| *Intercompany Clearing Journal* (`account_interco_clearing_journal_id`) | **Journal** | journal | type is `general` | Where the two clearing entries are booked. Its presence is what enables the whole mechanism |
+| *Intercompany Clearing Payable Account* (`account_interco_payable_id`) | **Account Payable** | account | account type is payable **and** the account is reconcilable | Where a bill paid by a sister company is cleared |
+| *Intercompany Clearing Receivable Account* (`account_interco_receivable_id`) | **Account Receivable** | account | account type is receivable **and** the account is reconcilable | The mirror on the paying company's side |
 
-All three are company-checked.
+Three further rules govern the block:
+
+- **Required-ness.** Both account pickers become **required as soon as a clearing journal is chosen**, and are optional while it is empty. So the configuration is all-or-nothing: either no clearing journal and no accounts, or a journal together with both accounts.
+- **Ordering hint.** Both account pickers are opened with the *sort by non-trade* hint, which lists the non-trade payable and non-trade receivable accounts first — those are the accounts a clearing arrangement normally uses, rather than the ordinary trade accounts.
+- **Company check.** On the settings form all three pickers are company-checked against the company being configured. On the Company entity itself only the clearing **journal** declares a company check; the two account fields declare their account-type-and-reconcilable domains and nothing else (see `entities.md` §14). A rebuild that writes the accounts through the settings form gets the check; one that writes them directly onto the company does not.
 
 ---
 
@@ -128,8 +132,38 @@ A global sequence named *Payment*, code `account.payment`, prefix `PAY`, padding
 | Cheque payment method | Check Printing Base | Name *Checks*, code `check_printing`, payment type **outbound**, mode `multi`, allowed journal type **bank** |
 | *Print Checks* server action | Check Printing Base | Bound to the payment entity, offered on list and kanban views, restricted to the accountant group; its effect is to call the printing operation on the selection |
 | *Confirm Entries* server action | Accounting | Bound to the journal entry, offered on list and kanban views, restricted to the invoicing group; its effect is to call the confirmation-with-dialogue operation |
+| *Review Entries* server action | Accounting | Bound to the journal entry, offered on list and kanban views, restricted to the accountant group; its effect is to call the *Check selected* operation on the entity, which reads the documents named in the context and marks them reviewed |
+| *Switch into invoice/credit note* server action | Accounting | Bound to the journal entry, offered on the form view, restricted to the invoicing group; its effect is to call the switch-type operation on the selection, and nothing when the selection is empty |
+| *Pay* server action | Accounting | Bound to the journal entry, offered on the form view, restricted to the invoicing group; its effect is to call the force-register-payment operation on the selection, and nothing when the selection is empty |
+| *(Un)Block Payment* server action | Accounting | Bound to the journal entry, offered on the form view, restricted to the invoicing group; its effect is to call the toggle-payment-block operation on the selection |
+| *Share* server action | Accounting | Bound to the journal entry, offered on the form view, restricted to **no** group; its effect is to call the share operation, which produces a shareable link to the document |
+| *Create Debit Note* action | Debit Notes | Bound to the journal entry, offered on list and kanban views, restricted to no group; it opens the *Create Debit Note* dialogue, which itself refuses sources that may not be debited (`business-rules.md` §11) |
 | Cheque sequences | Check Printing Base, at installation | One per existing bank journal |
+| The ten payment terms | Accounting | Enumerated in §4.1 |
 | Product name similarity threshold | Accounting | A system parameter keyed `account.product_name_similarity_threshold` with value `0.9`, used when a decoder matches a product by name |
+
+### 4.1 The payment terms shipped by the Accounting package
+
+Ten payment terms are created by the Accounting package itself, independently of any chart of accounts. They are ordinary records: a user may rename, extend, archive or delete them, and a purchase document may use any of them as the vendor payment term. The entity and its four delay types are specified in `entities.md` §7 and §8; the distribution arithmetic is in `calculations.md` §5.
+
+Every line below is a **percent** line. Unless a delay type is named, the line uses `days_after` (*Days after invoice date*), so its due date is the bill date plus the day count.
+
+| External identifier | Name | Instalment lines | Early discount |
+|---|---|---|---|
+| `account_payment_term_immediate` | *Immediate Payment* | one line: 100 %, 0 days | none |
+| `account_payment_term_15days` | *15 Days* | one line: 100 %, 15 days | none |
+| `account_payment_term_21days` | *21 Days* | one line: 100 %, 21 days | none |
+| `account_payment_term_30days` | *30 Days* | one line: 100 %, 30 days | none |
+| `account_payment_term_45days` | *45 Days* | one line: 100 %, 45 days | none |
+| `account_payment_term_end_following_month` | *End of Following Month* | one line: 100 %, delay type `days_after_end_of_next_month` (*Days after end of next month*), 0 days | none |
+| `account_payment_term_30_days_end_month_the_10` | *10 Days after End of Next Month* | one line: 100 %, delay type `days_after_end_of_next_month`, 10 days | none |
+| `account_payment_term_advance_60days` | *30% Now, Balance 60 Days* | two lines, in this order: 30 % at 0 days, then 70 % at 60 days. The second is the balance line and absorbs any rounding drift | none |
+| `account_payment_term_30days_early_discount` | *2/7 Net 30* | one line: 100 %, 30 days | **on**: 2 %, within 7 days. The term is also flagged to be shown on the printed document |
+| `account_payment_term_90days_on_the_10th` | *90 days, on the 10th* | one line: 100 %, delay type `days_end_of_month_on_the` (*Days end of month on the*), 90 days, day of the following month 10 | none |
+
+Each of the ten carries a **note**, the free text reproduced on a document that uses the term. For nine of them the note is the words *Payment terms:* followed by a space and the term's own name — *Payment terms: Immediate Payment*, *Payment terms: 15 Days*, *Payment terms: 21 Days*, *Payment terms: 30 Days*, *Payment terms: 45 Days*, *Payment terms: End of Following Month*, *Payment terms: 10 Days after End of Next Month*, *Payment terms: 30% Now, Balance 60 Days* and *Payment terms: 90 days, on the 10th*. The tenth departs from the pattern: the note of *2/7 Net 30* reads *Payment terms: 30 Days, 2% Early Payment Discount under 7 days*.
+
+The mode of the early payment discount on *2/7 Net 30* is not part of the shipped record: the term takes the default computation mode of its entity (`entities.md` §7.2), and the three modes and their consequences are specified in `calculations.md` §5.3.
 
 ---
 
