@@ -91,7 +91,7 @@ Building an in-memory record takes a value map, an optional origin and an option
 
 Mixing in-memory and database identifiers in one record set is accepted for reading, but every write path asserts that a set is either entirely in memory or entirely stored:
 
-> "\<record set\> contains a mix of real and new records. It is not supported."
+> "\<the record set\> contains a mix of real and new records. It is not supported."
 
 An existence test reports in-memory records as existing, by convention.
 

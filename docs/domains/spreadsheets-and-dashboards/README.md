@@ -103,6 +103,8 @@ The extensions this domain adds to those entities — six new operations on Acco
 | Opening, reading and downloading a shared dashboard from outside the application | [`workflows.md`](workflows.md) §9, §10, [`interfaces.md`](interfaces.md) §5 |
 | The personal board: pinning an action, the stored per-user layout, the preprocessing of that layout | [`entities.md`](entities.md) §6, [`workflows.md`](workflows.md) §13 |
 | Export logging: what is written, when, and for which operations | [`workflows.md`](workflows.md) §16, [`business-rules.md`](business-rules.md) §11 |
+| Printing a dashboard: what is rendered and what is restored afterwards | [`workflows.md`](workflows.md) §17, [`interfaces.md`](interfaces.md) §11 |
+| Downloading a workbook as a workbook file from inside the application | [`workflows.md`](workflows.md) §18, [`interfaces.md`](interfaces.md) §12 |
 | Every access group, access right, record rule, menu, action, view and shipped record | [`configuration.md`](configuration.md) |
 | Every route, named operation, formula, cell action and import or export path | [`interfaces.md`](interfaces.md) |
 | Why the domain writes nothing to the ledger, and which ledger data it reads | [`accounting-effects.md`](accounting-effects.md) |
@@ -114,7 +116,7 @@ The extensions this domain adds to those entities — six new operations on Acco
 3. [`document-format.md`](document-format.md) — the structure of the stored workbook that those entities carry.
 4. [`state-machines.md`](state-machines.md) — the seven state machines of the domain.
 5. [`global-filters.md`](global-filters.md) — the filter system, because workflows and calculations both depend on it.
-6. [`workflows.md`](workflows.md) — the sixteen end-to-end procedures.
+6. [`workflows.md`](workflows.md) — the eighteen end-to-end procedures.
 7. [`business-rules.md`](business-rules.md) — every validation, permission check and invariant, numbered.
 8. [`calculations.md`](calculations.md) — every formula with its rounding and a worked example.
 9. [`accounting-effects.md`](accounting-effects.md) — the ledger position of the domain.
@@ -132,7 +134,7 @@ The extensions this domain adds to those entities — six new operations on Acco
 | [`document-format.md`](document-format.md) | The structure of a stored workbook: top-level sections, sheets, cells, figures, lists, pivots, charts, filters, links, the empty workbook, the frozen workbook, and the validation walk |
 | [`state-machines.md`](state-machines.md) | Publication, favourite mark, dashboard rendering status, data-source status, sample-versus-live presentation, share-link reachability, and global-filter value state, each with states, transitions, guards and a diagram |
 | [`global-filters.md`](global-filters.md) | The six filter kinds, every operator, every value shape, default values, the record-selection rule each produces, the field matching, the period offset, and the filter sheet written on export |
-| [`workflows.md`](workflows.md) | Sixteen numbered end-to-end procedures with the records each step creates or changes and the failures each step can raise |
+| [`workflows.md`](workflows.md) | Eighteen numbered end-to-end procedures with the records each step creates or changes and the failures each step can raise |
 | [`business-rules.md`](business-rules.md) | Sixty-six numbered rules with exact messages, plus the permission matrix, the locking position and the rule index |
 | [`calculations.md`](calculations.md) | Twenty calculation families with quantities named in words, evaluation order, rounding and worked numeric examples |
 | [`accounting-effects.md`](accounting-effects.md) | The reasoned statement that the domain posts nothing, the ledger data it reads, the correctness obligations that follow, and links to the domains that do post |

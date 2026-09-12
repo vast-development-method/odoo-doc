@@ -938,4 +938,9 @@ The direct-send threshold is fifty notifications.
 - [Views and actions](views-and-actions.md) — the conversation panel and the activity view kind.
 - [The mail gateway](../runtime/mail-gateway.md) — the outgoing queue, server selection, bounces and inbound routing.
 - [The notification bus](../runtime/notification-bus.md) — how a posted message reaches an open screen.
+- [Record operations and query notation](record-operations-and-query-notation.md) — the generic operations that posting, subscribing and tracking are built on.
+- [Client architecture](client-architecture.md) — how an open screen receives a posted message and renders the conversation panel.
+- [Multi-company](multi-company.md) — the company a notification is rendered in, and the companies a follower may see.
+- [Translation](../runtime/translation.md) — the language a notification is rendered in.
+- [Report rendering](../runtime/report-rendering.md) — the documents a message may carry as attachments.
 - [Messaging and activities](../domains/messaging-and-activities/README.md) — the business capability built on this behaviour: channels, templates, digests, plans and campaigns.

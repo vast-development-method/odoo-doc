@@ -83,7 +83,7 @@ flowchart TD
     end
 
     subgraph Storage["Persistence"]
-        DB[("One relational database per tenant")]
+        Database[("One relational database per tenant")]
         Files["File store for attachments"]
     end
 
@@ -132,7 +132,7 @@ There is no shared database across tenants, no tenant discriminator column on bu
 
 ### 2.2 Multiple legal companies inside one tenant
 
-A tenant is **not** a company. One tenant commonly holds many legal companies that share parties, products, currencies and users. Separation between companies is a *record-level* concern handled by the company field and the company record rules described in [the security model](security-model.md#7-company-scoping), not a database-level concern. This distinction is central:
+A tenant is **not** a company. One tenant commonly holds many legal companies that share parties, products, currencies and users. Separation between companies is a *record-level* concern handled by the company field and the company record rules described in [the security model](multi-company.md#5-company-scoping-through-record-rules), not a database-level concern. This distinction is central:
 
 - **Tenant boundary**: hard, physical, one database, no query crosses it.
 - **Company boundary**: soft, logical, enforced by record rules and consistency checks, and deliberately crossed by inter-company operations performed by users allowed in both companies.
@@ -185,7 +185,7 @@ Owns the discovery of capability packages, their manifests, their dependency gra
 
 ### 3.4 Presentation contracts
 
-Views, actions, menus and printable document definitions — all stored as records of entities, all contributed by packages as data, all extensible. A client never receives arbitrary markup from the server for a business screen; it receives a **view definition**, which is a declarative description of what to show, plus the field metadata needed to render it. Described in [views and actions](views-and-actions.md).
+Views, actions, menus and printable document definitions — all stored as records of entities, all contributed by packages as data, all extensible. A client never receives arbitrary markup from the server for a business screen; it receives a **view definition**, which is a declarative description of what to show, plus the field metadata needed to render it. Described in [views and actions](views-and-actions.md), with the client's side of the same contract in [client architecture](client-architecture.md). A printable document definition is turned into a finished document by [report rendering](../runtime/report-rendering.md).
 
 ### 3.5 Transport
 
@@ -270,6 +270,8 @@ The registry owns a fixed set of named, bounded, least-recently-used caches. The
 | `routing` | The compiled routing table for this tenant |
 | `templates.cached_values` | Values computed while rendering templates and safe to reuse |
 
+The record cache and the prefetching that fills it are a different mechanism, specified in [caching](../runtime/caching.md); the caches above hold *derived answers*, not record values. The asset bundles the first two rows refer to are assembled by [the package system, section 22](package-system.md#22-client-asset-bundles), and the rendering templates by [report rendering](../runtime/report-rendering.md).
+
 Rules:
 
 1. A cache entry is never allowed to survive a change to the data it was derived from. Every operation that changes such data explicitly clears the affected cache by name.
@@ -288,7 +290,7 @@ Given the set of packages recorded as installed (plus those being installed or u
 
 1. **Discover.** Scan the configured search locations for package directories, each containing a manifest. Build a manifest object for each.
 2. **Graph.** Build a directed graph whose nodes are packages and whose edges are the declared dependencies. Remove any package that is marked not installable, any whose declared dependencies are not all present, and any in a dependency cycle; removal cascades to dependents.
-3. **Order.** Sort the nodes as described in [the package system](package-system.md#5-installation-order). The base package is always first and alone in its phase.
+3. **Order.** Sort the nodes as described in [the package system](package-system.md#6-installation-order). The base package is always first and alone in its phase.
 4. **For each package in order:**
    1. Load the package's definitions. Every entity definition and every entity extension declared by the package is registered against that package's name.
    2. **Compose** each affected entity: for the entity's transport name, take the base definition and apply, in package order, every extension declared for it. This produces the resolved definition. Record the names of the entities the package directly touched.
@@ -399,7 +401,7 @@ Consequences:
 
 **Context cleaning on entering unrestricted mode.** When an environment that is *not* unrestricted derives an unrestricted one without also supplying a context, the context is cleaned: keys that instruct the system to apply default values or to bind a specific active record are removed, because they were supplied by a less-privileged caller and must not silently influence a privileged operation. Keys carrying language, time zone and company selection survive.
 
-**Acting user of the derived environment.** Entering unrestricted mode does not change the acting user identifier. Audit fields therefore still record the real actor, and messages still attribute to the real actor. Unrestricted mode changes *what is allowed*, not *who is acting*. This is the elevate-privileges contract, specified in [the security model](security-model.md#6-the-unrestricted-actor-and-the-elevate-privileges-contract).
+**Acting user of the derived environment.** Entering unrestricted mode does not change the acting user identifier. Audit fields therefore still record the real actor, and messages still attribute to the real actor. Unrestricted mode changes *what is allowed*, not *who is acting*. This is the elevate-privileges contract, specified in [the security model](security-model.md#10-the-unrestricted-actor-and-the-elevate-privileges-contract).
 
 ### 6.5 Company selection
 
@@ -457,6 +459,8 @@ Keys not listed here are contributed by packages and are documented with the cap
 - When reading a translatable field, the stored value for the effective language is returned if present, otherwise the source-language value.
 - For rich values translated term by term, the effective language is prefixed with an underscore when the translation-authoring keys are present, which selects the authoring representation instead of the rendered one.
 - Setting an unknown or inactive language is an error, not a silent fallback, because an unknown language would silently produce source-language output and hide a configuration mistake.
+
+The language catalogue, the collection of translatable terms, their delivery to a client and the per-record translation of rich text are specified in [translation](../runtime/translation.md); how a translatable field stores its languages is in [the entity and field system, section 12](entity-and-field-system.md#12-translatable-values).
 
 ---
 
@@ -777,16 +781,16 @@ The boundary matters because they have different compatibility guarantees. Gener
 | `read` | Record set | A list of field names, and a load mode | One mapping per record, in the order requested | Many-to-one fields are returned as an identifier and display name pair under the default load mode, and as a bare identifier under the raw mode. |
 | `write` | Record set | One value mapping | Success | Applies the same values to every record of the set. |
 | `unlink` | Record set | None | Success | Deletes the records, cascading as declared. |
-| `copy` | Record set | An optional mapping of overrides | The new record set | Duplication rules per field are in [the entity and field system](entity-and-field-system.md#14-copying). |
+| `copy` | Record set | An optional mapping of overrides | The new record set | Duplication rules per field are in [the entity and field system](entity-and-field-system.md#19-copying). |
 | `search` | Empty set | A filter, an offset, a limit, an ordering | The matching record set | |
 | `search_count` | Empty set | A filter, an optional limit | The number of matches | The limit caps the count, which lets a client ask "are there more than eighty?" cheaply. |
 | `search_read` | Empty set | A filter, a list of field names, offset, limit, ordering | A list of mappings | One round trip instead of search then read. |
 | `search_fetch` | Empty set | A filter, a list of field names, offset, limit, ordering | The matching record set with those fields preloaded | |
 | `name_search` | Empty set | A text fragment, an extra filter, an operator, a limit | Identifier and display name pairs | The operation behind every relational field's type-ahead. |
 | `name_create` | Empty set | A display name | The new record's identifier and display name | Creates a record from a name alone, where the entity supports it. |
-| `default_get` | Empty set | A list of field names | A mapping of default values | Resolution order in [the entity and field system](entity-and-field-system.md#11-defaults). |
+| `default_get` | Empty set | A list of field names | A mapping of default values | Resolution order in [the entity and field system](entity-and-field-system.md#13-defaults). |
 | `fields_get` | Empty set | Optional field names, optional attribute names | A mapping describing each field | The field metadata a client needs to render a view. |
-| `onchange` | Record set (usually a new record) | Current values, changed field names, a field specification | Changed values, warnings, filter updates | See [the entity and field system](entity-and-field-system.md#12-on-change-behaviour). |
+| `onchange` | Record set (usually a new record) | Current values, changed field names, a field specification | Changed values, warnings, filter updates | See [the entity and field system](entity-and-field-system.md#14-on-change-behaviour). |
 | `read_group` | Empty set | A filter, measures, grouping keys, offset, limit, ordering | One mapping per group | Aggregation without fetching rows. |
 | `check_access` | Record set | An operation name | Nothing, or a refusal | Raises with the precise refusal message. |
 | `has_access` | Record set | An operation name | Boolean | The same check, expressed as a question. |
@@ -849,7 +853,7 @@ These conventions are observed throughout the domains and a rebuild should follo
 
 ### 10.6 Returning an action
 
-A named operation invoked from a button may return a **action description**: a mapping that the client interprets as "now show this". Its shape is specified in [views and actions](views-and-actions.md#5-window-actions). Returning nothing means "stay where you are and reload the record".
+A named operation invoked from a button may return a **action description**: a mapping that the client interprets as "now show this". Its shape is specified in [views and actions](views-and-actions.md#17-window-actions). Returning nothing means "stay where you are and reload the record".
 
 ---
 
@@ -1090,3 +1094,10 @@ Every failure in the system belongs to exactly one of the following kinds. The k
 - [Design principles](design-principles.md) — the recurring choices and their trade-offs.
 - [Transactions and concurrency](../runtime/transactions-and-concurrency.md) — the runtime view of section 11.
 - [Request lifecycle](../runtime/request-lifecycle.md) — the runtime view of section 9.
+- [Caching](../runtime/caching.md) — the record cache, prefetching, the recomputation schedule and the cross-worker signalling of sections 7.5, 8 and 12.
+- [Report rendering](../runtime/report-rendering.md) — how a printable document definition becomes a finished document.
+- [Translation](../runtime/translation.md) — the language catalogue and the term collection behind section 6.7.
+- [Record operations and query notation](record-operations-and-query-notation.md) — the generic operations of section 10 in full, with their checks, their errors and the filter notation.
+- [Multi-company](multi-company.md) — the company selection of section 6.5, the company tree and the consistency check.
+- [Client architecture](client-architecture.md) — what a client does with the presentation contracts of section 3.4.
+- [Messaging model](messaging-model.md) — the largest adopted behaviour bundle built on the layers of this document.

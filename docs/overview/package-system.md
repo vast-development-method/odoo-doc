@@ -31,8 +31,10 @@ Read [the architecture](architecture.md) first: this document assumes the entity
 19. [Translations](#19-translations)
 20. [The category tree](#20-the-category-tree)
 21. [The shipped catalogue](#21-the-shipped-catalogue)
-22. [Error conditions and messages](#22-error-conditions-and-messages)
-23. [Acceptance criteria](#23-acceptance-criteria)
+22. [Client asset bundles](#22-client-asset-bundles)
+23. [Error conditions and messages](#23-error-conditions-and-messages)
+24. [Acceptance criteria](#24-acceptance-criteria)
+25. [Reconciliation notes](#25-reconciliation-notes)
 
 ---
 
@@ -159,6 +161,49 @@ Validation happens when the manifest is first parsed, and its outcome is cached 
 4. Automatic installation is normalised: a boolean true becomes the set of all declared dependencies; a list becomes that set. **Every entry of an automatic-installation list must also be a declared dependency**; otherwise the manifest is rejected with a message naming the offending entries and the package.
 5. The version is normalised. Failure makes an installable package's manifest invalid, reported as **"Module "** the technical name **": invalid manifest"**.
 6. An incompatible platform version silently sets `installable` to false and records a warning.
+
+### 2.9 Version normalisation
+
+Every declared version is normalised before it is stored or compared. The platform itself carries a **series identifier** of two numeric parts; it is written below as *series* rather than reproduced, because a specification must not pin a release.
+
+1. Split the declared version on full stops. Fewer than two parts or more than five is refused with **"Invalid version '"** the version **"', must have between 2 and 5 parts"**.
+2. If the version begins with the series identifier and the first part is not made only of digits, reduce the first part to its digits.
+3. Every part must parse as a whole number; otherwise the version is refused with **"Invalid version '"** the version **"'"**. The user-facing form of the same refusal is **"Invalid version '"** the version **"'. Modules should have a version in format 'x.y', 'x.y.z', '\<series\>.x.y' or '\<series\>.x.y.z'."**
+4. If there are three parts or fewer and the version does not already begin with the series identifier, prepend the series identifier and a full stop.
+5. Otherwise return the version unchanged.
+
+| Declared | Normalised | Reason |
+|---|---|---|
+| Two parts, `1.0` | *series* then `.1.0` | Two parts, not prefixed by the series: the series is prepended |
+| Two parts, `0.1` | *series* then `.0.1` | The same rule |
+| Two parts, `1.3` | *series* then `.1.3` | The same rule |
+| The series followed by `.1.0` | Unchanged | Already prefixed by the series |
+| Four parts, `1.0.0.1` | Unchanged | Four parts are left as declared |
+| One part, `1` | Refused | Fewer than two parts |
+| Six parts | Refused | More than five parts |
+| `1.x` | Refused | A part does not parse as a whole number |
+
+**Compatibility.** After normalisation, a version is compatible when it begins with the series identifier followed by a full stop.
+
+- An **incompatible** version on an installable package downgrades the package: the warning **"The module "** the technical name **" has an incompatible version, setting installable=False"** is recorded and the package's installable attribute becomes false.
+- An **invalid** version on an installable package makes the manifest fail to load, reported as **"Module "** the technical name **": invalid manifest"**.
+- An invalid version on a package already marked not installable is ignored, and the default two-part version of one and zero is used.
+
+### 2.10 External prerequisites
+
+A manifest may declare that the host must provide named software components before the package can change state. The prerequisites are checked when the package is about to be installed, updated or otherwise moved, **not** while the manifest is read, so that a package whose prerequisite is absent can still be listed.
+
+**Named components.**
+
+1. Parse each requirement expression into a name, an optional version constraint and an optional environment condition. An expression that cannot be parsed is refused with the expression followed by **" is an invalid external dependency specification: "** and the reason.
+2. When an environment condition is present and does not hold in this environment, skip the requirement.
+3. Resolve the installed version of the named component.
+4. When the component is not installed but a runnable component with that exact name can nevertheless be loaded, record the warning that the dependency does not appear to be a valid distribution name and that a distribution name is recommended, and accept the requirement. Otherwise refuse with **"External dependency '"** the name **"' not installed: "** and the reason.
+5. When a version constraint is present and the installed version does not satisfy it, refuse with **"External dependency version mismatch: "** the name **" (installed: "** the version **")"**.
+
+**Named executables.** For each declared executable name, refuse with **"Unable to find '"** the name **"' in path"** when it is not found among the host's executable search locations.
+
+**Reporting.** A failure is reported to the user with one of the three transition-specific messages of [section 23](#23-error-conditions-and-messages). When the host is one whose software-installation command the manifest declares for that prerequisite, the message is extended with a further line beginning **"It can be installed running: "** and that command.
 
 ---
 
@@ -288,6 +333,27 @@ Refreshing requires the privilege to change configuration and is recorded in the
 
 **Creating a package record also creates its external identifier**, in the `base` package namespace, named by the technical name prefixed with the word for package and an underscore, and marked not updatable. This is what makes a package record referable from data files.
 
+### 4.6 Bootstrapping an empty database
+
+A database is empty when the package table does not exist. Bringing it into service is the only situation in which the platform writes rows before the self-describing catalogue exists.
+
+1. Execute the foundation package's bootstrap statements, which create the tables required before the entity catalogue exists.
+2. For each discovered manifest, in technical-name order:
+   1. Create the category path, splitting the declared category on the separator and creating each missing level.
+   2. Set the state to `uninstalled` when the manifest is installable and to `uninstallable` when it is not.
+   3. Insert the package record with the manifest's values, that category and that state.
+   4. Insert an external identifier owned by the foundation package, named after the package, pointing at that record and flagged not updatable.
+   5. Insert one dependency record per declared dependency, with the required-for-automatic-installation flag set when the dependency belongs to the automatic-installation trigger set.
+3. If automatic installation is disabled by configuration, set the foundation package's state to `to install` and stop.
+4. Otherwise repeat until no candidate is found:
+   1. Candidates are every package that declares automatic installation, whose state is neither `to install` nor `uninstallable`, none of whose dependency records is unresolvable, and none of whose dependency records flagged required for automatic installation points at a package whose state is not `to install`.
+   2. Add to the candidates every dependency of a package that is `to install` or is itself a candidate, whose own state is not `to install` and which is not already a candidate.
+   3. If there are no candidates, stop; otherwise set the state of every candidate to `to install`.
+
+Because the foundation package declares automatic installation with an empty trigger set — its dependency list is forced empty — it is always selected in the first round. Every package that declares automatic installation and depends only on the foundation package is selected in the second round, and so on at each further round, so that a fresh database converges on the full set of automatic packages without anybody choosing them.
+
+When the database is not initialised and no update was requested, the platform records **"Database "** the name **" not initialized, you can force it with an explicit installation of the root package"** and serves nothing. When the foundation package itself cannot be found, the build fails with **"The root package cannot be loaded (verify the configured package directories)"**.
+
 ---
 
 ## 5. Dependency resolution
@@ -344,7 +410,7 @@ Two closures are computed against the database, not against the graph, because t
 
 **Downstream dependencies** of a set of packages: every package that depends on one of them, directly or indirectly, excluding by default those in states `uninstalled`, `uninstallable` and `to remove`. Computed by repeatedly joining the dependency records by name until no new package appears.
 
-**Upstream dependencies** of a set of packages: every package that one of them depends on, directly or indirectly, excluding by default those in states `installed`, `uninstallable` and `to remove`. Computed the same way in the other direction.
+**Prerequisite dependencies** of a set of packages: every package that one of them depends on, directly or indirectly, excluding by default those in states `installed`, `uninstallable` and `to remove`. Computed the same way in the other direction.
 
 Both flush the relevant fields before querying, because they read the database directly.
 
@@ -818,6 +884,29 @@ Module operations are refused inside tests, because they are not transactional: 
 
 ---
 
+### 13.5 Failure and recovery during a build
+
+1. Any failure during a build rolls back the current transaction, resets the transient package states — `to install`, `to upgrade` and `to remove` return to their stable counterparts — and re-raises. The reset is recorded with the warning **"Transient module states were reset"**.
+2. A failure while loading **demonstration data** is caught per package and does not stop the build: the warning **"Module "** the technical name **" demo data failed to install, installed without demo data"** is recorded, the package's demonstration flag becomes false, the shipped configuration step that reports demonstration failures is opened, and a demonstration-failure record is created holding the package and the failure trace. The installation continues.
+3. After a build that completed but left packages in a transient state, the marker recording that the database is only partially updated is written, and the next build forces update mode so that the unfinished work is retried.
+4. Diagnostic messages recorded while the load order is computed, none of which stops the build:
+
+| Condition | Message |
+|---|---|
+| A package is not installable | "module \<name\>: not installable, skipped" |
+| A package is not installed and the build is only loading | "module \<name\>: not installed, skipped" |
+| A dependency is absent from the graph | "module \<name\>: some depends are not loaded (\<names\>), skipped" |
+| A package lies on a dependency cycle | "module \<name\>: in a dependency loop, skipped" |
+| A package depends on one that was skipped | "module \<name\>: its direct/indirect dependency is skipped, skipped" |
+| Installed packages are absent from the graph at the end | "Some modules are not loaded, some dependencies or manifest may be missing: \<names\>" |
+| Packages are left in a transient state at the end | "Some modules have inconsistent states, some dependencies may be missing: \<names\>" |
+| An entity is recorded in the catalogue but no installed package defines it | "Model \<name\> is declared but cannot be loaded! (Perhaps a module was partially removed or renamed)" |
+| A package's description is empty | "module \<name\>: description is empty!" |
+| A data file is listed twice in one manifest | "File \<file\> is imported twice in module \<package\> \<kind\>" |
+| A stored field has no not-null constraint although the field is required | "Missing not-null constraint on \<field\>" |
+
+---
+
 ## 14. The update lifecycle
 
 ### 14.1 Scheduling
@@ -1144,7 +1233,165 @@ The base package alone defines the entities that describe the system to itself. 
 
 ---
 
-## 22. Error conditions and messages
+## 22. Client asset bundles
+
+A capability package contributes not only entities, views and data but also the static files a client loads. Those files are organised into **bundles**, and a bundle is assembled from the contributions of every installed package. The mechanism belongs here because a bundle's content is decided entirely by which packages are installed and in what order.
+
+### 22.1 What a bundle is
+
+A bundle is a named ordered list of static file paths. A bundle name is qualified by the package that introduces it, written as the package's technical name, a full stop and the local bundle name. The qualified name is part of the public contract: every other package targets the bundle by exactly that name. A bundle whose local name begins with an underscore is a building block meant to be spliced into other bundles.
+
+Two sources contribute to a bundle: the asset declarations in the manifest of every installed package, and the **asset directive** records stored in the tenant's database.
+
+**The asset directive record.**
+
+| Identifier | Full name | Type | Required | Default | Meaning |
+|---|---|---|---|---|---|
+| `name` | Name | Short text | Yes | None | Identification only |
+| `bundle` | Bundle | Short text | Yes | None | The bundle the directive applies to |
+| `directive` | Directive | Selection | No | `append` | One of `append`, `prepend`, `after`, `before`, `remove`, `replace`, `include` |
+| `path` | Path | Short text | Yes | None | A path, a wildcard pattern, a web address, or a bundle name when the directive is `include` |
+| `target` | Target | Short text | No | None | The path the directive positions itself against; meaningful only for `after`, `before` and `replace` |
+| `active` | Active | Boolean | No | True | Inactive records are read and then filtered out |
+| `sequence` | Sequence | Integer | Yes | 16 | Ordering. A record whose sequence is strictly below sixteen is applied **before** the manifest contributions; the others after |
+
+The default ordering of the entity is by sequence, then identifier. Creating, writing or deleting an asset directive clears the assembled-bundle cache.
+
+### 22.2 The directives
+
+| Directive | Declared in a manifest as | Effect |
+|---|---|---|
+| `append` | A bare path | Adds the matching files at the end of the bundle |
+| `prepend` | A pair of the keyword and a path | Inserts the matching files at the position the current bundle started at, which is the beginning of the contributions made for this bundle at this nesting level |
+| `before` | A triple of the keyword, a target and a path | Inserts the matching files immediately before the target file |
+| `after` | A triple of the keyword, a target and a path | Inserts the matching files immediately after the target file |
+| `remove` | A pair of the keyword and a target | Removes the matching files from the bundle |
+| `replace` | A triple of the keyword, a target and a path | Inserts the matching files at the target's position, then removes the target |
+| `include` | A pair of the keyword and a bundle name | Splices the named bundle in at this position |
+
+A directive that positions itself against a target requires that target to be present already, contributed either by a package earlier in the package order or by an asset directive with a lower sequence.
+
+### 22.3 The assembly algorithm
+
+**Preconditions.** A bundle name, and a registry in which the installed packages are known.
+
+1. Take the installed packages of this registry plus the always-loaded ones. An overriding layer may narrow the set — the multi-site capability narrows it to the packages enabled for the site being served.
+2. Order that set topologically by dependency, breaking ties by the tuple of "is not an application", then sequence, then technical name.
+3. Start an empty ordered list with a membership set, and fill it for the requested bundle as follows.
+
+**Filling one bundle.**
+
+1. If the bundle is already on the inclusion stack, refuse with **"Circular assets bundle declaration: "** followed by the chain of bundle names separated by greater-than signs.
+2. Record the current length of the result as the bundle's start position.
+3. Read every asset directive for this bundle regardless of its active flag, order them by sequence then key, and then drop the inactive ones.
+4. Apply every directive whose sequence is below sixteen.
+5. For each package in the order of step 2, apply every directive that package's manifest declares for this bundle.
+6. Apply every directive whose sequence is sixteen or above.
+
+**Applying one directive.**
+
+1. For the inclusion directive, fill the named bundle recursively with the current bundle pushed onto the inclusion stack, and stop.
+2. Resolve the path into a list of files ([section 22.4](#224-path-resolution)) when the path can be aggregated; otherwise treat it as a single external entry.
+3. When the directive positions itself against a target, resolve the target the same way. If the target resolves to nothing and its suffix is not an asset suffix, do nothing at all — a mistyped suffix is ignored silently. If it resolves, take the first resolved path as the target. Then find the target's position in the result, failing with **"File(s) "** the target **" not found in bundle "** the bundle when it is absent.
+4. Then, by directive: append the paths at the end; insert them at the bundle's start position; insert them after the target's position; insert them before the target's position; remove them, failing with the same not-found message when none of them is present; or, for the replacing directive, insert them at the target's position and then remove the target.
+
+**The uniqueness rule.** A path already present in the result is never added a second time, and the **first** occurrence decides the position. This is what allows a package to force a file to the front of a wildcard expansion by naming it explicitly just before the pattern that also matches it.
+
+### 22.4 Path resolution
+
+1. Normalise the path separators to the web form.
+2. Take the first segment as a package technical name. If a manifest exists for it:
+   1. If that package is not installed, refuse with **"Unallowed to fetch files from addon "** the package **" for file "** the path **". Addon "** the package **" is not installed"**.
+   2. Join the remaining segments onto the package's directory and normalise. If the result does not stay inside the package's static directory, the path is not safe and resolution falls through to step 3.
+   3. Otherwise expand the wildcard pattern, keep only files whose suffix is an asset suffix, sort by path, and return one entry per file with its modification timestamp.
+3. If nothing matched and the path cannot be aggregated — an absolute web address, or a path under the served-content route — return one entry marked as an external asset with no timestamp.
+4. If nothing matched and the path holds no wildcard character, return one entry with no file and no timestamp, which addresses an attachment rather than a file.
+5. Otherwise record the warning that the path did not resolve to anything, extended with a note about security when the path was not inside a package's static directory.
+
+A path can be aggregated when it names no scheme, no network location and does not begin with the served-content route. The asset suffixes are the client script suffix, the four style-sheet suffixes — the plain one and the three preprocessor dialects — and the client template suffix.
+
+### 22.5 Requesting a bundle
+
+A bundle is requested by a name composed of the qualified bundle name, an optional right-to-left marker, an optional vendor-prefixing marker, an optional minimisation marker and a type suffix, in that order and separated by full stops.
+
+- The type is the last segment and must be either the client script type or the style-sheet type; anything else is rejected with **"Only js and css assets bundle are supported for now"**.
+- Outside diagnosis mode the segment before the type must be the minimisation marker, otherwise the name is rejected with **"'min' expected in extension in non debug mode"**.
+- For a style sheet, the vendor-prefixing marker requests vendor-prefixed output and the right-to-left marker requests the right-to-left transformation.
+- The remaining name must have exactly two parts, the qualifying package and the local bundle name, otherwise it is rejected with the name followed by **" is not a valid bundle name, should have two parts"**.
+
+### 22.6 The shipped bundle catalogue
+
+The bundle names below are reproduced because other packages target them by name.
+
+| Bundle | Purpose |
+|---|---|
+| `web.assets_web` | The complete desktop client bundle: the code, styles and templates of the back-office application |
+| `web.assets_web_dark` | The dark-theme variant of the desktop client bundle |
+| `web.assets_backend` | The back-office contributions of every package: views, fields, widgets, services and templates |
+| `web.assets_backend_lazy` | Back-office contributions loaded on demand rather than at start-up |
+| `web.assets_backend_lazy_dark` | The dark-theme variant of the on-demand back-office contributions |
+| `web.assets_frontend` | The public site and customer-portal contributions |
+| `web.assets_frontend_minimal` | The minimal subset of the public bundle loaded before the rest |
+| `web.assets_frontend_lazy` | Public contributions loaded on demand |
+| `web.assets_web_print` | The print style sheet of the desktop client |
+| `web.report_assets_common` | Styles and scripts shared by every printed document |
+| `web.report_assets_pdf` | Additions specific to the portable-document renderer |
+| `web.assets_emoji` | The pictograph data set, loaded on demand |
+| `web.assets_clickbot` | The automated click-through helper |
+| `web.assets_tests` | End-to-end guided-tour test code |
+| `web.tests_assets` | Helpers and fixtures for the test bundles |
+| `web.assets_unit_tests` | Unit test code |
+| `web.assets_unit_tests_setup` | Set-up code required by the unit tests |
+| `web.assets_unit_tests_setup_ui` | Set-up code required by the interface unit tests |
+| `web.qunit_suite_tests` | The unit test suite entry point |
+| `web.__assets_tests_call__` | The entry point that invokes the test bundles |
+| `web.assets_inside_builder_iframe` | Assets injected inside the page-builder editing frame |
+| `web._assets_primary_variables` | Primary style variables, included first by every style bundle |
+| `web._assets_secondary_variables` | Secondary style variables, computed from the primary ones |
+| `web._assets_helpers` | Style helper functions and mixins |
+| `web._assets_backend_helpers` | Back-office specific style helpers |
+| `web._assets_frontend_helpers` | Public-site specific style helpers |
+| `web._assets_bootstrap`, `web._assets_bootstrap_backend`, `web._assets_bootstrap_frontend` | The base style framework and its two specialisations |
+| `web._assets_core` | The core client runtime |
+| `web._assets_jquery` | The document-traversal library |
+| `web.ace_lib`, `web.chartjs_lib`, `web.fullcalendar_lib`, `web.jsvat_lib` | Third-party libraries loaded on demand: the source editor, the charting library, the calendar library and the tax-identification validation library |
+| `web.dark_mode_variables`, `web.dark_mode_assets_backend` | The dark-theme variables and back-office overrides |
+| `web_tour.common`, `web_tour.automatic`, `web_tour.interactive`, `web_tour.recorder` | The guided-tour runtime in its four modes |
+| `mail.assets_public` | Messaging contributions available to anonymous visitors |
+| `mail.assets_message_email` | Styles applied to outgoing electronic mail messages |
+| `mail.assets_odoo_sfu`, `mail.assets_lamejs` | On-demand libraries for conference calls and audio encoding |
+| `mail.assets_discuss_public_test_tours` | Guided tours for the public discussion page |
+| `portal.assets_chatter`, `portal.assets_chatter_helpers`, `portal.assets_chatter_style` | The discussion panel embedded in customer-portal pages |
+| `bus.websocket_worker_assets` | The background worker that maintains the notification connection |
+| `html_editor.assets_editor` | The rich-text editor |
+| `html_editor.assets_readonly` | The read-only rendering of rich-text content |
+| `html_editor.assets_media_dialog`, `html_editor.assets_image_cropper`, `html_editor.assets_link_popover`, `html_editor.assets_history_diff` | On-demand editor dialogs and tools |
+| `html_editor.assets_prism`, `html_editor.assets_prism_dark` | Source-text highlighting inside rich text |
+| `html_builder.assets`, `html_builder.assets_inside_builder_iframe`, `html_builder.iframe_add_dialog` | The page builder and the assets injected into its editing frame |
+| `website.website_builder_assets` | Site-specific page-builder contributions |
+| `website.assets_editor`, `website.assets_wysiwyg`, `website.assets_all_wysiwyg` | The site editor in its three scopes |
+| `website.assets_inside_builder_iframe` | Site assets injected into the editing frame |
+| `website_slides.slide_embed_assets` | The embedded course player |
+| `mass_mailing.mailing_assets`, `mass_mailing.assets_builder`, `mass_mailing.assets_mail_themes`, `mass_mailing.assets_iframe_style`, `mass_mailing.assets_inside_builder_iframe`, `mass_mailing.assets_inside_basic_editor_iframe`, `mass_mailing.iframe_add_dialog` | The campaign editor, its themes and the assets injected into its editing frames |
+| `point_of_sale._assets_pos` | The point of sale client, contributed to by every package that extends the point of sale |
+| `point_of_sale.base_app`, `point_of_sale.base_tests` | The point of sale application shell and its test helpers |
+| `point_of_sale.assets_prod`, `point_of_sale.assets_prod_dark`, `point_of_sale.assets_debug` | The point of sale bundles for normal operation, dark theme and diagnosis |
+| `point_of_sale.customer_display_assets`, `point_of_sale.customer_display_assets_test` | The customer-facing display and its tests |
+| `pos_self_order.assets`, `pos_self_order.assets_tests` | The self-ordering client and its tests |
+| `im_livechat.assets_embed_core`, `im_livechat.assets_embed_external`, `im_livechat.assets_embed_cors` | The live-chat widget embedded in a page of the same origin, of another origin, and across origins |
+| `im_livechat.embed_assets_unit_tests`, `im_livechat.embed_assets_unit_tests_setup`, `im_livechat.qunit_embed_suite`, `im_livechat.assets_livechat_support_tours` | Live-chat test bundles |
+| `spreadsheet.o_spreadsheet` | The spreadsheet engine |
+| `spreadsheet.assets_print`, `spreadsheet.public_spreadsheet` | The printable and the public spreadsheet renderings |
+| `survey.survey_assets`, `survey.survey_user_input_session_assets` | The survey player and the live session player |
+| `project.webclient`, `mrp_subcontracting.webclient` | Package-specific desktop client additions |
+| `hr_attendance.assets_public_attendance` | The public attendance terminal |
+| `snailmail.report_assets_snailmail` | Styles for documents sent by postal mail |
+| `iot_drivers.assets` | The connected-device bridge client |
+| `api_doc.assets` | The service documentation browser |
+
+---
+
+## 23. Error conditions and messages
 
 | Condition | Message |
 |---|---|
@@ -1186,10 +1433,45 @@ The base package alone defines the entities that describe the system to itself. 
 | A module operation is attempted inside a test | "Module operations inside tests are not transactional and thus forbidden." |
 | The manifest declares an automatic-installation trigger that is not a dependency | A message stating that automatic-installation triggers must be dependencies, naming them and the package |
 | The manifest version cannot be normalised | "Module \<package\>: invalid manifest" |
+| The technical name is not a valid package name | "Invalid module name: \<name\>" |
+| A directory in a search location holds no manifest | "module \<name\>: manifest not found" |
+| A configured search location is not a directory | "package directory path is not a directory: \<path\>" |
+| The manifest declares no author | "Missing 'author' key in manifest for '\<package\>', defaulting to '\<value\>'" |
+| The manifest declares no licence | "Missing 'license' key in manifest for '\<package\>', defaulting to LGPL-3" |
+| A version has the wrong number of parts | "Invalid version '\<version\>', must have between 2 and 5 parts" |
+| A version part is not a whole number | "Invalid version '\<version\>'", and, in its user-facing form, "Invalid version '\<version\>'. Modules should have a version in format 'x.y', 'x.y.z', '\<series\>.x.y' or '\<series\>.x.y.z'." |
+| A version is incompatible with the series | "The module \<package\> has an incompatible version, setting installable=False" |
+| A named external component is not installed | "External dependency '\<name\>' not installed: \<reason\>" |
+| A named external component is of the wrong version | "External dependency version mismatch: \<name\> (installed: \<version\>)" |
+| A named external executable is not on the search path | "Unable to find '\<name\>' in path" |
+| An external requirement expression cannot be parsed | "\<expression\> is an invalid external dependency specification: \<reason\>" |
+| An immediate package operation is requested on a registry that is still being built | "The method _button_immediate_install cannot be called on init or non loaded registries. Please use button_install instead." |
+| An update confirmation names packages that are unknown or not installed | "The following modules are not installed or unknown: \<names\>" |
+| The foundation package cannot be found | "The root package cannot be loaded (verify the configured package directories)" |
+| The database is not initialised and no update was requested | "Database \<name\> not initialized, you can force it with an explicit installation of the root package" |
+| Demonstration data fails for one package | "Module \<package\> demo data failed to install, installed without demo data" |
+| Transient package states were reset after a failure | "Transient module states were reset" |
+| A required stored field has no not-null constraint | "Missing not-null constraint on \<field\>" |
+| A category tree would become cyclic | "Error ! You cannot create recursive categories." |
+| A rich-text field is declared with the markup content type in a data file | "Rich-text field \<field\> is declared with the markup content type" |
+| A record document does not satisfy the declaration grammar | "The record document '\<file\>' does not fit the required grammar!" |
+| A tabular data file has no external-identifier column while updating | "Import specification does not contain the external identifier column, cannot continue." |
+| A data value's expression cannot be evaluated | "Could not eval(\<expression\>) for \<field\> in \<session\>" |
+| A record is created under an external identifier owned by another package | "Creating record \<identifier\> in module \<package\>." |
+| A referenced record cannot be resolved while creating | "Skipping creation of \<identifier\> because \<field\>=\<reference\> could not be resolved" |
+| A deletion selector matches nothing | "Skipping deletion for failed search '\<condition\>'" |
+| A deletion names an external identifier that does not exist | "Skipping deletion for a missing external identifier '\<identifier\>'" |
+| A bundle includes itself, directly or through a chain | "Circular assets bundle declaration: \<first\> > \<second\> > \<third\>" |
+| An asset directive targets a path the bundle does not hold | "File(s) \<paths\> not found in bundle \<bundle\>" |
+| An asset path names a package that is not installed | "Unallowed to fetch files from addon \<package\> for file \<path\>. Addon \<package\> is not installed" |
+| An asset path resolves to nothing | "IrAsset: the path \"\<path\>\" did not resolve to anything.", optionally followed by " It may be due to security reasons." |
+| A bundle is requested with an unsupported type | "Only js and css assets bundle are supported for now" |
+| A bundle is requested without the minimisation marker outside diagnosis mode | "'min' expected in extension in non debug mode" |
+| A bundle name does not have exactly two parts | "\<name\> is not a valid bundle name, should have two parts" |
 
 ---
 
-## 23. Acceptance criteria
+## 24. Acceptance criteria
 
 ### Manifest and discovery
 
@@ -1271,6 +1553,56 @@ The base package alone defines the entities that describe the system to itself. 
 
 **AC-PKG-35.** *Given* package `alpha` defining entity M, package `beta` extending M with a new required field and being updated, and package `gamma` also extending M but not updated, *when* the build completes, *then* entity M's table has the columns implied by both extensions.
 
+### Versions, prerequisites and bootstrapping
+
+**AC-PKG-36.** *Given* a manifest declaring a two-part version that does not begin with the series identifier, *when* the manifest is read, *then* the stored version is the series identifier followed by the declared version.
+
+**AC-PKG-37.** *Given* a manifest declaring a four-part version, *when* the manifest is read, *then* the version is stored unchanged.
+
+**AC-PKG-38.** *Given* a manifest declaring a one-part version, *when* the manifest is read, *then* it is refused with "Invalid version '\<version\>', must have between 2 and 5 parts".
+
+**AC-PKG-39.** *Given* an installable package whose normalised version does not begin with the series identifier, *when* the manifest is read, *then* the incompatibility warning is recorded and the package becomes not installable.
+
+**AC-PKG-40.** *Given* a package declaring an external component that the host does not provide, *when* an installation is scheduled, *then* it is refused with the install-specific external-dependency message, and the prerequisite is **not** checked while the manifest is merely read.
+
+**AC-PKG-41.** *Given* an empty database, *when* the platform starts, *then* the foundation package's bootstrap statements run, one package record and one external identifier are created for every discovered manifest, and the automatic-installation fixed point marks the foundation package and every package that transitively depends only on it as `to install`.
+
+**AC-PKG-42.** *Given* an empty database and automatic installation disabled by configuration, *when* the platform starts, *then* only the foundation package is marked `to install`.
+
+**AC-PKG-43.** *Given* a build that fails part-way, *when* the failure propagates, *then* the transaction is rolled back, every transient package state returns to its stable counterpart, and the reset is recorded.
+
+**AC-PKG-44.** *Given* a build that completes while leaving a package in a transient state, *when* the next build starts, *then* it forces update mode.
+
+### Asset bundles
+
+**AC-PKG-45.** *Given* two packages contributing to one bundle, the second depending on the first, *when* the bundle is assembled, *then* the first package's files precede the second's.
+
+**AC-PKG-46.** *Given* a package that names a file explicitly and then a wildcard that also matches it, *when* the bundle is assembled, *then* the file appears once, at the position of the explicit mention.
+
+**AC-PKG-47.** *Given* an asset directive with a sequence below sixteen, *when* the bundle is assembled, *then* it is applied before every manifest contribution; *given* a sequence of sixteen or above, *then* after them.
+
+**AC-PKG-48.** *Given* a directive that positions itself before a target the bundle does not hold and whose suffix **is** an asset suffix, *when* the bundle is assembled, *then* it fails with the file-not-found message; *given* a target whose suffix is not an asset suffix, *then* the directive is ignored silently.
+
+**AC-PKG-49.** *Given* a bundle that includes a second bundle which includes the first, *when* either is assembled, *then* it fails with the circular-declaration message naming the chain.
+
+**AC-PKG-50.** *Given* an asset path whose first segment names a package that is not installed, *when* the bundle is assembled, *then* it fails with the not-installed message and no file is served.
+
+**AC-PKG-51.** *Given* a bundle requested outside diagnosis mode without the minimisation marker, *when* the request is parsed, *then* it is rejected.
+
+---
+
+## 25. Reconciliation notes
+
+The two drafts merged into this document disagreed on four points, and three organisational decisions are recorded with them.
+
+1. **What the empty automatic-installation list means.** One draft read an empty trigger list as "never automatic". It means the opposite: the condition over an empty set is vacuously satisfied, so the package is always installed automatically, and its own dependencies are pulled in with it. This is what makes the foundation package install itself on an empty database. [Section 11.1](#111-declaration) and [section 4.6](#46-bootstrapping-an-empty-database) state the corrected reading.
+2. **When external prerequisites are checked.** One draft checked them while the manifest was read, which would hide a package from the list because the host lacks a component. They are checked when the package is about to change state, and the three refusals differ by transition. [Section 2.10](#210-external-prerequisites) states it, and criterion AC-PKG-40 asserts it.
+3. **Version normalisation.** One draft treated the declared version as opaque. It is normalised — between two and five parts, every part a whole number, the series identifier prepended when there are three parts or fewer — and the outcome decides both comparability and installability. [Section 2.9](#29-version-normalisation) gives the algorithm and the table of worked cases.
+4. **What happens when demonstration data fails.** One draft treated it as a build failure. It is caught per package: the package installs, its demonstration flag becomes false, a failure record is kept and the build continues. [Section 13.5](#135-failure-and-recovery-during-a-build) states it, and criterion AC-PKG-34 asserts it.
+5. **Where the record declaration grammar lives.** Both drafts specified it. It stays here in [section 8](#8-the-data-declaration-grammar) because a package's data files are the only place the platform itself uses it; [data loading and exchange](../data/data-loading-and-exchange.md) specifies the import and export paths that share it, and neither document repeats the other.
+6. **Where asset bundles live.** One draft placed them with the client, the other with the package system. They are here, in [section 22](#22-client-asset-bundles), because a bundle's content is decided by which packages are installed and in what order; [client architecture](client-architecture.md) states only what the client does with the bundle it receives.
+7. **Acceptance criteria identifiers.** The two drafts numbered their scenarios independently. They are unified here in one series with the prefix `AC-PKG`, and scenarios that appeared in both are stated once.
+
 ---
 
 ## Related documents
@@ -1282,3 +1614,6 @@ The base package alone defines the entities that describe the system to itself. 
 - [Data loading and exchange](../data/data-loading-and-exchange.md) — the import and export paths that share the data grammar.
 - [Reference data](../data/reference-data.md) — the shipped record sets loaded by data files.
 - [Build sequence](../reimplementation/build-sequence.md) — the order in which a rebuild should tackle the catalogue.
+- [Client architecture](client-architecture.md) — what the client does with the bundles assembled by [section 22](#22-client-asset-bundles).
+- [Record operations and query notation](record-operations-and-query-notation.md) — the generic load operation the data files drive.
+- [Multi-company](multi-company.md) — the country restriction that gates the automatic installation of a localisation.

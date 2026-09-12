@@ -1104,7 +1104,7 @@ A package declares access rights for the entities it introduces, and additional 
 
 ### 11.4 Adding record rules
 
-Record rules are **restrictive**, and their combination is specified in [the security model](security-model.md#5-record-rules). A package adding a rule therefore restricts, and a package cannot loosen another's rule except by adding a rule in the same group, because rules attached to groups combine by disjunction within the set of the user's groups.
+Record rules are **restrictive**, and their combination is specified in [the security model](security-model.md#6-record-rules). A package adding a rule therefore restricts, and a package cannot loosen another's rule except by adding a rule in the same group, because rules attached to groups combine by disjunction within the set of the user's groups.
 
 ### 11.5 Restricting a field
 
@@ -1240,7 +1240,7 @@ This section collects, in one place, the order in which conflicting contribution
 | Asset contributions | Package dependency order, then the manifest's own order, then the entry operations ([13.2](#132-assets)) |
 | Data records | Package installation order; the last package to write a field wins ([10.2](#102-modifying-another-packages-records)) |
 | Access rights | Additive; any grant suffices ([11.3](#113-adding-access-rights)) |
-| Record rules | Restrictive; see [the security model](security-model.md#5-record-rules) |
+| Record rules | Restrictive; see [the security model](security-model.md#6-record-rules) |
 | Translations | Package topological order; a dependent package's term overrides its dependency's ([package system, section 19](package-system.md#19-translations)) |
 
 ---

@@ -446,7 +446,7 @@ The disposition header is built with the encoded file name, which transports nam
 
 1. Take the explicitly supplied name.
 2. Otherwise take the value of the designated name field of the record, when that field name contains `name` or the acting user may read it.
-3. Otherwise use `<table>-<record key>-<field name>`, in which the placeholders are the physical table name of the entity, the record key and the field name.
+3. Otherwise build the name from the physical table name of the entity, a hyphen, the record key, a hyphen and the field name.
 4. Replace every carriage return and every line break in the name with an underscore.
 5. Take the extension of the name, keep the first 100 characters of the name without its extension, and append the extension again.
 6. If the name still has no extension and the media type is not the generic binary type, append the extension that corresponds to the media type.

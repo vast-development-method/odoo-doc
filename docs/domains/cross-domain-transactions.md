@@ -2743,15 +2743,33 @@ finished_price_unit = 900.00 ÷ 10 = 90.00
 finished_move_value = 900.00
 ```
 
-**Delta against part (c).** Items 5 and 6 become 900.00. Account 5200 Production Cost ends the
-first order at 140.00 + 490.00 + 240.00 − 900.00 = **30.00 credit**, exactly the extra cost, and
-it stays there: the extra unit cost is capitalised into the finished product **without any
-counterpart entry**, which is the documented behaviour of the account. The Shelf unit's unit cost
-becomes 90.00, so the second order's component value becomes 2 × 90.00 = 180.00, its total cost
-180.00 + 104.00 + 90.00 = 374.00, its finished unit price 187.00, and items 9, 10, 13, 14, 20 and
-21 move accordingly. Account 1400 Inventory ends 30.00 higher than in part (c), against a
-production account 30.00 in credit; a rebuild should surface that residue in the production
-account's own report.
+The Shelf unit's unit cost becomes 900.00 ÷ 10 = 90.00, so the second order changes too:
+
+```formula
+component_value  = 2 × 90.00 = 180.00        ( Shelf unit, at the new average )
+total_cost       = 180.00 + 104.00 + 90.00 = 374.00
+finished_price_unit = 374.00 ÷ 2 = 187.00
+delivery_value   = 374.00
+cogs_unit_price  = 374.00 ÷ 2 = 187.00
+```
+
+**Delta against part (c).** Items 5 and 6 become 900.00; items 9 and 10 become 180.00; items 13
+and 14 become 374.00; items 20 and 21 become 374.00. Items 1 to 4, 7, 8, 11, 12, 15 to 19 and 22
+to 25 are unchanged.
+
+Account 5200 Production Cost ends the first order at
+140.00 + 490.00 + 240.00 − 900.00 = **30.00 credit**, exactly the extra cost, and it stays there:
+the extra unit cost is capitalised into the finished product **without any counterpart entry**,
+which is the documented behaviour of the account. The second order still closes the production
+account, at 180.00 + 104.00 + 90.00 − 374.00 = 0.00, so 30.00 credit is the residue of the whole
+trace.
+
+Account 1400 Inventory ends at debits 900.00 + 374.00 = 1 274.00 against credits
+140.00 + 490.00 + 180.00 + 104.00 + 374.00 = 1 288.00, a net 14.00 credit rather than the 38.00 of
+part (c) — **24.00 higher**. The arithmetic is exact: 30.00 of extra cost was capitalised into ten
+shelf units, of which two were consumed into cabinets and sold, so 2 × 3.00 = 6.00 left through the
+sale and 30.00 − 6.00 = 24.00 is still on the shelf. A rebuild should surface the 30.00 residue in
+the production account's own report, because nothing in the trace will ever clear it.
 
 ## 3.f Failure points
 
@@ -2909,3 +2927,962 @@ and the invoice posts with revenue, tax and a receivable but no cost recognition
 reconciliation).
 
 `You can't create a new statement line without a suspense account set on the <the journal display name> journal.`
+
+---
+
+# 4. Point of sale session from opening to closing
+
+A cashier opens a till, counts the drawer, sells across five orders — one paid in cash, two by
+card, one charged to a customer account and one a refund of the first — has one of them invoiced
+at the counter, then closes the till, counts again and validates. The trace crosses
+[point of sale](point-of-sale/), [taxes](taxes/), [inventory operations](inventory-operations/),
+[inventory valuation and costing](inventory-valuation-and-costing/),
+[accounts receivable](accounts-receivable/) and
+[payments and bank reconciliation](payments-and-bank-reconciliation/).
+
+Its point is aggregation. A counter produces no document per sale; it produces one **session
+closing entry** in which every sale of the session is summed into a handful of items, plus a small
+set of satellite documents — one bank statement line per cash method, one accounting payment per
+bank method, one invoice and one invoice payment entry per invoiced order — that are reconciled
+against the closing entry so that a single receivable account returns to zero.
+
+## 4.a Starting records
+
+Everything of the [shared fixture](#the-shared-fixture) applies. In addition:
+
+**Configuration — Counter One.** Selling currency: the euro, which is also the company currency.
+Company: Northwind Trading. Warehouse: Main Warehouse. Operation type: *Point of Sale Orders*,
+source location `WH/Stock`, destination location `Partners/Customers`. Point of sale journal: Point
+of Sale. Invoice journal: Customer Invoices. Cash control: **on**. Cash rounding: **off**. Per
+product closing entry: **off**, so the closing entry carries no product on its sales lines. Stock
+updates: **not deferred**, so a delivery document is created the moment an order becomes paid.
+Company default point-of-sale receivable account: 1150 Point of Sale Receivable.
+
+**Payment methods.**
+
+| Name | Kind | Journal | Outstanding account | Intermediary account | Identify customer |
+|---|---|---|---|---|---|
+| Cash | Cash | Cash | — | empty, so 1150 Point of Sale Receivable is used | No |
+| Card | Bank | Bank | 1450 Outstanding Receipts | empty, so 1150 Point of Sale Receivable is used | No |
+| Customer Account | Pay later | — | — | — | Yes |
+
+**Product — Reading lamp.** Category *Lighting* of the shared fixture, which carries the income
+account 4000 Product Sales, the expense account 5000 Cost of Goods Sold, the inventory valuation
+account 1400 Inventory and the inventory journal Inventory Valuation. Goods product, storable,
+reference unit `Units`. Costing method **first in first out**, valuation mode **perpetual**. Sales
+price 60.50, **tax included**: the tax is Sales 21 % included. Two completed incoming goods
+movements:
+
+| Movement | Date | Source | Destination | Quantity | Value | Unit value |
+|---|---|---|---|---|---|---|
+| L1 | 2026-05-19 | `Partners/Vendors` | `WH/Stock` | 3 `Units` | 66.00 | 22.00 |
+| L2 | 2026-06-22 | `Partners/Vendors` | `WH/Stock` | 37 `Units` | 999.00 | 27.00 |
+
+Quantity on hand 40; total value 1 065.00; stored unit cost 1 065.00 ÷ 40 = 26.625 stored as
+**26.63**.
+
+**Product — Bulb pack.** Same category. Goods product, storable, reference unit `Units`. Costing
+method **average cost**, valuation mode **perpetual**. Sales price 12.10, tax included, the same
+tax. One completed incoming goods movement K1 of 100 `Units` on 2026-06-02 valued 420.00; stored
+unit cost **4.20**.
+
+**Customers.** Halstead Studio and Marlowe Interiors, each its own commercial entity, each with the
+receivable account 1200 Trade Receivables.
+
+**Session.** `POS/0031`, opened on 2026-07-06, closed and validated on 2026-07-07. Opening count
+150.00. No manual cash movement. Closing count 210.25. The session name is drawn from the session
+sequence and is reproduced here as the system builds it.
+
+**Orders.** All five are transmitted on 2026-07-06, in this order. Their receipt numbers are drawn
+from the configuration's sequence.
+
+| Order | Content | Selling total | Tender | Customer | Invoiced |
+|---|---|---|---|---|---|
+| 1 | 2 Reading lamps at 60.50 | 121.00 | Cash 121.00 | — | No |
+| 2 | 1 Reading lamp at 60.50 and 3 Bulb packs at 12.10 | 96.80 | Card 96.80 | — | No |
+| 3 | 5 Bulb packs at 12.10 | 60.50 | Customer Account 60.50 | Halstead Studio | No |
+| 4 | 1 Reading lamp at 60.50 | 60.50 | Card 60.50 | Marlowe Interiors | **Yes** |
+| 5 | refund of 1 Reading lamp from order 1 | −60.50 | Cash −60.50 | — | No |
+
+## 4.b Steps
+
+1. **Open the session.** Domain: point of sale,
+   [point-of-sale/workflows.md](point-of-sale/workflows.md) section 2; states in
+   [point-of-sale/state-machines.md](point-of-sale/state-machines.md) section 1.
+   - The configuration is validated first: the company has a chart of accounts; every price list
+     and payment method belongs to the configuration's company; the currencies of the payment
+     methods, the price lists and the invoice journal all equal the configuration currency; cash
+     control is on, so every cash method's journal must carry both a profit and a loss account —
+     the Cash journal carries 7581 Cash Difference Gain and 6581 Cash Difference Loss; at least
+     one payment method exists; the company has a fiscal country.
+   - A session is created in state `opening_control`, whose label is *Opening Control*. Its name
+     is the single character `/` and it has no opening instant. The starting balance is pre-filled
+     with the counted closing balance of the previous session.
+   - The cashier counts 150.00 and confirms. The opening instant is stamped, the difference
+     against the pre-filled balance is posted in the session thread as three lines, the starting
+     balance is overwritten with 150.00, the state becomes `opened` — label *In Progress* — and
+     the session receives its name `POS/0031` from the session sequence.
+   - **No journal item.** Opening a session posts nothing.
+
+2. **Sell and take payment.** Domain: point of sale,
+   [point-of-sale/workflows.md](point-of-sale/workflows.md) sections 4 and 5. Each order is built
+   in the selling application, tendered and validated; the browser stamps the computed amounts,
+   sets the order state to `paid` and transmits.
+
+3. **The server accepts each order.** Domain: point of sale,
+   [point-of-sale/workflows.md](point-of-sale/workflows.md) sections 7 and 7.1. Per order: the
+   refunded orders named by its lines are collected (order 5 names order 1, and exactly one is
+   allowed); the session is resolved and the order is re-homed if that session is no longer open;
+   the receipt number, the tracking number and the session-unique sequence number are assigned;
+   the paid amount is recomputed from the tenders; the paid check runs and, on success, the state
+   becomes `paid`.
+
+4. **Each paid order produces a delivery document at once.** Domain: point of sale,
+   [point-of-sale/workflows.md](point-of-sale/workflows.md) sections 8.1 and 8.3, delegating to
+   [inventory-operations/workflows.md](inventory-operations/workflows.md) section 13. The session
+   does not defer stock updates, so a transfer is created immediately: source `WH/Stock`,
+   destination `Partners/Customers` (the customer location of the order's partner when it has one,
+   otherwise the operation type's default destination), one movement per product, the quantities
+   marked done, the movements marked picked, and the transfer completed. A refusal — insufficient
+   stock, a missing lot — is swallowed and the transfer is left incomplete.
+
+   Order 5's lines are negative and all refund lines of one single order, but order 1's transfer is
+   already completed, so neither the cancel branch nor the reduce branch applies; a **return
+   transfer** is created instead, using the return operation type of the configuration's operation
+   type, and its movement records order 1's movement as its returned origin.
+
+5. **Each completed movement is valued, and none of them posts.** Domain: inventory valuation and
+   costing,
+   [inventory-valuation-and-costing/calculations.md](inventory-valuation-and-costing/calculations.md)
+   sections 1.2, 2.2 and 5.2. Neither `WH/Stock` nor `Partners/Customers` carries a location
+   valuation account, so the condition of
+   [inventory-valuation-and-costing/accounting-effects.md](inventory-valuation-and-costing/accounting-effects.md)
+   section 1 fails for every one of them and **not one journal entry is written**. The values
+   nevertheless matter, because the closing entry reads them.
+
+   - **Order 1, 2 Reading lamps.** The stack is built newest first until the quantity on hand, 40,
+     is covered: L2 offers 37 and leaves 3; L1 offers 3 and leaves 0. Reversed, the stack is L1
+     with a bottom quantity of 3, then L2. Consuming 2:
+
+     ```formula
+     offered_quantity = 3
+     offered_value    = 66.00 × 3 ÷ 3 = 66.00
+     offered_value    = 66.00 × 2 ÷ 3 = 44.00        ( scaled, because 3 exceeds the 2 wanted )
+     movement_value   = 44.00                        ( 22.00 per unit )
+     unit_cost        = ( 1 065.00 − 44.00 ) ÷ 38 = 1 021.00 ÷ 38 = 26.868421…  stored as 26.87
+     ```
+
+   - **Order 2, 1 Reading lamp and 3 Bulb packs.** On hand 38. Newest first: L2 offers 37 and
+     leaves 1; L1 offers 3, of which only 1 is needed, so its bottom quantity is 1. Reversed, the
+     stack is L1 (bottom 1) then L2. Consuming 1:
+
+     ```formula
+     offered_value  = 66.00 × 1 ÷ 3 = 22.00
+     movement_value = 22.00                          ( 22.00 per unit; the last unit of layer L1 )
+     unit_cost      = ( 1 021.00 − 22.00 ) ÷ 37 = 999.00 ÷ 37 = 27.00
+     ```
+
+     The Bulb packs are valued at the stored average, which an outgoing movement never changes:
+     3 × 4.20 = **12.60**; 97 on hand at 4.20.
+
+   - **Order 3, 5 Bulb packs.** 5 × 4.20 = **21.00**; 92 on hand at 4.20.
+
+   - **Order 4, 1 Reading lamp.** On hand 37. Newest first: L2 offers 37 and leaves 0, so its
+     bottom quantity is 37 and L1 is not reached. Consuming 1:
+
+     ```formula
+     offered_value  = 999.00 × 37 ÷ 37 = 999.00
+     offered_value  = 999.00 × 1 ÷ 37 = 27.00
+     movement_value = 27.00                          ( 27.00 per unit; the layer has crossed )
+     unit_cost      = ( 999.00 − 27.00 ) ÷ 36 = 972.00 ÷ 36 = 27.00
+     ```
+
+   - **Order 5, 1 Reading lamp returned.** The movement is **incoming**: its source
+     `Partners/Customers` is outside the valued perimeter and its destination `WH/Stock` is inside
+     it. Source 4 of the priority chain answers, because the movement has an originating returned
+     movement and that movement is outgoing:
+
+     ```formula
+     origin_value          = 44.00                   ( order 1's movement )
+     origin_valued_quantity = 2
+     return_value = 44.00 × 1 ÷ 2 = 22.00
+     ```
+
+     A return is therefore valued at the price the goods left at, not at today's cost. The
+     incremental fast path then recomputes the unit cost:
+
+     ```formula
+     added_value       = 22.00
+     added_quantity    = 1
+     quantity_on_hand  = 37
+     previous_quantity = 37 − 1 = 36                 ( greater than zero )
+     unit_cost         = ( 36 × 27.00 + 22.00 ) ÷ 37 = 994.00 ÷ 37 = 26.864864…
+     stored_unit_cost  = 26.86
+     ```
+
+6. **Order 4 is invoiced at the counter.** Domain: point of sale,
+   [point-of-sale/workflows.md](point-of-sale/workflows.md) sections 10.1 and 10.2, and
+   [point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section 6.
+   - The document kind is a customer invoice, because the group total is greater than zero. The
+     journal is the configuration's invoice journal, Customer Invoices. The customer is Marlowe
+     Interiors; the invoice date is the order date, 2026-07-06, because the session is not closed.
+   - **Payment terms are set only when at least one tender is of the pay-later kind.** Order 4 is
+     paid by card, so the invoice carries none and its single receivable item matures on the
+     invoice date.
+   - The tax is price-included, so the engine splits the 60.50:
+
+     ```formula
+     to_price_excluded = 1 ÷ ( 1 + 0.21 ) = 0.826446280991735…
+     tax_amount        = round_to_currency( 60.50 × 0.826446280991735 × 0.21 ) = round_to_currency( 10.50 ) = 10.50
+     base_amount       = 60.50 − 10.50 = 50.00
+     ```
+
+   - The cost pair is injected at posting, exactly as on any customer invoice
+     ([inventory-valuation-and-costing/accounting-effects.md](inventory-valuation-and-costing/accounting-effects.md)
+     section 2). The unit cost is taken from the valued real-time movements of the order's
+     transfers for that product
+     ([point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section 9):
+
+     ```formula
+     cogs_quantity   = 1
+     unit_price      = 27.00 ÷ 1 = 27.00
+     already_posted  = 0.00
+     cogs_unit_price = | 27.00 × 1 − 0.00 | ÷ 1 = 27.00
+     amount_currency = +1 × 1 × 27.00 = 27.00
+     ```
+
+   - The invoice is posted immediately, with a message linking it back to the order.
+
+7. **One invoice payment entry is created for order 4's tender.** Domain: point of sale,
+   [point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section 7. It is
+   written in the **point of sale journal**, not in the bank journal, dated the order date, with
+   the reference `Invoice payment for <the order name> (<the invoice number>) using Card`. Because
+   the session is still open, the counter side goes to the company's default point-of-sale
+   receivable account 1150 with no counterparty; the customer side goes to Marlowe Interiors'
+   receivable account 1200 with that counterparty. The customer-side item is reconciled with the
+   invoice's receivable item at once, so the invoice is paid before the session closes.
+
+8. **Request the closing control.** Domain: point of sale,
+   [point-of-sale/workflows.md](point-of-sale/workflows.md) section 13.1; states in
+   [point-of-sale/state-machines.md](point-of-sale/state-machines.md) section 1.2. No order of the
+   session that is due now or earlier may be unfinished; none is. The closing instant is stamped
+   and the state becomes `closing_control`, whose label is *Closing Control*. The closing control
+   screen reports the expected cash — the starting balance plus the cash tenders plus the cash
+   movements — and one row per non-cash method with its total and its count.
+
+9. **Count the drawer.** The cashier enters 210.25. The server stores it as the counted ending
+   balance after repeating the not-closed and no-unfinished-order checks and verifying that the
+   session has a cash register.
+
+10. **Validate: accumulate the amounts.** Domain: point of sale,
+    [point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) sections 3.2 to
+    3.13. The closed orders of the session are the paid, posted and invoiced ones — all five here.
+    The buckets are filled as follows.
+
+    **Sales, from every closed order that is not invoiced** — orders 1, 2, 3 and 5. Each order line
+    becomes a tax base line whose taxes, income account and tags are mapped through the order's
+    fiscal position, of which there is none. Orders 1, 2 and 3 are ordinary sales, so their base
+    lines fall into one bucket keyed by (account 4000, sign +1, the tax, the tax's base tags):
+
+    ```formula
+    base_order_1 = round_to_currency( 121.00 ÷ 1.21 ) = 100.00      tax = 121.00 − 100.00 = 21.00
+    base_order_2 = round_to_currency(  60.50 ÷ 1.21 ) =  50.00      tax =  60.50 −  50.00 = 10.50
+                 + round_to_currency(  36.30 ÷ 1.21 ) =  30.00      tax =  36.30 −  30.00 =  6.30
+    base_order_3 = round_to_currency(  60.50 ÷ 1.21 ) =  50.00      tax =  60.50 −  50.00 = 10.50
+    sales_amount = − ( 100.00 + 50.00 + 30.00 + 50.00 ) = − 230.00
+    ```
+
+    A negative bucket amount is a credit, so the item is a credit of 230.00 on 4000 Product Sales.
+
+    **Refunds.** Order 5's line has a negative unit price times quantity, so it is a **refund
+    line**: its key sign is −1 and it lands in a different bucket, whose name begins with the word
+    `Refund` ([point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section
+    3.6). Its amounts are the negatives of the corresponding sale amounts, so the item is a
+    **debit** of 50.00 on 4000 Product Sales.
+
+    **Taxes.** Each tax line the engine returns is bucketed by (account, tax repartition line, tax
+    tags). The ordinary sales use the tax's **invoice** repartition line and the refund uses its
+    **refund** repartition line, so two buckets result even though both name account 2510:
+
+    ```formula
+    tax_amount ( invoice repartition ) = − ( 21.00 + 10.50 + 6.30 + 10.50 ) = − 48.30
+    tax_base_amount                    =     100.00 + 50.00 + 30.00 + 50.00 = 230.00
+    tax_amount ( refund repartition )  = + 10.50
+    tax_base_amount                    =   50.00
+    ```
+
+    **Payments, from every closed order including the invoiced one.**
+
+    ```formula
+    aggregated_cash[ Cash ]              = 121.00 − 60.50 = 60.50
+    aggregated_bank[ Card ]              =  96.80 + 60.50 = 157.30
+    identified_pay_later[ order 3 tender ] = 60.50
+    invoiced_bank[ Card ]                = 60.50
+    ```
+
+    The Card bucket carries the **whole** 157.30 taken on the card, the 96.80 of the uninvoiced
+    order 2 and the 60.50 of the invoiced order 4, because both really reached the bank. The last
+    bucket gives the 60.50 back.
+
+    **Cost of goods sold and stock valuation, from every order of the session that is not invoiced
+    and has no shipping date** — orders 1, 2, 3 and 5, through their transfers. Order 4 is
+    excluded, because its cost was recognised on its own invoice in step 6.
+
+    ```formula
+    signed_quantity( an outgoing movement ) = + the quantity in the reference unit
+    signed_quantity( an incoming movement ) = − the quantity in the reference unit
+    move_amount = signed_quantity × the valuation unit price of the movement
+
+    order 1 : + 2 × 22.00 = + 44.00
+    order 2 : + 1 × 22.00 = + 22.00   and   + 3 × 4.20 = + 12.60
+    order 3 : + 5 × 4.20  = + 21.00
+    order 5 : − 1 × 22.00 = − 22.00
+
+    cost_of_goods_sold[ 5000 ] = 44.00 + 22.00 + 12.60 + 21.00 − 22.00 = 77.60
+    stock_delivered[ 1400 ]    = 44.00 + 22.00 + 12.60 + 21.00 = 99.60      ( outgoing only )
+    stock_returned[ 1400 ]     = − 22.00                                    ( incoming only )
+    ```
+
+    Every one of these contributions is declared to be **already in company currency**, so no
+    conversion is applied to them even in a foreign-currency session.
+
+    **Rounding.** The configuration has no cash rounding, so no rounding line is accumulated and
+    none is produced.
+
+11. **Validate: write the closing entry and its satellites.** Domain: point of sale,
+    [point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) sections 3.1, 3.5
+    to 3.12. The entry is created empty in the point of sale journal, dated **today in the acting
+    time zone** — 2026-07-07, not the session's opening or closing instant — with the session name
+    as its reference, and is then populated in the fixed order: tax lines, sales lines, cost of
+    goods sold and rounding; the bank receivable lines and their accounting payments; the pay-later
+    receivable lines; the cash statement lines and the cash receivable lines; the invoice
+    receivable lines; the stock valuation lines.
+    - The aggregated Card bucket produces a receivable line **debited** 157.30 on 1150 with no
+      counterparty and the payment-term display kind, plus an **accounting payment** of 157.30
+      inbound in the Bank journal, with the forced outstanding account 1450 Outstanding Receipts,
+      the destination account 1150 and the memo `Combine Card POS payments from POS/0031`, posted
+      immediately.
+    - The identified-customer pay-later tender of order 3 produces one receivable line **debited**
+      60.50 on Halstead Studio's own receivable account 1200, carrying that counterparty. No
+      payment and no statement line are created: the money has not arrived. This line alone is
+      written with the follow-up exclusion **turned off**, so it appears in the customer's ageing
+      and in dunning.
+    - The aggregated Cash bucket produces a receivable line **debited** 60.50 on 1150, plus a
+      **bank statement line** in the Cash journal dated today, labelled with the session name, with
+      the counterpart account 1150. That statement line owns its own entry: a liquidity debit of
+      60.50 on 1020 Cash against a counterpart credit of 60.50 on 1150.
+    - The invoiced-order bucket produces one line named `From invoice payments`, **credited** 60.50
+      on the company's default point-of-sale receivable account 1150 — never on a method's
+      intermediary account.
+    - The cost bucket produces a debit of 77.60 on 5000 Cost of Goods Sold. The two stock buckets
+      produce one line each on 1400 Inventory: the delivered bucket credited 99.60 and the returned
+      bucket credited −22.00, which is a debit of 22.00.
+
+12. **Validate: check the balance, post the cash difference, post and reconcile.** Domain: point of
+    sale, [point-of-sale/state-machines.md](point-of-sale/state-machines.md) section 1.4 and
+    [point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) sections 3.14 and 4.
+    - The closing entry balances at 438.40 on each side (part (c)), so the forced-close wizard is
+      not offered.
+    - The cash difference captured **before** the payment statement lines were created is posted as
+      one more bank statement line in the session's cash journal:
+
+      ```formula
+      theoretical_closing_balance = starting balance 150.00 + cash movements 0.00 + cash tenders 60.50 = 210.50
+      counted_ending_balance      = 210.25
+      difference                  = 210.25 − 210.50 = − 0.25
+      ```
+
+      A negative difference is a loss, so the counterpart account is the cash journal's loss
+      account, 6581 Cash Difference Loss, and the statement label is
+      `Cash difference observed during the counting (Loss) - closing`. The line's entry debits 6581
+      with 0.25 and credits 1020 Cash with 0.25.
+    - The closing entry is posted and every order of the session still in the paid state becomes
+      posted.
+    - The reconciliation plan is assembled once and executed once
+      ([point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section 3.14):
+      the cash receivable line against the cash statement's counterpart line; the Card receivable
+      line against the accounting payment's destination line; and the `From invoice payments` line
+      against the counter-side line of order 4's invoice payment entry. The invoice settlement
+      itself was reconciled at invoicing time, in step 7.
+    - The scheduler is triggered on the movements of the session's transfers, the state becomes
+      `closed` — label *Closed & Posted* — and a closing notification is broadcast on the
+      configuration's change feed.
+
+## 4.c The ledger
+
+Every journal item the trace produces. The invoice and its payment entry are posted on 2026-07-06,
+at the moment order 4 is transmitted; everything else is written on 2026-07-07 when the session is
+validated. Within the validation the closing entry is populated first, then the satellites, then
+the cash difference. Every amount is in euro, which is both the selling currency and the company
+currency.
+
+| # | Date | Journal | Entry | Account | Debit | Credit | Counterparty | Reconciled against |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 2026-07-06 | Customer Invoices | `INV/2026/00478` | 4000 Product Sales | | 50.00 | Marlowe Interiors | — |
+| 2 | 2026-07-06 | Customer Invoices | `INV/2026/00478` | 2510 Tax Payable | | 10.50 | Marlowe Interiors | — |
+| 3 | 2026-07-06 | Customer Invoices | `INV/2026/00478` | 1200 Trade Receivables | 60.50 | | Marlowe Interiors | item 6 |
+| 4 | 2026-07-06 | Customer Invoices | `INV/2026/00478` | 5000 Cost of Goods Sold | 27.00 | | Marlowe Interiors | — (injected cost item) |
+| 5 | 2026-07-06 | Customer Invoices | `INV/2026/00478` | 1400 Inventory | | 27.00 | Marlowe Interiors | — (injected cost item) |
+| 6 | 2026-07-06 | Point of Sale | Invoice payment of order 4 | 1200 Trade Receivables | | 60.50 | Marlowe Interiors | item 3 |
+| 7 | 2026-07-06 | Point of Sale | Invoice payment of order 4 | 1150 Point of Sale Receivable | 60.50 | | — | item 15 |
+| 8 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 2510 Tax Payable | | 48.30 | — | — |
+| 9 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 2510 Tax Payable | 10.50 | | — | — |
+| 10 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 4000 Product Sales | | 230.00 | — | — |
+| 11 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 4000 Product Sales | 50.00 | | — | — |
+| 12 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 1150 Point of Sale Receivable | 157.30 | | — | item 22 |
+| 13 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 1200 Trade Receivables | 60.50 | | Halstead Studio | open |
+| 14 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 1150 Point of Sale Receivable | 60.50 | | — | item 20 |
+| 15 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 1150 Point of Sale Receivable | | 60.50 | — | item 7 |
+| 16 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 5000 Cost of Goods Sold | 77.60 | | — | — |
+| 17 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 1400 Inventory | | 99.60 | — | — |
+| 18 | 2026-07-07 | Point of Sale | Closing `POS/0031` | 1400 Inventory | 22.00 | | — | — |
+| 19 | 2026-07-07 | Cash | Statement `CSH1/2026/00033` | 1020 Cash | 60.50 | | — | — |
+| 20 | 2026-07-07 | Cash | Statement `CSH1/2026/00033` | 1150 Point of Sale Receivable | | 60.50 | — | item 14 |
+| 21 | 2026-07-07 | Bank | Payment `BNK1/2026/0121` | 1450 Outstanding Receipts | 157.30 | | — | — |
+| 22 | 2026-07-07 | Bank | Payment `BNK1/2026/0121` | 1150 Point of Sale Receivable | | 157.30 | — | item 12 |
+| 23 | 2026-07-07 | Cash | Statement `CSH1/2026/00034` | 6581 Cash Difference Loss | 0.25 | | — | — |
+| 24 | 2026-07-07 | Cash | Statement `CSH1/2026/00034` | 1020 Cash | | 0.25 | — | — |
+
+Item names, where the system builds them: item 8 and item 9 are both named with the tax name,
+`Sales 21 % included`; item 10 is named `Sales with Sales 21 % included` and item 11
+`Refund with Sales 21 % included`, because the per-product option is off and the product name is
+therefore empty; items 12 and 14 are named `POS/0031 - Card` and `POS/0031 - Cash`; item 15 is
+named `From invoice payments`; items 16 to 18 carry no name at all. Items 12 to 15 carry the
+payment-term display kind, which is what marks them as settlement lines and excludes them from
+dunning — with the single exception of item 13, the pay-later line, whose follow-up exclusion is
+turned off.
+
+**Totals of the closing entry alone** (items 8 to 18):
+
+```formula
+debits  = 10.50 + 50.00 + 157.30 + 60.50 + 60.50 + 77.60 + 22.00 = 438.40
+credits = 48.30 + 230.00 + 60.50 + 99.60 = 438.40
+```
+
+**Totals of the whole trace.**
+
+```formula
+debits  = 60.50 + 27.00 + 60.50 + 10.50 + 50.00 + 157.30 + 60.50 + 60.50
+        + 77.60 + 22.00 + 60.50 + 157.30 + 0.25 = 804.45
+credits = 50.00 + 10.50 + 27.00 + 60.50 + 48.30 + 230.00 + 60.50 + 99.60
+        + 60.50 + 157.30 + 0.25 = 804.45
+```
+
+**Per-account proof.**
+
+| Account | Debits | Credits | Balance after the trace | Meaning |
+|---|---|---|---|---|
+| 1020 Cash | 60.50 | 0.25 | 60.25 debit | Added to the 150.00 opening float, the counted 210.25 |
+| 1150 Point of Sale Receivable | 278.30 | 278.30 | 0.00 | Every tender matched to where the money went |
+| 1200 Trade Receivables | 121.00 | 60.50 | 60.50 debit | Halstead Studio's charge to account, still owed |
+| 1400 Inventory | 22.00 | 126.60 | 104.60 credit | The net value of the goods that left, part (d) |
+| 1450 Outstanding Receipts | 157.30 | — | 157.30 debit | The card takings, awaiting the bank statement |
+| 2510 Tax Payable | 10.50 | 58.80 | 48.30 credit | 21 % of 230.00 of net sales |
+| 4000 Product Sales | 50.00 | 280.00 | 230.00 credit | Net sales of the day |
+| 5000 Cost of Goods Sold | 104.60 | — | 104.60 debit | The value of the goods that left |
+| 6581 Cash Difference Loss | 0.25 | — | 0.25 debit | The shortfall on the count |
+
+Three checks read off the table. Net sales excluding order 4 are 230.00 − 50.00 = 180.00 of base
+and 48.30 − 10.50 = 37.80 of tax, and 21 % of 180.00 is exactly 37.80. The tenders of those same
+orders are 60.50 of cash, 96.80 of card and 60.50 on account, which sum to 217.80 = 180.00 + 37.80.
+And account 1150 returns to zero, which is the whole purpose of the reconciliation plan: the
+invoiced order contributed a debit of 157.30 − 96.80 = 60.50 through the Card bucket and a credit
+of 60.50 through the counterweight, so its net contribution to the closing entry is nothing while
+its money still reached the bank.
+
+**What is reconciled against what.**
+
+| Group | Items | Account | Amount | When |
+|---|---|---|---|---|
+| Invoice settlement | 3 against 6 | 1200 | 60.50 | At invoicing, step 7 |
+| Cash | 14 against 20 | 1150 | 60.50 | In the closing plan |
+| Card | 12 against 22 | 1150 | 157.30 | In the closing plan |
+| Invoiced order | 15 against 7 | 1150 | 60.50 | In the closing plan |
+| Pay later | item 13, unmatched | 1200 | 60.50 | When Halstead Studio settles |
+
+Item 13 stays open by design. It is settled through the ordinary receivable flow: an inbound
+payment is registered against Halstead Studio and its counterpart item is reconciled with item 13
+([point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section 10).
+
+## 4.d Stock consequences
+
+**Quantities per location**, in the order the five orders are transmitted.
+
+| Product | `WH/Stock` at opening | Order 1 | Order 2 | Order 3 | Order 4 | Order 5 |
+|---|---|---|---|---|---|---|
+| Reading lamp | 40 | 38 | 37 | 37 | 36 | 37 |
+| Bulb pack | 100 | 100 | 97 | 92 | 92 | 92 |
+
+`Partners/Customers` ends at −3 Reading lamps (4 out, 1 back) and −8 Bulb packs. A customer
+location is never counted, which is why the movements that cross it are classified as outgoing or,
+for the return, incoming.
+
+**Value carried by each completed goods movement of the Reading lamp**, which is valued first in
+first out.
+
+| Movement | Direction | Quantity | Value | Remaining quantity | Remaining value |
+|---|---|---|---|---|---|
+| L1 (2026-05-19) | incoming | 3 | 66.00 | 0 | 0.00 |
+| L2 (2026-06-22) | incoming | 37 | 999.00 | 36 | 999.00 × 36 ÷ 37 = 972.00 |
+| S1, order 1 | outgoing | 2 | 44.00 | 0 | 0.00 |
+| S2, order 2 | outgoing | 1 | 22.00 | 0 | 0.00 |
+| S3, order 4 | outgoing | 1 | 27.00 | 0 | 0.00 |
+| S4, order 5 | incoming | 1 | 22.00 | 1 | 22.00 |
+
+Layer L1 is exhausted by orders 1 and 2, which is why order 4's lamp costs 27.00 and not 22.00 —
+the stack has crossed into L2. The return re-enters the stack as its own layer at the price it left
+at, 22.00, so the next lamp sold will cost 22.00 again.
+
+**Value of the Bulb pack**, which is valued at average cost, where a remaining quantity per
+movement is not a meaningful notion.
+
+| Product | Quantity on hand | Stored unit cost | Value |
+|---|---|---|---|
+| Bulb pack | 92 | 4.20 | 386.40 |
+
+```formula
+lamp_value     = 972.00 + 22.00 = 994.00
+lamp_unit_cost = 994.00 ÷ 37 = 26.864864…            stored as 26.86
+physical_value = 994.00 + 386.40 = 1 380.40
+opening_value  = 1 065.00 + 420.00 = 1 485.00
+ledger_change  = 22.00 debit − 126.60 credit = − 104.60
+ledger_value   = 1 485.00 − 104.60 = 1 380.40
+difference     = 0.00
+```
+
+## 4.e Variations
+
+### 4.e.1 Invoicing another order at the counter
+
+Order 2 is invoiced as well, to Halstead Studio. Its revenue, its tax and its cost leave the
+closing entry and move onto its own invoice; its card tender stays in the Card bucket and is given
+back by the counterweight.
+
+```formula
+sales_amount                 = − ( 100.00 + 50.00 ) = − 150.00        ( orders 1 and 3 only )
+tax_amount ( invoice )       = − ( 21.00 + 10.50 ) = − 31.50 , base 150.00
+invoiced_bank[ Card ]        = 96.80 + 60.50 = 157.30
+cost_of_goods_sold[ 5000 ]   = 44.00 + 21.00 − 22.00 = 43.00
+stock_delivered[ 1400 ]      = 44.00 + 21.00 = 65.00
+stock_returned[ 1400 ]       = − 22.00
+```
+
+**Delta against part (c).** Item 8 becomes 31.50, item 10 becomes 150.00, item 15 becomes 157.30,
+item 16 becomes 43.00 and item 17 becomes 65.00. Items 9, 11, 12, 13, 14 and 18 are unchanged. New
+totals for the closing entry: debits 10.50 + 50.00 + 157.30 + 60.50 + 60.50 + 43.00 + 22.00 =
+403.80; credits 31.50 + 150.00 + 157.30 + 65.00 = 403.80.
+
+A second invoice appears, for 96.80 including 16.80 of tax on a base of 80.00, with a cost pair of
+22.00 + 12.60 = 34.60 debited to 5000 Cost of Goods Sold against a credit on 1400 Inventory, and a
+second invoice payment entry debiting 1150 with 96.80 against a credit of 96.80 on Halstead
+Studio's receivable account.
+
+**The asymmetry to watch.** Had order **1** been invoiced instead, its cost of 44.00 would have
+moved onto its invoice while order 5's return of −22.00 stayed in the closing entry, because a
+refund order is a separate order and is not invoiced with the one it refunds. The two halves of the
+same lamp would then be recognised in two different documents. The amounts still net correctly
+across the ledger, but the closing entry alone would show a negative cost of goods sold for that
+product.
+
+### 4.e.2 Costing method *average cost* on the Reading lamp
+
+The stored unit cost is 1 065.00 ÷ 40 = 26.625, stored as **26.63**. Every outgoing movement takes
+that figure and never changes it; the return is still valued from its origin, by source 4 of the
+priority chain, which now gives 53.26 × 1 ÷ 2 = 26.63.
+
+```formula
+order 1 : 2 × 26.63 = 53.26
+order 2 : 1 × 26.63 = 26.63
+order 4 : 1 × 26.63 = 26.63
+order 5 : − 26.63
+cost_of_goods_sold[ 5000 ] = 53.26 + 26.63 + 12.60 + 21.00 − 26.63 = 86.86
+stock_delivered[ 1400 ]    = 53.26 + 26.63 + 12.60 + 21.00 = 113.49
+stock_returned[ 1400 ]     = − 26.63
+```
+
+**Delta against part (c).** Item 4 becomes 26.63 and item 5 becomes 26.63; item 16 becomes 86.86,
+item 17 becomes 113.49 and item 18 becomes 26.63. Closing entry totals: debits
+10.50 + 50.00 + 157.30 + 60.50 + 60.50 + 86.86 + 26.63 = 452.29; credits
+48.30 + 230.00 + 60.50 + 113.49 = 452.29.
+
+**A rounding drift that the trace does not create and does not close.** Under average cost the
+reported value of a product is its quantity on hand multiplied by the **stored**, two-decimal unit
+cost:
+
+```formula
+reported_lamp_value_at_opening = 40 × 26.63 = 1 065.20
+ledger_lamp_value_at_opening   = 1 065.00
+drift_at_opening               = 1 065.20 − 1 065.00 = 0.20
+
+lamp_value_credited_to_1400 = 53.26 + 26.63 + 26.63 − 26.63 = 79.89
+ledger_lamp_value_at_the_end   = 1 065.00 − 79.89 = 985.11
+reported_lamp_value_at_the_end = 37 × 26.63 = 985.31
+drift_at_the_end               = 985.31 − 985.11 = 0.20
+```
+
+The drift is 0.20 before the trace and 0.20 after it: it comes from rounding 26.625 to 26.63 on 40
+units and is neither created nor closed by anything the session does. Part two of the inventory
+valuation closing posts it as a debit of 0.20 on 1400 Inventory against a credit of 0.20 on 1410
+Inventory Variation
+([inventory-valuation-and-costing/accounting-effects.md](inventory-valuation-and-costing/accounting-effects.md)
+section 6.2). A rebuild that stored the unit cost at more decimals would carry no drift at all;
+the two-decimal `Product Price` precision is what produces it.
+
+### 4.e.3 Costing method *standard price* at 26.00 on the Reading lamp
+
+Every outgoing movement is valued at the product's unit cost, and the return is still valued from
+its origin: 52.00 × 1 ÷ 2 = 26.00.
+
+```formula
+cost_of_goods_sold[ 5000 ] = 52.00 + 26.00 + 12.60 + 21.00 − 26.00 = 85.60
+stock_delivered[ 1400 ]    = 52.00 + 26.00 + 12.60 + 21.00 = 111.60
+stock_returned[ 1400 ]     = − 26.00
+```
+
+**Delta against part (c).** Items 4 and 5 become 26.00; item 16 becomes 85.60, item 17 becomes
+111.60 and item 18 becomes 26.00. Closing entry totals: debits
+10.50 + 50.00 + 157.30 + 60.50 + 60.50 + 85.60 + 26.00 = 450.40; credits
+48.30 + 230.00 + 60.50 + 111.60 = 450.40.
+
+The reported value of a standard-cost product is its quantity on hand multiplied by its unit cost,
+so the lamp is worth 37 × 26.00 = 962.00, while the ledger holds
+
+```formula
+lamp_value_credited_to_1400 = 52.00 + 26.00 + 26.00 − 26.00 = 78.00
+ledger_lamp_value_at_the_end = 1 065.00 − 78.00 = 987.00
+gap_at_the_end               = 962.00 − 987.00 = − 25.00
+
+reported_lamp_value_at_opening = 40 × 26.00 = 1 040.00
+ledger_lamp_value_at_opening   = 1 065.00
+gap_at_opening                 = 1 040.00 − 1 065.00 = − 25.00
+```
+
+The gap of 25.00 is exactly the amount by which the opening lamps were bought above the standard
+cost; it existed before the trace, the trace neither widens nor narrows it, and part two of the
+inventory valuation closing settles it by crediting 1400 Inventory with 25.00 against a debit of
+25.00 on 1410 Inventory Variation.
+
+### 4.e.4 Anglo-saxon against continental accounting
+
+The point of sale domain never reads the company-level anglo-saxon switch. What it reads is the
+product's **valuation mode**: the closing entry collects only the movements of products whose
+valuation is real time
+([point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section 3.12.1), and
+the cost pair on an invoice is governed by the same condition.
+
+Setting the category's valuation mode to **periodic**:
+
+- Items 16, 17 and 18 disappear from the closing entry. They were self-balancing —
+  77.60 debit = 99.60 credit − 22.00 debit — so the entry still balances at 338.80 on each side
+  without them.
+- Items 4 and 5 disappear from order 4's invoice, which also stays balanced.
+- Account 1400 Inventory is untouched by the whole trace, and account 5000 Cost of Goods Sold ends
+  at 0.00.
+- The inventory valuation closing run on 2026-07-31 posts part two of its entry. Under periodic
+  valuation the opening goods were expensed by their vendor bills, so the ledger holds nothing:
+
+  ```formula
+  balance = 1 380.40 − 0.00 − 0.00 = 1 380.40
+  ```
+
+  a debit of 1 380.40 on 1400 Inventory against a credit of 1 380.40 on 1410 Inventory Variation.
+
+### 4.e.5 A foreign selling currency
+
+The configuration sells in United States dollars while the company keeps its books in euro, at a
+rate of 1.0850 dollars for one euro on 2026-07-06. Every order amount above is now in dollars. The
+sales and tax lines take their balance directly from the tax engine, which has already used each
+order's own rate; the payment buckets are converted at the contribution date, which is the payment
+date for a tender and the order date for the invoiced-order counterweight; the cost and stock lines
+are declared to be already in company currency and are **not** converted at all.
+
+| # | Line | Account | Amount in currency (dollar) | Debit (euro) | Credit (euro) |
+|---|---|---|---|---|---|
+| 8 | tax, invoice repartition | 2510 Tax Payable | −48.30 | | 44.52 |
+| 9 | tax, refund repartition | 2510 Tax Payable | +10.50 | 9.68 | |
+| 10 | sales | 4000 Product Sales | −230.00 | | 211.98 |
+| 11 | refund | 4000 Product Sales | +50.00 | 46.08 | |
+| 12 | Card receivable | 1150 Point of Sale Receivable | +157.30 | 144.98 | |
+| 13 | pay later | 1200 Trade Receivables | +60.50 | 55.76 | |
+| 14 | Cash receivable | 1150 Point of Sale Receivable | +60.50 | 55.76 | |
+| 15 | from invoice payments | 1150 Point of Sale Receivable | −60.50 | | 55.76 |
+| 16 | cost of goods sold | 5000 Cost of Goods Sold | none | 77.60 | |
+| 17 | stock delivered | 1400 Inventory | none | | 99.60 |
+| 18 | stock returned | 1400 Inventory | none | 22.00 | |
+
+```formula
+round_to_currency( 230.00 ÷ 1.0850 ) = round_to_currency( 211.981566 ) = 211.98
+round_to_currency(  48.30 ÷ 1.0850 ) = round_to_currency(  44.516129 ) =  44.52
+round_to_currency(  50.00 ÷ 1.0850 ) = round_to_currency(  46.082949 ) =  46.08
+round_to_currency(  10.50 ÷ 1.0850 ) = round_to_currency(   9.677419 ) =   9.68
+round_to_currency( 157.30 ÷ 1.0850 ) = round_to_currency( 144.976959 ) = 144.98
+round_to_currency(  60.50 ÷ 1.0850 ) = round_to_currency(  55.760369 ) =  55.76
+debits  = 9.68 + 46.08 + 144.98 + 55.76 + 55.76 + 77.60 + 22.00 = 411.86
+credits = 44.52 + 211.98 + 55.76 + 99.60 = 411.86
+```
+
+The entry closes, but only because every rounded conversion happened to agree. **A
+foreign-currency session is the ordinary place where a closing entry fails to balance**, because
+the sales and tax balances come from the tax engine with its own delta redistribution while the
+receivable balances are converted bucket by bucket. When the two disagree the whole validation is
+rolled back and the forced-close wizard is offered, which adds one balancing line named
+`Difference at closing PoS session` on an account the operator chooses
+([point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section 3.15). The
+cash statement line, meanwhile, carries an amount in the **journal's** currency and an amount in
+currency in the selling currency, converted at the session closing instant.
+
+### 4.e.6 Cash rounding to the nearest five hundredths
+
+The configuration enables a cash rounding method *Nearest 0.05*, half away from zero, with a profit
+account 7580 Cash Rounding Gain and a loss account 6580 Cash Rounding Loss. Applied to the five
+orders of part (a) it changes nothing at all: every one of 121.00, 96.80, 60.50, 60.50 and −60.50
+is already a multiple of five hundredths, so each order's rounding difference is zero, the
+accumulated difference is zero in both currencies, and **no rounding line is produced**.
+
+Add a sixth order to the session — one Bulb pack at 12.10 and one *Cable clip* at 3.99, both tax
+included at 21 %, cost 1.80 for the clip, paid in cash — and the mechanism becomes visible.
+
+```formula
+order_total    = 12.10 + 3.99 = 16.09
+rounded_total  = round_to_step( 16.09 , 0.05 , half away from zero ) = 16.10
+amount_paid    = 16.10
+base_bulb      = round_to_currency( 12.10 ÷ 1.21 ) = 10.00      tax = 2.10
+base_clip      = round_to_currency(  3.99 ÷ 1.21 ) =  3.30      tax = round_to_currency( 3.99 − 3.30 ) = 0.69
+order_total_amount_currency = − ( 10.00 + 3.30 + 2.10 + 0.69 ) = − 16.09
+order_rounding_difference   = 16.10 + ( − 16.09 ) = + 0.01
+```
+
+A positive accumulated difference is a **gain**, credited to the profit account of the rounding
+method.
+
+**Delta against part (c).** Item 10 becomes a credit of 230.00 + 13.30 = 243.30; item 8 becomes a
+credit of 48.30 + 2.79 = 51.09 with a base of 243.30; item 14 becomes a debit of
+60.50 + 16.10 = 76.60; item 16 becomes 77.60 + 4.20 + 1.80 = 83.60 and item 17 becomes
+99.60 + 6.00 = 105.60; one new item appears, a credit of 0.01 on 7580 Cash Rounding Gain, always
+named `Rounding line`. The cash statement line and the theoretical closing balance both rise by
+16.10. Closing entry totals: debits 10.50 + 50.00 + 157.30 + 60.50 + 76.60 + 83.60 + 22.00 =
+460.50; credits 51.09 + 243.30 + 60.50 + 105.60 + 0.01 = 460.50.
+
+When the rounding method is restricted to cash tenders, an order paid entirely by card is left
+unrounded and contributes nothing to the accumulated difference; when it is not restricted, every
+order is rounded whatever its tender.
+
+### 4.e.7 An early payment discount of two per cent within ten days
+
+A closing entry can never carry an early payment discount: its receivable lines are settlement
+lines produced from tenders, and no payment term is involved. The discount reaches the counter only
+through the invoice of an invoiced order, and an invoice of a counter order carries the customer's
+payment terms **only when at least one of its tenders is of the pay-later kind**
+([point-of-sale/accounting-effects.md](point-of-sale/accounting-effects.md) section 6.1).
+
+Change order 4 accordingly: it is charged to Marlowe Interiors' customer account **and** invoiced.
+Two consequences follow before any discount is considered.
+
+- A pay-later tender is aggregated **only when the order is not invoiced**, so order 4 now
+  contributes **nothing** to the closing entry: no Card receivable line for its 60.50, and no
+  counterweight either. **Delta against part (c):** item 12 becomes 96.80 and item 15 disappears;
+  the accounting payment for the Card method becomes 96.80. Items 7 and 6 disappear as well,
+  because no invoice payment entry is created for a pay-later tender. Closing entry totals: debits
+  10.50 + 50.00 + 96.80 + 60.50 + 60.50 + 77.60 + 22.00 = 377.90; credits
+  48.30 + 230.00 + 99.60 = 377.90.
+- The debt now lives on the invoice, whose receivable item is 60.50 on 1200 Trade Receivables with
+  the counterparty Marlowe Interiors.
+
+Give Marlowe Interiors a payment term of one line of 100 % at 30 days carrying a discount of 2 %
+within 10 days, in the computation mode *On early payment*. The invoice's receivable item then
+matures on 2026-08-05, stamped with a discount deadline of 2026-07-16 and a discounted amount of
+
+```formula
+discount_amount = 60.50 × 2 ÷ 100 = 1.21
+amount_due      = round_to_currency( 60.50 − 1.21 ) = 59.29
+```
+
+The customer pays 59.29 on 2026-07-14, inside the deadline, and the register-payment assistant adds
+the write-off items to the payment's own entry:
+
+| Account | Label | Debit | Credit |
+|---|---|---|---|
+| 1450 Outstanding Receipts | `INV/2026/00478` | 59.29 | |
+| 6900 Cash Discount Granted | `Early Payment Discount` | 1.00 | |
+| 2510 Tax Payable | `Early Payment Discount (Sales 21 % included)` | 0.21 | |
+| 1200 Trade Receivables | `INV/2026/00478` | | 60.50 |
+
+```formula
+net_discount = round_to_currency( 50.00 × 2 ÷ 100 ) = 1.00
+tax_on_it    = round_to_currency( 1.00 × 21 ÷ 100 ) = round_to_currency( 0.21 ) = 0.21
+1.00 + 0.21 = 1.21 = 60.50 − 59.29
+```
+
+### 4.e.8 Several companies
+
+A configuration belongs to exactly one company, and the validation run at opening refuses to start
+a session whose price lists, payment methods or invoice journal belong to another. Every document
+the trace produces — the closing entry, the statement lines, the accounting payment, the invoice
+and the invoice payment entry — is written in that company, with that company's accounts, journals
+and taxes. The point-of-sale receivable account, the cost account and the stock valuation account
+are all resolved in the company of the record being posted.
+
+A group therefore runs one session per till per company and never produces an inter-company item at
+the counter. Selling goods that belong to another company of the group is inter-company trade and
+is traced in [trace 9](#9-drop-shipping-and-inter-company-trade).
+
+### 4.e.9 Deferred stock updates
+
+The company switches the deferred-stock flag on; the session freezes it at creation, so the change
+takes effect from the next session.
+
+- Step 4 no longer runs at sale time. The condition is *create the delivery now when the session
+  does not defer stock updates, or the company uses cost-at-invoicing accounting and the order asks
+  to be invoiced, or the order refunds an order that had a shipping date*. Order 4 still gets its
+  transfer at once, because it asks to be invoiced and the company recognises the cost at
+  invoicing; orders 1, 2, 3 and 5 do not.
+- At validation, before the closing entry is built, the deferred delivery documents are created and
+  the cost of the not-yet-costed closed orders is computed from their movements
+  ([point-of-sale/state-machines.md](point-of-sale/state-machines.md) section 1.4, step 3). Those
+  transfers are attached to the **session** rather than to a single order, and the cost collection
+  of section 3.12.1 picks them up through its second clause.
+- The consumption order changes, and with it which lamp costs 22.00 and which costs 27.00. Order
+  4's lamp is now taken **first**, on 2026-07-06, from the bottom of layer L1; the deferred
+  transfers of orders 1, 2 and 5 are completed on 2026-07-07, in that order.
+
+  ```formula
+  order 4, out 1 : stack L1 ( bottom 3 ) then L2 ; value = 66.00 × 1 ÷ 3 = 22.00
+  order 1, out 2 : stack L1 ( bottom 2 ) then L2 ; value = 66.00 × 2 ÷ 3 = 44.00
+  order 2, out 1 : L1 is exhausted, so L2        ; value = 999.00 × 1 ÷ 37 = 27.00
+  order 5, in 1  : from its origin, order 1      ; value = 44.00 × 1 ÷ 2 = 22.00
+  ```
+
+- **Delta against part (c).** Item 4 becomes 22.00 and item 5 becomes 22.00, because order 4's
+  invoice now recognises the cheaper lamp. In the closing entry, item 16 becomes
+  44.00 + 27.00 + 12.60 + 21.00 − 22.00 = 82.60 and item 17 becomes
+  44.00 + 27.00 + 12.60 + 21.00 = 104.60; item 18 stays at 22.00. The closing entry balances at
+  10.50 + 50.00 + 157.30 + 60.50 + 60.50 + 82.60 + 22.00 = 443.40 against
+  48.30 + 230.00 + 60.50 + 104.60 = 443.40. The **total** cost recognised by the trace is
+  unchanged at 22.00 + 82.60 = 104.60; only its split between the invoice and the closing entry
+  moves, and with it the quantity table of part (d), which now falls in one step on 2026-07-07 for
+  four of the five orders.
+
+## 4.f Failure points
+
+Each entry gives the step, the condition, the domain that refuses and the exact text.
+
+**Step 1, creating a session with no configuration** (point of sale).
+
+`You should assign a Point of Sale to your session.`
+
+**Step 1, a session already open for the same till** (point of sale). Rescue sessions are exempt
+from the rule.
+
+`Another session is already opened for this point of sale.`
+
+**Step 1, a starting date inside a locked period** (point of sale). The lock dates of the point of
+sale journal's company are checked at creation.
+
+`You cannot create a session starting before: <lock date information>`
+
+**Step 1, cancelling a session that has already traded** (point of sale).
+
+`You can only cancel a session that is in opening control state and has no orders.`
+
+**Step 3, an order whose lines refund more than one order** (point of sale).
+
+`You can only refund products from the same order.`
+
+**Step 3, an order transmitted against a session that is no longer open, with no other open
+session** (point of sale).
+
+`No open session available. Please open a new session to capture the order.`
+
+**Step 3, the tenders do not cover the total** (point of sale).
+
+`Order <the order name> is not fully paid.`
+
+**Step 3, a write that leaves the paid amount below the total on a paid or posted order** (point of
+sale).
+
+`The paid amount is different from the total amount of the order.`
+
+When the paid amount is **greater** than the total on a paid order, nothing is refused; a line is
+appended to the payment-changes message instead:
+
+`Warning, the paid amount is higher than the total amount. (Difference: <amount>)`
+
+**Step 3, change is due but the session has no cash method** (point of sale).
+
+`No cash statement found for this session. Unable to record returned cash.`
+
+**Step 4, a unit conversion that rounds a delivered quantity down to zero** (point of sale). The
+message begins with the text below, lists each offending pair as ` - From "<source unit>" to
+"<target unit>"` and ends with an explanation of how to fix it.
+
+`Conversion Error: The following unit of measure conversions result in a zero quantity due to rounding:`
+
+**Step 6, the order asks to be invoiced but the configuration has no invoice journal** (point of
+sale).
+
+`No invoice journal configured for this POS session.`
+
+**Step 6, the product resolves no income account** (point of sale).
+
+`Please define income account for this product: '<product name>' (id:<product identifier>).`
+
+**Step 8, unfinished orders due now or earlier** (point of sale). The same text is returned both by
+the closing-control transition and by the selling application's pre-check.
+
+`You cannot close the POS while there are still draft orders for the day.`
+
+**Step 8 or step 12, a session that somebody else has already closed** (point of sale).
+
+`This session is already closed.`
+
+**Step 9, storing a count on a session with no cash journal** (point of sale).
+
+`There is no cash register in this session.`
+
+**Step 11, a tender on a customer-identifying method with no customer** (point of sale). The
+missing space after the comma is part of the shipped text.
+
+`You have enabled the "Identify Customer" option for <payment method name> payment method,but the order <order name> does not contain a customer.`
+
+**Step 11, a tax whose repartition line resolves no account** (point of sale). The whole closing is
+refused.
+
+`Unable to close and validate the session.\nPlease set corresponding tax account in each repartition line of the following taxes: \n<the tax names, joined by a comma and a space>`
+
+**Step 12, an unfinished order found at validation** (point of sale).
+
+`There are still orders in draft state in the session. Pay or cancel the following orders to validate the session:\n<the order names, joined by a comma and a space>`
+
+**Step 12, an invoice of a closed order that is not posted** (point of sale). One line per offending
+invoice.
+
+`You cannot close the point of sale when invoices are not posted.\nInvoices: <invoice number> - <state>`
+
+**Step 12, a cash difference with no account to post it to** (point of sale), one message per sign.
+
+`Please go on the <cash journal name> journal and define a Loss Account. This account will be used to record cash difference.`
+
+`Please go on the <cash journal name> journal and define a Profit Account. This account will be used to record cash difference.`
+
+**Step 12, a per-method bank difference with no account on the journal** (point of sale), one
+message per sign.
+
+`Need loss account for the following journals to post the lost amount: <journal names>`
+
+`Need profit account for the following journals to post the gained amount: <journal names>`
+
+**Step 12, a closing entry that does not balance** (point of sale). No error is raised: the whole
+transaction is rolled back and the forced-close wizard is offered instead, carrying the explanation
+
+`There is a difference between the amounts to post and the amounts of the orders, it is probably caused by taxes or accounting configurations changes.`
+
+Confirming it re-runs the validation with a balancing account and an amount, adding one line named
+`Difference at closing PoS session` at the very end.
+
+**Step 12, a closing entry with no line at all** (point of sale). No message. The entry is deleted
+instead of being posted and the orders of the session are **not** moved to the posted state; this
+happens for a session whose only activity was cancelled orders.
+
+**Recording a cash movement in a session with no cash journal** (point of sale).
+
+`There is no cash payment method for this PoS Session`

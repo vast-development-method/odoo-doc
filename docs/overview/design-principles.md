@@ -83,7 +83,7 @@ There is no separate metadata store, no separate configuration file format read 
 
 A client never receives rendered markup for a business screen. It receives a **declarative description** — a tree of fields, buttons, groupings and layout containers — plus the metadata of the fields named. The client renders.
 
-The grammar is closed and specified ([views and actions](views-and-actions.md)). A capability that needs a rendering the grammar does not express contributes a **widget name**, which the client resolves to a renderer and, when it does not know the name, falls back to the field type's default.
+The grammar is closed and specified ([views and actions](views-and-actions.md)). A capability that needs a rendering the grammar does not express contributes a **widget name**, which the client resolves to a renderer and, when it does not know the name, falls back to the field type's default. The catalogue of shipped widgets is in [views and actions, section 29](views-and-actions.md#29-field-presentation-widgets), and what a client does with a description it receives is in [client architecture](client-architecture.md).
 
 ### 2.2 What it buys
 
@@ -267,7 +267,7 @@ Every persistent and transient record carries four fields, maintained automatica
 ### 6.3 The mechanics
 
 - The four fields exist on every entity that keeps them ([entity and field system, section 4](entity-and-field-system.md#4-the-automatic-fields)).
-- The recorded user is the environment's **acting** user, not the effective one: elevating privileges does not change who is recorded ([security model, section 7.2](security-model.md#72-what-it-does-not-change)).
+- The recorded user is the environment's **acting** user, not the effective one: elevating privileges does not change who is recorded ([security model, section 7.2](security-model.md#103-what-it-does-not-change)).
 - The timestamps come from the **database clock**, so records written by different workers order consistently.
 - They are never writable from the transport or from a data file.
 
@@ -296,7 +296,7 @@ Only for very high-volume entities where four columns per row is a measurable fr
 
 A tenant holds many legal companies. Separation between them is expressed **on the record**, by a company field, and enforced by a **record rule**, not by a separate database, a separate schema or a discriminator on the connection.
 
-An empty company field means "shared by every company".
+An empty company field means "shared by every company". The company tree, the five canonical rule shapes, the consistency check that keeps one company's document from pointing at another's master data, per-company values, currency and the cross-company flows are specified in [multi-company](multi-company.md).
 
 ### 7.2 What it buys
 
@@ -308,10 +308,10 @@ An empty company field means "shared by every company".
 
 ### 7.3 The mechanics
 
-- A company field on the record, and a **global** record rule per entity restricting to the selected companies ([security model, section 8.5](security-model.md#85-the-standard-global-rule)).
+- A company field on the record, and a **global** record rule per entity restricting to the selected companies ([security model, section 8.5](multi-company.md#52-the-five-canonical-shapes)).
 - The selection lives in the environment's context; the current company is the first selected, the allowed companies are the whole selection ([architecture, section 6.5](architecture.md#65-company-selection)).
 - An empty selection means **all** the user's companies, not the main one, so that non-interactive operations do not silently lose records.
-- A **consistency check** prevents linking records of incompatible companies ([security model, section 9](security-model.md#9-company-consistency)).
+- A **consistency check** prevents linking records of incompatible companies ([security model, section 9](multi-company.md#6-the-company-consistency-check)).
 - A **company-dependent field** lets one shared record carry a different value per company ([entity and field system, section 11](entity-and-field-system.md#11-company-dependent-values)).
 
 ### 7.4 The trade-off
@@ -893,4 +893,7 @@ These check that a rebuild has adopted the principles, not merely the tables.
 - [The security model](security-model.md) — company scope, the rules that enforce it, and what is not enforcement.
 - [Views and actions](views-and-actions.md) — the presentation contract that principle two defines.
 - [The messaging model](messaging-model.md) — the largest adopted behaviour, and the clearest illustration of what adoption costs.
+- [Multi-company](multi-company.md) — principle seven in full: the company tree, the rule shapes, the consistency check and the cross-company flows.
+- [Record operations and query notation](record-operations-and-query-notation.md) — the uniform operations that principle one makes available to every entity.
+- [Client architecture](client-architecture.md) — the client side of principle two.
 - [Coverage and evidence](../reimplementation/coverage-and-evidence.md) — what remains uncertain, and why a principle can be stated confidently while one of its instances cannot.
