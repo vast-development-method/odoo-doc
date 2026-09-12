@@ -30,7 +30,39 @@ A milestone may close with acknowledged differences. An acknowledged difference 
 
 Step and cross-cutting gates are numbered `GATE-<milestone>-<nn>`, for example `GATE-M4-07`. They are stable: later documents, test suites and the coverage matrix cite them. The milestone numbers match the step numbers of the build sequence; `M0` is preparatory and `MX1` to `MX4` are cross-cutting. Stage gate rows are numbered `<stage>.<nn>`, for example 6.4, where the stage numbers are those of the stage map in section 1.7 of the build sequence.
 
-### 1.3 Evidence formats accepted for a gate
+### 1.3 How a gate cites a domain's acceptance criteria
+
+A gate that rests on a domain's numbered scenarios cites them by that domain's acceptance prefix, in code font, in one of three forms:
+
+| Form | Example | Meaning |
+|---|---|---|
+| `<prefix>-AC-<nnn>` | `BOOK-AC-001` | One numbered scenario of that domain's `acceptance-criteria.md`. |
+| `<prefix>-AC-<nnn>` to `<prefix>-AC-<nnn>` | `BOOK-AC-001` to `BOOK-AC-004` | A contiguous range of numbered scenarios. |
+| `<prefix>-AC` followed by a topic in words | `BOOK-AC` numbering section | Every numbered scenario in the section of that file that covers the named topic. |
+
+The first citation of a prefix inside a milestone links the file it addresses; later citations in the same milestone use the prefix alone. The fifteen prefixes are:
+
+| Prefix | Domain whose acceptance criteria it addresses |
+|---|---|
+| `BOOK-AC` | [general ledger](../domains/general-ledger/acceptance-criteria.md) |
+| `TAX-AC` | [taxes](../domains/taxes/acceptance-criteria.md) |
+| `AN-AC` | [analytic accounting](../domains/analytic-accounting/acceptance-criteria.md) |
+| `RECV-AC` | [accounts receivable](../domains/accounts-receivable/acceptance-criteria.md) |
+| `PAY-AC` | [payments and bank reconciliation](../domains/payments-and-bank-reconciliation/acceptance-criteria.md) |
+| `INV-AC` | [inventory operations](../domains/inventory-operations/acceptance-criteria.md) |
+| `VAL-AC` | [inventory valuation and costing](../domains/inventory-valuation-and-costing/acceptance-criteria.md) |
+| `PUR-AC` | [purchasing](../domains/purchasing/acceptance-criteria.md) |
+| `SALE-AC` | [sales](../domains/sales/acceptance-criteria.md) |
+| `PROD-AC` | [products and catalog](../domains/products-and-catalog/acceptance-criteria.md) |
+| `PR-AC` | [pricing and pricelists](../domains/pricing-and-pricelists/acceptance-criteria.md) |
+| `UNIT-AC` | [units of measure and packaging](../domains/units-of-measure-and-packaging/acceptance-criteria.md) |
+| `LEAD-AC` | [customer relationship management](../domains/customer-relationship-management/acceptance-criteria.md) |
+| `HRC-AC` | [human resources core](../domains/human-resources-core/acceptance-criteria.md) |
+| `IDAC-AC` | [identity and access](../domains/identity-and-access/acceptance-criteria.md) |
+
+The `-AC` segment is what distinguishes an acceptance citation from every other identifier of this repository. In particular `INV-AC` addresses the inventory operations acceptance criteria, while `INV-01` to `INV-21` without the `-AC` segment are the invariants of section 18 of the [equivalence test plan](equivalence-test-plan.md); the two never collide because no acceptance citation omits the segment. Where a domain's acceptance criteria are cited but the domain has no prefix in the table above, the gate names the file itself.
+
+### 1.4 Evidence formats accepted for a gate
 
 | Evidence | Accepted when |
 |---|---|
@@ -41,7 +73,7 @@ Step and cross-cutting gates are numbered `GATE-<milestone>-<nn>`, for example `
 | A timed run log | The gate concerns a scheduled job or a bounded amount of work. The log gives the moment, the selected records and the effect. |
 | A matrix export | The gate concerns access control. The export lists entity, group, create, read, update, delete and the record rule filter. |
 
-### 1.4 The test layer that proves a gate
+### 1.5 The test layer that proves a gate
 
 A step gate names the evidence a reviewer inspects. A stage gate names the layer of the [equivalence test plan](equivalence-test-plan.md) that produces that evidence automatically. The eleven layers are, in order: layer one arithmetic; layer two entity structure; layer three state machines; layer four business scenarios; layer five invariants; layer six contracts; layer seven authorization; layer eight concurrency and recovery; layer nine business rules; layer ten accounting consequences; layer eleven report content. A stage gate row that names a layer is a claim that the layer's suite contains at least one case asserting exactly that statement.
 
@@ -120,7 +152,7 @@ A step gate names the evidence a reviewer inspects. A stage gate names the layer
 | GATE-M1-15 | A report renders to a printable document with the company's layout, the chosen page format and the translations of the recipient's language. | [`../runtime/report-rendering.md`](../runtime/report-rendering.md). |
 | GATE-M1-16 | A user without the group required by an entity's access rule is refused the operation with the access message of the domain document, and the refusal names the entity and the operation. | [`../domains/identity-and-access/business-rules.md`](../domains/identity-and-access/business-rules.md). |
 | GATE-M1-17 | A record rule restricts a query so that a user sees only the records the rule allows, rules of the same group combine with a logical or and rules of different groups with a logical and. | `IDAC-AC` record rule criteria. |
-| GATE-M1-18 | Password authentication, application key authentication and two-factor enrolment each work, and an application key can be revoked and immediately stops working. | `IDAC-AC-001` onwards. |
+| GATE-M1-18 | Password authentication, application key authentication and two-factor enrollment each work, and an application key can be revoked and immediately stops working. | `IDAC-AC-001` onwards. |
 | GATE-M1-19 | A screen definition of each presentation kind (list, form, kanban, calendar, pivot, graph, activity, hierarchy) renders with the fields, buttons, filters and groupings the definition declares. | [`../domains/platform-foundation/interfaces.md`](../domains/platform-foundation/interfaces.md). |
 | GATE-M1-20 | Exporting records produces one row per record with the chosen fields in the chosen order, and re-importing that file reproduces the records including their relations resolved by external identifier. | [`../interfaces/report-and-export-documents.md`](../interfaces/report-and-export-documents.md). |
 | GATE-M1-21 | The three foundation scheduled jobs run with their declared effect and are idempotent within one interval. | Build sequence step 1 job table. |

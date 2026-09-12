@@ -6,6 +6,8 @@ A claim is made per level and per domain. "Behavioral conformance in accounting,
 
 Whatever the level, a claim names the evidence behind it: the milestones and stage gates of [milestones](milestones.md) that closed, the layers of the [equivalence test plan](equivalence-test-plan.md) that ran, and the entries in [coverage and evidence](coverage-and-evidence.md) that record every acknowledged difference. A claim without that evidence is an opinion.
 
+Every gate a claim rests on is binary. A gate passes exactly as written or the claim does not include it: there is no partial credit and no "passes except for rounding". Section 1.1 of [milestones](milestones.md) states that rule in full, and it applies at every level below.
+
 ## Level one: decision conformance
 
 **Claim.** For every supported operation, the rebuild reaches the same accept-or-reject decision, and when it accepts, it produces the same business outcome in the same states, quantities and amounts.
@@ -17,6 +19,8 @@ Whatever the level, a claim names the evidence behind it: the milestones and sta
 - Every calculation produces the same result to the last decimal the specification's rounding rules produce. There is no amount tolerance at any level; section 19 of the equivalence test plan states the rule.
 - Every event that touches the ledger produces items with the same accounts, sides and amounts, whatever the entries are keyed or numbered.
 - Every access decision is the same: the same user, in the same groups, sees the same records and is refused the same operations.
+- Every record the specification says exists is written, including records no user ever sees: tracking entries, follower subscriptions, partial reconciliation rows, valuation layers, analytic lines, activity records and scheduled job logs. A missing invisible record is a failure at this level and at every level above it.
+- Where the specification declares an order for a relation, a result set or a printed section, that order is reproduced. Where it declares none, an ordering difference is not a failure at any level.
 - Quantity and value conservation invariants hold.
 
 **Not required.** Identical stored identifiers, identical table and column names, identical route paths, identical selection values, identical error text, identical document numbering format, identical screen layout.
@@ -123,8 +127,101 @@ No level requires the rebuild to reproduce the internal structure of the origina
 
 Equally, no level permits a rebuild to drop a decision because it seems wrong. An observed behavior that looks like a defect is recorded as a compatibility finding in the domain that owns it, and the rebuild chooses deliberately whether to reproduce it, with the consequence understood. A silent deviation is a conformance failure even when the new behavior is better.
 
-## Reconciliation notes
 
-1. **Only one of the two versions carried this document.** The other stated its position on the same topics inside its test plan and its gates: that a difference in any amount is a failure, that a missing record is a failure even when no user ever sees it, that an ordering difference matters only where an order is declared, and that a gate is binary. Those statements are folded into the levels above and into the layer table, and are stated in full in sections 1 and 19 of the [equivalence test plan](equivalence-test-plan.md) and in section 1 of [milestones](milestones.md).
-2. **The layer table is new.** It exists because the merged test plan has eleven layers rather than eight, and a claim has to say which of them ran.
-3. **Access decisions were added to the obligations of level one.** Both versions treat a refusal as observable behavior, and one of them tests access as a matrix from its first milestone, so an access decision belongs to the lowest level rather than to a higher one.
+## The milestones and stage gates each level requires
+
+A level is claimed per domain, so the step milestones a claim needs are those of the steps that deliver the claimed domains, listed in section 1.8 of the [build sequence](build-sequence.md). The cross-cutting milestones and the stage gates are claimed for the system as a whole, because they assert properties that no single domain owns. Each level requires everything the levels below it require.
+
+| Level | Step milestones | Cross-cutting milestones | Stage gate rows it adds |
+|---|---|---|---|
+| One: decision conformance | Every step milestone of every step that delivers a claimed domain, including that milestone's final coverage gate at one hundred percent | `MX1`, access control is complete, and `MX3`, numbers never drift | Every row proved by layers one, three, four, five, seven and ten: the whole of stage gate two, rows 1.2, 1.6, 1.7, 1.10 and 1.11, rows 3.5 and 3.7, the whole of stage gates five, six, seven, eight, nine and ten except the rows named against the higher levels below |
+| Two: record conformance | The same, read again against the stored shape of every record each gate writes | The same | Rows 1.1, 1.3, 1.4, 1.5, 1.9, 3.3, 5.1 and 7.5, all proved by layer two |
+| Three: contract conformance | The same, read again against the request and response shape of every endpoint and the content of every document each gate produces | The same | Rows 3.1, 3.2, 3.4 and 3.6, proved by layer six, and row 3.8, proved by layer eleven |
+| Four: operational conformance | The same, replayed under concurrency and interruption | Additionally `MX2`, concurrency is safe, and `MX4`, performance is acceptable | Rows 1.8, 4.7, 7.3, 8.6, 8.8 and 10.5, all proved by layer eight |
+
+Layer nine, business rules, has no stage gate row of its own: it is asserted by the coverage gate of every step milestone, because a rule belongs to one domain and a stage spans several. A level one claim therefore fails if any rule of a claimed domain is uncovered, even though no stage gate names layer nine.
+
+## How a claim is written
+
+A claim is a short written statement, kept with the rebuild and refreshed whenever a milestone closes. It names six things and nothing may be left out:
+
+1. **The scope.** The domains the claim covers, by their folder names under `docs/domains/`.
+2. **The level.** One of the four, per domain, never a range and never "approximately".
+3. **The date and the revision.** The moment the evidence was produced and the revision of the rebuild it was produced from.
+4. **The evidence.** The milestones and stage gate rows that closed, the layers that ran, and the run in which they ran.
+5. **The acknowledged differences.** Every entry of [coverage and evidence](coverage-and-evidence.md) that applies to the claimed domains, by its identifier.
+6. **The exclusions.** Anything inside a claimed domain that the claim does not cover, stated positively rather than by silence.
+
+A worked example of a well-formed claim:
+
+> As of the run of 2026-03-14 on revision 4 812, the rebuild claims record conformance in general ledger, taxes and analytic accounting, and decision conformance in inventory operations and inventory valuation and costing. Evidence: milestones M0, M4, M5, M7 and M8 closed with all coverage gates at one hundred percent; cross-cutting milestones MX1 and MX3 closed; stage gate six rows 6.1 to 6.15 and stage gate seven rows 7.1 to 7.14 passed; test layers one, two, three, four, five, seven, nine and ten ran green. Acknowledged differences: three, recorded as the entries for the resequencing message wording, the second decimal of the tax report rounding label, and the ordering of unmatched statement lines. Exclusions: the country tax return structures of the general ledger claim are not covered, because no country package is loaded in the fixture.
+
+A claim that cannot name its run, its revision and its differences is not a claim; it is a hope.
+
+## What each level compares, and how exactly
+
+Each level adds a comparison procedure, and the procedure is what makes the claim checkable by someone who did not run it.
+
+| Level | What is compared | How the comparison is performed | What ends the comparison |
+|---|---|---|---|
+| One | Decisions and outcomes | For each acceptance scenario and golden scenario, the resulting records are read back by business key and every value the scenario states is compared as a decimal, a string or a state, never as a rendered label | The first differing value, reported with the record's business key and the field name |
+| Two | Stored shape | The rebuild's own registry is exported and compared against the entity catalogs entity by entity, field by field, for storage name, type, required flag, default, relation target and cardinality, then the migration data set is loaded and every field is accounted for as mapped, defaulted or explicitly dropped | Any field the load leaves unmapped, any value it reinterprets, any selection value it re-encodes |
+| Three | Contracts | Recorded exchanges are replayed against the rebuild and the responses are compared field by field, ignoring only what section 19 of the [equivalence test plan](equivalence-test-plan.md) marks as varying; every structured document is round-tripped; every report is compared against the content list of its domain's `interfaces.md` | Any field absent, renamed, retyped or reordered where an order is declared; any route that answers at a different path or with a different error kind |
+| Four | Behavior under load and failure | Conflicting operations are driven in parallel from at least two workers, and operations are interrupted at the points the runtime documents name, then the recovered state is compared against the specified state | Any outcome that depends on the interleaving where the specification says it does not, any duplicated effect after a retry, any partial write after an interruption |
+
+## Acknowledged differences
+
+A difference between the rebuild and the specification is either acknowledged or it is a failure. Acknowledging one is a deliberate, recorded act, not a note in a message thread.
+
+Every acknowledged difference is recorded in [coverage and evidence](coverage-and-evidence.md) with all of the following:
+
+| Field | Content |
+|---|---|
+| Identifier | A stable reference the claim can cite |
+| Scope | The domain and the artifact that differs: a rule identifier, a gate identifier, a scenario reference, a field, a route or a report |
+| What the specification requires | Stated in the specification's own words, with a link to the owning document |
+| What the rebuild does instead | Stated concretely, with the observable consequence |
+| Why | The reason the difference was accepted |
+| Who decided | The role that accepted it |
+| Level effect | The highest level the claim can still hold in that domain with this difference present |
+
+Four kinds of difference recur, and they do not weigh the same:
+
+1. **A cosmetic difference.** Different wording of a refusal that identifies the same condition. Permitted at level one, because level one requires the same condition, not the same words. It blocks nothing above level one either, unless a client keys on the text, in which case it becomes a contract difference.
+2. **A structural difference.** A different storage name, a different table layout, a different selection value. Permitted at level one, fatal at level two.
+3. **A contract difference.** A different route path, a different response shape, a different document field. Permitted at levels one and two, fatal at level three.
+4. **A behavioral difference.** A different decision, a different amount, a different state, a missing record. Fatal at every level. It is never acknowledged as acceptable; it is acknowledged only as a known defect with a date by which it is corrected, and the domain holds no level until it is.
+
+A compatibility finding is not an acknowledged difference. A finding records that the specified behavior itself looks wrong; the rebuild still has to choose, deliberately, to reproduce it or to depart from it, and a departure is then recorded as an acknowledged difference of the fourth kind.
+
+## Losing a level and regaining it
+
+A claim is not permanent. It is withdrawn, for the affected domain only, when any of the following happens:
+
+1. A gate that the level requires stops passing, for any reason, including a change elsewhere in the rebuild.
+2. An acknowledged difference expires without being corrected or re-accepted.
+3. The specification changes in a way that adds a rule, a state, a field, a route or a document to a claimed domain, and no test yet covers the addition.
+4. A behavioral difference of the fourth kind is discovered.
+
+Regaining the level requires the same evidence as claiming it the first time: the full suite of the level's layers, on the current revision, with every coverage gate back at one hundred percent. Evidence from an earlier revision is never carried forward, because the property being claimed is a property of the system as it now stands.
+
+## Reading a claim as a reviewer
+
+A reviewer verifies a claim by asking six questions in this order, stopping at the first that cannot be answered:
+
+1. Which domains, at which level, on which revision?
+2. Which run produced the evidence, and can it be re-run unchanged?
+3. Did every coverage gate of the claimed domains reach one hundred percent, or is a rule uncovered?
+4. Which stage gate rows are claimed, and does each one name a layer that actually ran?
+5. Is every difference between the run and the specification in the acknowledged list, and is each of them of a kind the claimed level permits?
+6. What is excluded, and does the exclusion list match the gaps visible in the coverage report?
+
+## Overstatements to avoid
+
+These five claims sound conformant and are not, and each one has cost a rebuild a re-run:
+
+1. **"Conformant."** Without a level and a domain the word carries no obligation, and a reader supplies the strongest reading.
+2. **"The tests pass."** A suite proves the level of the layers it contains. A suite of layers one, four and five proves decision conformance in the domains it touches and nothing about record, contract or operational conformance.
+3. **"Equivalent apart from rounding."** There is no amount tolerance at any level. A rounding difference is a behavioral difference of the fourth kind.
+4. **"The screens look the same."** No level requires a screen to look the same, and no level is earned by one that does. Screen layout is outside every claim.
+5. **"We improved it."** A better behavior that differs is still a difference. It is claimable only when it is recorded as an acknowledged difference and the domain's level is reduced accordingly.
