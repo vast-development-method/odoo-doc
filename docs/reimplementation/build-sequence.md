@@ -299,7 +299,7 @@ None of its own. The document layout, headers, footers and page formats configur
 
 ### Interfaces to deliver
 
-The contact autocomplete and enrichment service contracts of [`../interfaces/external-integrations.md`](../interfaces/external-integrations.md). The notification bus channel contract of [`../runtime/notification-bus.md`](../runtime/notification-bus.md), which every later screen that waits for events uses. The calendar synchronization connectors of [`../interfaces/external-integrations.md`](../interfaces/external-integrations.md).
+The contact autocomplete and enrichment service contracts and the calendar synchronization connectors, both specified in [`../interfaces/external-integrations.md`](../interfaces/external-integrations.md). The notification bus channel contract of [`../runtime/notification-bus.md`](../runtime/notification-bus.md), which every later screen that waits for events uses.
 
 ### Domain folders to read
 
