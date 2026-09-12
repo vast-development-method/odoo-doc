@@ -1,7 +1,11 @@
 # Endpoint catalog
 
 Every request endpoint the system exposes, grouped by business domain, with its path patterns, transport, authentication
-level, allowed methods, site-page flag, parameters, the operation it performs and the failures it reports. The catalog
+level, allowed methods, site-page flag, parameters, the operation it performs and the failures it reports. The failures
+of an endpoint are stated in two places, and the [Failures](#failures) section below says how to put the two together:
+a refusal the endpoint makes for a reason of its own is in its row, and the failures that follow from its transport, its
+authentication level, its path converters, its cross-site setting and the records it touches are stated once for all
+endpoints that share them. The catalog
 lists 855 endpoints bound to 1029 path patterns. An endpoint that one capability package declares and another package
 extends is listed once, in the row of the endpoint it extends, with every contributing package named in the last column
 and the added behaviour described in the purpose sentence; seven rows carry such extension layers, fourteen in total.
@@ -21,8 +25,12 @@ these endpoints call are in [`service-layer.md`](service-layer.md).
 | Methods | The request methods accepted. An endpoint declared without a method restriction accepts both reading and submitting methods, shown as `GET, POST`. |
 | Site page | Whether the endpoint runs in site context: the site record of the requested host is resolved, the language prefix of the address is honoured, the visitor record is tracked, the time zone is taken from the network position, and the answer is wrapped in the page layout of that site. |
 | Parameters | The named parameters the handler declares. `accepts further named parameters` means the handler also receives every other parameter of the request, which extension layers use to add their own inputs without changing the contract. |
-| Purpose and effect | What the endpoint does, in one sentence, including the records it writes and the answer it returns. |
+| Purpose and effect | What the endpoint does, in one sentence, including the records it writes, the answer it returns and any failure the endpoint refuses on for a reason of its own, with the exact message where the system shows one. The failures that follow from the transport, the authentication level, the path converters, the cross-site setting and the records the endpoint touches are the same for every endpoint that shares them and are stated once under [Failures](#failures) below. |
 | Capability package | The package that declares the endpoint, followed by the packages that extend it, in installation order. |
+
+The complete set of failures of any row is the union of the refusals its own *Purpose and effect* sentence states and
+the failures the [Failures](#failures) section derives from the other columns. No row is complete on its own; none is
+meant to be.
 
 ### Path pattern notation
 
@@ -100,6 +108,59 @@ Three token mechanisms grant access to one record without signing in, and they a
    notifications of a journal, unsubscribe from a mailing, confirm a mailing list subscription.
 3. **Guest identity.** A record that represents an unidentified visitor of a conversation, addressed by a guest token.
    It is the identity under which a visitor posts in a live conversation, joins a shared channel or opens a meeting room.
+
+### Failures
+
+Every endpoint of this catalogue reports failures, and the failures of an endpoint come from two places. A reader
+assembles the complete set of an endpoint from both.
+
+**Failures the row states itself.** Where an endpoint refuses on a condition of its own — a code that is not valid, a
+fingerprint that does not match, a company without registered credentials, an amount below a stated minimum, a document
+in a state that forbids the action — the refusal, and the exact message where the system shows one, is part of the
+sentence in the *Purpose and effect* column of that row. Every endpoint that can fail for a reason no other endpoint
+shares carries its refusal there; the endpoints that can only fail for the reasons of the table below carry none, and
+that is what the absence of a refusal in a row means.
+
+**Failures every endpoint of the same shape reports.** All the other failures follow from five properties that the row
+already states — its path patterns, its methods, its transport, its authentication level and its site-page flag — plus
+the records the endpoint touches. They are the same for every endpoint that shares those properties, so they are stated
+once, here, rather than 855 times. An endpoint reports every failure in the table below whose condition its row
+satisfies, and reports nothing beyond that and its own refusals.
+
+| The row says | The condition that fails | What the caller receives |
+|---|---|---|
+| A path pattern contains `<name:integer>` | The segment is not a whole number | No pattern matches; the caller receives the not-found answer of its transport. |
+| A path pattern contains `<name:record of Entity>` | No record of the entity has that identifier, or the caller may not read it, or it fails the restriction stated for that segment | The not-found answer, never a refusal, so that the existence of a record is not revealed. |
+| A path pattern contains `<name:text>`, `<name:path>`, `<key:text of length 16>` or `<ext:one of css or js>` | The segment does not have the stated shape | No pattern matches; the not-found answer. |
+| Methods | The request method is outside the listed set | Status `405`. |
+| Transport | The body's media type does not belong to the transport family of the endpoint | Status `415`, with an `Accept` response header naming the media types the family accepts, and a body that names the families the request is compatible with and asks the caller to check the media-type header. |
+| Transport | The body is larger than the effective maximum content length | Status `413`. |
+| Transport `remote call` or `structured call` | The body is not a well-formed parameter document | Status `400` with the body `"Invalid JSON data"`; an envelope that parses but lacks its required members gives `400` with the body `"Invalid JSON-RPC data"`. |
+| Authentication | The identity required by the level is absent or refused | The failure column of the level in the *Authentication levels* table above, which states the status and the exact message for each of the six levels. |
+| Site page — yes | The address matches no page and no endpoint of the resolved site | The not-found answer rendered inside the page layout of that site rather than as the bare framework error page. A caller who holds the site-designer group is instead shown the site's own not-found page, which offers to create a page at that address; a page protected by a visibility password answers `403` with the site's password page. |
+| Transport `page or file`, a method that is not a reading method, and the endpoint does not switch the check off | The anti-forgery token is absent, malformed, expired or does not recompute | Status `400` with the body `"Session expired (invalid CSRF token)"`. When no database is selected the request is redirected to the database selector instead. |
+| The purpose names the document access token | The token is absent or does not equal the token stored on the document, and the caller has no reading right of its own | A page endpoint of the portal redirects the caller to `/my`; a remote-call endpoint of the portal answers with an error member, for example `"Invalid order."`. A document that does not exist at all gives the missing-record failure with the message `"This document does not exist."`. |
+| The purpose names a signed link token | The signature does not recompute over the record, the action and the scope | No message is shown. A signed-in caller is redirected to the discussion screen; a caller with no session is redirected to the sign-in form carrying a link back to the record view. |
+| The purpose names a guest identity | The guest token is absent or matches no guest record | The endpoint answers as it would to a visitor with no access to that conversation: the not-found answer for a page, an access refusal for a call. |
+| Any endpoint that reads or writes records | Access rights, record rules or field permissions refuse the operation | The access refusal. |
+| Any endpoint that invokes a business operation | A guard of that operation refuses | The business rule violation carrying that operation's own message; the guards and their messages are specified with the operation in [`service-layer.md`](service-layer.md) and in the domain folder named in the section heading. |
+| Any endpoint that exports records | The caller does not hold the export permission and is not an administrator | The message `"You don't have the rights to export data. Please contact an Administrator."`; the structured browsing endpoints under `/json/2` answer instead with `"You need export permissions to use the /json route"`. |
+| Any endpoint at all | The request raises a failure the handler does not catch | Status `500`. |
+| Any endpoint at all | The database reports a serialization failure, a deadlock or a lock timeout | The whole request is rolled back and replayed, up to five attempts, before any failure is reported; a request carrying an uploaded file that cannot be rewound cannot be replayed and fails with `"Cannot retry request on input file '<name>' after serialization failure"`. |
+
+**How a failure is rendered.** The mapping from a failure class to a status, an envelope code and a body is the same
+for the whole platform and is tabulated once, per transport family, in
+[`remote-transport-contracts.md`](remote-transport-contracts.md), section 13.2, which is the authoritative table; the
+retry loop that precedes every reported failure is section 13.1 of the same document and the guidance on which failures
+a client may retry unchanged is section 13.3. In short: on the `page or file` transport a failure becomes a rendered
+error page carrying the matching status; on the `remote call` transport it becomes a `200` answer whose envelope carries
+an error block, except that an expired session carries envelope code `100` and an unknown path or entity carries
+envelope code `404`; on the `structured call` transport it becomes the matching status with a structured body naming the
+error class, the message and the arguments. The three *Errors* cells of the *Transports* table above say the same thing
+in one line each.
+
+**A row that names no failure of its own.** Such a row has exactly the failure set that the table above gives it, and
+nothing further. That is a statement about the endpoint, not a gap in the row.
 
 ## Endpoints by domain
 
@@ -1810,3 +1871,20 @@ against the source of the system and against the condensed catalog
 6. **The operation column.** One draft presented the operation names as the handler identifiers a rebuild must
    reproduce. They are not: nothing outside the server ever sees them. The column now states that they are this
    specification's own names, spelled without abbreviations, and that the condensed catalog is keyed by path.
+7. **The failures of an endpoint.** The plan for this document promises, for every endpoint, its path, method,
+   authentication, request type, purpose, inputs, outputs and failures, and the opening sentence of the catalog
+   repeated that promise; but the row schema had no failures column, the description of the purpose column mentioned
+   only the records written and the answer returned, and only the endpoints with a refusal peculiar to themselves
+   stated one. The failures of an endpoint are in fact determined by five properties the row already carries — its path
+   patterns, its methods, its transport, its authentication level and its site-page flag — together with the records
+   the endpoint touches, and they are identical for every endpoint sharing them. The [Failures](#failures) section now
+   states that derivation completely, in one table, so that the failure set of any of the 855 rows can be read off; the
+   description of the purpose column says that a refusal peculiar to an endpoint is stated in the row; and the section
+   points at [`remote-transport-contracts.md`](remote-transport-contracts.md), section 13, for the authoritative
+   mapping of every failure class to a status, an envelope code and a body, for the retry loop and for the client retry
+   guidance.
+8. **Links to four domain folders.** The behaviour-owner column of the domain table and two paragraphs of the payment
+   sections referred to the calendar and scheduling, fiscal localizations, marketing and mass mailing, and payment
+   providers domains by a direct folder link. They now go through the domain index
+   [`../domains/README.md`](../domains/README.md), which carries the entry of every domain, so that every
+   cross-reference in this file resolves to a file of this repository.

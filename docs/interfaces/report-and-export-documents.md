@@ -34,7 +34,7 @@ every entry of the catalogue in Part 2 is read against them.
 | `report_file` | Report File | Text, stored, writable | no | empty | The path of the file the template is declared in. |
 | `print_report_name` | Printed Report Name | Text, translatable | no | empty | An expression evaluated per record that produces the file name shown to the user. When empty, the report name and the record display name are used. |
 | `attachment` | Save as Attachment Prefix | Text | no | empty | An expression evaluated per record that produces the name under which the rendered document is stored as an attachment of the record. Empty means the result is not stored. |
-| `attachment_use` | Reload from Attachment | Boolean | no | false | When true and an attachment with that name already exists on the record, the stored file is returned instead of rendering again. This is what makes a posted invoice always print identically. |
+| `attachment_use` | Reload from Attachment | Boolean | no | false | When true and an attachment with that name already exists on the record, the stored file is returned instead of rendering again. This is what makes a posted invoice always print byte-identical. |
 | `binding_model_id` | Action Binding | Many-to-one to Entity | no | empty | The entity on whose records the document appears in the print menu. When empty, the document is only reachable from a button or from an action. |
 | `binding_type` | Action Binding Type | Selection: `action`, `report` | no | `report` | Which menu of the interface the entry appears in: the action menu or the print menu. A report definition defaults to `report`. |
 | `binding_view_types` | Binding View Types | Text listing view kinds | no | `list,form` | The view kinds whose print menu offers the entry. |
