@@ -511,7 +511,7 @@ this domain.
 
 | Kind | Statement | Message |
 |---|---|---|
-| Database check | `related_record_identifier IS NOT NULL AND related_record_identifier != 0` | *"Traces have to be linked to records with a not null res_id."* |
+| Database check | `res_id IS NOT NULL AND res_id != 0` | *"Traces have to be linked to records with a not null res_id."* |
 | Index | `mass_mailing_id` indexed; `campaign_id`, `mail_mail_id`, `mail_mail_id_int` and `sms_id_int` partially indexed | — |
 
 ### 6.6 Status operations

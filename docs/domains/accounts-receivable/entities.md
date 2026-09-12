@@ -100,6 +100,7 @@ price into an accounting balance.
 | Company (`company_id`) | many-to-one to Company | Computed and stored with manual override, precomputed, indexed. Taken from the journal's company; if the journal's company is not an ancestor of the current company, the first accessible branch of the journal company (or of the active company) is used. |
 | Journal Items (`line_ids`) | one-to-many to Journal Item | Every line of the document, of every kind. Copied when the document is duplicated. |
 | Invoice lines (`invoice_line_ids`) | one-to-many to Journal Item | A filtered view of the same lines, restricted to the display kinds `product`, `line_section`, `line_subsection` and `line_note`. Not copied (the full line set is copied instead). This is the list the user edits. |
+| Accountable lines (`journal_line_ids`) | one-to-many to Journal Item | The same lines restricted to the accountable ones: every display kind except `line_section` (section), `line_subsection` (subsection) and `line_note` (note). Not copied when the document is duplicated and excluded from exports. It lets a caller address the lines that carry an account and an amount without filtering them itself. |
 | Ledger (`journal_group_id`) | many-to-one to Journal Group | Not stored; search only. Used to filter documents by a named group of journals. |
 | Suitable journals (`suitable_journal_ids`) | many-to-many to Journal | Computed, not stored. The journals acceptable for this document type and company. |
 | Show journal (`show_journal`) | boolean | Computed, not stored. True when more than one suitable journal exists, or when the current journal is not among the suitable ones. Controls whether the journal selector is displayed. |
@@ -209,6 +210,10 @@ an inverse is noted). The routine is specified with worked examples in
 | Reversal entries (`reversal_move_ids`) | one-to-many to Journal Entry | The credit notes that reverse this document. |
 | Exchange difference origin (`exchange_diff_partial_ids`) | one-to-many to Partial Reconciliation | The partial reconciliations for which this document is the exchange difference entry. |
 | Needs cancel request (`need_cancel_request`) | boolean | Computed, not stored. False in the base platform; a localization sets it when the document has been filed with a tax authority and may only be cancelled through an approved request. |
+| Transactions (`transaction_ids`) | many-to-many to Payment Transaction | Readonly, not copied. Stored through the association table `account_invoice_transaction_rel`, whose column `invoice_id` holds the document and whose column `transaction_id` holds the transaction. The online payment attempts linked to this document. Added by the online-payment capability; see section 15. |
+| Authorized Transactions (`authorized_transaction_ids`) | many-to-many to Payment Transaction | Computed from the previous field, evaluated with elevated rights, readonly, not copied. Those linked transactions whose state is the authorised one: the money is reserved at the provider but not yet captured. |
+| Transaction Count (`transaction_count`) | integer | Computed from the previous-but-one field, not stored. The number of linked transactions, whatever their state. It drives the statistic button that opens them. |
+| Amount paid (`amount_paid`) | monetary in the document currency | Computed from the linked transactions, not stored. The sum of the amounts of those whose state is authorised or done. It is deliberately not the settled amount: an authorised transaction counts here although nothing has reached the ledger yet, so this figure may exceed the difference between the total and the residual. |
 
 ### 1.11 Field table — sending and printing
 
@@ -223,12 +228,12 @@ an inverse is noted). The routine is specified with worked examples in
 | Document file (`invoice_pdf_report_file`) | binary, stored as attachment | Not copied. The rendered printable document. |
 | Document attachment (`invoice_pdf_report_id`) | many-to-one to Attachment | Computed, not stored, from the binary field. The attachment record holding the rendered document. |
 | Terms and Conditions (`narration`) | rich text | Computed and stored with manual override. When the system parameter that enables invoice terms is on and the document is a sale document: if the company's terms are of the plain kind, the company's terms text translated into the customer's language; if the company's terms are of the web-page kind, the text "Terms & Conditions: " followed by the company's base address and the path `/terms`. |
-| Payment quick response code generator (`qr_code_method`) | selection | Not copied. Which quick response code generator to use when printing. The choices are the generators available on the installation, ordered by their declared priority. Empty means "the first available generator that can produce a code". |
+| Payment quick response code generator (`qr_code_method`) | selection | Not copied. Which quick response code generator to use when printing. The choices are the generators available on the installation, offered in ascending order of their declared priority. Two are shipped by the in-scope capabilities, and both labels are reproduced exactly as the selector shows them: `sct_qr`, labelled "SEPA Credit Transfer QR", declared priority 20 — the credit transfer scheme of the Single Euro Payments Area; and `emv_qr`, labelled "EMV Merchant-Presented QR-code", declared priority 30 — the merchant-presented quick response code standard of the international card specification. Empty means "the first available generator that can produce a code". The payloads are in [`interfaces.md`](interfaces.md) sections 9.2 and 9.3. |
 | Show the payment quick response code (`display_qr_code`) | boolean | Computed, not stored. True when the type is a customer invoice, a sales receipt, a vendor bill or a purchase receipt and the company enables payment codes. |
 | Show the link quick response code (`display_link_qr_code`) | boolean | Computed, not stored. Same type condition with the company's portal-link code setting. |
 | Incoterm (`invoice_incoterm_id`) | many-to-one to Incoterm | Computed and stored with manual override. Defaults to the company's incoterm for an outgoing document. |
 | Incoterm Location (`incoterm_location`) | text | Computed and stored with manual override. |
-| Incoterm placeholder (`invoice_incoterm_placeholder`) | text | Computed, not stored. The company's incoterm code and name, shown greyed out. |
+| Incoterm placeholder (`invoice_incoterm_placeholder`) | text | Computed, not stored, recomputed whenever the company's default incoterm changes. Two branches: when the company has a default incoterm, the placeholder is that incoterm's code and name, shown greyed out; when the company has none, the placeholder is the literal text "Define a default in the settings". |
 | Attachments (`attachment_ids`) | one-to-many to Attachment | Every attachment whose owning model is the journal entry. |
 
 ### 1.12 Field table — warnings, checks and miscellaneous
@@ -252,6 +257,7 @@ an inverse is noted). The routine is specified with worked examples in
 | Total (Tax inc.) (`quick_edit_total_amount`) | monetary | The gross total the user types in quick encoding; the platform then creates a line to match it. |
 | Quick encoding values (`quick_encoding_vals`) | structured data | Computed, not stored, not exportable. |
 | No Follow-Up (`no_followup`) | boolean | Computed with manual override, not stored on the document (it is stored on the lines). Excludes the document from follow-up reports; writing it writes the same flag on the receivable lines. |
+| Type filter domain (`invoice_filter_type_domain`) | text | Computed, not stored, recomputed when the document type changes. The journal kind implied by the type: `sale` for a customer invoice, a customer credit note or a sales receipt; `purchase` for a vendor bill, a vendor credit note or a purchase receipt; empty for a plain journal entry. The form reads it to restrict the journal selector and the tax selectors to that kind, and the same derivation picks the fallback journal when a document is created without one. |
 | Is sale installed (`is_sale_installed`) | boolean | Computed, not stored. Lets the interface hide fields that only make sense with the sales domain present. |
 | Tax country (`tax_country_id`) | many-to-one to Country | Computed, not stored. The country whose taxes may be used: the fiscal position's country when the fiscal position declares a foreign tax registration, otherwise the company's fiscal country. |
 | Tax country code (`tax_country_code`) | text | Computed, not stored. The code of the previous field. |
@@ -288,6 +294,31 @@ an inverse is noted). The routine is specified with worked examples in
   (journal, status, payment status, type, date); on (journal, date); on (journal, company, date); on
   the tuple used for gap detection restricted to documents that made a gap; on the reference
   restricted to purchase documents; on the sanitised payment reference expression.
+
+### 1.14 Recomputation triggers on the form
+
+Editing certain header fields does not only store the new value: it schedules other fields for
+re-derivation, so that the form stays consistent before the record is saved. A field scheduled this
+way is recomputed by its own rule unless the same write also supplies a value for it. The complete
+list of triggers the document declares:
+
+| Field edited | What is scheduled for re-derivation | Condition attached to the trigger |
+| --- | --- | --- |
+| Company (`company_id`) | the journal | the present journal is not a journal of the new company (nor of one of its ancestors). Leaving the company empty is refused outright; see [`business-rules.md`](business-rules.md) section 5.6. |
+| Journal (`journal_id`) | the company | the company is empty, or differs from the journal's company |
+| Journal (`journal_id`) | the currency | the currency is empty, or the journal imposes a currency and that currency differs from the present one |
+| Currency (`currency_id`) | the currency of every line, both the invoice lines and the journal items | the document is an invoice (receipts included) and the line's currency differs from the document's new currency |
+| Partner (`partner_id`) | the partner of every line | the document is an invoice (receipts included) and the line's partner is not the commercial entity of the new partner; each corrected line then re-applies its own partner rule |
+| Payment Reference (`payment_reference`) | the label of every payment term line | unconditional |
+| Payment Terms (`invoice_payment_term_id`) | the label of every payment term line | unconditional |
+| Number (`name`) | the payment reference | the number exists and is not `/`; the numbering-gap flag is refreshed at the same time |
+| Accounting Date (`date`) | the amount in currency of every line, re-derived from the line's balance and the rate at the new date | the document is **not** an invoice |
+
+Two of these run as ordinary field rules as well as on the form, so a programmatic write produces the
+same result as a keystroke: the journal-to-company and journal-to-currency triggers, and the
+payment-reference and payment-term relabelling. The date trigger is a form-only behaviour: a
+programmatic write of the accounting date on a plain journal entry does not re-derive the line
+amounts.
 
 ---
 
@@ -355,7 +386,7 @@ account, no balance and no currency amount; this is enforced by a stored check.
 | Balance (`balance`) | monetary in company currency | The signed amount in company currency. On an invoice line it is derived from the currency amount and the rate by the synchronisation; it is never defaulted from the other lines. On a non-invoice line, when nothing is given, it defaults to the negative of the sum of the other lines so the entry balances. |
 | Amount in Currency (`amount_currency`) | monetary in the line currency | Computed and stored with manual override. When it has never been set it is the balance multiplied by the line rate, rounded to the line currency. When the line currency equals the company currency and the document is not an invoice, it is forced equal to the balance. |
 | Currency (`currency_id`) | many-to-one to Currency | Computed and stored with manual override. A cost-of-goods-sold line always uses the company currency; a line of an invoice uses the document currency; any other line keeps its currency or falls back to the company currency. |
-| Rate (`currency_rate`) | decimal | Computed and stored. On an invoice line it is the document's currency rate (or one). Otherwise it is the conversion rate from company currency to line currency at the document date, or one when there is no currency. |
+| Rate (`currency_rate`) | decimal | Computed, **not** stored, so it is recalculated on every read and cannot be searched or grouped. On an invoice line it is the document's currency rate (or one). Otherwise it is the conversion rate from company currency to line currency at the document date, or one when there is no currency. |
 | Same currency (`is_same_currency`) | boolean | Computed, not stored. True when the line currency equals the company currency. |
 | Partner (`partner_id`) | many-to-one to Partner | Computed with manual override, with an inverse. Always the commercial entity of the document's partner on accountable lines. |
 | Storno (`is_storno`) | boolean | Computed and stored with manual override, precomputed. Only meaningful when the company uses storno accounting: it flips a line's debit and credit sides so that a reversal is booked as a negative on the original side rather than on the opposite side. |
@@ -367,6 +398,10 @@ account, no balance and no currency amount; this is enforced by a stored check.
 | Full reconciliation (`full_reconcile_id`) | many-to-one to Full Reconciliation | Set when the line belongs to a fully balanced reconciliation group. |
 | Matched debits (`matched_debit_ids`) / Matched credits (`matched_credit_ids`) | one-to-many to Partial Reconciliation | The partial reconciliations in which this line is respectively the credit or the debit side. |
 | Due Date (`date_maturity`) | date | Indexed, tracked. On a payment term line it is the instalment due date; the payment term synchronisation writes it. |
+| Discount Date (`discount_date`) | date | Stored, readonly. The last date on which the discounted amount may be paid for the early payment discount to be granted. The payment term synchronisation writes it on a payment term line whose term carries an early payment discount; it is empty on every other line. |
+| Discount amount in Currency (`discount_amount_currency`) | monetary in the line currency | Stored. The amount that settles this instalment when the early payment discount is taken, expressed in the line currency. Empty (zero) when no discount applies. |
+| Discount Balance (`discount_balance`) | monetary in company currency | Stored. The same discounted amount expressed in the company currency. |
+| Next Payment Date (`payment_date`) | date | Computed, not stored, searchable. The discount date when one is set and today is on or before it; the maturity date in every other case. Its search rule reproduces the same choice in three branches — discount date on or after today compared against the discount date; discount date before today compared against the maturity date; no discount date compared against the maturity date — and an equality test is evaluated as "on or before", so searching for one date returns everything payable by then. Negated operators are not supported by the search rule. |
 | No Follow-Up (`no_followup`) | boolean | Computed and stored with manual override, with an inverse. Default: true when the journal is not of a kind that produces follow-ups. |
 
 ### 2.4 Field table — the commercial part of a product line
@@ -617,9 +652,11 @@ tie-breaking rule, the way the difference is booked, and the two accounts that a
   rounding method.
 - **Compute the difference** between an amount and its rounded value: first round the amount to the
   given currency, then subtract it from the result of rounding it to the coin multiple, then round
-  the difference to the currency. For example with a precision of 0.05, the nearest method and a
-  two-decimal currency: an amount of 23.91 gives a difference of 0.09 (23.91 rounds to 24.00... see
-  [`calculations.md`](calculations.md) for the exact arithmetic and the worked example at 0.05).
+  the difference to the currency. For example with a rounding precision of 0.05, the nearest method
+  and a two-decimal currency: an amount of 23.91 is first rounded to the currency, which leaves
+  23.91; rounding it to the coin multiple gives 23.90; the difference is 23.90 − 23.91 = −0.01. See
+  [`calculations.md`](calculations.md) section 6.1 for the full arithmetic and the table of worked
+  values at 0.05.
 
 ### 5.4 Validation
 
@@ -650,13 +687,32 @@ Partner (`res.partner`, table `res_partner`). Only the fields this domain adds o
 | Fiscal Position (`property_account_position_id`) | many-to-one to Fiscal Position | Company-dependent, company-checked. |
 | Degree of trust (`trust`) | selection | Company-dependent. Values: `good` (Good Debtor), `normal` (Normal Debtor), `bad` (Bad Debtor). |
 | Invoice sending (`invoice_sending_method`) | selection | Company-dependent. Values: `manual` (Manual), `email` (by Email). The default channel proposed by the sending wizard. |
-| Electronic invoice format (`invoice_edi_format`) | selection | Computed with an inverse, evaluated with elevated rights; the underlying storage is company-dependent. Empty in the base platform; the electronic invoicing domain adds the formats. |
+| Electronic invoice format (`invoice_edi_format`) | selection | Computed with an inverse, evaluated with elevated rights, not stored. Empty in the base platform; the electronic invoicing domain adds the values. It reads the **commercial entity's** stored value: when that stored value is the literal `none` the field is empty, otherwise it is the stored value, and when nothing is stored it falls back to the format suggested for that commercial entity (no suggestion exists in the base platform). The inverse writes the stored value: nothing when the chosen format equals the suggested one, the literal `none` when the user clears the field, the chosen format otherwise. |
+| Electronic invoice format storage (`invoice_edi_format_store`) | text | Company-dependent: each company keeps its own value for the same contact. This is the column that actually holds the choice behind the computed field above; the literal `none` in it means "this customer explicitly wants no electronic format", which is not the same as "nothing chosen". |
+| Show the electronic invoice format selector (`display_invoice_edi_format`) | boolean | Not stored. Its default is the number of values the electronic invoice format selection offers, read as a truth value, so the selector is hidden while no capability contributes a format — that is, always in the base platform. |
 | Invoice report (`invoice_template_pdf_report_id`) | many-to-one to Report | Stored, editable, restricted to the available invoice templates. Which printable layout to use for this customer. |
-| Available invoice templates (`available_invoice_template_pdf_report_ids`) | one-to-many to Report | Computed, not stored. |
+| Available invoice templates (`available_invoice_template_pdf_report_ids`) | one-to-many to Report | Computed, not stored. Every printable layout declared for the journal entry entity, flagged as an invoice layout, and whose own record filter accepts all three receivable types at once — customer invoice, customer credit note and sales receipt. When that set comes out empty the computation does not return an empty list: it refuses with "There is no template that applies to invoices." So a company with no invoice-flagged layout cannot open this selector on the contact form, nor the layout selector of the sending wizard, which reads the same set. |
+| Show the invoice layout selector (`display_invoice_template_pdf_report_id`) | boolean | Not stored. Its default is true when more than one layout is available for invoices, false otherwise, so a company with a single layout never sees the selector. |
 | Invoices (`invoice_ids`) | one-to-many to Journal Entry | Readonly, not copied. |
-| Journal entry count (`account_move_count`) | integer | Computed, same group restriction. |
+| Journal entry count (`account_move_count`) | integer | Computed, same group restriction. The number of customer documents of the contact. It also feeds the contact-card statistics entry described below. |
 | Ignore abnormal invoice date (`ignore_abnormal_invoice_date`) | boolean | Company-dependent. Suppresses the abnormal-date warning for this customer. |
 | Ignore abnormal invoice amount (`ignore_abnormal_invoice_amount`) | boolean | Company-dependent. Suppresses the abnormal-amount warning. |
+
+**The contact-card statistics entry.** A member of the invoicing group sees, on the contact card, an
+extra statistics entry for every contact whose accounting count is non-zero. Its label is reproduced
+exactly as the platform emits it: "Invoices/Bills/Mandates". It carries a pencil-square icon and the
+ninth colour tag. The number shown is:
+
+```formula
+accounting statistics count = customer document count + vendor bill count
+```
+
+so it is a joint receivable-and-payable figure, not a receivable one. When the sum is zero the entry
+is not produced at all, and a user outside the invoicing group never sees it. The vendor bill count
+is defined in [`../accounts-payable/entities.md`](../accounts-payable/entities.md).
+
+Worked example: a contact with 12 customer documents and 3 vendor bills shows the entry with the
+value 12 + 3 = 15.
 
 ### 6.2 Days Sales Outstanding
 
@@ -739,9 +795,88 @@ behavior is given here; the account number validation belongs to
 
 Invoice Send Wizard (`account.move.send.wizard`) and Invoice Batch Send Wizard
 (`account.move.send.batch.wizard`) are transient: they hold the user's choices for one sending
-operation and are discarded afterwards. Their complete field lists and the sending algorithm are in
-[`workflows.md`](workflows.md), "Sending a customer document", and
-[`interfaces.md`](interfaces.md), "Sending".
+operation and are discarded afterwards. Both fields tables are below; the sending algorithm they
+drive is in [`workflows.md`](workflows.md) section 3, and the dialogues that render them are in
+[`interfaces.md`](interfaces.md) section 9.6.
+
+Both wizards share one behaviour contract, contributed by the sending capability they both build on:
+the default channels, the default extra electronic deliveries, the default electronic format, the
+default layout, the default mail template and the alert collection are computed by the same rules for
+one document and for many.
+
+### 8.1 Invoice Send Wizard — field table
+
+Twenty fields. "Structured value" means an opaque nested structure of names and values, not a scalar
+column; the shapes are given under the table.
+
+| Field (storage name) | Full name | Type | Rules |
+| --- | --- | --- | --- |
+| `move_id` | Journal Entry | many-to-one to Journal Entry | Required. Its default is the first of the documents the user selected. A constraint re-checks the sending guards of [`business-rules.md`](business-rules.md) section 12 whenever it is set. |
+| `company_id` | Company | many-to-one to Company | Related to the document's company; readonly, follows the document. |
+| `alerts` | Alerts | structured value | Computed, not stored, recomputed whenever the channels, the extra electronic deliveries or the recipients change. The collected warnings and blockers for this one document; a blocker is raised instead of sending. |
+| `sending_methods` | Sending methods | structured value | Computed, not stored: the list of the keys whose checkbox is ticked. It has an inverse, so writing a list of keys directly rewrites the checkbox structure with exactly those keys ticked. |
+| `sending_method_checkboxes` | Sending method checkboxes | structured value | Computed **and stored**, precomputed, writable — this is the field the dialogue binds to and the one that survives a re-render. Recomputed from the document. It holds one entry per channel offered, each with a ticked flag and a label. The channels offered are the partner's invoice sending methods minus the manual (download) one, keeping only those applicable to the company. A channel is ticked when it is among the document's preferred channels **and** either it is electronic mail — always acceptable in single-document mode, because a missing address can be added in the dialogue — or it passes the applicability test for this document. |
+| `display_attachments_widget` | Show the attachments widget | boolean | Computed, not stored, from the electronic format. Decides whether the attachment list is shown at all. |
+| `extra_edis` | Extra electronic deliveries | structured value | Computed, not stored: the list of the keys whose checkbox is ticked, with the same inverse behaviour as the channels. |
+| `extra_edi_checkboxes` | Extra electronic delivery checkboxes | structured value | Computed **and stored**, precomputed, writable. One entry per extra electronic delivery that applies to the document by default, each ticked, each with a label and an optional help text. |
+| `invoice_edi_format` | Electronic invoice format | selection | Computed, not stored. Its value list is exactly the contact's electronic invoice format list (empty in the base platform). Recomputed from the document and the chosen channels. |
+| `pdf_report_id` | Printable layout | many-to-one to Report | Computed **and stored**, writable, restricted to the available layouts of the next field. Its default is the layout resolved for the document: the partner's, else the journal's, else the generic invoice layout. |
+| `available_pdf_report_ids` | Available printable layouts | one-to-many to Report | Computed, not stored. The layouts declared for the journal entry entity, flagged as invoice layouts, whose own record filter accepts this document. |
+| `display_pdf_report_id` | Show the layout selector | boolean | Computed, not stored. True when more than one layout is available **and** the document has no generated file yet. |
+| `template_id` | Mail template | many-to-one to Mail Template | Computed **and stored**, writable, evaluated with elevated rights, restricted to templates whose entity is the journal entry. Its default is the template chosen by document type (see [`interfaces.md`](interfaces.md) section 7.1). |
+| `lang` | Language | text | Computed, not stored, evaluated with elevated rights, never precomputed. The rendering language derived from the template for this document; when no template is selected it is the current user's language code. |
+| `mail_partner_ids` | Recipients | many-to-many to Partner | Computed **and stored**, writable, recomputed when the template or the language changes. Without a template it is the document's commercial entity when that entity has an electronic mail address, and empty otherwise; with a template it is the template's resolved recipients. |
+| `mail_attachments_widget` | Attachments | structured value | Computed **and stored**, writable, recomputed when the template, the electronic format, the extra deliveries or the layout change. The recomputation keeps every entry the user added by hand and rebuilds the rest. |
+| `attachments_not_supported` | Attachments not supported | structured value | Computed, not stored. Always an empty structure in the base platform; a channel that cannot carry attachments fills it so the dialogue can say so. |
+| `model` | Related document model | text | Computed **and stored**, writable. The entity the composed mail renders against; it is taken from the caller's context the first time and never overwritten afterwards. |
+| `res_ids` | Related document identifiers | text | Computed **and stored**, writable. The identifier of the document being sent. |
+| `template_name` | Template name | text | Plain stored text, no computation. Only used by the "save as a new mail template" path, where the user types the name of the template to create. |
+
+Three fields come from the composer contract and are re-derived here rather than declared here: the
+**subject** and the **body**, both recomputed from the template in the chosen language and both empty
+when no template is selected; and **may edit the body**, true only when electronic mail is among the
+chosen channels. The rendering entity of the composer is fixed to the journal entry.
+
+**Shapes of the structured values.**
+
+| Field | Shape |
+| --- | --- |
+| `sending_method_checkboxes`, `extra_edi_checkboxes` | a map from the channel or delivery key to an entry holding a ticked flag, a label and, for a delivery, an optional help text |
+| `sending_methods`, `extra_edis` | a list of the keys that are ticked |
+| `mail_attachments_widget` | a list of attachment entries, each carrying the file name, its origin (an already-generated file, a placeholder for a file yet to be produced, a template attachment, a dynamic report, or one the user added by hand), a protected flag for entries that may not be removed, and a manual flag for entries the user added |
+| `alerts` | a map from a stable alert key to an entry with a level, a message and an optional action |
+
+### 8.2 Invoice Batch Send Wizard — field table
+
+| Field (storage name) | Full name | Type | Rules |
+| --- | --- | --- | --- |
+| `move_ids` | Journal Entries | many-to-many to Journal Entry | **Required.** Its default is the whole set of documents the user selected. A constraint re-checks the sending guards on every document whenever the set is set. |
+| `summary_data` | Summary | structured value | Computed, not stored, recomputed from the document set. See below. |
+| `alerts` | Alerts | structured value | Computed, not stored, recomputed from the summary. The warnings and blockers collected over the whole selection, using each document's own default settings. |
+
+There is nothing else to choose: the batch wizard offers no channel, template, layout or recipient
+field, because every document is sent with its own partner's settings.
+
+**Shape and labels of the summary.** The summary is a map whose key is a channel key or an extra
+electronic delivery key, and whose entry holds a count and a label:
+
+1. For each selected document, its default extra electronic deliveries are counted, and its default
+   channels are counted, keeping only the channels that pass the applicability test for that
+   document with that document's own settings.
+2. Each extra electronic delivery contributes an entry whose count is the number of documents that
+   would use it and whose label is the word "by ", a space and that delivery's own label — for
+   example a delivery labelled "the exchange network" is summarised as "by the exchange network".
+3. Each channel contributes an entry whose count is the number of documents that would use it and
+   whose label is the channel's own label, with one substitution: the manual channel is relabelled
+   "Manually", reproduced exactly, instead of its ordinary label. The substitution exists because in
+   batch mode everything is produced asynchronously and nothing is handed to the user for download,
+   so the ordinary "download it yourself" wording would be wrong.
+
+Worked example: five documents are selected; three partners prefer electronic mail, two prefer the
+manual channel, and one extra electronic delivery labelled "the exchange network" applies to four of
+them. The summary holds three entries: electronic mail with a count of 3 and its ordinary label, the
+manual channel with a count of 2 and the label "Manually", and the delivery with a count of 4 and the
+label "by the exchange network".
 
 ---
 
