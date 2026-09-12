@@ -152,7 +152,7 @@ Replenishment turns a need into a supplying document. The workflows below carry 
 
 1. **Validate the rules.** For every pair, if the rule has no `location_source`, raise a procurement exception carrying the single pair and the message `No source location defined on stock rule: <rule name>!`. Nothing is created.
 2. **Order the pairs.** Sort the pairs so that requests with a negative or zero quantity are handled before requests with a positive quantity. (The sort key is the boolean "quantity is greater than zero", ascending.) This matters because a negative request expresses a return and must be able to merge with its sibling.
-3. **Compute the supply method to write.** For each pair, the move's supply method is the rule's `procure_method`, except that `make_to_stock_else_make_to_order` is written as `make_to_stock`. The split between the part taken from stock and the part that triggers another rule has already happened before the request was built (see section 8, step 3).
+3. **Compute the supply method to write.** For each pair, the move's supply method is the rule's `procure_method`, except that `mts_else_mto` (make to stock, else make to order) is written as `make_to_stock`. The split between the part taken from stock and the part that triggers another rule has already happened before the request was built (see section 8, step 3).
 4. **Build the move values** for each pair, as follows.
 
 | Move field | Value |
@@ -445,12 +445,12 @@ Had the sales safety days been 2, step 1 would give `date_planned` = day 18 and 
 1. **Classify each draft move.**
    - If the move already has origin moves: it becomes *waiting*.
    - Else if its supply method is `make_to_order`: it becomes *waiting* and a procurement request is created for it.
-   - Else if its rule's supply method is `make_to_stock_else_make_to_order`: it becomes *confirmed* and a procurement request is created for it.
+   - Else if its rule's supply method is `mts_else_mto`: it becomes *confirmed* and a procurement request is created for it.
    - Else: it becomes *confirmed*.
    Moves that are not drafts are left alone.
 2. **Compute the quantity to procure** for each move that needs a request:
-   - For a move whose rule's supply method is not `make_to_stock_else_make_to_order`, the quantity is the move's demand quantity.
-   - For a move whose rule's supply method is `make_to_stock_else_make_to_order`:
+   - For a move whose rule's supply method is not `mts_else_mto`, the quantity is the move's demand quantity.
+   - For a move whose rule's supply method is `mts_else_mto`:
      - when the move's real quantity is zero or negative, or when the move's source location bypasses reservation, the quantity is the full demand quantity;
      - otherwise: read the free quantity of the product at the move's source location once per (location, product) pair; subtract from it the quantity already consumed by earlier moves of the same batch for that pair; the result, floored at zero, is the *available quantity*; the quantity to procure is `max(move real quantity − available quantity, 0)`, converted into the move's unit with half-up rounding; and the consumed amount for that pair is increased by `min(move real quantity, available quantity)`.
 3. **Build the procurement request values** for each such move:
@@ -461,7 +461,7 @@ Had the sales safety days been 2, step 1 would give `date_planned` = day 18 and 
 | `date_order` | the dates-information result |
 | `date_deadline` | the move's `deadline` |
 | `move_destinations` | the move itself, but only when the move's supply method is `make_to_order`; empty otherwise |
-| `partner` | the move's partner, resolved as follows, and only when the rule's supply method is `make_to_order` or `make_to_stock_else_make_to_order`: when the move's source location is the company's internal transit location, the partner of the destination location's warehouse; otherwise the move's own partner |
+| `partner` | the move's partner, resolved as follows, and only when the rule's supply method is `make_to_order` or `mts_else_mto`: when the move's source location is the company's internal transit location, the partner of the destination location's warehouse; otherwise the move's own partner |
 | `routes` | the move's `routes`; when the move has none, the routes of the package types of the packages holding the move's result packages |
 | `warehouse` | the move's `warehouse`, else the warehouse of the move's operation type; when the move's source location belongs to no warehouse, the supplier warehouse of the move's rule's route instead |
 | `priority` | the move's priority |
@@ -500,7 +500,7 @@ Two different mechanisms create a chain of moves. A replacement must implement b
 | Direction | Backwards: the downstream move exists first, the origin document is created to supply it. | Forwards: the origin move exists first, the downstream move is created to continue. |
 | Link | The created move lists the triggering move in `move_destinations`. | The created move is listed in the completing move's `move_destinations`. |
 | Reservation | The downstream move waits for the origin move; it reserves nothing from general stock. | The downstream move is created with supply method `make_to_order` and is therefore bound to the move that created it. |
-| Quantity | The full demand quantity, except for `make_to_stock_else_make_to_order` where only the missing part is chained. | The quantity actually completed on the origin move (or the full negative demand for a negative move). |
+| Quantity | The full demand quantity, except for `mts_else_mto` where only the missing part is chained. | The quantity actually completed on the origin move (or the full negative demand for a negative move). |
 | Cancellation | Governed by the rule's `propagate_cancel`, evaluated downstream. | Same. |
 | Typical use | Buying or manufacturing specifically for one sales order. | Two-step reception, three-step reception, two-step and three-step delivery. |
 
@@ -531,7 +531,7 @@ A purchase order for 12 units is confirmed:
    3. If a rule is found, stop.
    4. Otherwise set *location* to its parent and repeat.
 3. If no rule was found at all, set the move's supply method to `make_to_stock` and stop.
-4. Otherwise write the rule on the move, and set the move's supply method to the rule's supply method when that is `make_to_stock` or `make_to_order`, or to `make_to_stock` when the rule's supply method is `make_to_stock_else_make_to_order`.
+4. Otherwise write the rule on the move, and set the move's supply method to the rule's supply method when that is `make_to_stock` or `make_to_order`, or to `make_to_stock` when the rule's supply method is `mts_else_mto`.
 
 ---
 

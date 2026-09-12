@@ -70,18 +70,22 @@ The three persistent entities this domain owns — Route, Stock Rule and Reorder
 
 ---
 
-## 1. Route archive state
+## 1. Route
+
+A Route carries seven state fields: the archive flag that decides whether the route takes part in rule selection at all, and the six applicability flags that decide where the route may be attached. All seven are stored booleans, all seven are copied when the record is duplicated, none of them is tracked, and exactly one of them — `warehouse_selectable` — has a write side effect of its own.
+
+### 1.1 Archive state
 
 **Field.** `active` on Route. Boolean, stored, default true, copied when the record is duplicated.
 
-### 1.1 States
+#### 1.1.1 States
 
 | Stored value | Label | Meaning |
 |---|---|---|
 | `true` | Active | The route takes part in rule selection, is offered wherever its selectable flags allow, and its rules are candidates for every need and every arrival. |
 | `false` | Archived | The route is excluded from every default query. It is never a candidate route, never offered on a product, a product category, a warehouse, a package type, a sales order line or a shipping method, and the rules it archived with it are equally invisible. The record and its rules survive, so unarchiving restores the exact configuration. |
 
-### 1.2 Transition table
+#### 1.1.2 Transition table
 
 | From | To | Trigger | Guards, in evaluation order | Records created or changed |
 |---|---|---|---|---|
@@ -97,13 +101,13 @@ The three persistent entities this domain owns — Route, Stock Rule and Reorder
 | Archived | Active | A pull rule of the global Dropship route becomes active again | At least one active pull rule exists in the route | The route's `active` becomes true. |
 | Active or Archived | deleted | A user deletes the route | The route is not referenced by a warehouse's `reception_route` or `delivery_route`; those two relations refuse the deletion | Every Stock Rule of the route is deleted, because the rule's `route` relation has deletion behavior `cascade`. |
 
-### 1.3 Guards with their refusal messages
+#### 1.1.3 Guards with their refusal messages
 
 1. **Company consistency.** Evaluated whenever `company` is written on the route and whenever `company` is written on one of its rules. A route with a company whose rule carries a different company is refused with: `Rule <rule name> belongs to <rule company> while the route belongs to <route company>.` The placeholders are the display name of the offending rule, the display name of the rule's company and the display name of the route's company. A route with no company never fails this check, because an empty company means "shared by every company" (`RP-RULE-001`).
 2. **Deletion of a route a warehouse depends on.** The `reception_route` and `delivery_route` relations of Warehouse have deletion behavior `restrict`: the platform's shared "record is referenced" refusal is raised and the route stays.
 3. No guard refuses archiving or unarchiving. Archiving a route that rule selection is currently relying on is allowed; the consequence is that needs at the affected locations stop finding a rule and fail with the message of `RP-RULE-072`.
 
-### 1.4 Diagram
+#### 1.1.4 Diagram
 
 ```mermaid
 stateDiagram-v2
@@ -121,11 +125,121 @@ stateDiagram-v2
     Archived --> [*]: Delete, cascading to every rule
 ```
 
+### 1.2 The five plain applicability flags
+
+**Fields.** Five stored booleans on Route. Each one decides whether the route may be **attached** to one kind of record; none of them changes what the route's rules do once the route is attached. All five are copied when the record is duplicated, none is tracked, and none is derived.
+
+| Identifier | Full name in words | Label on the form | Default | Contributed by |
+|---|---|---|---|---|
+| `product_selectable` | product selectable | "Applicable on Product" | `true` | the Inventory capability package |
+| `product_category_selectable` | product category selectable | "Applicable on Product Category" | `false` | the Inventory capability package |
+| `package_type_selectable` | package type selectable | "Applicable on Package Type" | `false` | the Inventory capability package |
+| `sale_selectable` | sale selectable | "Selectable on Sales Order Line" | `false` | the Sales Inventory capability package |
+| `shipping_selectable` | shipping selectable | "Applicable on Shipping Methods" | `false` | the Delivery Methods capability package |
+
+#### 1.2.1 States
+
+Each of the five carries the same two states.
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `true` | Applicable | The route appears in the route selector of the kind of record the flag names, and may be attached there. Once attached, the route's rules become candidates for every need and every arrival that concerns that record. |
+| `false` | Not applicable | The route is absent from that selector, so no new attachment can be made. Attachments made while the flag was `true` are **not** removed: an existing link keeps working and keeps making the route a candidate. Only the ability to create a new attachment is withdrawn. |
+
+What each flag opens when it is `true`:
+
+| Flag | The selector it opens | The effect of an attachment made through it |
+|---|---|---|
+| `product_selectable` | The Routes field on the Inventory tab of a Product Template, and the route selector of the Product Replenish Wizard | The route is a candidate route for every need and every arrival of that product. |
+| `product_category_selectable` | The Routes field of a Product Category | The route is a candidate route for every product of that category that does not carry its own route. |
+| `package_type_selectable` | The Routes field of a Package Type | The route is a candidate route for goods handled in that package type. |
+| `sale_selectable` | The Route field of a Sales Order Line | The route is forced onto the need created from that line, ahead of the product's own routes. |
+| `shipping_selectable` | The Routes field of a Shipping Method | The route is a candidate route for a delivery carried by that shipping method. |
+
+The flags are read only when the selector is built. Rule selection itself never reads them: it reads the attachment, not the flag that allowed it. This is why unticking a flag never changes the behaviour of a route that is already attached.
+
+The `route` field of a Reordering Rule is a partial exception and must be reproduced as such: it accepts a route whose `product_selectable` is `true`, **or** any route that contains at least one rule whose action is `buy` or `manufacture`, whatever the five flags say (`RP-RULE-050`).
+
+#### 1.2.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `product_selectable` `true`, the four others `false` | An inventory administrator creates a route without supplying the flags | none | The defaults are applied. |
+| not existing | `product_selectable` `true` and `product_category_selectable` `true` | Warehouse configuration generates the reception route or the delivery route, or the inter-warehouse resupply generator creates a resupply route | The guards of section 1.1.2 for that creation path | The route is created with those two flags `true`; `package_type_selectable`, `sale_selectable` and `shipping_selectable` keep their default `false`. |
+| `false` | `true` | An inventory administrator ticks the flag | none | Nothing else is written. The route appears in the corresponding selector on the next read of that selector. |
+| `true` | `false` | An inventory administrator unticks the flag | none | Nothing else is written. Existing attachments survive; see the finding below. |
+| any | the same value | A user duplicates the route | none | All five flags are copied unchanged onto the copy, while `products`, `product_categories`, `warehouses`, `supplied_warehouse` and `supplier_warehouse` are cleared. |
+
+#### 1.2.3 Guards and consequences
+
+1. No guard refuses either value of any of the five flags. Every combination is storable, including all five `false`, which makes the route reachable only through the Routes screen and through the rules that already point at it.
+2. **Compatibility finding — unticking a flag leaves stale attachments behind.** Unticking `product_selectable` on a route that thirty products already carry removes the route from the product selector but leaves the route on all thirty products, where it keeps driving rule selection and can no longer be removed from the form, because the field that held it is now hidden. The same holds for the other four. Only `warehouse_selectable` clears its own attachments, and only when it is written through a form (section 1.3). A corrected behaviour applies the `warehouse_selectable` treatment to all six: clearing the corresponding attachment set in the same write that sets the flag to `false`, and doing it on every write rather than only on a form on-change.
+3. Archiving the route (section 1.1) makes it invisible whatever these five flags say. The flags and the archive flag are independent: an archived route with every applicability flag `true` is offered nowhere.
+
+#### 1.2.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Applicable: Created with the flag defaulting to true
+    [*] --> NotApplicable: Created with the flag defaulting to false
+    state "Applicable, offered in the selector" as Applicable
+    state "Not applicable, absent from the selector" as NotApplicable
+    Applicable --> NotApplicable: Flag unticked, existing attachments survive
+    NotApplicable --> Applicable: Flag ticked
+    Applicable --> Applicable: Route duplicated, the flag is copied
+    NotApplicable --> NotApplicable: Route duplicated, the flag is copied
+```
+
+### 1.3 The warehouse applicability flag
+
+**Field.** `warehouse_selectable` on Route, labelled "Applicable on Warehouse". Boolean, stored, default false, copied when the record is duplicated. It is separated from the five flags of section 1.2 because it is the only one of the six that writes another field when it changes.
+
+#### 1.3.1 States
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `true` | Applicable on Warehouse | The route may be listed in a warehouse's route set and holds its own `warehouses` set. For every warehouse in that set the route acts as a default route: goods passing through the warehouse are offered the route's rules even when neither the product nor its category carries the route. The `allowed_warehouses` list restricts what may be added — every warehouse of the route's `company`, or every warehouse when `company` is empty. |
+| `false` | Not applicable on Warehouse | The route is absent from the warehouse route selector, and `warehouses` is empty whenever the flag was switched off through a form, because the form on-change empties the set in the same edit. |
+
+#### 1.3.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `false` | An inventory administrator creates a route without supplying the flag | none | The default is applied. |
+| not existing | `true` | Warehouse configuration generates the reception route or the delivery route of a warehouse | The warehouse exists and its step value is known | The route is created with `warehouse_selectable` `true` and `product_category_selectable` `true`, and is added to the warehouse's `routes`. |
+| not existing | `true` | The inter-warehouse resupply generator creates a resupply route for a pair of warehouses | The two guards of section 14.2 | The route is created with `warehouse_selectable` `true`, `product_selectable` `true` and `product_category_selectable` `true`. |
+| `false` | `true` | An inventory administrator ticks the flag on a form | none | The Warehouses field becomes visible and empty. `allowed_warehouses` is computed from `company`. |
+| `true` | `false` | An inventory administrator unticks the flag on a form | none | **`warehouses` is emptied in the same on-change.** Every warehouse for which this route was a default route stops having it. The route's rules are untouched and are still reachable through a product, a category or a sales order line when the matching flag of section 1.2 allows it. |
+| `true` | `false` | The value `false` is written outside a form — by an import, by a batch write or by a scripted configuration step | none | The on-change does not run, so `warehouses` keeps its members and the route keeps acting as a default route for them while being absent from the selector. See the finding below. |
+| `true` | `true` | `company` is written on the route through a form | none | `warehouses` is filtered down to the warehouses of the new company; warehouses of other companies are dropped. `allowed_warehouses` is recomputed. |
+| any | the same value | A user duplicates the route | none | The flag is copied; `warehouses`, `supplied_warehouse` and `supplier_warehouse` are cleared on the copy. |
+
+#### 1.3.3 Guards and consequences
+
+1. No guard refuses either value.
+2. `warehouses` is restricted to `allowed_warehouses`. A warehouse of another company is refused with the shared "value not allowed" message of the platform.
+3. **Compatibility finding — the clearing of `warehouses` is a form behaviour, not a rule.** Emptying `warehouses` happens in the form on-change of `warehouse_selectable` and in the form on-change of `company`, so a write that does not go through a form leaves a route that is not applicable on warehouses still attached to warehouses, and leaves a route whose company changed still attached to warehouses of the old company — which the company-consistency rule of section 1.1.3 does not catch, because it only compares the route company with its rules' companies. A corrected behaviour performs both clearings in the write itself, so that the stored data can never hold a warehouse attachment that the flags forbid.
+4. Archiving the route does not clear `warehouses`; unarchiving therefore restores the exact configuration, which is the behaviour section 1.1.1 relies on.
+
+#### 1.3.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> NotApplicable: Created with the default false
+    [*] --> Applicable: Generated by warehouse configuration or by the resupply generator
+    state "Applicable on warehouses" as Applicable
+    state "Not applicable on warehouses" as NotApplicable
+    Applicable --> NotApplicable: Unticked on a form, the warehouse set is emptied
+    Applicable --> NotApplicable: Written false outside a form, the warehouse set survives
+    NotApplicable --> Applicable: Ticked, the warehouse set starts empty
+    Applicable --> Applicable: Company changed, the warehouse set is filtered
+```
+
 ---
 
 ## 2. Stock Rule
 
-A Stock Rule carries four state fields: its archive flag, its action, its supply method and its push mode. They are independent machines on one record, and a replacement must implement all four.
+A Stock Rule carries seven state fields: its archive flag, its action, its supply method, its push mode, the flag that decides where the created move lands, the flag that propagates cancellation down the chain and the flag that propagates the shipping method. They are independent machines on one record, and a replacement must implement all seven.
 
 ### 2.1 Archive state
 
@@ -248,7 +362,7 @@ stateDiagram-v2
 |---|---|---|
 | `make_to_stock` | Take From Stock | The goods are taken from the stock available in `location_source`. Confirming the created move creates no further need. |
 | `make_to_order` | Trigger Another Rule | The stock available in `location_source` is ignored. Confirming the created move creates a new need at `location_source` for the full demand quantity, and rule selection runs again for it. |
-| `make_to_stock_else_make_to_order` | Take From Stock, if unavailable, Trigger Another Rule | The free stock of `location_source` covers as much as it can; only the missing quantity creates a new need there. The created move is written with `make_to_stock`, because the split has already happened. |
+| `mts_else_mto` | Take From Stock, if unavailable, Trigger Another Rule | The stored value shortens "make to stock, else make to order". The free stock of `location_source` covers as much as it can; only the missing quantity creates a new need there. The created move is written with `make_to_stock`, because the split has already happened. |
 
 #### 2.3.2 Transition table
 
@@ -267,8 +381,8 @@ stateDiagram-v2
 No guard refuses a value: all three are always storable. Three consequences are nevertheless part of the machine and a replacement must reproduce them.
 
 1. A rule whose `location_source` equals its `destination_location` and whose supply method is `make_to_order` describes an endless supply loop. Saving it is allowed; the loop is detected when a rule chain is walked, and the walk refuses with `Invalid rule's configuration, the following rule causes an endless loop: <rule display name>`, where the placeholder is the display name of the rule that appeared twice (`RP-RULE-036`, `RP-RULE-160`). **Industry-standard default.** The late detection is deliberate, so that a partially built configuration stays editable; a replacement should apply the same late detection rather than refusing at save time.
-2. `make_to_stock_else_make_to_order` is never written onto a stock move. The pull action writes `make_to_stock` in its place, because the split between the part taken from stock and the part that triggers another rule happened before the request was built (`RP-RULE-081`).
-3. When an existing move is re-evaluated against the rules, a rule whose supply method is `make_to_stock_else_make_to_order` gives the move `make_to_stock` (`RP-RULE-153`).
+2. `mts_else_mto` is never written onto a stock move. The pull action writes `make_to_stock` in its place, because the split between the part taken from stock and the part that triggers another rule happened before the request was built (`RP-RULE-081`).
+3. When an existing move is re-evaluated against the rules, a rule whose supply method is `mts_else_mto` gives the move `make_to_stock` (`RP-RULE-153`).
 
 #### 2.3.4 Diagram
 
@@ -276,11 +390,11 @@ No guard refuses a value: all three are always storable. Three consequences are 
 stateDiagram-v2
     [*] --> make_to_stock: Default on creation
     make_to_stock --> make_to_order: Edit, or resupply rule not sourced at stock
-    make_to_stock --> make_to_stock_else_make_to_order: Edit
+    make_to_stock --> mts_else_mto: Edit
     make_to_order --> make_to_stock: Edit, or supplying warehouse back to one delivery step
-    make_to_order --> make_to_stock_else_make_to_order: Edit
-    make_to_stock_else_make_to_order --> make_to_stock: Edit
-    make_to_stock_else_make_to_order --> make_to_order: Edit
+    make_to_order --> mts_else_mto: Edit
+    mts_else_mto --> make_to_stock: Edit
+    mts_else_mto --> make_to_order: Edit
 ```
 
 ### 2.4 Push mode
@@ -319,11 +433,137 @@ stateDiagram-v2
     transparent --> transparent: Re-run of arrival handling while the destination changes
 ```
 
+### 2.5 The destination-location origin flag
+
+**Field.** `location_destination_from_rule` on Stock Rule, labelled "Destination location origin from rule". Boolean, stored, default false, copied when the record is duplicated. It decides which of two locations the rule stamps on the move it creates, and which of them becomes the move's final location instead.
+
+#### 2.5.1 States
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `false` | Destination taken from the operation type | The created move's `destination_location` is the default destination location of the rule's `operation_type`, and the rule's own `destination_location` is written on the move as its `location_final` — the place the goods must eventually reach. The move therefore lands one step short of the rule's destination and a further rule is expected to carry it the rest of the way (`RP-RULE-032`). |
+| `true` | Destination taken from the rule | The created move's `destination_location` is the rule's own `destination_location`. The operation type's default destination location is ignored for this move, and no final location is derived from the rule. |
+
+#### 2.5.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `false` | An inventory administrator creates a rule without supplying the flag | none | The default is applied. Every rule that warehouse configuration generates for a reception route or a delivery route keeps `false`. |
+| not existing | `true` | The inter-warehouse resupply generator creates the **first** rule of a resupply route, the one that runs from the supplying warehouse's output location to the transit location | The two guards of section 14.2 | The rule is created with `location_destination_from_rule` `true`, so that the goods stop in the transit location instead of being pushed on to the operation type's default destination. The second and third rules of the same route are created with the default `false`. |
+| `false` | `true` | An inventory administrator edits the field | none | Moves already created keep the destination and final location they were given; only needs resolved after the edit change. |
+| `true` | `false` | An inventory administrator edits the field | none | The same: no existing move is rewritten. |
+| any | the same value | A user duplicates the rule | none | The flag is copied unchanged. |
+
+#### 2.5.3 Guards and consequences
+
+1. No guard refuses either value.
+2. The flag is read only by the pull action, and only for a rule whose `action` is `pull` or `pull_push` and whose operation type has a default destination location. A `push`, `buy` or `manufacture` rule stores a value that is never consulted.
+3. The flag also changes the sentence the Rules screen shows for the rule: when the action is `pull` or `pull_push`, the operation type has a default destination location that differs from the rule's `destination_location`, and the flag is `false`, the description gains the clause that names the operation type's destination as the place the goods will actually be moved towards. The full text is in `calculations.md`, section "Rule description message".
+4. Setting the flag to `true` on a rule whose operation type points elsewhere is the documented way to make a rule land exactly where it says, and it is what makes an inter-warehouse resupply chain stop in transit rather than jump to the supplying warehouse's own default destination.
+
+#### 2.5.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> FromOperationType: Default on creation
+    [*] --> FromRule: First rule of a generated resupply route
+    state "Destination from the operation type" as FromOperationType
+    state "Destination from the rule" as FromRule
+    FromOperationType --> FromRule: Edit
+    FromRule --> FromOperationType: Edit
+```
+
+### 2.6 The cancellation-propagation flag
+
+**Field.** `propagate_cancel` on Stock Rule, labelled "Cancel Next Move". Boolean, stored, default false, copied when the record is duplicated. It is stamped onto every stock move and every purchase order line the rule creates, and it is read at cancellation time from that copy, never from the rule.
+
+#### 2.6.1 States
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `false` | Do not cancel the next move | Cancelling a move created by this rule never cancels the moves downstream of it. When every sibling origin move is completed or cancelled, the downstream moves have their supply method set to `make_to_stock` and are unlinked from the cancelled move, so they survive and will be served from stock (`RP-RULE-242`). |
+| `true` | Cancel the next move | Cancelling a move created by this rule cancels the downstream moves that are not yet completed and whose source location equals the cancelled move's destination location, provided every sibling origin move is already cancelled. Downstream moves that do not match are set to `make_to_stock` and unlinked (`RP-RULE-241`). When the stored parameter `inventory.cancel_originating_moves` is present, cancelling such a move also cancels its not-yet-completed origin moves (`RP-RULE-243`). |
+
+#### 2.6.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `false` | An inventory administrator creates a rule without supplying the flag | none | The default is applied. |
+| not existing | `true` | Warehouse configuration generates the reception route of a warehouse | The warehouse's reception step value is known | Every rule of the generated list is created with `propagate_cancel` `true`, **then the last rule of the list has it forced back to `false`**, so that cancelling the first step of a receipt chain never cascades past the end of the chain into an unrelated delivery (`RP-RULE-034`). |
+| not existing | derived from the reception steps | Warehouse configuration generates the `buy_pull` rule of a warehouse | `buy_to_resupply` is true | The rule is created with `propagate_cancel` equal to "the warehouse's reception step value is not one step". |
+| `false` | `true`, or `true` to `false` | The warehouse's reception step value is changed | none | The reception route is rebuilt: the rules are rewritten with `true` and the last one forced back to `false`, and the `buy_pull` rule's `propagate_cancel` is rewritten to "the new step value is not one step". |
+| `false` | `true` | An inventory administrator edits the field | none | Moves and purchase order lines already created keep the value they were stamped with; only documents created after the edit change. |
+| `true` | `false` | An inventory administrator edits the field | none | The same. |
+| any | the same value | A user duplicates the rule | none | The flag is copied unchanged. |
+
+#### 2.6.3 Guards and consequences
+
+1. No guard refuses either value, and no configuration is rejected because of it. The forced `false` on the last rule of a generated chain is a write, not a refusal.
+2. The value is copied onto the created stock move at creation and onto the created purchase order line by the buy action. It is part of the purchase order line merge key: two needs may share one line only when their `propagate_cancel` values match (`RP-RULE-106`, `RP-RULE-108`).
+3. Cancelling a purchase order or deleting a purchase order line reads the value from the **line**, not from the rule: the remaining downstream moves are cancelled when the line's `propagate_cancel` is true and fall back to `make_to_stock` otherwise (`RP-RULE-245`, `RP-RULE-247`).
+4. Because the value travels with the document, editing the rule can never change the fate of a document that already exists. A replacement that reads the rule at cancellation time instead of the stamped copy produces a different, and wrong, cascade.
+
+#### 2.6.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> DoNotCancel: Default on creation
+    [*] --> Cancel: Generated on a reception route, except its last rule
+    state "Do not cancel the next move" as DoNotCancel
+    state "Cancel the next move" as Cancel
+    DoNotCancel --> Cancel: Edit, or reception steps changed
+    Cancel --> DoNotCancel: Edit, or reception steps changed, or forced false as the last rule of a chain
+```
+
+### 2.7 The shipping-method-propagation flag
+
+**Field.** `propagate_carrier` on Stock Rule, labelled "Propagation of carrier". Boolean, stored, default false, copied when the record is duplicated. It is read from the rule at two moments and is never stamped onto a document.
+
+#### 2.7.1 States
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `false` | Do not propagate the shipping method | A transfer created for a move of this rule receives no shipping method from the chain. A shipping method may still be set on it by hand or by the delivery step that owns it. |
+| `true` | Propagate the shipping method | A transfer created for a move of this rule receives a shipping method and a tracking reference from the chain, and a validated transfer that carries a shipping method passes it on to the next transfers whose moves belong to a rule with this flag. |
+
+#### 2.7.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `false` | An inventory administrator creates a rule without supplying the flag | none | The default is applied. |
+| not existing | `true` | Warehouse configuration generates the delivery route of a warehouse | The warehouse's delivery step value is known | Every rule of the generated delivery list is created with `propagate_carrier` `true`. |
+| not existing | `true` | Warehouse configuration generates the warehouse's make-to-order rule inside the shipped "Replenish on Order" route | `delivery_steps` is known | The rule is created with `procure_method` `make_to_order`, `auto` `manual` and `propagate_carrier` `true`. |
+| `false` | `true` | An inventory administrator edits the field | none | Transfers already created keep the shipping method they have; only transfers created or validated after the edit change. |
+| `true` | `false` | An inventory administrator edits the field | none | The same. |
+| any | the same value | A user duplicates the rule | none | The flag is copied unchanged. |
+
+#### 2.7.3 Guards and consequences
+
+Two distinct moments read the flag, and a replacement must reproduce both, because a shipping method may be chosen before the chain starts or half-way through it.
+
+1. **When a transfer is created for a batch of moves.** If no rule among the moves of the new transfer has `propagate_carrier` true, nothing is propagated. Otherwise: the candidate shipping method is the one of the sales orders reached through the moves' stock references, but only when those orders resolve to exactly one shipping method; when the origin moves' transfers resolve to exactly one shipping method, that one is taken instead, because a shipping method chosen on an earlier step is more recent than the one on the order. The tracking reference is taken from the first origin transfer that carries one. Each of the two is written on the new transfer only when it is non-empty.
+2. **When a transfer that carries a shipping method is validated.** Every transfer that follows it in the chain, that has no shipping method of its own, and among whose moves at least one rule has `propagate_carrier` true, receives that shipping method and that tracking reference.
+3. No guard refuses either value, and the flag is never read for a rule whose action is `buy` or `manufacture`, because those actions create no transfer of their own.
+
+#### 2.7.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> DoNotPropagate: Default on creation
+    [*] --> Propagate: Generated on a delivery route or as the make-to-order rule
+    state "Do not propagate the shipping method" as DoNotPropagate
+    state "Propagate the shipping method" as Propagate
+    DoNotPropagate --> Propagate: Edit
+    Propagate --> DoNotPropagate: Edit
+    Propagate --> Propagate: Transfer created, shipping method and tracking reference copied from the chain
+    Propagate --> Propagate: Upstream transfer validated, shipping method pushed to the next transfers
+```
+
 ---
 
 ## 3. Reordering Rule
 
-A Reordering Rule carries five machines: its trigger, its snooze state, its archive flag, its derived replenishment state and its manual-override state. The first three are stored, the last two are derived from stored quantities.
+A Reordering Rule carries six machines: its trigger, its snooze state, its archive flag, its derived replenishment state, its manual-override state and the pair of derived flags that decide which of the two supply columns the screens show. The first three are stored, the last three are derived from stored values.
 
 ### 3.1 Trigger
 
@@ -353,7 +593,7 @@ A Reordering Rule carries five machines: its trigger, its snooze state, its arch
 2. **A snooze date may not be written on an automatic rule.** Evaluated on every write that contains `snoozed_until`, and refused as soon as **any** record of the written set has `trigger` equal to `auto`. Refusal: `You can only snooze manual orderpoints. You should rather archive 'auto-trigger' orderpoints if you do not want them to be triggered.`
 3. **Uniqueness.** `A replenishment rule already exists for this product on this location.`
 4. **Minimum and maximum.** `The minimum quantity must be less than or equal to the maximum quantity.`
-5. **Kit products.** `A product with a kit-type bill of materials can not have a reordering rule.`
+5. **Kit products.** `A product with a kit-type bill of materials can not have a reordering rule.` (`RP-RULE-042`). The constraint is enforced from both sides, and a replacement must implement both. The mirror guard sits on Bill of Materials: making a bill of materials a kit, or pointing an existing kit bill at another product, is refused as soon as any of the products concerned has at least one reordering rule, with `You can not create a kit-type bill of materials for products that have at least one reordering rule.` (`RP-RULE-355`). The two together make the invariant "a kit product never has a reordering rule" unbreakable in either order of operations; a replacement that implements only the reordering-rule side lets a user reach the forbidden combination by creating the rule first and the kit bill afterwards.
 6. **The company may never change.** `Changing the company of this record is forbidden at this point, you should rather archive it and create a new one.`
 7. **No warehouse for the company.** The shared redirect warning of `../inventory-operations/`: `Please create a warehouse for company <company name>.` with the button `Go to Warehouses` for an inventory administrator, or `Please contact your administrator to configure your warehouse.` for anyone else.
 
@@ -572,6 +812,61 @@ stateDiagram-v2
     Override --> Override: Trigger switched to automatic by editing the field
 ```
 
+### 3.6 The two supply-column flags
+
+**Fields.** `show_vendor` and `show_bill_of_materials` on Reordering Rule. Both are derived booleans, neither is stored, neither is copied, and neither can be written by anyone. They decide whether the Vendor column and the Bill of Materials column are shown on the replenishment report and on the Reordering Rules screen for that row. `show_vendor` is contributed by the Purchase Inventory capability package and `show_bill_of_materials` by the Manufacturing capability package; on a database where the package is absent the field does not exist and its column is never rendered.
+
+Neither field carries a label of its own: they are read only by the column-visibility conditions of the two screens, never rendered. Their two siblings, `unwanted_replenish` and `show_supply_warning`, are specified with the replenishment state in section 3.4; these two are separate because they depend on `effective_route` alone and change with the configuration rather than with the quantities.
+
+#### 3.6.1 States
+
+| Field | Stored value | Label | Meaning |
+|---|---|---|---|
+| `show_vendor` | `true` | (not rendered; the field drives column visibility) | `effective_route` is one of the routes that contain at least one rule whose action is `buy`. The Vendor column is shown for the row, the vendor cell offers the rule's `vendor_price` with `vendor_price_identifier_placeholder` as its grey placeholder, and the vendor tab of the Replenishment Information dialog is the one the user is expected to use. |
+| `show_vendor` | `false` | (not rendered) | `effective_route` is empty, or it is a route that holds no `buy` rule. The Vendor column is hidden for the row. The rule may still be served by purchasing when rule selection reaches a `buy` rule through a route the user did not choose; the flag describes the **chosen** route, not the chain that will actually run. |
+| `show_bill_of_materials` | `true` | (not rendered) | `effective_route` is one of the routes that contain at least one rule whose action is `manufacture`. The Bill of Materials column is shown for the row and offers the rule's `bill_of_materials` with `bill_of_materials_identifier_placeholder` as its grey placeholder. |
+| `show_bill_of_materials` | `false` | (not rendered) | `effective_route` is empty, or it is a route that holds no `manufacture` rule. The Bill of Materials column is hidden for the row. |
+
+The two are independent: a route that holds both a `buy` rule and a `manufacture` rule shows both columns, and a route that holds neither shows neither. `effective_route` is `route` when the user chose one and the default route computed by `calculations.md`, section "Default route of a reordering rule", otherwise; the flags therefore change when the user picks a route, when the default route changes, and when a rule is added to or removed from a route.
+
+#### 3.6.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| `false` | `true` for `show_vendor` | The user sets `route` to a route that contains a `buy` rule, or the computed default route becomes such a route | none | Nothing is written on the rule. The Vendor column appears on the next read. |
+| `false` | `true` for `show_vendor` | The user writes a `vendor_price` while `route` is empty | The write itself sets `route` to the route of the first `buy` rule of the rule's company or of no company (`RP-RULE-052`) | `route` is written, `effective_route` changes with it, and the flag follows. |
+| `true` | `false` for `show_vendor` | The user clears `route`, or points it at a route with no `buy` rule, or the last `buy` rule of the chosen route is deleted or archived | none | Clearing `route` also clears `vendor_price` (`RP-RULE-051`), so the hidden column can never keep a stale value. |
+| `false` | `true` for `show_bill_of_materials` | The user sets `route` to a route that contains a `manufacture` rule, or the computed default route becomes such a route | none | Nothing is written on the rule. |
+| `false` | `true` for `show_bill_of_materials` | The user writes a `bill_of_materials` while `route` is empty | The write itself sets `route` to the route of the first `manufacture` rule (`RP-RULE-053`) | `route` is written and the flag follows. |
+| `true` | `false` for `show_bill_of_materials` | The user clears `route`, or points it at a route with no `manufacture` rule, or the last `manufacture` rule of the chosen route is deleted or archived | none | `bill_of_materials` is **not** cleared by that write; the value survives, hidden, and is used again if the route is set back. |
+| either value | the same value | The rule's quantities, minimum, maximum or forecast change | none | Neither flag depends on a quantity. This is what distinguishes them from `unwanted_replenish` and `show_supply_warning` of section 3.4. |
+
+#### 3.6.3 Guards and consequences
+
+1. No guard refuses either value, because neither can be written.
+2. The scan that answers "does this route hold a `buy` rule?" reads **every** rule with that action across the database and keeps the routes they belong to, ignoring the archive flag of the rule's route and ignoring the company. A route of another company that holds a `buy` rule therefore makes the flag true for a rule of this company whose `effective_route` happens to be that route. In practice `effective_route` is already restricted to routes the rule may use, so the case arises only for a route with no company at all, which is exactly the shipped Buy route. This is the behaviour to reproduce.
+3. **Compatibility finding — a hidden bill of materials survives while a hidden vendor price does not.** Clearing `route` clears `vendor_price` but leaves `bill_of_materials` set, so a rule can carry a bill of materials that no screen shows and that the manufacture action will nevertheless use if a `manufacture` route is chosen again later. A corrected behaviour clears `bill_of_materials` in the same write that clears `route`, exactly as `RP-RULE-051` already does for `vendor_price`.
+
+#### 3.6.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Neither: Rule created without a route
+    state "Neither column shown" as Neither
+    state "Vendor column shown" as Vendor
+    state "Bill of materials column shown" as Bom
+    state "Both columns shown" as Both
+    Neither --> Vendor: Effective route holds a buy rule
+    Neither --> Bom: Effective route holds a manufacture rule
+    Neither --> Both: Effective route holds both
+    Vendor --> Neither: Route cleared, the vendor price is cleared with it
+    Bom --> Neither: Route cleared, the bill of materials survives hidden
+    Both --> Vendor: The manufacture rule leaves the route
+    Both --> Bom: The buy rule leaves the route
+    Vendor --> Both: A manufacture rule joins the route
+    Bom --> Both: A buy rule joins the route
+```
+
 ---
 
 ## 4. The replenishment report line
@@ -673,6 +968,24 @@ Five derived values of a Reordering Rule form a dependency chain: the rule chain
 
 **Refusal message of the Looping state.** `Invalid rule's configuration, the following rule causes an endless loop: <rule display name>`, where the placeholder is the display name of the rule that appeared twice.
 
+**Diagram.**
+
+```mermaid
+stateDiagram-v2
+    [*] --> NotApplicable: Rule with no product or no location
+    state "Not applicable" as NotApplicable
+    state "Chain empty" as EmptyChain
+    state "Chain resolved" as Resolved
+    state "Chain looping" as Looping
+    NotApplicable --> EmptyChain: Product and location supplied, the walk finds no rule
+    NotApplicable --> Resolved: Product and location supplied, the walk ends on a rule
+    EmptyChain --> Resolved: A route or a rule is added at the location or at an ancestor
+    Resolved --> EmptyChain: The last rule of the chain is archived or deleted
+    Resolved --> Resolved: The route, the product, the location, the company or the warehouse is written
+    Resolved --> Looping: A rule already added is met again, the read refuses
+    Looping --> Resolved: The offending rule is corrected
+```
+
 ### 5.2 The lead time
 
 **Fields.** `lead_days` and `lead_horizon_date` on Reordering Rule, both derived and not stored.
@@ -684,6 +997,21 @@ Five derived values of a Reordering Rule form a dependency chain: the rule chain
 | Refused | The chain is Looping | The message of section 5.1 aborts the read. |
 
 **Dependencies that invalidate it.** `rules`, the product's Vendor Prices, the lead time of those Vendor Prices, and the company's replenishment horizon. The lead time is computed with the description of each contribution switched off; the same computation with descriptions switched on produces the breakdown shown in the Replenishment Information dialog.
+
+**Diagram.**
+
+```mermaid
+stateDiagram-v2
+    [*] --> NotApplicable: Rule with no product or no location
+    state "Not applicable, zero days and no horizon date" as NotApplicable
+    state "Computed, total delay and horizon date" as Computed
+    state "Refused, the chain loops" as Refused
+    NotApplicable --> Computed: Product and location supplied
+    Computed --> Computed: A rule lead time, a vendor lead time or the replenishment horizon is written
+    Computed --> NotApplicable: The product or the location is emptied
+    Computed --> Refused: The chain of section 5.1 becomes looping
+    Refused --> Computed: The loop is removed
+```
 
 ### 5.3 The quantity-to-order computation
 
@@ -700,6 +1028,25 @@ Five derived values of a Reordering Rule form a dependency chain: the rule chain
 
 **Forced recomputation.** Two operations recompute the stored value explicitly rather than waiting for a read: task 1 of the scheduler recomputes it with elevated rights on every automatic rule before running them, and opening the replenishment report recomputes it when the opening context asks for a forced recomputation.
 
+**Diagram.**
+
+```mermaid
+stateDiagram-v2
+    [*] --> NotEvaluated: Form opened, the record has no identifier yet
+    state "Not evaluated" as NotEvaluated
+    state "Empty, nothing to order" as EmptyQty
+    state "Computed, a quantity to order" as ComputedQty
+    state "Stale, the stored column is behind" as Stale
+    NotEvaluated --> EmptyQty: Saved with a forecast at or above the minimum
+    NotEvaluated --> ComputedQty: Saved with a forecast below the minimum
+    EmptyQty --> Stale: A dependency is written
+    ComputedQty --> Stale: A dependency is written
+    Stale --> EmptyQty: Recomputed on the next read, forecast at or above the minimum
+    Stale --> ComputedQty: Recomputed on the next read, forecast below the minimum
+    EmptyQty --> ComputedQty: Forced recomputation by the scheduler or by the report
+    ComputedQty --> EmptyQty: Forced recomputation by the scheduler or by the report
+```
+
 ### 5.4 The deadline computation
 
 **Field.** `deadline_date` on Reordering Rule. Date, derived **and stored**, read-only, never copied.
@@ -715,7 +1062,32 @@ Five derived values of a Reordering Rule form a dependency chain: the rule chain
 
 **Reading rule.** The dated walk counts only moves whose state is `waiting`, `confirmed`, `assigned` or `partially_available` and whose date is not later than the horizon date, grouped by calendar day, incoming adding and outgoing subtracting, archived moves included. A deadline may therefore exist while `quantity_to_order` is zero: this happens when an arrival is expected after the day the minimum is crossed, and it is exactly the situation the Deadline column is there to reveal.
 
-### 5.5 Diagram
+**Diagram.**
+
+```mermaid
+stateDiagram-v2
+    [*] --> NoDeadline: Rule created
+    state "Critical, the deadline is today" as Critical
+    state "Dated, a day inside the horizon" as Dated
+    state "Empty, no crossing inside the horizon" as NoDeadline
+    state "Stale, the stored column is behind" as Stale
+    NoDeadline --> Critical: Quantity on hand falls below the minimum
+    NoDeadline --> Dated: The dated walk crosses below the minimum inside the horizon
+    Dated --> Critical: Quantity on hand falls below the minimum, the walk is skipped
+    Critical --> Dated: Stock restored, a later crossing remains
+    Critical --> NoDeadline: Stock restored and no crossing remains
+    Dated --> NoDeadline: The crossing is pushed outside the horizon
+    Critical --> Stale: A dependency is written
+    Dated --> Stale: A dependency is written
+    NoDeadline --> Stale: A dependency is written
+    Stale --> Critical: Recomputed on the next read
+    Stale --> Dated: Recomputed on the next read
+    Stale --> NoDeadline: Recomputed on the next read
+```
+
+### 5.5 Diagram of the whole chain
+
+Sections 5.1 to 5.4 each carry their own diagram above. The diagram below is the fifth one and shows the four machines as the single dependency chain they form, because a replacement has to reproduce the order in which they are evaluated as well as each machine on its own.
 
 ```mermaid
 stateDiagram-v2
@@ -1071,17 +1443,17 @@ stateDiagram-v2
 | `make_to_stock` | Default: Take From Stock | The move draws on the stock of its source location. Confirming it creates no need. It reserves from the general pool like any other move. |
 | `make_to_order` | Advanced: Apply Procurement Rules | The move is bound to an origin move that must supply it. Confirming it creates a need at its source location and puts the move in the waiting state. It never reserves from the general pool. |
 
-The third value of the rule-level machine, `make_to_stock_else_make_to_order`, is never written onto a move.
+The third value of the rule-level machine, `mts_else_mto`, is never written onto a move.
 
 ### 9.2 Transition table
 
 | From | To | Trigger | Guards, in evaluation order | Records created or changed |
 |---|---|---|---|---|
-| not existing | `make_to_stock` or `make_to_order` | The pull action creates a move | The value is the rule's `procure_method`, with `make_to_stock_else_make_to_order` written as `make_to_stock` | The move. |
+| not existing | `make_to_stock` or `make_to_order` | The pull action creates a move | The value is the rule's `procure_method`, with `mts_else_mto` written as `make_to_stock` | The move. |
 | not existing | `make_to_order` | A manual push rule creates the next move of a chain | none, the value is unconditional | The move, then guard 2 below may switch it. |
 | `make_to_order` | `make_to_stock` | The same push, immediately after creation | The new move's source location bypasses reservation, that is it is a vendor, customer, production, inventory-loss or transit location | The move is additionally **not** linked as a destination of the arriving move, because there is nothing to wait for. |
 | any | `make_to_stock` | Re-evaluating an existing move against the rules | No rule was found at the source location or at any ancestor of it | No rule is written on the move. |
-| any | the rule's value | Re-evaluating an existing move against the rules | A rule was found; its supply method is written when it is `make_to_stock` or `make_to_order`, and `make_to_stock` is written when it is `make_to_stock_else_make_to_order` | The rule is written on the move as well. |
+| any | the rule's value | Re-evaluating an existing move against the rules | A rule was found; its supply method is written when it is `make_to_stock` or `make_to_order`, and `make_to_stock` is written when it is `mts_else_mto` | The rule is written on the move as well. |
 | `make_to_order` | `make_to_stock` | An origin move is cancelled with `propagate_cancel` true, and this move is not cancelled by the propagation | Every sibling origin move is already cancelled, and this move's source location differs from the cancelled move's destination location | This move is unlinked from the cancelled move. |
 | `make_to_order` | `make_to_stock` | An origin move is cancelled with `propagate_cancel` false | Every sibling origin move is completed or cancelled | This move is unlinked from the cancelled move; it is never cancelled by this path. |
 | `make_to_order` | `make_to_stock` | A make-to-order link is broken explicitly | none | The origin move is removed from this move's `move_origins` and this move's state is recomputed from its remaining links and its reservation. |
@@ -1122,7 +1494,7 @@ The full status machine of Stock Move belongs to `../inventory-operations/`. Fou
 |---|---|---|---|---|
 | `draft` | `waiting` | Confirming a batch of moves | The move already has origin moves | No need is created; the move waits for what already supplies it. |
 | `draft` | `waiting` | Confirming a batch of moves | The move has no origin move and its own supply method is `make_to_order` | A procurement request is created for the full demand quantity, carrying the move itself in `values.move_destinations`. |
-| `draft` | `confirmed` | Confirming a batch of moves | The move has no origin move, its own supply method is not `make_to_order`, and its rule's supply method is `make_to_stock_else_make_to_order` | A procurement request is created for the missing quantity only, carrying no destination move, because the part taken from stock and the part ordered are independent. The missing quantity is `max(move real quantity − available quantity, 0)` converted into the move's unit with half-up rounding, where the available quantity is the free quantity at the source location reduced by what earlier moves of the same batch already claimed for the same location and product, floored at zero. |
+| `draft` | `confirmed` | Confirming a batch of moves | The move has no origin move, its own supply method is not `make_to_order`, and its rule's supply method is `mts_else_mto` | A procurement request is created for the missing quantity only, carrying no destination move, because the part taken from stock and the part ordered are independent. The missing quantity is `max(move real quantity − available quantity, 0)` converted into the move's unit with half-up rounding, where the available quantity is the free quantity at the source location reduced by what earlier moves of the same batch already claimed for the same location and product, floored at zero. |
 | `draft` | `confirmed` | Confirming a batch of moves | None of the three conditions above | No need is created. |
 | `confirmed` or `partially_available` | `assigned` or `partially_available` | Task two of the scheduler | The selection and ordering of section 8.1.3 | Reservations are taken in chunks of one thousand. |
 | any state other than `done` | `cancel` | Cancellation propagation from an origin move | The origin move has `propagate_cancel` true, every sibling origin move is already cancelled, and this move's source location equals the cancelled move's destination location | The move is cancelled; the propagation continues to its own destination moves. |
@@ -1242,25 +1614,92 @@ The four states are evaluated in this exact order on every recomputation, and th
 
 ### 12.2 The shipped flag
 
-**Field.** `is_shipped` on Purchase Order. Boolean, derived, not stored.
+**Field.** `is_shipped` on Purchase Order. Boolean, derived, not stored, recomputed from the transfers of the order and from their states. It carries no label of its own: it is read only by the visibility condition of the Receive button on the order form.
 
-| Value | Exact condition | Meaning |
+#### 12.2.1 States
+
+| Stored value | Label | Meaning |
 |---|---|---|
-| `false` | The order has no transfer, or at least one transfer is neither `done` nor `cancel` | Work remains on the goods side. |
-| `true` | The order has at least one transfer and every one of them is `done` or `cancel` | Nothing more will arrive. Note the difference with `receipt_status`: an order whose transfers are **all** cancelled has `is_shipped` true and an empty receipt status. |
+| `false` | (not rendered; the flag hides the Receive button) | The order has no transfer at all, or at least one of its transfers is neither `done` nor `cancel`. Work remains on the goods side, so the Receive button is offered whenever the order is confirmed and has at least one incoming transfer. |
+| `true` | (not rendered) | The order has at least one transfer and every one of them is `done` or `cancel`. Nothing more will arrive and the Receive button is hidden. Note the difference with `receipt_status` of section 12.1: an order whose transfers are **all** cancelled has `is_shipped` `true` and an **empty** receipt status, because the two computations order their branches differently. |
+
+The flag is not stored, so it has no stale state: every read recomputes it from the current states of the transfers.
+
+#### 12.2.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `false` | A request for quotation is created | none | Nothing. An order with no transfer is `false`, and stays `false` while it is a draft request for quotation. |
+| `false` | `false` | Confirming the order creates its first transfers | The order holds at least one goods line | The transfers and their moves. The flag stays `false` because the new transfers are neither `done` nor `cancel`. |
+| `false` | `true` | The last transfer of the order that was neither `done` nor `cancel` is validated | Every other transfer of the order is already `done` or `cancel` | Nothing is written on the order by this machine. `receipt_status` becomes `full` at the same moment, `effective_date` is set when it was empty, and the Receive button disappears. |
+| `false` | `true` | The last open transfer of the order is cancelled | The same | The same, except that when **every** transfer of the order is cancelled `receipt_status` becomes empty instead of `full`, while `is_shipped` is `true`. |
+| `true` | `false` | The ordered quantity of a line is increased after validation and a new receipt move, and with it a new transfer, is created | none | The new transfer is neither `done` nor `cancel`, so the flag falls back and the Receive button reappears. |
+| `true` | `false` | A validated transfer of the order is returned and the return transfer is attached to the same order | none | The same fall-back. |
+| `true` or `false` | not existing | The order is deleted | The order is a draft or a cancelled order | The order and its transfers disappear. |
+
+#### 12.2.3 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> NotShipped: Request for quotation created, no transfer yet
+    state "Not shipped, the Receive button is offered" as NotShipped
+    state "Shipped, the Receive button is hidden" as Shipped
+    NotShipped --> NotShipped: Confirmation creates the transfers
+    NotShipped --> Shipped: The last open transfer is validated
+    NotShipped --> Shipped: The last open transfer is cancelled
+    Shipped --> NotShipped: A new transfer appears after an increase or a return
+    NotShipped --> [*]: Draft order deleted
+    Shipped --> [*]: Cancelled order deleted
+```
 
 ### 12.3 The arrival date
 
-**Field.** `effective_date` on Purchase Order, labelled "Arrival". Datetime, derived and stored, not copied.
+**Field.** `effective_date` on Purchase Order, labelled "Arrival". Datetime, derived **and stored**, not copied when the order is duplicated, recomputed from the transfers of the order, from their states and from their completion dates.
 
-| Value | Exact condition |
-|---|---|
-| empty | No transfer of the order is completed, or every completed transfer either has no completion date or has a vendor location as destination. |
-| a date | The earliest completion date among the order's completed transfers whose destination location is not a vendor location. |
+#### 12.3.1 States
 
-A return to the vendor therefore never moves the arrival date, because its destination is a vendor location. The field is the basis of the effective days to arrival of the purchase analysis view and of the on-time delivery rate.
+| Stored value | Label | Meaning |
+|---|---|---|
+| empty | Arrival, blank | No transfer of the order is completed, or every completed transfer either has no completion date or has a vendor location as its destination. Nothing has arrived that counts as an arrival. The Arrival column is blank and the effective days to arrival of the purchase analysis view is not computed for the order. |
+| a date | Arrival, a date and time | The **earliest** completion date among the order's completed transfers whose destination location is not a vendor location. It is the moment the first goods of the order actually landed, not the moment the last of them did. |
+| stale | (the same rendering as the value it holds) | A dependency was written and the recomputation has not run yet. The stored column holds the previous value. Every read of the field triggers the recomputation first, so a user never observes the stale value; a direct read of the stored column would. |
 
-### 12.4 Diagram
+A return to the vendor never moves the arrival date, because its destination is a vendor location and the computation excludes it. The field is the basis of the effective days to arrival of the purchase analysis view (`RP-RULE-350`, `RP-RULE-351`) and one of the grouping keys of that view (`RP-RULE-353`).
+
+#### 12.3.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | empty | A request for quotation is created | none | The stored column is empty. |
+| empty | a date | The first transfer of the order is validated | 1. The transfer's state is `done`. 2. Its completion date is not empty. 3. Its destination location usage is not `supplier`. | The stored column receives that completion date. `receipt_status` moves to `partial` or `full` in the same recomputation. |
+| empty | empty | A return to the vendor is validated while nothing else has arrived | The transfer's destination location usage is `supplier`, so it is excluded | Nothing. The order still shows no arrival. |
+| a date | an earlier date | A second transfer is validated whose completion date is **earlier** than the one already stored, which happens when a completion date is corrected or when transfers are validated out of order | The three guards above | The stored column is replaced by the earlier date, because the value is a minimum and not a first-write. |
+| a date | the same date | A later transfer of the same order is validated | The three guards above | Nothing changes: the minimum is unaffected. |
+| a date | empty | Every completed transfer of the order is reset to a state that is not `done`, or the only completed transfer is deleted | none | The minimum over an empty set is empty and the column is cleared. |
+| any | stale | A dependency is written: a transfer is added to or removed from the order, a transfer changes state, or a completion date is written | none | Nothing is written yet; the recomputation runs on the next read of the field. |
+| stale | empty or a date | The field is read, or the purchase analysis view is refreshed | none | The stored column is rewritten with the recomputed value. |
+| any | not existing | The order is deleted | The order is a draft or a cancelled order | The order disappears. |
+
+#### 12.3.3 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> NoArrival: Request for quotation created
+    state "No arrival date" as NoArrival
+    state "An arrival date" as Dated
+    state "Stale, the stored column is behind" as Stale
+    NoArrival --> Dated: A transfer is validated with a completion date and a destination that is not a vendor location
+    NoArrival --> NoArrival: A return to the vendor is validated and is excluded
+    Dated --> Dated: A later transfer is validated, the minimum is unchanged
+    Dated --> Dated: An earlier completion date appears, the minimum moves back
+    Dated --> NoArrival: The last completed transfer is reset or deleted
+    NoArrival --> Stale: A transfer, a state or a completion date is written
+    Dated --> Stale: A transfer, a state or a completion date is written
+    Stale --> NoArrival: Recomputed on the next read
+    Stale --> Dated: Recomputed on the next read
+```
+
+### 12.4 Diagram of the receipt status
 
 ```mermaid
 stateDiagram-v2
@@ -1353,7 +1792,16 @@ stateDiagram-v2
 
 ### 13.3 The archive state of the global Dropship route
 
-**Field.** `active` on the shipped route named `Dropship`, sequence 20, no company, selectable on sales order lines, on products and on product categories.
+**Field.** `active` on the shipped route named `Dropship`, sequence 20, no company, selectable on sales order lines, on products and on product categories. Boolean, stored, default true, copied when the record is duplicated.
+
+**States.**
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `true` | Active | The Dropship route takes part in rule selection. It is offered on a sales order line, on a product and on a product category, its per-company `buy` rules are candidates for a need at a customer location, and the per-warehouse `pull` rules that move components from a subcontracting location to a production location are candidates too. |
+| `false` | Archived | The route is excluded from every default query: it is offered nowhere and none of its rules can be selected, including the `buy` rules that make an ordinary drop shipment to a customer work. Archiving it archived every rule of it whose destination location is still active, so unarchiving the route unarchives exactly the same set. The route and its rules survive, so the configuration is restored intact. |
+
+**Transitions.**
 
 | From | To | Trigger | Guards | Records created or changed |
 |---|---|---|---|---|
@@ -1372,7 +1820,16 @@ stateDiagram-v2
 
 ### 13.4 The archive state of a subcontracting drop-ship rule
 
-**Field.** `active` on the per-warehouse Stock Rule inside the global Dropship route, remembered on the warehouse as `subcontracting_dropshipping_pull`: action `pull`, supply method `make_to_order`, push mode `manual`, source the subcontracting location, destination the production location, the warehouse's subcontracting operation type, the warehouse company.
+**Field.** `active` on the per-warehouse Stock Rule inside the global Dropship route, remembered on the warehouse as `subcontracting_dropshipping_pull`: action `pull`, supply method `make_to_order`, push mode `manual`, source the subcontracting location, destination the production location, the warehouse's subcontracting operation type, the warehouse company. Boolean, stored, default true, copied when the record is duplicated.
+
+**States.**
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `true` | Active | The rule is a candidate whenever a component is needed at the warehouse's production location: the need is pulled from the subcontracting location, which is what lets a component be drop-shipped straight from a vendor to a subcontractor. Because the rule's action is `pull`, its existence is also what keeps the global Dropship route active — the counting rule of section 13.3 counts exactly these rules. |
+| `false` | Archived | The rule is excluded from rule selection. A component needed at the production location must then be found through another route, and when this rule was the last active `pull` rule of the Dropship route, the recomputation of section 13.3 archives the whole route as well. |
+
+**Transitions.**
 
 | From | To | Trigger | Guards | Records created or changed |
 |---|---|---|---|---|
@@ -1391,12 +1848,14 @@ stateDiagram-v2
 
 ### 13.5 The drop-shipment flag of a Transfer
 
-**Field.** `is_dropship` on Transfer, labelled "Is a Dropship". Boolean, derived, not stored.
+**Field.** `is_dropship` on Transfer, labelled "Is a Dropship". Boolean, derived, not stored, recomputed from the transfer's source and destination locations.
 
-| Value | Exact condition |
-|---|---|
-| `true` | The source location is a vendor location, **or** a transit location with no company; **and** the destination location is a customer location, **or** a transit location with no company. |
-| `false` | Any other combination. |
+**States.**
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `true` | Is a Dropship | The source location is a vendor location, **or** a transit location with no company; **and** the destination location is a customer location, **or** a transit location with no company. The goods never enter the company's own stock. The transfer counts in the purchase order's drop-shipment count and is excluded from its incoming-transfer count, and the same split is applied on the sales order between deliveries and drop shipments. |
+| `false` | Is not a Dropship | Any other combination of the two locations. The transfer is an ordinary receipt, delivery or internal transfer and is counted as such on both documents. |
 
 | From | To | Trigger | Guards | Consequences |
 |---|---|---|---|---|
@@ -1426,12 +1885,16 @@ Three fields of Warehouse, owned by `../inventory-operations/` and extended here
 
 ### 14.1 The purchase-resupply flag
 
-**Field.** `buy_to_resupply` on Warehouse. Boolean, derived from whether the warehouse is listed on the shipped Buy route, writable through an inverse rule, default true.
+**Field.** `buy_to_resupply` on Warehouse, labelled "Buy to Resupply". Boolean, derived from whether the warehouse is listed on the shipped Buy route, writable through an inverse rule, default true.
 
-| Value | Meaning |
-|---|---|
-| `true` | The warehouse may be supplied by purchasing. It appears in the `warehouses` list of the shipped Buy route and its `buy_pull` rule is active. |
-| `false` | The warehouse is never supplied by purchasing. It is absent from the Buy route's `warehouses` and its `buy_pull` rule is archived. |
+**States.**
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `true` | Buy to Resupply, ticked | The warehouse may be supplied by purchasing. It appears in the `warehouses` list of the shipped Buy route and its `buy_pull` rule is active, so a need at the warehouse stock location that no other rule serves reaches the buy action. |
+| `false` | Buy to Resupply, unticked | The warehouse is never supplied by purchasing. It is absent from the Buy route's `warehouses` and its `buy_pull` rule is archived, so a need at the warehouse stock location that no other rule serves fails with the "no rule found" refusal of `RP-RULE-072`. |
+
+**Transitions.**
 
 | From | To | Trigger | Guards | Records created or changed |
 |---|---|---|---|---|
@@ -1449,7 +1912,18 @@ stateDiagram-v2
 
 ### 14.2 The inter-warehouse resupply set
 
-**Field.** `resupply_warehouses` on Warehouse, a many-to-many to Warehouse. Its state is the membership of the set; each membership change is a transition that creates, archives or unarchives a whole route.
+**Field.** `resupply_warehouses` on Warehouse, a many-to-many to Warehouse, labelled "Resupply From". Its state is the membership of the set together with the archive flag of the route that membership generates; each membership change is a transition that creates, archives or unarchives a whole route.
+
+**States.** The stored value of this machine is a pair of facts: whether the (supplied warehouse, supplying warehouse) pair is present in the association table, and, when a route was ever generated for that pair, the `active` of that route.
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| the pair is absent and no route has ever been generated for it | Not a supplying warehouse | The supplying warehouse never appears as a source for the supplied one. No resupply route exists, and a need at the supplied warehouse is served by the other routes of the product. |
+| the pair is present and the generated route's `active` is `true` | Supplying, resupply route active | The route named `<supplied warehouse name>: Supply Product from <supplying warehouse name>` exists and is active, with its two or three pull rules. The route is offered on products and on product categories, is attached to the supplied warehouse, and appears in the Replenishment Information dialog as one candidate supplying warehouse with its free-to-use quantity and its lead time. |
+| the pair is absent and an archived route survives for it | Removed, the route is archived | The supplying warehouse was removed from the set. The route and its rules were archived rather than deleted, so the exact configuration — the rules, their operation types, their lead times and their supply methods — is preserved. Adding the supplying warehouse back unarchives that route instead of creating a second one. |
+| the pair is present and the generated route's `active` is `false` | Supplying, route archived by hand | Reachable only by archiving the route itself (section 1.1) or the supplied warehouse, which leaves the membership row untouched. The supplying warehouse is still listed on the form while no rule of the pair can be selected. Unarchiving the route restores the second state without touching the set. |
+
+**Transitions.**
 
 | From | To | Trigger | Guards, in evaluation order | Records created or changed |
 |---|---|---|---|---|
@@ -1474,12 +1948,16 @@ stateDiagram-v2
 
 ### 14.3 The subcontractor-resupply flag
 
-**Field.** `subcontracting_to_resupply` on Warehouse, labelled "Resupply Subcontractors". Boolean.
+**Field.** `subcontracting_to_resupply` on Warehouse, labelled "Resupply Subcontractors". Boolean, stored, default true.
 
-| Value | Meaning |
-|---|---|
-| `true` | The warehouse holds two active rules in the shipped resupply-subcontractor route — a make-to-order pull rule and a make-to-stock pull rule that move components from the warehouse to the subcontracting location — and, when the Dropship and Subcontracting Management capability package is installed, one active pull rule in the global Dropship route from the subcontracting location to the production location. |
-| `false` | Those rules are archived. |
+**States.**
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `true` | Resupply Subcontractors, ticked | The warehouse holds two active rules in the shipped resupply-subcontractor route — a make-to-order pull rule and a make-to-stock pull rule that move components from the warehouse to the subcontracting location — and, when the Dropship and Subcontracting Management capability package is installed, one active pull rule in the global Dropship route from the subcontracting location to the production location. |
+| `false` | Resupply Subcontractors, unticked | Those rules are archived, so no component can be pulled from this warehouse to a subcontracting location and no component can be drop-shipped from a vendor to a subcontractor through this warehouse. |
+
+**Transitions.**
 
 | From | To | Trigger | Guards | Records created or changed |
 |---|---|---|---|---|
@@ -1548,7 +2026,7 @@ stateDiagram-v2
 | Route | `active` | archive flag | `true`, `false` | user, warehouse configuration, resupply changes, the Dropship recomputation | 1 |
 | Stock Rule | `active` | archive flag | `true`, `false` | user, route archiving, warehouse configuration, the three resupply flags | 2.1 |
 | Stock Rule | `action` | mode selection | `pull`, `push`, `pull_push`, `buy`, `manufacture` | user, warehouse configuration | 2.2 |
-| Stock Rule | `procure_method` | mode selection | `make_to_stock`, `make_to_order`, `make_to_stock_else_make_to_order` | user, warehouse configuration, delivery-step changes | 2.3 |
+| Stock Rule | `procure_method` | mode selection | `make_to_stock`, `make_to_order`, `mts_else_mto` | user, warehouse configuration, delivery-step changes | 2.3 |
 | Stock Rule | `auto` | mode selection | `manual`, `transparent` | user | 2.4 |
 | Reordering Rule | `trigger` | mode selection | `auto`, `manual` | user, the replenishment report, the Automate button | 3.1 |
 | Reordering Rule | `snoozed_until` | date-derived state | not snoozed, expired, snoozed | the snooze wizard | 3.2 |

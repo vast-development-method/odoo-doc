@@ -29,7 +29,7 @@ Four subjects in this domain are unusually intricate and are treated exhaustivel
    four-branch resolution algorithm that binds a recorded line to a sales order item, a delivered
    quantity derived by aggregation and unit conversion, and an invoicing step that stamps each
    consumed line with the invoice that consumed it. This is specified in
-   [workflows.md](workflows.md) §4 to §8 and [calculations.md](calculations.md) §4 to §6.
+   [workflows.md](workflows.md) §5 to §9 and [calculations.md](calculations.md) §4 to §6.
 3. **The locking rules.** A recorded line that has been invoiced is frozen; a recorded line that was
    generated from an absence is frozen; a recorded line that belongs to another person is invisible.
    Each freeze has its own exact refusal message. This is specified in
@@ -38,7 +38,7 @@ Four subjects in this domain are unusually intricate and are treated exhaustivel
    day of the absence, on a company-wide internal project and a company-wide absence task, sized
    from the employee's working schedule; refusing, cancelling, shortening or deleting the absence
    deletes them again, and a public holiday does the same for every employee that shares the
-   affected working schedule. This is specified in [workflows.md](workflows.md) §10.
+   affected working schedule. This is specified in [workflows.md](workflows.md) §11.
 
 ---
 
@@ -123,6 +123,22 @@ each of these are in [entities.md](entities.md).
 10. **[acceptance-criteria.md](acceptance-criteria.md)** — numbered Given / When / Then scenarios
     with concrete numbers, to be used as the conformance suite for a re-implementation.
 
+### Every file in this folder
+
+| File | Content |
+|---|---|
+| [README.md](README.md) | This file: scope, capabilities, the entities the domain owns, the reading order, the dependencies and the one-paragraph summary of the billing model |
+| [entities.md](entities.md) | Every entity in full — purpose, lifecycle, complete field table, relations, uniqueness, ordering, display rule, archival, company behaviour, extension points — plus the links to the generated reference pages |
+| [state-machines.md](state-machines.md) | The twelve machines of the domain, each with its states, its transition table, its guards with their exact refusal messages and a diagram |
+| [workflows.md](workflows.md) | Fourteen end-to-end procedures, step by step, with the records each step creates or changes and the failure conditions |
+| [business-rules.md](business-rules.md) | Every validation, constraint, invariant, exact message, permission check and locking rule, numbered from TS-001 |
+| [calculations.md](calculations.md) | Every formula and algorithm with rounding, precision, currency and unit handling, and worked numeric examples |
+| [accounting-effects.md](accounting-effects.md) | Why this domain posts nothing to the ledger, and the four paths by which it changes the ledger indirectly |
+| [configuration.md](configuration.md) | Settings, company values, privilege groups, model permissions, record rules, shipped records, presentation defaults, scheduled work, notifications, sequences and storage-level objects |
+| [interfaces.md](interfaces.md) | Navigation, every screen and its columns, every window action, every named operation, external routes and pages, printable documents, presentation widgets, import and export |
+| [acceptance-criteria.md](acceptance-criteria.md) | Numbered Given / When / Then scenarios with concrete numbers, grouped from section A to section X |
+| [glossary.md](glossary.md) | Every term of the domain, defined |
+
 ---
 
 ## 4. Dependencies on other domains
@@ -141,7 +157,7 @@ It cannot be built before the following are available.
 | [Products and Catalog](../products-and-catalog/README.md) | The Product and the service product configuration: product kind, invoicing policy, service type, service policy, service tracking and the project/template references. |
 | [Accounts Receivable](../accounts-receivable/README.md) | The Customer Invoice and its status, its payment status, its reversal mechanism and the credit note. |
 | [Multi-currency](../multi-currency/README.md) | The currency conversion used when the employee's currency differs from the analytic account's currency, and again when the project's profitability figures are consolidated. |
-| [Time Off](../time-off/README.md) | The Absence Request entity, its approval transitions, its refusal, its cancellation, its duration decomposition per day, and the public holiday (company-wide working schedule exception). |
+| [Time Off](../time-off/) | The Absence Request entity, its approval transitions, its refusal, its cancellation, its duration decomposition per day, and the public holiday (company-wide working schedule exception). |
 | [Pricing and Pricelists](../pricing-and-pricelists/README.md) | The margin computation on a sales order item, into which this domain injects a cost per unit derived from recorded time. |
 | [Messaging and Activities](../messaging-and-activities/README.md) | The follower collection used by the visibility rules, and the activity raised when an upselling opportunity is detected. |
 
@@ -152,7 +168,7 @@ Domains that depend on **this** one:
 | [Projects and Tasks](../projects-and-tasks/README.md) | The profitability sections for recorded time, the time-spent counters on the project dashboard and the periodic project update figures. |
 | [Sales](../sales/README.md) | The `timesheet` delivered quantity method, the time-remaining display suffix on a sales order item's name and the upselling activity. |
 | [Expenses](../expenses/README.md) | Shares the analytic line as the carrier for re-invoiceable costs; the two are kept apart by the project-reference discriminator. |
-| [Time Off](../time-off/README.md) | The generated absence lines, and the refusal messages that forbid editing them from the timesheet side. |
+| [Time Off](../time-off/) | The generated absence lines, and the refusal messages that forbid editing them from the timesheet side. |
 
 ---
 
@@ -169,7 +185,7 @@ Domains that depend on **this** one:
   [Attendances and Working Time](../attendances-and-working-time/README.md). Only the comparison
   entity is specified here.
 - The Absence Request's own approval flow, its allocation model and its accrual plans — see
-  [Time Off](../time-off/README.md). Only the generation of recorded lines is specified here.
+  [Time Off](../time-off/). Only the generation of recorded lines is specified here.
 - Any posting to the general ledger. This domain posts nothing; see
   [accounting-effects.md](accounting-effects.md) for the explanation and for the indirect effects.
 
@@ -192,4 +208,4 @@ service type produces a different *billable type*, which changes not the deliver
 section of the project's profitability report that the line's cost and revenue land in.
 
 The exhaustive form of that paragraph is in [calculations.md](calculations.md) §4 to §6 and in
-[workflows.md](workflows.md) §4 to §8.
+[workflows.md](workflows.md) §5 to §9.

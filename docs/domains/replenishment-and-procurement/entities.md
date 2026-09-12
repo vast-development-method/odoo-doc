@@ -174,7 +174,7 @@ Closed list for `procure_method`:
 |---|---|---|
 | `make_to_stock` | Take From Stock | The goods are taken from the stock available in `location_source`. No supply need is created. |
 | `make_to_order` | Trigger Another Rule | The available stock in `location_source` is ignored; a new need is created in `location_source` and rule selection runs again for it. |
-| `make_to_stock_else_make_to_order` | Take From Stock, if unavailable, Trigger Another Rule | The goods are taken from the free stock of `location_source`; only the missing quantity creates a new need in `location_source`. |
+| `mts_else_mto` (make to stock, else make to order) | Take From Stock, if unavailable, Trigger Another Rule | The goods are taken from the free stock of `location_source`; only the missing quantity creates a new need in `location_source`. |
 
 ### 2.2 Identity, ordering and display
 
@@ -384,7 +384,7 @@ Identifier: `replenishment_information`. Kind: transient. Display name is taken 
 | `quantity_to_order` | decimal | no | derived from `orderpoint.quantity_to_order` | derived | |
 | `structured_data_lead_days` | text holding a structured data document | no | derived | derived | The lead-time breakdown. Content specified in `interfaces.md`, section "Replenishment Information payload". |
 | `structured_data_replenishment_graph` | text holding a structured data document | no | derived | derived | The demand graph. Content and formulas in `calculations.md`, section "Replenishment demand graph". |
-| `based_on` | selection | yes | `one_month` | stored | The historic period used to estimate daily demand. Closed list: `one_week` = Last 7 days, `one_month` = Last 30 days, `three_months` = Last 3 months, `one_year` = Last 12 months, `last_year` = Same month last year, `last_year_next_month` = Next month last year, `last_year_month_after_next` = After next month last year, `last_year_quarter` = Last year quarter. |
+| `based_on` | selection | yes | `one_month` | stored | The historic period used to estimate daily demand. Closed list: `one_week` = Last 7 days, `one_month` = Last 30 days, `three_months` = Last 3 months, `one_year` = Last 12 months, `last_year` = Same month last year, `last_year_2` = Next month last year, `last_year_3` = After next month last year, `last_year_quarter` = Last year quarter. |
 | `percent_factor` | integer | yes | 100 | stored | A percentage applied to the estimated daily demand. |
 | `resupply_routes` | one_to_many to Route | no | derived from `orderpoint.warehouse.resupply_routes` | derived | The inter-warehouse resupply routes that feed the rule's warehouse. |
 | `warehouse_replenishment_options` | one_to_many to Replenishment Option | no | derived | derived | One option per resupply route, created on the fly and sorted by free-to-use quantity descending. |

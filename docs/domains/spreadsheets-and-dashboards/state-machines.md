@@ -275,7 +275,7 @@ A Dashboard Share has no state field. Its *reachability* is nevertheless a state
 | State | Condition | What a reader with the address gets |
 |---|---|---|
 | Reachable | the record exists, the supplied token equals the stored one, and the sharing user may still read the dashboard | the frozen page, the frozen data, and — when the reader may export — the workbook file |
-| Token mismatch | the record exists but the supplied token differs, or no token was supplied | refusal, with rule [SD-011](business-rules.md#sd-011) |
+| Token mismatch | the record exists but the supplied token differs, or no token was supplied | refusal, with rule [SD-022](business-rules.md#sd-022) |
 | Revoked | the record exists and the token matches, but the sharing user may no longer read the dashboard | the same refusal |
 | Gone | the record no longer exists | not found |
 

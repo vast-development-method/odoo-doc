@@ -2,9 +2,9 @@
 
 This file specifies everything through which a person, another system or a client program reaches
 the recorded time of this domain: the navigation tree, every screen and its columns, every named
-operation a button can invoke, every external page and its address, every printable document, the
-import and export layouts, the presentation widgets, and the pieces of state the server hands to the
-client so that time can be typed and displayed in the company's chosen unit.
+operation a button can invoke, every external page and its address, every printable document, both
+of the layouts used for exchanging files, the presentation widgets, and the pieces of state the
+server hands to the client so that time can be typed and displayed in the company's chosen unit.
 
 Conventions:
 
@@ -205,7 +205,7 @@ the action (§6.2).
 | Identifier | Label | Selection | Context |
 |---|---|---|---|
 | `timesheet_action_from_sales_order` | "Timesheets" | project reference is set; narrowed at run time to the order's items (§6.6) | Set at run time |
-| `timesheet_action_from_sales_order_item` | "Timesheets" | project reference is set **and** the bound item is the record the action was launched from | pre-applied filter "billable", pre-applied filter "This Week", default bound item = that item, default manual-binding flag = true, `is_timesheet` = 1 |
+| `timesheet_action_from_sales_order_item` | "Timesheets" | project reference is set **and** the bound item is the record the action was launched from | the pre-applied filter `billable_timesheet` ("billable recorded time"), the pre-applied filter "This Week", default bound item = that item, default manual-binding flag = true, `is_timesheet` = 1 |
 | `action_timesheet_from_invoice` | "Timesheets" | consuming invoice is the record the action was launched from | creation, modification and deletion all switched off, `is_timesheet` = 1 |
 
 Presentations of `timesheet_action_from_sales_order`: list (`timesheet_view_tree_user`, order 4) and
@@ -681,7 +681,7 @@ presentations:
 
 `action_view_timesheet` returns nothing when the order has no item. Otherwise it returns
 `timesheet_action_from_sales_order` selecting the lines bound to any of the order's items whose
-project is set, with the pre-applied filter "billable" and, as defaults:
+project is set, with the pre-applied filter `billable_timesheet` and, as defaults:
 
 1. the bound item, taken as the first item of the order that is a sellable service whose service
    policy is prepaid ordered quantity or based on recorded time;
@@ -734,7 +734,7 @@ The external home page gains a service-category card:
 | Text | "Review all timesheets related to your projects" |
 | Destination | `/my/timesheets` |
 | Counter | The number of recorded lines the external selection admits |
-| Icon | A shipped clock illustration |
+| Icon | A shipped illustration |
 
 The card is a switchable customization named "Timesheets", identified as
 `portal_my_home_timesheet`. *(external hiding capability)* Switching that customization off is the

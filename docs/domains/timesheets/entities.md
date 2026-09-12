@@ -18,6 +18,33 @@ Conventions used throughout:
 - Where a field is declared by another domain and only *narrowed* here (a changed selection list, a
   changed domain filter, a changed default), the table says so explicitly.
 
+## Generated reference pages
+
+Every entity named below also has a generated field-by-field reference page in the repository's
+entity catalogue. The reference page is produced from the machine-readable definition and lists the
+raw field set, including the fields other domains add; this file is the authoritative statement of
+*behaviour*, the reference page the authoritative statement of *shape*.
+
+| Entity | Reference page |
+|---|---|
+| Timesheet Line (the Analytic Line) | [../../references/entities/account.analytic.line.md](../../references/entities/account.analytic.line.md) |
+| Employee Rate Mapping | [../../references/entities/project.sale.line.employee.map.md](../../references/entities/project.sale.line.employee.map.md) |
+| Timesheets Analysis Row | [../../references/entities/timesheets.analysis.report.md](../../references/entities/timesheets.analysis.report.md) |
+| Attendance Comparison Row | [../../references/entities/hr.timesheet.attendance.report.md](../../references/entities/hr.timesheet.attendance.report.md) |
+| Calendar Employee Filter | [../../references/entities/account.analytic.line.calendar.employee.md](../../references/entities/account.analytic.line.calendar.employee.md) |
+| Employee Removal Dialogue | [../../references/entities/hr.employee.delete.wizard.md](../../references/entities/hr.employee.delete.wizard.md) |
+| Analytic Plan Applicability (a value added here) | [../../references/entities/account.analytic.applicability.md](../../references/entities/account.analytic.applicability.md) |
+
+Entities this domain only extends carry their reference page in the folder that owns them:
+the Project and the Task in [Projects and Tasks](../projects-and-tasks/entities.md), the Sales Order
+and the Sales Order Item in [Sales](../sales/entities.md), the Customer Invoice in
+[Accounts Receivable](../accounts-receivable/entities.md), the Product in
+[Products and Catalog](../products-and-catalog/entities.md), the Employee and the Company in
+[Human Resources Core](../human-resources-core/entities.md) and
+[Contacts and Organizations](../contacts-and-organizations/entities.md), the Absence Request in
+[Time Off](../time-off/), and the Working Schedule Exception in
+[Attendances and Working Time](../attendances-and-working-time/).
+
 ---
 
 ## 1. Timesheet Line

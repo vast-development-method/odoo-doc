@@ -4,7 +4,7 @@
 
 This domain specifies everything the system does with **costs incurred by an employee on behalf of the company**: the capture of a single expense (by hand, from a photograph or scan of a receipt, by electronic mail, by splitting an existing expense, or from a project or sales context), the pricing of that expense from an expense category, the treatment of the taxes that the receipt already includes, the conversion of a foreign-currency receipt into the company currency, the approval chain that decides who may submit, approve, refuse, reset and post it, the accounting entries produced when it is posted — different for a cost the employee advanced and for a cost the company itself paid — the reimbursement of the employee and the resulting payment state, and the rebilling of the cost to a customer on a sales order.
 
-Everything in this folder is derived from the behaviour of five capability packages:
+Everything in this folder is derived from the behaviour of seven capability packages:
 
 | Capability package (as a role, not a name) | What it contributes |
 |---|---|
@@ -13,6 +13,8 @@ Everything in this folder is derived from the behaviour of five capability packa
 | **Expense margin on sales** | The cost side of the margin of a rebilling Sales Order Line, taken from the untaxed amount of the originating expense |
 | **Expense costs on projects** | The default analytic distribution taken from the project in context, the project's expense action, and the expense cost section of the project profitability panel |
 | **Expense costs on projects sold** | The reconciliation of the project analytic distribution with the sales-order analytic distribution, the creation of the project's analytic account at posting time, and the revenue side of the expense section of the project profitability panel |
+| **Expense document layout for one jurisdiction** | A document-title block that sets the title of the printable expense document to *"Expenses Report"* so that it conforms to a standardised business-letter layout; specified in `configuration.md` §18 and `interfaces.md` §8.4 |
+| **Expense dashboard document** | A shipped spreadsheet dashboard whose main data source is the Expense entity, together with the sample version used before any expense exists; specified in `configuration.md` §17 |
 
 ## What this domain does **not** re-specify
 
@@ -42,7 +44,7 @@ Where the expense domain **changes** the behaviour of one of those subjects — 
 
 | Capability | Where specified |
 |---|---|
-| The Expense entity with all eighty-four of its fields, its computed chain and its ordering | `entities.md` §2 |
+| The Expense entity with all fifty-four of its named fields, the message-thread fields it inherits, its computed chain and its ordering | `entities.md` §2 |
 | Expense categories: the "can be expensed" flag, the unit cost, the unit of measure, the supplier taxes, the expense account, the rebilling policy, the six shipped categories | `entities.md` §3, `configuration.md` §4 |
 | The two payment modes and everything that depends on them | `entities.md` §2.7, `accounting-effects.md` §3–§5 |
 | Pricing from a category that has a unit cost versus a category that has none | `calculations.md` §2 |
@@ -66,32 +68,59 @@ Where the expense domain **changes** the behaviour of one of those subjects — 
 | The personal dashboard figures | `calculations.md` §12, `interfaces.md` §3.6 |
 | Settings, the mailbox alias, the sequence, security groups, the access matrix, record rules, the weekly job | `configuration.md` |
 | Every window action, view, dialogue, named operation, printable document and message template | `interfaces.md` |
-| Fifty-eight numbered acceptance scenarios with concrete numbers | `acceptance-criteria.md` |
+| One hundred and thirty-one numbered acceptance scenarios with concrete numbers | `acceptance-criteria.md` |
 
 ## Entities
 
+### Entities this domain owns
+
+Six, of which one is durable and five are short-lived dialogue records. Each links to its generated
+reference page.
+
 | Entity | Transport name | Storage name | Purpose |
 |---|---|---|---|
-| Expense | `hr.expense` | `hr_expense` | One cost incurred by one employee on one date for one expense category; the only durable entity the domain owns |
-| Expense Split Line | `hr.expense.split` | `hr_expense_split` | One proposed piece of an expense being split; short-lived |
-| Expense Split Dialogue | `hr.expense.split.wizard` | `hr_expense_split_wizard` | The container that holds the proposed pieces and checks that they still add up; short-lived |
-| Expense Posting Dialogue | `hr.expense.post.wizard` | `hr_expense_post_wizard` | Asks for the accounting date and the journal before employee-paid expenses are posted; short-lived |
-| Expense Refusal Dialogue | `hr.expense.refuse.wizard` | `hr_expense_refuse_wizard` | Asks for the mandatory refusal reason; short-lived |
-| Duplicate Expense Confirmation Dialogue | `hr.expense.approve.duplicate` | `hr_expense_approve_duplicate` | Shows the expenses that look like duplicates and offers to approve them all or refuse them all; short-lived |
-| Journal Entry | `account.move` | `account_move` | Extended with the set of expenses it carries and with expense-specific overrides of numbering, term lines, cancellation and reversal |
-| Journal Item | `account.move.line` | `account_move_line` | Extended with a reference to the expense that produced it, and with expense-specific overrides of partner, tax totals and payable checks |
-| Payment | `account.payment` | `account_payment` | Extended for the company-paid mode: a payment record is created **as the document**, not as a settlement of one |
-| Product Variant used as expense category | `product.product` | `product_product` | Extended with the "can be expensed" flag and the rebilling policy; a category carries the unit cost, unit, taxes and expense account |
-| Employee | `hr.employee` | `hr_employee` | Extended with the designated expense approver and with the search filter that limits whose expenses a user may encode |
-| Department | `hr.department` | `hr_department` | Extended with the count of expenses awaiting approval |
-| Company | `res.company` | `res_company` | Extended with the default expense journal and the list of payment methods allowed for company-paid expenses |
-| Sales Order | `sale.order` | `sale_order` | Extended with the expenses rebilled onto it and their count |
-| Sales Order Line | `sale.order.line` | `sale_order_line` | Extended with the expenses that produced it and with the single expense used for its cost |
-| Analytic Plan Applicability | `account.analytic.applicability` | `account_analytic_applicability` | Extended with an `expense` business domain so a plan can be made mandatory for expenses |
+| Expense | [`hr.expense`](../../references/entities/hr.expense.md) | `hr_expense` | One cost incurred by one employee on one date for one expense category; the only durable entity the domain owns |
+| Expense Split Line | [`hr.expense.split`](../../references/entities/hr.expense.split.md) | `hr_expense_split` | One proposed piece of an expense being split; short-lived |
+| Expense Split Dialogue | [`hr.expense.split.wizard`](../../references/entities/hr.expense.split.wizard.md) | `hr_expense_split_wizard` | The container that holds the proposed pieces and checks that they still add up; short-lived |
+| Expense Posting Dialogue | [`hr.expense.post.wizard`](../../references/entities/hr.expense.post.wizard.md) | `hr_expense_post_wizard` | Asks for the accounting date and the journal before employee-paid expenses are posted; short-lived |
+| Expense Refusal Dialogue | [`hr.expense.refuse.wizard`](../../references/entities/hr.expense.refuse.wizard.md) | `hr_expense_refuse_wizard` | Asks for the mandatory refusal reason; short-lived |
+| Duplicate Expense Confirmation Dialogue | [`hr.expense.approve.duplicate`](../../references/entities/hr.expense.approve.duplicate.md) | `hr_expense_approve_duplicate` | Shows the expenses that look like duplicates and offers to approve them all or refuse them all; short-lived |
+
+### Entities owned elsewhere that this domain extends
+
+Every one of these is specified in the folder named in the last column; only the additions and the
+overrides this domain makes are specified here, in `entities.md` §7 to §10.
+
+| Entity | Transport name | Storage name | What this domain adds | Owned by |
+|---|---|---|---|---|
+| Journal Entry | `account.move` | `account_move` | The set of expenses it carries, their count, the exemption from the journal-kind check, the commercial-partner rule, the term-line override, and the unlinking of expenses on cancellation and reversal | [`../general-ledger/`](../general-ledger/) |
+| Journal Item | `account.move.line` | `account_move_line` | A reference to the expense that produced it, and expense-specific overrides of the partner, the displayed totals, the payable check and the attachment lookup | [`../general-ledger/`](../general-ledger/) |
+| Payment | `account.payment` | `account_payment` | The company-paid mode, in which a payment record is created **as the document**, not as a settlement of one; the outstanding-account override; the frozen fields | [`../payments-and-bank-reconciliation/`](../payments-and-bank-reconciliation/) |
+| Payment Registration Dialogue | `account.payment.register` | `account_payment_register` | The batch key extended with the employee's bank account, and the stamping of the expense onto the payment's lines | [`../payments-and-bank-reconciliation/`](../payments-and-bank-reconciliation/) |
+| Tax | `account.tax` | `account_tax` | The expenses that use the tax, the "is used" flag, and the expense carried through the grouping keys | [`../taxes/`](../taxes/) |
+| Analytic Account | `account.analytic.account` | `account_analytic_account` | The deletion guard for an account named by an expense's distribution | [`../analytic-accounting/`](../analytic-accounting/) |
+| Analytic Plan Applicability | `account.analytic.applicability` | `account_analytic_applicability` | The `expense` business domain, so a plan can be made mandatory for expenses, and the always-shown account prefix | [`../analytic-accounting/`](../analytic-accounting/) |
+| Product Template and Product Variant used as expense category | `product.template`, `product.product` | `product_template`, `product_product` | The "can be expensed" flag, the rebilling-policy explanation, the unit-cost change warning and the cascade of a new unit cost onto draft expenses | [`../products-and-catalog/`](../products-and-catalog/) |
+| Employee | `hr.employee` | `hr_employee` | The designated expense approver and the search filter that limits whose expenses a user may encode | [`../human-resources-core/`](../human-resources-core/) |
+| Public Employee Profile | `hr.employee.public` | `hr_employee_public` | The same two fields, read-only | [`../human-resources-core/`](../human-resources-core/) |
+| Department | `hr.department` | `hr_department` | The count of expenses awaiting approval and two window actions | [`../human-resources-core/`](../human-resources-core/) |
+| Company | `res.company` | `res_company` | The default expense journal and the list of payment methods allowed for company-paid expenses | [`../contacts-and-organizations/`](../contacts-and-organizations/) |
+| Settings | `res.config.settings` | `res_config_settings` | The mailbox switch, its local part and domain, the three optional capability switches and the two accounting settings | [`../platform-foundation/`](../platform-foundation/) |
+| Attachment | `ir.attachment` | `ir_attachment` | The creation and deletion guards keyed on the expense status, and the elevated creation path for an employee's own receipt | [`../platform-foundation/`](../platform-foundation/) |
+| Printable Document Action | `ir.actions.report` | `ir_act_report_xml` | The hook that appends every receipt of the expense to the printed expense document | [`../platform-foundation/`](../platform-foundation/) |
+| Sales Order | `sale.order` | `sale_order` | The expenses rebilled onto it, their count, and the widened name search | [`../sales/`](../sales/) |
+| Sales Order Line | `sale.order.line` | `sale_order_line` | The expenses that produced it, the single expense used for its cost, and the cost side of its margin | [`../sales/`](../sales/) |
+| Project | `project.project` | `project_project` | The expense section of the profitability panel, the embedded expenses action, and the four exclusions that stop double counting | [`../projects-and-tasks/`](../projects-and-tasks/) |
+
+The candidate entity list for this folder also named the generic platform entities whose transport
+names begin `ir.`, `base.`, `report.`, `format.`, `properties.` and `change.`. Those belong to the
+platform foundation and to [`../../overview/README.md`](../../overview/README.md); the two this
+domain genuinely extends — the attachment and the printable document action — are in the table
+above, and nothing else from that group is specified here.
 
 ## Reading order
 
-1. **`glossary.md`** — read the twelve or so terms that carry precise meaning here (expense category, payment mode, approval state, rebilling policy, outstanding account, work contact) before anything else.
+1. **[`glossary.md`](glossary.md)** — read at least the terms that carry a precise and easily mistaken meaning here (expense category, payment mode, approval state, visible status, rebilling policy, destination account, outstanding account, work contact, priced and unpriced category) before anything else; the file defines every term of the domain.
 2. **`entities.md`** — the Expense entity and the four short-lived dialogue entities, field by field.
 3. **`state-machines.md`** — the single visible status, the hidden approval state, and how the linked journal entry overrides both.
 4. **`calculations.md`** — pricing, the price-included tax arithmetic, currency conversion, duplicate keys, mail parsing, splitting, rebilling amounts.
@@ -100,7 +129,25 @@ Where the expense domain **changes** the behaviour of one of those subjects — 
 7. **`business-rules.md`** — every validation, every message, every permission check.
 8. **`configuration.md`** — settings, groups, access rights, record rules, shipped data, scheduled job.
 9. **`interfaces.md`** — navigation, views, named operations, documents, message templates.
-10. **`acceptance-criteria.md`** — the numbered scenarios a rebuild must reproduce exactly.
+10. **`acceptance-criteria.md`** — the one hundred and thirty-one numbered scenarios a rebuild must reproduce exactly.
+
+## Every file in this folder
+
+| File | What it holds |
+|---|---|
+| [`README.md`](README.md) | This file: scope, capability packages, the entities the folder owns, the reading order, the dependencies in both directions, and the conventions used throughout |
+| [`entities.md`](entities.md) | The Expense entity field by field, the four short-lived dialogue entities, the expense category, and every field this domain adds to an entity owned elsewhere; uniqueness, ordering, display, archival and company behaviour; links to the generated reference pages |
+| [`state-machines.md`](state-machines.md) | The visible status and its seven values, the hidden approval state, the payment progress of the linked entry, every transition with its guards and side effects, the message subtypes broadcast, and a diagram |
+| [`workflows.md`](workflows.md) | The end-to-end procedures: the six ways to capture an expense, submitting, approving, refusing, resetting, splitting, posting, rebilling, project tracking, reimbursing, and the weekly reminder |
+| [`business-rules.md`](business-rules.md) | Every validation, constraint, invariant, permission check and locking rule, numbered `EXP-…`, each with its exact message, and an index of rule identifiers |
+| [`calculations.md`](calculations.md) | Every formula: pricing, the price-included tax arithmetic, currency conversion and the rate override, label and account resolution, duplicate and same-receipt detection, mail parsing, splitting, rebilling prices and quantities, analytic distribution, profitability and the dashboard |
+| [`accounting-effects.md`](accounting-effects.md) | The two journal entries the domain produces, item by item, with nine worked examples; reimbursement; reversal; the accounts used and the cross-checks against the payable model |
+| [`configuration.md`](configuration.md) | Settings, system parameters, shipped categories, the numbering series, security groups, access rights, record rules, company configuration, the mailbox, the activity type, message subtypes and templates, the scheduled job, the digest tip, the tour, the dashboard document, the layout variant and the analytic configuration |
+| [`interfaces.md`](interfaces.md) | Menus, views, window actions, named operations, dialogues, receipt capture, printable documents, the electronic-mail interface, presence in other applications, routes, import and export, and field-level visibility |
+| [`acceptance-criteria.md`](acceptance-criteria.md) | The standing fixture and one hundred and thirty-one numbered Given–When–Then scenarios with concrete records, amounts and messages |
+| [`glossary.md`](glossary.md) | Every term of the domain, defined, with the stored values behind them and the terms this folder deliberately does not use |
+
+There are no extra topic files: the eleven documents above are the whole folder.
 
 ## Dependencies on other domains
 

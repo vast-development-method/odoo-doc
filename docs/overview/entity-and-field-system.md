@@ -1,8 +1,8 @@
 # The entity and field system
 
-Everything the system stores, computes, validates, displays or exchanges is a **field of an entity**. This document specifies the entity and field machinery in full: the three entity kinds and how each is stored; every field type with its storage form, value semantics and attributes; computed fields, their declared dependencies, the choice to store or not, their inverse and search rules, and the recomputation algorithm including traversal across relations; related fields; company-dependent values; translatable values; defaults and their resolution order; on-change behaviour and its limits; validation rules and database constraints; ordering, display names and name searching; the archive flag; audit fields; and the filter grammar in full, with every operator's exact semantics.
+Everything the system stores, computes, validates, displays or exchanges is a **field of an entity**. This document specifies the entity and field machinery in full: the three entity kinds and how each is stored; every field type with its storage form, value semantics, attributes and rounding rules; relational fields, self-references and the materialised ancestor path; computed fields, their declared dependencies, the choice to store or not, their inverse and filter rules, their derived capabilities and the recomputation algorithm including traversal across relations; related fields; company-dependent values and their fallback; translatable values; defaults, including the recorded default values a tenant can add; on-change behaviour and its limits; validation rules and database constraints; ordering, display names and name searching; the archive flag; audit fields; the field descriptions served to clients; how the database schema is derived from all of it; and fields created while the system is running.
 
-Read [the architecture](architecture.md) first: this document assumes the registry, the environment, the record set and the unit of work.
+Read [the architecture](architecture.md) first: this document assumes the registry, the environment, the record set and the unit of work. The operations that read and write these fields, and the complete grammar of the filter notation, are in [record operations and query notation](record-operations-and-query-notation.md).
 
 ---
 
@@ -29,8 +29,12 @@ Read [the architecture](architecture.md) first: this document assumes the regist
 19. [Copying](#19-copying)
 20. [The filter grammar](#20-the-filter-grammar)
 21. [Field metadata exposed to clients](#21-field-metadata-exposed-to-clients)
-22. [Invariants a rebuild must preserve](#22-invariants-a-rebuild-must-preserve)
-23. [Acceptance criteria](#23-acceptance-criteria)
+22. [Deriving the database schema](#22-deriving-the-database-schema)
+23. [User-created fields](#23-user-created-fields)
+24. [A worked example of an entity from end to end](#24-a-worked-example-of-an-entity-from-end-to-end)
+25. [Invariants a rebuild must preserve](#25-invariants-a-rebuild-must-preserve)
+26. [Acceptance criteria](#26-acceptance-criteria)
+27. [Reconciliation notes](#27-reconciliation-notes)
 
 ---
 
@@ -348,6 +352,66 @@ Worked example. With two decimal places: `compare(0.001, 0.0, 2)` rounds 0.001 t
 
 Default aggregate: sum.
 
+#### The rounding routine in full
+
+Every decimal and monetary rounding in the platform uses one routine. It takes a value, a **step** — either ten raised to the negative number of decimal places, or an arbitrary positive step such as 0.05 — and a tie-breaking method.
+
+1. If the step is zero or the value is zero, return zero.
+2. Normalise: divide the value by the step. When the step is below one, compute the reciprocal of the step exactly and multiply by it instead of dividing, which reduces representation error.
+3. Compute a tolerance: two raised to the power of the base-two logarithm of the absolute normalised value, minus fifty.
+4. Apply the tie-breaking method to the normalised value.
+5. Denormalise: multiply the result by the step, or divide it by the reciprocal when the reciprocal path of step 2 was taken.
+
+| Method | Rule applied at step 4 |
+|---|---|
+| Half up, the default | Round to the nearest whole number, ties away from zero, after adding the tolerance signed like the normalised value |
+| Half down | The same, after subtracting the tolerance signed like the normalised value |
+| Half even | Let the integral part be the largest whole number not above the normalised value and the remainder be the absolute difference between the normalised value and that integral part. When the absolute difference between one half and the remainder is below the tolerance, the result is the integral part plus its own remainder on division by two; otherwise round to the nearest whole number, ties away from zero |
+| Up | Truncate towards zero after adding, signed like the normalised value, one minus the tolerance |
+| Down | Truncate towards zero after adding the tolerance signed like the normalised value |
+
+Rounding to the nearest whole number with ties away from zero preserves the sign of a negative zero.
+
+**Worked example one.** Rounding 2.675 to a step of 0.01, half up. The binary representation of 2.675 is slightly below the exact tie. Normalising gives 267.49999999999997; the tolerance is two to the power of the base-two logarithm of 267.5 minus fifty, approximately 0.00000000000024; adding it gives 267.5000000000002, which rounds to 268; denormalising gives 2.68. Without the tolerance the result would have been 2.67.
+
+**Worked example two.** Rounding 1.3 to a step of 0.5, half up: normalising gives 2.6, which rounds to 3, and 3 × 0.5 = 1.5.
+
+**Worked example three.** Rounding 2.5 to a step of 1, half even, gives 2; rounding 3.5 to the same step and method gives 4.
+
+#### Zero test and comparison
+
+```formula
+is zero( value , step ) = ( value = 0 )  OR  ( | round( value , step ) | < step )
+```
+
+Comparing two values at a step:
+
+1. If the two values are identical, the result is zero.
+2. Round each value at the step; the difference is the first rounded value minus the second.
+3. If that difference is zero at the step by the test above, the result is zero.
+4. Otherwise the result is minus one when the difference is below zero and plus one when it is above.
+
+Comparison rounds **before** subtracting; the zero test of a difference rounds **after** subtracting. The two are not equivalent, and a business rule must state which it uses.
+
+**Worked example.** At two decimal places, comparing 0.006 with 0.002 gives plus one, because 0.006 rounds to 0.01 and 0.002 rounds to 0.00. The zero test of the difference gives true, because 0.006 − 0.002 = 0.004 rounds to 0.00.
+
+#### Euclidean division at a given precision
+
+1. Scale the first value: round it at the step, divide by the step, and take the nearest whole number.
+2. Scale the second value the same way.
+3. The quotient is the whole-number division of the first scaled value by the second, rounded towards negative infinity.
+4. The remainder is the remainder of that division, multiplied by the step and rounded at the step.
+
+```formula
+first value  ≈  quotient × second value  +  remainder      at the given precision
+```
+
+**Worked example.** Dividing 10.00 by 3.00 at two decimal places: the scaled values are 1000 and 300; the quotient is 3; the remainder of 1000 divided by 300 is 100, which multiplied by 0.01 and rounded gives 1.00. Indeed 3 × 3.00 + 1.00 = 10.00.
+
+#### Rendering a decimal as text
+
+Rendering produces a fixed-point text with exactly the requested number of decimal places. When the value is zero at that precision by the test above, it is first replaced by zero, so that −0.004 at two decimal places renders as 0.00 and never as a negative zero. Rendering must never be used to round: it is a presentation step only.
+
 ### 6.5 Monetary amount
 
 Stores an amount of money. Always fixed-point storage.
@@ -652,6 +716,18 @@ Rules:
 | Polymorphic reference | A record set of the pointed-at entity, of size zero or one. |
 | Reference by identifier | The bare integer. |
 
+### 7.8 Self-references and the materialised ancestor path
+
+An entity may declare a **parent field**, a many-to-one to itself, and may in addition enable **materialised ancestor path storage**.
+
+- With path storage enabled the entity carries a short-text field, `parent_path` — the materialised ancestor path — which must be indexed. It holds the ancestor chain of the record as the root identifier, a separator, each intermediate identifier and a separator, and finally the record's own identifier and a separator; it always ends with a separator.
+- On creation the path is the parent's path concatenated with the record's identifier and a separator. A record with no parent gets its own identifier and a separator.
+- On a write of the parent field, the records whose parent actually changes are determined **before** the write, by comparing the stored parent with the new one. After the write, each such record and **all its descendants** have their path rewritten by replacing the old prefix with the new parent's path. Descendants are selected by the range from the node's own path up to but excluding the node's path with its last character replaced by the next character, which selects exactly the subtree while remaining index-friendly.
+- **Cycle guard.** Before rewriting, the new parent's ancestors are extracted from its path; when any of them is one of the records being moved, the write is refused with **"Recursion Detected."**
+- A generic cycle test exists for entities without path storage, and for any self-referencing many-to-one or many-to-many field: it walks the relation level by level until it either exhausts the graph or revisits a starting record. The traversal runs with elevated rights and with archived records visible, so that an archived intermediate record cannot hide a cycle.
+- The materialised ancestor path is rejected from creation and write value maps exactly like the audit fields.
+- The path is what makes the hierarchy operators of the filter grammar resolve without an iterative search ([record operations and query notation, section 4.9](record-operations-and-query-notation.md#49-hierarchy-operators)).
+
 ---
 
 ## 8. Computed fields
@@ -744,6 +820,41 @@ Rules and limits:
 2. Precomputation is pointless on a non-stored field and produces a warning; likewise on a field that is neither computed nor related.
 3. Precomputation is a trade-off: it avoids a second statement per creation, but it computes record by record rather than in a batch, so it loses the benefit of batching and prefetching. It pays off on the lines of a document created in one call, and costs on records created one at a time in a loop.
 4. A precomputed field whose computation depends on another precomputed field of the same record is computed in dependency order.
+
+### 8.8 Derived capabilities of a computed field
+
+Whether a computed field can be filtered on, sorted by, grouped by or aggregated is determined by attempting to express it as a query term.
+
+| Capability | Rule |
+|---|---|
+| Filterable | True when the field is stored, or when it declares a filter rule |
+| Sortable | True when the field has a column and is stored; otherwise true when the field is embedded from a parent and the parent field is sortable; otherwise true when an ordering term can be produced for the field, and false when producing one fails |
+| Groupable | The same, using a grouping term; for a date or date-and-time field the attempt is made with the month granularity |
+| Aggregatable | None when no aggregate is declared; the declared aggregate when the field has a column and is stored; otherwise the parent's aggregate when the field is embedded and the parent is aggregatable; otherwise the declared aggregate when an aggregate term can be produced, and none when producing one fails |
+
+The capabilities are computed once when the registry is built and are served to clients with the field description ([section 21](#21-field-metadata-exposed-to-clients)), which is how a client knows not to offer grouping on a field that cannot be grouped.
+
+### 8.9 Failure catalogue of derivation
+
+| Situation | Message |
+|---|---|
+| A dependency path names an unknown field | "Wrong @depends on '\<rule\>' (compute method of field \<transport name\>.\<field\>). Dependency field '\<name\>' not found in model \<transport name\>." |
+| A dependency path contains the identifier | "Compute method cannot depend on field 'identifier'." |
+| A self-dependency that was not declared | "Field \<transport name\>.\<field\> should be declared with recursive=True" |
+| Precomputation is not feasible because a dependency is not precomputed | "Field \<transport name\>.\<field\> cannot be precomputed as it depends on non-precomputed field \<transport name\>.\<field\>" |
+| An intermediate dependency step is not filterable | "Field \<transport name\>.\<field\> in dependency of \<transport name\>.\<field\> should be searchable. This is necessary to determine which records to recompute when \<transport name\>.\<field\> is modified. You should either make the field searchable, or simplify the field dependency." |
+| A computation assigns nothing on a read-only non-stored field | "Compute method failed to assign \<record set\>.\<field\>" |
+| A related field's type disagrees with its target's | "Type of related field \<transport name\>.\<field\> is inconsistent with \<transport name\>.\<field\>" |
+| A related field's path names an unknown field | "Field \<name\> referenced in related field definition \<transport name\>.\<field\> does not exist." |
+| A filter rule cannot serve the operator | "Unsupported operator on \<field label\> '\<entity description\>' (\<transport name\>) in \<condition\>" |
+| A permission failure while traversing a path or an embedded field | The original message, then a blank line, then "Implicitly accessed through '\<entity description\>' (\<transport name\>)." |
+| Too many recomputation rounds | "Too many iterations for recomputing fields!", logged rather than raised |
+| A co-computed group whose members disagree about elevated computation | "\<transport name\>: inconsistent 'compute_sudo' for computed fields \<list\>. Either set 'compute_sudo' to the same value on all those fields, or use distinct compute methods for sudoed and non-sudoed fields." |
+| A co-computed group whose members disagree about storage | "\<transport name\>: inconsistent 'store' for computed fields, accessing \<list\> may recompute and update \<list\>. Use distinct compute methods for stored and non-stored fields." |
+| A co-computed group whose members disagree about precomputation | "\<transport name\>: inconsistent 'precompute' for computed fields \<list\>. Either set all fields as precompute=True (if possible), or use distinct compute methods for precomputed and non-precomputed fields." |
+| Precomputation declared on a field that is not derived | The attribute is forced to false and a warning is logged |
+| Precomputation declared on a field that is not stored | The attribute is forced to false and a warning is logged |
+| A company-dependent field declared required, translatable, or of an unsupported type | A warning is logged when the registry is built |
 
 ---
 
@@ -864,6 +975,28 @@ Had the notification been issued after the deletion, the traversal backwards alo
 - A computation that raises a business refusal propagates it: the whole operation fails. A computation is not a place to recover from a business error.
 - A computation that raises because a record vanished is retried without that record.
 
+### 9.7 Three worked examples of derivation
+
+**A precomputed field on a line.** An Order Line declares a sequence number as a stored integer, computed by a rule that reads the order's lines and assigns the line's position, declared precomputed.
+
+- Given an Order with no lines, when the order is created with three line-creation commands, then the three lines are inserted in one statement and each row already carries its sequence number, because the value was produced before insertion.
+- Given the same entity, when a line is created with an explicit sequence number, then no precomputation occurs and the supplied value is inserted.
+- Given a declared default of ten on the sequence number, when a line is created without a value, then the default produces ten and the precomputation is skipped, because a declared default disables precomputation.
+- Given the sequence number is additionally declared read-only, when a line is created with an explicit value, then the value is discarded before defaults are resolved and the precomputation runs.
+- Given the sequence number depends on the order's total, which is a stored computed field that is **not** precomputed, then when the registry is built the precomputation is cancelled with the corresponding message of [section 8.9](#89-failure-catalogue-of-derivation) and the field is computed at flush time instead.
+
+**A recursive field.** A Category has a parent as a many-to-one to itself, a materialised ancestor path, and a complete name that is stored, computed, declared recursive, and depends on the name and on the parent's complete name.
+
+- Given categories A, A then B, and A then B then C, when A's name is changed to Z, then the traversal marks the complete name on A; draining it computes "Z"; assigning it declares a modification whose trigger tree reaches the complete name on B through the inverse of the parent link; the recursion guard allows B because it was not marked yet; the same happens for C. The three values become "Z", "Z / B" and "Z / B / C".
+- Given the same entities, when the complete name is **not** declared recursive, then the self-dependency is detected when the registry is built, the field is declared recursive automatically, a warning is logged, and the behaviour is identical afterwards.
+- Given a cycle from A to B and back created concurrently, then the recursion guard stops the traversal when it revisits a record that is already marked, and the materialised-path guard refuses the write that would create the cycle with "Recursion Detected."
+
+**A co-computed group.** An Order declares an untaxed amount, a tax amount and a total amount, all stored, all computed by one rule, all depending on the lines' subtotal and tax.
+
+- Given a write that assigns the total explicitly, the field being editable, then all three fields are protected for the duration of the write, therefore none of them is recomputed and the manual total survives.
+- Given a write on a line's subtotal, then the traversal marks all three fields on the order; draining any one of them removes all three from the schedule, runs the rule once, and assigns all three.
+- Given one of the three declared not stored while the other two are stored, then the registry build logs the storage-inconsistency message of [section 8.9](#89-failure-catalogue-of-derivation), because reading the non-stored one would silently write the stored ones.
+
 ---
 
 ## 10. Related fields
@@ -918,6 +1051,26 @@ Two costs a rebuild must accept:
 
 1. **Duplication.** The value now exists in two places and is kept in step by the recomputation machinery. A rebuild that omits the recomputation will silently produce stale copies.
 2. **Translated stored related fields are not reliable in every language**, because the column holds one language's value per language slot and the recomputation only refreshes the language it ran in. Declaring one records a warning naming the field.
+
+### 10.5 Worked example of a related field and a broken path
+
+An Invoice Line declares a customer country following the path from the invoice, to the contact, to the country, where the invoice link is a required many-to-one, the contact link is an optional many-to-one, and the country link is an optional many-to-one.
+
+**Derived attributes.** Not stored; computed with elevated rights; not copied; read-only; one dependency path, the declared path itself; target entity Country; label and help text copied from the contact's country field.
+
+**Reading on three lines** — line one whose invoice has a contact with a country, line two whose invoice has a contact with no country, line three whose invoice has no contact:
+
+1. The invoice link is read for the whole set in one statement, giving three invoices.
+2. The contact link is read for the three invoices in one statement, giving two contacts and one empty value.
+3. The country link is read for the two contacts in one statement. Line one receives the country, lines two and three receive the empty value.
+
+Three statements for three lines, not nine, because the traversal is performed one field at a time for the whole set.
+
+**Filtering.** A condition that the customer country equals a country name is rewritten by the generated filter rule. The value is a non-empty text and the operator is positive, therefore no tolerance for an unset link is added, and the condition becomes a chain of privileged existence conditions ending in a display-name membership on Country.
+
+A condition that the customer country is the empty value has a value denoting emptiness under a positive operator, therefore every non-required link in the chain also accepts an unset value: the condition becomes an existence condition on the invoice whose sub-filter is the disjunction of "the contact satisfies the disjunction of the country condition and the country being unset" with "the contact is unset". It matches lines two and three but not line one. The invoice step adds no alternative, because the invoice link is required.
+
+A condition that the customer country differs from a country name is declined by the generated filter rule, because the operator is negative and the value is not empty; the platform therefore retries with the positive form and negates the whole result, which correctly returns lines two and three alongside every line whose country is not that country.
 
 ---
 
@@ -977,6 +1130,25 @@ Consequences a rebuild must reproduce:
 ### 11.6 Company-dependent many-to-one and referential integrity
 
 A company-dependent many-to-one has **no foreign key**, because the identifiers live inside a structured document. The registry therefore keeps an index of which entities have company-dependent many-to-one fields, and deleting a record of the target entity must clear those references explicitly. A rebuild that stores them as plain columns will get foreign keys and different deletion behaviour.
+
+### 11.7 Candidate filter, sorting, grouping and invalidation
+
+- **Filtering** compares the effective value, which means the coalesced expression of [section 11.5](#115-the-fallback): a record with no stored entry matches when its fallback satisfies the condition. Sorting and grouping use the same coalesced expression.
+- **The index-friendly rewrite.** When the field carries the standard-excluding-empty-values index and the fallback does **not** satisfy the condition, the condition is prefixed with a test that the stored mapping is not empty, which lets the partial index be used, because a record with no entry cannot match anyway. The rewrite is skipped when the condition targets a date granularity rather than the whole value. Whether the fallback satisfies the condition is decided by building a throwaway in-memory record carrying the fallback and evaluating the condition against it in memory; when that evaluation is impossible the rewrite is skipped.
+- **The candidate filter sent to a client.** When a company-dependent relational field is also marked for company consistency, the candidate filter is built against the **first activated company** of the environment rather than the record's own company, conjoined with the field's own declared filter ([multi-company, section 4.3](multi-company.md#43-company-checked-relations)).
+- **Invalidation.** Creating, writing or deleting any recorded default value invalidates the **entire** record cache and clears the registry caches, because any company-dependent field's fallback may have changed.
+- **Deleting a record referenced by a company-dependent link.** Because no foreign key exists, deletion is handled explicitly ([section 11.6](#116-company-dependent-many-to-one-and-referential-integrity)). Its two refusals are **"Unable to delete "** the record's display name **" because it is used as the default value of "** the field, and **"You cannot delete "** the record being deleted **", as it is used by "** the referencing record.
+
+### 11.8 Worked example of a company-dependent value with a fallback
+
+A Product declares a cost as a company-dependent monetary field. Companies 1 and 2 exist, and the company currency has two decimal places.
+
+1. Given no recorded default for the product's cost, when a product is created while company 1 is current with a cost of 12.345, then the value is rounded to 12.35, compared with the fallback of 0.00, found different, and the mapping holding the single entry for company 1 with the value 12.35 is inserted.
+2. Given that product, when it is read while company 2 is current, then the mapping has no entry for company 2 and the fallback 0.00 is returned.
+3. Given that product, when a recorded default of 12.35 is created for company 1, then the whole record cache is invalidated; reading the cost while company 1 is current still returns 12.35, now from the stored entry; writing 12.35 again while company 1 is current rebuilds the mapping, finds the entry equal to the fallback and removes it, leaving an empty mapping.
+4. Given the empty mapping and a fallback of 12.35, when the fallback is changed to 13.00, then reading the cost while company 1 is current returns 13.00, because the record follows the fallback.
+5. Given the cost carries the standard-excluding-empty-values index, when records whose cost exceeds 100.00 are searched while company 1 is current, then the fallback of 13.00 does not satisfy the condition, therefore the condition is compiled with the mapping-not-empty prefix and the partial index is used.
+6. Given the same, when records whose cost is below 100.00 are searched, then the fallback does satisfy the condition, therefore the prefix is **not** added and records with no entry are correctly returned.
 
 ---
 
@@ -1083,6 +1255,38 @@ Common declared defaults and what they mean:
 | The next number from a sequence | Deliberately **not** done as a default; numbering is assigned at confirmation or posting time, because a default would consume numbers for records the user abandons. |
 
 Declaring the default explicitly as absent removes an inherited default: an extension can therefore take a default away.
+
+### 13.5 Recorded default values
+
+A **recorded default value** stores a default for one field, optionally narrowed by user, by company and by a condition. It is the second and the fourth step of the resolution order of [section 13.1](#131-the-resolution-order), and it is also the fallback source of a company-dependent field ([section 11.5](#115-the-fallback)).
+
+| Field | Meaning |
+|---|---|
+| Field | The field definition the default applies to. Required. Deleting the field definition deletes the default |
+| User | When set, the default applies only to that user |
+| Company | When set, the default applies only while that company is current |
+| Condition | When set, the default applies only when the client asks for defaults with this condition. The conventional shape is a field name, an equals sign and the serialised value |
+| Serialised value | The value, serialised as a structured document. Required |
+
+**Resolution** for one entity and one condition returns a map from field name to value:
+
+1. Select every recorded default of that entity whose user is empty or is the acting user, whose company is empty or is the current company, and whose condition matches — the empty condition when none is asked for.
+2. Order by user, then company, then identifier.
+3. Keep the **first** value seen for each field.
+
+Because an empty column sorts before a filled one in that ordering, a default that names neither a user nor a company is kept in preference to a narrower one only when it has the lower identifier. The intended reading is that the ordering makes the result deterministic; a caller that needs a user-specific value must not also define a general one for the same field. [Multi-company, section 7.2](multi-company.md#72-user-default-values) states the company precedence that follows from the same ordering.
+
+**Validation on write.** The serialised value must parse and must convert to the field's type. A malformed document is refused with **"Invalid structured-data format in Default Value field."** A type mismatch is refused with **"Invalid value in Default Value field. Expected type '"** the field type **"' for '"** the qualified field name **"'."** An integer default outside the range of a thirty-two-bit whole number is refused with **"Invalid value for "** the qualified field name **": "** the value **" is out of bounds (integers should be between -2,147,483,648 and 2,147,483,647)"**.
+
+**Permission.** A user may only define a default for a field they may write; the check is performed after the record's own permission check.
+
+**Invalidation.** Creating, writing or deleting a recorded default value invalidates the whole record cache and clears the registry caches, because any company-dependent fallback may have changed.
+
+### 13.6 Declared defaults and copying
+
+- A declared default of "none" explicitly discards any default inherited from a previous declaration of the same field.
+- A field named as the state field defaults to not being copied, which means duplicating a record resets the state to its default rather than carrying the current state over.
+- A derived field that is read-only and has no inverse rule must not declare a default; declaring one is reported in the log as redundant, because the default can never be observed.
 
 ---
 
@@ -1241,26 +1445,26 @@ Guards run before anything is deleted, on the whole set at once.
 
 ### 15.5 Company consistency
 
-Relational fields marked for company consistency are checked so that a record never links to a record of an incompatible company.
+Relational fields marked for company consistency are checked so that a record never links to a record of an incompatible company. Unlike the four data gates, the check is a **validation**: it runs whatever the acting identity and also with elevated rights, because a cross-company link corrupts the books regardless of who created it.
 
-**When it runs.** On every creation and every write, for entities that switch the automatic check on; otherwise explicitly, wherever a capability calls for it.
+What this document contributes:
 
-**Algorithm.**
+| Contribution | Rule |
+|---|---|
+| The declaration | A relational field declares that it participates; an entity declares whether the check runs automatically on every creation and write, or only where a capability invokes it |
+| Which fields are checked | Every field of the entity when no names are given, or when the company field or the company list field is among the names; otherwise only the named ones |
+| The split | The participating fields are partitioned into ordinary ones, checked against the record's own companies, and company-dependent ones, checked against the environment's **current** company, because a per-company value belongs to the company it was written for |
+| The reads | The linked records are read with elevated rights and with archived records visible, so that neither a permission refusal nor an archived target can turn a violation into a spurious pass or a wrong message |
 
-1. Determine which fields to check. If no names are given, or if the company field or company-set field is among them, check every field of the entity; otherwise only the named ones.
-2. Partition the marked relational fields into ordinary ones and company-dependent ones.
-3. For each record:
-   - **Ordinary fields.** Determine the record's companies: the record itself if the entity *is* the company entity; otherwise the record's company field if it has one; otherwise its company-set field if it has one; otherwise skip with a warning naming the entity and the fields and stating that the entity has neither. For each marked field, read its value unrestricted and check that every linked record's company is either empty or among the record's companies.
-   - **Company-dependent fields.** Check against the **environment's current company** instead, because the per-company value belongs to the company it was written for.
-4. Collect the inconsistencies. If any, refuse with a message built as follows:
-   - First line: **"Uh-oh! You’ve got some company inconsistencies here:"**
-   - Then up to five lines, one per inconsistency:
-     - when the record is a company: **"- Record is company “"** name **"” while “"** field label **"” ("** field name **": "** the linked records' names **") belongs to another company."**
-     - when the record links to itself through its own company field: **"- Only a root company can be set on “"** record name **"”. Currently set to “"** company name **"”"**
-     - otherwise: **"- “"** record name **"” belongs to company “"** company names **"” while “"** field label **"” ("** field name **": "** linked record names **") belongs to another company."**
-   - Last line: **"To avoid a mess, no company crossover is allowed!"**
+The company filter of each target entity, the four entity families that override the compatibility rule, the full algorithm, the refusal message with its three line shapes and the worked examples are in [multi-company, section 6](multi-company.md#6-the-company-consistency-check).
 
-**The compatibility rule.** A linked record is compatible when its company is empty or among the owning record's companies. An empty company means "shared by all companies", which is why shared reference data can be linked from any company's documents. An entity may override the rule — for example the user entity checks membership of the company set rather than equality of the company field.
+```formula
+compatible( linked record , owning companies ) =
+    ( company of linked record is empty )
+    OR ( company of linked record ∈ owning companies )
+```
+
+This is the default family's rule; an empty company on the linked record means "shared by all companies", which is why shared reference data can be linked from any company's documents.
 
 ### 15.6 Which mechanism to use
 
@@ -1472,224 +1676,47 @@ Any field may override the default by declaring whether it is copied.
 
 A **filter** — the value passed to every search, every record rule, every relational field's candidate restriction and every action's fixed criteria — is a first-order logical expression over conditions on fields.
 
-### 20.1 Two notations
+### 20.1 The two notations at a glance
 
-The **list notation** is what travels over the transport and what appears in stored records. It is a flat list in prefix notation mixing conditions and connectives:
-
-| Item | Meaning |
-|---|---|
-| A triple | A condition. |
-| `&` | Conjunction of the next two items. |
-| `|` | Disjunction of the next two items. |
-| `!` | Negation of the next item. |
-
-Items that are adjacent with no connective between them are conjoined. The empty list means "everything".
-
-Examples:
+The **list notation** is what travels over the transport and what appears in stored records. It is a flat list in prefix notation mixing conditions and connectives: a triple is a condition, `&` conjoins the next two items, `|` disjoins them, and `!` negates the next item. Items adjacent with no connective between them are conjoined, and the empty list means "everything".
 
 | Filter | Meaning |
 |---|---|
 | `[]` | Every record |
 | `[('state', '=', 'posted')]` | Posted records |
 | `[('state', '=', 'posted'), ('amount', '>', 100)]` | Posted **and** over one hundred |
-| `['|', ('state', '=', 'draft'), ('state', '=', 'posted')]` | Draft **or** posted |
-| `['&', '!', ('state', '=', 'cancel'), '|', ('a', '=', 1), ('b', '=', 2)]` | Not cancelled, and (a is 1 or b is 2) |
+| `['\|', ('state', '=', 'draft'), ('state', '=', 'posted')]` | Draft **or** posted |
+| `['&', '!', ('state', '=', 'cancel'), '\|', ('a', '=', 1), ('b', '=', 2)]` | Not cancelled, and either the first field is 1 or the second is 2 |
 
-The **tree notation** is the internal form: a node is either the constant true, the constant false, a condition, a conjunction of nodes, a disjunction of nodes, a negation of a node, or a custom node carrying its own compilation rule. Filters are immutable; combining them produces new ones.
+The **tree notation** is the internal form: a node is the constant true, the constant false, a condition, a conjunction, a disjunction, a negation, or a custom node carrying its own compilation rule. Filters are immutable; combining them produces new ones.
 
-Parsing the list notation into the tree is a right-to-left stack walk: conditions push, `&` and `|` pop two and push the combination, `!` pops one and pushes its negation. A malformed list — a connective with too few operands — is refused with **"Domain() malformed domain "** followed by the list. An item that is neither a triple nor a connective is refused with **"Domain() invalid item in domain: "** followed by the item.
+A condition is a triple of a field expression, an operator and a value. The field expression names a field of the entity, a path of relational segments, a granularity of a date field, a property of a custom-properties field, the identifier, or the display name.
 
-### 20.2 The condition
+The complete grammar — the operator set with its standard, convenience and internal operators, value normalisation, path decomposition, the empty-value rules and their compiled forms, the semantics of every operator on every field type, the resolution of an existence condition into a sub-query or a join, the hierarchy operators, in-memory evaluation, the four optimisation stages and the merging of sibling conditions — is specified in [record operations and query notation, section 4](record-operations-and-query-notation.md#4-the-filter-notation). Nothing of the grammar is restated here.
 
-A condition is a triple: a **field expression**, an **operator** and a **value**.
+### 20.2 Where the field system contributes to the grammar
 
-The field expression is one of:
+Three parts of this document decide how a condition on a field compiles, and a rebuild must keep them consistent with the grammar:
 
-| Form | Meaning |
+| Contribution | Section |
 |---|---|
-| `field` | A field of the entity being searched. |
-| `field.sub` … | A path: every segment but the last is relational and is traversed. Equivalent to nesting the `any` operator. |
-| `field.property` | For a custom-properties field, one property of it. |
-| `field.granularity` | For a date or instant, a derived number such as the year, the quarter, the month, the week-of-year, the day-of-month, the day-of-week or the hour. |
-| `id` | The record identifier. |
+| The declared empty value of each type, which a filter treats as "not set" | [Section 6](#6-the-field-types) |
+| The column expression of a company-dependent field, which is the current company's entry with the fallback applied, and the extra emptiness test that lets its partial index be used | [Section 11.5](#115-the-fallback) |
+| The column expression of a translatable field, which is the current language's entry with the source-language fallback | [Section 12.3](#123-storage) |
+| The generated search rule of a non-stored computed or related field, which rewrites a condition into one the query builder can serve | [Section 8.6](#86-the-filter-rule) and [section 10.3](#103-derived-behaviour) |
+| Whether a field may be filtered on, sorted by, grouped by or aggregated at all | [Section 8.8](#88-derived-capabilities-of-a-computed-field) |
 
-### 20.3 The operator table
-
-Operators divide into **standard** operators, which every layer supports, and **convenience** operators, which are rewritten into standard ones before compilation.
-
-**Standard operators**
-
-| Operator | Applies to | Exact semantics |
-|---|---|---|
-| `in` | Any field | The field's value is one of the values in the collection. An entry that is the empty value means *the field is not set*. For a relational field, an integer entry compares identifiers and **bypasses the target's record rules**; a text entry is matched against the target's display name. |
-| `not in` | Any field | The negation of `in`, with the empty-value handling of [20.7](#207-empty-values-and-the-null-question). |
-| `<`, `>`, `<=`, `>=` | Ordered types | Ordinary comparison against a single value, with the empty-value handling of [20.7](#207-empty-values-and-the-null-question). |
-| `like` | Text | The value, **surrounded by wildcards**, matched case-sensitively. The field is cast to text first when it is not a text type. |
-| `not like` | Text | The negation, which also matches rows whose value is not set. |
-| `ilike` | Text | The same as `like` but case-insensitive **and accent-insensitive** where the tenant's database offers accent folding. Both the column and the pattern are folded. |
-| `not ilike` | Text | The negation, which also matches rows whose value is not set. |
-| `=like` | Text | The value matched **without** added wildcards, case-sensitively. The pattern's own wildcards still apply. |
-| `not =like` | Text | The negation, which also matches unset rows. |
-| `=ilike` | Text | The anchored form, case-insensitive and accent-insensitive. |
-| `not =ilike` | Text | The negation, which also matches unset rows. |
-| `any` | Relational fields and the identifier | The field leads to at least one record matching the given sub-filter. For a many-to-one and for the identifier, the sub-filter is evaluated on the target entity **with the archive filter switched off**; for a to-many field it is evaluated on the target entity with the field's own client-side context applied. The target's record rules **are** applied. |
-| `not any` | The same | No record the field leads to matches the sub-filter. |
-
-Two further standard operators exist for internal use and may not appear in a filter received from outside; supplying one is refused with **"Domain() invalid item in domain: "** followed by the item.
-
-| Operator | Semantics |
-|---|---|
-| `any!` | Like `any`, but the target's record rules are **not** applied. |
-| `not any!` | Like `not any`, without the target's record rules. |
-
-**Convenience operators**, each rewritten before compilation:
-
-| Operator | Rewritten to |
-|---|---|
-| `=` | `in` against a one-element collection. Against a collection, `in` against that collection; against an **empty** collection, `in` against the collection containing only the empty value, because a screen writes "is not set" that way. |
-| `!=` | `not in`, by the same rules. |
-| `=?` | The whole condition becomes "everything" when the value is empty; otherwise `=`. Used in stored filters where a blank parameter should not restrict. |
-| `child_of` | See [20.5](#205-the-hierarchy-operators). |
-| `parent_of` | See [20.5](#205-the-hierarchy-operators). |
-
-Any other operator is refused when the condition is checked, with a message naming the operator and the condition.
-
-### 20.4 Normalisation before compilation
-
-A filter is normalised in four increasing levels, applied in order and repeated until stable, with a bound of one thousand iterations.
-
-| Level | What happens |
-|---|---|
-| None | The filter as parsed. |
-| Basic | Convenience operators are rewritten. Equality becomes membership. Values are coerced to collections. Conditions on a field type are normalised per type. Constants are folded: a conjunction containing "nothing" becomes "nothing"; a disjunction containing "everything" becomes "everything"; duplicate conditions are merged. Negations are pushed down by inverting operators. |
-| Dynamic values | Relative values are resolved: a text value naming a relative date on a date field becomes an absolute date; the same for instants. This level is separated because its result depends on *when* the filter is evaluated, so a filter normalised at this level cannot be cached across time. |
-| Full | The hierarchy operators are expanded, which requires searching. Access-bypassing forms are chosen where the environment or the field allows. A membership test against a many-to-one whose sub-filter is only about identifiers is collapsed into a direct comparison, avoiding a sub-query. |
-
-Normalisation rules worth stating explicitly because they change results:
-
-1. A membership test against an **empty** collection is "nothing"; a non-membership test against an empty collection is "everything".
-2. A membership test whose collection contains only values that cannot occur — for instance the empty value on a field the registry knows to be not-null — has those values removed; if nothing remains, the rules above apply.
-3. A pattern operator against an **empty** value is folded: for a relational field or an anchored operator it becomes an emptiness test; otherwise it becomes the constant matching the operator's polarity.
-4. A pattern operator against a non-text value converts the value to text, except for the anchored forms, which refuse with **"The pattern to match must be a string"**.
-5. A condition on a **relational** field compared with text is rewritten to a condition on the target's display name, wrapped in `any`. Comparing a relational field with text using an inequality operator is refused with **"Inequality not supported for relational field using a string"**.
-6. A condition on a **boolean** field whose value is not a collection is refused; whose collection contains non-boolean values is normalised by truthiness.
-7. Conditions in a conjunction or a disjunction are sorted into a canonical order before merging, so that equivalent filters normalise to the same form and duplicate conditions collapse.
-
-### 20.5 The hierarchy operators
-
-Two operators walk a parent-child relation.
-
-**Semantics.** The field expression is either the identifier, meaning "use the entity's declared parent field", or a relational field. When the field's target entity is the same as the searched entity, the walk happens on that entity; otherwise the condition is equivalent to traversing the field and applying the hierarchy operator to the target's identifier.
-
-The value identifies the starting records: integers are identifiers; text values are matched against display names with case-insensitive containment; a mixture is allowed. For a many-to-many field, identifiers are also resolved by search rather than used directly.
-
-| Operator | Result |
-|---|---|
-| `child_of` | The starting records **and** all their descendants. |
-| `parent_of` | The starting records **and** all their ancestors. |
-
-**Resolution with a materialised hierarchy.** When the entity stores a path field and the walk uses the declared parent field:
-
-- descendants: the disjunction, over the starting records, of the condition that the path begins with that record's path;
-- ancestors: the set of identifiers appearing in the starting records' paths, excluding the final segment which is the record itself.
-
-**Resolution without one.** Iteratively, elevated and with the archive filter switched off:
-
-- descendants: repeatedly search for records whose parent is in the current frontier, adding the new ones, until nothing new appears;
-- ancestors: repeatedly follow the parent link, adding the new ones, until nothing new appears.
-
-In both cases the elevation is deliberate: the hierarchy must be walked completely, and the filtering of records the user may not see is left to the record rules applied to the search as a whole.
-
-A hierarchy operator against an empty value yields "nothing". A hierarchy operator on a non-relational field is refused with a message stating that it works only for relational fields.
-
-### 20.6 Compilation of each operator
-
-The condition is compiled against the field's column. Let *column* be the field's expression in the query — the plain column, or, for a company-dependent field, the current company's entry in the mapping with the fallback applied, or, for a translatable field, the current language's entry with the source-language fallback.
-
-| Operator | Compiled form |
-|---|---|
-| `in` with no empty value among the values | *column* is in the list of converted values |
-| `in` with an empty value among the values | (*column* is in the list of the other values) **or** *column* is unset — and, if the registry knows the column cannot be unset, just the first part, or "nothing" if the list is otherwise empty |
-| `not in` with no empty value | (*column* is not in the list) **or** *column* is unset — because an unset column satisfies "not one of these" — and, if the column cannot be unset, just the first part |
-| `not in` with only the empty value | *column* is set — or "everything" if the column cannot be unset |
-| `<`, `>`, `<=`, `>=` | *column* compared to the converted value; **and**, when the field has a declared empty value that would itself satisfy the comparison and the column can be unset, *or column is unset* |
-| `like`, `ilike` | *column*, cast to text if it is not text, compared with a pattern consisting of a wildcard, the value, and a wildcard; for the case-insensitive form both sides are accent-folded |
-| `=like`, `=ilike` | The same without the added wildcards |
-| The four negative pattern operators | The negated comparison **or** *column* is unset, when the column can be unset |
-| `any!`, `not any!` | *column* is, or is not, in the sub-query produced by compiling the sub-filter on the target entity |
-
-For a **company-dependent** field with the standard-excluding-empty-values index, the compiled condition is additionally prefixed with a test that the raw mapping is not empty, whenever the fallback value does not itself satisfy the condition. This preserves the result while letting the partial index be used.
-
-### 20.7 Empty values and the null question
-
-This is the subtlest part of the grammar and the most common source of divergence in a rebuild.
-
-**The rule.** In a filter, the empty value of the field's type means *the field is not set*. For a text field the declared empty value is the **empty string**, for an integer it is **zero**, for a decimal number and a monetary amount it is **zero**, and for a boolean it is **false**. Where such a declared empty value exists, the compilation treats the empty value and the declared empty value as the same thing:
-
-1. A membership test that includes the empty value also includes the declared empty value in the compared list, and adds the unset test.
-2. A membership test that includes the declared empty value is treated as including the empty value, and therefore also adds the unset test.
-3. An inequality that the declared empty value would satisfy also matches unset rows.
-
-**Worked examples.**
-
-| Filter | On a nullable integer column | Matches |
-|---|---|---|
-| `[('count', '=', 0)]` | | Rows whose count is 0 **and** rows whose count is unset |
-| `[('count', '!=', 0)]` | | Rows whose count is neither 0 nor unset |
-| `[('count', '<', 1)]` | | Rows whose count is below 1 **and** rows whose count is unset, because 0 is below 1 |
-| `[('count', '>', -1)]` | | Rows whose count is above −1 **and** rows whose count is unset, because 0 is above −1 |
-| `[('name', '=', False)]` | On a nullable text column | Rows whose name is unset **and** rows whose name is the empty string |
-| `[('name', 'not like', 'x')]` | | Rows whose name does not contain "x" **and** rows whose name is unset |
-| `[('partner_id', '=', False)]` | On a many-to-one | Rows with no party — a many-to-one has no declared empty value, so only the unset test applies |
-
-**When the column cannot be unset.** The registry records which columns really carry a not-null constraint. For those:
-
-- an empty value in a membership list is removed before compilation;
-- a membership test on nothing but the empty value becomes "nothing";
-- a non-membership test on nothing but the empty value becomes "everything";
-- the extra unset tests are omitted.
-
-This is why the post-installation verification of not-null agreement matters: if the registry believes a column is not-null when it is not, filters will silently miss rows.
-
-### 20.8 Traversal
-
-A condition whose field expression is a path is equivalent to nested `any` conditions:
-
-```
-('order_id.partner_id.country_id', '=', 21)
-    ≡  ('order_id', 'any', [('partner_id', 'any', [('country_id', '=', 21)])])
-```
-
-Rules:
-
-1. Each traversal produces a sub-query on the target entity, to which the target's **record rules** are applied unless the field bypasses them or the environment is elevated.
-2. Traversal switches the **archive filter off** on the target for a many-to-one; for a to-many it applies the field's own client-side context, which may itself switch the archive filter on or off.
-3. A path through a **nullable** many-to-one additionally accepts unset rows when the condition being pushed down is one that an unset value would satisfy — that is, when the value tested is the empty value under a positive operator, or a non-empty value under a negative one. A negative condition against a non-empty value cannot be pushed down this way and is instead handled by evaluating the positive form and negating the whole thing.
-4. Traversal depth is not bounded by the platform; a very deep path produces a correspondingly deep sub-query.
-
-### 20.9 In-memory evaluation
-
-A filter can also be evaluated against records already in memory, which is what a client-side dynamic filter and the company consistency check use. The semantics must match the compiled form:
-
-1. Each condition is evaluated by reading the field on the record and applying the operator's semantics.
-2. Empty values follow the same rules as [20.7](#207-empty-values-and-the-null-question).
-3. Traversal reads the relation and evaluates the sub-filter on the results.
-4. Hierarchy operators expand exactly as they do for compilation.
-5. A custom node evaluates through its own rule.
-
-A rebuild that implements the two evaluations independently will drift; deriving both from one normalised tree is strongly preferable.
-
-### 20.10 Filters as values
+### 20.3 Filters as values
 
 Filters appear in stored records in three forms, and the difference matters:
 
 | Form | Where | Evaluation |
 |---|---|---|
-| A literal filter | An action's fixed criteria, a record rule with no variables | Parsed and used directly |
-| An expression producing a filter | A record rule, a relational field's candidate restriction | Evaluated in a restricted evaluation context providing the acting user, the current company, the current date and a resolver from external identifier to identifier; the result must be a filter |
-| An expression evaluated by the client | A relational field's candidate restriction declared as text | Sent to the client as text and evaluated there against the record being edited, so the candidates can depend on unsaved values |
+| A literal filter | An action's fixed criteria; a record rule with no variables | Parsed and used directly |
+| An expression producing a filter | A record rule; a relational field's candidate restriction | Evaluated in a restricted evaluation context providing the acting user, the current company, the current date and a resolver from external identifier to identifier; the result must be a filter |
+| An expression evaluated by the client | A relational field's candidate restriction declared as text | Sent to the client as text and evaluated there against the record being edited, so that the candidates can depend on unsaved values |
 
-The third form is the only one that can depend on unsaved form state, and it is therefore the only one that is **not** enforced on the server. A candidate restriction expressed that way is guidance, not a constraint; a constraint must also exist as a declared validation.
+The third form is the only one that can depend on unsaved form state, and it is therefore the only one that is **not** enforced on the server. A candidate restriction expressed that way is guidance, not a constraint ([the security model, section 20](security-model.md#20-what-is-not-enforcement)); a constraint must also exist as a declared validation.
 
 ---
 
@@ -1736,7 +1763,117 @@ The describe-fields operation returns, per field, the attributes a client needs.
 
 ---
 
-## 22. Invariants a rebuild must preserve
+## 22. Deriving the database schema
+
+Installing or updating a package brings the tables into agreement with the registry. The sequence below is what [the package system](package-system.md) invokes; it is stated here because what it produces is decided entirely by field attributes.
+
+### 22.1 Tables
+
+For every persistent or transient entity with an automatic table, the table is created if it is missing, with a single identifier column that is the primary key. Columns are then created, one per stored field that has a column type, in an order that groups identical storage types together.
+
+An entity without an automatic table is left to its own initialisation; the platform neither creates nor alters it.
+
+### 22.2 Columns
+
+- A missing column is created with the field's column type and a comment holding the field's label.
+- An existing column whose underlying type differs from the field's type is converted. For translatable fields, and for columns that already hold key-value documents, the conversion is the translation-aware one, which wraps each existing value under the source-language key.
+- A short-text column whose declared bound is smaller than the field's declared size, or which is bounded while the field is not, is converted to the new bound.
+- Columns present in the table but matching no field are detected and reported; they are **not** dropped automatically.
+
+### 22.3 Derived stored columns filled directly
+
+When a stored related field of exactly two segments is added to a table for the first time, and the traversed many-to-one is itself stored and not derived, and the target field is stored, not derived, not attachment-backed binary content and not a to-many field, the column is filled with a single join-and-set statement instead of by running the derivation record by record. Otherwise the field is scheduled for recomputation over the whole table, in batches.
+
+### 22.4 Indexes
+
+For every stored field with a column, the expected index name is the table name, an underscore, the field name, an underscore and the word `index`.
+
+| Declared index kind | Access method | Indexed expression | Partial condition |
+|---|---|---|---|
+| Balanced tree, also written as simply "true" | Balanced tree | The column | None |
+| Balanced tree excluding empty values | Balanced tree | The column | The column is set |
+| Balanced tree excluding empty values, on a company-dependent field | Balanced tree | Whether the column is set | The column is set |
+| Three-character-sequence index | Inverted index over three-character sequences | The column, or, for a translatable field, the concatenation of all language values; wrapped in the accent-folding function when that function is available and deterministic | None |
+| None | No index is created | | |
+
+Rules:
+
+1. An existing index whose access method does not match the expected one is dropped and recreated.
+2. An index that exists while the field declares none is **kept** and reported in the log, so as not to fight a deliberate database tuning.
+3. On a translatable field only the three-character-sequence index is honoured; any other declared index is ignored with a warning.
+4. A three-character-sequence index is created only when the database offers that index type.
+5. The accent-folding wrapper is applied to three-character-sequence indexes only, because accent folding is applied only to case-insensitive pattern matching.
+
+### 22.5 Foreign keys
+
+- A many-to-one produces a foreign key from its column to the target table's primary key, carrying its declared deletion policy — unless the field is company-dependent, or the owning table or the target table is not an ordinary table, or the target entity has no automatic table.
+- A many-to-many produces two foreign keys on its association table, one per side.
+- Foreign keys are applied at the end of the schema update. An existing key whose target or policy differs is dropped and recreated.
+
+### 22.6 Association tables
+
+An association table that belongs to a package — that is, whose field is not a user-created field — is reflected as a record of the association-table catalogue, which makes it removable when the package is removed. Association tables of user-created fields are not reflected; they are dropped together with the field definition record.
+
+---
+
+## 23. User-created fields
+
+A field may be created while the system is running, through the field definition entity, rather than being declared by a package. Such a field:
+
+- carries the user-created marker, which forces its prefetch group to false, meaning it is never read together with other fields;
+- is named with a reserved prefix by convention, so that it can never collide with a field a package may later declare;
+- supports the same types and the same attributes as a declared field, with the definition stored as data;
+- has its association table, for a many-to-many, dropped when its definition record is deleted;
+- participates in every rule of this document identically, once the registry has been rebuilt.
+
+Creating, changing or deleting a user-created field rebuilds the registry and synchronises the schema, exactly as installing a package does.
+
+---
+
+## 24. A worked example of an entity from end to end
+
+Consider an entity Product Lot with: a translatable short-text name; a required link to Product whose deletion policy is `restrict`; a decimal quantity at the unit-of-measure precision; a company-dependent cost in the company currency; an archive flag; and a custom-properties field whose definition lives on the product.
+
+**The schema derived from those declarations.**
+
+| Column | Type | Notes |
+|---|---|---|
+| The identifier | Integer | Primary key |
+| The creation instant | Timestamp | Audit field |
+| The creating user | Integer | Foreign key to the user table, deletion policy `set null` |
+| The last update instant | Timestamp | Audit field |
+| The last updating user | Integer | Foreign key to the user table, deletion policy `set null` |
+| The name | Key-value document | Translatable |
+| The product | Integer, not null | Foreign key to the product table, deletion policy `restrict` |
+| The quantity | Exact decimal | |
+| The cost | Key-value document | Company-dependent, monetary |
+| The archive flag | Boolean | |
+| The properties | Key-value document | Custom properties |
+
+Three indexes are created: a balanced tree on the product column; a balanced tree on whether the cost column is set, restricted to rows where it is set; and a three-character-sequence index over all language values of the name.
+
+**Creating one record** while company 1 is current, with acting user 7, a language other than the source language, a unit-of-measure precision of three decimal places and a company currency with two, supplying the name "Lot A", the product, a quantity of 1.23456 and a cost of 10.005:
+
+1. The identifier, the two instants and the two user fields are removed from the value map and then refilled: both user fields take the acting user, and both instants take the transaction timestamp.
+2. Defaults are resolved for every field not supplied; the archive flag receives its declared default of true.
+3. The custom-properties field is precomputed: the product's definition list is read and each property's default is applied.
+4. The quantity is rounded to three decimal places, giving 1.235.
+5. The cost is rounded to the company currency's two decimal places, giving 10.01. The company-dependent mapping is compared with the fallback; with no recorded default in place, the mapping becomes the single entry for company 1 with the value 10.01.
+6. The name is stored with two entries, one under the source language and one under the environment's language, both holding "Lot A", because on insertion both receive the value.
+7. The row is inserted, the generated identifier is read back, and every stored field absent from the insertion is put in the cache as empty.
+8. Validations watching any of the name, the product, the quantity, the cost, the archive flag or the properties run with elevated rights.
+9. The create right is checked again against the freshly created record, which applies record rules that may depend on the values just written.
+
+**Reading the record afterwards** as the same user while company 2 is current and in a third language:
+
+- The name returns that language's entry when present, otherwise the source-language entry, otherwise empty.
+- The cost has no entry for company 2 and therefore returns the fallback recorded for company 2, or zero when there is none.
+- The quantity returns 1.235.
+- The display name returns the name rendered in that language.
+
+---
+
+## 25. Invariants a rebuild must preserve
 
 1. An entity's transport name is its identity and is part of the external contract, as are stored selection codes and column names.
 2. Abstract entities have no table; their fields become columns on every adopting entity.
@@ -1756,10 +1893,18 @@ The describe-fields operation returns, per field, the attributes a client needs.
 16. Filter traversal applies the target's record rules unless the field bypasses them, and switches the archive filter off.
 17. Ordering by a many-to-one orders by the target's default ordering.
 18. Archiving hides from searches but not from reads or relations.
+19. All decimal and monetary rounding goes through one routine with an explicit step, an explicit tie-breaking method and a tolerance that corrects binary representation error.
+20. Comparison at a precision rounds before subtracting; the zero test of a difference rounds after subtracting; the two are not interchangeable.
+21. A materialised ancestor path is rewritten for a moved record and all its descendants, and a move that would create a cycle is refused.
+22. A recorded default value is resolved by the ordering user, then company, then identifier, keeping the first value per field, and any change to one invalidates the whole record cache.
+23. Company consistency is a validation, not a permission: it runs with elevated rights and with archived records visible.
+24. An index the database has but the registry does not declare is kept and reported, never dropped.
+25. A column the table has but no field claims is reported, never dropped.
+26. A user-created field is never prefetched with other fields.
 
 ---
 
-## 23. Acceptance criteria
+## 26. Acceptance criteria
 
 ### Entity kinds
 
@@ -1915,14 +2060,71 @@ The describe-fields operation returns, per field, the attributes a client needs.
 
 **AC-ENT-67.** *Given* the case-insensitive containment operator and a tenant whose database offers accent folding, *when* the filter is compiled, *then* both the column and the pattern are folded, so that a search for "eleve" matches "élevé".
 
+### Rounding and decimal arithmetic
+
+**AC-ENT-68.** *Given* the value 2.675 and a step of 0.01 with half-up rounding, *when* it is rounded, *then* the result is 2.68, because the tolerance corrects the binary representation of the tie.
+
+**AC-ENT-69.** *Given* the value 1.3 and a step of 0.5 with half-up rounding, *when* it is rounded, *then* the result is 1.5.
+
+**AC-ENT-70.** *Given* the values 2.5 and 3.5 and a step of 1 with half-even rounding, *when* they are rounded, *then* the results are 2 and 4.
+
+**AC-ENT-71.** *Given* the values 0.006 and 0.002 at two decimal places, *when* they are compared, *then* the result is plus one; *when* the zero test is applied to their difference, *then* it reports zero.
+
+**AC-ENT-72.** *Given* 10.00 divided by 3.00 at two decimal places, *when* the Euclidean division runs, *then* the quotient is 3 and the remainder is 1.00.
+
+**AC-ENT-73.** *Given* the value −0.004 at two decimal places, *when* it is rendered, *then* the text is "0.00" and never carries a minus sign.
+
+### Hierarchies, defaults and the schema
+
+**AC-ENT-74.** *Given* a tree of three categories with materialised ancestor paths, *when* the middle one is moved to a new parent, *then* its own path and the paths of all its descendants are rewritten in the same transaction.
+
+**AC-ENT-75.** *Given* the same tree, *when* a record is written with one of its own descendants as its parent, *then* the write is refused with "Recursion Detected."
+
+**AC-ENT-76.** *Given* a recorded default for a field with a user and no company, and another with a company and no user, *when* defaults are resolved for that user while that company is current, *then* the ordering by user, then company, then identifier decides, and exactly one value is returned for the field.
+
+**AC-ENT-77.** *Given* a recorded default whose serialised value does not convert to the field's type, *when* it is written, *then* it is refused with "Invalid value in Default Value field. Expected type '\<field type\>' for '\<qualified field name\>'."
+
+**AC-ENT-78.** *Given* any recorded default is created, written or deleted, *when* the next read of a company-dependent field happens, *then* the value is recomputed, because the whole record cache was invalidated.
+
+**AC-ENT-79.** *Given* a table carrying an index the registry does not declare, *when* the schema is synchronised, *then* the index is kept and reported in the log.
+
+**AC-ENT-80.** *Given* a table carrying a column that matches no field, *when* the schema is synchronised, *then* the column is reported and not dropped.
+
+**AC-ENT-81.** *Given* a translatable field declaring a balanced-tree index, *when* the schema is synchronised, *then* the declared index is ignored with a warning and only a three-character-sequence index may be created.
+
+**AC-ENT-82.** *Given* a stored related field of exactly two segments added to an existing table, *when* the schema is synchronised, *then* the column is filled by a single join-and-set statement rather than record by record.
+
+**AC-ENT-83.** *Given* a user-created field, *when* any other field of the same entity is read, *then* the user-created field is not read with it, because its prefetch group is false.
+
+**AC-ENT-84.** *Given* a user-created many-to-many field, *when* its definition record is deleted, *then* its association table is dropped.
+
+---
+
+## 27. Reconciliation notes
+
+The two drafts merged into this document disagreed on five points, and three organisational decisions are recorded with them.
+
+1. **Where the filter grammar lives.** One draft carried the whole grammar here, the other carried it with the operations that consume filters. It now lives in [record operations and query notation, section 4](record-operations-and-query-notation.md#4-the-filter-notation). [Section 20](#20-the-filter-grammar) keeps what belongs to fields: the two notations at a glance, the three contributions this document makes to how a condition compiles, and the three forms in which a filter is stored. Nothing was dropped in the move, and no rule is stated in both places.
+2. **The rounding rule.** One draft described rounding as "half away from zero" and stopped there. The observed routine takes an explicit step, applies one of five tie-breaking methods, and adds a tolerance derived from the magnitude of the normalised value in order to correct binary representation error; without the tolerance, 2.675 rounds to 2.67 rather than 2.68. [Section 6.4](#64-decimal-number) states the full routine, and criteria AC-ENT-68 to AC-ENT-70 assert it.
+3. **Comparison against the zero test.** One draft treated "compare at a precision" and "is the difference zero at a precision" as the same operation. They differ: comparison rounds each operand before subtracting, while the zero test rounds the difference. Both are specified, with the worked example that separates them, and criterion AC-ENT-71 asserts the difference.
+4. **Where company consistency is specified.** One draft carried the whole algorithm here, the other in the multi-company document. [Section 15.5](#155-company-consistency) keeps the part that is a property of fields — the declaration, which fields are checked, the ordinary against company-dependent split, and the elevated archived-visible reads — and the algorithm, the entity families and the message are in [multi-company, section 6](multi-company.md#6-the-company-consistency-check).
+5. **The precedence of a recorded default.** One draft placed the recorded default after the declared default in every case. It is consulted **before** the declared default for an ordinary field and **after** it for a company-dependent field, which is why the resolution order of [section 13.1](#131-the-resolution-order) has five steps rather than four. Invariant 11 of [section 25](#25-invariants-a-rebuild-must-preserve) states the corrected order.
+6. **Where the schema derivation belongs.** One draft described only that a schema synchronisation happens, and left the rules to the package system; the other specified the rules. The rules are here, in [section 22](#22-deriving-the-database-schema), because every one of them is decided by a field attribute; [the package system](package-system.md) states only when the synchronisation runs.
+7. **Naming.** One draft used the words "delegation" and "delegate field", the other "embedding" and "link field". This document uses embedding and link field, matching [inheritance and extension](inheritance-and-extension.md), and says once that the mechanism is the same one.
+8. **Acceptance criteria identifiers.** The two drafts numbered their scenarios independently. They are unified here in one series with the prefix `AC-ENT`, and scenarios that appeared in both are stated once.
+
 ---
 
 ## Related documents
 
 - [Architecture](architecture.md) — the registry, the environment, the record set and the unit of work.
-- [Inheritance and extension](inheritance-and-extension.md) — how several packages contribute to one entity and one field.
-- [The security model](security-model.md) — field restrictions, record rules, the unrestricted actor and company scope.
+- [Record operations and query notation](record-operations-and-query-notation.md) — the generic operations that read and write these fields, and the complete filter grammar.
+- [Inheritance and extension](inheritance-and-extension.md) — how several packages contribute to one entity and one field, and what embedding a parent record means.
+- [The security model](security-model.md) — field restrictions, record rules and the unrestricted actor.
+- [Multi-company](multi-company.md) — the current company that decides a company-dependent value, and the full company consistency check.
 - [Views and actions](views-and-actions.md) — how fields are presented and how the search grammar reaches this one.
-- [The package system](package-system.md) — when the schema synchronisation of this document runs.
+- [The package system](package-system.md) — when the schema synchronisation of [section 22](#22-deriving-the-database-schema) runs.
+- [Caching](../runtime/caching.md) — the record cache, the pending-write buffer and the recomputation schedule this document's derivations drive.
+- [Translation](../runtime/translation.md) — the language catalogue and the collection of translatable terms behind [section 12](#12-translatable-values).
 - [Identity and values](../data/persistence-identity-and-values.md) — identifiers, precision, rounding, dates and sequences in one place.
 - [The physical data catalogue](../data/physical-data-catalog.md) — the tables, columns, indexes and constraints a full installation creates.

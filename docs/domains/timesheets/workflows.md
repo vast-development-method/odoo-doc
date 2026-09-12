@@ -713,7 +713,8 @@ restricts every reader to rows of the active companies plus rows with no company
 
 ### 13.5 As a customer or an external collaborator
 
-See [interfaces.md](interfaces.md) §6.
+See [interfaces.md](interfaces.md) §7 for the external pages, their addresses, their filters, their
+groupings and their totals.
 
 ---
 
