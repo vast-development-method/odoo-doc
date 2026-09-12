@@ -1,11 +1,12 @@
 # Endpoint catalog
 
 Every request endpoint the system exposes, grouped by business domain, with its path patterns, transport, authentication
-level, allowed methods, site-page flag, parameters, and the operation it performs. The installation registers 906
-handlers on 855 distinct endpoints: 51 of the handlers are extension layers that a capability package adds on top of an
-endpoint another package already declared, and those are folded into the row of the endpoint they extend, named at the
-end of its capability package column and described in its purpose sentence. The condensed table of the same material,
-sorted by path, is [`../references/routes.md`](../references/routes.md); the envelope, session and
+level, allowed methods, site-page flag, parameters, the operation it performs and the failures it reports. The catalog
+lists 855 endpoints bound to 1029 path patterns. An endpoint that one capability package declares and another package
+extends is listed once, in the row of the endpoint it extends, with every contributing package named in the last column
+and the added behaviour described in the purpose sentence; seven rows carry such extension layers, fourteen in total.
+The condensed table of the same material, sorted by path and carrying the technical handler names, is
+[`../references/routes.md`](../references/routes.md); the envelope, session and
 error contracts are in [`remote-transport-contracts.md`](remote-transport-contracts.md); the generic entity operations
 these endpoints call are in [`service-layer.md`](service-layer.md).
 
@@ -14,7 +15,7 @@ these endpoints call are in [`service-layer.md`](service-layer.md).
 | Column | Meaning |
 |---|---|
 | Path patterns | Every address pattern bound to the same handler. A request matching any of them runs the same operation. Patterns are matched after the optional language prefix is removed on site pages. |
-| Operation | The stable name of the handler operation. It is the identifier other documents cite; it is not a path. |
+| Operation | This specification's name for the handler, spelled without abbreviations. It is the name other documents of this repository cite; it is not a path, it is not sent on the wire, and a rebuild may name its own handler differently. The condensed catalog carries the same endpoints keyed by path. |
 | Transport | How parameters arrive and how the answer is shaped: `page or file`, `remote call` or `structured call` (see below). |
 | Authentication | The identity the request must carry before the handler runs (see below). |
 | Methods | The request methods accepted. An endpoint declared without a method restriction accepts both reading and submitting methods, shown as `GET, POST`. |
@@ -49,7 +50,8 @@ below show each one in full.
 | `structured call` | The body is the parameter document itself, with no envelope. | The raw result document. | A status code that matches the failure (400, 401, 403, 404, 422, 500) with a structured body naming the error class, the message and the arguments. |
 
 Six endpoints use the structured call transport: the five reflection endpoints and the direct entity call endpoint.
-Every other endpoint uses one of the first two transports: 448 page-or-file endpoints and 406 remote-call endpoints.
+Every other endpoint uses one of the first two transports: 446 page-or-file endpoints and 403 remote-call endpoints.
+412 of the 855 endpoints run in site context and 443 do not.
 
 ### Authentication levels
 
@@ -62,16 +64,26 @@ Every other endpoint uses one of the first two transports: 448 page-or-file endp
 | `invitation token` | The request must carry the invitation token of a meeting attendee in the query string; the attendee identified by the token becomes the subject of the call, and the anonymous public identity is bound. | 400 with the message "Invalid Invitation Token." when no attendee matches, or "Invitation cannot be forwarded via email. This event/meeting belongs to \<invited address\> and you are logged in as \<signed-in address\>. Please ask organizer to add you." when another user is signed in. |
 | `plug-in key` | The request must carry, in the authorization header, an application key issued for the electronic mail plug-in scope; the key user becomes the request user and the display context of that user is applied. | 400 with the message "Access token missing" or "Access token invalid". |
 
-The levels are distributed as follows: 482 endpoints are public or signed in, 316 require a signed-in user, 39 require no
-identity, 14 use the plug-in key, 5 use the invitation token and 4 use an application key.
+The levels are distributed as follows: 482 endpoints are public or signed in, 314 require a signed-in user, 39 require no
+identity, 11 use the plug-in key, 5 use the invitation token and 4 use an application key.
 
 ### Cross-site submission protection
 
-794 endpoints verify the anti-forgery token of a submitted form or remote call. The 66 endpoints that do not are exactly
-the endpoints whose caller is not a browser of the current session: every payment provider notification and return
-address, the document exchange network callbacks, the tax identification verification callback, the text message delivery
-reports, the fulfilment notification of the print-on-demand partner, the mobile payment callbacks, and the installation
-administration endpoints, which run before any session exists. An endpoint that receives a browser back from an external
+On the page-or-file transport the anti-forgery token of a submitted form is verified on every method that is not a
+reading method, unless the endpoint switches the check off. Sixty-five page-or-file endpoints switch it off, and they
+are exactly the endpoints whose caller is not a browser of the current session: every payment provider notification and
+return address, the document exchange network callbacks, the tax identification verification callback, the text message
+delivery reports, the fulfilment notification of the print-on-demand partner, the mobile and terminal payment callbacks,
+the inbound automation hook, the mailing list confirmation links, the periodic activity summary links, the module import
+endpoint, and the installation administration endpoints, which run before any session exists.
+
+The two remote call transports do not use the token at all, because their media type cannot be produced by a cross-site
+form submission and a preflight is answered only for the endpoints that declare a cross-origin value. Two remote call
+endpoints nevertheless switch the check on explicitly, because a site page submits them as an ordinary form: the mailing
+feedback endpoint and the mailing list subscription update endpoint. One remote call endpoint, the terminal payment
+notification of one point of sale provider, switches it off explicitly.
+
+An endpoint that receives a browser back from an external
 site additionally does not open a session on that request, because a cookie set on a cross-site submission is rejected by
 the browser and a new empty session would replace the one the visitor already has.
 
@@ -142,7 +154,7 @@ external landing page, an anonymous visitor reaches the sign-in form.
 | Path patterns | Operation | Transport | Authentication | Methods | Site page | Parameters | Purpose and effect | Capability package |
 |---|---|---|---|---|---|---|---|---|
 | `/` | `index` | page or file | none | GET, POST | no | `s_action`, `database` (accepts further named parameters) | Landing entry point: redirects a signed-in external user to the external landing page and every other visitor to the desktop client shell, forwarding all received query parameters. | Web + Customer Portal + Website |
-| `/web` <br> `/system` <br> `/system/<subpath:path>` <br> `/scoped_app/<subpath:path>` | `web_client` | page or file | none | GET, POST | no | `s_action` (accepts further named parameters) | Serves the desktop client shell for a signed-in internal user, refreshes the session lifetime, and redirects to the sign-in form (with the requested address as the return target) when no valid session exists or to the external landing page when the signed-in user is external. | Web |
+| `/web` <br> `/app` <br> `/app/<subpath:path>` <br> `/scoped_app/<subpath:path>` | `web_client` | page or file | none | GET, POST | no | `s_action` (accepts further named parameters) | Serves the desktop client shell for a signed-in internal user, refreshes the session lifetime, and redirects to the sign-in form (with the requested address as the return target) when no valid session exists or to the external landing page when the signed-in user is external. | Web |
 | `/web/bundle/<bundle_name:text>` | `bundle` | page or file | public or signed in | GET | no | `bundle_name` (accepts further named parameters) | Returns the definition of a named resource bundle (its script and style sheet members) as used to build the client shell. | Web + Website |
 | `/web/assets/<unique:text>/<filename:text>` | `content_assets` | page or file | public or signed in | GET, POST | no | `filename`, `unique`, `nocache`, `assets_parameters` | Streams one generated resource bundle file; the version segment in the address makes the response immutable and cacheable for one year. | Web |
 | `/web/webclient/load_menus` | `web_load_menus` | page or file | signed in | GET | no | `language` | Returns the complete menu tree the signed-in user may see, in the requested language, with the application icons inlined; the response is marked as not storable in any cache. | Web + Auth Timeout |
@@ -259,7 +271,7 @@ device is offline.
 | `/scoped_app` | `scoped_app` | page or file | public or signed in | GET | no | `app`, `path`, `app_name` | Serves the page that offers installation of one application scope as a standalone application. | Web |
 | `/scoped_app_icon_png` | `scoped_app_icon_png` | page or file | public or signed in | GET | no | `app`, `add_padding` | Returns the icon of an application scope rendered at a fixed pixel size, optionally with padding, for devices that require a fixed-size raster icon. | Web + Point of Sale Self Order |
 | `/web/service-worker.js` | `service_worker` | page or file | public or signed in | GET | no | none | Returns the background script that caches the shell and serves the offline page when the device has no connection. | Web |
-| `/system/offline` | `offline` | page or file | public or signed in | GET | no | none | Serves the page displayed by the background script while the device has no connection. | Web |
+| `/app/offline` | `offline` | page or file | public or signed in | GET | no | none | Serves the page displayed by the background script while the device has no connection. | Web |
 
 ### Installation administration
 
@@ -340,7 +352,7 @@ tasks, tickets) are listed under their own domains; the endpoints below are the 
 | `/my/account` | `account` | page or file | signed in | GET, POST | yes | accepts further named parameters | Serves and processes the personal details form of the signed-in portal user (name, electronic mail address, telephone, address, tax identification number and company name), rejecting changes to fields the portal user may not alter. | Customer Portal |
 | `/my/security` | `security` | page or file | signed in | GET, POST | yes | accepts further named parameters | Serves the security page of the portal user: password change, second-factor management, device-bound credentials, application keys and the account deletion request. | Customer Portal |
 | `/my/deactivate_account` | `deactivate_account` | page or file | signed in | POST | yes | `validation`, `password` (accepts further named parameters) | Deactivates the account of the signed-in portal user after the confirmation word and the password are both verified, then ends the session. | Customer Portal |
-| `/scoped_app/<subpath:path>` <br> `/system` <br> `/system/<subpath:path>` <br> `/web` | `web_client` | page or file | signed in | GET, POST | no | `s_action` (accepts further named parameters) | Extends the desktop client entry point in installations with a portal: a signed-in external user is sent to the portal home instead of the desktop client shell. | Customer Portal |
+| `/scoped_app/<subpath:path>` <br> `/app` <br> `/app/<subpath:path>` <br> `/web` | `web_client` | page or file | signed in | GET, POST | no | `s_action` (accepts further named parameters) | Extends the desktop client entry point in installations with a portal: a signed-in external user is sent to the portal home instead of the desktop client shell. | Customer Portal |
 
 ### Portal address book
 
