@@ -43,7 +43,11 @@ the archive flag that suspends every machine.
 **Field** `state` (Status) on Event Registration (`event.registration`, table
 `event_registration`). Required, derived and stored, precomputed before insertion, editable through
 the four operations below, tracked in the discussion thread, **not** copied when the record is
-duplicated. Its default is produced by the derivation of section 2.4 rather than by a constant.
+duplicated. In the core package alone the field is a plain stored selection whose default is `open`.
+The product bridge, the sales bridge and the counter bridge turn it into a derived field that is
+still writable by hand, with no constant default: its value on insertion then comes from the
+derivations of sections 2.2, 2.3 and 2.4, which fall back to `open` when no order carries the
+seat.
 
 ### 1.1 States
 
@@ -160,13 +164,34 @@ attendee-based communication schedulers of its event are woken for that attendee
 
 ### 2.3 Derivation from a counter order
 
+The derivation is layered: the counter bridge decides first, and the counter-and-sales bridge, when
+it is installed, decides again afterwards over the same registrations. Both layers are stated
+separately because the second one overrides the first.
+
+**Layer one, the counter bridge alone.** Applied to every registration that carries a counter order.
+
 | Counter order situation | `sale_status` | `state` |
 |---|---|---|
-| The counter order is cancelled | unchanged | `cancel` |
-| The counter order total is zero | `free` | `open` |
-| Any other counter order, base counter bridge only | `sold` | `open` |
-| Counter order in state `paid`, `done` or `invoiced`, with the counter-and-sales bridge installed | `sold` | `open` |
-| Counter order in any other state, with the counter-and-sales bridge installed | `to_pay` | `draft` |
+| The counter order is cancelled (state `cancel`) | unchanged | `cancel` |
+| The counter order total including tax is zero, compared with the rounding of the currency of that order | `free` | `open` |
+| Any other counter order | `sold` | `open` |
+
+**Layer two, added by the counter-and-sales bridge.** Applied afterwards to every registration that
+carries a counter order, whatever layer one decided.
+
+| Counter order state | `sale_status` | `state` |
+|---|---|---|
+| `paid`, `done` or `invoiced` | `sold` | `open` |
+| every other state, including `draft` and `cancel` | `to_pay` | `draft` |
+
+**Compatibility finding.** Because layer two is not restricted to the orders layer one left alone,
+installing the counter-and-sales bridge changes two outcomes of layer one. A registration of a
+**cancelled** counter order ends at `to_pay` and `draft` instead of `cancel`, so a cancelled counter
+sale leaves an unconfirmed seat rather than a cancelled one; and a registration of a **zero-total**
+counter order that is not yet paid ends at `to_pay` and `draft` instead of `free` and `open`. Both
+outcomes are reproduced as observed. A corrected behaviour would leave a cancelled counter order at
+`cancel` and would keep the zero-total rule of layer one, applying layer two only to counter orders
+that owe money.
 
 ### 2.4 Base rule
 
@@ -534,9 +559,9 @@ its public page.
 ## 11. The outcome vocabulary of a badge scan
 
 The operation `register_attendee`, invoked with a barcode and an optional event identifier, returns
-one of seven status words together with the registration summary. The words are part of the
-contract of the registration desk and are reproduced exactly. The tests are evaluated in the order
-of the table; the first one that matches decides.
+one of seven status words. The words are part of the contract of the registration desk and are
+reproduced exactly. The tests are evaluated in the order of the table; the first one that matches
+decides.
 
 | Order | Situation | Status returned | State change |
 |---|---|---|---|
@@ -544,9 +569,17 @@ of the table; the first one that matches decides.
 | 2 | The registration is in state `cancel` | `canceled_registration` | none |
 | 3 | The registration is in state `draft` | `unconfirmed_registration` | none |
 | 4 | The event of the registration has finished | `not_ongoing_event` | none |
-| 5 | The desk was opened for a given event and the registration belongs to another one | `need_manual_confirmation` | none |
-| 6 | The registration is already in state `done` | `already_registered` | none |
+| 5 | The registration is already in state `done` | `already_registered` | none |
+| 6 | The desk was opened for a given event and the registration belongs to another one | `need_manual_confirmation` | none |
 | 7 | None of the above | `confirmed_registration` | the registration moves to `done` with every side effect of section 1.2 |
+
+Rows 5 and 6 are in that order in the observed behaviour: an attendee already marked as attended is
+reported as `already_registered` even when the desk was opened for a different event, so the event
+mismatch is never reported for an attendee who has already been scanned.
+
+Every outcome except the first is returned together with the registration summary, under the key
+`status`. The first outcome has no registration to summarise and is returned alone, under the key
+`error`.
 
 ---
 
@@ -600,3 +633,13 @@ machines of their own:
 4. **Label of `open` in the revenue analysis.** Section 13 records the inconsistency between
    "Registered" on the registration and "Confirmed" in the analysis as a compatibility finding,
    because both labels are observable and a rebuild has to choose.
+5. **The counter-order layering.** Both versions described the payment situation of a counter
+   registration in one table. The source shows two layers that both write, the second overriding the
+   first for every registration that carries a counter order. Section 2.3 now states the two layers
+   separately and records the two outcomes the second layer changes as a compatibility finding.
+6. **The order of the badge-scan tests.** Both versions listed the event-mismatch test before the
+   already-attended test. The source evaluates the attendance test first, so an attendee already in
+   state `done` is reported as `already_registered` whichever event the desk was opened for. Section
+   11 carries the corrected order, and [`workflows.md`](workflows.md#18-check-an-attendee-in-at-the-registration-desk)
+   and [`entities.md`](entities.md) were aligned with it.
+

@@ -5,8 +5,8 @@ the domain, with the exact user-facing text where one exists.
 
 Each rule carries a stable identifier of the form `PR-nnn`. The identifiers are unique within this
 file and are cited from the other files of the folder and from
-[`acceptance-criteria.md`](acceptance-criteria.md). Section 22 maps the identifiers of the two
-earlier drafts of this folder onto the scheme used here.
+[`acceptance-criteria.md`](acceptance-criteria.md). Section 22 indexes every identifier used here
+and section 23 maps the identifiers of the two earlier drafts of this folder onto it.
 
 A rule states **when** it runs, **what** it tests, **what** happens when the test fails, and, where
 the platform leaves something implicit, **what a rebuild must do**. Messages are reproduced exactly
@@ -311,6 +311,25 @@ chosen, aligning the level with what the user filled in — run **only** in an i
 programmatic write or a data load performs none of them, which is why the normalisation of PR-036
 exists separately. The complete table is in
 [`entities.md`](entities.md#26-form-change-handlers).
+
+**PR-046.** *(Form change handler only, present only with the event-ticketing capability.)* Setting
+a strictly positive minimum quantity on a rule raises a **non-blocking** warning, because event
+ticket lines are priced one ticket at a time and never reach a quantity break. The warning has the
+title "Warning" and one of two texts, and nothing is changed by it.
+
+| Level of the rule | Further condition | Warning text |
+|---|---|---|
+| `3_global` or `2_product_category` | none | "A pricelist item with a positive min. quantity will not be applied to the event tickets products." |
+| `1_product` | the product template's service tracking is event registration | "A pricelist item with a positive min. quantity cannot be applied to this event tickets product." |
+| `0_product_variant` | the product variant's service tracking is event registration | "A pricelist item with a positive min. quantity cannot be applied to this event tickets product." |
+| `1_product` or `0_product_variant` | the target's service tracking is anything else | no warning |
+
+Both texts are reproduced exactly, including the shortened form of the words "minimum quantity",
+because a rebuild must show the same sentence. The handler watches the level, the product template,
+the product variant and the minimum quantity, so it re-evaluates whenever any of the four changes. A
+minimum quantity of zero or below produces no warning at any level. Because it is a form handler, a
+data load or a remote write stores the rule silently, and the rule then behaves exactly as PR-075
+says: an event ticket line of one ticket simply never reaches the break.
 
 ---
 
@@ -1282,7 +1301,358 @@ variant rule cannot answer when the variants differ.
 
 ---
 
-## 22. Mapping of the former rule identifiers
+## 22. Index of rule identifiers
+
+Every rule of this file, in one table, with the kind of enforcement it uses and the subject it
+governs. The kinds are the five of section 1, plus **Behaviour** for a statement of what the platform
+does rather than of something it refuses, **Invariant** for a property a rebuild must preserve,
+**Edge case** for a situation whose outcome is stated so that a rebuild does not have to guess,
+**Industry-standard default** where the platform leaves a question open and this specification
+answers it, and **Compatibility finding** where the observed behaviour looks like a defect.
+
+### Section 2 — Capabilities and feature gating
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-001 | Behaviour | The Basic Price Lists capability gates the whole domain |
+| PR-002 | Behaviour | Switching the capability on provisions every company's default price list |
+| PR-003 | Behaviour | Switching the capability off archives every active price list |
+| PR-004 | Behaviour | Granting multi-currency also grants Basic Price Lists |
+| PR-005 | Behaviour | The Discounts capability decides whether a discount is shown |
+| PR-006 | Behaviour | Three different tests of whether a capability is switched on |
+
+### Section 3 — Price List
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-010 | Stored constraint | The name is required, and names are not unique |
+| PR-011 | Stored constraint | The currency is required, and its deletion is restricted |
+| PR-012 | Behaviour | An empty company shares the price list with every company |
+| PR-013 | Deletion guard | A price list used as a base elsewhere cannot be deleted |
+| PR-014 | Behaviour | Changing the company re-checks every rule, but only for a single record |
+| PR-015 | Stored constraint | A website price list must belong to the website's company |
+| PR-016 | Behaviour | Archiving a currency archives its price lists |
+| PR-017 | Provisioning | Un-archive the rule-less default, otherwise create "Default" at sequence ten |
+| PR-018 | Behaviour | Duplication copies the rules and suffixes the name |
+| PR-019 | Archive guard | An active promotion programme blocks archiving |
+| PR-020 | Behaviour | What an archived price list stops doing, and what it keeps doing |
+| PR-021 | Behaviour | Deleting a price list cascades to its rules |
+| PR-022 | Behaviour | The display name is the name and the currency code |
+| PR-023 | Behaviour | The standard price list ordering, and what "the first price list" means |
+| PR-024 | Behaviour | A name search matches the name or the currency |
+| PR-025 | Behaviour | The rule list hides rules of archived products without disabling them |
+| PR-026 | Stored constraint | A promotion programme and its price lists share one currency |
+
+### Section 4 — Price List Rule
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-030 | Stored constraint | A rule based on another price list must name one |
+| PR-031 | Stored constraint | The price list base graph must be acyclic |
+| PR-032 | Stored constraint | The validity window must be ordered, and equal instants are refused |
+| PR-033 | Stored constraint | The minimum margin must not exceed the maximum margin |
+| PR-034 | Stored constraint | The rule's target must match its applicability level |
+| PR-035 | Form change handler | A negative rounding step is refused as it is typed |
+| PR-036 | Normalisation | Targets outside the chosen level are emptied on every write |
+| PR-037 | Invariant | The markup is always the exact negation of the discount |
+| PR-038 | Company consistency check | The rule's target and base price list must match its company |
+| PR-039 | Behaviour | Four links cascade into the deletion of a rule |
+| PR-040 | Behaviour | A rule has no active flag |
+| PR-041 | Behaviour | A rule with no price list is storable but never selected |
+| PR-042 | Behaviour | How the rule's company and currency are derived |
+| PR-043 | Behaviour | The rule's currency formats the form; it never prices |
+| PR-044 | Behaviour | No unique constraint and no stored check constraint |
+| PR-045 | Behaviour | The form change handlers never run on a programmatic write |
+| PR-046 | Form change handler | The event-ticket warning on a positive minimum quantity |
+
+### Section 5 — Vendor Price
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-050 | Stored constraint | The required fields of an offer and their defaults |
+| PR-051 | Normalisation | A written variant fills the template, and never the reverse |
+| PR-052 | Form change handler | Changing the template clears a foreign variant |
+| PR-053 | Behaviour | An empty variant covers every variant of the template |
+| PR-054 | Behaviour | An empty company covers every company |
+| PR-055 | Company consistency check | The vendor, the variant and the template must match the offer's company |
+| PR-056 | Behaviour | The three cascades of an offer are asymmetric |
+| PR-057 | Behaviour | There is no uniqueness rule on offers |
+| PR-058 | Behaviour | There is no validity-window ordering constraint on offers |
+| PR-059 | Behaviour | An archived vendor's offer is excluded at selection time |
+| PR-060 | Behaviour | The stored ordering of offers, which decides the vendor |
+| PR-061 | Behaviour | The discounted price is derived and never currency-converted |
+| PR-062 | Form change handler | Choosing a vendor sets the offer's currency |
+| PR-063 | Behaviour | The two forms of an offer's display name |
+| PR-064 | Compatibility finding | The default variant computation never assigns |
+| PR-065 | Compatibility finding | The price-from-cost default is never attached and never runs |
+| PR-066 | Behaviour | An offer has no active flag; it retires through its end date |
+| PR-067 | Behaviour | Vendor price learning stops at ten existing offers |
+| PR-068 | Behaviour | Vendor price learning never updates an existing offer |
+| PR-069 | Behaviour | Vendor price learning writes with elevated rights |
+
+### Section 6 — Rule selection and applicability
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-070 | Behaviour | The candidate filter, and what it deliberately leaves out |
+| PR-071 | Behaviour | The candidate ordering, and the absence of a sequence field |
+| PR-072 | Behaviour | Specificity beats every other consideration |
+| PR-073 | Behaviour | The largest quantity break the quantity satisfies wins |
+| PR-074 | Behaviour | The two tie-breaks, by category identifier then by rule identifier |
+| PR-075 | Behaviour | The minimum quantity is compared in the product's own unit, without tolerance |
+| PR-076 | Behaviour | A category rule matches a subtree, and never a product without a category |
+| PR-077 | Behaviour | A variant rule prices a template only when the template has one variant |
+| PR-078 | Behaviour | A template rule applies to every variant of its template |
+| PR-079 | Behaviour | The empty rule prices at the catalogue price and returns no identifier |
+| PR-080 | Behaviour | Archival takes no part in rule selection |
+| PR-081 | Behaviour | Exactly one rule applies; rules never combine |
+| PR-082 | Invariant | Rule selection is fully deterministic |
+
+### Section 7 — The price computation
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-090 | Behaviour | The engine never raises a business error |
+| PR-091 | Behaviour | The fixed order of the formula operations |
+| PR-092 | Behaviour | Both margin bounds are measured from the base price |
+| PR-093 | Behaviour | Four amounts are unit-converted; the rounding step is not |
+| PR-094 | Behaviour | Percentages are never converted |
+| PR-095 | Behaviour | The sales-price base includes the attribute extras, before conversion |
+| PR-096 | Behaviour | The cost base, its variant fallback and its elevated read |
+| PR-097 | Behaviour | The other-price-list base, its currency and the discarded inner rule |
+| PR-098 | Behaviour | Every conversion inside the engine is unrounded, in the acting company |
+| PR-099 | Behaviour | The engine never rounds its result |
+| PR-100 | Behaviour | A fixed price is never converted between currencies |
+| PR-101 | Behaviour | Zero means "not configured" |
+| PR-102 | Edge case | A base price list branch with no base price list falls through |
+| PR-103 | Edge case | A zero and a negative quantity against the quantity breaks |
+| PR-104 | Behaviour | The engine tolerates a failed quantity conversion |
+| PR-105 | Behaviour | An unknown computation kind falls through to the base price |
+| PR-106 | Behaviour | The pricing date is resolved once for the whole call |
+
+### Section 8 — Presentation on a sales order line
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-110 | Behaviour | Only a percentage rule may show a discount |
+| PR-111 | Behaviour | The displayed unit price is the larger of the two candidates |
+| PR-112 | Behaviour | The discount percentage and its sign guard |
+| PR-113 | Edge case | A zero base price produces a zero discount |
+| PR-114 | Behaviour | The price-before-discount walk through chained percentage rules |
+| PR-115 | Behaviour | The storefront's wider discount-display test |
+| PR-116 | Behaviour | The four conditions of the fiscal-position price adaptation |
+| PR-117 | Behaviour | The shadow price detects a manual edit, at the currency's precision |
+| PR-118 | Behaviour | The seven cases that skip the automatic unit price |
+| PR-119 | Behaviour | What *Update Prices* does, and what it posts |
+| PR-120 | Stored constraint | The price list of a confirmed order cannot be changed |
+| PR-121 | Behaviour | The order currency follows the price list |
+| PR-122 | Behaviour | The order price list follows the customer while the order is a draft |
+| PR-123 | Behaviour | What makes *Update Prices* visible |
+| PR-124 | Edge case | A quantity of zero on a line is read as one |
+| PR-125 | Behaviour | Combo lines, prorated combo item prices and the copied discount |
+| PR-126 | Behaviour | An invoiced line is never repriced, even under a forced recomputation |
+| PR-127 | Behaviour | Which lines *Update Prices* touches |
+
+### Section 9 — Contact price list resolution
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-130 | Behaviour | The three steps of the resolution and the base filter |
+| PR-131 | Behaviour | The four steps of the fallback |
+| PR-132 | Behaviour | The context country of a contact with no country |
+| PR-133 | Behaviour | A specific assignment is recorded only when it differs from the default |
+| PR-134 | Behaviour | Changing the country never moves a pinned assignment |
+| PR-135 | Behaviour | The specific assignment is stored per company |
+| PR-136 | Behaviour | The specific assignment propagates from the commercial parent |
+| PR-137 | Invariant | The resolved price list is never empty while one exists |
+| PR-138 | Behaviour | An archived assignment falls through to the country chain |
+| PR-139 | Behaviour | A storefront request adds the publishability filter |
+| PR-140 | Behaviour | A missing or malformed configuration parameter is tolerated |
+
+### Section 10 — Vendor price selection
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-145 | Behaviour | The preparation filter, with its equality test on the company |
+| PR-146 | Behaviour | Which company counts as the buying company |
+| PR-147 | Behaviour | The six rejections applied to a prepared candidate |
+| PR-148 | Behaviour | No quantity at all disables the minimum-quantity filter; zero does not |
+| PR-149 | Behaviour | The offer's minimum quantity is compared precision-aware |
+| PR-150 | Behaviour | Only the first vendor encountered survives |
+| PR-151 | Behaviour | The final ranking key and the cheapest offer |
+| PR-152 | Behaviour | An alternative primary ranking key |
+| PR-153 | Behaviour | The ranking conversion is unrounded, so a rate change can swap two offers |
+| PR-154 | Behaviour | The offer's quantity conversion raises on failure |
+| PR-155 | Behaviour | An empty selection and who falls back |
+| PR-156 | Behaviour | The two extension narrowings of the candidate set |
+
+### Section 11 — Purchase order line pricing
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-160 | Behaviour | The three steps that price a line from a selected offer |
+| PR-161 | Behaviour | The three steps that price a line from the product's cost |
+| PR-162 | Behaviour | When a typed purchase price survives, and when it is overwritten |
+| PR-163 | Behaviour | The expected arrival and the lead time of the selected offer |
+| PR-164 | Behaviour | The units a purchase line may use |
+| PR-165 | Behaviour | The quantity pre-filled when a product is picked |
+| PR-166 | Behaviour | The five cases that skip the purchase line computation |
+| PR-167 | Behaviour | A vendor discount is always shown |
+| PR-168 | Behaviour | The line description follows the selected offer |
+| PR-169 | Behaviour | The three derived values of a purchase line |
+| PR-170 | Behaviour | The gross unit price used by the amount to invoice |
+| PR-171 | Compatibility finding | The procurement path converts the currency rounded |
+
+### Section 12 — Replenishment
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-175 | Behaviour | The three-step precedence by which a buy rule chooses an offer |
+| PR-176 | Behaviour | The first offer is taken anyway rather than blocking a replenishment |
+| PR-177 | Behaviour | Three hundred and sixty-five days and the no-vendor message |
+| PR-178 | Behaviour | The buy rule's ordinary lead time contribution |
+| PR-179 | Behaviour | Extending a line re-selects on the summed quantity |
+| PR-180 | Behaviour | The two half-up conversions that create a new line |
+| PR-181 | Behaviour | Setting an offer on a reordering rule assigns a route and raises the quantity |
+| PR-182 | Behaviour | Clearing the route clears the offer |
+
+### Section 13 — Storefront
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-185 | Behaviour | When a price list is publishable on a storefront |
+| PR-186 | Behaviour | A back-office price list never reaches a storefront |
+| PR-187 | Behaviour | When a price list is available in a country |
+| PR-188 | Behaviour | The promotional code is readable only by internal users |
+| PR-189 | Behaviour | The session remembers the resolved price list |
+| PR-190 | Behaviour | The four steps of the visitor resolution |
+| PR-191 | Behaviour | How the set of price lists available to a visitor is built |
+| PR-192 | Behaviour | The website's displayed currency |
+| PR-193 | Compatibility finding | The publishability test checks the active flag on one branch only |
+
+### Section 14 — Point of sale
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-195 | Stored constraint | The default price list must be among the available ones |
+| PR-196 | Stored constraint | Every available price list must be in the terminal's currency |
+| PR-197 | Stored constraint | The default price list's company |
+| PR-198 | Stored constraint | The available price lists' companies |
+| PR-199 | Behaviour | The checks run again when a session is opened |
+| PR-200 | Behaviour | Which rules are loaded into the terminal, and when |
+| PR-201 | Behaviour | Which price lists are loaded, including the chained bases |
+
+### Section 15 — Margins
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-205 | Behaviour | The line cost, its two conversions and the company it is read as |
+| PR-206 | Behaviour | The line cost is writable, and when the override is lost |
+| PR-207 | Behaviour | The line margin and the line margin percentage |
+| PR-208 | Edge case | A line delivered but never ordered |
+| PR-209 | Behaviour | The line margin percentage is a fraction |
+| PR-210 | Behaviour | The order margin and its average aggregation |
+| PR-211 | Behaviour | The five margin fields are internal-only |
+| PR-212 | Behaviour | The stock variant of the line cost |
+| PR-213 | Behaviour | The manufacturing variant adds no formula of its own |
+| PR-214 | Behaviour | The two groups the timesheet variant separates first |
+| PR-215 | Compatibility finding | The timesheet cost uses quantity conversion |
+| PR-216 | Behaviour | The fourteen product margin measures and the thirteen that sum |
+
+### Section 16 — Access, visibility and permissions
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-220 | Company consistency check | The company inconsistency message, in both of its shapes |
+| PR-221 | Record rule | The three shipped company record rules |
+| PR-222 | Behaviour | The consequences of the access rights matrix |
+| PR-223 | Behaviour | The four field-level restrictions |
+| PR-224 | Behaviour | The cost is read with elevated rights inside the engine |
+| PR-225 | Behaviour | The configuration parameters are read with elevated rights |
+| PR-226 | Behaviour | The deletion guard and the archive guard run with elevated rights |
+| PR-227 | Behaviour | Vendor price learning writes with elevated rights |
+| PR-228 | Behaviour | Pricing needs no write right anywhere |
+
+### Section 17 — Rounding, precision and currency consistency
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-230 | Behaviour | Quantity conversion rounds away from zero, and short-circuits |
+| PR-231 | Behaviour | Price conversion is never rounded |
+| PR-232 | Behaviour | Rounding onto a step rounds halves away from zero |
+| PR-233 | Behaviour | A display precision does not round the stored value |
+| PR-234 | Industry-standard default | A rule's amounts are never re-expressed when the currency changes |
+| PR-235 | Behaviour | An offer's amount is converted at the order date |
+| PR-236 | Behaviour | The two currencies of one product |
+| PR-237 | Behaviour | The rounding step and the currency rounding are independent |
+| PR-238 | Behaviour | The price precision changes what can be entered, not how offers compare |
+| PR-239 | Industry-standard default | The missing-rate contract the engine inherits |
+| PR-240 | Invariant | The same physical quantity costs the same in either unit |
+| PR-241 | Form change handler | A negative cost is refused in a form only |
+
+### Section 18 — Dates
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-245 | Behaviour | A rule's bounds are instants, not days |
+| PR-246 | Behaviour | Both of a rule's bounds are inclusive |
+| PR-247 | Behaviour | A sales line is priced at the order's date |
+| PR-248 | Behaviour | An offer's bounds are calendar dates, inclusive |
+| PR-249 | Behaviour | The default dates of the two selections |
+| PR-250 | Behaviour | The procurement path takes the later of the order date and today |
+
+### Section 19 — Locking and concurrency
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-255 | Behaviour | No locking rules; ordinary optimistic concurrency |
+| PR-256 | Behaviour | The engine reads a consistent snapshot |
+| PR-257 | Behaviour | A stored price is not repriced when a rule changes |
+| PR-258 | Behaviour | The two storefront caches and what clears them |
+
+### Section 20 — Invariants a rebuild must preserve
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-260 | Industry-standard default | The engine is free of side effects |
+| PR-261 | Industry-standard default | The engine is deterministic |
+| PR-262 | Industry-standard default | A price on a document line is a snapshot |
+| PR-263 | Industry-standard default | The domain keeps no price history |
+| PR-264 | Invariant | The engine never reads a document |
+| PR-265 | Behaviour | Loyalty and delivery are separate engines |
+| PR-266 | Invariant | Unit-independence of the line total |
+
+### Section 21 — Edge cases collected
+
+| Rule | Kind | Subject |
+|---|---|---|
+| PR-270 | Edge case | Pricing with no price list at all |
+| PR-271 | Edge case | A price list with no rules |
+| PR-272 | Edge case | A rule with no price list |
+| PR-273 | Edge case | Two rules identical in every respect |
+| PR-274 | Edge case | A category rule and a template rule both matching |
+| PR-275 | Edge case | A quantity break on a template rule against a bigger break on a category rule |
+| PR-276 | Edge case | A validity window in the past on the only rule |
+| PR-277 | Edge case | A rule whose product has been archived |
+| PR-278 | Edge case | A price list whose currency has been archived |
+| PR-279 | Edge case | A contact whose assigned price list has been archived |
+| PR-280 | Edge case | A purchase line whose vendor has no offer |
+| PR-281 | Edge case | A purchase line whose offer is filtered out |
+| PR-282 | Edge case | A margin on a line with a zero subtotal |
+| PR-283 | Edge case | A margin on a line delivered but never ordered |
+| PR-284 | Edge case | A rounding step larger than the price |
+| PR-285 | Edge case | Both margin bounds configured with the floor above the ceiling |
+| PR-286 | Edge case | Deleting a country group |
+| PR-287 | Edge case | A contact with a parent company |
+| PR-288 | Edge case | A quantity of zero on a sales line against a direct call |
+| PR-289 | Edge case | Units in different trees |
+| PR-290 | Edge case | A fixed price and a non-matching currency |
+| PR-291 | Edge case | An offer whose start date is after its end date |
+| PR-292 | Edge case | A product template priced against a variant rule |
+
+---
+
+## 23. Mapping of the former rule identifiers
 
 The two earlier drafts of this folder numbered their rules differently. Both schemes are mapped here
 so that any external reference to either can be resolved. The first draft numbered its rules by
@@ -1318,7 +1688,7 @@ section — "rule 2.3" and so on; the second used identifiers of the form `PR-RU
 | 3.11 Archiving a product does not disable its rules | — | PR-025, PR-080 |
 | — | PR-RULE-040 | PR-042 |
 | — | PR-RULE-043 | PR-041 |
-| — | PR-RULE-044 | withdrawn; see the reconciliation notes |
+| — | PR-RULE-044 | PR-046 |
 | 4.1 The engine raises no business error | PR-RULE-200 | PR-090, PR-260 |
 | 4.2 A quantity of zero | PR-RULE-103 | PR-103, PR-124 |
 | 4.3 A negative quantity | — | PR-103 |
@@ -1465,7 +1835,7 @@ PR-226, PR-233, PR-237, PR-238, PR-250, PR-264, PR-265, PR-288 to PR-292.
 
 ---
 
-## 23. Reconciliation notes
+## 24. Reconciliation notes
 
 Where the two earlier drafts disagreed, the source of the platform's behaviour was consulted and the
 correct statement kept. Each resolution is recorded here.
@@ -1486,8 +1856,12 @@ correct statement kept. Each resolution is recorded here.
    the acting company; the second said the order's company when one is supplied. The second is
    correct: the purchasing capability overrides the buying company with the order's company. PR-146.
 5. **The unit recorded by vendor price learning.** The first draft said the unit is copied "from the
-   offer the line had selected"; the second said the **order line's** unit. The second is correct.
-   Workflow 16 of [`workflows.md`](workflows.md) and PR-067 state it.
+   offer the line had selected"; the second said the **order line's** unit. Neither is complete.
+   When the line had selected an offer, the vendor's product **name** and product **code** are taken
+   from that offer while the **unit** is taken from the line; when the line had selected no offer,
+   none of the three is written at all and the unit falls back to its ordinary default. Workflow 16
+   of [`workflows.md`](workflows.md), section 15.10 of [`calculations.md`](calculations.md) and
+   PR-067 state it.
 6. **Whether a quantity may be omitted from the vendor selection.** Only the second draft recorded
    that passing no quantity at all disables the minimum-quantity filter while passing zero does not.
    It is correct and is kept as PR-148.
@@ -1496,10 +1870,12 @@ correct statement kept. Each resolution is recorded here.
    price lists; already archived ones are simply left alone, which has the same end state. PR-003
    states it precisely.
 8. **The event-ticket warning.** The second draft carried a non-blocking form warning about a
-   positive minimum quantity on a rule when the event ticketing capability is installed. No such
-   warning exists in the behaviour this specification describes, and it has been **withdrawn**; that
-   is the entry marked "withdrawn" in the mapping table for `PR-RULE-044`. Event ticket pricing goes
-   through the ordinary engine and through the storefront display rule of PR-115.
+   positive minimum quantity on a rule when the event-ticketing capability is installed; the first
+   draft did not mention it, and an intermediate draft of this folder wrongly withdrew it as
+   non-existent. The warning **does** exist, with two distinct texts and a service-tracking
+   condition on the two product-level branches. It is restored as PR-046 and in section 2.6 of
+   [`entities.md`](entities.md). Event ticket pricing otherwise goes through the ordinary engine and
+   through the storefront display rule of PR-115.
 9. **The vendor price display name.** The second draft attributed the enriched display name to the
    purchasing capability. It is contributed by the purchasing-and-inventory bridge, not by purchasing
    alone. PR-063.

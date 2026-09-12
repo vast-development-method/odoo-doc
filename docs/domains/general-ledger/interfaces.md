@@ -66,6 +66,7 @@ The entries that belong to this domain are:
 | Multi-ledger | Journal Group | list, form | — |
 | Settings | Settings | form | the accounting section |
 | Unmerge account | Account | list | used only as the target of the confirmation dialogue |
+| Merge accounts | Account merge wizard | form, in a dialogue | Bound to the Account as a contextual action of its list and card presentations, restricted to the Administrator group. It carries the name "Merge accounts". When the wizard re-opens itself (after a change that must be re-shown) it does so under the name "Merge Accounts" |
 
 ---
 
@@ -202,8 +203,17 @@ Specified in `../accounts-receivable/` and `../accounts-payable/`.
 | New entry | opens a new entry of that journal |
 | Post all entries | opens the validate-entries wizard on the draft entries of that journal |
 | Show sequence holes | opens the entry list restricted to the entries of the journal whose numbering prefix contains a hole |
-| Show unhashed entries | opens the entry list restricted to the posted unhashed entries of the chains that would be hashed |
+| Show unhashed entries | opens an entry list named "Journal Entries to Hash", restricted to the entries of the chains that would be hashed. When that list holds exactly one entry, the form of that entry is opened instead of a list. The selection is **wider** than the one behind the indicator that makes the button appear: see the note below |
 | Configure | for a bank journal with no statement source, opens the bank setup dialogue |
+
+**The unhashed-entries button and the unhashed-entries indicator do not select the same entries.** Both start from the same search: the entries of that journal whose journal secures posted entries, which carry no hash, and whose accounting date is **strictly after** the effective fiscal lock date of the acting user for that journal. Both then run the chain selection of `state-machines.md` with hashing forced, so the journal setting is ignored at that step. They differ in one flag:
+
+| | Indicator `has_unhashed_entries` | Button "Show unhashed entries" |
+|---|---|---|
+| Entries whose counter is **below** the last already hashed entry of the chain | excluded | **included** |
+| Stops at the first hit | yes, it only answers "is there any" | no, it collects them all |
+
+So the list the user sees can contain entries that the indicator never counted: those are the entries that were left unhashed behind a part of the chain that was hashed later. The reverse cannot happen. The shared cut-off at the fiscal lock date means that neither the indicator nor the button ever offers an entry of a closed period.
 
 ---
 
@@ -257,6 +267,7 @@ These are the operations callable by name on a record or on the model. Each is l
 | Operation | Inputs | Output |
 |---|---|---|
 | Open the related taxes | one account | a window action on the taxes that use it |
+| Merge | a set of accounts | the merge dialogue, that is the form of the account merge wizard filled from the selection |
 | Unmerge | a set of accounts | a client reload; raises the confirmation dialogue first |
 | Read the import templates | none | the list of downloadable templates |
 
@@ -290,11 +301,13 @@ These are the operations callable by name on a record or on the model. Each is l
 |---|---|---|
 | Reversal | Reverse | a window action on the reversals |
 | Reversal | Reverse and Modify | a window action on the new draft copies |
-| Automatic transfer | Do the action | a window action on the created entries |
+| Automatic transfer | Do the action | a window action on the created entries, named "Generated Entries"; when exactly one entry was created the form of that entry is opened instead of the list |
 | Resequence | Resequence | nothing |
 | Validate entries | Validate | a close action, or the automatic-posting proposal dialogue |
 | Secure entries | Secure entries | nothing |
 | Lock exception | Revoke | nothing |
+| Account merge | Merge | a success notification carrying the message "Accounts successfully merged!", which closes the dialogue when it is dismissed |
+| Fiscal year opening | Save the fiscal-year step | marks the "Set Periods" checklist step as done, refreshes the checklist when the step had not been done before, and reloads the client |
 | Lock exception | Show the audit trail during the exception | a window action on the journal items |
 
 ---

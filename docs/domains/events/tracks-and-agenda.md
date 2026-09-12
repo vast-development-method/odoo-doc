@@ -358,10 +358,12 @@ The leaderboard ranks the site visitors of one event by the points they collecte
 2. Order by the sum **descending**, then by the visitor identifier **ascending**; the identifier tie-break makes the ranking stable and favours the visitor who arrived first.
 3. Assign positions `1, 2, 3, …` walking the ordered list. The counter advances on **every** row, including rows hidden by a name search, therefore a searched row keeps its true rank.
 4. A name search keeps only the visitors whose display name contains the searched text, compared without case.
-5. The top three of the full ranking are returned separately for the podium.
-6. Pagination: 30 visitors per page, at most 5 page links. When the reader is ranked and no page was requested, the page containing the reader is opened, computed as `⌈position ÷ 30⌉`, and the page scrolls to that row.
+5. The **first three rows of the returned list** are also returned separately for the podium. Without a name search those are the first three of the full ranking; with a name search they are the first three matching rows, which may carry any positions.
+6. Pagination: 30 visitors per page, at most 5 page links, the number of pages being `⌈number of returned rows ÷ 30⌉`. When the reader is ranked and no page was requested, the page containing the reader is opened, computed as `⌈position of the reader ÷ 30⌉`, and the page scrolls to that row. When no page was requested and the reader is not ranked, page 1 is opened.
 
-**Worked example.** Twelve visitors are ranked; the reader is at position 34 of a ranking of 95. Opening the leaderboard without a page opens page `⌈34 ÷ 30⌉ = 2` and scrolls to the reader. The pager shows at most 5 of the 4 pages, that is all of them.
+**Worked example.** A ranking holds 95 visitors and the reader is at position 34. Opening the leaderboard without a page opens page `⌈34 ÷ 30⌉ = 2` and scrolls to the reader. The ranking has `⌈95 ÷ 30⌉ = 4` pages, and since 4 is below the maximum of 5 page links the pager shows all four.
+
+**Compatibility finding.** The page opened for the reader is computed from the **full-ranking** position, while the rows shown on that page are cut out of the **filtered** list. A name search that keeps the reader but removes rows above them therefore opens a page that may not contain the reader at all. The behaviour is reproduced as observed; a corrected behaviour would compute the page from the position of the reader inside the filtered list.
 
 The display name of an anonymous visitor is the attendee name of its latest registration, which is why an anonymous quiz taker who registered to the event appears under their real name rather than as an anonymous entry.
 
@@ -409,3 +411,9 @@ The programme package turns the event site into an installable application.
    `website_cta_url`, `website_cta_delay`, `is_website_cta_live` and `website_cta_start_remaining`,
    which is what the database carries; version M had renamed them. Their full names are in
    [`entities.md`](entities.md).
+4. **The leaderboard podium and pager.** Both versions said the podium holds the top three of the
+   full ranking. The source returns the first three rows of the list that is actually returned, so a
+   name search changes the podium; section 12 now says so, and the mismatch between the page number,
+   which is computed from the full-ranking position, and the rows shown, which are cut from the
+   filtered list, is recorded there as a compatibility finding.
+

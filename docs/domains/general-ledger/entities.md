@@ -25,6 +25,7 @@ Contents:
 17. [Relations and deletion behavior](#17-relations-and-deletion-behavior)
 18. [Ordering rules](#18-ordering-rules)
 19. [Fields that are tracked in the audit trail](#19-fields-that-are-tracked-in-the-audit-trail)
+20. [Relations with other domains](#20-relations-with-other-domains)
 
 ---
 
@@ -123,6 +124,21 @@ Editing the code schedules a recomputation of the account type, so retyping a co
 ### Splitting a name that contains a code
 
 When a name is typed that begins with a token containing at least one digit, and the code is still empty, the leading token is moved into the code and the rest becomes the name. The split uses the rule "the first whitespace-free token that contains at least one digit, then the remainder trimmed". The same rule applies when importing a file in which code and name were typed in one column.
+
+### Defaults derived from the creation context
+
+Two defaults are computed from the context in which the creation form is opened:
+
+1. **A numeric name is moved into the code.** When the context supplies a default name and no default code, and the whole supplied name parses as an integer, that integer becomes the default code and the default name is cleared. This is what happens when a user types a bare code into an account selection field and asks to create the missing account.
+2. **One code-mapping row per company is pre-created.** When the form asks for the code-mapping rows and the context does not already supply them, one Account Code Mapping row is created in memory for every company the acting user belongs to, so that a code can be typed for each of them before the account is saved.
+
+### Duplication
+
+Duplicating an account:
+
+1. **The code.** Unless the caller supplies the code-mapping rows explicitly, a fresh free code is invented **per company**, not once for the whole account. The companies that receive a new code are all the companies of the original when no code is supplied at all, and all of them except the first when an explicit code is supplied for that first company. For each of those companies the walk of the previous subsection starts from the code the original account has in that company, falling back to the code it has in its first company. A per-company set of the codes already handed out in the same call is kept, so that duplicating the same account twice in one operation cannot produce the same code twice.
+2. **The name.** Unless the caller supplies a name, the name of the copy is the name of the original followed by a space and "(copy)".
+3. **The translations.** The name is excluded from the ordinary copying of translations and is rebuilt afterwards: in every language for which the original carries a translation, the translation of the copy is that translation followed by a space and "(copy)". Every other translatable field is copied unchanged.
 
 ### Choosing a free code
 
@@ -311,6 +327,7 @@ A book of entries. Every Journal Entry belongs to exactly one Journal. The Journ
 | `company_id` | Link to Company | Required, read-only after creation, indexed, default the active company. |
 | `currency_id` | Link to Currency | Optional. When set and different from the company currency, the journal works in that foreign currency: its liquidity account is forced to the same currency, its balance figures are expressed in it, and the journal display name carries the currency name in parentheses. |
 | `country_code` | Text, related | The code of the fiscal country of the company. |
+| `account_fiscal_country_group_codes` | Structured data, related | The codes of the country groups the fiscal country of the company belongs to, read from the company field of the same name. Used by country packages to show or hide journal settings for a whole group of countries at once. The company-level field itself is specified in `../taxes/`. |
 | `default_account_id` | Link to Account | The account proposed on lines of entries of this journal and, for liquidity journals, the account that holds the money. Restricted to the account types listed below per journal type. Deleting the account is refused while a journal points to it. Not copied when the journal is duplicated. |
 | `default_account_type` | Text, computed, not stored | The account-type pattern used to filter the default account: `asset_cash` for bank and cash, `liability_credit_card` for credit card, `income%` for sale, `expense%` for purchase, `%` otherwise. |
 | `suspense_account_id` | Link to Account | Computed, stored, editable. For bank, cash and credit-card journals: the account on which a bank transaction is parked until it is matched with a business document. Restricted to current-asset accounts. The computation sets it to the previous value when one exists, otherwise to the company journal-suspense account, otherwise to nothing; for other journal types it is cleared. |
@@ -339,6 +356,8 @@ A book of entries. Every Journal Entry belongs to exactly one Journal. The Journ
 | `has_invalid_statements` | Boolean, computed, not stored | True when the journal holds a bank statement that is not valid or not complete. |
 | `invoice_template_pdf_report_id` | Link to Report | Which printable invoice template this journal uses. |
 | `available_invoice_template_pdf_report_ids` | Sub-records: Report, computed | The templates that may be chosen. |
+| `display_invoice_template_pdf_report_id` | Boolean, not stored | Whether the template selector is shown on the journal form. Its default is computed at the moment the form is opened: true when more than one template is available for invoices, false otherwise. It has no stored value and no computation afterwards, so it keeps the value the form received. |
+| `display_alias_fields` | Boolean, computed, not stored | Whether the incoming electronic-mail block of the journal form is shown at all. True when at least one electronic-mail alias domain is configured in the system, false otherwise; the value does not depend on the journal. The alias behavior itself is specified in `../electronic-invoicing-and-document-exchange/`. |
 | `is_self_billing` | Boolean | The journal is for self-billing documents; invoices then use a separate numbering chain per partner. |
 | `show_fetch_in_einvoices_button`, `show_refresh_out_einvoices_status_button` | Booleans, computed | Whether the electronic-invoice fetch buttons are shown; always false in the core and switched on by exchange packages. |
 
@@ -381,6 +400,23 @@ When a journal is created, missing values are filled before the record is writte
 6. For a credit-card journal: the default account is the first credit-card account of the company, or a newly created one.
 7. On import without a code, the code is the first five characters of the name; if that collides, the next free type-based code is taken. If none can be found the creation fails with "Cannot generate an unused journal code. Please change the name for journal *the journal name*."
 8. For sale and purchase journals, an incoming-mail local part is prepared and made unique.
+
+### Behaviour when the type is changed on the form
+
+Choosing or changing the type in the journal form, before the record is saved, rewrites several fields in this order:
+
+1. Every journal of the form whose new type is neither sale nor purchase has its incoming-mail local part cleared.
+2. Every journal whose new type is sale or purchase and which has no incoming-mail local part receives a freshly prepared one, derived from the journal name, the code, the type and the company by the derivation rule stated in `interfaces.md`.
+3. The code, the default account, the profit account and the loss account are cleared.
+4. The default account is then refilled: for a sale journal with the default income account of the company, and for a purchase journal with the default expense account of the company — in both cases only when that account is **active**; an archived account leaves the field empty.
+5. For a bank or a cash journal the profit account is refilled with the cash-difference income account of the company and the loss account with the cash-difference expense account of the company, each again only when that account is active.
+6. The code is recomputed: because it was cleared in step 3, the computation proposes the type prefix followed by the smallest integer from 1 to 99 that yields a code not already used in the company.
+
+Nothing else is touched: the name, the currency, the company, the ledger groups and the payment method lines keep the values they had.
+
+### Normalising the copy list of electronic-mail addresses
+
+The help text of the copy list asks for entries separated by a semicolon, but the value is rewritten as soon as the box is left. The whole text is parsed into individual addresses, each address is normalised (the domain part is lowercased, a display name around the address is dropped, and an entry that cannot be parsed as an address is removed), and the addresses that survive are joined again with a comma followed by a space. So a list typed as three semicolon-separated entries, one of them malformed, is stored as the two valid addresses separated by a comma and a space.
 
 ### Creating the liquidity account of a new bank, cash or credit-card journal
 
@@ -469,6 +505,7 @@ The direction sign is 1 for a plain entry and for outbound documents, and −1 f
 | `currency_id` | Link to Currency | Required. The document currency. Computed, stored, editable, precomputed, with an inverse. Tracked. |
 | `line_ids` | Sub-records: Journal Item | Every item of the entry, including tax lines, payment-term lines, rounding lines and display-only lines. Copied when the entry is duplicated. |
 | `invoice_line_ids` | Sub-records: Journal Item | A view over `line_ids` restricted to product lines, sections, subsections and notes. Not copied. |
+| `journal_line_ids` | Sub-records: Journal Item | A second view over the items of the entry, labelled "Journal Items (DEPRECATED)", restricted to the items whose display type is **not** a section, a subsection or a note — that is, every accountable item. Not copied and explicitly excluded from exports. It is readable and searchable like any other collection; the maintained view of the same data is `line_ids`. |
 | `posted_before` | Boolean | Not copied. True once the entry has been posted at least once. Governs the numbering reset rule and the audit-trail deletion rule. |
 | `checked` | Boolean | "Reviewed". Computed, stored, editable, tracked, not copied. The computation sets it to true when the entry is posted **and** either the journal is a miscellaneous journal or the acting user is allowed to review. |
 | `always_tax_exigible` | Boolean | Computed, stored, editable. True when the entry is not an invoice-like document **and** it collects no cash-basis values, meaning its tax lines are immediately reportable. |
@@ -478,6 +515,8 @@ The direction sign is 1 for a plain entry and for outbound documents, and −1 f
 | `hide_post_button` | Boolean, computed, not stored | True when the entry is not draft, or when it is scheduled for automatic posting and its date is in the future. |
 | `made_sequence_gap` | Boolean, stored | True when this entry is the first one that breaks the natural numbering of its chain. Maintained by the gap-detection algorithm, not by an ordinary computation. |
 | `highest_name` | Text, computed, not stored | The last number used in the numbering chain this entry belongs to. |
+| `show_name_warning` | Boolean, not stored | Whether the "number too low" warning is shown under the number box. Set when the number is being edited on the form and all of the following hold: the number is filled, it is not the placeholder `/`, it sorts at or below the highest number of the chain in plain character order, and the entry is not in quick-encoding mode. Cleared in every other case. The warning text is quoted in `interfaces.md`. |
+| `invoice_filter_type_domain` | Text, computed, not stored | The journal-and-account family the form must restrict its selection lists to, derived from the document type alone: `sale` for a customer invoice, a customer credit note or a sales receipt; `purchase` for a vendor bill, a vendor credit note or a purchase receipt; empty for a plain entry. |
 | `sequence_prefix` | Text, computed, stored | The part of the number before the trailing digit block. |
 | `sequence_number` | Integer, computed, stored | The trailing digit block of the number, as an integer; zero when there is none. |
 | `type_name` | Text, computed, not stored | The human label of the document type, with two overrides: a customer invoice is called "Invoice" and a customer credit note is called "Credit Note". |
@@ -506,14 +545,17 @@ The direction sign is 1 for a plain entry and for outbound documents, and −1 f
 | `tax_cash_basis_created_move_ids` | Sub-records: Journal Entry | The cash-basis entries created from this document. |
 | `exchange_diff_partial_ids` | Sub-records: Partial Reconciliation | The reconciliations that produced this exchange-difference entry. |
 | `adjusting_entry_origin_move_ids` / `adjusting_entries_move_ids` | Multiple links to Journal Entry | The two directions of the link created by the automatic transfer wizard between an origin entry and the adjusting entry it produced. |
+| `adjusting_entries_count` | Integer, computed, not stored | How many adjusting entries this entry produced: the size of `adjusting_entries_move_ids`. |
+| `adjusting_entry_origin_moves_count` | Integer, computed, not stored | How many origin entries this adjusting entry was produced from: the size of `adjusting_entry_origin_move_ids`. |
+| `adjusting_entry_origin_label` | Text, computed, not stored, language-dependent | The label of the **document type** of the single origin entry when there is exactly one origin entry, and empty when there are none or several. Because it is a translated label it is recomputed when the reading language changes. It names the window action that opens the origin entries. |
 
 ### Amount fields
 
-All of these are computed and stored. They are recomputed whenever a line balance, a line foreign amount, a line residual, a reconciliation or the state changes.
+All of these are computed and stored. They are recomputed whenever a line balance, a line foreign amount, a line residual, a reconciliation or the state changes. Exactly one of them, the untaxed total, is tracked in the audit trail; the others are not.
 
 | Field (storage name) | Currency | Meaning |
 |---|---|---|
-| `amount_untaxed` | document | Signed untaxed total in the document currency |
+| `amount_untaxed` | document | Signed untaxed total in the document currency. **Tracked in the audit trail** — the only monetary field of the entity that is |
 | `amount_tax` | document | Signed tax total in the document currency |
 | `amount_total` | document | Signed grand total in the document currency |
 | `amount_residual` | document | Signed amount still due in the document currency |
@@ -569,10 +611,39 @@ Descending accounting date, then descending number, then descending document dat
 
 ### Display name
 
-- A draft entry shows "Draft" followed by the type name, then the reference in parentheses or the word "Unknown" when it has no number.
-- A cancelled entry shows the number followed by "(Cancelled)".
-- A posted entry shows the number.
-- When the display is requested in "full" mode the partner name and the date are appended.
+There are two forms. Which one is produced depends on one switch in the reading context; a second switch adds the counterpart and the date to the ordinary form.
+
+**The ordinary form** is built in four steps:
+
+1. When, and only when, the entry is **draft**, the name starts with one fixed word group chosen by the document type. There are exactly seven, one per type, and no other prefix exists:
+
+   | Document type | Prefix on a draft entry |
+   |---|---|
+   | `entry` | "Draft Entry" |
+   | `out_invoice` | "Draft Invoice" |
+   | `out_refund` | "Draft Credit Note" |
+   | `in_invoice` | "Draft Bill" |
+   | `in_refund` | "Draft Vendor Credit Note" |
+   | `out_receipt` | "Draft Sales Receipt" |
+   | `in_receipt` | "Draft Purchase Receipt" |
+
+   A posted entry and a cancelled entry get no prefix and no suffix: they display exactly alike.
+2. When the number exists and is not the placeholder `/`, it is appended after a space (and the leading and trailing spaces of the result are trimmed, so an entry that is posted and numbered displays as the bare number).
+3. When the context asks for the **full** form: the counterpart name is appended after a comma and a space when there is a counterpart, and then the accounting date, formatted for the reading language, after a comma and a space when there is a date.
+4. When the caller asks for the reference to be shown and a reference exists, the reference is appended in parentheses after a space. The reference is first shortened to at most fifty characters: runs of whitespace are collapsed to single spaces and, when the result is still longer than fifty characters, it is cut at a word boundary and completed with a space and three dots between square brackets. The computation of the stored display name asks for the reference, so the reference is part of the display name everywhere the display name is read.
+
+An entry with neither prefix nor number produces the empty text.
+
+**The amount-total form** is produced instead whenever the reading context asks for it (the client uses it in the lists where the amount matters more than the number). The grand total is first formatted in the document currency, with its currency symbol, to the decimal precision of that currency. Then exactly one of four patterns applies, tested in this order:
+
+| Situation | Result |
+|---|---|
+| A **posted sale document** (customer invoice, customer credit note or sales receipt) | the number, then — when a reference exists — a space, a hyphen, a space and the reference, then " at " and the formatted total |
+| Otherwise, a label exists and the entry is **draft** | the label, " at ", the formatted total, a space and "(Draft)" |
+| Otherwise, a label exists | the label, " at " and the formatted total |
+| Otherwise (no label) | "Draft (" then the formatted total then ")" |
+
+The **label** used by the last three rows is the reference when the entry is a purchase document (vendor bill, vendor credit note or purchase receipt) and it has one, and the number in every other case; an entry with neither is treated as having no label.
 
 ### Copying
 
@@ -632,6 +703,11 @@ A Journal Item exists only inside a Journal Entry and is deleted with it. While 
 |---|---|---|
 | `account_id` | Link to Account | Required for every item that is not a section, subsection or note (enforced by a database check). Computed, stored, editable, precomputed, with an inverse. Tracked. Deleting the account is refused while items exist. Off-balance accounts are excluded from the selection list. |
 | `account_name`, `account_code` | Text, related | Denormalised for report configuration. |
+| `search_account_id` | Link to Account, not stored | A drop-in search substitute for `account_id` that carries no value of its own: it can only be used as a search criterion, never read or written. Searching on it with the membership operators (is in, is not in) or with the sub-query operators (matches any, matches no) first resolves the account criterion on its own — ignoring the record rules, because the account link is already exempt from them — and then searches the items on the resulting list of account identifiers. The point is to inline the identifiers instead of joining the two tables, which is faster while the chart of accounts stays below roughly ten thousand accounts. Every other operator is passed through to `account_id` unchanged. |
+| `account_internal_group` | Selection, related | The internal group of the account (asset, liability, equity, income, expense, off-balance). Denormalised so that the item list can group by it without joining. |
+| `account_root_id` | Link to Account Root, related | The root of the account, that is the first one or two characters of its code. Because the account code is per company, this related value is **company-dependent**: the same item read from two companies of one hierarchy can report two different roots. |
+| `commercial_partner_country` | Link to Country, related | The country of the commercial entity of the counterpart of the **entry**, reached through the entry, its commercial counterpart and its country. Used for country-based grouping of the item list. |
+| `product_category_id` | Link to Product Category, related | The category of the product template of the product of the item. Used for category-based grouping and by the reports of `../inventory-valuation-and-costing/`. |
 | `name` | Text | The item label. Computed from the product and the entry reference, stored, editable, precomputed. Tracked. |
 | `debit` | Money in company currency | Computed from the balance, stored, precomputed, with an inverse. Equal to the balance when it is positive, zero otherwise (reversed under storno accounting). |
 | `credit` | Money in company currency | Computed from the balance, stored, precomputed, with an inverse. Equal to minus the balance when it is negative, zero otherwise (reversed under storno accounting). |
@@ -694,6 +770,12 @@ The three non-accountable types are the only ones for which the account, the deb
 | `is_account_reconcile` | Boolean, related to the account | Whether the account allows matching. |
 | `reconciled_lines_ids` | Multiple links to Journal Item, computed with an inverse | Every item matched with this one. Writing it triggers a reconciliation of the whole set. |
 | `reconciled_lines_excluding_exchange_diff_ids` | Multiple links to Journal Item, computed | The same set without the exchange-difference items. |
+| `first_reconciled_lines_id` | Link to Journal Item, computed, not stored | The first item of `reconciled_lines_ids`, or empty when there is none. Computed by the same computation as that collection, from the two collections of partial matches. |
+| `count_reconciled_lines` | Integer, computed, not stored | How many items `reconciled_lines_ids` holds. Computed by the same computation. |
+| `first_reconciled_lines_excluding_exchange_diff_id` | Link to Journal Item, computed, not stored | The first item of `reconciled_lines_excluding_exchange_diff_ids`, or empty when there is none. Computed by the same computation as that collection. |
+| `count_reconciled_lines_excluding_exchange_diff` | Integer, computed, not stored | How many items that collection holds. Computed by the same computation. |
+
+The four companion fields exist so that the reconciliation widget can decide, without reading the whole collection, whether to open one item directly (count of one, open the first item) or to open a list (count above one). Their value is always consistent with the collection they accompany, because each pair is produced by a single computation.
 | `exchange_move_ids` | Multiple links to Journal Entry, computed | The exchange-difference entries produced by the matches of this item. |
 
 The residual is zero for an item on an account that neither allows matching nor is a bank-and-cash or credit-card account.
@@ -908,6 +990,7 @@ Validation: unless the chosen pair is the twenty-ninth of February (which is acc
 | `account_journal_early_pay_discount_gain_account_id`, `account_journal_early_pay_discount_loss_account_id` | The write-off accounts of an early-payment discount |
 | `expense_accrual_account_id`, `revenue_accrual_account_id` | The accounts used by the automatic transfer wizard when it moves an amount to another period; restricted respectively to liability accounts that are not payable or receivable, and to asset accounts that are not payable or receivable |
 | `automatic_entry_default_journal_id` | The miscellaneous journal used by default by the automatic transfer wizard |
+| `bank_journal_ids` | Sub-records: Journal, labelled "Bank Journals": every journal of the company whose type is `bank`. A read-only view used by the settings screen and by the bank-setup steps; cash, credit-card, sale, purchase and miscellaneous journals are excluded from it |
 | `income_account_id`, `expense_account_id` | The default income and expense accounts of the company, also written as the default income and expense accounts of product categories |
 | `price_difference_account_id` | The account that absorbs the difference between a standard cost and a billed price |
 | `account_discount_income_allocation_id`, `account_discount_expense_allocation_id` | The accounts used when a discount is booked separately |
@@ -964,7 +1047,10 @@ The list of countries in which storno accounting is mandatory is: Bosnia and Her
 | `total_invoiced` | Money, computed, not stored | The sum of the untaxed subtotals of the customer invoices and credit notes of this partner and its children, excluding draft and cancelled documents. |
 | `days_sales_outstanding` | Number, computed, not stored | See `calculations.md`. |
 | `account_move_count` | Integer, computed | How many entries mention this partner; visible only to accounting users. |
-| `trust` | Selection, per company | `good` (Good Debtor), `normal` (Normal Debtor), `bad` (Bad Debtor). |
+| `trust` | Selection, per company | `good` (Good Debtor), `normal` (Normal Debtor), `bad` (Bad Debtor). The package ships a system-wide default of `normal`, so every partner is a normal debtor until someone says otherwise. |
+| `ref_company_ids` | Sub-records: Company | Labelled "Companies that refers to partner": every Company whose own partner record is this partner. It is the reverse of the link that gives a company its partner, and it is what tells the ledger screens that a counterpart is in fact one of the companies of the installation. |
+| `contract_ids` | Sub-records: Analytic Account | Labelled "Partner Contracts", read-only: every analytic account whose counterpart is this partner. The analytic account itself is specified in `../analytic-accounting/`. |
+| `bank_account_count` | Integer, computed, not stored | Labelled "Bank": how many bank accounts are registered for this partner. Computed by counting the bank-account records grouped by partner; a partner with none reports zero. |
 
 The computation of the credit and debit totals is deliberately company-hierarchy-wide: it uses every posted, unreconciled item on a receivable or payable account whose company is the root of the active company or a descendant of it.
 
@@ -986,6 +1072,7 @@ These are transient records: they exist only for the duration of one user intera
 | `reason` | Text | Free text appended to the reference of the reversal. |
 | `journal_id` | Link to Journal | Required. Computed from the selection (the first active journal of the selected entries), stored, editable. Must be of the same type as the journal of the entries. |
 | `company_id` | Link to Company | Required, read-only. |
+| `country_code` | Text, related, not stored | The code of the **ordinary** country of the company, that is the country of its address. Country packages use it to show or hide their own reversal options. Note that this wizard reads the ordinary country while the securing wizard reads the fiscal country; the two can differ for a company that files its returns in another country. |
 | `available_journal_ids` | Multiple links to Journal, computed | The journals of the company whose type matches one of the selected entries. |
 | `residual`, `currency_id`, `move_type` | computed | Shown only when exactly one entry is selected, to size the credit note. |
 
@@ -1054,25 +1141,82 @@ Opening the wizard with no draft entry fails with "There are no journal items in
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
 | `company_id` | Link to Company | Required, read-only, default the active company. |
+| `country_code` | Text, related, not stored | The code of the **fiscal** country of the company, that is the country whose tax rules the company files under. Country packages use it to show their own securing requirements. Note that the reversal wizard reads the ordinary country instead. |
 | `hash_date` | Date | Required. "Hash All Entries". Computed from the maximum hashable date, stored, editable. Every eligible entry dated on or before it is hashed. |
 | `max_hash_date` | Date, computed | The highest date such that every posted entry up to and including it is already secured. Computed as the day before the earliest date among the entries that still need hashing and the entries that cannot be hashed; empty when nothing remains. |
 | `move_to_hash_ids` | Multiple links to Journal Entry, computed | Exactly the entries that will be hashed. |
 | `chains_to_hash_with_gaps` | Structured data, computed | The first and last entry of every chain whose hashing would leave a numbering gap. |
 | `not_hashable_unlocked_move_ids` | Multiple links to Journal Entry, computed | Entries before the date that cannot be hashed and are not protected by the hard lock date. |
 | `unreconciled_bank_statement_line_ids` | Multiple links to Statement Line, computed | Unreconciled bank transactions before the date; their whole numbering chain is excluded from the operation. |
-| `warnings` | Structured data, computed | The warnings to display, each with a message, a severity, a button label and an action. |
+| `warnings` | Structured data, computed | The warnings to display, keyed by a stored warning key, each carrying a message, optionally a severity, a button label and the window action the button opens. When no date is chosen the collection is empty. |
 
-The warning messages are:
+The five warnings, with the key under which each is stored, its message, its severity and the label of its button:
 
-| Key | Message |
-|---|---|
-| unreconciled transactions | "There are still unreconciled bank statement lines before the selected date. The entries from journal prefixes containing them will not be secured: *the list of prefixes*" (severity: danger) |
-| draft entries | "There are still draft entries before the selected date." |
-| not hashable | "There are entries that cannot be hashed. They can be protected by the Hard Lock Date." |
-| gap | "Securing these entries will create at least one gap in the sequence." |
-| beyond the date | "Securing these entries will also secure entries after the selected date." |
+| Stored key | Message | Severity | Button label |
+|---|---|---|---|
+| `account_unreconciled_bank_statement_line_ids` | "There are still unreconciled bank statement lines before the selected date. The entries from journal prefixes containing them will not be secured: *the list of numbering prefixes that hold them*" | `danger` | "Review Statements" |
+| `account_unhashed_draft_entries` | "There are still draft entries before the selected date." | none | "Review Entries" |
+| `account_not_hashable_unlocked_moves` | "There are entries that cannot be hashed. They can be protected by the Hard Lock Date." | none | "Review Entries" |
+| `account_sequence_gap` | "Securing these entries will create at least one gap in the sequence." | none | "Review Entries" |
+| `account_move_to_secure_after_selected_date` | "Securing these entries will also secure entries after the selected date." | none | "Review Entries" |
+
+Only the first warning carries a severity, and only the first uses the button label "Review Statements"; the other four use "Review Entries". The button of the first opens the unreconciled bank transactions of the company; the button of the second opens the draft entries before the date; the button of the third opens the entries that cannot be hashed; the button of the fourth opens the entry list grouped by numbering prefix and filtered on irregular numbering, restricted to the counters between the first and the last entry of every affected chain; the button of the fifth opens the entries that would be secured although they are dated after the chosen date.
 
 Running the wizard without a date fails with "Set a date. The moves will be secured up to including this date."
+
+### 16.6 Account merge wizard
+
+`account.merge.wizard`, described as the account merge wizard.
+
+**Purpose.** Two or more accounts selected in the chart of accounts are grouped into sets that may legitimately become one account, and each set is merged into a single surviving account that keeps every code and every company of the set. It is the opposite of the unmerge operation of section 1: unmerge splits one shared account into one account per company, merge collapses several accounts into one shared account. The algorithm is in `workflows.md`; the refusals and the per-line blocking reasons are in `business-rules.md`.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `account_ids` | Multiple links to Account | The accounts the operation acts on. Filled at opening from the selection of the chart of accounts, unless the caller supplies the accounts or the lines directly. |
+| `is_group_by_name` | Boolean | Labelled "Group by name?". Default false. Help text: "Tick this checkbox if you want accounts to be grouped by name for merging." When true, the account name joins the grouping key, so that two accounts of the same type and settings but of different names land in two different groups. |
+| `wizard_line_ids` | Sub-records: Account merge wizard line | Computed from `account_ids` and `is_group_by_name`, **stored and editable**: the computation rebuilds the whole list whenever either source changes, and between two rebuilds the user may tick and untick the selection boxes of the lines. The rebuild first drops every account whose type is Bank and Cash or Credit Card, then produces, for each group in turn, one section line followed by one account line per account of the group, numbering them consecutively from one. |
+| `disable_merge_button` | Boolean, computed, not stored | Whether the Merge button is inert. Computed from the selection flag and the blocking reason of the lines: the account lines that are selected and carry no blocking reason are grouped by their grouping key, and the button is disabled when **every** such group holds fewer than two lines — that is, when no merge would actually happen. |
+
+**Ordering and lifecycle.** The wizard is transient: it exists for the duration of the dialogue and is purged by housekeeping. It has no state field; the dialogue ends either by the Merge button or by the Cancel button.
+
+### 16.7 Account merge wizard line
+
+`account.merge.wizard.line`, described as the account merge wizard line. One row of the dialogue: either a heading that names a group, or one account offered for merging inside that group.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `wizard_id` | Link to the account merge wizard | Required. The line is deleted with its wizard. |
+| `grouping_key` | Text | The textual form of the grouping key of the group this line belongs to. Every line of one group carries the same value, heading included; it is what ties an account line to its heading and what the merge groups by. |
+| `sequence` | Integer | The display order inside the dialogue. Assigned consecutively from one while the lines are built, headings and account lines sharing one counter. |
+| `display_type` | Selection | Required. Three stored values: `line_section` ("Section"), `line_subsection` ("Subsection") and `account` ("Account"). The core builds only section headings and account lines; the subsection value exists so that a package can insert a second heading level. |
+| `is_selected` | Boolean | Whether the account of this line takes part in the merge. Set to true on every account line when the list is built; the user may untick it. Meaningless on a heading line. |
+| `account_id` | Link to Account | Labelled "Account", read-only. On an account line, the account offered for merging. On a heading line, the first account of the group, carried only so that the heading text can be built from it. The line is deleted with the account. |
+| `company_ids` | Multiple links to Company, related | The companies of that account. Shown as tags so that the user can see at a glance whether two lines of a group overlap. |
+| `info` | Text, computed, not stored | Labelled "Info". Help text: "Contains either the section name or error message, depending on the line type." On a heading line it is the group name built by the rule in `business-rules.md`. On an account line it is empty when the account may be merged and the blocking reason when it may not. It is recomputed for the whole group every time any line of the group is ticked or unticked, because whether one account may be merged depends on which other accounts of the same group are selected. |
+| `account_has_hashed_entries` | Boolean, computed, not stored | True when at least one journal item on that account belongs to an entry that carries an inalterability hash. Computed for all the lines at once with a single lookup that ignores the record rules, and used twice: to raise a blocking reason when two selected accounts of one group both have hashed entries, and to sort the surviving account first so that its identifier is the one that survives. |
+
+**Ordering.** By the display order number, then by identifier.
+
+### 16.8 Fiscal year opening wizard
+
+`account.financial.year.op`, described as the opening balance of the financial year. This is the dialogue behind the "Set Periods" step of the accounting checklist: it sets the fiscal-year end and the date from which the ledger is kept.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `company_id` | Link to Company | Required. The company being configured. |
+| `opening_move_posted` | Boolean, computed, not stored | True when the company already has an opening entry **and** that entry is posted. Recomputed whenever the opening entry of the company changes. It is what makes the dialogue show the opening balances as final rather than editable. |
+| `opening_date` | Date | Required. A writable view of the opening date of the company: the date from which the ledger is kept, and one day after the date of the opening entry itself. |
+| `fiscalyear_last_day` | Integer | Required. A writable view of the fiscal-year end day of the company. Help text: "The last day of the month will be used if the chosen day doesn't exist." |
+| `fiscalyear_last_month` | Selection of the twelve months | Required. A writable view of the fiscal-year end month of the company. Same help text. |
+
+**What creating or writing the wizard does.** The three writable views are not written to the company one at a time, because the company-level fiscal-year validation would then see an incoherent intermediate pair. Instead:
+
+1. Whichever of the three values the operation carries are collected and written **on the company in one single write**, the opening date going to the opening-date field of the company.
+2. The opening date to use is the one just supplied, or, when none was supplied, the one already on the company.
+3. When that opening date exists and the opening entry of the company is still **draft**, the opening entry is re-dated to the day before it. A posted opening entry is left alone.
+4. The two fiscal-year values are then removed from the values actually stored on the wizard record, since the company is their home. The opening date is kept on the wizard record, because the wizard requires it.
+
+The wizard carries its own fiscal-year validation, distinct from the company one; both are quoted in `business-rules.md`.
 
 ---
 
@@ -1218,9 +1362,38 @@ Two context switches change the account ordering in a selection list: a preferre
 
 | Entity | Tracked fields |
 |---|---|
-| Journal Entry | the number, the reference, the accounting date, the state, the document type, the reviewed flag, the counterpart, the currency, the recipient bank account, the salesperson, the payment reference, the payment status, the origin, the source electronic-mail address |
+| Journal Entry | the number, the reference, the accounting date, the state, the document type, the reviewed flag, the counterpart, the currency, the recipient bank account, the salesperson, the payment reference, the payment status, the origin, the source electronic-mail address, the untaxed total |
 | Journal Item | the label, the account, the balance, the taxes, the tax grids, the due date |
 | Account | the name, the code, the account type, the active flag, the reconcilable flag, the currency, the tags, the internal notes |
 | Company | the five lock dates, the restrictive audit trail switch |
 
 A change to a tracked field of a Journal Item is logged on its **entry**, not on the item, and only when the entry has been posted at least once.
+
+The untaxed total is the only monetary field of the Journal Entry that is tracked: the tax total, the grand total and the three residual amounts change with it but leave no audit-trail line of their own.
+
+---
+
+## 20. Relations with other domains
+
+The entities of this domain are extended by other domains and extend entities that other domains own. Each row states which side depends on which, the field that carries the relation, and the event at which the boundary is crossed.
+
+| Relation | Direction of dependence | Field that carries it | Event that crosses the boundary | Sibling folder |
+|---|---|---|---|---|
+| A Contact carries a receivable and a payable account, a degree of trust, its ledger totals and its counts | The General Ledger extends the Contact | `property_account_receivable_id`, `property_account_payable_id`, `trust`, `credit`, `debit`, `total_invoiced`, `days_sales_outstanding`, `account_move_count`, `bank_account_count` | Reading or writing the accounting page of a contact | [`../contacts-and-organizations/`](../contacts-and-organizations/) |
+| A Contact that is one of the companies of the installation | The General Ledger reads the Contact | `ref_company_ids` on the Contact, the reverse of the partner link of the Company | Opening a contact that is also a company | [`../contacts-and-organizations/`](../contacts-and-organizations/) |
+| Re-parenting a Contact rewrites the counterpart of its journal items and the commercial counterpart of the entries dedicated to it | The Contact drives the General Ledger | `parent_id` on the Contact; `partner_id` on the Journal Item; `commercial_partner_id` on the Journal Entry | Writing the parent of a contact that already has journal items. The rule, the lock-check exemption and the logged message are in `business-rules.md`, the ledger consequence in `accounting-effects.md` | [`../contacts-and-organizations/`](../contacts-and-organizations/) |
+| Deleting or merging a Contact is refused by accounting | The General Ledger constrains the Contact | the counterpart of a Journal Entry, and the hash of the entry behind a Journal Item | Deleting a contact, or merging two contacts. Both refusals are in `business-rules.md` | [`../contacts-and-organizations/`](../contacts-and-organizations/) |
+| A Contact carries its analytic contracts | The General Ledger reads the analytic account | `contract_ids` on the Contact | Opening the contracts of a contact | [`../analytic-accounting/`](../analytic-accounting/) |
+| A Journal Item carries an analytic distribution and produces analytic lines | The General Ledger hosts the analytic hook | `analytic_distribution`, `analytic_line_ids`, `has_invalid_analytics` | Posting an entry creates the analytic lines; returning it to draft deletes them | [`../analytic-accounting/`](../analytic-accounting/) |
+| A Journal and a Journal Entry know the country groups of the fiscal country | The General Ledger reads a tax setting | `account_fiscal_country_group_codes` on the Journal and on the Journal Entry, related to the same field of the Company | Opening a journal or an entry form whose fields depend on the fiscal country group | [`../taxes/`](../taxes/) |
+| A Journal Item carries taxes, an originating tax and tax grids | The General Ledger hosts the tax hook | `tax_ids`, `tax_line_id`, `tax_repartition_line_id`, `tax_tag_ids`, `tax_base_amount` | Posting, and the tax lock check at every write | [`../taxes/`](../taxes/) |
+| A plain entry produced as a cash-basis entry is excluded from automatic balancing | The tax domain constrains a General Ledger mechanism | `tax_cash_basis_origin_move_id` on the Journal Entry | Saving a draft plain entry that carries taxes; see `accounting-effects.md` | [`../taxes/`](../taxes/) |
+| A Journal Item knows the category of its product | The General Ledger reads the catalogue | `product_category_id`, related through the product and its template | Grouping the item list by product category | [`../products-and-catalog/`](../products-and-catalog/) |
+| A Journal Item knows the country of the commercial entity of its counterpart | The General Ledger reads the Contact | `commercial_partner_country` | Grouping the item list by country | [`../contacts-and-organizations/`](../contacts-and-organizations/) |
+| A Journal shows or hides its incoming electronic-mail block | The General Ledger reads the messaging configuration | `display_alias_fields`, `alias_name` | Opening a journal form while at least one alias domain exists | [`../electronic-invoicing-and-document-exchange/`](../electronic-invoicing-and-document-exchange/) |
+| A Journal chooses the printable invoice template and the copy list of addresses | The receivable domain configures the Journal | `invoice_template_pdf_report_id`, `available_invoice_template_pdf_report_ids`, `display_invoice_template_pdf_report_id`, `incoming_einvoice_notification_email` | Sending a document from a journal | [`../accounts-receivable/`](../accounts-receivable/) |
+| The origin entries of an adjusting entry are named after their document type, and "Invoices" when there are several | The General Ledger names a commercial document | `adjusting_entry_origin_label`, `adjusting_entry_origin_move_ids` | Opening the origin entries of an adjusting entry; see `interfaces.md` | [`../accounts-receivable/`](../accounts-receivable/) |
+| A Journal Entry carries the message subtypes of the commercial document lifecycle | The General Ledger hosts the message thread | the audit-trail messages of the entry and the shipped subtypes listed in `configuration.md` | Validating a document, paying it, creating it | [`../messaging-and-activities/`](../messaging-and-activities/) |
+| A Journal Entry is matched with payments and bank transactions | The payment domain consumes the reconciliation of the General Ledger | `origin_payment_id`, `statement_line_id`, `matched_payment_ids`, the partial and full reconciliations | Matching a payment or a bank transaction against an item | [`../payments-and-bank-reconciliation/`](../payments-and-bank-reconciliation/) |
+| Every monetary field is rounded and converted by the currency rules | The General Ledger depends on the currency domain | `currency_id`, `company_currency_id`, `amount_currency`, `currency_rate` | Every write of an amount, and every reconciliation across currencies | [`../multi-currency/`](../multi-currency/) |
+| Posted journal items feed every financial statement and the audit drill-down | The reporting domain depends on the General Ledger | `parent_state`, `account_id`, `date`, `balance`, `account_root_id`, `account_internal_group` | Rendering a report and drilling down from a figure to the items | [`../financial-reporting/`](../financial-reporting/) |

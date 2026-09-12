@@ -227,6 +227,7 @@ documents listed in section 8.
 | [Multi-currency](../multi-currency/README.md) | The conversion of order line totals into the currency of the event company for the sales total shown on an event and for the measures of the revenue analysis. |
 | [Customer relationship management](../customer-relationship-management/README.md) | The lead entity, its stages and teams, and the merge algorithm the events bridge extends. |
 | [Website and storefront](../website-and-storefront/README.md) | The site, the public visitor, the published-record mixin, the search mixin, the menu system, the page editing, the cart and the checkout used by the public event pages. |
+| [Marketing and mass mailing](../marketing-and-mass-mailing/README.md) | The mailing entity, its recipient selection and its exclusion list, used by the "Invite", "Contact Attendees" and "Contact Speakers" buttons of an event. This domain declares Event Registration and Event Track as mailing targets and prepares the selection; it does not restate the mailing behaviour. |
 | [Learning, surveys and gamification](../learning-surveys-and-gamification/README.md) | The karma and profile mechanics that the quiz points feed when the community profile capability is present. |
 | [Analytic accounting](../analytic-accounting/README.md) | The analytic distribution an organisation may set on the order lines of an event; this domain sets none of its own. |
 

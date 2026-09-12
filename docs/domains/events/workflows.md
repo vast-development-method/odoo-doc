@@ -567,15 +567,17 @@ The endpoint `/event/<event identifier>/my_tickets` returns the printed tickets 
    | Situation | Outcome | Effect |
    |---|---|---|
    | No registration carries that barcode | `invalid_ticket` | none |
-   | The registration is cancelled | `canceled_registration` | none |
-   | The registration is unconfirmed | `unconfirmed_registration` | none |
+   | The registration is cancelled (state `cancel`) | `canceled_registration` | none |
+   | The registration is unconfirmed (state `draft`) | `unconfirmed_registration` | none |
    | The event of the registration has finished | `not_ongoing_event` | none |
+   | The registration is already attended (state `done`) | `already_registered` | none |
    | The desk is opened for a given event and the registration belongs to another event | `need_manual_confirmation` | none |
-   | The registration is already attended | `already_registered` | none |
    | Otherwise | `confirmed_registration` | the registration is set to `done` |
 
-   The order of the tests is exactly the order of the rows.
-4. Whatever the outcome, the answer carries the registration summary: identifier, attendee name, contact, slot display name, ticket name, event identifier and display name, the display text of every selection answer, the company name, the badge format, the attendance date in short format, and whether that date falls on the current day in the event time zone. With the product bridge it also carries the sale status, its readable label and a "has to pay" flag that is true when the sale status is `to_pay`.
+   The order of the tests is exactly the order of the rows. In particular, an attendee who is
+   already in state `done` is reported as `already_registered` even when the desk was opened for
+   another event, because the attendance test is evaluated before the event test.
+4. Except in the `invalid_ticket` case, the answer carries the registration summary: identifier, attendee name, contact, slot display name, ticket name, event identifier and display name, the display text of every selection answer, the company name, the badge format, the attendance date in short format, and whether that date falls on the current day in the event time zone. With the product bridge it also carries the sale status, its readable label and a "has to pay" flag that is true when the sale status is `to_pay`. In the `invalid_ticket` case there is no registration to summarise and the answer carries the single marker `invalid_ticket` under the key `error` instead of under the key `status`; every other outcome is carried under the key `status`.
 5. Alternatively the operator picks an attendee from the kanban or list view of the desk and presses "Mark as Attending", which performs the same state change without a scan.
 
 **Effect of setting the state to `done`:** `date_closed` is stamped with the current moment when it is still empty; a note *"Attended on <date, short format>"* is logged in the discussion thread of the registration; the seat moves from reserved to used, leaving `seats_taken` unchanged; lead rules with the trigger "Attendees attended" run.
@@ -695,7 +697,7 @@ The same move can be triggered by hand with the "Set as Done" operation on one o
 1. The user opens the booth of the event and fills the renter: `partner_id`, and optionally `contact_name`, `contact_email` and `contact_phone` (each filled from the renter contact only while empty).
 2. The user presses "Confirm", which writes `state = unavailable` together with the collected values in a single write.
 3. The post-confirmation rule runs on the booths that were `available` before the write:
-   - when the booth category asks for a sponsor and the booth has a renter, a Sponsor is created or reused (see [booths-and-exhibitors.md](booths-and-exhibitors.md#creating-the-sponsor-of-a-booth));
+   - when the booth category asks for a sponsor and the booth has a renter, a Sponsor is created or reused (see [booths-and-exhibitors.md](booths-and-exhibitors.md#9-creating-the-sponsor-of-a-booth));
    - a message built from the booking layout is posted **on the event** with the subtype "Booth Booked".
 
 ## Booking through a sales order
@@ -836,18 +838,56 @@ Details of the agenda grid, the suggestions, the reminders, the video and the qu
 2. The request is forbidden unless the quiz allows unlimited tries **or** the reader is an Event Administrator (administrators may always reset, for testing).
 3. The visitor link is force-created if missing, then `quiz_completed` becomes false and `quiz_points` becomes zero.
 
-**Leaderboard.** See [tracks-and-agenda.md](tracks-and-agenda.md#leaderboard).
+**Leaderboard.** See [tracks-and-agenda.md](tracks-and-agenda.md#12-leaderboard).
 
 ---
 
 # 28. Send a mass mailing to attendees
 
-**Actor:** Event User, with the mass mailing capability package installed.
+**Actor:** Event User who also holds the mass mailing role, on an event, with the Mass Mailing on
+Attendees package installed. Every button below is hidden from a user who does not hold that role.
 
-1. From the event, the user presses "Mass Mail Attendees" (electronic mail) or the text message equivalent. A mailing is prepared on Event Registration with a default selection restricted to the attendees of that event.
-2. From the event, the user may also press "Invite Contacts", which prepares a mailing on contacts.
-3. With the programme package, "Mass Mail Speakers" prepares a mailing on Event Track restricted to the talks of that event.
-4. Unlike the automatic communications of the event, a mass mailing **does** honour the mass-mailing exclusion list.
+**Preconditions:** the event exists and is saved.
+
+## Steps
+
+1. The event form shows a button labelled "Invite" next to the stage bar. It is hidden once the
+   event is finished, and it is otherwise always offered; it is drawn as the primary button while
+   registrations are open (`event_registrations_open` is true) and as a secondary button while they
+   are closed. Pressing it opens a screen titled "Mass Mail Invitation" that prepares a mailing on
+   Contact with the subject pre-filled as `Event: <event name>` and no default selection, so that
+   the user chooses whom to invite.
+2. The event form shows a second button labelled "Contact Attendees". It is hidden while
+   `seats_taken` is zero, that is while nobody has taken a seat. Pressing it opens a screen titled
+   "Mass Mail Attendees" that prepares a mailing on Event Registration with the subject pre-filled
+   as `Event: <event name>` and the default selection restricted to the attendees of that event
+   whose state is neither `cancel` nor `draft`.
+3. Event Registration is declared a mailing target by that package. When a mailing is prepared on
+   Event Registration by any other route, its default selection is the attendees whose state is
+   neither `cancel` nor `draft`, without the event restriction.
+4. With the Event Attendees Text Message Marketing package, both buttons open the same two prepared
+   mailings on the combined screen that carries the electronic mail channel and the text message
+   channel side by side, instead of the electronic mail screen.
+5. With the Mass Mailing on Talk Speakers package, a third button labelled "Contact Speakers"
+   appears. It is hidden while the event has no talk (`track_count` is zero). Pressing it opens a
+   prepared mailing on Event Track with the subject pre-filled as `Event: <event name>` and the
+   default selection restricted to the talks of that event whose stage is not flagged as a
+   cancelling stage. Event Track is declared a mailing target by that package, and a mailing
+   prepared on Event Track by any other route defaults to the talks whose stage is not flagged as a
+   cancelling stage. With the Talk Speakers Text Message Marketing package that button too opens the
+   combined screen.
+6. Unlike the automatic communications of the event, a mass mailing **does** honour the mass-mailing
+   exclusion list, because it is an ordinary mailing and not a transactional message
+   (`EV-RULE-036`).
+
+**Compatibility finding.** The prepared speaker mailing carries the screen title "Mass Mail
+Attendees", the same title as the prepared attendee mailing, although it selects talks. The title is
+reproduced as observed; a corrected behaviour would title it "Mass Mail Speakers".
+
+**Failure conditions:** none of these operations validates anything; they only prepare a screen. A
+user without the mass mailing role never sees the buttons and, if the operation is invoked
+directly, is refused by the access rules of the mailing entity, which belong to
+[Marketing and mass mailing](../marketing-and-mass-mailing/README.md).
 
 ---
 
@@ -880,3 +920,7 @@ writes.
    Abbreviations are not used in the prose of this repository, so the job is named here by its label
    without the abbreviation and by its external identifier `event_crm.ir_cron_generate_leads`, which
    is the string a replacement has to reproduce.
+4. **Mass mailing.** Neither version gave the button labels, the visibility guards or the default
+   selections of the prepared mailings. They are stated in section 28, with the duplicated screen
+   title of the speaker mailing recorded as a compatibility finding.
+

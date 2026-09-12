@@ -24,6 +24,7 @@ Contents:
 18. [Field-level write protection](#18-field-level-write-protection)
 19. [Concurrency and transactional rules](#19-concurrency-and-transactional-rules)
 20. [Rules that other domains rely on](#20-rules-that-other-domains-rely-on)
+21. [Rules this domain contributes to the Contact](#21-rules-this-domain-contributes-to-the-contact)
 
 ---
 
@@ -78,7 +79,7 @@ These statements must hold at every commit. They are the properties an implement
 | Reconciliation switched off | Reconciliation may be switched off only when no partial reconciliation is pending on the account | "You cannot switch an account to prevent the reconciliation if some partial reconciliations are still pending." |
 | Deprecation | An account used in a tax distribution may not be deprecated | "You cannot deprecate an account that is used in a tax distribution." |
 | Name creation outside the chart screen | Creating an account by typing a name into a selection field is refused unless the creation comes from a file import | "Please create new accounts from the Chart of Accounts menu." |
-| Merging | Two accounts may never be merged | "You cannot merge accounts." |
+| Generic record merge | The generic record-merge entry point, the one that merges arbitrary records of any kind, always refuses on accounts | "You cannot merge accounts." |
 | Code generation exhausted | No free code could be found | "Cannot generate an unused account code." |
 
 ### Deletion and archival
@@ -94,6 +95,8 @@ These statements must hold at every commit. They are the properties an implement
 Switching the flag **on** rewrites, for every item on the account that has no Full Reconciliation: the reconciled flag becomes true when the debit, the credit and the foreign amount are all zero and false otherwise; the residual in the company currency becomes the debit minus the credit; the residual in the item currency becomes the foreign amount.
 
 Switching the flag **off** first refuses the operation when a pending partial reconciliation exists, then sets both residuals of every item without a Full Reconciliation to zero.
+
+Accounts **can** be merged, but only through the dedicated account merge wizard, which applies its own preconditions and its own per-account blocking reasons; the refusal quoted above guards only the generic entry point, which the wizard does not use. The wizard is specified in `entities.md`, its algorithm in `workflows.md` and its rules in section 16 of this document.
 
 ### Unmerging
 
@@ -221,6 +224,7 @@ All of these are gathered and raised together, one per line.
 | Registering a payment on a blocked document | "You cannot register payments for blocked invoices." |
 | Blocking a paid or in-payment document | "You can't block a paid invoice." |
 | An unsupported combination of communication type and standard on the journal | "The combination of reference model and reference type on the journal is not implemented" |
+| Choosing a counterpart on an entry of a company that has no chart of accounts — that is, a counterpart for which **both** the receivable account and the payable account resolve to nothing, which happens only when no chart has been loaded for that company | "Cannot find a chart of accounts for this company, You should configure it. \nPlease go to Account Configuration." The text carries an explicit line break before its second sentence. The refusal is a redirect: it is shown with a button labelled "Go to the configuration panel" that opens the accounting settings. It applies to every document type, the plain entry included, because the counterpart is chosen the same way on all of them. |
 
 ---
 
@@ -379,6 +383,8 @@ An exception applies only when its relaxed value is **strictly smaller** than th
 | A numbering gap in the chain | "An error occurred when computing the inalterability. A gap has been detected in the sequence." |
 | Printing the integrity report without the accounting user group | "Please contact your accountant to print the Hash integrity result." |
 | Reordering a chain by date in a hash-secured journal | "You can not reorder sequence by date when the journal is locked with a hash." |
+| Merging two contacts when at least one journal item of a contact being absorbed belongs to an entry that carries a hash | "Partners that are used in hashed entries cannot be merged." |
+| Merging two accounts when both carry hashed entries | "Contains hashed entries, but *the display name of the account that would survive* also has hashed entries." — the second account is greyed out in the merge dialogue instead of the operation being refused |
 
 Hashing an entry in a journal that does **not** secure by default activates the group that shows the inalterability features, so that the user can see the hash column.
 
@@ -453,6 +459,7 @@ The single exception: writing **only** the account, on **every** item of the mat
 | Partial Reconciliation | always; the side effects of section 12 apply | — |
 | Full Reconciliation | always; the matching numbers fall back to the partial form | — |
 | Lock Exception | not applicable: an exception is revoked, not deleted | — |
+| Contact | No Journal Entry in the draft or the posted state names it as its counterpart. A Journal Entry in the cancelled state does **not** block the deletion | "The partner cannot be deleted because it is used in Accounting" — see section 21 |
 
 ---
 
@@ -537,6 +544,53 @@ The fiscal-year end day check accepts the twenty-ninth of February unconditional
 | Rule | Message |
 |---|---|
 | A date is required | "Set a date. The moves will be secured up to including this date." |
+
+### Account merge
+
+Two refusals stop the dialogue outright, and two blocking reasons grey out one account line inside it without stopping anything.
+
+**The two refusals**, both raised while the dialogue is being opened:
+
+| Rule | Condition | Message |
+|---|---|---|
+| The selection must be accounts | The dialogue is opened from a list of records that are not accounts | "This can only be used on accounts." |
+| At least two accounts | Fewer than two records are selected | "You must select at least 2 accounts." |
+
+A third refusal is raised when the merge itself is launched, and again inside the merge of each group:
+
+| Rule | Condition | Message |
+|---|---|---|
+| Write access | The acting user may not write on one of the accounts | the ordinary access error |
+| Company access | One of the companies of the accounts is not among the companies the acting user may act for | "You do not have the right to perform this operation as you do not have access to the following companies: *the names of those companies, separated by a comma and a space*." — the same text as the unmerge check of section 2 |
+
+**The two blocking reasons.** They are recomputed for a whole group every time any line of that group is ticked or unticked, and they are evaluated in this order, each only over the lines that are ticked and not already blocked:
+
+| Order | Condition | Text written into the blocking reason |
+|---|---|---|
+| 1 | The account shares at least one company with an account that comes earlier in the group and is itself still eligible | "Belongs to the same company as *the display name of that earlier account*." |
+| 2 | The account carries hashed entries and an earlier still-eligible account of the group already carries hashed entries | "Contains hashed entries, but *the display name of that earlier account* also has hashed entries." |
+
+A blocked line stays visible, keeps its tick box and shows its reason in the information column; it is simply skipped by the merge. Two accounts of the same company are blocked because merging them would put two codes of one company on one account, which the code uniqueness rule forbids; the remedy offered is to re-point the journal items themselves. Two accounts that both carry hashed entries are blocked because a merge keeps only one of the two identifiers, and moving a hashed journal item to another account identifier would break the hash of its entry.
+
+**The Merge button.** It is inert whenever every group holds fewer than two lines that are both ticked and unblocked, that is whenever the operation would do nothing.
+
+**The heading of a group.** Each group shows a heading built from the first account of the group, as follows:
+
+1. Start from the label of the account type of that account.
+2. When that type is Receivable or Payable, replace the label by "Non-trade *the label*" when the account is flagged as non-trade, and by "Trade *the label*" otherwise.
+3. Collect the additional elements, in this order: the name of the currency when the account restricts its items to one currency; the word "Reconcilable" when the account allows matching; the word "Deprecated" when the account is archived.
+4. When the dialogue does **not** group by name: the heading is the label of step 2, followed — only when at least one additional element was collected — by a space and the additional elements between parentheses, separated by a comma and a space.
+5. When the dialogue **does** group by name: the heading is the account name, a space, then between parentheses the label of step 2 followed by the additional elements, all separated by a comma and a space. In this form the parentheses are always present.
+
+For example a trade receivable account in dollars that allows matching and is still in use gives, when the dialogue does not group by name, a heading of the shape "Trade Receivable (USD, Reconcilable)" — with the currency name reproduced as it is stored.
+
+### Fiscal year opening
+
+| Rule | Condition | Message |
+|---|---|---|
+| The fiscal-year end day must exist in the fiscal-year end month | The chosen day and month do not form a valid date. The test is made against the year 2020, a leap year, so that the twenty-ninth of February is accepted | "Incorrect fiscal year date: day is out of range for month. Month: *the chosen month*; Day: *the chosen day*" |
+
+This check belongs to the wizard, not to the company, and its text is deliberately different from the company-level check quoted in section 15 ("Invalid fiscal year last day"). The reason the wizard carries its own check is that it writes the day and the month to the company in one single operation; a check placed on the company alone would be evaluated after each of the two values separately and would reject a legitimate pair such as moving from the thirty-first of December to the thirtieth of June, because it would see the thirty-first of June in between.
 
 ---
 
@@ -640,6 +694,7 @@ This section consolidates, per field, what may be written in each state. It is t
 | Foreign amount | free | lock-checked (fiscal) | breaks the match | free unless it is a hashed field — it is not, so free |
 | Currency | free | lock-checked (fiscal) | breaks the match | free |
 | Counterpart | free | lock-checked (fiscal) | free | **refused** |
+| Counterpart, when the change comes from re-parenting the contact | free | **exempt from the lock check**: the whole set of items of that contact is rewritten in one operation with the lock check suppressed, so items of locked periods are rewritten too; see section 21 | same exemption | still **refused**, because the counterpart is a hashed field |
 | Taxes, originating tax | free | **refused** | **refused** | **refused** |
 | Tax grids | free | lock-checked (tax) | free | free |
 | Due date | free | free | free | free |
@@ -703,3 +758,45 @@ An implementation must keep these guarantees because other domains are built on 
 | An item on an account that does not allow matching always has zero residuals | the reports |
 | Deleting an entry is impossible once it is hashed, and impossible once it is posted when the company keeps a restrictive audit trail | the legal archive |
 | Every entry produced by any domain balances in the company currency | the whole ledger |
+
+
+---
+
+## 21. Rules this domain contributes to the Contact
+
+The Contact itself belongs to `../contacts-and-organizations/`. This domain adds three rules to it, all three enforced from the accounting side and all three invisible to a reader of that folder alone.
+
+### 21.1 A Contact used in accounting cannot be deleted
+
+**Condition.** The deletion of one or more contacts is refused as soon as at least one Journal Entry in the **draft** or the **posted** state names any of them as its counterpart. The count is made ignoring the record rules, so an entry the acting user cannot see still blocks the deletion. An entry in the **cancelled** state does not block anything, and neither does a Journal Item whose entry has been cancelled.
+
+**Message.** "The partner cannot be deleted because it is used in Accounting"
+
+**Why the rule is on the entry and not on the item.** Every accountable Journal Item copies the commercial entity of the counterpart of its entry, so testing the entry covers the items; testing the item alone would miss an entry that carries a counterpart on its header but no counterpart on its lines.
+
+### 21.2 A Contact used in a hashed entry cannot be merged
+
+**Condition.** Merging contacts is refused when at least one Journal Item belonging to one of the contacts being **absorbed** sits in an entry that carries an inalterability hash. The test reads the items ignoring the record rules and stops at the first hit. Items of the surviving contact are not tested, because the surviving contact keeps its identifier.
+
+**Message.** "Partners that are used in hashed entries cannot be merged."
+
+**Why.** A merge re-points the journal items of the absorbed contacts to the identifier of the survivor. The counterpart identifier of an item is one of the values that enters the hash of its entry, so a merge would make the entry fail verification for ever. This is the same reasoning that blocks a merge of two accounts that both carry hashed entries.
+
+### 21.3 Re-parenting a Contact rewrites its journal items
+
+Writing the parent of a contact changes which commercial entity it belongs to, and the commercial entity is what the ledger books against. The write therefore carries a ledger consequence.
+
+**Step 1 — the check before the write.** Before anything is written, the contacts of the operation whose parent actually changes are collected together with their journal items. When at least one of them has journal items, a new parent is being set, and the tax number of any of those contacts differs from the tax number of the new parent, the write is refused with "You cannot set a partner as an invoicing address of another if they have a different *the label of the tax number field for the country*." — that refusal is a tax rule and is specified in `../taxes/`. An empty tax number on either side counts as an empty text, so a contact without a tax number may be re-parented under a parent without one.
+
+**Step 2 — the write itself.** The parent is written by the ordinary mechanism, which recomputes the commercial entity of the contact and of its own children.
+
+**Step 3 — the propagation, for each affected contact in turn.**
+
+1. The commercial entity of the contact is recomputed.
+2. **Every** journal item that named that contact as its counterpart — the set collected in step 1, posted items of locked periods included — is rewritten in one single operation to the new commercial entity. The write is made with the **lock check suppressed**: the fiscal, tax, sale, purchase and hard lock dates are not consulted, and the write succeeds on items whose accounting date lies in a locked or even a hard-locked period.
+3. Among the entries of those items, those whose own counterpart is that contact — that is, the entries **wholly dedicated** to it — have their commercial entity rewritten to the same value, again with the lock check suppressed. An entry that is shared between several counterparts, such as a miscellaneous entry or a grouped bank payment, keeps its commercial entity unchanged.
+4. The message "The commercial partner has been updated for all related accounting entries." is logged on the contact.
+
+**Why the whole set must be written at once.** The reconciliation check that runs on a write of the counterpart compares the counterpart of the items of one matched group; writing the items one at a time would make the group temporarily inconsistent and the check would refuse the second write. Writing them in one operation lets the check see the final, consistent state.
+
+**Compatibility finding.** This is the only path in the domain that writes the counterpart of a posted journal item without consulting the lock dates, and section 18 records the exemption. It means that re-parenting a contact silently modifies items of periods that are closed, and of periods protected by the Hard Lock Date, which every other path treats as irreversible. A corrected behaviour would either refuse the re-parenting when any affected item lies on or before the effective hard lock date of its company, or leave those items on the old commercial entity and log which ones were skipped. The observed behaviour is the one specified above.

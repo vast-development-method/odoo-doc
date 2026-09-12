@@ -214,6 +214,143 @@ Internal Transfers and Bank Fees; see `workflows.md`.
 
 Bank Suspense Account, Cash Discount Loss, Cash Discount Gain, Cash Difference Gain, Cash Difference Loss, Liquidity Transfer, Outstanding Receipts, Outstanding Payments, and the Profit or Loss Appropriation account of type Current Year Earnings; see `workflows.md`.
 
+### Decimal precisions
+
+Exactly one decimal precision is shipped by this package. A decimal precision is a named setting that tells the system how many decimal places a family of numbers carries; it is created with the force-create flag, meaning that it is restored if it was deleted.
+
+| Name | Digits | What it governs |
+|---|---|---|
+| "Payment Terms" | 6 | The number of decimal places kept on the percentages and the fixed amounts of a payment term line, so that a term split into thirds does not lose a cent over a large amount. The payment term itself is specified in `../accounts-receivable/`. |
+
+No other decimal precision belongs to this domain; currency decimal places are a property of the currency and are specified in `../multi-currency/`.
+
+### Message subtypes shipped for the Journal Entry
+
+A message subtype is a category of notification on the message thread of a record: followers subscribe to subtypes, and a subtype flagged as default is subscribed to automatically. Three subtypes are shipped on the Journal Entry, and **none of them is a default**, so a follower receives none of them until someone subscribes deliberately.
+
+| Name | Description | Default | Hidden from the subscription list |
+|---|---|---|---|
+| "Validated" | "Invoice validated" | no | no |
+| "Paid" | "Invoice paid" | no | no |
+| "Invoice Created" | "Invoice Created" | no | **yes** |
+
+The third is hidden, which means it never appears in the subscription dialogue: it exists so that the creation of a document can be logged as a typed message that automated rules can filter on, not so that a person can follow it. The events that raise the first two belong to `../accounts-receivable/`; the thread itself belongs to `../messaging-and-activities/`.
+
+### The generic chart of accounts
+
+One complete chart of accounts is shipped by this package itself, under the name "Generic Chart of Accounts". It is the chart offered to a company whose country has no chart of its own, and it is the chart every worked example of this folder uses. It declares **no country**, so it is offered everywhere; the country-specific charts are built by the same mechanism, described in `workflows.md`, from their own sets of the same four kinds of record.
+
+**What it writes on the company.**
+
+| Setting | Value |
+|---|---|
+| Anglo-Saxon accounting | on |
+| Fiscal country | United States |
+| Bank account code prefix | `1014` |
+| Cash account code prefix | `1015` |
+| Transfer account code prefix | `1017` |
+| Receivable account of a counterpart | Account Receivable, code `1210` |
+| Payable account of a counterpart | Account Payable, code `2110` |
+| Point-of-sale receivable account | code `1013` |
+| Exchange gain account | Foreign Exchange Gain, code `4410` |
+| Exchange loss account | Foreign Exchange Loss, code `6410` |
+| Cash difference gain account | Cash Difference Gain, code `4420` |
+| Cash difference loss account | Cash Difference Loss, code `6420` |
+| Early-payment discount loss account | Cash Discount Loss, code `4430` |
+| Early-payment discount gain account | Cash Discount Gain, code `6430` |
+| Default expense account | Expenses, code `6000` |
+| Default income account | Product Sales, code `4000` |
+| Inventory valuation journal | the miscellaneous journal named Inventory Valuation |
+| Stock valuation account | Stock Valuation, code `1101` |
+| Work-in-progress account of production | Work in Progress, code `1105` |
+| Work-in-progress overhead account of production | Cost of Production, code `1104` |
+
+It also writes, on the Stock Valuation account itself, the stock variation account: Stock Variation, code `6100`. The last five settings belong to `../inventory-valuation-and-costing/` and `../manufacturing/`; they are listed here because the chart is what sets them.
+
+**The forty-six accounts.** The column "Matches" repeats the reconcilable flag, and "Non-trade" the non-trade flag; the cash-flow tags are the three tags listed above.
+
+| Code | Name | Account type | Matches | Non-trade | Cash-flow tag |
+|---|---|---|---|---|---|
+| `1010` | Current Assets | Current Assets | no | no | — |
+| `1013` | Account Receivable (`PoS`) | Receivable | yes | no | — |
+| `1101` | Stock Valuation | Current Assets | no | no | — |
+| `1104` | Cost of Production | Current Assets | yes | no | — |
+| `1105` | Work in Progress | Current Assets | yes | no | — |
+| `1210` | Account Receivable | Receivable | yes | no | — |
+| `1211` | Products to receive | Current Assets | yes | no | — |
+| `1220` | Owner's Current Account | Receivable | yes | **yes** | — |
+| `1280` | Prepaid Expenses | Current Assets | no | no | — |
+| `1310` | Tax Paid | Current Assets | no | no | — |
+| `1320` | Tax Receivable | Receivable | yes | **yes** | — |
+| `1410` | Prepayments | Prepayments | no | no | — |
+| `1510` | Fixed Asset | Fixed Assets | no | no | — |
+| `1910` | Non-current assets | Non-current Assets | no | no | — |
+| `2010` | Current Liabilities | Current Liabilities | no | no | — |
+| `2110` | Account Payable | Payable | yes | no | — |
+| `2111` | Bills to receive | Current Liabilities | yes | no | — |
+| `2120` | Deferred Revenue | Current Liabilities | no | no | — |
+| `2300` | Salary Payable | Current Liabilities | yes | no | — |
+| `2301` | Employee Payroll Taxes | Current Liabilities | yes | no | — |
+| `2302` | Employer Payroll Taxes | Current Liabilities | yes | no | — |
+| `2510` | Tax Received | Current Liabilities | no | no | — |
+| `2520` | Tax Payable | Payable | yes | **yes** | — |
+| `2910` | Non-current Liabilities | Non-current Liabilities | no | no | — |
+| `3010` | Capital | Equity | no | no | — |
+| `3020` | Dividends | Equity | no | no | — |
+| `4000` | Product Sales | Income | no | no | Operating |
+| `4410` | Foreign Exchange Gain | Income | no | no | Financing |
+| `4420` | Cash Difference Gain | Income | no | no | Investing |
+| `4430` | Cash Discount Loss | Expenses | no | no | — |
+| `4500` | Other Income | Other Income | no | no | — |
+| `5000` | Cost of Goods Sold | Cost of Revenue | no | no | Operating |
+| `6000` | Expenses | Expenses | no | no | Operating |
+| `6100` | Stock Variation | Expenses | no | no | — |
+| `6110` | Purchase of Equipments | Expenses | no | no | Investing |
+| `6120` | Rent | Expenses | no | no | Investing |
+| `6200` | Bank Fees | Expenses | no | no | Financing |
+| `6300` | Salary Expenses | Expenses | no | no | Operating |
+| `6410` | Foreign Exchange Loss | Expenses | no | no | Financing |
+| `6420` | Cash Difference Loss | Expenses | no | no | Investing |
+| `6430` | Cash Discount Gain | Income | no | no | — |
+| `9610` | RD Expenses | Expenses | no | no | Investing |
+| `9620` | Sales Expenses | Expenses | no | no | Investing |
+| `201100` | Credit Card | Credit Card | no | no | — |
+| `999998` | Accumulated Retained Earnings | Current Year Earnings | no | no | — |
+| `999999` | Profit or Loss Appropriation | Current Year Earnings | no | no | — |
+
+The three code prefixes written on the company (`1014`, `1015` and `1017`) carry no shipped account: they are the starting points from which the loading mechanism invents the codes of the bank, cash and transfer accounts it creates, by the walk described in `entities.md`.
+
+Two oddities of the shipped data are reproduced as they are, because a rebuild that "corrects" them would produce different figures from the same template. **Compatibility finding.** The account named Cash Discount Loss, code `4430`, is of type Expenses although its code sits in the income range, and the account named Cash Discount Gain, code `6430`, is of type Income although its code sits in the expense range: the two names are swapped with respect to their codes and their types. A corrected chart would name `4430` the gain and `6430` the loss, or renumber them. The observed data is the one specified above, and the company settings quoted earlier point the early-payment discount **loss** setting at `4430` and the **gain** setting at `6430`, consistently with the names and inconsistently with the types.
+
+**The two tax groups.**
+
+| Name | Country | Account credited when the group is payable | Account debited when the group is receivable |
+|---|---|---|---|
+| "Tax 15%" | United States | Tax Payable, code `2520` | Tax Receivable, code `1320` |
+| "Tax 0%" | United States | Tax Payable, code `2520` | Tax Receivable, code `1320` |
+
+**The four taxes.** Each has an amount expressed as a percentage of the base and a distribution of four lines: on an invoice, the whole base to the grids and the whole tax to one account; on a credit note, the same two lines again. No tax grid is attached, because the generic chart carries no tax report.
+
+| Name | Applies to | Rate | Group | Account of the tax line | Attached fiscal position | Replaces |
+|---|---|---|---|---|---|---|
+| "15%" | sales | 15 percent | Tax 15% | Tax Received, code `2510` | Domestic | — |
+| "15%" | purchases | 15 percent | Tax 15% | Tax Paid, code `1310` | Domestic | — |
+| "0% Exports" | sales | 0 percent | Tax 0% | none | Foreign Trade | the sales tax "15%" |
+| "0% Imports" | purchases | 0 percent | Tax 0% | none | Foreign Trade | the purchase tax "15%" |
+
+In each of the four, the two base lines (one for the invoice, one for the credit note) carry the whole hundred percent of the base and no account, and the two tax lines carry the whole hundred percent of the tax and the account named above. The two zero-rate taxes have no account at all on their tax lines, which is why a zero-rate document produces no tax item. The tax mechanism itself is specified in `../taxes/`.
+
+**The two fiscal positions.**
+
+| Order | Name | Country | Applied automatically |
+|---|---|---|---|
+| 10 | "Domestic" | United States | yes |
+| 20 | "Foreign Trade" | none, so every country | yes |
+
+Because both are applied automatically and the domestic one is tried first, a counterpart in the United States gets the fifteen-percent taxes and every other counterpart gets the zero-rate ones. Fiscal positions are specified in `../taxes/`.
+
+**What the chart does not ship.** The generic chart ships no account group, no account tag of its own beyond the three cash-flow tags listed above, no reconciliation model of its own and no journal of its own: the journals and the reconciliation models listed earlier in this section are created by the loading mechanism for every chart, generic or not, and the utility accounts listed earlier are created by the same mechanism when the chart does not supply them.
+
 ---
 
 ## 7. Security groups
@@ -305,10 +442,10 @@ The Administrator group deliberately has only read access on entries and items t
 
 | Entity | Group | C | R | U | D |
 |---|---|---|---|---|---|
-| Lock Exception | internal user | yes | — | — | — |
-| Lock Exception | Administrator | yes | — | yes | — |
+| Lock Exception | internal user | — | yes | — | — |
+| Lock Exception | Administrator | yes | yes | — | — |
 
-An ordinary internal user can therefore **request** an exception but can neither read the list nor revoke one; the Administrator can also modify them. Revocation is additionally guarded in the operation itself.
+An ordinary internal user can therefore **read** the exceptions but can neither create nor modify nor delete one; the Administrator can read them and create them, but cannot modify an existing one and cannot delete one. Revocation is not a deletion: it is a state change performed by a dedicated operation that runs with elevated rights, and it is additionally guarded by the permission check of `business-rules.md`.
 
 ### Wizards
 
@@ -319,6 +456,11 @@ An ordinary internal user can therefore **request** an exception but can neither
 | Automatic transfer wizard | Show Full Accounting Features | yes | yes | yes | — |
 | Resequence wizard | Administrator | yes | yes | yes | — |
 | Secure entries wizard | Administrator | yes | yes | yes | — |
+| Account merge wizard | Administrator | yes | yes | yes | **yes** |
+| Account merge wizard line | Administrator | yes | yes | yes | **yes** |
+| Fiscal year opening wizard | Administrator | yes | yes | yes | — |
+
+The account merge wizard and its line are the only two wizards of the domain that also carry delete rights: the dialogue rebuilds its whole list of lines whenever the grouping switch or the selection of accounts changes, which means removing the previous lines, and that removal goes through the ordinary delete right. Every other wizard of the table builds its rows once and never removes them, so create, read and update are enough. The window action that opens the account merge wizard is in addition restricted to the Administrator group, so the dialogue cannot be reached at all by a lower group.
 
 ---
 

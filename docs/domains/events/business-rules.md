@@ -83,7 +83,7 @@ event_registrations_sold_out =
                             or strictly positive availability
         single-slot event → every ticket has is_sold_out = true
      )
-```formula
+```
 
 The event maximum and the sum of the ticket maximums are deliberately independent: an event may cap 20 seats while offering a 20-seat ticket A and a 20-seat ticket B, and it may also leave its own cap empty while capping each ticket.
 
@@ -734,5 +734,3 @@ No identifier was reused for a different rule, and no rule of either version was
    bound of the per-order limit and as the fallback limit of the public form. The source confirms a
    single constant used in both places, so `EV-RULE-016` and
    [`calculations.md`](calculations.md#9-per-order-ticket-limits) quote the same number.
-
-```

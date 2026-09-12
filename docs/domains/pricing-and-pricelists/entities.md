@@ -8,6 +8,31 @@ multi-company behaviour.
 Field tables use three columns: the field with its storage name in code font, its type, and the
 meaning and rules. Every storage name is given its full name in words on first use.
 
+**Generated reference pages.** Every entity named in this file has a generated reference page that
+lists its raw field inventory. This file is the authority on behaviour; the reference page is the
+authority on the exact spelling of each identifier.
+
+| Entity | Transport name | Reference page |
+|---|---|---|
+| Price List | `product.pricelist` | [`../../references/entities/product.pricelist.md`](../../references/entities/product.pricelist.md) |
+| Price List Rule | `product.pricelist.item` | [`../../references/entities/product.pricelist.item.md`](../../references/entities/product.pricelist.item.md) |
+| Vendor Price | `product.supplierinfo` | [`../../references/entities/product.supplierinfo.md`](../../references/entities/product.supplierinfo.md) |
+| Product Margin Wizard | `product.margin` | [`../../references/entities/product.margin.md`](../../references/entities/product.margin.md) |
+| Country Group | `res.country.group` | [`../../references/entities/res.country.group.md`](../../references/entities/res.country.group.md) |
+| Product Template | `product.template` | [`../../references/entities/product.template.md`](../../references/entities/product.template.md) |
+| Product Variant | `product.product` | [`../../references/entities/product.product.md`](../../references/entities/product.product.md) |
+| Contact | `res.partner` | [`../../references/entities/res.partner.md`](../../references/entities/res.partner.md) |
+| Company | `res.company` | [`../../references/entities/res.company.md`](../../references/entities/res.company.md) |
+| Currency | `res.currency` | [`../../references/entities/res.currency.md`](../../references/entities/res.currency.md) |
+| Sales Order | `sale.order` | [`../../references/entities/sale.order.md`](../../references/entities/sale.order.md) |
+| Sales Order Line | `sale.order.line` | [`../../references/entities/sale.order.line.md`](../../references/entities/sale.order.line.md) |
+| Purchase Order Line | `purchase.order.line` | [`../../references/entities/purchase.order.line.md`](../../references/entities/purchase.order.line.md) |
+| Reordering Rule | `stock.warehouse.orderpoint` | [`../../references/entities/stock.warehouse.orderpoint.md`](../../references/entities/stock.warehouse.orderpoint.md) |
+| Product Replenish Wizard | `product.replenish` | [`../../references/entities/product.replenish.md`](../../references/entities/product.replenish.md) |
+| Point of Sale Configuration | `pos.config` | [`../../references/entities/pos.config.md`](../../references/entities/pos.config.md) |
+| Website | `website` | [`../../references/entities/website.md`](../../references/entities/website.md) |
+| Loyalty Programme | `loyalty.program` | [`../../references/entities/loyalty.program.md`](../../references/entities/loyalty.program.md) |
+
 ---
 
 ## 1. Price List
@@ -33,7 +58,9 @@ policies are layered.
 | Created automatically | A company is created, or the basic price list feature is switched on | One Price List named "Default", in the company's currency, with sequence ten and no rules, is created for every company that has none. An existing rule-less Price List whose currency equals its company's currency is un-archived instead of a new one being created. |
 | Created manually | A user with the create privilege saves the form | The Price List exists with its currency, company, country groups and rules. |
 | Copied | Duplicate | Name becomes the original name followed by a space and the word "(copy)" in parentheses, unless the caller supplies a name. Rules are copied. |
-| Archived | The active flag is cleared, or the Price List's currency is archived | The Price List is hidden from selection lists everywhere but keeps its identity and its rules. A partner whose price list is archived falls back through the selection chain. |
+| Archived | The active flag is cleared, the Price List's currency is archived, or the basic price list capability is switched off | The Price List is hidden from selection lists everywhere but keeps its identity and its rules. A partner whose price list is archived falls back through the selection chain. |
+| Archive refused | The active flag is cleared while an **active** loyalty or promotion programme names the Price List | Nothing is written. The message is "This pricelist may not be archived. It is being used for active promotion programs: " followed by the comma-separated programme names. Because archiving a currency archives its price lists, one such programme also aborts the archiving of the currency. |
+| Un-archived | A user clears the archive, or the provisioning step of section 1.10 finds a rule-less Price List in the company's own currency | Reappears in every selection list and in the country resolution chain. |
 | Deleted | Delete | Refused if any rule **in another Price List** uses it as a base. See the deletion guard below. |
 
 ### 1.3 Field table
@@ -49,7 +76,9 @@ policies are layered.
 | Rules (`item_ids`) | one-to-many to Price List Rule | The rules of this price list, filtered by a domain so that rules pointing at an archived product template or an archived product variant are hidden. Copied when the price list is duplicated. |
 | Promotional Code (`code`) | single-line text | Present only when the storefront capability is installed. Readable only by internal users. A storefront visitor who enters this code gets this price list even when it is not selectable. |
 | Selectable (`selectable`) | boolean | Present only when the storefront capability is installed. When true, a storefront visitor may pick this price list from the price list chooser. |
-| Website (`website_id`) | link to Website | Present only when the storefront capability is installed. On delete: restricted. Tracked (tracking level twenty). Default: the first website of the acting company. A price list with a website belongs to that website only. |
+| Website (`website_id`) | link to Website | Present only when the storefront capability is installed. On delete: restricted. Tracked (tracking level twenty). Default: the first website of the acting company. Restricted by a domain to websites of the price list's company, or to every website when the price list has no company. A price list with a website belongs to that website only. |
+| Contacts Count (`partners_count`) | integer | Computed, never stored. Present only when the contact-partnership capability is installed. The number of contacts whose specific price list assignment names this price list, counted in the acting company. Displayed as a button that opens those contacts. |
+| Contacts Label (`partners_label`) | single-line text | Related, read-only. Present only when the contact-partnership capability is installed: the acting company's own word for the group of contacts attached to a price list. It labels the count button; it never affects pricing. |
 | Display Name (`display_name`) | single-line text | Computed, not stored. See the display rule below. |
 
 The messaging mixin adds the usual conversation, follower, activity and rating fields; they behave
@@ -138,6 +167,18 @@ references **from outside the deleted set** block the deletion.
 - Enabling multi-currency also enables the basic price list feature and then runs the automatic
   creation for every company.
 - Archiving a currency archives every price list denominated in it.
+
+### 1.11 Uniqueness, stored constraints and indexes
+
+- **Identity** is the surrogate primary key alone. There is **no** natural key: two price lists may
+  share the same name, the same currency, the same company and the same country groups. The display
+  name disambiguates them only visually.
+- There is **no** unique constraint and **no** stored check constraint on this entity. Every
+  refusal it produces comes from a constraint method, a deletion guard or an archive guard; they are
+  listed in [`business-rules.md`](business-rules.md#3-price-list).
+- **Indexes:** the primary key; the index on `pricelist_id` (price list) carried by the rule side;
+  and the association table `res_country_group_pricelist_rel` (price list to country group), which
+  carries an index on each of its two columns.
 
 ---
 
@@ -301,6 +342,7 @@ These run only in an interactive form; they never run on a programmatic write.
 | Variant, template or category changed, with no default level | Rules with both a variant and a template become variant rules; rules with only a template become template rules; rules with a category whose name is not the single word "All" become category rules; everything else becomes global. |
 | Rounding step changed | A strictly negative rounding step is refused immediately with the message *The rounding method must be strictly positive.* |
 | Start or end date changed | The date-range check is run immediately. |
+| Level, variant, template or minimum quantity changed, with the event-ticketing capability installed | A **non-blocking** warning appears when the minimum quantity is strictly positive. Its title is "Warning". Its text is "A pricelist item with a positive min. quantity will not be applied to the event tickets products." when the level is `3_global` or `2_product_category`, and "A pricelist item with a positive min. quantity cannot be applied to this event tickets product." when the level is `1_product` and the template's service tracking is event registration, or the level is `0_product_variant` and the variant's service tracking is event registration. Both texts are reproduced exactly, including the shortened form of the words "minimum quantity", because a rebuild must show the same sentence. No other combination produces a warning, and the value is never changed. |
 
 ### 2.7 Multi-company behaviour
 
@@ -311,6 +353,28 @@ carries a company.
 
 The automatic company check refuses a rule whose product template, product variant or base price
 list belongs to a different company than the rule itself.
+
+### 2.8 Uniqueness, stored constraints and indexes
+
+- **Identity** is the surrogate primary key. Several rules with the same level, the same target, the
+  same minimum quantity, the same window and the same computation may coexist inside one price list;
+  the ordering of section 2.4 decides which one is selected and the others never apply.
+- There is **no** unique constraint and **no** stored check constraint. The five constraint methods
+  — the base price list, the recursion guard, the date range, the margin ordering and the target
+  consistency — are listed with their messages in
+  [`business-rules.md`](business-rules.md#4-price-list-rule).
+- **Indexes:** `pricelist_id` (price list), a plain index; `product_tmpl_id` (product template),
+  indexed over non-empty values only; `product_id` (product variant), indexed over non-empty values
+  only; `compute_price` (computation kind), a plain index. The rule ordering itself is not indexed.
+
+### 2.9 Lifecycle in one place
+
+A rule is created from the price list form, from the product template form, from the product variant
+form, from the rule list or by a data load; it is edited freely at any time; and it disappears when
+it is deleted directly or when its price list, its product template, its product variant or its
+product category is deleted, because all four links cascade. Deleting a rule is never refused.
+Changing a rule takes effect on the **next** price computation: document lines already written keep
+the price they carry until they are repriced (see [`workflows.md`](workflows.md#12-change-the-price-list-on-a-quotation-and-update-prices)).
 
 ---
 
@@ -362,9 +426,16 @@ the past or by deleting it.
 | Variant Count (`product_variant_count`) | integer | Related, read-only: the number of variants of the template. |
 | Lead Time (`delay`) | integer | Required. Default one. Days between confirming a purchase order and receiving the goods. Used to derive the planned date of a purchase line and by the replenishment scheduler. |
 
-Extension packages add further fields that this domain does not own: a flag marking the vendor as a
-subcontractor, the date of the last purchase from this vendor, a link to a purchase agreement line,
-and a user-interface button flag.
+Five further fields are contributed by extension packages. They are listed in full because the
+selection algorithm, the replenishment screens and the subcontracting flows all read them.
+
+| Field (storage name) | Type | Contributed by | Meaning and rules |
+|---|---|---|---|
+| Subcontracted (`is_subcontractor`) | boolean | the subcontracting capability | Computed, never stored. True when the vendor is registered as a subcontractor of the product. It is what allows the product to be subcontracted to that vendor, and it is the field the subcontracting narrowing of the candidate set tests. |
+| Last Purchase (`last_purchase_date`) | date | the purchasing-and-inventory bridge | Computed, never stored. The order date of the most recent **confirmed** purchase order placed with this vendor that contains any variant of this product template. Informational; it takes no part in the selection. |
+| Agreement (`purchase_requisition_id`) | link to Purchase Agreement | the purchase-agreement capability | Related, read-only: the agreement of the agreement line below. |
+| *(technical, no label)* (`purchase_requisition_line_id`) | link to Purchase Agreement Line | the purchase-agreement capability | Indexed over non-empty values. Set when the offer comes from a purchase agreement rather than being maintained by hand. The agreement narrowing of the candidate set keeps only the offers with no agreement line or with the agreement of the order in context. |
+| Show Set Supplier Button (`show_set_supplier_button`) | boolean | the purchasing-and-inventory bridge | Computed, never stored. True except when this offer is already the one named on the reordering rule carried in the calling context. It drives the visibility of the *Set Vendor* action on the replenishment information screen. |
 
 ### 3.4 The discounted price formula
 
@@ -405,15 +476,35 @@ list.
 
 ### 3.6 Display name
 
-The display name is the vendor's display name. Two offers from the same vendor for the same product
-therefore display identically; they are distinguished in lists by the quantity, the price and the
-dates, which the list view always shows.
+In the base platform the display name is the **vendor's** display name, and nothing else. Two offers
+from the same vendor for the same product therefore display identically; they are distinguished in
+lists by the quantity, the price and the dates, which the list view always shows.
 
-### 3.7 Normalisation on write
+With the purchasing-and-inventory bridge installed the display name is enriched:
+
+```formula
+display_name = vendor_display_name + " (" + minimum_quantity + " " + unit_name + " - " + unit_price_formatted_in_the_offer_currency + ")"
+```
+
+unless the calling context asks for the simplified vendor name, in which case the vendor's display
+name alone is used. The minimum quantity is printed with the `Product Unit` precision and the unit
+price with the offer's currency.
+
+**Worked example.** The vendor "Wood Corner", a minimum quantity of three, the unit named "Units"
+and a unit price of seven hundred eighty-five United States dollars display as
+`Wood Corner (3.0 Units - $ 785.00)`.
+
+### 3.7 Normalisation and form change handlers
 
 Whenever a variant is written without a template, the template is filled in from the variant. This
-runs on creation and on modification. In an interactive form, changing the template also clears a
-variant that no longer belongs to it.
+runs on creation and on modification.
+
+Two handlers run only inside an interactive form:
+
+| Change | Effect |
+|---|---|
+| Product template changed | A variant that no longer belongs to the chosen template is cleared. |
+| Vendor changed | Present only with the purchasing capability. The currency becomes the vendor's preferred purchase currency when the vendor has one, and the acting company's currency otherwise. |
 
 ### 3.8 Multi-company behaviour
 
@@ -422,6 +513,21 @@ of one of the acting user's allowed companies. The filtering helper used by the 
 repeats the check explicitly: an offer is a candidate only when it has no company or its company
 **is exactly** the acting company — note that this is an equality test, stricter than the record
 rule's ancestor test.
+
+The vendor, the product variant and the product template are company-checked against the offer's own
+company.
+
+### 3.9 Uniqueness, stored constraints and indexes
+
+- **Identity** is the surrogate primary key. The same vendor may hold several offers for the same
+  product, differing by minimum quantity, by validity window, by unit, by currency or by company;
+  that is precisely how quantity breaks and seasonal prices are expressed.
+- There is **no** unique constraint, **no** stored check constraint and **no** constraint method at
+  all on this entity. Every rule that governs it is a default, a normalisation or a filter applied
+  by a consumer; they are listed in [`business-rules.md`](business-rules.md#5-vendor-price).
+- **Indexes:** `product_tmpl_id` (product template), a plain index; `company_id` (company), a plain
+  index; `purchase_requisition_line_id` (purchase agreement line), indexed over non-empty values
+  only.
 
 ---
 
@@ -494,9 +600,16 @@ overrode it.
 
 ### 4.6 Sales Order
 
-**Sales Order** (`sale.order`, table `sale_order`) gains a stored, computed monetary **Margin**
-(`margin`) and a stored, computed **Margin (%)** (`margin_percent`) whose list aggregation is the
-average rather than the sum.
+**Sales Order** (`sale.order`, table `sale_order`) — owned by [sales](../sales/).
+
+| Field (storage name) | Type | Role in this domain |
+|---|---|---|
+| Pricelist (`pricelist_id`) | link to Price List | Computed, stored, writable, pre-computed, company-checked, tracked (tracking level one). Derived from the customer's effective price list read in the order's company, and only while the order is a draft; cleared when there is no customer. Restricted by a domain to price lists of the order's company or with no company. Its help text reads "If you change the pricelist, only newly added lines will be affected." |
+| Currency (`currency_id`) | link to Currency | Computed, stored, pre-computed: the price list's currency when a price list is set, and the company's currency otherwise. This is why choosing a price list in another currency re-expresses the whole quotation. |
+| *(no label)* (`has_active_pricelist`) | boolean | Computed, never stored: true when at least one **active** price list exists whose company is the order's company or nothing. It decides whether the price list field is worth showing at all. |
+| Has Pricelist Changed (`show_update_pricelist`) | boolean | Neither stored nor computed. Set to true when the user changes the price list on an order that already has lines, and when the user changes the order's company. It makes the *Update Prices* operation visible, and that operation sets it back to false. |
+| Margin (`margin`) | monetary | Computed and stored. Visible only to internal users. The sum of the line margins. |
+| Margin (%) (`margin_percent`) | decimal | Computed and stored. Visible only to internal users. Its aggregation in a grouped list is the **average**, not the sum. |
 
 ### 4.7 Purchase Order Line
 
@@ -509,7 +622,7 @@ average rather than the sum.
 | Unit Price (`price_unit`) | decimal | Computed, stored, writable. |
 | *(technical, no label)* (`technical_price_unit`) | decimal | The shadow copy that detects a manual override, exactly as on the sales line. |
 | Discount (%) (`discount`) | decimal | Computed, stored, writable. Copied from the chosen offer's discount, or set to zero when no offer applies. |
-| Unit Price Product UoM (`price_unit_product_uom`) | decimal | Computed, read-only display: the line's unit price converted into the product's own unit. |
+| Unit Price in the Product Unit (`price_unit_product_uom`) | decimal | Computed, read-only display: the line's unit price converted into the product's own unit, and zero for display-only lines and down payments. |
 | Unit Price (Discounted) (`price_unit_discounted`) | decimal | Computed: the unit price times one minus the discount over one hundred. |
 | Allowed Units (`allowed_uom_ids`) | many-to-many to Unit of Measure | Computed: the product's own unit, plus its packaging units, plus the units of every offer for this product or for no particular variant. This is why a buyer can pick the vendor's unit even when the product does not otherwise list it. |
 
@@ -518,7 +631,95 @@ average rather than the sum.
 **Website** (`website`, table `website`) gains a computed, never-stored **Price list available for
 this Ecommerce/Website** (`pricelist_ids`), the set of price lists the website publishes, and a
 computed **Default Currency** (`currency_id`) which is the currency of the price list resolved for
-the current request, falling back to the website's company currency.
+the current request, falling back to the website's company currency. No field is added on the
+website side to bind a price list to it: that binding is carried on the price list, by `website_id`
+(website), `selectable` (selectable) and `code` (promotional code), and by the publishability tests
+of [`business-rules.md`](business-rules.md#13-storefront).
+
+### 4.9 Reordering Rule
+
+**Reordering Rule** (`stock.warehouse.orderpoint`, table `stock_warehouse_orderpoint`) — owned by
+[replenishment and procurement](../replenishment-and-procurement/). The fields below exist only when
+the purchasing-and-inventory bridge is installed.
+
+| Field (storage name) | Type | Role in this domain |
+|---|---|---|
+| Vendor Pricelist (`supplier_id`) | link to Vendor Price | Stored, writable, company-checked, with an inverse. Restricted by a domain to the offers of this variant, or of this template with no variant. The offer the buy rule must use instead of running the automatic selection. Writing it while the reordering rule has **no** route assigns the first route that contains a buy rule. |
+| Show supplier column (`show_supplier`) | boolean | Computed, never stored: true when the reordering rule's effective route contains a buy rule. It decides whether the vendor column is shown. |
+| *(no label)* (`supplier_id_placeholder`) | single-line text | Computed, never stored: the display name of the offer the automatic selection *would* pick, shown as the placeholder of the vendor price list field so that the buyer can see the default without pinning it. |
+| Vendors (`vendor_ids`) | one-to-many to Vendor Price | Related, read-only: the offers of the variant. |
+| *(no label)* (`effective_vendor_id`) | link to Contact | Computed, never stored, searchable: the vendor of the offer named on the rule when one is named, otherwise the vendor of the offer the automatic selection would pick. |
+| Available Vendor (`available_vendor`) | link to Contact | Neither stored nor computed; a search helper only. It matches any vendor that has an offer for the rule's product. |
+
+Clearing the route of a reordering rule clears its vendor price list. Setting the vendor price list
+also raises the quantity to order to the offer's minimum quantity converted into the product's own
+unit whenever the quantity to order is below it; see
+[`business-rules.md`](business-rules.md#12-replenishment).
+
+### 4.10 Product Replenish Wizard
+
+**Product Replenish Wizard** (`product.replenish`) — owned by
+[replenishment and procurement](../replenishment-and-procurement/). It gains, from the same bridge,
+a transient **Vendor** (`supplier_id`) link to Vendor Price. Opening the wizard from a reordering
+rule copies that rule's offer into it. When the wizard is opened with the vendor column shown and
+no offer chosen, the **first** offer of the product template is proposed; clearing the vendor column
+clears the field. The chosen offer is handed to the buy rule, which then skips the automatic
+selection entirely, and it also drives the wizard's planned date through the offer's lead time.
+
+### 4.11 Point of Sale Configuration
+
+**Point of Sale Configuration** (`pos.config`, table `pos_config`) — owned by
+[point of sale](../point-of-sale/).
+
+| Field (storage name) | Type | Role in this domain |
+|---|---|---|
+| Use a pricelist. (`use_pricelist`) | boolean | Whether the terminal offers a choice of price lists. The label ends with a full stop; it is reproduced as the platform shows it. |
+| Default Pricelist (`pricelist_id`) | link to Price List | The price list used when no customer is selected, or when the selected customer has no price list. |
+| Available Pricelists (`available_pricelist_ids`) | many-to-many to Price List | The price lists a cashier may switch to. |
+
+The four validations these three fields carry — the default must be among the available ones, every
+available one must be in the terminal's currency, and both must belong to no company or to the
+terminal's company — are in [`business-rules.md`](business-rules.md#14-point-of-sale). They
+constrain configuration, never the computation.
+
+### 4.12 Company
+
+**Company** (`res.company`, table `res_company`) — owned by
+[platform foundation](../platform-foundation/). This domain adds **no field**. It adds two
+behaviours:
+
+1. Creating a company provisions that company's default price list, unless the calling context
+   carries the flag that suppresses the step or the acting user does not hold the basic price list
+   capability.
+2. Writing a company's currency performs the write with provisioning suppressed and re-runs the
+   provisioning afterwards, so that a price list created in the same transaction would carry the new
+   currency. See the compatibility finding recorded in
+   [`business-rules.md`](business-rules.md#3-price-list) on why the re-run does not in fact happen.
+
+The values used for a company's default price list are fixed:
+
+| Field | Value |
+|---|---|
+| `name` (name) | "Default" |
+| `currency_id` (currency) | the company's currency |
+| `company_id` (company) | the company |
+| `sequence` (sequence) | ten |
+
+### 4.13 Currency
+
+**Currency** (`res.currency`, table `res_currency`) — owned by
+[multi-currency](../multi-currency/). This domain adds **no field**. It adds two behaviours:
+archiving a currency archives every price list denominated in it, and granting the multi-currency
+capability also grants the basic price list capability to internal users and then runs the
+provisioning for every company.
+
+### 4.14 Loyalty Programme
+
+**Loyalty Programme** (`loyalty.program`, table `loyalty_program`) — owned by
+[loyalty and promotions](../loyalty-and-promotions/). This domain adds no field to it. It adds one
+guard in the opposite direction: a price list named by an **active** programme cannot be archived,
+with the message quoted in section 1.2. The programme side carries the mirror constraint that a
+programme's currency must equal the currency of every price list it names.
 
 ---
 
@@ -534,15 +735,16 @@ the current request, falling back to the website's company currency.
 
 The button opens the product list in margin mode, carrying the three values in the calling context
 under the keys `date_from`, `date_to` and `invoice_state`, and disabling creation and editing. The
-fifteen margin measures on the product variant are computed from that context; see
+seventeen margin analysis fields on the product variant are computed from that context; see
 [`calculations.md`](calculations.md).
 
 ---
 
-## 6. The fifteen margin measures on the Product Variant
+## 6. The margin analysis fields on the Product Variant
 
-All fifteen are computed together, never stored, and read only when the calling context supplies
-the date range and the invoice-state filter. They are grouped here; the arithmetic is in
+Seventeen fields are computed together by one operation, never stored, and read only when the
+calling context supplies the date range and the invoice-state filter: **three echoes** of that
+context and **fourteen numeric measures**. They are grouped here; the arithmetic is in
 [`calculations.md`](calculations.md).
 
 | Field (storage name) | Type | Meaning |
@@ -565,5 +767,68 @@ the date range and the invoice-state filter. They are grouped here; the arithmet
 | Total Margin Rate (%) (`total_margin_rate`) | decimal | Total margin times one hundred divided by turnover. |
 | Expected Margin (%) (`expected_margin_rate`) | decimal | Expected margin times one hundred divided by expected sale. |
 
-These fields are also summable in grouped lists, through a special aggregation path that computes
-every group's total by summing the per-record values rather than by asking the database.
+Thirteen of the fourteen numeric measures are summable in grouped lists, through a special
+aggregation path that computes every group's total by summing the per-record values rather than by
+asking the database. The exception is the average purchase unit price (`purchase_avg_price`), which
+carries no such aggregation and cannot be summed. The three context echoes are not measures and are
+not aggregated.
+
+The button that opens this analysis is on the Product Margin Wizard of section 5; the list, form and
+graph it opens are described in [`interfaces.md`](interfaces.md#7-screens).
+
+---
+
+## 7. Reconciliation notes
+
+Two independently written descriptions of this domain were merged into this file. Where they
+disagreed the platform's own behaviour was consulted and the correct statement kept; each resolution
+is recorded here.
+
+1. **The identifiers used.** One description named fields by a readable canonical name — for
+   instance a "vendor price" field called `unit_of_measure` — and the other reproduced the storage
+   names. Storage names are contractual: a rebuild that must import an existing database or serve an
+   existing integration depends on them character for character. This file therefore reproduces the
+   storage names, in code font, each with its full name in words, and the readable names appear only
+   as prose. The affected fields are the vendor price's unit (`product_uom_id`), minimum quantity
+   (`min_qty`), discount (`discount`), lead time (`delay`) and vendor (`partner_id`); the rule's
+   minimum quantity (`min_quantity`), category (`categ_id`), template (`product_tmpl_id`), variant
+   (`product_id`) and margins (`price_min_margin`, `price_max_margin`); the price list's rules
+   (`item_ids`) and country groups (`country_group_ids`); and the sales and purchase line fields
+   (`price_unit`, `technical_price_unit`, `discount`, `pricelist_item_id`, `selected_seller_id`,
+   `date_planned`, `allowed_uom_ids`).
+
+2. **The price description field of a rule.** One description called the derived one-line price
+   sentence `price_label`, to distinguish it from the numeric notion of a price. The stored name is
+   `price` (price description) and it is reproduced here; the field is text, never a number, and the
+   table says so.
+
+3. **The display name of a Vendor Price.** One description said the display name is the vendor's
+   display name; the other said it is the vendor's display name followed by the quantity, the unit
+   and the price, and attributed the difference to the purchasing capability. Both halves are true
+   of different installations, and the attribution was wrong: the enriched form is contributed by
+   the purchasing-and-inventory bridge, not by purchasing alone. Section 3.6 states both forms and
+   the correct contributor.
+
+4. **The event-ticket warning on a rule.** One description recorded a non-blocking form warning when
+   a positive minimum quantity is set on a rule while the event-ticketing capability is installed;
+   the other did not mention it, and an intermediate draft of this folder withdrew it as
+   non-existent. The warning does exist, with two distinct texts. It is restored in section 2.6 and
+   is numbered in [`business-rules.md`](business-rules.md#4-price-list-rule).
+
+5. **How many margin measures the product analysis has.** Both descriptions spoke of "fifteen"
+   measures. The operation computes **seventeen** fields: three echoes of the calling context and
+   fourteen numeric measures, of which **thirteen** can be summed in a grouped list. Section 6
+   states the corrected counts.
+
+6. **The unit recorded when a vendor price is learned from a confirmed order.** One description said
+   the unit is copied from the offer the line had selected; the other said it is the order line's
+   unit. Neither was complete: when the line had selected an offer, the vendor's product name and
+   product code are copied from that offer while the unit is taken from the **line**; when the line
+   had selected no offer, none of the three is written and the unit falls back to its ordinary
+   default. [`calculations.md`](calculations.md#1510-learning-a-vendor-price-from-a-confirmed-order)
+   states it.
+
+7. **Whether a rule can be archived.** One description described the rule as "not archivable, in the
+   sense that it disappears when its price list is archived". A rule has no active flag at all and
+   nothing about it changes when its price list is archived; only the price list stops being
+   selected. Section 2.9 states it plainly.
