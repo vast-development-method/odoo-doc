@@ -15,8 +15,8 @@ The three persistent entities this domain owns — Route, Stock Rule and Reorder
 | Kind | Description | Examples in this domain |
 |---|---|---|
 | **Archive flags** | A boolean `active` whose two values are a genuine two-state lifecycle: an archived record is excluded from every default query and can never be selected by any algorithm of this domain. | `active` on Route, on Stock Rule, on Reordering Rule, on Operation Type. |
-| **Mode selections** | A closed list of stored values that changes what the record *does* rather than how far it has progressed. Every value is a state; every edit of the field is a transition; the guards are the conditions under which each value is admissible. | `action`, `procure_method` and `auto` on Stock Rule; `trigger` on Reordering Rule; `code` on Operation Type. |
-| **Derived states** | Values recomputed from other records, which a user can never write directly, but which decide what the screens offer and what the scheduler does. | `quantity_to_order_computed`, `deadline_date`, `unwanted_replenish`, `show_supply_warning` on Reordering Rule; `receipt_status` and `is_shipped` on Purchase Order; `delay_alert_date` and `is_dropship` on the records this domain extends. |
+| **Mode selections and mode flags** | A closed list of stored values, or a stored boolean, that changes what the record *does* rather than how far it has progressed. Every value is a state; every edit of the field is a transition; the guards are the conditions under which each value is admissible. | `action`, `procure_method`, `auto`, `location_destination_from_rule`, `propagate_cancel` and `propagate_carrier` on Stock Rule; the six applicability flags on Route; `trigger` on Reordering Rule; `based_on` on Replenishment Information; `predefined_date` on the Reordering Rule Snooze Wizard; `code` on Operation Type; `group_request_for_quotation` and `grouping_weekday` on Contact. |
+| **Derived states** | Values recomputed from other records, which a user can never write directly, but which decide what the screens offer and what the scheduler does. | `quantity_to_order_computed`, `deadline_date`, `unwanted_replenish`, `show_supply_warning`, `show_vendor` and `show_bill_of_materials` on Reordering Rule; `show_vendor_tab` and `show_bill_of_materials_tab` on Replenishment Information; `receipt_status`, `is_shipped` and `effective_date` on Purchase Order; `delay_alert_date` and `is_dropship` on the records this domain extends. |
 | **Process states** | States of a unit of work rather than of a record: the procurement request, the scheduler run, a scheduler batch, a replenishment report line. They are never stored, but a replacement must reproduce them because they decide what is created, what is retried and what is reported to the user. | The procurement request; the scheduler run and its batches; the report line. |
 
 ### 0.2 Notation
@@ -32,16 +32,22 @@ The three persistent entities this domain owns — Route, Stock Rule and Reorder
 
 | Section | Machine | Carrier | Kind |
 |---|---|---|---|
-| 1 | Route archive state | `active` on Route | archive flag |
+| 1.1 | Route archive state | `active` on Route | archive flag |
+| 1.2 | Route applicability flags | `product_selectable`, `product_category_selectable`, `package_type_selectable`, `sale_selectable`, `shipping_selectable` on Route | mode flags |
+| 1.3 | Route warehouse applicability flag | `warehouse_selectable` on Route | mode flag |
 | 2.1 | Stock Rule archive state | `active` on Stock Rule | archive flag |
 | 2.2 | Stock Rule action | `action` on Stock Rule | mode selection |
 | 2.3 | Stock Rule supply method | `procure_method` on Stock Rule | mode selection |
 | 2.4 | Stock Rule push mode | `auto` on Stock Rule | mode selection |
+| 2.5 | Stock Rule destination-location origin | `location_destination_from_rule` on Stock Rule | mode flag |
+| 2.6 | Stock Rule cancellation propagation | `propagate_cancel` on Stock Rule | mode flag |
+| 2.7 | Stock Rule shipping-method propagation | `propagate_carrier` on Stock Rule | mode flag |
 | 3.1 | Reordering Rule trigger | `trigger` on Reordering Rule | mode selection |
 | 3.2 | Reordering Rule snooze state | `snoozed_until` on Reordering Rule | derived from a date |
 | 3.3 | Reordering Rule archive state | `active` on Reordering Rule | archive flag |
 | 3.4 | Reordering Rule replenishment state | derived from the quantities | derived state |
 | 3.5 | Reordering Rule manual override state | `quantity_to_order_manual` | derived from a quantity |
+| 3.6 | Reordering Rule supply-column flags | `show_vendor`, `show_bill_of_materials` | derived states |
 | 4 | Replenishment report line | none, a report row | process state |
 | 5.1 | Rule chain state | `rules` on Reordering Rule | derived state |
 | 5.2 | Lead-time state | `lead_days`, `lead_horizon_date` | derived state |
@@ -66,7 +72,13 @@ The three persistent entities this domain owns — Route, Stock Rule and Reorder
 | 14.1 | Warehouse purchase-resupply flag | `buy_to_resupply` on Warehouse | mode flag |
 | 14.2 | Warehouse inter-warehouse resupply set | `resupply_warehouses` on Warehouse | link lifecycle |
 | 14.3 | Warehouse subcontractor-resupply flag | `subcontracting_to_resupply` on Warehouse | mode flag |
-| 15 | Transient wizard lifecycle | the six wizards of this domain | process state |
+| 15.1 to 15.3 | Transient wizard lifecycle | the six wizards of this domain | process state |
+| 15.4 | Replenishment Information historic period | `based_on` on Replenishment Information | mode selection |
+| 15.5 | Replenishment Information tab flags | `show_vendor_tab`, `show_bill_of_materials_tab` | derived states |
+| 15.6 | Snooze preset | `predefined_date` on the Reordering Rule Snooze Wizard | mode selection |
+| 15.7 | Stock Rules Report variant flag | `product_has_variants` on the Stock Rules Report wizard | mode flag |
+| 16.1 | Request-for-quotation grouping mode | `group_request_for_quotation` on Contact | mode selection |
+| 16.2 | Grouping weekday | `grouping_weekday` on Contact | mode selection |
 
 ---
 
@@ -153,7 +165,7 @@ What each flag opens when it is `true`:
 | `product_selectable` | The Routes field on the Inventory tab of a Product Template, and the route selector of the Product Replenish Wizard | The route is a candidate route for every need and every arrival of that product. |
 | `product_category_selectable` | The Routes field of a Product Category | The route is a candidate route for every product of that category that does not carry its own route. |
 | `package_type_selectable` | The Routes field of a Package Type | The route is a candidate route for goods handled in that package type. |
-| `sale_selectable` | The Route field of a Sales Order Line | The route is forced onto the need created from that line, ahead of the product's own routes. |
+| `sale_selectable` | The Routes field of a Sales Order Line, and the extra-routes selector of the Stock Rules Report wizard | The route is carried by the need created from that line and is tried ahead of the product's own routes. In the routes-diagram dialog it only widens what is drawn. |
 | `shipping_selectable` | The Routes field of a Shipping Method | The route is a candidate route for a delivery carried by that shipping method. |
 
 The flags are read only when the selector is built. Rule selection itself never reads them: it reads the attachment, not the flag that allowed it. This is why unticking a flag never changes the behaviour of a route that is already attached.
@@ -165,7 +177,8 @@ The `route` field of a Reordering Rule is a partial exception and must be reprod
 | From | To | Trigger | Guards, in evaluation order | Records created or changed |
 |---|---|---|---|---|
 | not existing | `product_selectable` `true`, the four others `false` | An inventory administrator creates a route without supplying the flags | none | The defaults are applied. |
-| not existing | `product_selectable` `true` and `product_category_selectable` `true` | Warehouse configuration generates the reception route or the delivery route, or the inter-warehouse resupply generator creates a resupply route | The guards of section 1.1.2 for that creation path | The route is created with those two flags `true`; `package_type_selectable`, `sale_selectable` and `shipping_selectable` keep their default `false`. |
+| not existing | `product_selectable` `false` and `product_category_selectable` `true` | Warehouse configuration generates the reception route, the delivery route or another route slot of a warehouse | The guards of section 1.1.2 for that creation path | The route is created with `product_selectable` explicitly `false`, overriding its default, and `product_category_selectable` `true`. `package_type_selectable`, `sale_selectable` and `shipping_selectable` keep their default `false`. The route is meant to be reached through the warehouse, not chosen on a product. |
+| not existing | `product_selectable` `true` and `product_category_selectable` `true` | The inter-warehouse resupply generator creates a resupply route for a pair of warehouses | The two guards of section 14.2 | The route is created with both flags `true`, so a single product may be pointed at one supplying warehouse without changing the whole category. The other three keep their default `false`. |
 | `false` | `true` | An inventory administrator ticks the flag | none | Nothing else is written. The route appears in the corresponding selector on the next read of that selector. |
 | `true` | `false` | An inventory administrator unticks the flag | none | Nothing else is written. Existing attachments survive; see the finding below. |
 | any | the same value | A user duplicates the route | none | All five flags are copied unchanged onto the copy, while `products`, `product_categories`, `warehouses`, `supplied_warehouse` and `supplier_warehouse` are cleared. |
@@ -556,7 +569,7 @@ stateDiagram-v2
     DoNotPropagate --> Propagate: Edit
     Propagate --> DoNotPropagate: Edit
     Propagate --> Propagate: Transfer created, shipping method and tracking reference copied from the chain
-    Propagate --> Propagate: Upstream transfer validated, shipping method pushed to the next transfers
+    Propagate --> Propagate: An earlier transfer validated, shipping method pushed to the next transfers
 ```
 
 ---
@@ -593,7 +606,7 @@ A Reordering Rule carries six machines: its trigger, its snooze state, its archi
 2. **A snooze date may not be written on an automatic rule.** Evaluated on every write that contains `snoozed_until`, and refused as soon as **any** record of the written set has `trigger` equal to `auto`. Refusal: `You can only snooze manual orderpoints. You should rather archive 'auto-trigger' orderpoints if you do not want them to be triggered.`
 3. **Uniqueness.** `A replenishment rule already exists for this product on this location.`
 4. **Minimum and maximum.** `The minimum quantity must be less than or equal to the maximum quantity.`
-5. **Kit products.** `A product with a kit-type bill of materials can not have a reordering rule.` (`RP-RULE-042`). The constraint is enforced from both sides, and a replacement must implement both. The mirror guard sits on Bill of Materials: making a bill of materials a kit, or pointing an existing kit bill at another product, is refused as soon as any of the products concerned has at least one reordering rule, with `You can not create a kit-type bill of materials for products that have at least one reordering rule.` (`RP-RULE-355`). The two together make the invariant "a kit product never has a reordering rule" unbreakable in either order of operations; a replacement that implements only the reordering-rule side lets a user reach the forbidden combination by creating the rule first and the kit bill afterwards.
+5. **Kit products.** `A product with a kit-type bill of materials can not have a reordering rule.` (`RP-RULE-042`). The constraint is enforced from both sides, and a replacement must implement both. The mirror guard sits on Bill of Materials: making a bill of materials a kit, or pointing an existing kit bill at another product, is refused as soon as any of the products concerned has at least one **active** reordering rule, with `You can not create a kit-type bill of materials for products that have at least one reordering rule.` (`RP-RULE-355`). The two together make the invariant "a kit product never has a reordering rule" unbreakable in either order of operations; a replacement that implements only the reordering-rule side lets a user reach the forbidden combination by creating the rule first and the kit bill afterwards.
 6. **The company may never change.** `Changing the company of this record is forbidden at this point, you should rather archive it and create a new one.`
 7. **No warehouse for the company.** The shared redirect warning of `../inventory-operations/`: `Please create a warehouse for company <company name>.` with the button `Go to Warehouses` for an inventory administrator, or `Please contact your administrator to configure your warehouse.` for anyone else.
 
@@ -1979,7 +1992,7 @@ stateDiagram-v2
 
 ## 15. The transient wizards
 
-The six wizards of this domain are transient records: they have no archive flag and no status field, they live for the duration of one dialog, they are never followed and none of their fields is tracked. Their common lifecycle is a machine nonetheless, because the moment at which each of them writes on a persistent record differs, and a replacement must reproduce that moment.
+The six wizards of this domain are transient records: they have no archive flag and no status field, they live for the duration of one dialog, they are never followed and none of their fields is tracked. Their common lifecycle is a machine nonetheless, because the moment at which each of them writes on a persistent record differs, and a replacement must reproduce that moment. Three of the six additionally carry state fields of their own, which decide what the dialog computes and what it shows: the historic period and the two tab flags of the Replenishment Information dialog (sections 15.4 and 15.5), the snooze preset of the Reordering Rule Snooze Wizard (section 15.6) and the variant flag of the Stock Rules Report wizard (section 15.7).
 
 ### 15.1 States
 
@@ -2017,17 +2030,366 @@ stateDiagram-v2
     Discarded --> [*]
 ```
 
+### 15.4 The historic period of the Replenishment Information dialog
+
+**Field.** `based_on` on Replenishment Information, labelled "Based on". Selection, stored on the transient record, required, default `one_month`. It selects the window of past stock moves from which the dialog estimates the daily demand, and with it the ordering period the demand graph draws. It is the only stored selection of any wizard of this domain, and it is written by the user, never by an algorithm.
+
+#### 15.4.1 States
+
+Eight stored values, each one a window with a start date and a limit date. "Today" below means the moment the dialog is read; the first four windows end at that moment and the last four are whole months or a whole quarter of the previous year.
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `one_week` | Last 7 days | The window runs from today minus one week to today. |
+| `one_month` | Last 30 days | The window runs from today minus one month to today. This is the default. |
+| `three_months` | Last 3 months | The window runs from today minus three months to today. |
+| `one_year` | Last 12 months | The window runs from today minus one year to today. |
+| `last_year` | Same month last year | The window starts on the first day of the current month of last year and runs for one month. |
+| `last_year_2` | Next month last year | The window starts on the first day of the current month of last year plus one month, and runs for one month. The stored value is the plain sequence number of the month offset, not a word: a replacement that stores a descriptive value in its place is incompatible. |
+| `last_year_3` | After next month last year | The window starts on the first day of the current month of last year plus two months, and runs for one month. The same remark on the stored value applies. |
+| `last_year_quarter` | Last year quarter | The window starts on the first day of the current month of last year and runs for three months. It is the only value whose window is longer than one month while still being anchored on last year. |
+
+The exact start and limit dates of each of the eight, and the arithmetic that turns the counted quantities into a daily demand and an ordering period, are in `calculations.md`, section "The replenishment demand graph".
+
+#### 15.4.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `one_month` | The Replenishment Information dialog is opened on a reordering rule | none | The transient record is created with `one_month` and `percent_factor` 100. Nothing persistent is written. |
+| any value | any other value | The user picks another period in the dialog | The field is required, so the empty value can never be stored | Nothing persistent is written. The demand graph and the ordering period are recomputed from the new window, and so is the graph's title. |
+| any value | the same value | The user changes `percent_factor`, the minimum or the maximum in the dialog | none | The period is unchanged, but the graph is recomputed all the same, because it depends on all four values. |
+| any value | not existing | The dialog is closed, and later the periodic transient-record cleanup runs | none | The transient record is deleted. The chosen period is **not** remembered: reopening the dialog on the same reordering rule starts again at `one_month`. |
+
+#### 15.4.3 Guards and consequences
+
+1. The field is required, so no guard can refuse a value: only the eight listed values are offered and one of them is always set.
+2. The period never touches the reordering rule. It changes what the dialog draws, never `quantity_to_order`, `product_minimum_quantity` or `product_maximum_quantity`. The three writable fields of the dialog are specified in section 15.2.
+3. Because the value is not remembered, two users looking at the same reordering rule at the same moment can see two different graphs. This is the behaviour to reproduce; the estimate is an aid to a human decision and never an input to the scheduler.
+4. When the window contains no outgoing move at all, the estimated daily demand is zero, the ordering period is zero and the graph degenerates to the two flat lines of the minimum and the maximum. No error is raised and no warning is shown.
+
+#### 15.4.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> one_month: Dialog opened, the default is applied
+    one_month --> one_week: Pick Last 7 days
+    one_month --> three_months: Pick Last 3 months
+    one_month --> one_year: Pick Last 12 months
+    one_month --> last_year: Pick Same month last year
+    last_year --> last_year_2: Pick Next month last year
+    last_year_2 --> last_year_3: Pick After next month last year
+    last_year --> last_year_quarter: Pick Last year quarter
+    last_year_quarter --> one_month: Pick Last 30 days
+    one_week --> one_month: Pick Last 30 days
+    three_months --> one_month: Pick Last 30 days
+    one_year --> one_month: Pick Last 30 days
+    last_year_3 --> one_month: Pick Last 30 days
+    one_month --> [*]: Dialog closed, the transient record is cleaned up
+```
+
+Every one of the eight values can be reached from every other one in a single pick; the diagram draws a spanning set of those edges rather than all fifty-six, because the transition is the same operation in every case and carries no guard.
+
+### 15.5 The two tab flags of the Replenishment Information dialog
+
+**Fields.** `show_vendor_tab` and `show_bill_of_materials_tab` on Replenishment Information. Both are derived booleans, neither is stored, neither can be written. They decide whether the dialog shows the vendor tab and the bills-of-materials tab. `show_vendor_tab` is contributed by the Purchase Inventory capability package and `show_bill_of_materials_tab` by the Manufacturing capability package; where the package is absent the field does not exist and the tab is never rendered. Neither field carries a label: they are read only by the visibility conditions of the two tabs.
+
+They are close cousins of `show_vendor` and `show_bill_of_materials` on Reordering Rule (section 3.6) but they are **not** the same test, and a replacement that shares one computation between them shows the wrong tabs.
+
+#### 15.5.1 States
+
+| Field | Stored value | Label | Meaning |
+|---|---|---|---|
+| `show_vendor_tab` | `true` | (not rendered) | The reordering rule has **no** preferred `route`, **or** it has one and at least one rule of its chain `rules` has action `buy`. The vendor tab is shown, listing every Vendor Price of the product with the rule's current `vendor_price` marked as the selected row. |
+| `show_vendor_tab` | `false` | (not rendered) | The rule has a preferred `route` and no rule of its chain has action `buy`. The vendor tab is hidden. |
+| `show_bill_of_materials_tab` | `true` | (not rendered) | The rule has **no** preferred `route`, **or** it has one and at least one rule of its chain has action `manufacture`. The bills-of-materials tab is shown, listing every bill of materials that could produce the product. |
+| `show_bill_of_materials_tab` | `false` | (not rendered) | The rule has a preferred `route` and no rule of its chain has action `manufacture`. The tab is hidden. |
+
+Three differences from section 3.6 must be reproduced exactly.
+
+1. These two read the rule's own `route`, that is the preferred route the user chose, while `show_vendor` and `show_bill_of_materials` read `effective_route`, which falls back to the computed default route. The two pairs therefore disagree whenever `route` is empty.
+2. These two read the actions of the rule's chain `rules`, which is the walk of section 5.1 from the rule's location back to the source of supply. The two column flags instead test whether the route is one of the routes that hold a rule with that action anywhere.
+3. These two are true when the route is empty, which is the case the dialog exists to help with: a user who has not chosen a route is offered every way of supplying the product. A rule with no chosen route therefore always shows **both** tabs in the dialog, while the two columns on the report follow the computed default route and may show one, both or neither.
+
+#### 15.5.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | both `true` | The dialog is opened on a reordering rule that has no preferred route | none | Nothing is written. Both tabs are rendered. |
+| not existing | derived from the chain | The dialog is opened on a reordering rule that has a preferred route | The chain `rules` is walked as in section 5.1 | Nothing is written. Each tab is rendered when its action appears in the chain. |
+| `true` | `false` for `show_vendor_tab` | The rule gains a preferred route whose chain holds no `buy` rule, while the dialog is open on it | none | The vendor tab disappears on the next read of the dialog. |
+| `false` | `true` for `show_vendor_tab` | The rule's preferred route is cleared, or a `buy` rule enters its chain | none | The vendor tab reappears. |
+| `true` | `false` for `show_bill_of_materials_tab` | The rule gains a preferred route whose chain holds no `manufacture` rule | none | The bills-of-materials tab disappears. |
+| `false` | `true` for `show_bill_of_materials_tab` | The rule's preferred route is cleared, or a `manufacture` rule enters its chain | none | The tab reappears. |
+| either value | not existing | The dialog is closed and the periodic cleanup runs | none | The transient record is deleted. |
+
+#### 15.5.3 Guards and consequences
+
+1. No guard refuses either value, because neither can be written.
+2. Selecting a Vendor Price in the vendor tab writes `vendor_price` on the reordering rule with the acting user's own rights; selecting a bill of materials writes `bill_of_materials`. Both writes can therefore change the rule's `route`, through `RP-RULE-052` and `RP-RULE-053`, and so change the flags themselves on the next read.
+3. When the chain of a rule with a preferred route is empty — no rule at all was found — both flags are `false` and the dialog shows only the lead-time breakdown and the demand graph. The missing supply method is reported on the report row instead, by `show_supply_warning` of section 3.4.
+
+#### 15.5.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> BothTabs: Dialog opened on a rule with no preferred route
+    [*] --> FromChain: Dialog opened on a rule with a preferred route
+    state "Both tabs shown" as BothTabs
+    state "Tabs derived from the chain" as FromChain
+    state "Vendor tab only" as VendorOnly
+    state "Bills-of-materials tab only" as BomOnly
+    state "No supply tab" as NoTab
+    FromChain --> VendorOnly: The chain holds a buy rule and no manufacture rule
+    FromChain --> BomOnly: The chain holds a manufacture rule and no buy rule
+    FromChain --> BothTabs: The chain holds both
+    FromChain --> NoTab: The chain holds neither, or is empty
+    VendorOnly --> BothTabs: The preferred route is cleared
+    BomOnly --> BothTabs: The preferred route is cleared
+    NoTab --> BothTabs: The preferred route is cleared
+    BothTabs --> FromChain: A preferred route is chosen
+    BothTabs --> [*]: Dialog closed, the transient record is cleaned up
+```
+
+### 15.6 The snooze preset of the Reordering Rule Snooze Wizard
+
+**Field.** `predefined_date` on the Reordering Rule Snooze Wizard, labelled "Snooze for". Selection, stored on the transient record, default `day`. It is a shortcut: changing it fills the wizard's own `snoozed_until` date, which the Snooze operation then writes onto every selected reordering rule. The state machine of the date on the rule itself is section 3.2; this section specifies the preset that proposes it.
+
+#### 15.6.1 States
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `day` | 1 Day | The default. Choosing it sets the wizard's `snoozed_until` to today plus one day. |
+| `week` | 1 Week | Choosing it sets the wizard's `snoozed_until` to today plus one week. |
+| `month` | 1 Month | Choosing it sets the wizard's `snoozed_until` to today plus one month, that is the same day number in the next month, or the last day of that month when the day number does not exist in it. |
+| `custom` | Custom | Choosing it leaves `snoozed_until` exactly as it is, for the user to type a date by hand. It is the only value whose on-change writes nothing. |
+
+"Today" is the current date in the acting user's time zone, not in the database time zone. Two users in different time zones pressing the same preset in the same minute can therefore obtain two different dates, and that is the behaviour to reproduce.
+
+#### 15.6.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `day` | A user selects rows on the replenishment report or on the Reordering Rules screen and opens the snooze dialog | none | The transient record is created with `predefined_date` `day` and `orderpoints` set to the selected rules. Building a new record runs every on-change once the defaults are in place, so the on-change of this field runs too and `snoozed_until` opens at today plus one day. A user who confirms without touching anything therefore snoozes by one day, which is what the label promises. |
+| `day`, `week`, `month` or `custom` | `week` | The user picks 1 Week | none | The wizard's `snoozed_until` becomes today plus one week. Nothing persistent is written yet. |
+| any | `month` | The user picks 1 Month | none | The wizard's `snoozed_until` becomes today plus one month. |
+| any | `day` | The user picks 1 Day | none | The wizard's `snoozed_until` becomes today plus one day. |
+| any | `custom` | The user picks Custom | none | Nothing is written: the date field keeps whatever it held and becomes the user's to fill. |
+| `custom` | `custom` | The user types a date directly | none | The wizard's `snoozed_until` becomes the typed date. A date in the past is accepted here and leaves the rules in the Expired state of section 3.2.1. |
+| any | applied | The user confirms with the Snooze button | 1. Every rule in `orderpoints` has `trigger` equal to `manual`; a single automatic rule refuses the whole write. 2. No other guard: an empty date, a past date and a date far in the future are all accepted. | `snoozed_until` is written on every rule in `orderpoints`, moving each of them along the machine of section 3.2. |
+| any | not existing | The dialog is cancelled, and later the periodic transient-record cleanup runs | none | The transient record is deleted and no rule changes. |
+
+#### 15.6.3 Guards with their refusal messages
+
+1. **Only a manual rule may be snoozed.** The write is refused as soon as one rule of the selection is automatic, and none of the selection is changed: `You can only snooze manual orderpoints. You should rather archive 'auto-trigger' orderpoints if you do not want them to be triggered.` The refusal comes from the reordering rule, not from the wizard, so it fires at the moment the Snooze button is pressed and never at the moment the preset is picked.
+2. No guard is attached to `predefined_date` itself. All four values are always admissible and the field is never required to be non-empty.
+3. The date the preset computes is only a proposal: nothing prevents the user from choosing `week` and then typing a date two days away. The stored preset and the stored date can therefore disagree, and it is the **date** that is written on the rules; the preset is never written anywhere and is discarded with the transient record.
+4. Confirming with an empty `snoozed_until` — reachable by picking `custom` and clearing the date — writes the empty value on every selected rule, which **clears** their snooze rather than extending it. The write is still refused when any selected rule is automatic, because guard 1 does not look at the value being written. This is the "Snoozed or Expired to Not snoozed" transition of section 3.2.2.
+
+#### 15.6.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> day: Dialog opened, the default preset is 1 Day and the date opens at tomorrow
+    day --> week: Pick 1 Week, the date becomes today plus one week
+    day --> month: Pick 1 Month, the date becomes today plus one month
+    week --> month: Pick 1 Month
+    month --> week: Pick 1 Week
+    week --> day: Pick 1 Day
+    month --> day: Pick 1 Day
+    day --> custom: Pick Custom, the date is left as it is
+    week --> custom: Pick Custom
+    month --> custom: Pick Custom
+    custom --> day: Pick 1 Day
+    custom --> week: Pick 1 Week
+    custom --> month: Pick 1 Month
+    custom --> custom: Type a date by hand
+    day --> Applied: Snooze, manual rules only
+    week --> Applied: Snooze, manual rules only
+    month --> Applied: Snooze, manual rules only
+    custom --> Applied: Snooze, manual rules only
+    state "Applied, the date is written on every selected rule" as Applied
+    Applied --> [*]: Dialog closed, the transient record is cleaned up
+```
+
+### 15.7 The variant flag of the Stock Rules Report wizard
+
+**Field.** `product_has_variants` on the Stock Rules Report wizard, labelled "Has variants". Boolean, stored on the transient record, required, default false. It decides whether the dialog offers a variant selector before the routes diagram is printed. The identical flag on the Product Replenish Wizard behaves the same way and is owned by `../inventory-operations/`.
+
+#### 15.7.1 States
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `false` | Has variants, unticked | The dialog was opened on a single product variant, or on a product template that has exactly one variant. No variant selector is shown; the diagram is drawn for the one product that `product` holds. |
+| `true` | Has variants, ticked | The dialog was opened on a product template that has more than one variant. The variant selector is shown, pre-filled with the template's first variant, and the user may pick another before printing. The diagram is drawn for whichever variant `product` then holds. |
+
+#### 15.7.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `false` | The dialog is opened from a product variant | The opening context names a product variant | `product` is that variant, `product_template` is its template, `product_has_variants` stays `false`, and `warehouses` holds the first warehouse of the template's company or of the active company. |
+| not existing | `false` | The dialog is opened from a product template that has exactly one variant | The opening context names a template | `product` is that single variant and the flag stays `false`. |
+| not existing | `true` | The dialog is opened from a product template that has more than one variant | The opening context names a template | `product` is the template's first variant and the flag is set to `true`. |
+| `true` | `true` | The user picks another variant in the selector | none | Only `product` changes. The flag is not recomputed, because it describes the template and not the chosen variant. |
+| `false` or `true` | refused | The dialog is opened while the company has no warehouse | The warehouse lookup finds nothing | Nothing is created. The shared "no warehouse configured" redirect warning of `../inventory-operations/` is raised: `Please create a warehouse for company <company name>.` with the button `Go to Warehouses` for an inventory administrator, or `Please contact your administrator to configure your warehouse.` for anyone else. |
+| `false` or `true` | printed | The user presses Print | `product` and `warehouses` are both required and non-empty | Nothing persistent. The routes diagram document is rendered for `product` and `warehouses`. |
+| any | not existing | The dialog is closed and the periodic cleanup runs | none | The transient record is deleted. |
+
+#### 15.7.3 Guards and consequences
+
+1. The field is required, so it always holds `true` or `false`; there is no empty state.
+2. It is computed once, when the defaults of the dialog are built, and never afterwards. Adding a variant to the template while the dialog is open does not make the selector appear.
+3. It is a presentation flag only. It changes nothing about the rules the diagram draws, which depend on `product` and on `warehouses`.
+
+#### 15.7.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Single: Opened on a variant, or on a template with one variant
+    [*] --> Multiple: Opened on a template with more than one variant
+    [*] --> Refused: No warehouse exists for the company
+    state "No variant selector" as Single
+    state "Variant selector shown" as Multiple
+    state "Opening refused with the warehouse warning" as Refused
+    Multiple --> Multiple: Another variant is picked
+    Single --> Printed: Print
+    Multiple --> Printed: Print
+    state "Routes diagram rendered" as Printed
+    Printed --> [*]: Dialog closed, the transient record is cleaned up
+    Single --> [*]: Cancelled
+    Multiple --> [*]: Cancelled
+```
+
 ---
 
-## 16. Summary of every state field of the domain
+## 16. The request-for-quotation grouping mode contributed to Contact
+
+Two selection fields that this domain adds to Contact decide how the buy action merges the needs of one vendor into requests for quotation. They are specified here for the same reason as the code of an Operation Type in section 13.1: the entity is owned by another domain, but the values are contributed by this one, only this domain reads them, and a replacement that stores different values or evaluates them in a different order merges the wrong needs into the wrong orders.
+
+Both are required, both are stored on Contact, both are copied when the contact is duplicated, and both are read only at the moment the buy action looks for an existing draft order to extend — never afterwards. Changing either of them therefore never re-merges or splits an order that already exists.
+
+### 16.1 The grouping mode
+
+**Field.** `group_request_for_quotation` on Contact, labelled "Group Request for Quotation" on the vendor's Purchase tab. Selection, stored, required, default `default`.
+
+#### 16.1.1 States
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `default` | On Order | Needs are grouped by the originating stock reference. A candidate draft order must carry at least one of the request's stock references; a request that carries none may only extend an order that carries none either. Needs that come from different originating documents therefore never merge, and a make-to-order need never merges with anything. |
+| `day` | Daily | The reference test is dropped and replaced by a date test: a candidate draft order's planned date must fall on the same calendar day as the request's planned date, from the start of that day to the end of it. |
+| `week` | Weekly | The reference test is dropped and replaced by the weekly window computed with `grouping_weekday` (section 16.2). |
+| `all` | Always | Neither the reference test nor a date test applies. Every need for this vendor, this operation type, this company, this buyer and this currency extends the same draft order. |
+
+Whatever the value, the candidate order must always match the request on the vendor, the draft state, the operation type, the company, the buyer of the vendor and the currency. The four values differ only in what they add to that base test.
+
+#### 16.1.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `default` | A contact is created | The field is required, so the default is always applied | The contact. |
+| any value | any other value | A purchase administrator edits the field on the vendor's Purchase tab | The field is required, so the empty value can never be stored | Nothing else is written. Draft orders that already exist are neither merged nor split; only needs resolved after the edit follow the new mode. |
+| any value | the same value | The buy action runs for this vendor | none | Nothing is written on the contact. The value is read to build the candidate search. |
+| any value | forced to `default` in effect | The buy action runs for an operation type whose code is `dropship` | The operation type of the rule has code `dropship` | The reference test is applied whatever the stored mode says: a drop-shipment request may only extend an order that carries one of its stock references. The stored value is **not** rewritten; the override lives in the search, not in the data. |
+
+#### 16.1.3 Guards and consequences
+
+1. The field is required and offers exactly the four values, so no guard can refuse a write.
+2. The drop-shipment override is the only case where the stored mode is not honoured. A vendor set to `all` who is drop-shipping still gets one order per originating sale, because merging two customers' drop shipments into one order would send goods to the wrong address (`RP-RULE-101` and the candidate search of `workflows.md`, section "The buy action").
+3. `day` and `week` compare the **planned date** of the candidate order with the planned date the request computed, never the order date. The order date is derived from the planned date by subtracting the vendor lead time and the days to purchase.
+4. Widening the mode never merges existing orders and narrowing it never splits them. A vendor moved from `all` to `default` keeps the single large draft order already built and starts a new order for the next need that carries a stock reference.
+
+#### 16.1.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> OnOrder: Contact created, the default is On Order
+    state "On Order, grouped by originating reference" as OnOrder
+    state "Daily, grouped by the planned day" as Daily
+    state "Weekly, grouped by the planned week or weekday" as Weekly
+    state "Always, one order for the vendor" as Always
+    OnOrder --> Daily: Edit
+    OnOrder --> Weekly: Edit
+    OnOrder --> Always: Edit
+    Daily --> OnOrder: Edit
+    Daily --> Weekly: Edit
+    Daily --> Always: Edit
+    Weekly --> OnOrder: Edit
+    Weekly --> Daily: Edit
+    Weekly --> Always: Edit
+    Always --> OnOrder: Edit
+    Always --> Daily: Edit
+    Always --> Weekly: Edit
+    Daily --> Daily: A drop-shipment need is grouped by reference instead
+    Weekly --> Weekly: A drop-shipment need is grouped by reference instead
+    Always --> Always: A drop-shipment need is grouped by reference instead
+```
+
+### 16.2 The grouping weekday
+
+**Field.** `grouping_weekday` on Contact, labelled "Week Day". Selection, stored, required, default `default`. It is read only when `group_request_for_quotation` is `week`; every other mode stores a value that is never consulted.
+
+#### 16.2.1 States
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `default` | Expected Date | Group by calendar week. The window runs from the start of the day *n* days before the request's planned date to the end of the day (6 − *n*) days after it, where *n* is the weekday number of the planned date with Monday = 1 and Sunday = 7. |
+| `1` | Monday | Group on a single target day: the planned date shifted forward by `(7 + 1 − planned weekday) modulo 7` days, from the start to the end of that day. The line's planned date is itself shifted forward to that day. |
+| `2` | Tuesday | The same with target weekday 2. |
+| `3` | Wednesday | The same with target weekday 3. |
+| `4` | Thursday | The same with target weekday 4. |
+| `5` | Friday | The same with target weekday 5. |
+| `6` | Saturday | The same with target weekday 6. |
+| `7` | Sunday | The same with target weekday 7. |
+
+The seven named weekdays store the plain digit, not the name of the day: a replacement that stores `monday` in place of `1` is incompatible. The digits follow the same Monday-is-one numbering as the weekday of the planned date, which is what makes the shift formula work.
+
+#### 16.2.2 Transition table
+
+| From | To | Trigger | Guards, in evaluation order | Records created or changed |
+|---|---|---|---|---|
+| not existing | `default` | A contact is created | The field is required | The contact. |
+| any value | any other value | A purchase administrator edits the field | The field is required | Nothing else is written. Existing draft orders keep the planned dates they were given. |
+| any value | the same value | The buy action runs while the mode is `week` | none | Nothing is written on the contact. The value chooses between the calendar-week window and the single-day window. |
+| any value | the same value | The buy action runs while the mode is not `week` | none | The value is not read at all. |
+
+#### 16.2.3 Guards and consequences
+
+1. The field is required and offers exactly the eight values, so no guard can refuse a write.
+2. When a named weekday is chosen, the shift is applied twice and a replacement must do both: to the **candidate search**, which looks for an order whose planned date falls on the shifted day, and to the **created line**, whose planned date is moved forward to that day (`RP-RULE-102`, `RP-RULE-118`).
+3. When the created line moves the order's planned date forward, the order's own order date is moved forward by the same number of days, but only when the order has no planned date yet or its planned date is not earlier than the shifted line date, so that the interval between the order deadline and the expected arrival is preserved (`RP-RULE-118`).
+4. A shift of zero days happens when the planned date already falls on the target weekday. The formula gives zero rather than seven, so a need planned for a Wednesday with target Wednesday is not pushed a week out.
+5. The arithmetic of both windows, with worked examples, is in `calculations.md`, section "The grouping windows".
+
+#### 16.2.4 Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> ExpectedDate: Contact created, the default is Expected Date
+    state "Expected Date, the calendar week" as ExpectedDate
+    state "A named weekday, one target day" as Weekday
+    ExpectedDate --> Weekday: Pick Monday to Sunday
+    Weekday --> Weekday: Pick another weekday
+    Weekday --> ExpectedDate: Pick Expected Date
+    ExpectedDate --> ExpectedDate: Read while the grouping mode is Weekly
+    Weekday --> Weekday: Read while the grouping mode is Weekly, the planned date is shifted forward
+```
+
+---
+
+## 17. Summary of every state field of the domain
 
 | Entity | Field | Kind | Values or states | Written by | Section |
 |---|---|---|---|---|---|
-| Route | `active` | archive flag | `true`, `false` | user, warehouse configuration, resupply changes, the Dropship recomputation | 1 |
+| Route | `active` | archive flag | `true`, `false` | user, warehouse configuration, resupply changes, the Dropship recomputation | 1.1 |
+| Route | `product_selectable`, `product_category_selectable`, `package_type_selectable`, `sale_selectable`, `shipping_selectable` | mode flags | `true`, `false` each | user, warehouse configuration, the inter-warehouse resupply generator | 1.2 |
+| Route | `warehouse_selectable` | mode flag | `true`, `false` | user, warehouse configuration, the inter-warehouse resupply generator | 1.3 |
 | Stock Rule | `active` | archive flag | `true`, `false` | user, route archiving, warehouse configuration, the three resupply flags | 2.1 |
 | Stock Rule | `action` | mode selection | `pull`, `push`, `pull_push`, `buy`, `manufacture` | user, warehouse configuration | 2.2 |
 | Stock Rule | `procure_method` | mode selection | `make_to_stock`, `make_to_order`, `mts_else_mto` | user, warehouse configuration, delivery-step changes | 2.3 |
 | Stock Rule | `auto` | mode selection | `manual`, `transparent` | user | 2.4 |
+| Stock Rule | `location_destination_from_rule` | mode flag | `true`, `false` | user, the inter-warehouse resupply generator | 2.5 |
+| Stock Rule | `propagate_cancel` | mode flag | `true`, `false` | user, warehouse configuration, reception-step changes | 2.6 |
+| Stock Rule | `propagate_carrier` | mode flag | `true`, `false` | user, warehouse configuration | 2.7 |
 | Reordering Rule | `trigger` | mode selection | `auto`, `manual` | user, the replenishment report, the Automate button | 3.1 |
 | Reordering Rule | `snoozed_until` | date-derived state | not snoozed, expired, snoozed | the snooze wizard | 3.2 |
 | Reordering Rule | `active` | archive flag | `true`, `false` | user, product archiving | 3.3 |
@@ -2038,6 +2400,8 @@ stateDiagram-v2
 | Reordering Rule | `lead_days`, `lead_horizon_date` | derived | not applicable, computed, refused | the recomputation | 5.2 |
 | Reordering Rule | `unwanted_replenish` | derived | `true`, `false` | the recomputation | 3.4 |
 | Reordering Rule | `show_supply_warning` | derived | `true`, `false` | the recomputation | 3.4 |
+| Reordering Rule | `show_vendor` | derived | `true`, `false` | the recomputation from `effective_route` | 3.6 |
+| Reordering Rule | `show_bill_of_materials` | derived | `true`, `false` | the recomputation from `effective_route` | 3.6 |
 | Reference between stock documents | none | link lifecycle | created, linked, fanned out, orphaned, deleted | the producers of needs and the action handlers | 6 |
 | Procurement request | none | process state | fourteen states | the run algorithm | 7 |
 | The scheduled run | none | process state | nine states | the scheduled action | 8.1 |
@@ -2057,9 +2421,16 @@ stateDiagram-v2
 | Warehouse | `buy_to_resupply` | mode flag | `true`, `false` | an administrator | 14.1 |
 | Warehouse | `resupply_warehouses` | link lifecycle | membership of the set | an administrator | 14.2 |
 | Warehouse | `subcontracting_to_resupply` | mode flag | `true`, `false` | an administrator | 14.3 |
-| The six wizards | none | process state | created, edited, applied, closed, discarded | the dialogs and the periodic cleanup | 15 |
+| The six wizards | none | process state | created, edited, applied, closed, discarded | the dialogs and the periodic cleanup | 15.1 to 15.3 |
+| Replenishment Information | `based_on` | mode selection | `one_week`, `one_month`, `three_months`, `one_year`, `last_year`, `last_year_2`, `last_year_3`, `last_year_quarter` | the user in the dialog | 15.4 |
+| Replenishment Information | `show_vendor_tab` | derived | `true`, `false` | the recomputation from the rule's `route` and its chain | 15.5 |
+| Replenishment Information | `show_bill_of_materials_tab` | derived | `true`, `false` | the recomputation from the rule's `route` and its chain | 15.5 |
+| Reordering Rule Snooze Wizard | `predefined_date` | mode selection | `day`, `week`, `month`, `custom` | the user in the dialog | 15.6 |
+| Stock Rules Report wizard | `product_has_variants` | mode flag, set once from the opening context | `true`, `false` | the defaults of the dialog | 15.7 |
+| Contact | `group_request_for_quotation` | mode selection | `default`, `day`, `week`, `all` | a purchase administrator | 16.1 |
+| Contact | `grouping_weekday` | mode selection | `default`, `1`, `2`, `3`, `4`, `5`, `6`, `7` | a purchase administrator | 16.2 |
 
-### 16.1 Entities of this domain that carry no state
+### 17.1 Entities and fields of this domain that carry no state
 
 | Entity | Why it has none |
 |---|---|
@@ -2067,3 +2438,26 @@ stateDiagram-v2
 | Replenishment Option | A transient row rebuilt every time the Replenishment Information dialog is opened; it is never reused across dialogs. |
 | Forecasted Stock Report and Stock Replenishment Report | Report payloads assembled on each read; they hold no stored value at all. |
 | The procurement request | It is not a record. Its life is specified as a process machine in section 7 because a replacement must reproduce it, not because it is stored. |
+
+### 17.2 Every remaining field of an owned entity, and why it is not a state field
+
+The table of section 17 is complete only if every other field of every entity this domain owns is genuinely stateless. This section names them all, so that the claim can be checked rather than trusted. A field is **not** a state field when it holds a free value (a text, a quantity, a date typed by a user, an ordering key), when it holds a link whose changes are ordinary edits with no behaviour attached, or when it is a derived convenience value that only mirrors another record. Where a field's changes do drive behaviour, it appears in section 17 and not here.
+
+| Entity | Fields that are not state fields | Why |
+|---|---|---|
+| Route | `name`, `sequence` | Free text and an ordering key. The sequence changes the order in which candidate rules are tried, which is arithmetic on a list, not a state. |
+| Route | `rules`, `products`, `product_categories`, `warehouses`, `allowed_warehouses`, `supplied_warehouse`, `supplier_warehouse`, `company` | Links. Adding or removing a member changes what the route applies to, never what the route is. The one exception, `warehouses`, is specified with the flag that clears it, in section 1.3. |
+| Stock Rule | `name`, `sequence`, `lead_time_days`, `push_condition` | Free text, an ordering key, a number of days and an optional condition expression. |
+| Stock Rule | `company`, `route`, `route_company`, `route_sequence`, `destination_location`, `location_source`, `operation_type`, `partner_address`, `warehouse` | Links, and two denormalized copies of the route's company and sequence kept in step with it. |
+| Stock Rule | `allowed_operation_type_codes`, `rule_message` | Derived presentation values: the list of operation type codes the current `action` allows, and the sentence the Rules screen shows. Both follow `action`, `procure_method` and `location_destination_from_rule`, which are the machines of sections 2.2, 2.3 and 2.5. |
+| Reordering Rule | `name`, `product_minimum_quantity`, `product_maximum_quantity`, `quantity_to_order` | A sequence-fed reference and three quantities. `quantity_to_order` is the reading of the override machine of section 3.5 and holds no state of its own. |
+| Reordering Rule | `warehouse`, `source_location`, `product`, `company`, `route`, `vendor_price`, `bill_of_materials`, `replenishment_unit_of_measure` | Links. Two of them, `route` and `company`, are guarded — `company` may never change and `route` is restricted — but a guard on a link is a validation, not a state machine. |
+| Reordering Rule | `product_template`, `product_category`, `unit_of_measure`, `product_unit_of_measure_name`, `allowed_replenishment_unit_of_measures`, `allowed_locations`, `route_identifier_placeholder`, `effective_route`, `replenishment_unit_of_measure_identifier_placeholder`, `vendor_price_identifier_placeholder`, `bill_of_materials_identifier_placeholder`, `vendors`, `effective_vendor`, `available_vendor`, `effective_bill_of_materials` | Derived convenience values and grey placeholders. They mirror another record or compute the fallback that would apply; none of them changes what any algorithm does. `effective_route` is the input of the two flags of section 3.6, which is where its consequences are specified. |
+| Reordering Rule | `quantity_on_hand`, `quantity_forecast`, `days_to_order` | Derived quantities read from stock and from the chain. Their states are the states of the machines that consume them, sections 3.4, 5.2 and 5.3. |
+| Reordering Rule Snooze Wizard | `orderpoints`, `snoozed_until` | The selection the dialog acts on, and the date it proposes. The date's states belong to the reordering rule and are specified in section 3.2; the preset that fills it is section 15.6. |
+| Replenishment Information | `orderpoint`, `product`, `product_unit_of_measure_name`, `product_minimum_quantity`, `product_maximum_quantity`, `quantity_to_order`, `vendor_price`, `vendor_prices`, `bill_of_materials`, `bills_of_materials`, `resupply_routes`, `warehouse_replenishment_options` | Links and mirrors of the reordering rule. The three writable ones write straight through to the rule, whose machines then apply. |
+| Replenishment Information | `percent_factor`, `structured_data_lead_days`, `structured_data_replenishment_graph` | An integer percentage with no closed list, and two derived payloads recomputed on every read. The percentage scales the estimated demand; it has no admissible-value boundary and therefore no states. |
+| Replenishment Option | `route`, `product`, `replenishment_information`, `warehouse`, `source_location`, `unit_of_measure`, `quantity_to_order`, `free_to_use_quantity`, `lead_time`, `warning_message` | Every field of a row that is rebuilt from scratch each time the dialog opens. The warning message is derived from a comparison of two quantities and is shown, never stored across dialogs. |
+| Stock Rules Report wizard | `product`, `product_template`, `warehouses`, `sales_order_routes` | The inputs of the drawing. Only `product_has_variants` decides what the dialog shows, and it is section 15.7. |
+| Forecasted Stock Report and Stock Replenishment Report | every field | Report payloads assembled on each read. |
+| Vendor Delay Report | every field | A read-only database view. |
