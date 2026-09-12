@@ -68,7 +68,7 @@ This file specifies the end-to-end operational procedures of the fleet domain. E
 8. **Fill the model block.** Every physical attribute copied in step 2 may be overwritten here; overwriting does not change the model.
 9. **Fill the properties.** Values for the property set the model defines.
 10. **Save.** The following happen in order:
-    a. The synchronisation rule of the people bridge, if installed, resolves the driver Employee from the driver Contact and the future driver Employee from the future driver Contact, each requiring exactly one matching Employee; see W-17.
+    a. The synchronisation rule of the people bridge, if installed, resolves the driver Employee from the driver Contact and the future driver Employee from the future driver Contact, each requiring exactly one matching Employee; see [business-rules.md](business-rules.md), rule FLT-046.
     b. The plan-to-change marking of transition T4.6 is evaluated. On an ordinary creation it does nothing, because the vehicle kind is not part of the supplied values; see [state-machines.md](state-machines.md) section M4.3.
     c. The record is written. The status defaults to "New Request", the registration date and the first contract date to today, and the company to the current company.
     d. When the supplied values named a driver, one Driver Assignment Log is created with this vehicle, that driver and a start date of today. No end date is set and no reminder activity is scheduled, because the vehicle had no previous driver.

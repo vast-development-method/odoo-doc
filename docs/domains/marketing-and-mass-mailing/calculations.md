@@ -291,9 +291,9 @@ contact_count_opt_out     = number of subscriptions that are opted out
 contact_count_blacklisted = number of subscriptions whose contact is blocked
 bouncing_contacts         = number of distinct contacts of the list whose bounce counter is greater than 0
 
-contact_percentage_opt_out     = 100 × contact_count_opt_out     ÷ contact_count
-contact_percentage_blacklisted = 100 × contact_count_blacklisted ÷ contact_count
-contact_percentage_bounce      = 100 × bouncing_contacts         ÷ contact_count
+contact_pct_opt_out     = 100 × contact_count_opt_out     ÷ contact_count
+contact_pct_blacklisted = 100 × contact_count_blacklisted ÷ contact_count
+contact_pct_bounce      = 100 × bouncing_contacts         ÷ contact_count
 ```
 
 When `contact_count` is zero the three percentages are all exactly 0 and no division is performed.
@@ -303,9 +303,9 @@ With the Text Message Marketing package, `contact_count_blacklisted` additionall
 **Worked example.** A list with 1204 subscriptions: 37 opted out, 11 blocked addresses, 1150 with a usable address that is neither opted out nor blocked, and 64 contacts with at least one bounce.
 
 ```
-contact_percentage_opt_out     = 100 × 37 ÷ 1204 = 3.0731 %
-contact_percentage_blacklisted = 100 × 11 ÷ 1204 = 0.9136 %
-contact_percentage_bounce      = 100 × 64 ÷ 1204 = 5.3156 %
+contact_pct_opt_out     = 100 × 37 ÷ 1204 = 3.0731 %
+contact_pct_blacklisted = 100 × 11 ÷ 1204 = 0.9136 %
+contact_pct_bounce      = 100 × 64 ÷ 1204 = 5.3156 %
 contact_count_email            = 1150
 ```
 

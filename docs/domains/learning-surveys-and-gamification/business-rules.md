@@ -134,6 +134,7 @@ label must be attached to only one question.`
 The constraint `_value_not_empty` refuses a record with neither with `Suggested answer value must
 not be empty (a text and/or an image must be provided).`
 
+<a id="lsg-020a"></a>
 **LSG-020a — Questions cannot be deleted during a live session.** On Survey Question, at deletion.
 When a live session is in progress on the questionnaire, the deletion is refused with `You cannot
 delete questions from surveys "%(survey_names)s" while live sessions are in progress.`
@@ -291,6 +292,7 @@ every save. When the value field matching the answer type is empty, the save is 
 answer must be in the right type`. Two values are tolerated: a numerical answer whose value rounds
 to zero at six decimal places, and a scale answer whose value is zero.
 
+<a id="lsg-045a"></a>
 **LSG-045a — An existing answer is not silently overwritten.** When an answer already exists for the
 question and the caller did not ask for an overwrite, the save is refused with `This answer cannot be
 overwritten.`
@@ -551,14 +553,17 @@ Certification! Otherwise, students might think diplomas just grow on trees. The 
 them are: %s`, the placeholder being one line per questionnaire as `- <certification title> (Courses
 - <course names>)`.
 
+<a id="lsg-090a"></a>
 **LSG-090a — A content tag name is unique.** On Content Tag, at every save. The constraint
 `_slide_tag_unique` refuses a duplicate with `A tag must be unique!`
 
+<a id="lsg-090b"></a>
 **LSG-090b — Voting on a content item.** The like endpoint refuses an anonymous visitor with
 `public_user`, a non-member with `channel_membership_required`, a course that does not allow
 comments with `channel_comment_disabled`, and a reader below the vote threshold with
 `channel_karma_required`.
 
+<a id="lsg-090c"></a>
 **LSG-090c — Sharing one content item needs a template.** Refused with `Impossible to send emails.
 Select a "Share Template" for courses %(course_names)s first`.
 
@@ -683,20 +688,25 @@ to upvote.` or `%d karma required to downvote.` Two escapes exist: an upvote is 
 it cancels the reader's own downvote, and a downvote is always allowed when it cancels the reader's
 own upvote.
 
+<a id="lsg-115a"></a>
 **LSG-115a — Only a moderator reaches a moderation queue.** The validation, flagged, offensive and
 closed queues answer not-found to a reader whose balance is below the moderation threshold.
 
+<a id="lsg-115b"></a>
 **LSG-115b — One pending question at a time.** A user who already has a question waiting for
 validation on a forum is redirected back to the ask page instead of being allowed to ask another.
 
+<a id="lsg-115c"></a>
 **LSG-115c — Asking requires a valid electronic mail address.** A user whose account carries no
 valid address is redirected to their own profile page carrying the forum identifier, so they can
 complete the address first.
 
+<a id="lsg-115d"></a>
 **LSG-115d — A post of an author with no reputation is hidden.** The view rule makes a post
 invisible when the author's balance is zero or lower, unless the reader is the author or the reader
 may close posts.
 
+<a id="lsg-115e"></a>
 **LSG-115e — A tag page rejects an invalid pager letter or filter.** An entry that is not a single
 alphabetic character is refused with `Bad "tag_char" value "<value>"`; an unknown filter is refused
 with `Bad "filters" value "<value>".`

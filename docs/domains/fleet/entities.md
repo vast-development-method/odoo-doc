@@ -710,7 +710,7 @@ The Vehicle Contract carries a discussion thread and scheduled activities. The r
 
 ### 11.6 The renewal activity
 
-Every running contract that has a responsible user and expires within the configured alert delay receives one activity of the dedicated renewal type, whose deadline is the contract's expiry date and whose responsible user is the contract's responsible. The daily job that creates it skips any contract that already carries an activity of that type, so exactly one reminder exists per contract. Changing the expiry date or the responsible user of a contract reschedules the existing activity rather than creating a second one. The complete procedure is in [workflows.md](workflows.md), procedure W-09.
+Every running contract that has a responsible user and expires within the configured alert delay receives one activity of the dedicated renewal type, whose deadline is the contract's expiry date and whose responsible user is the contract's responsible. The daily job that creates it skips any contract that already carries an activity of that type, so exactly one reminder exists per contract. Changing the expiry date or the responsible user of a contract reschedules the existing activity rather than creating a second one. The complete procedure is in [workflows.md](workflows.md), procedure W-11.
 
 ---
 
@@ -802,7 +802,7 @@ The assistant carries the platform's message composition behaviour: a subject an
 
 ### 14.4 Operations
 
-Both operations are specified step by step in [workflows.md](workflows.md), procedures W-11 and W-12:
+Both operations are specified step by step in [workflows.md](workflows.md), procedures W-14 and W-15:
 
 - `action_send` posts one message per vehicle, or refuses when a driver has no electronic mail address.
 - `action_save_as_template` turns the composed subject, body and attachments into a new stored template bound to the Vehicle and opens it.
@@ -828,7 +828,7 @@ Changed behaviour:
 
 ## 16. Journal Entry
 
-**Journal Entry** (`account.move`), owned by [general ledger](../general-ledger/). The accounting bridge adds no field. It changes posting: after an entry is posted for the first time, every product item of it that names a vehicle and does not already carry a service produces one Vehicle Service. The complete rule, including every skip condition and the message logged on the new service, is in [workflows.md](workflows.md), procedure W-07, and its ledger consequences are in [accounting-effects.md](accounting-effects.md).
+**Journal Entry** (`account.move`), owned by [general ledger](../general-ledger/). The accounting bridge adds no field. It changes posting: after an entry is posted for the first time, every product item of it that names a vehicle and does not already carry a service produces one Vehicle Service. The complete rule, including every skip condition and the message logged on the new service, is in [workflows.md](workflows.md), procedure W-08, and its ledger consequences are in [accounting-effects.md](accounting-effects.md).
 
 ## 17. Create Automatic Entries
 
@@ -864,7 +864,7 @@ Changed behaviour:
 |---|---|---|---|---|---|---|---|
 | `release_campany_car` | Release Company Vehicle | boolean | — | no | true when the acting user is a member of the fleet officer group, false otherwise | — | Whether registering the departure should also free the vehicles the leaver drove. The storage name is reproduced exactly, including its spelling. Labelled "Company Car" beside the other departure options. |
 
-Changed behaviour: registering a departure runs the release procedure of [workflows.md](workflows.md), procedure W-10, when the flag is set. The departure form is also changed so that the block of activity options, which is normally hidden, is always shown, because this option lives in it.
+Changed behaviour: registering a departure runs the release procedure of [workflows.md](workflows.md), procedure W-16, when the flag is set. The departure form is also changed so that the block of activity options, which is normally hidden, is always shown, because this option lives in it.
 
 ## 21. Activity Plan Template
 
@@ -914,7 +914,7 @@ Changed behaviour:
 Changed behaviour:
 
 - Creating a batch orders its transfers by customer postal code and, when a dock is already set, redirects the moves to that dock.
-- Writing a dock onto a batch redirects the moves to it, or resets them when the dock is emptied. The redirection rule is in [workflows.md](workflows.md), procedure W-13.
+- Writing a dock onto a batch redirects the moves to it, or resets them when the dock is emptied. The redirection rule is in [workflows.md](workflows.md), procedure W-21.
 - Merging batches carries the vehicle and the dock of the batch being merged into the merged result.
 
 ## 26. Operation Type

@@ -194,7 +194,7 @@ The extensions are specified here; the entities themselves belong to the domain 
 | Lead (`crm.lead`) and Sales Team (`crm.team`) | [Customer relationship management](../customer-relationship-management/README.md) | The originating questionnaire on the lead, the questionnaires assigned to a team, and the creation of leads from lead-generating answer options. |
 | Job Position (`hr.job`) and Application (`hr.applicant`) | [Recruitment](../recruitment/README.md) | The interview questionnaire attached to a job position and to an application; the fifth questionnaire purpose `recruitment`. |
 | Employee (`hr.employee`), Public Employee (`hr.employee.public`) and Résumé Line (`hr.resume.line`) | [Human resources core](../human-resources-core/README.md) | The subscribed courses and the completion text on the employee; the course link, the course duration and the certification link on the résumé line; the résumé lines written when a course is completed or a certification is passed; the employee link on a granted badge. |
-| Mailing (`mailing.mailing`) | [Marketing and mass mailing](../marketing-and-mass-mailing/) | The action that opens a new mailing addressed to the attendees of the selected courses. |
+| Mailing (`mailing.mailing`) | [Marketing and mass mailing](../marketing-and-mass-mailing/README.md) | The action that opens a new mailing addressed to the attendees of the selected courses. |
 | Spreadsheet Dashboard (`spreadsheet.dashboard`) | [Spreadsheets and dashboards](../spreadsheets-and-dashboards/README.md) | The shipped electronic-learning dashboard, restricted to the Learning Manager group. |
 | Rating (`rating.rating`) | [Website and storefront](../website-and-storefront/README.md) | Course reviews: the average shown in stars, the one-review-per-author rule and the reputation points a review grants. |
 
@@ -261,14 +261,14 @@ These domains must exist before this one can work.
 | [Contacts and organizations](../contacts-and-organizations/README.md) | Contacts identify participants, attendees and post authors; languages drive the questionnaire language list and the translation of every message. |
 | [Messaging and activities](../messaging-and-activities/README.md) | The discussion thread on questionnaires, participations, courses, contents, forums, posts, badges and challenges; message subtypes; message templates and their rendering; outgoing messages; planned activities for course access requests. |
 | [Website and storefront](../website-and-storefront/README.md) | The public pages, the site record and its address, the publication markers, the cover properties, the search integration, the rating component behind course reviews, and the public profile pages. |
-| [Customer portal](../customer-portal/) | The portal discussion component used for comments and reviews on courses and contents. |
+| [Customer portal](../customer-portal/README.md) | The portal discussion component used for comments and reviews on courses and contents. |
 | [Platform foundation](../platform-foundation/) | Stored records and their audit fields, attachments, configuration parameters, scheduled jobs, printed reports, request routing and the configuration settings screen. |
 | [Products and catalog](../products-and-catalog/README.md) | The service product that represents paid access to a course. Required only when courses are sold. |
 | [Sales](../sales/README.md) | The order whose confirmation enrols the buyer, and the revenue analysis behind the per-course revenue figure. Required only when courses are sold. |
 | [Customer relationship management](../customer-relationship-management/README.md) | The lead created from a lead-generating answer option, its team, its source and its medium. Required only when lead generation is used. |
 | [Recruitment](../recruitment/README.md) | The interview questionnaire attached to a job position and to an application. Required only when recruitment interviews are used. |
 | [Human resources core](../human-resources-core/README.md) | The employee record, the résumé line and its types. Required only when skills tracking is used. |
-| [Marketing and mass mailing](../marketing-and-mass-mailing/) | The mailing whose recipients are the attendees of a course. Required only when attendee mailing is used. |
+| [Marketing and mass mailing](../marketing-and-mass-mailing/README.md) | The mailing whose recipients are the attendees of a course. Required only when attendee mailing is used. |
 | [Spreadsheets and dashboards](../spreadsheets-and-dashboards/README.md) | The dashboard container that holds the shipped electronic-learning dashboard. Required only when that dashboard is used. |
 | [Accounts receivable](../accounts-receivable/README.md) and [General ledger](../general-ledger/README.md) | The customer invoice and the journal entry that recognise the revenue of a sold course. Reached only through the selling domain. |
 

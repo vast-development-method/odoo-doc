@@ -4,8 +4,9 @@ Every state field of this domain, with the complete list of its states, the mean
 the complete transition table, the guards of each transition in the order in which they are
 evaluated together with the exact refusal message, and a diagram of the machine.
 
-Six machines exist. Four of them are stored selections; two are stored conditions with exactly two
-values whose transitions carry enough behaviour to be specified as machines in their own right.
+Six machines exist. Four of them are stored selections; the other two are stored conditions with
+exactly two values whose transitions carry enough behaviour that this document treats each of them
+as a machine of its own.
 
 | Machine | Entity | Field | Kind |
 |---|---|---|---|

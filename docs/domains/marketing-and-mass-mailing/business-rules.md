@@ -307,3 +307,73 @@ The complete rule catalogue of the domain. Each rule has a stable number so that
 | `MKT-RULE-314` | An outgoing marketing message is never sent through a server that has a personal owner. |
 | `MKT-RULE-315` | The trace keeps the normalised address and the plain integer keys of the outgoing message, in order that the measurement survives the deletion of the outgoing message. |
 | `MKT-RULE-316` | The report entity counts an opened delivery as the status `open` only, while the mailing counts `open` and `reply` together; both definitions must be reproduced. |
+
+## 18. Delivery reporting and status ordering
+
+| Rule | Statement | Message |
+|---|---|---|
+| `MKT-RULE-320` | Marking a delivery record opened never downgrades a record already in `open` or `reply`; those two statuses are explicitly skipped. | — |
+| `MKT-RULE-321` | Marking a delivery record clicked never changes its status; it only stamps the last-click moment, and it always overwrites it, so the stored moment is the latest click. | — |
+| `MKT-RULE-322` | Marking a delivery record sent clears its failure type, so a successful retry leaves no stale failure code. | — |
+| `MKT-RULE-323` | A text-message delivery report is ignored when the record is already in a status at least as advanced; the ignore sets are listed in [entities.md](entities.md#2811-text-message-tracker-messaging-and-activities). | — |
+| `MKT-RULE-324` | A text-message delivery report reporting that messages are being processed writes the mailing back to `sending` even when it had already reached `done`. | — |
+| `MKT-RULE-325` | A mailing closed by a delivery report gets the sent moment and, only when it had no previous sent moment, the statistics flag. | — |
+| `MKT-RULE-326` | When a delivery report arrives from an unauthenticated provider callback, the change entries it causes are attributed to the system contact rather than to a person. | — |
+| `MKT-RULE-327` | A delivery record is never deleted by a status change; it is deleted only by a retry or by the deletion of its mailing. | — |
+
+## 19. Reproduced text irregularities
+
+The strings below contain irregularities. They are reproduced exactly, because support procedures and
+automated tests key on them, and a rebuild that tidies them changes observable behaviour.
+
+| Rule | Where | Irregularity |
+|---|---|---|
+| `MKT-RULE-330` | The notice shown after adding contacts to a list | *"%s Mailing Contacts have been added. "* ends with a space. |
+| `MKT-RULE-331` | The discard button of the schedule assistant | Its label *"Discard "* ends with a space. |
+| `MKT-RULE-332` | The name of a comparison-test winner copy | It begins with a space: *" <original name> (final)"*. |
+| `MKT-RULE-333` | The label of the failure type `twilio_authentication` | It ends with a stray double quotation mark: the stored label is exactly `Authentication Error"`. **Compatibility finding**: a corrected behaviour would display the label without the trailing mark. |
+| `MKT-RULE-334` | The refusal shown by the paste import above its limit | *"You have to much emails, please upload a file."* contains a grammatical error. |
+| `MKT-RULE-335` | The refusal shown by an invalid saved condition | *"The filter domain is not valid for this recipients."* contains a grammatical error. |
+| `MKT-RULE-336` | The refusal shown when both membership views are supplied | *"You should give either list_ids, either subscription_ids to create new contacts."* names two stored identifiers inside the sentence and uses "either … either". |
+| `MKT-RULE-337` | The refusal shown when a website form names a non-public list | *"You cannot subscribe to the following list anymore : %s"* has a space before the colon. |
+| `MKT-RULE-338` | The rendering-failure message of a marketing card | *"An error occured while rendering a card for %(record_name)s. Try again or check the server logs for more details."* misspells "occurred". |
+
+## 20. Compatibility obligations
+
+| Rule | Statement |
+|---|---|
+| `MKT-RULE-340` | The older unsubscribe path, which uses a different prefix and different parameter spellings, must keep answering, because addresses of that shape are inside messages already delivered. It performs the same unsubscription as the current path. |
+| `MKT-RULE-341` | The two shifted labels of the delivery status must be reproduced: the stored value `pending` is displayed as "Sent" and the stored value `sent` is displayed as "Delivered". Every formula uses the stored values. |
+| `MKT-RULE-342` | The analytical view counts an opened delivery as the status `open` alone, while a mailing counts `open` and `reply` together. Both definitions must be reproduced. |
+| `MKT-RULE-343` | The campaign indicators use one single denominator and derive the delivered figure by subtracting bounces from the handed-over count, while the mailing indicators use three denominators and derive the delivered figure by summing statuses. Both must be reproduced. |
+| `MKT-RULE-344` | The status value written on an outgoing text message that is suppressed is spelled `canceled` with one letter L, while the delivery-record status is spelled `cancel`. Both spellings are contractual. |
+| `MKT-RULE-345` | The three campaign-tracking cookies keep the names they have today, because a visitor may arrive carrying cookies written by an earlier visit. |
+| `MKT-RULE-346` | The marketing card image is served under the fixed download name `card.jpg`, and both the readable-key form and the numeric-key form of the three card addresses must answer, because social networks cache whichever form they first saw. |
+
+## 21. Rule identifier index
+
+| Range | Topic | Section |
+|---|---|---|
+| `MKT-RULE-001` – `MKT-RULE-013` | Mass Mailing structure and validation | 1 |
+| `MKT-RULE-020` – `MKT-RULE-026` | Editing guards | 2 |
+| `MKT-RULE-030` – `MKT-RULE-039` | Sending guards | 3 |
+| `MKT-RULE-050` – `MKT-RULE-071` | Audience and exclusion | 4 |
+| `MKT-RULE-080` – `MKT-RULE-086` | Batching, resumability and transactions | 5 |
+| `MKT-RULE-090` – `MKT-RULE-101` | Dates and moments | 6 |
+| `MKT-RULE-110` – `MKT-RULE-114` | Rounding and numeric presentation | 7 |
+| `MKT-RULE-120` – `MKT-RULE-130` | Uniqueness | 8 |
+| `MKT-RULE-140` – `MKT-RULE-156` | Deletion and archiving guards | 9 |
+| `MKT-RULE-170` – `MKT-RULE-183` | Comparison testing | 10 |
+| `MKT-RULE-190` – `MKT-RULE-207` | Link tracking | 11 |
+| `MKT-RULE-210` – `MKT-RULE-216` | Campaign tracking capture | 12 |
+| `MKT-RULE-220` – `MKT-RULE-239` | Public pages, tokens and permissions | 13 |
+| `MKT-RULE-250` – `MKT-RULE-263` | Marketing card rules | 14 |
+| `MKT-RULE-270` – `MKT-RULE-285` | Mailing lists, contacts and subscriptions | 15 |
+| `MKT-RULE-290` – `MKT-RULE-304` | Permissions per operation | 16 |
+| `MKT-RULE-310` – `MKT-RULE-316` | Consistency rules | 17 |
+| `MKT-RULE-320` – `MKT-RULE-327` | Delivery reporting and status ordering | 18 |
+| `MKT-RULE-330` – `MKT-RULE-338` | Reproduced text irregularities | 19 |
+| `MKT-RULE-340` – `MKT-RULE-346` | Compatibility obligations | 20 |
+
+Numbers not listed inside a range are unused; every number listed inside a range is defined. The
+ranges leave room so that a later rule can be added to a topic without renumbering the rest.
