@@ -36,7 +36,7 @@ Every term used in this domain, defined in full. Terms are listed alphabetically
 
 **Balance invariant** — The rule that the sum of the balances of the items of an entry, rounded to the company currency, is zero. Checked around every write, every deletion and every reconciliation.
 
-**Balancing item** — The item on the current-year-earnings account that the opening-entry mechanism adjusts so that the opening entry always balances. Labelled "Automatic Balancing Line".
+**Balancing item** — An item whose only purpose is to make an entry balance, labelled "Automatic Balancing Line". Two unrelated mechanisms produce one under that label: the opening-entry mechanism writes it on the current-year-earnings account, and the synchronisation of a draft plain entry that carries taxes writes it on the default account of the journal, or on the journal suspense account of the company when the journal has none. Both are specified in `accounting-effects.md`.
 
 **Cancelling reversal** — A reversal that is posted immediately and reconciled with the original, so that the pair nets to zero. Used when undoing an entry that may not be deleted.
 
@@ -45,6 +45,8 @@ Every term used in this domain, defined in full. Terms are listed alphabetically
 **Chain** — see *Numbering chain*.
 
 **Chart of accounts** — The whole set of accounts of a company, ordered by code.
+
+**Blocking reason** — The text shown on one row of the account merge dialogue when that account may not take part in the merge of its group. Two exist: belonging to the same company as another selected account, and carrying hashed entries when another selected account also carries some. A blocked row is skipped, not refused.
 
 **Chart template** (`account.chart.template`) — A named, country-specific bundle of accounts, groups, taxes, tax groups, fiscal positions, journals, reconciliation models and company settings, loaded into a company in one operation.
 
@@ -82,6 +84,8 @@ Every term used in this domain, defined in full. Terms are listed alphabetically
 
 **Full Reconciliation** (`account.full.reconcile`) — The marker created when a matched group nets exactly to zero. It carries no amount; its identifier becomes the matching number of every item of the group.
 
+**Fiscal year opening wizard** (`account.financial.year.op`) — The dialogue behind the "Set Periods" step of the accounting checklist. It writes the fiscal-year end day, the fiscal-year end month and the opening date of a company in one single operation, and re-dates a still-draft opening entry to the day before the opening date.
+
 **Gap** — A missing counter in a numbering chain. Detected by comparing each entry with its immediate neighbours of the same journal, prefix and suffix, and flagged on the entry that opens the hole.
 
 **Global Lock Date** (`fiscalyear_lock_date`) — The lock date that applies to every entry of a company.
@@ -89,6 +93,8 @@ Every term used in this domain, defined in full. Terms are listed alphabetically
 **Hard Lock Date** (`hard_lock_date`) — The lock date that applies to every entry, can never be removed, can never be moved backwards, and can never be relaxed by an exception.
 
 **Hash** (`inalterable_hash`) — The value that binds an entry to its predecessor in a chain, making any later modification detectable. Stored as a dollar sign, the hash version, a dollar sign and the hexadecimal digest.
+
+**Hash version** — The numbered variant of the hash computation an entry was hashed under. Four exist. They differ in the set of fields, in the way a monetary amount is turned into text, and in whether the stored value carries a version marker. A verification reproduces the version the entry was hashed under, not the current one. Specified in `calculations.md`.
 
 **Hash chain** — The ordered set of hashed entries of one journal and one numbering prefix, each hash computed from the digest of the previous one and the exact content of the entry.
 
@@ -117,6 +123,10 @@ Every term used in this domain, defined in full. Terms are listed alphabetically
 **Lock Exception** (`account.lock_exception`) — A time-limited and optionally user-limited relaxation of one soft lock date, recorded with the company value it relaxed so that the trace is auditable.
 
 **Matching number** (`matching_number`) — The label that identifies a matched group on each of its items: the decimal identifier of the Full Reconciliation when the group is closed, the letter `P` followed by the smallest match identifier of the component while it is only partially matched, or the letter `I` followed by anything for a label imported from another system and not yet resolved.
+
+**Merge (of accounts)** — The operation that collapses several accounts into one surviving account that keeps every code and every company of the set, retargeting every reference to the accounts that disappear. It is the mirror image of the unmerge. Specified in `workflows.md`.
+
+**Merge grouping key** — The tuple that decides which accounts of a merge dialogue may become one: the account type, the non-trade flag, the currency restriction, the reconcilable flag and the active flag, plus the account name when the "Group by name?" switch is ticked.
 
 **Miscellaneous journal** — A journal of type "general", used for entries that are neither sales, nor purchases, nor money movements.
 

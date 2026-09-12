@@ -274,7 +274,33 @@ Entries are grouped by journal and then by numbering prefix; each group is one c
 |---|---|
 | An entry of the chain is the entry of an unreconciled bank transaction | "An error occurred when computing the inalterability. All entries have to be reconciled." |
 | The chain contains no entry to hash | "This move could not be locked either because some move with the same sequence prefix has a higher number. You may need to resequence it." |
-| The counters of the entries to hash are not contiguous | "An error occurred when computing the inalterability. A gap has been detected in the sequence." |
+| The counters are not contiguous, measured as stated below | "An error occurred when computing the inalterability. A gap has been detected in the sequence." |
+
+**How contiguity is measured.** The test is not made among the entries to hash alone: it is made from the **last already hashed entry of the chain**, when there is one, so that a hole between the hashed part of the chain and the first entry to hash counts as a gap just as much as a hole inside the entries to hash. The entries to hash are read in ascending counter order, and the test has two branches:
+
+| Situation | The counter the walk starts from | The number of steps expected | Contiguous when |
+|---|---|---|---|
+| The chain already has a hashed entry | the counter of that last hashed entry | the number of entries to hash | starting counter + number of entries to hash = counter of the last entry to hash |
+| The chain has no hashed entry yet | the counter of the first entry to hash | the number of entries to hash, less one | counter of the first entry to hash + number of entries to hash − 1 = counter of the last entry to hash |
+
+A chain with nothing to hash is never tested and never reports a gap.
+
+```formula
+gap reported  =  starting counter + number of expected steps ≠ counter of the last entry to hash
+```
+
+**Worked examples.** In every one of them the entries to hash are those of one numbering prefix, in ascending counter order.
+
+| Case | Already hashed up to | Counters to hash | Starting counter | Expected steps | Counter of the last | Sum | Gap? |
+|---|---|---|---|---|---|---|---|
+| A fresh chain, no hole | none | 1, 2, 3 | 1 | 3 − 1 = 2 | 3 | 1 + 2 = 3 | no |
+| A fresh chain with a hole | none | 1, 2, 4 | 1 | 3 − 1 = 2 | 4 | 1 + 2 = 3 | **yes** |
+| A continued chain, no hole | counter 7 | 8, 9 | 7 | 2 | 9 | 7 + 2 = 9 | no |
+| A continued chain, hole at the boundary | counter 7 | 9, 10 | 7 | 2 | 10 | 7 + 2 = 9 | **yes** |
+| A continued chain, hole inside | counter 7 | 8, 10 | 7 | 2 | 10 | 7 + 2 = 9 | **yes** |
+| A continued chain, one entry only | counter 7 | 8 | 7 | 1 | 8 | 7 + 1 = 8 | no |
+
+The fourth case is the one the two branches exist for: nothing is missing between the entries to hash, and the chain is still broken, because entry number eight was never hashed and is no longer eligible. The test does not say **where** the hole is; the numbering-hole detection of `calculations.md` does.
 
 ### Diagram
 

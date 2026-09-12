@@ -782,3 +782,35 @@ internal users.
 
 **Postconditions.** The margin is a reporting measure; it never reaches the ledger. See
 [`accounting-effects.md`](accounting-effects.md).
+
+---
+
+## 24. Reconciliation notes
+
+Two independently written descriptions of these procedures were merged into this file. Where they
+disagreed, the platform's behaviour decided. Each resolution is recorded here.
+
+1. **How many procedures the domain has.** One description stopped at twenty procedures and ended
+   with three lifecycle tables; the other carried the margin procedures as well. The lifecycle tables
+   belong to a state file, so they are in [`state-machines.md`](state-machines.md), and the margin
+   procedures are kept here as workflows 22 and 23. Nothing was dropped: every row of those three
+   tables reappears as a transition of a lifecycle in that file.
+
+2. **What is written when a vendor is learned from a confirmed order.** One description copied the
+   unit, the vendor's product name and the vendor's product code from the offer the line had selected;
+   the other copied the unit from the order line. Workflow 16 states the correct split: the name and
+   the code come from the offer, the unit comes from the **line**, and all three are written only when
+   the line had selected an offer.
+
+3. **Whether changing a company's currency re-provisions its default price list.** Both descriptions
+   said it does. Workflow 2 records the guard that prevents it and marks the observed behaviour a
+   compatibility finding, so that a rebuild chooses deliberately.
+
+4. **Who may run each procedure.** One description named an actor for every procedure; the other
+   named none. Every procedure here names its actor, and the privileges those actors hold are in
+   [`configuration.md`](configuration.md#3-access-rights-matrix), never restated in the steps.
+
+5. **The order of the steps that price a purchase order line.** One description gave a single order of
+   tax correction, currency conversion and unit conversion; the other gave two orders, one per branch.
+   Workflow 15 gives both, because they really do differ between the branch with a selected offer and
+   the cost fallback.

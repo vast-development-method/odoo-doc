@@ -39,6 +39,10 @@ Contents:
 24. [Multi-company](#24-multi-company)
 25. [Access rights](#25-access-rights)
 26. [Rounding edge cases](#26-rounding-edge-cases)
+27. [Merging accounts](#27-merging-accounts)
+28. [The automatic balancing line of a plain entry](#28-the-automatic-balancing-line-of-a-plain-entry)
+29. [Contact rules contributed by the ledger](#29-contact-rules-contributed-by-the-ledger)
+30. [The fiscal year opening wizard](#30-the-fiscal-year-opening-wizard)
 
 ---
 
@@ -1330,3 +1334,168 @@ Then the stored match is rounded to 909.09 and the residual is 0.00.
 **26.8 — The tolerance range uses half the step of the source currency.**
 Given a source currency with a step of 0.01 and an amount of 281.53 converted at a rate of 0.05297255491929631,
 Then the three values computed are the conversions of 281.525, 281.53 and 281.535, each rounded to the target currency.
+
+---
+
+## 27. Merging accounts
+
+Unless a scenario says otherwise, company A and company B belong to one hierarchy, the acting user is an Administrator who may act for both, and no account carries hashed entries.
+
+**27.1 — Two accounts of two companies merge into one.**
+Given account X, name "Other Receivables", type Current Assets, not non-trade, no currency restriction, not reconcilable, active, belonging to company A with code `1010` and carrying 3 journal items,
+and account Y, name "Sundry Receivables", the same five key values, belonging to company B with code `1020` and carrying 5 journal items,
+and X is read before Y,
+When the user selects both, opens the merge dialogue, leaves "Group by name?" unticked and presses Merge,
+Then the dialogue showed one group headed "Current Assets" with two ticked rows and no blocking reason;
+X survives with its own identifier and Y is deleted;
+X belongs to companies A and B; it has code `1010` in A and code `1020` in B;
+the 5 items of Y now name X, and all 8 items keep their amount, their date, their entry and their code;
+X is named "Other Receivables", because the first account wins;
+and the notification "Accounts successfully merged!" is shown.
+
+**27.2 — Two accounts of the same company are blocked, not refused.**
+Given accounts X and Y with the same five key values, both belonging to company A, X read first,
+When the user selects both and opens the dialogue,
+Then one group is shown with both rows ticked, the row of Y carries the blocking reason "Belongs to the same company as *the display name of X*.", the Merge button is inert, and nothing is merged.
+
+**27.3 — The account with hashed entries survives.**
+Given accounts X, Y and Z with the same five key values, belonging to companies A, B and C of one hierarchy, read in that order, and Y is the only one that carries hashed entries,
+When the user selects the three and presses Merge,
+Then Y is the surviving account and keeps its identifier, X and Z are deleted, Y belongs to A, B and C and carries the code each of them had, and no hash breaks.
+
+**27.4 — Two accounts that both carry hashed entries cannot both be merged.**
+Given accounts X and Y with the same five key values, in companies A and B, both carrying hashed entries, X read first,
+When the user selects both,
+Then the row of Y carries "Contains hashed entries, but *the display name of X* also has hashed entries.", the group holds one eligible row, and the Merge button is inert.
+
+**27.5 — A Bank and Cash account never reaches the dialogue.**
+Given accounts X of type Current Assets and L of type Bank and Cash, both in company A,
+When the user selects both and opens the dialogue,
+Then only X is listed, no group holds two rows, and the Merge button is inert.
+
+**27.6 — Grouping by name splits one group into two.**
+Given accounts X named "Other Receivables" and Y named "Sundry Receivables", identical in the five key values, in companies A and B,
+When the user opens the dialogue and ticks "Group by name?",
+Then the list is rebuilt into two groups, each holding one row, each headed with the account name followed by the type label between parentheses, and the Merge button is inert.
+
+**27.7 — Fewer than two accounts.**
+Given one account selected,
+When the user runs the merge action,
+Then the operation is refused with "You must select at least 2 accounts." and no dialogue opens.
+
+**27.8 — The selection is not accounts.**
+Given a selection of journal entries,
+When the merge dialogue is opened on it,
+Then the operation is refused with "This can only be used on accounts."
+
+**27.9 — A company the user may not act for.**
+Given accounts X in company A and Y in company C, identical in the five key values, and the user may act for A but not for C,
+When the user presses Merge,
+Then the operation is refused with "You do not have the right to perform this operation as you do not have access to the following companies: *the name of company C*." and neither account is changed.
+
+**27.10 — Translations merge with the first account winning.**
+Given account X whose name is "Other Receivables" in English and has no French translation, and account Y whose name is "Sundry Receivables" in English and "Créances diverses" in French, X read first,
+When the two are merged,
+Then the surviving account X is named "Other Receivables" in English and "Créances diverses" in French.
+
+---
+
+## 28. The automatic balancing line of a plain entry
+
+The miscellaneous journal of the scenarios has the default account Suspense unless the scenario says otherwise.
+
+**28.1 — A draft plain entry with one taxed item is balanced automatically.**
+Given a draft plain entry in the miscellaneous journal with one item: Expenses, debit 1 000.00, carrying a purchase tax of 15 %,
+When the entry is saved,
+Then it holds three items: Expenses debit 1 000.00, Tax Paid debit 150.00, and Suspense credit 1 150.00 labelled "Automatic Balancing Line", with no tax and no analytic distribution;
+and the entry balances, so it can be posted.
+
+**28.2 — Removing the tax rewrites the balancing item and deletes the tax item.**
+Given the entry of 28.1, still draft,
+When the tax is removed from the expense item,
+Then the tax item of 150.00 is deleted, every tax grid of the entry is cleared, and the balancing item becomes a **debit** of 150.00 on Suspense, because the imbalance is 1 000.00 − 1 150.00 = −150.00.
+
+**28.3 — A plain entry without taxes is never balanced automatically.**
+Given a draft plain entry with one item: Expenses, debit 1 000.00, and no tax on any item and none before,
+When the entry is saved,
+Then no balancing item is created and the save is refused with "The entry is not balanced."
+
+**28.4 — A cash-basis entry is excluded.**
+Given a draft plain entry that names an origin document for its cash-basis taxes and carries taxes,
+When it is saved,
+Then no balancing item is created; the entry is expected to be balanced by the mechanism that built it.
+
+**28.5 — A journal with no default account falls back to the suspense account of the company.**
+Given the same entry as 28.1 in a miscellaneous journal that has no default account, and the company journal suspense account is Bank Suspense Account,
+When the entry is saved,
+Then the balancing item of 1 150.00 credit lands on Bank Suspense Account.
+
+**28.6 — The balancing item survives at zero once the entry is completed by hand.**
+Given the entry of 28.1,
+When the accountant adds a credit of 1 150.00 on Account Payable,
+Then the balancing item is set to zero and kept, the entry balances, and the entry posts with a zero-amount item on Suspense unless the accountant deletes it.
+
+---
+
+## 29. Contact rules contributed by the ledger
+
+**29.1 — A contact used on a draft entry cannot be deleted.**
+Given contact P named as the counterpart of one Journal Entry in the draft state,
+When P is deleted,
+Then the deletion is refused with "The partner cannot be deleted because it is used in Accounting".
+
+**29.2 — A contact used only on a cancelled entry can be deleted.**
+Given contact P named as the counterpart of exactly one Journal Entry, and that entry is in the cancelled state,
+When P is deleted,
+Then the deletion succeeds.
+
+**29.3 — A contact whose items sit in a hashed entry cannot be merged away.**
+Given contacts P and Q, and one Journal Item of P belonging to an entry that carries a hash,
+When P is merged into Q,
+Then the merge is refused with "Partners that are used in hashed entries cannot be merged."
+And when Q is merged into P instead, so that only the items of Q are tested and Q has none in a hashed entry, the merge succeeds.
+
+**29.4 — Re-parenting a contact rewrites its posted items across a lock date.**
+Given company A with a Global Lock Date of 31 December 2025,
+and contact P, with no parent and therefore its own commercial entity, carrying two posted Journal Items: one of 500.00 dated 30 June 2025 (inside the locked period) and one of 300.00 dated 15 February 2026,
+and contact M, with the same tax number as P, or both without one,
+When P is given M as its parent,
+Then both items name M as their counterpart, the one of 30 June 2025 included, although its date is on or before the Global Lock Date;
+the entry of each item whose own counterpart is P has its commercial counterpart set to M;
+an entry that also names another counterpart keeps its commercial counterpart;
+no amount, account, date or state changes;
+and the message "The commercial partner has been updated for all related accounting entries." is logged on P.
+
+**29.5 — Re-parenting is refused when the tax numbers differ.**
+Given contact P carrying journal items and a tax number, and contact M carrying a different tax number,
+When P is given M as its parent,
+Then the write is refused before anything is rewritten, with the tax-number message specified in `../taxes/`, and no journal item changes.
+
+---
+
+## 30. The fiscal year opening wizard
+
+**30.1 — Setting the fiscal year and the opening date in one operation.**
+Given company A whose fiscal year ends on 31 December, whose opening date is empty, and whose opening entry exists and is **draft**,
+When the wizard is filled with the last day 30, the last month June and the opening date 1 January 2026, and saved,
+Then the company carries the last day 30, the last month June and the opening date 1 January 2026, all three written in one operation;
+and the opening entry is re-dated to 31 December 2025, the day before the opening date.
+
+**30.2 — A day that does not exist in the chosen month.**
+Given the same company,
+When the wizard is filled with the last day 31 and the last month June,
+Then the save is refused with "Incorrect fiscal year date: day is out of range for month. Month: 6; Day: 31" and neither value reaches the company.
+
+**30.3 — The twenty-ninth of February is accepted.**
+Given the same company,
+When the wizard is filled with the last day 29 and the last month February,
+Then the save succeeds, because the check is made against the year 2020, which is a leap year.
+
+**30.4 — A posted opening entry is not re-dated.**
+Given company A whose opening entry is **posted** and dated 31 December 2024,
+When the wizard is saved with the opening date 1 January 2026,
+Then the company carries the new opening date and the opening entry keeps the date 31 December 2024.
+
+**30.5 — The wizard reports whether the opening entry is final.**
+Given company A whose opening entry exists and is posted,
+Then the wizard reports the opening entry as posted; and given a company whose opening entry is draft, or a company with no opening entry at all, it reports it as not posted.

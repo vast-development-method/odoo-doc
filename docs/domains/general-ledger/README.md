@@ -6,7 +6,7 @@ This domain specifies the double-entry accounting core of the system: the chart 
 
 It is the foundation on which every other accounting domain rests. Customer invoices, vendor bills, payments, bank statements, point-of-sale sessions, inventory valuation, payroll and expense reports all end in a Journal Entry built by the rules of this domain, numbered by the rules of this domain, checked by the constraints of this domain and posted by the algorithm of this domain.
 
-Everything in this folder is derived from the behavior of the core Accounting capability package: the account model, the account group and account root models, the account tag model, the journal and journal-group models, the journal entry and journal item models, the full and partial reconciliation models, the lock exception model, the automatic sequence mixin, the company accounting settings, the partner accounting fields, the journal dashboard aggregation, the chart-template loading mechanism, and the wizards for reversal, automatic transfer entries, resequencing, entry validation and entry securing, together with the shipped security groups, access rights, record rules, sequences, scheduled jobs and system parameters of that package.
+Everything in this folder is derived from the behavior of the core Accounting capability package: the account model, the account group and account root models, the account tag model, the journal and journal-group models, the journal entry and journal item models, the full and partial reconciliation models, the lock exception model, the automatic sequence mixin, the company accounting settings, the partner accounting fields, the journal dashboard aggregation, the chart-template loading mechanism, and the wizards for reversal, automatic transfer entries, resequencing, entry validation, entry securing, account merging and the opening of the fiscal year, together with the shipped security groups, access rights, record rules, sequences, scheduled jobs and system parameters of that package.
 
 ## What is in scope and what is not
 
@@ -14,7 +14,7 @@ In scope:
 
 | Subject | Where specified |
 |---|---|
-| Chart of accounts: account types, internal groups, roots, groups, tags, reconcilable flag, archival, company-dependent code, currency restriction, non-trade flag, opening balances, unmerge | `entities.md`, `business-rules.md`, `calculations.md`, `configuration.md` |
+| Chart of accounts: account types, internal groups, roots, groups, tags, reconcilable flag, archival, company-dependent code, currency restriction, non-trade flag, opening balances, duplication, merge and unmerge | `entities.md`, `business-rules.md`, `calculations.md`, `configuration.md` |
 | Journals: all six types, default account, suspense account, profit and loss accounts, outstanding accounts through payment method lines, sequence prefix, sequence override expression, dedicated credit-note and payment sequences, restricted hash mode, ledger groups, incoming document alias, dashboard figures | `entities.md`, `business-rules.md`, `calculations.md`, `configuration.md`, `interfaces.md` |
 | Journal entries: the three-state machine, the balance invariant, the posting algorithm step by step, the accounting date derivation, every kind of lock date and its check, lock date exceptions, the numbering grammar with its five reset periodicities, gap detection, resequencing, the inalterability hash chain with its exact input string and ordering, the audit trail, the reversal methods, automatic and recurring posting, cancellation requests, deletion rules | `state-machines.md`, `workflows.md`, `business-rules.md`, `calculations.md`, `configuration.md` |
 | Journal items: account, partner, debit, credit, balance, foreign-currency amount, currency, dates, display types, matching number, residual amounts, tax and analytic hooks, deletion and modification rules | `entities.md`, `business-rules.md`, `calculations.md` |
@@ -22,7 +22,8 @@ In scope:
 | Fiscal years, opening entries and the current-year-earnings account | `calculations.md`, `workflows.md`, `accounting-effects.md` |
 | Company accounting settings that belong to the ledger, the accounting onboarding steps, the security groups, the access rights matrix, the record rules and the scheduled jobs | `configuration.md` |
 | Automatic transfer entries, resequencing, entry validation, entry securing and the hash integrity report | `workflows.md`, `interfaces.md`, `calculations.md` |
-| The chart-template loading mechanism (how a template is selected, what it ships and how it is applied) | `workflows.md`, `configuration.md` |
+| The chart-template loading mechanism (how a template is selected, what it ships and how it is applied), and the complete content of the generic chart of accounts shipped with the domain: its forty-six accounts, its two tax groups, its four taxes and its two fiscal positions | `workflows.md`, `configuration.md` |
+| Merging several accounts into one, and splitting a shared account per company | `entities.md`, `workflows.md`, `business-rules.md`, `configuration.md`, `interfaces.md` |
 
 Out of scope, specified in a neighbouring folder:
 
@@ -31,11 +32,10 @@ Out of scope, specified in a neighbouring folder:
 | Customer invoices, credit notes, receipts, payment terms, cash rounding, invoice sending, portal payment | `../accounts-receivable/` |
 | Vendor bills, vendor refunds, purchase receipts, bill upload and decoding, check printing | `../accounts-payable/` |
 | Payments, payment methods, bank statements, reconciliation models, the payment register | `../payments-and-bank-reconciliation/` |
-| Taxes, tax groups, tax distribution, fiscal positions, tax grids, cash-basis tax entries | `../taxes/` |
+| Taxes, tax groups, tax distribution, fiscal positions, tax grids, cash-basis tax entries, the per-country tax rules and the accounts a foreign tax registration creates | `../taxes/` |
 | Currencies, rates, rounding arithmetic, exchange-difference amounts | `../multi-currency/` |
 | Analytic plans, analytic accounts, analytic distribution models, analytic lines | `../analytic-accounting/` |
-| The report engine, the shipped financial statements and the tax closing entry | `../financial-reporting/` |
-| Per-country chart templates, their accounts, taxes and legal reports | `../fiscal-localizations/` |
+| The report engine, the shipped financial statements, the legal statements built on the chart and the tax closing entry | `../financial-reporting/` |
 
 This folder describes the hooks those domains attach to (the analytic distribution field on a journal item, the tax grid field, the exchange-difference creation point, the report drill-down) but not their content.
 
@@ -63,6 +63,9 @@ This folder describes the hooks those domains attach to (the analytic distributi
 | Resequence wizard | `account.resequence.wizard` | transient | Renumbers a selected set of entries in a chosen order |
 | Validate entries wizard | `validate.account.move` | transient | Posts a selected set of draft entries in bulk |
 | Secure entries wizard | `account.secure.entries.wizard` | transient | Hashes all eligible entries up to a chosen date |
+| Account merge wizard | `account.merge.wizard` | transient | Groups the selected accounts into mergeable sets and merges each set into one surviving account |
+| Account merge wizard line | `account.merge.wizard.line` | transient | One row of that dialogue: either a group heading or one account offered for merging |
+| Fiscal year opening wizard | `account.financial.year.op` | transient | Sets the fiscal-year end and the date from which the ledger is kept, and re-dates a draft opening entry |
 | Chart template mechanism | `account.chart.template` | none (abstract) | Loads a country chart of accounts and all the records that come with it |
 
 ## Reading order

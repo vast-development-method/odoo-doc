@@ -10,9 +10,11 @@ There are five of them:
 4. [The change-of-account transfer entry](#4-the-change-of-account-transfer-entry)
 5. [The change-of-period adjusting entries](#5-the-change-of-period-adjusting-entries)
 
+Section 6 then specifies the one ledger **item** the domain produces inside an entry it did not itself create: the automatic balancing line of a plain entry that carries taxes.
+
 It also specifies two entries it *hosts* without producing: the cash-basis tax entry (specified in `../taxes/`) and the tax closing entry (specified in `../financial-reporting/`). Both are ordinary Journal Entries of this domain and obey every rule of it.
 
-At the end, section 6 states the general rules every produced entry obeys, and section 7 states how the domain affects other domains.
+At the end, section 7 states the general rules every produced entry obeys, section 8 states how the domain affects other domains, and section 9 states the one case in which an event of another domain rewrites ledger records of this one.
 
 ---
 
@@ -355,7 +357,95 @@ The two Deferred revenue items share the label, the account, the partner, the cu
 
 ---
 
-## 6. General rules obeyed by every entry this domain produces
+## 6. The automatic balancing line of a plain entry
+
+This is not an entry of its own: it is one item that the domain adds to, or updates inside, a plain entry that somebody else is editing, so that the entry balances and can be saved and posted.
+
+### Event
+
+A **plain entry** — an entry whose document type is the plain entry type — is created or modified while it is **not posted**, and it either carries taxes on at least one of its items after the change, or carried taxes on at least one of its items immediately before it. An entry that has no taxes and had none is left alone: an ordinary miscellaneous entry that the user is composing by hand is never balanced automatically, and an unbalanced one is refused at saving by the balance invariant.
+
+Two kinds of plain entry are excluded:
+
+| Excluded | Why |
+|---|---|
+| A posted entry | its items are read-only |
+| An entry created as the cash-basis counterpart of another document — that is, an entry that names an origin document for its cash-basis taxes | the tax domain builds it complete and balanced; automatic balancing would add a spurious item to it. The exclusion is on the link to the origin document, so an ordinary plain entry that merely carries cash-basis taxes of its own is **not** excluded |
+
+The step runs inside the synchronisation of the derived items of an entry, at stage 20: after the payment-term items (stage 10) and around the rounding items (30), the discount items (40), the tax items (50) and the non-deductible items (60), all of which are produced before the imbalance is measured. So the tax items an entry needs already exist when the balancing item is computed.
+
+### Order of operations
+
+```
+ 1. When the entry carried taxes before the change and carries none after it, every tax item
+    of the entry is deleted and every tax grid of every remaining item is cleared. This is
+    done here because the tax synchronisation, which would normally do it, is switched off
+    once there is no tax left to synchronise.
+ 2. The item labelled "Automatic Balancing Line", if one already exists on the entry, has its
+    balance and its foreign amount set to zero, so that it does not count towards the
+    imbalance about to be measured.
+ 3. The imbalance of the entry is measured as the total of the debits minus the total of the
+    credits over every accountable item.
+ 4. When the entry is balanced, nothing more happens; the zeroed item, if there was one, stays
+    on the entry with a zero amount. When it is unbalanced, the item is created, or the
+    existing zeroed one is updated.
+```
+
+### Journal
+
+The journal of the entry itself. No entry is created, so no journal is chosen.
+
+### Items
+
+| # | Account selection rule | Side | Amount formula | Currency | Counterparty | Label |
+|---|---|---|---|---|---|---|
+| 1 | the default account of the journal of the entry; when the journal has none, the journal suspense account of the company | credit when the debits exceed the credits, debit when the credits exceed the debits | the imbalance, in the company currency | the currency of the entry; the foreign amount is derived from the balance at the rate of the entry, and equals the balance when the entry is in the company currency | whatever the item derives from the entry; nothing is set explicitly | "Automatic Balancing Line" |
+
+```formula
+balance of the balancing item (company currency)
+    = total of the credits of the entry (company currency)
+    − total of the debits of the entry (company currency)
+```
+
+A negative result is a credit item, a positive result a debit item, by the ordinary sign convention of the domain. The amount is rounded to the decimal precision of the company currency by the rule of section 1 of `calculations.md`, because it is a difference between two already rounded totals.
+
+### Tax treatment
+
+None, and deliberately so: the item is created with an empty tax list, so the default taxes of the account it lands on are **not** applied to it. Applying them would change the imbalance the item was created to close.
+
+### Analytic distribution
+
+None.
+
+### Reconciliation
+
+None. The item is not matched against anything, and the account it lands on is normally not a reconcilable account.
+
+### Worked example
+
+A company whose currency has two decimals records a plain entry in its miscellaneous journal, whose default account is Suspense. The accountant types one item: Expenses, debit 1 000.00, with a fifteen-percent purchase tax.
+
+1. The tax synchronisation adds a tax item: Tax Paid, debit 150.00.
+2. The imbalance is measured: debits 1 000.00 + 150.00 = 1 150.00, credits 0.00, so the imbalance is 1 150.00.
+3. The balancing item is created with a balance of 0.00 − 1 150.00 = −1 150.00, that is a credit of 1 150.00 on Suspense.
+
+| Account | Label | Debit | Credit |
+|---|---|---|---|
+| Expenses | the typed label | 1 000.00 | |
+| Tax Paid | the tax label | 150.00 | |
+| Suspense | "Automatic Balancing Line" | | 1 150.00 |
+
+The accountant then types the real counterpart, a credit of 1 150.00 on Account Payable. The next synchronisation zeroes the balancing item, measures an imbalance of 0.00 and leaves it at zero, so the entry posts with a zero-amount item on Suspense unless the accountant deletes it.
+
+If instead the accountant removes the tax from the expense item, step 1 of the order of operations deletes the tax item of 150.00 and clears the grids, the imbalance becomes 1 000.00 − 1 150.00 = −150.00 and the balancing item is rewritten to a **debit** of 150.00 on Suspense.
+
+### Not to be confused with
+
+The opening entry of section 1 writes an item carrying the same label, "Automatic Balancing Line", on the **current-year-earnings** account. That is a different mechanism with a different account rule, and the two never meet: the opening entry carries no taxes, so the mechanism of this section skips it.
+
+---
+
+## 7. General rules obeyed by every entry this domain produces
 
 | Rule | Statement |
 |---|---|
@@ -369,7 +459,7 @@ The two Deferred revenue items share the label, the account, the partner, the cu
 
 ---
 
-## 7. How this domain affects the other domains
+## 8. How this domain affects the other domains
 
 | Domain | Effect |
 |---|---|
@@ -381,3 +471,32 @@ The two Deferred revenue items share the label, the account, the partner, the cu
 | `../financial-reporting/` | Every report reads posted Journal Items. The audit drill-down opens the Journal Items behind a figure. The hash integrity check and the tax closing entry rely on the chain and the lock dates defined here. |
 | `../inventory-valuation-and-costing/`, `../manufacturing/`, `../expenses/`, `../point-of-sale/` | All of them create Journal Entries through the same model and are subject to the same rules. |
 | `../messaging-and-activities/` | The audit trail of an entry is a message thread; the tracked field changes and the cancellation-request activity live there. |
+| `../contacts-and-organizations/` | Re-parenting a Contact rewrites the counterpart of its Journal Items and the commercial counterpart of the entries dedicated to it, without creating any entry; see section 9. |
+
+
+---
+
+## 9. Ledger records rewritten by an event outside this domain
+
+One event owned by another domain rewrites records of this one after they are posted, without creating any entry. It is specified here because it changes what the ledger reports, and in `business-rules.md` because it is also a rule.
+
+### Event
+
+The parent of a Contact is written, so that the contact moves under a different commercial entity. The Contact belongs to `../contacts-and-organizations/`; the direction of dependence and the fields that carry the relation are in the relations table of `entities.md`.
+
+### What is rewritten
+
+| Records | Field written | New value | Scope |
+|---|---|---|---|
+| Every Journal Item whose counterpart is that contact | the counterpart | the new commercial entity of the contact | every item, whatever the state of its entry and whatever the accounting date, posted items of locked periods included |
+| Every Journal Entry among those items whose **own** counterpart is that contact | the commercial counterpart | the same value | only the entries wholly dedicated to that contact; an entry shared between several counterparts, such as a miscellaneous entry or a grouped bank payment, is left unchanged |
+
+No amount, no account, no date, no state and no reconciliation is touched, so no figure of any report changes: what changes is on whose ledger those figures appear. The receivable and payable totals of the old commercial entity fall by the residual of the moved items and those of the new one rise by the same amount.
+
+### The lock dates are not consulted
+
+Both writes are made with the lock check suppressed. The fiscal, tax, sale, purchase and hard lock dates are not evaluated, and the write succeeds on items of closed and even hard-locked periods. The reason is technical: the reconciliation check that guards a write of the counterpart compares the counterparts of a whole matched group, so the items must all be written in one operation, and that operation carries the suppression for the whole set. The exemption is recorded in section 18 of `business-rules.md`, and section 21 of the same document records it as a **compatibility finding** with the corrected behaviour it suggests.
+
+### The trace
+
+The message "The commercial partner has been updated for all related accounting entries." is logged on the contact. Nothing is logged on the entries themselves, so the audit trail of an entry does not show that its commercial counterpart changed.

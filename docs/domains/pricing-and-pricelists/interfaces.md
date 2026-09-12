@@ -370,3 +370,30 @@ loaded:
 
 The two implementations must agree exactly; the client-side engine itself is owned by
 [point of sale](../point-of-sale/).
+
+---
+
+## 9. Reconciliation notes
+
+1. **The export column headers.** One of the two descriptions this file was merged from expanded the
+   grid's column headers into words; the other reproduced the shortened forms. The headers cross a
+   system boundary and are read by integrations, so section 2 reproduces them exactly, in code font,
+   with their meaning given in words beside them.
+
+2. **The name of the export route's two values.** One description named the payload and the format in
+   prose only. Both are part of the request contract and are reproduced in code font in section 2,
+   with their meaning in words.
+
+3. **The screens.** One description listed the screens as field lists; the other omitted them
+   entirely. Section 7 keeps the field lists, because a rebuild needs to know which field appears
+   where, and states plainly that nothing in that section changes behaviour.
+
+4. **The vendor price display name.** One description gave only the vendor's display name; the other
+   gave the enriched form and attributed it to the purchasing capability. The enriched form is
+   contributed by the purchasing-and-inventory bridge; both forms are specified in
+   [`entities.md`](entities.md#36-display-name) and the list views here show the fields that
+   distinguish two offers of one vendor in either case.
+
+5. **The scheduled jobs.** One description left the section empty; the other said the domain defines
+   none. Section 6 says the second, and [`configuration.md`](configuration.md#12-scheduled-jobs) names
+   the two jobs owned elsewhere that call into this domain.

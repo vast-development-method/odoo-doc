@@ -415,3 +415,92 @@ stateDiagram-v2
    would not move. In the storefront no such path exists, so every line re-prices.
 4. Every displayed price on the site changes, including the struck-through prices governed by the
    storefront's wider discount-display rule.
+
+---
+
+## 7. The one stored selection that names document states
+
+The domain owns no state field, but it owns one stored selection whose values **name the states of
+documents in another domain**: the invoice-state filter of the Product Margin Wizard
+(`product.margin`), carried into the analysis under the context key `invoice_state` (invoice state)
+and echoed on the product variant as a read-only field of the same name.
+
+### 7.1 Values
+
+| Stored value | Label | Meaning |
+|---|---|---|
+| `paid` | "Paid" | Count only documents that are posted **and** settled. |
+| `open_paid` | "Open and Paid" | Count every posted document, settled or not. This is the default. |
+| `draft_open_paid` | "Draft, Open and Paid" | Count posted **and** draft documents, settled or not. |
+
+### 7.2 What each value selects
+
+The filter is expanded into two sets, which are applied together: a set of document states and a set
+of payment states. A document is counted only when **both** of its states are in the corresponding
+set.
+
+| Filter | Document states counted | Payment states counted |
+|---|---|---|
+| `paid` | posted | in payment, paid, reversed |
+| `open_paid` | posted | not paid, in payment, paid, reversed, partial |
+| `draft_open_paid` | posted, draft | not paid, in payment, paid, reversed, partial |
+
+Three consequences a rebuild must reproduce. A cancelled document is never counted, under any value,
+because no value names the cancelled document state. A posted document that is **partially** settled
+is counted by "Open and Paid" and by "Draft, Open and Paid" but **not** by "Paid", because the
+partial payment state is absent from the first set. A reversed document is counted by every value,
+because the reversed payment state is present in all three sets.
+
+### 7.3 Transitions
+
+The field has no lifecycle of its own: it is a filter a user picks in a dialogue and that the
+analysis then reads from its calling context. It is set when the wizard is opened, changed while the
+wizard is open, and read once when the button opens the analysis. Nothing in this domain writes it
+afterwards, and the value is never stored on a product.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> OpenAndPaid: wizard opened (default)
+    OpenAndPaid --> Paid: user picks Paid
+    OpenAndPaid --> DraftOpenAndPaid: user picks Draft, Open and Paid
+    Paid --> OpenAndPaid: user picks Open and Paid
+    Paid --> DraftOpenAndPaid: user picks Draft, Open and Paid
+    DraftOpenAndPaid --> OpenAndPaid: user picks Open and Paid
+    DraftOpenAndPaid --> Paid: user picks Paid
+    OpenAndPaid --> Analysis: button pressed
+    Paid --> Analysis: button pressed
+    DraftOpenAndPaid --> Analysis: button pressed
+    Analysis --> [*]
+```
+
+The states the filter names, and the transitions between them, belong to
+[accounts receivable](../accounts-receivable/) and [accounts payable](../accounts-payable/); this
+domain only reads them. The arithmetic they feed is in
+[`calculations.md`](calculations.md#18-margins-on-a-product--the-analysis-measures).
+
+---
+
+## 8. Reconciliation notes
+
+1. **Whether this file should exist at all.** One of the two descriptions this folder was merged from
+   carried no state file, on the ground that no entity of the domain has a state field; the other
+   carried three lifecycle tables at the end of its workflow file. Both observations are true and
+   neither is a reason to omit the file: the domain's behaviour depends on four derived lifecycles, on
+   two archival lifecycles and on a session lifecycle, and an observer cannot distinguish those from
+   state machines. All seven are specified here, and the three lifecycle tables of the other
+   description reappear as sections 1, 5.1 and 5.2, with their transitions completed.
+
+2. **The purchase line's manual state.** One description described the sales line and the purchase
+   line as behaving identically. They do not: section 4.4 records that a manually priced purchase line
+   is overwritten when an offer from the order's vendor exists but none applies, which never happens
+   on the sales side.
+
+3. **The publishability of an archived price list.** Neither description recorded that the storefront
+   publication test applies the active-flag check to one branch only. Section 1.4 lists the
+   publication states as the test really computes them, and the consequence is recorded as a
+   compatibility finding in [`business-rules.md`](business-rules.md#13-storefront).
+
+4. **The invoice-state filter.** Neither description treated the invoice-state filter as a stored
+   selection worth specifying, and one of them omitted the analysis entirely. It is the only stored
+   selection in the domain whose values name states, so section 7 specifies it in full.

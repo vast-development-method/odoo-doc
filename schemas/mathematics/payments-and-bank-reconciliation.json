@@ -3,7 +3,7 @@
     "name": "Payments and Bank Reconciliation calculations",
     "description": "Every formula, algorithm, rounding rule and worked example of the payments and bank reconciliation domain, in a structured form a rebuild can test against: the rounding and sign conventions and the four currency roles, the residual amounts of a journal item, the whole reconciliation operation from the optimisation of the plan to the pairing loop, the single-pair matching with its residual maps, its two reconciliation-currency branches, its rounding-tolerance collapse and its four exchange-difference branches, the exchange-difference entries and their reversal, the detection of a full reconciliation and the matching number, the ordering index and the four balances of a bank statement, the three currencies and three amounts of a bank transaction and the three conversions at the bank's own rate, the reconciliation of a transaction and the reconciliation models with their four counterpart amount modes, the whole register-payment arithmetic with its batches, its installments, its four totals, its payment difference and its early payment discount lines, the amounts of a payment entry, the international bank account number validation with its country templates, the seven structured payment reference schemes, the two quick response code generators, the dashboard figures of a liquidity journal, the selection of the journal, the payment method and the recipient account, and the memo of a payment.",
     "domain": "payments-and-bank-reconciliation",
-    "record_count": 183,
+    "record_count": 185,
     "authored_from": "docs/domains/payments-and-bank-reconciliation/calculations.md, with the cash-basis quantities and the company attribution of docs/domains/payments-and-bank-reconciliation/accounting-effects.md and the rule sections of docs/domains/payments-and-bank-reconciliation/business-rules.md"
   },
   "records": [
@@ -840,6 +840,125 @@
     },
     {
       "identifier": "payments-and-bank-reconciliation-010",
+      "name": "Worked example: the residual of an invoice settled by two partial payments",
+      "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#13-worked-example",
+      "purpose": "Carries the two residual formulas and the reconciled flag of a journal item through one complete numeric case, giving a rebuild a single test vector for the subtraction of the matched totals and for the zero tests that follow it.",
+      "operands": [
+        {
+          "name": "balance of the invoice line",
+          "unit_or_currency": "company currency",
+          "source": "the Journal Item of the customer invoice",
+          "constraints": "one thousand, positive because a receivable line of a customer invoice is a debit"
+        },
+        {
+          "name": "foreign amount of the invoice line",
+          "unit_or_currency": "the currency of the item, which here is the company currency",
+          "source": "the Journal Item of the customer invoice",
+          "constraints": "one thousand, equal to the balance because the invoice is drawn in the company currency"
+        },
+        {
+          "name": "amount of the first matching",
+          "unit_or_currency": "company currency",
+          "source": "the first Partial Reconciliation, whose debit item is the invoice line",
+          "constraints": "four hundred, positive"
+        },
+        {
+          "name": "amount of the second matching",
+          "unit_or_currency": "company currency",
+          "source": "the second Partial Reconciliation, whose debit item is the invoice line",
+          "constraints": "five hundred and fifty, positive"
+        },
+        {
+          "name": "the side the invoice line stands on in each matching",
+          "unit_or_currency": "not applicable",
+          "source": "the two Partial Reconciliations",
+          "constraints": "the invoice line is the debit item of both, the two payment lines being the credit items"
+        }
+      ],
+      "preconditions": [
+        {
+          "condition": "The invoice is drawn in the company currency, so the currency of the item and the company currency are the same.",
+          "otherwise": "The two residuals would be rounded to different precisions and could differ, which is the situation an exchange difference closes."
+        },
+        {
+          "condition": "The invoice line is the debit item of both matchings.",
+          "otherwise": "The two amounts would enter the residual formula as amounts matched as credit and the residual would be one thousand nine hundred and fifty instead of fifty."
+        },
+        {
+          "condition": "The account of the invoice line allows reconciliation.",
+          "otherwise": "Both residuals would be forced to zero and no matching could exist at all."
+        }
+      ],
+      "procedure": [
+        "Add the amounts of the two matchings in which the invoice line is the debit item: four hundred plus five hundred and fifty gives nine hundred and fifty as the amount matched as debit.",
+        "Take the amount matched as credit as zero, because the invoice line is the credit item of no matching.",
+        "Subtract the amount matched as debit from the balance and add the amount matched as credit: one thousand minus nine hundred and fifty plus zero gives fifty.",
+        "Round that result to the company currency, giving fifty exactly, which is the residual in the company currency.",
+        "Repeat the same subtraction on the foreign amount, whose matched totals are the same nine hundred and fifty and zero, and round to the currency of the item, giving fifty as the residual in the currency of the item.",
+        "Test each residual for zero at the precision of its currency: neither is zero, so the reconciled flag is false and the invoice stays partially paid."
+      ],
+      "formula": "balance                  = +1000.00\nmatched_as_credit        = 400.00 + 550.00 = 950.00     (the invoice line is the debit side, the payments the credit side, so from the invoice line's point of view the matchings are \"matched as debit\": the invoice item IS the debit item)\namount_residual          = round_to( company , 1000.00 − 950.00 + 0.00 ) = 50.00\namount_residual_currency = 50.00\nreconciled               = false",
+      "rounding": {
+        "what": "Each of the two residuals, once its whole expression has been evaluated; the two matched totals are not rounded again here, each matching amount being already expressed in a currency of two decimal places.",
+        "precision": "Two decimal places, the precision of the company currency of the example and of the currency of the item, which are the same currency.",
+        "method": "Half away from zero.",
+        "step": "After the subtraction and the addition, and again inside each zero test immediately before the comparison."
+      },
+      "result": {
+        "name": "the residual in the company currency, the residual in the currency of the item, and the reconciled flag",
+        "unit_or_currency": "company currency for both residuals, a truth value for the flag",
+        "stored_or_displayed": "All three stored on the Journal Item; the fifty still open is the amount the document shows as due and the amount the register-payment screen proposes next."
+      },
+      "edge_cases": [
+        {
+          "case": "The block of the document names the total of the two matchings the amount matched as credit, while the note inside the same block states that the invoice item is the debit item of both.",
+          "outcome": "The note governs and the arithmetic of the block follows it: the nine hundred and fifty is subtracted, not added, and the residual is fifty."
+        },
+        {
+          "case": "A third matching of fifty is created against the same invoice line.",
+          "outcome": "The amount matched as debit becomes one thousand, both residuals become zero, the reconciled flag becomes true and the full-reconciliation detector may close the group."
+        },
+        {
+          "case": "The matching of five hundred and fifty is deleted.",
+          "outcome": "The amount matched as debit falls back to four hundred, both residuals return to six hundred and the reconciled flag stays false."
+        },
+        {
+          "case": "One of the payments is matched against the invoice line in the opposite direction, the invoice line being the credit item.",
+          "outcome": "That amount enters as an amount matched as credit and is added instead of subtracted, which is why the two totals are kept apart."
+        }
+      ],
+      "worked_examples": [
+        {
+          "description": "The worked example of the document: a customer invoice of one thousand partially settled twice, once by four hundred and once by five hundred and fifty",
+          "inputs": {
+            "balance": 1000.0,
+            "amount_currency": 1000.0,
+            "currency_of_the_item": "the company currency",
+            "matchings_where_the_item_is_the_debit_item": [
+              400.0,
+              550.0
+            ],
+            "matchings_where_the_item_is_the_credit_item": []
+          },
+          "expected_outputs": {
+            "matched_as_debit": 950.0,
+            "matched_as_debit_currency": 950.0,
+            "matched_as_credit": 0.0,
+            "matched_as_credit_currency": 0.0,
+            "amount_residual": 50.0,
+            "amount_residual_currency": 50.0,
+            "reconciled": false
+          },
+          "narrative": "Nine hundred and fifty has been matched against the invoice line, all of it on the debit side, so one thousand minus nine hundred and fifty plus zero leaves fifty in the company currency and fifty in the currency of the item; neither is zero, so the line is not reconciled and the invoice is partially paid."
+        }
+      ],
+      "related_rules": [
+        "business-rules.md#82-invariants-of-a-matching",
+        "business-rules.md#87-partial-matching-restrictions"
+      ]
+    },
+    {
+      "identifier": "payments-and-bank-reconciliation-011",
       "name": "Optimising the reconciliation plan into nodes",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#21-phase-one--optimise-the-plan",
       "purpose": "Turns the plan a caller wrote into an ordered tree of nodes, fixing both which items meet and in which order they meet, which is what decides how a payment is spread over several documents.",
@@ -967,7 +1086,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-011",
+      "identifier": "payments-and-bank-reconciliation-012",
       "name": "The eligibility check of a set of items",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#22-phase-one--the-eligibility-check",
       "purpose": "Refuses a reconciliation that could not produce a coherent result, and states the exact refusal, before any matching is computed.",
@@ -1093,7 +1212,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-012",
+      "identifier": "payments-and-bank-reconciliation-013",
       "name": "Walking a node of the plan",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#23-phase-two--walking-a-node",
       "purpose": "Fixes the depth-first order in which a node's sub-nodes and its own item set are processed, and the regrouping by counterparty that lets a mixed selection settle each counterparty against itself.",
@@ -1186,7 +1305,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-013",
+      "identifier": "payments-and-bank-reconciliation-014",
       "name": "The pairing loop of a node",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#24-phase-two--the-pairing-loop",
       "purpose": "Walks an ordered list of items and produces the matchings, one debit against one credit at a time, until one of the two queues runs out.",
@@ -1304,7 +1423,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-014",
+      "identifier": "payments-and-bank-reconciliation-015",
       "name": "The three closing phases of a reconciliation",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#25-phases-three-and-four",
       "purpose": "States what is written once every matching has been computed: the matchings themselves, the exchange entries, the cash-basis entries, the full-reconciliation markers and the paid hooks of the settled documents.",
@@ -1403,7 +1522,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-015",
+      "identifier": "payments-and-bank-reconciliation-016",
       "name": "The cash-basis quantities a matching contributes",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#25-phases-three-and-four",
       "purpose": "Gives the four numbers this domain hands to the cash-basis tax entries that a matching on a trade account triggers; the content of those entries belongs to the tax domain, these quantities do not.",
@@ -1512,7 +1631,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-016",
+      "identifier": "payments-and-bank-reconciliation-017",
       "name": "The company that carries the derived entries of a matching",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#25-phases-three-and-four",
       "purpose": "Decides in which company the exchange-difference entry and the cash-basis entry of a matching are written, which matters when a branch's invoice is settled by the parent's payment.",
@@ -1593,7 +1712,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-017",
+      "identifier": "payments-and-bank-reconciliation-018",
       "name": "The accounting rate of a journal item",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#31-step-1--the-available-residual-per-currency-for-one-item",
       "purpose": "Reads back, from the item itself, the rate at which it was booked, so that a matching in the currency of the item can be converted to the company currency at exactly the rate the books already carry.",
@@ -1677,7 +1796,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-018",
+      "identifier": "payments-and-bank-reconciliation-019",
       "name": "The platform rate of a journal item towards a counterpart currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#31-step-1--the-available-residual-per-currency-for-one-item",
       "purpose": "Chooses the rate at which an item kept in the company currency on a trade account is offered in the currency of the item it is about to meet, so that a company-currency invoice can be settled by a foreign-currency payment.",
@@ -1777,7 +1896,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-019",
+      "identifier": "payments-and-bank-reconciliation-020",
       "name": "The available residual of one item, per currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#31-step-1--the-available-residual-per-currency-for-one-item",
       "purpose": "Builds, for one item and one counterpart currency, the map that says in which currencies that item still has something to offer and at which rate, which is what the choice of reconciliation currency reads.",
@@ -1909,7 +2028,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-020",
+      "identifier": "payments-and-bank-reconciliation-021",
       "name": "Choosing the reconciliation currency of a pair",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#32-step-2--choose-the-reconciliation-currency",
       "purpose": "Decides in which currency a debit and a credit meet, which decides in turn whether an exchange difference can arise at all and which of the two sides carries it.",
@@ -2024,7 +2143,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-021",
+      "identifier": "payments-and-bank-reconciliation-022",
       "name": "The two amounts to be matched, and the stop when there is nothing left",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#33-step-3--stop-when-there-is-nothing-to-match",
       "purpose": "Reads the two residuals that will actually be compared, in the reconciliation currency, and reports a side exhausted when it has nothing to offer in that currency.",
@@ -2099,7 +2218,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-022",
+      "identifier": "payments-and-bank-reconciliation-023",
       "name": "Detecting the exchange-line mode of a pair",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#34-step-4--detect-the-exchange-line-mode",
       "purpose": "Recognises that one of the two items is an exchange-difference line, so that the matching moves only the company-currency amount and leaves the foreign amounts untouched.",
@@ -2197,7 +2316,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-023",
+      "identifier": "payments-and-bank-reconciliation-024",
       "name": "Deciding which side of a pair is fully matched",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#35-step-5--decide-which-side-is-fully-matched",
       "purpose": "Compares the two amounts at the precision of the reconciliation currency and fixes the smaller of the two, which is the amount the matching will carry and the flags the exchange-difference branches read.",
@@ -2288,7 +2407,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-024",
+      "identifier": "payments-and-bank-reconciliation-025",
       "name": "The matched amounts when the reconciliation currency is the company currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#36-step-6--the-amounts-when-the-reconciliation-currency-is-the-company-currency",
       "purpose": "Produces the three amounts of the matching when the two items meet in the books' own currency, converting the matched amount back into each side's own currency at that side's rate.",
@@ -2385,7 +2504,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-025",
+      "identifier": "payments-and-bank-reconciliation-026",
       "name": "The interval of an amount after a rate",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#37-step-7--the-amounts-when-the-reconciliation-currency-is-a-foreign-currency",
       "purpose": "Gives the lowest, the central and the highest image of an already rounded amount once a rate is applied to it, which is what lets the matching tell a genuine rate difference from a rounding artefact.",
@@ -2487,7 +2606,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-026",
+      "identifier": "payments-and-bank-reconciliation-027",
       "name": "The matched amounts when the reconciliation currency is a foreign currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#37-step-7--the-amounts-when-the-reconciliation-currency-is-a-foreign-currency",
       "purpose": "Produces the three amounts of the matching when the two items meet in a foreign currency, converting the matched foreign amount back into the company currency on each side at that side's own rate.",
@@ -2609,7 +2728,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-027",
+      "identifier": "payments-and-bank-reconciliation-028",
       "name": "The rounding-tolerance collapse of a foreign-currency matching",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#37-step-7--the-amounts-when-the-reconciliation-currency-is-a-foreign-currency",
       "purpose": "Recognises that the two sides of a foreign-currency matching are indistinguishable once rounding is taken into account, and equalises them so that no exchange difference is invented where none exists.",
@@ -2735,7 +2854,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-028",
+      "identifier": "payments-and-bank-reconciliation-029",
       "name": "The exchange difference when the reconciliation currency is the company currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#38-step-8--the-exchange-difference",
       "purpose": "Closes the foreign residual of a side that has just been fully matched in the company currency, so that an item whose company-currency amount is settled does not keep a foreign amount open.",
@@ -2828,7 +2947,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-029",
+      "identifier": "payments-and-bank-reconciliation-030",
       "name": "The exchange difference when the reconciliation currency is a foreign currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#38-step-8--the-exchange-difference",
       "purpose": "Closes the company-currency drift of both sides of a foreign-currency matching, and keeps the ratio between an item's company residual and its foreign residual equal to the ratio it was booked at, even after a partial matching.",
@@ -2938,7 +3057,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-030",
+      "identifier": "payments-and-bank-reconciliation-031",
       "name": "Updating the running residuals and producing the matching",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#39-step-9--produce-the-matching-and-update-the-residuals",
       "purpose": "Applies the computed amounts to the two running item states and states exactly which values the Partial Reconciliation carries.",
@@ -3034,7 +3153,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-031",
+      "identifier": "payments-and-bank-reconciliation-032",
       "name": "The exhaustion test of one side of a pair",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#310-step-10--exhaustion",
       "purpose": "Tells the pairing loop whether a side has nothing left at all, which is what makes the loop advance to the next item of that queue and what marks the item fully reconciled for the operation.",
@@ -3118,7 +3237,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-032",
+      "identifier": "payments-and-bank-reconciliation-033",
       "name": "End-to-end example: a payment of one thousand against invoices of six hundred and five hundred",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#311-worked-example--a-payment-of-1-000-against-invoices-of-600-and-500",
       "purpose": "Carries one single-currency reconciliation through every step of the matching, and shows why the sort order of the plan decides which document is settled in full.",
@@ -3226,7 +3345,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-033",
+      "identifier": "payments-and-bank-reconciliation-034",
       "name": "When an exchange-difference entry is prepared",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#41-when-one-is-prepared",
       "purpose": "States the input the preparation reads: the list of drifting items and, for each, the amount to remove from one of its two residuals.",
@@ -3295,7 +3414,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-034",
+      "identifier": "payments-and-bank-reconciliation-035",
       "name": "The date and the header of an exchange-difference entry",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#42-the-entry-header",
       "purpose": "Fixes the company, the journal, the date and the numbering of the entry that books a rate difference, the date being the only part of the header that is arithmetic.",
@@ -3391,7 +3510,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-035",
+      "identifier": "payments-and-bank-reconciliation-036",
       "name": "The two lines produced for one drifting item",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#43-the-two-lines-per-fix",
       "purpose": "Turns one fix into the pair of journal items that cancels the drift on the item's own account and books the gain or the loss, and states which of the two exchange accounts is chosen.",
@@ -3518,7 +3637,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-036",
+      "identifier": "payments-and-bank-reconciliation-037",
       "name": "Creating and posting the exchange-difference entries",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#44-creating-the-entries",
       "purpose": "States the guards that run before the prepared entries are written, the exact refusal of each, and the two flags that keep the creation from cascading.",
@@ -3617,7 +3736,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-037",
+      "identifier": "payments-and-bank-reconciliation-038",
       "name": "Reversing an exchange-difference entry when a matching is deleted",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#45-reversal-on-unreconciliation",
       "purpose": "States what happens to the derived entry when the matching that produced it is removed, and how the reversal is dated so that it never falls in a locked period.",
@@ -3709,7 +3828,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-038",
+      "identifier": "payments-and-bank-reconciliation-039",
       "name": "End-to-end example: a bank transaction of one thousand five hundred matched to a foreign-currency invoice at a different rate",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#46-worked-example--a-bank-transaction-of-1-500-matched-to-a-foreign-currency-invoice-at-a-different-rate",
       "purpose": "Carries one cross-rate settlement through the transaction's own entry, the matching, the exchange difference and the resulting residuals, and shows the collapse rule deciding whether a second difference appears.",
@@ -3866,7 +3985,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-039",
+      "identifier": "payments-and-bank-reconciliation-040",
       "name": "The connected group of a set of items",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#51-the-connected-group",
       "purpose": "Widens a set of matched items to everything that shares their matching numbers, which is the population the completeness test is applied to.",
@@ -3950,7 +4069,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-040",
+      "identifier": "payments-and-bank-reconciliation-041",
       "name": "Whether a connected group is fully settled",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#52-is-the-group-complete",
       "purpose": "Decides whether the group may receive a full-reconciliation marker, using the company-currency residual or the item-currency residual according to whether the group mixes currencies.",
@@ -4094,7 +4213,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-041",
+      "identifier": "payments-and-bank-reconciliation-042",
       "name": "Creating the full-reconciliation marker",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#53-creating-the-marker",
       "purpose": "Records that a group has closed, by linking every matching and every item of the group to one marker and rewriting their matching numbers.",
@@ -4167,7 +4286,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-042",
+      "identifier": "payments-and-bank-reconciliation-043",
       "name": "End-to-end example: three partial payments reaching full reconciliation",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#54-worked-example--a-chain-of-partial-reconciliations-reaching-full-reconciliation",
       "purpose": "Follows one invoice through three separate reconciliations, showing when the partial number is assigned, when the group closes, and what undoing the last matching restores.",
@@ -4292,7 +4411,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-043",
+      "identifier": "payments-and-bank-reconciliation-044",
       "name": "Recomputing the matching number of a connected closure",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#61-the-algorithm",
       "purpose": "Assigns every item that takes part in a matching a stable number naming the component it belongs to, so that a group can be recognised without walking the matching graph every time.",
@@ -4393,7 +4512,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-044",
+      "identifier": "payments-and-bank-reconciliation-045",
       "name": "The permitted shapes of a matching number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#62-the-permitted-shapes",
       "purpose": "States the constraint that keeps a matching number consistent with the matchings and the marker of its item, and the exact internal error each violation raises.",
@@ -4488,7 +4607,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-045",
+      "identifier": "payments-and-bank-reconciliation-046",
       "name": "Deferred matching of imported items",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#63-deferred-matching-on-import",
       "purpose": "Turns the placeholder numbers carried by imported items into real matchings, once every entry of a group has been posted.",
@@ -4585,7 +4704,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-046",
+      "identifier": "payments-and-bank-reconciliation-047",
       "name": "The ordering index of a bank transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#71-the-ordering-index-of-a-transaction",
       "purpose": "Packs the date, the sequence and the identifier of a transaction into one text, so that asking for the transactions before a given one is a single text comparison rather than a compound condition.",
@@ -4682,7 +4801,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-047",
+      "identifier": "payments-and-bank-reconciliation-048",
       "name": "The running balance of a bank transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#72-the-running-balance-of-a-transaction",
       "purpose": "Gives the balance of the journal after each displayed transaction, anchored on statements so that the whole history of the journal does not have to be replayed.",
@@ -4827,7 +4946,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-048",
+      "identifier": "payments-and-bank-reconciliation-049",
       "name": "The starting balance of a bank statement",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#73-the-starting-balance-of-a-statement",
       "purpose": "Derives the balance the journal stood at just before a statement opens, chaining onto the reported ending balance of the previous statement and picking up whatever happened in between.",
@@ -4943,7 +5062,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-049",
+      "identifier": "payments-and-bank-reconciliation-050",
       "name": "The computed ending balance of a bank statement",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#74-computed-and-reported-ending-balances",
       "purpose": "Gives the balance the statement should close at according to the ledger, which the completeness test compares with what the bank actually reported.",
@@ -5029,7 +5148,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-050",
+      "identifier": "payments-and-bank-reconciliation-051",
       "name": "The reported ending balance of a bank statement",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#74-computed-and-reported-ending-balances",
       "purpose": "Holds what the bank says the account closed at; it starts as a copy of the computed balance so that a freshly created statement is complete by construction.",
@@ -5111,7 +5230,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-051",
+      "identifier": "payments-and-bank-reconciliation-052",
       "name": "The completeness of a bank statement",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#75-completeness",
       "purpose": "Says whether a statement is closed and agrees with the bank, which is what the reconciliation screen and the dashboard show as a warning when it fails.",
@@ -5199,7 +5318,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-052",
+      "identifier": "payments-and-bank-reconciliation-053",
       "name": "The validity of a bank statement",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#76-validity",
       "purpose": "Says whether a statement opens exactly where the previous one closed, which is what tells a user that a statement is missing or that a transaction was moved.",
@@ -5300,7 +5419,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-053",
+      "identifier": "payments-and-bank-reconciliation-054",
       "name": "End-to-end example: a chain of three statements",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#77-worked-example--a-chain-of-three-statements",
       "purpose": "Carries five transactions and three statements through the starting balance, the ending balance, the completeness and the validity, and shows what one wrong bank figure does to the chain.",
@@ -5429,7 +5548,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-054",
+      "identifier": "payments-and-bank-reconciliation-055",
       "name": "The three currencies of a bank transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#81-the-three-currencies",
       "purpose": "Fixes which currency each of the transaction's three amounts is expressed in, which every later formula of the transaction depends on.",
@@ -5511,7 +5630,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-055",
+      "identifier": "payments-and-bank-reconciliation-056",
       "name": "The three amounts of a bank transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#82-the-three-amounts",
       "purpose": "Derives, from the single amount the bank reported, the three figures the transaction's journal entry needs: one in the journal currency, one in the currency of the underlying obligation and one in the books' currency.",
@@ -5608,7 +5727,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-056",
+      "identifier": "payments-and-bank-reconciliation-057",
       "name": "The two journal items of a bank transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#83-the-two-items",
       "purpose": "States the liquidity line and the counterpart line the transaction's entry always carries when it is created, before any reconciliation rewrites the second one.",
@@ -5715,7 +5834,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-057",
+      "identifier": "payments-and-bank-reconciliation-058",
       "name": "The amounts and currencies read back from a transaction's entry",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#84-the-rates-read-back-from-the-entry",
       "purpose": "Recovers the transaction's three amounts from the entry as it now stands, which is what the reconciliation screen shows once the suspense line has been partly or wholly replaced.",
@@ -5817,7 +5936,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-058",
+      "identifier": "payments-and-bank-reconciliation-059",
       "name": "The two rates implied by a bank transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#85-converting-a-counterpart-amount-at-the-banks-own-rate",
       "purpose": "Reads back, from the transaction's own three amounts, the two rates the bank actually applied, so that a settlement made from this transaction uses the bank's conversion rather than the company's rate table.",
@@ -5901,7 +6020,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-059",
+      "identifier": "payments-and-bank-reconciliation-060",
       "name": "Converting a counterpart amount given in the transaction currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#85-converting-a-counterpart-amount-at-the-banks-own-rate",
       "purpose": "The first of the three conversion cases: the amount to settle is already expressed in the currency of the underlying obligation, so the two other amounts are derived downwards through the bank's own rates.",
@@ -5984,7 +6103,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-060",
+      "identifier": "payments-and-bank-reconciliation-061",
       "name": "Converting a counterpart amount given in the journal currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#85-converting-a-counterpart-amount-at-the-banks-own-rate",
       "purpose": "The second of the three conversion cases: the amount to settle is expressed in the currency the journal is held in, so it is pushed upwards into the transaction currency and downwards into the company currency.",
@@ -6061,7 +6180,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-061",
+      "identifier": "payments-and-bank-reconciliation-062",
       "name": "Converting a counterpart amount given in any other currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#85-converting-a-counterpart-amount-at-the-banks-own-rate",
       "purpose": "The third of the three conversion cases: the amount to settle is in neither the transaction currency nor the journal currency, so the company-currency balance is taken as given and the two other amounts are built up from it.",
@@ -6140,7 +6259,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-062",
+      "identifier": "payments-and-bank-reconciliation-063",
       "name": "The candidate journal items of a bank transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#91-the-candidate-journal-items",
       "purpose": "Fixes the population a transaction may be matched with, which the reconciliation screen offers and the automatic matching searches.",
@@ -6264,7 +6383,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-063",
+      "identifier": "payments-and-bank-reconciliation-064",
       "name": "Reconciling a bank transaction, step by step",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#92-the-operation-step-by-step",
       "purpose": "The whole operation a user performs on the reconciliation screen: taking a transaction whose amount sits on the suspense account and explaining it, by matching open items, by allocating through a model, or by recording a Payment.",
@@ -6393,7 +6512,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-064",
+      "identifier": "payments-and-bank-reconciliation-065",
       "name": "Undoing the reconciliation of a bank transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#93-undoing",
       "purpose": "Returns a transaction to its unexplained state, removing everything the reconciliation wrote and restoring the two default lines.",
@@ -6480,7 +6599,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-065",
+      "identifier": "payments-and-bank-reconciliation-066",
       "name": "Evaluating the reconciliation models of a transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#101-the-evaluation-step-by-step",
       "purpose": "Selects, from the models of the company, at most one that applies to a transaction, plus possibly a counterparty discovered by a mapping, in an order that is entirely determined.",
@@ -6605,7 +6724,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-066",
+      "identifier": "payments-and-bank-reconciliation-067",
       "name": "The amount condition of a reconciliation model: an upper bound",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#101-the-evaluation-step-by-step",
       "purpose": "The first of the three amount conditions: the model applies only to transactions no larger than a stated maximum.",
@@ -6687,7 +6806,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-067",
+      "identifier": "payments-and-bank-reconciliation-068",
       "name": "The amount condition of a reconciliation model: a lower bound",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#101-the-evaluation-step-by-step",
       "purpose": "The second of the three amount conditions: the model applies only to transactions no smaller than a stated minimum.",
@@ -6757,7 +6876,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-068",
+      "identifier": "payments-and-bank-reconciliation-069",
       "name": "The amount condition of a reconciliation model: between two bounds",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#101-the-evaluation-step-by-step",
       "purpose": "The third of the three amount conditions: the model applies only to transactions inside a stated band, both bounds being required.",
@@ -6847,7 +6966,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-069",
+      "identifier": "payments-and-bank-reconciliation-070",
       "name": "The label condition of a reconciliation model",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#101-the-evaluation-step-by-step",
       "purpose": "Tests the text a bank sent with the transaction against the pattern of a model, in one of three modes, over a pool that includes the raw details as well as the label.",
@@ -6934,7 +7053,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-070",
+      "identifier": "payments-and-bank-reconciliation-071",
       "name": "Whether a reconciliation model may be proposed",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#101-the-evaluation-step-by-step",
       "purpose": "Keeps a model with no condition at all from being offered against every transaction, by requiring at least one restriction or an automatic trigger.",
@@ -7042,7 +7161,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-071",
+      "identifier": "payments-and-bank-reconciliation-072",
       "name": "The ordering of reconciliation models and of their lines",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#102-the-ordering-rules-restated",
       "purpose": "States the three orderings the evaluation and the amount computation depend on, because each of them changes the result.",
@@ -7149,7 +7268,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-072",
+      "identifier": "payments-and-bank-reconciliation-073",
       "name": "Recognising a partner-mapping model",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#103-partner-mapping",
       "purpose": "States the four conditions that make a model a pure counterparty mapping, which writes nothing and only says whom a transaction belongs to.",
@@ -7241,7 +7360,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-073",
+      "identifier": "payments-and-bank-reconciliation-074",
       "name": "The transaction amount and the open balance of a model application",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#111-definitions",
       "purpose": "Defines the two quantities every counterpart line of a model reads: the amount the bank reported and what is still unexplained at the moment the line is evaluated.",
@@ -7314,7 +7433,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-074",
+      "identifier": "payments-and-bank-reconciliation-075",
       "name": "The counterpart line amount in the fixed mode",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#112-the-four-modes",
       "purpose": "The first of the four amount modes: the line carries a constant, whose sign decides the side of the journal item.",
@@ -7380,7 +7499,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-075",
+      "identifier": "payments-and-bank-reconciliation-076",
       "name": "The counterpart line amount as a percentage of the open balance",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#112-the-four-modes",
       "purpose": "The second of the four amount modes: the line takes a share of what is still unexplained at the moment it is evaluated, which is what makes the line order part of the model's definition.",
@@ -7456,7 +7575,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-076",
+      "identifier": "payments-and-bank-reconciliation-077",
       "name": "The counterpart line amount as a percentage of the transaction",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#112-the-four-modes",
       "purpose": "The third of the four amount modes: the line takes a share of the amount the bank reported, whatever the earlier lines consumed, so that two such lines of half each always split the original amount.",
@@ -7529,7 +7648,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-077",
+      "identifier": "payments-and-bank-reconciliation-078",
       "name": "The counterpart line amount read out of the label",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#112-the-four-modes",
       "purpose": "The fourth of the four amount modes: the line reads the amount out of the text the bank sent, which is how a gross amount stated in a remittance can be booked exactly.",
@@ -7609,7 +7728,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-078",
+      "identifier": "payments-and-bank-reconciliation-079",
       "name": "Reducing the open balance after each model line",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#112-the-four-modes",
       "purpose": "States what happens between two lines and at the end of the model: the open balance falls by each line amount, and any remainder stays on the suspense account.",
@@ -7708,7 +7827,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-079",
+      "identifier": "payments-and-bank-reconciliation-080",
       "name": "End-to-end example: a reconciliation model with a percentage counterpart",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#113-worked-example--a-reconciliation-model-with-a-percentage-counterpart",
       "purpose": "Carries one model application through the matching, the two line amounts and the rewritten entry, and shows how the line order and the choice between the two percentage modes change the outcome.",
@@ -7861,7 +7980,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-080",
+      "identifier": "payments-and-bank-reconciliation-081",
       "name": "The grouping key of a journal item on the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#121-the-grouping-key-of-a-journal-item",
       "purpose": "Decides which selected items belong to the same future payment, by naming the five properties two items must share.",
@@ -7970,7 +8089,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-081",
+      "identifier": "payments-and-bank-reconciliation-082",
       "name": "Building and merging the batches of the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#122-building-the-batches",
       "purpose": "Turns the selected items into the batches that will become payments, joining the two directions of one counterparty when each direction resolves to a single recipient account, so that an invoice and a credit note yield one net payment.",
@@ -8091,7 +8210,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-082",
+      "identifier": "payments-and-bank-reconciliation-083",
       "name": "The company and the source amounts of a batch",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#123-values-read-from-a-batch",
       "purpose": "Reads from a batch the company that will carry the payment and the two totals the screen shows as the amount the documents are asking for.",
@@ -8182,7 +8301,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-083",
+      "identifier": "payments-and-bank-reconciliation-084",
       "name": "The installment reading of a document",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#124-the-installment-reading-of-a-document",
       "purpose": "Turns the payment-term items of one document into the ordered installments the register-payment screen reasons about, each with its four amounts, its due date and its type.",
@@ -8298,7 +8417,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-084",
+      "identifier": "payments-and-bank-reconciliation-085",
       "name": "Eligibility of a document for an early payment discount",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#124-the-installment-reading-of-a-document",
       "purpose": "States the five conditions a document must satisfy before its installment is read at the discounted amount.",
@@ -8401,7 +8520,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-085",
+      "identifier": "payments-and-bank-reconciliation-086",
       "name": "Classifying a payment-term installment",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#124-the-installment-reading-of-a-document",
       "purpose": "Gives each installment of a document one of three types, and latches the first mode of the document, which decides what the screen proposes and what the switch under the amount offers.",
@@ -8504,7 +8623,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-086",
+      "identifier": "payments-and-bank-reconciliation-087",
       "name": "Converting a list of installments into the screen currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#125-converting-a-list-of-installments-into-the-wizard-currency",
       "purpose": "Totals a bucket of installments in the currency the payment will be made in, going through the company currency whenever neither shortcut applies.",
@@ -8604,7 +8723,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-087",
+      "identifier": "payments-and-bank-reconciliation-088",
       "name": "Dispatching the installments into the four buckets",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#126-the-four-totals",
       "purpose": "Sorts the installments of every document into the four groups whose totals the screen proposes, and latches the first mode that decides the wording of the switch under the amount.",
@@ -8714,7 +8833,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-088",
+      "identifier": "payments-and-bank-reconciliation-089",
       "name": "The four totals of the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#126-the-four-totals",
       "purpose": "Produces the four amounts the screen reasons about: what it proposes by default, what the whole selection comes to, and the two undiscounted counterparts used to compute the difference.",
@@ -8806,7 +8925,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-089",
+      "identifier": "payments-and-bank-reconciliation-090",
       "name": "The proposed amount of the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#127-the-proposed-amount",
       "purpose": "Decides what figure the amount field holds, and when the automatic computation stops overwriting what the user typed.",
@@ -8906,7 +9025,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-090",
+      "identifier": "payments-and-bank-reconciliation-091",
       "name": "The installment mode of the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#128-the-installment-mode",
       "purpose": "Names which of the proposed readings the current amount corresponds to, which the switch under the amount and the payment difference both read.",
@@ -9006,7 +9125,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-091",
+      "identifier": "payments-and-bank-reconciliation-092",
       "name": "The switch offered under the amount",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#129-the-switch-offered-under-the-amount",
       "purpose": "States, for each installment mode, which amount the clickable switch would write and which text is shown beside it.",
@@ -9118,7 +9237,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-092",
+      "identifier": "payments-and-bank-reconciliation-093",
       "name": "The early-discount mode of the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1210-discount-mode",
       "purpose": "Says when the screen is granting a discount rather than writing off a difference, which forces the difference handling and hides the write-off section.",
@@ -9208,7 +9327,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-093",
+      "identifier": "payments-and-bank-reconciliation-094",
       "name": "The payment difference of the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1211-the-payment-difference",
       "purpose": "Gives the gap between what the documents ask for, undiscounted, and what is actually being paid; in discount mode that gap is exactly the discount granted.",
@@ -9317,7 +9436,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-094",
+      "identifier": "payments-and-bank-reconciliation-095",
       "name": "The difference kept open",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1212-what-the-difference-becomes",
       "purpose": "The first of the three ways a difference is handled: nothing is booked for it and the document keeps a residual.",
@@ -9398,7 +9517,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-095",
+      "identifier": "payments-and-bank-reconciliation-096",
       "name": "The difference in discount mode: the open amount and the open balance",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1212-what-the-difference-becomes",
       "purpose": "The second of the three ways a difference is handled: it is the discount granted, and this calculation gives the two amounts the discount counterpart lines must together consume.",
@@ -9492,7 +9611,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-096",
+      "identifier": "payments-and-bank-reconciliation-097",
       "name": "The difference pushed onto an exchange account, with a foreign payment currency: the forced balance",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1212-what-the-difference-becomes",
       "purpose": "The first variant of the third way a difference is handled: when the chosen account is an exchange-difference account and the payment is not in the company currency, the payment's company-currency amount is forced onto the documents' figure so that the whole difference lands on the exchange side.",
@@ -9575,7 +9694,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-097",
+      "identifier": "payments-and-bank-reconciliation-098",
       "name": "The difference pushed onto an exchange account, with the company currency: the forced rate",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1212-what-the-difference-becomes",
       "purpose": "The second variant of the third way a difference is handled: when the chosen account is an exchange-difference account and the payment is in the company currency, a rate is forced onto the reconciliation so that the whole difference becomes an exchange-difference entry.",
@@ -9651,7 +9770,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-098",
+      "identifier": "payments-and-bank-reconciliation-099",
       "name": "The difference written off to an ordinary account",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1212-what-the-difference-becomes",
       "purpose": "The third variant of the third way a difference is handled: one write-off line is produced on the chosen account, with the sign that makes the counterpart settle the documents exactly.",
@@ -9770,7 +9889,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-099",
+      "identifier": "payments-and-bank-reconciliation-100",
       "name": "Choosing the cash-discount account of a document",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1213-the-discount-counterpart-lines",
       "purpose": "Decides on which of the company's two cash-discount accounts the discount of a document is booked, by the direction of the document rather than of the payment.",
@@ -9858,7 +9977,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-100",
+      "identifier": "payments-and-bank-reconciliation-101",
       "name": "The base delta of a rebuilt product line",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1213-the-discount-counterpart-lines",
       "purpose": "Computes, line by line, how much of a document's untaxed base the discount removes, by rebuilding the line at the discounted unit price and comparing it with the original.",
@@ -9951,7 +10070,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-101",
+      "identifier": "payments-and-bank-reconciliation-102",
       "name": "The fraction of the document being settled",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1213-the-discount-counterpart-lines",
       "purpose": "Scales the discount lines down to the share of the document the payment actually settles, so that a partial settlement grants only its share of the discount.",
@@ -10019,7 +10138,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-102",
+      "identifier": "payments-and-bank-reconciliation-103",
       "name": "The tax counterpart lines of an early payment discount",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1213-the-discount-counterpart-lines",
       "purpose": "Produces the lines that correct the tax when the payment term computes the discount on the taxed amount, so that the tax report reflects the discount granted.",
@@ -10106,7 +10225,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-103",
+      "identifier": "payments-and-bank-reconciliation-104",
       "name": "The base counterpart lines of an early payment discount",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1213-the-discount-counterpart-lines",
       "purpose": "Turns each accumulated base delta into a counterpart line on the cash-discount account, scaled to the share of the document being settled.",
@@ -10189,7 +10308,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-104",
+      "identifier": "payments-and-bank-reconciliation-105",
       "name": "The rounding fix of the discount counterpart lines",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1213-the-discount-counterpart-lines",
       "purpose": "Guarantees that the discount counterpart lines sum exactly to the discount the payment-term item records, by pushing any residue onto the largest base line.",
@@ -10279,7 +10398,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-105",
+      "identifier": "payments-and-bank-reconciliation-106",
       "name": "The leftover exchange line of an early payment discount",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1213-the-discount-counterpart-lines",
       "purpose": "Books whatever the discount lines did not consume of the open balance, on one of the company's two exchange-difference accounts, so that the payment entry balances.",
@@ -10370,7 +10489,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-106",
+      "identifier": "payments-and-bank-reconciliation-107",
       "name": "End-to-end example: a payment taking a two percent early discount",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1214-worked-example--a-payment-taking-a-two-percent-early-discount",
       "purpose": "Carries one discounted settlement through the installment reading, the four totals, the mode, the difference, the discount lines and the resulting payment entry, and states the taxed variant.",
@@ -10549,7 +10668,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-107",
+      "identifier": "payments-and-bank-reconciliation-108",
       "name": "End-to-end example: a write-off of three hundredths",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1215-worked-example--a-write-off-of-three-hundredths",
       "purpose": "Carries one short payment through the custom-amount detector, the mode, the difference and the write-off, in both directions, and states what the alternative handling would have produced.",
@@ -10704,7 +10823,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-108",
+      "identifier": "payments-and-bank-reconciliation-109",
       "name": "Correcting the balance when the payment currency differs from the documents'",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1216-fixing-the-balance-when-the-payment-currency-differs",
       "purpose": "Adds the small amount that makes a payment made in another currency settle its documents exactly in the company currency, so that no unmatched remainder is left behind.",
@@ -10803,7 +10922,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-109",
+      "identifier": "payments-and-bank-reconciliation-110",
       "name": "Splitting an existing payment entry into its three groups",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#131-splitting-an-existing-payment-entry",
       "purpose": "Classifies the items of a Payment's entry into liquidity, counterpart and write-off, which every later rule about a Payment reads, and repairs a Payment whose outstanding account has since been changed.",
@@ -10923,7 +11042,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-110",
+      "identifier": "payments-and-bank-reconciliation-111",
       "name": "The write-off and withholding totals of a new payment entry",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#132-preparing-the-items-of-a-new-payment-entry",
       "purpose": "Totals the supplied write-off lines and the withholding lines, and states the rule that drops the write-off lines when both kinds are present.",
@@ -11018,7 +11137,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-111",
+      "identifier": "payments-and-bank-reconciliation-112",
       "name": "The liquidity amount of a payment entry in the payment currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#132-preparing-the-items-of-a-new-payment-entry",
       "purpose": "Turns the always positive amount of a Payment into the signed foreign amount of its liquidity line, by the direction alone.",
@@ -11099,7 +11218,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-112",
+      "identifier": "payments-and-bank-reconciliation-113",
       "name": "The liquidity balance of a payment entry from a forced balance",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#132-preparing-the-items-of-a-new-payment-entry",
       "purpose": "The first of the two ways the company-currency amount of the liquidity line is obtained: the caller states it outright, so that the payment is booked at exactly the figure the documents carry.",
@@ -11176,7 +11295,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-113",
+      "identifier": "payments-and-bank-reconciliation-114",
       "name": "The liquidity balance of a payment entry by conversion",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#132-preparing-the-items-of-a-new-payment-entry",
       "purpose": "The second of the two ways the company-currency amount of the liquidity line is obtained: the signed foreign amount is converted at the date of the Payment.",
@@ -11256,7 +11375,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-114",
+      "identifier": "payments-and-bank-reconciliation-115",
       "name": "Subtracting the withholding totals from the liquidity side",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#132-preparing-the-items-of-a-new-payment-entry",
       "purpose": "Reduces the liquidity line by whatever is withheld, so that the liquidity carries the net while the counterpart still carries the gross.",
@@ -11339,7 +11458,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-115",
+      "identifier": "payments-and-bank-reconciliation-116",
       "name": "The counterpart amounts of a payment entry",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#132-preparing-the-items-of-a-new-payment-entry",
       "purpose": "Gives the amounts of the counterpart line, which absorb the liquidity, the write-off and the withholding so that the entry balances and the counterpart matches the documents exactly.",
@@ -11439,7 +11558,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-116",
+      "identifier": "payments-and-bank-reconciliation-117",
       "name": "The signed amount of a Payment in the company currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#133-the-company-currency-signed-amount",
       "purpose": "Gives the figure the dashboard and the reports use for a Payment, read from its entry when it has one and derived by conversion when it does not.",
@@ -11530,7 +11649,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-117",
+      "identifier": "payments-and-bank-reconciliation-118",
       "name": "Normalising and sanitizing a bank account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#141-normalisation",
       "purpose": "Reduces an account number as typed to the canonical form every check and every stored value uses.",
@@ -11598,7 +11717,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-118",
+      "identifier": "payments-and-bank-reconciliation-119",
       "name": "The account-number template of a country and its length",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#142-the-country-template",
       "purpose": "Gives, per country, the shape a valid international account number has, which fixes its length and says which position belongs to which part.",
@@ -11754,7 +11873,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-119",
+      "identifier": "payments-and-bank-reconciliation-120",
       "name": "The emptiness check of an account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#143-the-validation-written-as-arithmetic",
       "purpose": "The first step of the validation: an empty number is refused before anything else is attempted.",
@@ -11818,7 +11937,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-120",
+      "identifier": "payments-and-bank-reconciliation-121",
       "name": "The country check of an account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#143-the-validation-written-as-arithmetic",
       "purpose": "The second step of the validation: the first two characters must name a country the template table knows.",
@@ -11888,7 +12007,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-121",
+      "identifier": "payments-and-bank-reconciliation-122",
       "name": "The length and alphabet check of an account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#143-the-validation-written-as-arithmetic",
       "purpose": "The third step of the validation: the number must have exactly the length the country's template prescribes and must hold only letters and digits.",
@@ -11966,7 +12085,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-122",
+      "identifier": "payments-and-bank-reconciliation-123",
       "name": "Rotating an account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#143-the-validation-written-as-arithmetic",
       "purpose": "The fourth step of the validation: the four leading characters are moved to the end, which is what places the check digits where the modulo test expects them.",
@@ -12028,7 +12147,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-123",
+      "identifier": "payments-and-bank-reconciliation-124",
       "name": "Expanding an account number into decimal digits",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#143-the-validation-written-as-arithmetic",
       "purpose": "The fifth step of the validation: every character of the rotated text is replaced by its base-thirty-six value written in decimal, so that the whole text becomes one very large whole number.",
@@ -12098,7 +12217,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-124",
+      "identifier": "payments-and-bank-reconciliation-125",
       "name": "The modulo ninety-seven test and its left-to-right fold",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#143-the-validation-written-as-arithmetic",
       "purpose": "The sixth and last step of the validation: the expanded number must leave a remainder of one when divided by ninety-seven, computed by a fold so that no machine integer is ever exceeded.",
@@ -12216,7 +12335,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-125",
+      "identifier": "payments-and-bank-reconciliation-126",
       "name": "Worked example: validating a Belgian account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#144-worked-example--checking-be62-5100-0754-7061",
       "purpose": "Carries one account number through the six validation steps with every intermediate value, and shows what one wrong digit does.",
@@ -12335,7 +12454,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-126",
+      "identifier": "payments-and-bank-reconciliation-127",
       "name": "The pretty form of an account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#145-formatting-and-the-derived-parts",
       "purpose": "Rewrites a valid number in groups of four for display and storage, while leaving an invalid one exactly as the user typed it.",
@@ -12425,7 +12544,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-127",
+      "identifier": "payments-and-bank-reconciliation-128",
       "name": "The basic account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#145-formatting-and-the-derived-parts",
       "purpose": "Gives the national part of an international account number, that is what remains once the country code and the two check digits are dropped.",
@@ -12494,7 +12613,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-128",
+      "identifier": "payments-and-bank-reconciliation-129",
       "name": "Extracting a named part of an account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#145-formatting-and-the-derived-parts",
       "purpose": "Reads out of an international account number the bank code, the branch code, the account number, one of the two kinds of check digit, or one of the four country-specific parts, by walking the template.",
@@ -12580,7 +12699,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-129",
+      "identifier": "payments-and-bank-reconciliation-130",
       "name": "Inferring the type of an account number",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#145-formatting-and-the-derived-parts",
       "purpose": "Classifies a Bank Account as holding an international account number or an ordinary one, and keeps that classification honest whenever the number changes.",
@@ -12663,7 +12782,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-130",
+      "identifier": "payments-and-bank-reconciliation-131",
       "name": "Sanitising a payment reference",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#151-sanitisation",
       "purpose": "Reduces a payment communication to the form the seven structured checks read, removing the decoration a national scheme wraps around its digits.",
@@ -12749,7 +12868,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-131",
+      "identifier": "payments-and-bank-reconciliation-132",
       "name": "The trailing check-digit algorithm",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#152-two-shared-algorithms",
       "purpose": "The shared digit test two of the seven schemes use: every second digit from the right is doubled and the total must be a multiple of ten.",
@@ -12831,7 +12950,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-132",
+      "identifier": "payments-and-bank-reconciliation-133",
       "name": "The modulo ninety-seven remainder of a text",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#152-two-shared-algorithms",
       "purpose": "The shared remainder the international creditor reference scheme rests on: the text is expanded into decimal digits and folded modulo ninety-seven.",
@@ -12894,7 +13013,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-133",
+      "identifier": "payments-and-bank-reconciliation-134",
       "name": "The two check digits for a text",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#152-two-shared-algorithms",
       "purpose": "Produces the two check digits that make a reference pass the modulo ninety-seven test, by subtracting the remainder from ninety-eight.",
@@ -12964,7 +13083,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-134",
+      "identifier": "payments-and-bank-reconciliation-135",
       "name": "The Belgian structured reference check",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#153-the-seven-checks",
       "purpose": "The first of the seven schemes: twelve digits whose last two must equal the first ten reduced modulo ninety-seven.",
@@ -13044,7 +13163,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-135",
+      "identifier": "payments-and-bank-reconciliation-136",
       "name": "The Danish structured reference check",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#153-the-seven-checks",
       "purpose": "The second of the seven schemes: a decorated shape wrapping a block of fifteen or sixteen digits that must satisfy the trailing check-digit test.",
@@ -13133,7 +13252,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-136",
+      "identifier": "payments-and-bank-reconciliation-137",
       "name": "The Finnish structured reference check",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#153-the-seven-checks",
       "purpose": "The third of the seven schemes: a body of up to nineteen digits followed by one check digit computed with the repeating weights seven, three and one.",
@@ -13224,7 +13343,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-137",
+      "identifier": "payments-and-bank-reconciliation-138",
       "name": "The Norwegian and Swedish structured reference check",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#153-the-seven-checks",
       "purpose": "The fourth of the seven schemes, shared by two countries: the reference is all digits and must satisfy the trailing check-digit test.",
@@ -13293,7 +13412,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-138",
+      "identifier": "payments-and-bank-reconciliation-139",
       "name": "The Slovenian structured reference check",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#153-the-seven-checks",
       "purpose": "The fifth of the seven schemes: a fixed prefix followed by three hyphen-separated groups whose concatenation carries a check digit computed with weights rising from two.",
@@ -13397,7 +13516,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-139",
+      "identifier": "payments-and-bank-reconciliation-140",
       "name": "The Dutch structured reference check",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#153-the-seven-checks",
       "purpose": "The sixth of the seven schemes: three permitted lengths, and for the longer ones a check digit at the front computed over the reversed remainder with a cycle of ten weights.",
@@ -13502,7 +13621,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-140",
+      "identifier": "payments-and-bank-reconciliation-141",
       "name": "The international creditor reference check",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#153-the-seven-checks",
       "purpose": "The seventh of the seven schemes and the fall-back of the per-country test: a two-letter prefix, then a body that must pass the modulo ninety-seven test after rotation.",
@@ -13578,7 +13697,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-141",
+      "identifier": "payments-and-bank-reconciliation-142",
       "name": "Generating an international creditor reference",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#153-the-seven-checks",
       "purpose": "Builds a reference that passes the international check from a base number, and writes it in the grouped form a payer is expected to type.",
@@ -13650,7 +13769,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-142",
+      "identifier": "payments-and-bank-reconciliation-143",
       "name": "The combined structured-reference test",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#154-the-combined-test",
       "purpose": "Says whether a reference is structured under any of the seven schemes, which is what the credit-transfer code reads to decide which of its two remittance fields to fill.",
@@ -13725,7 +13844,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-143",
+      "identifier": "payments-and-bank-reconciliation-144",
       "name": "The per-country structured-reference test",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#155-the-per-country-test",
       "purpose": "Applies exactly one scheme, chosen by a country code, which is how a country-specific integration checks a reference without accepting another country's shape.",
@@ -13812,7 +13931,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-144",
+      "identifier": "payments-and-bank-reconciliation-145",
       "name": "Choosing a quick response code generator",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#161-choosing-a-generator",
       "purpose": "Selects, among the registered generators, the first that can encode a given payment, and states the refusal when the caller asked for errors to be shown.",
@@ -13918,7 +14037,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-145",
+      "identifier": "payments-and-bank-reconciliation-146",
       "name": "Eligibility of the credit-transfer quick response code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#162-the-single-euro-payments-area-credit-transfer-code",
       "purpose": "States the three tests an account and a currency must pass before the credit-transfer code may be produced, and the exact line each failing test contributes.",
@@ -14020,7 +14139,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-146",
+      "identifier": "payments-and-bank-reconciliation-147",
       "name": "The data check of the credit-transfer quick response code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#162-the-single-euro-payments-area-credit-transfer-code",
       "purpose": "States the single condition on the payment data that the credit-transfer code requires beyond the eligibility of the account.",
@@ -14088,7 +14207,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-147",
+      "identifier": "payments-and-bank-reconciliation-148",
       "name": "The payload of the credit-transfer quick response code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#162-the-single-euro-payments-area-credit-transfer-code",
       "purpose": "States the twelve fields the code carries, their order, the exact formatting of the amount, and the rule that decides which of the two remittance fields is used.",
@@ -14213,7 +14332,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-148",
+      "identifier": "payments-and-bank-reconciliation-149",
       "name": "The eligibility and data checks of the merchant-presented quick response code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#163-the-merchant-presented-code",
       "purpose": "States why the merchant-presented generator is never eligible in the base capability, and the four data conditions a country-specific scheme must satisfy once it makes the generator eligible.",
@@ -14306,7 +14425,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-149",
+      "identifier": "payments-and-bank-reconciliation-150",
       "name": "Encoding one field of the merchant-presented quick response code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#163-the-merchant-presented-code",
       "purpose": "The primitive every field of the merchant-presented code is written with: a two-digit tag, a two-digit length and the value, with an absent value contributing nothing at all.",
@@ -14401,7 +14520,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-150",
+      "identifier": "payments-and-bank-reconciliation-151",
       "name": "The fields of the merchant-presented quick response code, in order",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#163-the-merchant-presented-code",
       "purpose": "States the ten fields the code carries and the order they are written in, which the checksum then covers.",
@@ -14535,7 +14654,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-151",
+      "identifier": "payments-and-bank-reconciliation-152",
       "name": "The transaction amount field of the merchant-presented quick response code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#163-the-merchant-presented-code",
       "purpose": "States how the amount is written into the code: not at all when it is zero, without a decimal part when it is whole, and as it is otherwise.",
@@ -14619,7 +14738,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-152",
+      "identifier": "payments-and-bank-reconciliation-153",
       "name": "Cleaning the merchant name, the merchant city and the communication",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#163-the-merchant-presented-code",
       "purpose": "States the accent removal, the truncation and the character filtering applied before those three texts are written into the code.",
@@ -14703,7 +14822,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-153",
+      "identifier": "payments-and-bank-reconciliation-154",
       "name": "The checksum of the merchant-presented quick response code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#163-the-merchant-presented-code",
       "purpose": "Closes the code with a sixteen-bit cyclic redundancy check over everything written before it, including the four characters that announce the checksum itself.",
@@ -14787,7 +14906,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-154",
+      "identifier": "payments-and-bank-reconciliation-155",
       "name": "The numeric code of a currency for the merchant-presented code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#163-the-merchant-presented-code",
       "purpose": "Maps the name of a currency to the three-digit numeric code the merchant-presented code carries, and states that a currency outside the table cannot be encoded.",
@@ -14896,7 +15015,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-155",
+      "identifier": "payments-and-bank-reconciliation-156",
       "name": "Worked example: encoding a merchant-presented quick response code",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#163-the-merchant-presented-code",
       "purpose": "Carries one merchant-presented code through the serialisation of every field and the appending of the checksum.",
@@ -14989,7 +15108,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-156",
+      "identifier": "payments-and-bank-reconciliation-157",
       "name": "The number of bank transactions to reconcile",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#171-number-to-reconcile",
       "purpose": "The first figure of a liquidity journal's dashboard card: how many transactions have been checked but still carry an unexplained amount.",
@@ -15087,7 +15206,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-157",
+      "identifier": "payments-and-bank-reconciliation-158",
       "name": "The number and the amount of bank transactions to check",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#172-number-to-check-and-amount-to-check",
       "purpose": "The second figure of a liquidity journal's dashboard card: how many posted transactions nobody has reviewed yet, and what they come to.",
@@ -15179,7 +15298,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-158",
+      "identifier": "payments-and-bank-reconciliation-159",
       "name": "The running balance of a liquidity journal",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#173-running-balance-of-the-journal",
       "purpose": "The balance the journal's statements and unassigned transactions come to, anchored on the most recent statement so that the whole history is not replayed.",
@@ -15263,7 +15382,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-159",
+      "identifier": "payments-and-bank-reconciliation-160",
       "name": "The direct bank payments of a liquidity journal",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#174-direct-bank-payments",
       "purpose": "Totals the Payments booked straight onto the journal's own bank account rather than onto an outstanding account, which the card adds to the statement balance.",
@@ -15367,7 +15486,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-160",
+      "identifier": "payments-and-bank-reconciliation-161",
       "name": "The account balance shown on the dashboard card",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#175-account-balance-shown-on-the-card",
       "purpose": "The headline figure of a liquidity journal's card: what the bank account is expected to hold, statements and direct payments together.",
@@ -15434,7 +15553,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-161",
+      "identifier": "payments-and-bank-reconciliation-162",
       "name": "The outstanding payments balance of a liquidity journal",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#176-outstanding-payments-balance",
       "purpose": "Totals the Payments of the journal that have not yet met a bank transaction, which is the amount still sitting on the outstanding accounts.",
@@ -15526,7 +15645,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-162",
+      "identifier": "payments-and-bank-reconciliation-163",
       "name": "Converting a group of payments into the journal's currency",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#177-converting-a-group-into-the-journals-currency",
       "purpose": "The shared conversion the two payment figures of the dashboard use, which goes through the company-currency total of a group whenever its currency differs from the target.",
@@ -15617,7 +15736,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-163",
+      "identifier": "payments-and-bank-reconciliation-164",
       "name": "The miscellaneous operations of a liquidity journal",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#178-miscellaneous-operations",
       "purpose": "Counts the journal items posted on the journal's bank account that came from neither a Bank Transaction nor a Payment, which is what tells a user that something is booked outside the two normal paths.",
@@ -15720,7 +15839,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-164",
+      "identifier": "payments-and-bank-reconciliation-165",
       "name": "The last statement and its visibility on the dashboard card",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#179-last-statement-and-validity",
       "purpose": "The remaining figures of a liquidity journal's card: which statement is the latest, what it reports, whether it may be shown, and whether the journal has an invalid statement.",
@@ -15813,7 +15932,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-165",
+      "identifier": "payments-and-bank-reconciliation-166",
       "name": "The thirty-day balance graph of a liquidity journal",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1710-the-graph",
       "purpose": "Builds the filled line graph of the card, walking backwards from today so that the curve ends at the journal's current running balance and always spans a full month.",
@@ -15921,7 +16040,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-166",
+      "identifier": "payments-and-bank-reconciliation-167",
       "name": "The sample graph of a liquidity journal with no history",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#1710-the-graph",
       "purpose": "Fills the card of a journal that has neither a daily total nor a statement line, so that the card is never blank, and marks the series as sample data.",
@@ -15998,7 +16117,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-167",
+      "identifier": "payments-and-bank-reconciliation-168",
       "name": "The liquidity journals available for a batch",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#181-the-journals-available-for-a-batch",
       "purpose": "Fixes which journals a payment may be made from, by the type of the journal and by the direction the batch needs.",
@@ -16095,7 +16214,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-168",
+      "identifier": "payments-and-bank-reconciliation-169",
       "name": "The journal chosen for a batch that names a recipient account",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#182-the-journal-chosen-for-a-batch",
       "purpose": "The first variant of the journal choice: when the batch names a recipient bank account, four candidate sets are tried in a preference order that puts the account above the currency.",
@@ -16197,7 +16316,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-169",
+      "identifier": "payments-and-bank-reconciliation-170",
       "name": "The journal chosen for a batch that names no recipient account",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#182-the-journal-chosen-for-a-batch",
       "purpose": "The second variant of the journal choice: with no recipient account to match, only the currency and then the plain availability are tried.",
@@ -16283,7 +16402,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-170",
+      "identifier": "payments-and-bank-reconciliation-171",
       "name": "Recomputing the journal when the available set changes",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#183-when-the-chosen-journal-is-overridden",
       "purpose": "States when the register-payment screen replaces the journal the user is looking at, and the three sources it draws the replacement from.",
@@ -16369,7 +16488,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-171",
+      "identifier": "payments-and-bank-reconciliation-172",
       "name": "The recipient accounts available for an inbound batch",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#184-the-recipient-bank-accounts-available-for-a-batch",
       "purpose": "The first variant of the recipient-account choice: money coming in is received on the company's own account, so only the journal's account is offered.",
@@ -16442,7 +16561,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-172",
+      "identifier": "payments-and-bank-reconciliation-173",
       "name": "The recipient accounts available for an outbound batch",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#184-the-recipient-bank-accounts-available-for-a-batch",
       "purpose": "The second variant of the recipient-account choice: money going out is sent to the counterparty, so the counterparties' accounts are offered, restricted to the batch's company.",
@@ -16531,7 +16650,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-173",
+      "identifier": "payments-and-bank-reconciliation-174",
       "name": "The payment method line chosen on a Payment",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#185-the-payment-method-line-chosen",
       "purpose": "The first variant of the method-line choice: on a Payment record, the counterparty's own default line is preferred, then the current one, then any available one.",
@@ -16619,7 +16738,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-174",
+      "identifier": "payments-and-bank-reconciliation-175",
       "name": "The payment method line chosen on the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#185-the-payment-method-line-chosen",
       "purpose": "The second variant of the method-line choice: on the screen the current line is kept first, then the single preference named on the documents, and a batch of the other direction falls back to its own.",
@@ -16708,7 +16827,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-175",
+      "identifier": "payments-and-bank-reconciliation-176",
       "name": "Whether grouping is offered for a single batch",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#186-whether-grouping-is-offered",
       "purpose": "The first variant of the grouping test: with one batch, grouping is offered only when there is more than one item and they do not all belong to one invoice-like document.",
@@ -16799,7 +16918,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-176",
+      "identifier": "payments-and-bank-reconciliation-177",
       "name": "Whether grouping is offered for several batches",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#186-whether-grouping-is-offered",
       "purpose": "The second variant of the grouping test: with more than one batch, grouping is offered when at least one batch holds more than one of the items that will actually be paid.",
@@ -16868,7 +16987,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-177",
+      "identifier": "payments-and-bank-reconciliation-178",
       "name": "The default of the grouping switch",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#186-whether-grouping-is-offered",
       "purpose": "Sets the initial position of the grouping switch, which is on only when every item of the single batch belongs to one document.",
@@ -16936,7 +17055,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-178",
+      "identifier": "payments-and-bank-reconciliation-179",
       "name": "How many payments will be created and how many are blocked",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#187-how-many-payments-will-be-created-and-how-many-are-blocked",
       "purpose": "Gives the two counters the register-payment screen shows before creation: the number of payments to be created and the number blocked by a missing or untrusted recipient account.",
@@ -17034,7 +17153,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-179",
+      "identifier": "payments-and-bank-reconciliation-180",
       "name": "Edit mode of the register-payment screen",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#188-edit-mode",
       "purpose": "Says when the screen's own values, rather than the batch values, are used to create the Payments, and how many Payments are created in each case.",
@@ -17131,7 +17250,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-180",
+      "identifier": "payments-and-bank-reconciliation-181",
       "name": "The memo of a payment settling one document",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#191-the-rule",
       "purpose": "The first variant of the memo rule: when the items belong to a single document, the memo names that document by its most specific reference.",
@@ -17219,7 +17338,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-181",
+      "identifier": "payments-and-bank-reconciliation-182",
       "name": "The memo of a payment settling several documents of which one is outbound",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#191-the-rule",
       "purpose": "The second variant of the memo rule: when any of the documents is one the company pays, the memo lists their references so that the recipient can identify them.",
@@ -17298,7 +17417,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-182",
+      "identifier": "payments-and-bank-reconciliation-183",
       "name": "The memo of a payment settling several inbound documents",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#191-the-rule",
       "purpose": "The third variant of the memo rule: when several documents the company is owed money for are settled together, the memo is drawn from the company's group-payment sequence.",
@@ -17383,7 +17502,7 @@
       ]
     },
     {
-      "identifier": "payments-and-bank-reconciliation-183",
+      "identifier": "payments-and-bank-reconciliation-184",
       "name": "Which journal items the memo rule reads",
       "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#192-which-items-the-rule-reads",
       "purpose": "Says which of the selected items the memo is built from, so that a payment of only the next installment names only the documents actually being paid.",
@@ -17478,6 +17597,152 @@
       "related_rules": [
         "business-rules.md#116-the-custom-amount",
         "business-rules.md#115-forced-choices"
+      ]
+    },
+    {
+      "identifier": "payments-and-bank-reconciliation-185",
+      "name": "Worked examples: the memo of a payment in each of its five cases",
+      "document": "docs/domains/payments-and-bank-reconciliation/calculations.md#193-worked-examples",
+      "purpose": "Exercises the three branches of the memo rule and the rule that decides which items it reads, giving a rebuild the five text vectors the document tabulates.",
+      "operands": [
+        {
+          "name": "the number of documents behind the items the rule reads",
+          "unit_or_currency": "a count",
+          "source": "the journal items selected on the register-payment screen, narrowed by the rule that says which items are read",
+          "constraints": "one selects the first branch, more than one selects one of the other two"
+        },
+        {
+          "name": "whether any of those documents is an outbound one",
+          "unit_or_currency": "a truth value",
+          "source": "the kind of each Journal Entry",
+          "constraints": "a vendor bill, an outgoing credit note or an incoming receipt is outbound"
+        },
+        {
+          "name": "the payment reference, the reference and the number of each document",
+          "unit_or_currency": "texts",
+          "source": "the Journal Entries",
+          "constraints": "the most specific of the three is taken per document; the values shown are reproduced identifiers"
+        },
+        {
+          "name": "the next value of the company's group-payment sequence",
+          "unit_or_currency": "a text",
+          "source": "the company",
+          "constraints": "drawn only when several documents are paid and none of them is outbound"
+        }
+      ],
+      "preconditions": [
+        {
+          "condition": "The set of items the memo rule reads has already been narrowed.",
+          "otherwise": "A payment of only the next installment would name documents that are not being paid."
+        },
+        {
+          "condition": "The company has a group-payment sequence.",
+          "otherwise": "The third branch has no value to draw and the memo is left empty."
+        }
+      ],
+      "procedure": [
+        "Count the documents behind the items the rule reads.",
+        "When there is exactly one, take its payment reference, or its own reference, or its number.",
+        "When there are several and at least one of them is outbound, take the reference of each, drop the empty ones, keep the distinct ones, sort them and join them by a comma followed by a space.",
+        "When there are several and none of them is outbound, draw the next value of the company's group-payment sequence."
+      ],
+      "formula": "one document                                  : memo = that document's payment reference , or its own reference , or its number\nseveral documents , one of them outbound      : memo = the distinct values of ( payment reference , or reference , or number ) , the empty ones dropped , sorted , joined by \", \"\nseveral documents , none of them outbound     : memo = the next value of the company's group-payment sequence",
+      "rounding": {
+        "what": "Nothing; every case of the table produces a text.",
+        "precision": "Not applicable.",
+        "method": "Not applicable.",
+        "step": "When the Payments are created, after the set of items the rule reads has been decided."
+      },
+      "result": {
+        "name": "the memo of the Payment",
+        "unit_or_currency": "a text",
+        "stored_or_displayed": "Stored on the Payment, written into the reference of its Journal Entry and appended to the label of its liquidity and counterpart lines."
+      },
+      "edge_cases": [
+        {
+          "case": "Two of the documents carry the same reference in the outbound case.",
+          "outcome": "The reference appears once, because the values are made distinct before they are joined."
+        },
+        {
+          "case": "The references of the outbound case are supplied in an order other than the sorted one.",
+          "outcome": "The memo is the same, because the values are sorted before they are joined."
+        },
+        {
+          "case": "Three documents are selected but only the next installment of two of them is being paid.",
+          "outcome": "More than one document is still being paid, so the third branch applies and a group number is drawn, not the references of the two documents."
+        },
+        {
+          "case": "A single document has neither a payment reference nor a reference.",
+          "outcome": "Its number is used, so the memo is never empty for a single document that has been numbered."
+        }
+      ],
+      "worked_examples": [
+        {
+          "description": "One customer invoice whose payment reference is set",
+          "inputs": {
+            "documents": 1,
+            "payment_reference": "INV/2026/0007"
+          },
+          "expected_outputs": {
+            "memo": "INV/2026/0007"
+          },
+          "narrative": "The first branch takes the payment reference, which is the most specific of the three sources."
+        },
+        {
+          "description": "One customer invoice with no payment reference and no reference",
+          "inputs": {
+            "documents": 1,
+            "payment_reference": null,
+            "reference": null,
+            "number": "INV/2026/0007"
+          },
+          "expected_outputs": {
+            "memo": "INV/2026/0007"
+          },
+          "narrative": "The first branch falls through to the number of the document."
+        },
+        {
+          "description": "Two vendor bills, their references given in the reverse of their sorted order",
+          "inputs": {
+            "documents": 2,
+            "any_outbound_document": true,
+            "references": [
+              "BILL-2",
+              "BILL-1"
+            ]
+          },
+          "expected_outputs": {
+            "memo": "BILL-1, BILL-2"
+          },
+          "narrative": "The second branch sorts the two references and joins them by a comma and a space."
+        },
+        {
+          "description": "Two customer invoices paid together",
+          "inputs": {
+            "documents": 2,
+            "any_outbound_document": false
+          },
+          "expected_outputs": {
+            "memo": "the next group-payment number, for example GROUP/2026/00001"
+          },
+          "narrative": "The third branch draws the sequence value, because no reference of an inbound document would identify the payment to the company's own bank."
+        },
+        {
+          "description": "Three customer invoices of which only the next installment of two is being paid",
+          "inputs": {
+            "documents_selected": 3,
+            "documents_being_paid": 2,
+            "any_outbound_document": false
+          },
+          "expected_outputs": {
+            "memo": "the next group-payment number"
+          },
+          "narrative": "The rule reads only the items behind the two documents being paid, and because that is still more than one document the third branch applies."
+        }
+      ],
+      "related_rules": [
+        "business-rules.md#115-forced-choices",
+        "business-rules.md#116-the-custom-amount"
       ]
     }
   ]

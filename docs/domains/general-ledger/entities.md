@@ -529,7 +529,7 @@ The direction sign is 1 for a plain entry and for outbound documents, and −1 f
 | `audit_trail_message_ids` | Sub-records: Message | Every notification message logged on this entry; the audit trail. |
 | `attachment_ids` | Sub-records: Attachment | Files attached to the entry. |
 | `no_followup` | Boolean, computed with an inverse | Excludes the entry from dunning reports. For an invoice it reads and writes the flag of the first receivable or payable line; for anything else it is true. |
-| `partner_id` | Link to Partner | Optional on a plain entry. Tracked, indexed. Deleting the partner is refused while an entry points to it. Writing it recomputes the account of the payment-term lines. |
+| `partner_id` | Link to Partner | Optional on a plain entry. Tracked, indexed. Deleting the partner is refused while a draft or posted entry points to it, with the message quoted in `business-rules.md`. Writing it recomputes the account of the payment-term lines. |
 | `commercial_partner_id` | Link to Partner, computed, stored, read-only | The commercial entity of the partner: the top-most company in the partner hierarchy. Used for the payable and receivable accounts and for grouping. |
 | `payment_reference` | Text | The communication the payer should quote. Computed, stored, editable, with an inverse, tracked, not copied. The computation fills it, for posted customer invoices only, with the structured reference derived from the journal settings. |
 | `sanitize_payment_reference` | Text, computed, not stored | The payment reference stripped of every character that is not a letter or a digit. A functional index exists on the same expression for matching bank transactions. |
@@ -717,7 +717,7 @@ A Journal Item exists only inside a Journal Entry and is deleted with it. While 
 | `currency_rate` | Number, computed, not stored | The rate from the company currency to the item currency at the relevant date. |
 | `is_same_currency` | Boolean, computed, not stored | True when the item currency equals the company currency. |
 | `cumulated_balance` | Money, computed, not stored | The running total of the balance over the current list ordering and filter. Only computed when the list view requests it. |
-| `partner_id` | Link to Partner | Computed from the entry partner (its commercial entity), stored, editable, precomputed, with an inverse. Deleting the partner is refused while items exist. |
+| `partner_id` | Link to Partner | Computed from the entry partner (its commercial entity), stored, editable, precomputed, with an inverse. Deleting the partner is refused while items exist, with the message quoted in `business-rules.md`. Re-parenting the partner rewrites this field on every item of that partner at once, with the lock check suppressed; see the relations table of section 20. |
 | `date_maturity` | Date | The due date of a receivable or payable item. Indexed, tracked. |
 | `is_storno` | Boolean | Computed, stored, editable, precomputed. Marks an item booked as a negative amount on its natural side. |
 | `display_type` | Selection | Required. Computed, stored, editable, precomputed. See the table below. |
@@ -1113,7 +1113,7 @@ Opening the wizard fails when the selection is not journal items ("This can only
 | `ordering` | Selection | Required, default `keep`. `keep` (Keep current order) assigns the new numbers in the order of the current prefix and number; `date` (Reorder by accounting date) assigns them in the order of the accounting date, then the current number, then the identifier. |
 | `first_date`, `end_date` | Dates | Informative bounds of the operation. |
 | `new_values` | Structured text, computed | The proposed new number of every selected entry, under both orderings. |
-| `preview_moves` | Structured text, computed | A condensed version for the preview: the first three rows, the last row, every row whose two orderings disagree, and every row that opens a new period; the skipped rows are collapsed into a row labelled "… (*count* other)". |
+| `preview_moves` | Structured text, computed | A condensed version for the preview: the first three rows, the last row, every row whose two orderings disagree, and every row that opens a new period; the skipped rows are collapsed into a row whose current-number cell reads "... (*the number of rows collapsed* other)" — three full stops, a space, then the count and the word between parentheses — and whose three other cells each read "...", again three full stops. |
 
 Opening the wizard fails when the selection spans several journals ("You can only resequence items from the same journal"), when the journal has a dedicated credit-note numbering and the selection mixes credit notes with other documents ("The sequences of this journal are different for Invoices and Refunds but you selected some of both types.") or when the journal has a dedicated payment numbering and the selection mixes payments with other documents ("The sequences of this journal are different for Payments and non-Payments but you selected some of both types.").
 

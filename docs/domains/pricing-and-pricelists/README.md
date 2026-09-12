@@ -255,13 +255,14 @@ will not be able to reproduce the storefront, the terminal and the order line fr
 This folder was assembled from two independently written descriptions of the same domain. Where they
 disagreed, the platform's behaviour decided, and each resolution is recorded at the end of the file
 it affects: [`entities.md`](entities.md#7-reconciliation-notes),
+[`state-machines.md`](state-machines.md#8-reconciliation-notes),
 [`business-rules.md`](business-rules.md#24-reconciliation-notes),
 [`calculations.md`](calculations.md#22-reconciliation-notes),
 [`workflows.md`](workflows.md#24-reconciliation-notes),
 [`interfaces.md`](interfaces.md#9-reconciliation-notes),
 [`configuration.md`](configuration.md#13-reconciliation-notes),
 [`glossary.md`](glossary.md#11-reconciliation-notes) and
-[`acceptance-criteria.md`](acceptance-criteria.md#20-reconciliation-notes). Three resolutions change
+[`acceptance-criteria.md`](acceptance-criteria.md#25-reconciliation-notes). Three resolutions change
 the shape of this page and are recorded here:
 
 1. **The name of the domain.** One description called it "Pricing, Pricelists and Discounts". The
