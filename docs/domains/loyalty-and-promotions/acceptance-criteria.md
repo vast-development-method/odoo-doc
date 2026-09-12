@@ -10,25 +10,25 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-003** Given a program of type `promotion` whose rule was edited to grant 3 points per unit, When the program type is changed to `buy_x_get_y`, Then the edited rule is destroyed and replaced by a rule granting 1 point per unit paid on the first sellable product with a minimum quantity of 2, and the reward is replaced by a free product reward of that product requiring 2 points.
 
-**AC-LOY-004** Given a program, When every reward is deleted, Then the operation is refused with `A program must have at least one reward.`
+**AC-LOY-004** Given a program, When every reward is deleted, Then the operation is refused with "A program must have at least one reward."
 
-**AC-LOY-005** Given a program with `limit_usage` true, When `max_usage` is set to 0, Then the write is refused with `Max usage must be strictly positive if a limit is used.`
+**AC-LOY-005** Given a program with `limit_usage` true, When `max_usage` is set to 0, Then the write is refused with "Max usage must be strictly positive if a limit is used."
 
-**AC-LOY-006** Given a program whose currency is one currency, When a pricelist expressed in another currency is added to its pricelist restriction, Then the write is refused with `The loyalty program's currency must be the same as all it's pricelists ones.`
+**AC-LOY-006** Given a program whose currency is one currency, When a pricelist expressed in another currency is added to its pricelist restriction, Then the write is refused with "The loyalty program's currency must be the same as all it's pricelists ones."
 
-**AC-LOY-007** Given a program, When `date_from` is set to 2026-06-30 and `date_to` to 2026-06-01, Then the write is refused with `The validity period's start date must be anterior or equal to its end date.`
+**AC-LOY-007** Given a program, When `date_from` is set to 2026-06-30 and `date_to` to 2026-06-01, Then the write is refused with "The validity period's start date must be anterior or equal to its end date."
 
-**AC-LOY-008** Given an active program, When a user asks to delete it, Then the deletion is refused with `You can not delete a program in an active state`.
+**AC-LOY-008** Given an active program, When a user asks to delete it, Then the deletion is refused with "You can not delete a program in an active state".
 
 **AC-LOY-009** Given an active program with one rule, one reward and one communication rule, When it is archived, Then the rule, the reward, the communication rule and the reward's hidden discount product are all archived as well; When it is unarchived, Then all four are reactivated.
 
-**AC-LOY-010** Given an archived program whose rule carries the code `SUMMER26` and an active program whose rule carries the same code, When the archived program is unarchived, Then the operation is refused with `The promo code must be unique.`
+**AC-LOY-010** Given an archived program whose rule carries the code `SUMMER26` and an active program whose rule carries the same code, When the archived program is unarchived, Then the operation is refused with "The promo code must be unique."
 
-**AC-LOY-011** Given two archived programs whose rules both carry the code `SUMMER26`, When both are unarchived in a single operation, Then the operation is refused with `The promo code must be unique.`
+**AC-LOY-011** Given two archived programs whose rules both carry the code `SUMMER26`, When both are unarchived in a single operation, Then the operation is refused with "The promo code must be unique."
 
 **AC-LOY-012** Given the website capability package, an active program bound to website A whose rule carries `SUMMER26`, and an archived program bound to website B whose rule carries `SUMMER26`, When the archived program is unarchived, Then it succeeds.
 
-**AC-LOY-013** Given a gift card program with no email template, When a printed document is set on it, Then the write is refused with `You must set 'Email template' before setting 'Print Report'.`
+**AC-LOY-013** Given a gift card program with no email template, When a printed document is set on it, Then the write is refused with "You must set 'Email template' before setting 'Print Report'."
 
 **AC-LOY-014** Given a program of type `loyalty`, When the point name is set to `Stars`, Then `portal_point_name` is `Stars`; Given a program of type `ewallet`, When the point name is set to `Stars`, Then `portal_point_name` is forced back to the program currency symbol.
 
@@ -40,17 +40,17 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 ## 2. Rule definition
 
-**AC-LOY-021** Given a rule, When `reward_point_amount` is set to 0, Then the write is refused with `Rule points reward must be strictly positive.`
+**AC-LOY-021** Given a rule, When `reward_point_amount` is set to 0, Then the write is refused with "Rule points reward must be strictly positive."
 
-**AC-LOY-022** Given a program of type `ewallet`, When its rule's split option is turned on, Then the write is refused with `Split per unit is not allowed for Loyalty and eWallet programs.`
+**AC-LOY-022** Given a program of type `ewallet`, When its rule's split option is turned on, Then the write is refused with "Split per unit is not allowed for Loyalty and eWallet programs."
 
-**AC-LOY-023** Given a program whose `applies_on` is `both`, When a rule's split option is turned on, Then the write is refused with `Split per unit is not allowed for Loyalty and eWallet programs.`
+**AC-LOY-023** Given a program whose `applies_on` is `both`, When a rule's split option is turned on, Then the write is refused with "Split per unit is not allowed for Loyalty and eWallet programs."
 
-**AC-LOY-024** Given an active rule carrying the code `TEN`, When a second active rule is given the code `TEN`, Then the write is refused with `The promo code must be unique.`
+**AC-LOY-024** Given an active rule carrying the code `TEN`, When a second active rule is given the code `TEN`, Then the write is refused with "The promo code must be unique."
 
-**AC-LOY-025** Given an active card carrying the code `044a-1234-5678`, When a rule is given that same code, Then the write is refused with `A coupon with the same code was found.`
+**AC-LOY-025** Given an active card carrying the code `044a-1234-5678`, When a rule is given that same code, Then the write is refused with "A coupon with the same code was found."
 
-**AC-LOY-026** Given an active rule carrying the code `TEN`, When a card is created with the code `TEN`, Then the creation is refused with `A trigger with the same code as one of your coupon already exists.`
+**AC-LOY-026** Given an active rule carrying the code `TEN`, When a card is created with the code `TEN`, Then the creation is refused with "A trigger with the same code as one of your coupon already exists."
 
 **AC-LOY-027** Given a rule with `mode` `auto`, When a code is typed into it, Then `mode` becomes `with_code` and `promo_barcode` is regenerated; When the code is cleared, Then `mode` becomes `auto`.
 
@@ -58,13 +58,13 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 ## 3. Reward definition
 
-**AC-LOY-031** Given a reward, When `required_points` is set to 0, Then the write is refused with `The required points for a reward must be strictly positive.`
+**AC-LOY-031** Given a reward, When `required_points` is set to 0, Then the write is refused with "The required points for a reward must be strictly positive."
 
-**AC-LOY-032** Given a reward of type `product`, When `reward_product_qty` is set to 0, Then the write is refused with `The reward product quantity must be strictly positive.`
+**AC-LOY-032** Given a reward of type `product`, When `reward_product_qty` is set to 0, Then the write is refused with "The reward product quantity must be strictly positive."
 
-**AC-LOY-033** Given a reward of type `discount`, When `discount` is set to 0, Then the write is refused with `The discount must be strictly positive.`
+**AC-LOY-033** Given a reward of type `discount`, When `discount` is set to 0, Then the write is refused with "The discount must be strictly positive."
 
-**AC-LOY-034** Given a combination product, When it is chosen as a reward product, Then the write is refused with `A reward product can't be of type "combo".`
+**AC-LOY-034** Given a combination product, When it is chosen as a reward product, Then the write is refused with "A reward product can't be of type “combo”."
 
 **AC-LOY-035** Given a reward created with the description `10% on your order`, Then a hidden service product named `10% on your order` exists, is not sellable, is not purchasable, is priced 0, has no customer tax and no vendor tax, and has the invoicing policy "ordered quantities".
 
@@ -80,17 +80,17 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-041** Given a reward with `discount_max_amount` 40 in a currency whose symbol is placed before the amount, `discount_mode` `per_order`, `discount` 15 and `discount_applicability` `specific` matching more than one product, Then its description is `<symbol> 15 on specific products (Max <symbol> 40)`.
 
-**AC-LOY-042** Given a product used as the hidden discount product of an active reward, When a user archives that product, Then the operation is refused with `This product may not be archived. It is being used for an active promotion program.` (`LOY-148`)
+**AC-LOY-042** Given a product used as the hidden discount product of an active reward, When a user archives that product, Then the operation is refused with "This product may not be archived. It is being used for an active promotion program." (LOY-148)
 
-**AC-LOY-043** Given a pricelist referenced by an active program, When a user archives that pricelist, Then the operation is refused with `This pricelist may not be archived. It is being used for active promotion programs: <program names>` where the placeholder lists the names of every offending active program separated by a comma and a space (`LOY-150`).
+**AC-LOY-043** Given a pricelist referenced by an active program, When a user archives that pricelist, Then the operation is refused with "This pricelist may not be archived. It is being used for active promotion programs: <program names>" where the placeholder lists the names of every offending active program separated by a comma and a space (LOY-150).
 
-**AC-LOY-044** Given a second language activated in the deployment, a program, and a reward of type `discount` created in the first language with the description `My Discount`, so that its hidden discount product is named `My Discount`, When the translations of the reward description are written as `Test Discount EN` for the first language and `Test Discount FR` for the second, Then the hidden discount product's name reads `Test Discount EN` in the first language and `Test Discount FR` in the second, without any further action (`LOY-033`).
+**AC-LOY-044** Given a second language activated in the deployment, a program, and a reward of type `discount` created in the first language with the description `My Discount`, so that its hidden discount product is named `My Discount`, When the translations of the reward description are written as `Test Discount EN` for the first language and `Test Discount FR` for the second, Then the hidden discount product's name reads `Test Discount EN` in the first language and `Test Discount FR` in the second, without any further action (LOY-033).
 
-**AC-LOY-045** Given the shipped gift card product, When a user deletes it as a product variant, Then the deletion is refused with `You cannot delete Gift Card as it is used in 'Coupons & Loyalty'. Please archive it instead.`; When the same user deletes the product template that carries it, Then the deletion is refused with the same message; Given the shipped wallet top-up product, Then both deletions are refused with `You cannot delete Top-up eWallet as it is used in 'Coupons & Loyalty'. Please archive it instead.` (`LOY-149`).
+**AC-LOY-045** Given the shipped gift card product, When a user deletes it as a product variant, Then the deletion is refused with "You cannot delete Gift Card as it is used in 'Coupons & Loyalty'. Please archive it instead."; When the same user deletes the product template that carries it, Then the deletion is refused with the same message; Given the shipped wallet top-up product, Then both deletions are refused with "You cannot delete Top-up eWallet as it is used in 'Coupons & Loyalty'. Please archive it instead." (LOY-149).
 
-**AC-LOY-046** Given a reward and its hidden discount product, When a user deletes that product, Then the deletion is refused by the restricted reference of the reward and the product still exists (`LOY-151`); When the reward is archived instead, Then the hidden discount product is archived with it.
+**AC-LOY-046** Given a reward and its hidden discount product, When a user deletes that product, Then the deletion is refused by the restricted reference of the reward and the product still exists (LOY-151); When the reward is archived instead, Then the hidden discount product is archived with it.
 
-**AC-LOY-047** Given a program of type `buy_x_get_y` with one reward of type `product` whose reward product is an existing product Alpha that is active, When the program is archived, Then the archive succeeds, the hidden discount product of the reward is archived, the reward and the rule are archived, and Alpha stays active; no refusal `This product may not be archived. It is being used for an active promotion program.` is raised, because the reward is archived before its hidden discount product is written (`LOY-152`).
+**AC-LOY-047** Given a program of type `buy_x_get_y` with one reward of type `product` whose reward product is an existing product Alpha that is active, When the program is archived, Then the archive succeeds, the hidden discount product of the reward is archived, the reward and the rule are archived, and Alpha stays active; no refusal "This product may not be archived. It is being used for an active promotion program." is raised, because the reward is archived before its hidden discount product is written (LOY-152).
 
 ## 4. Cards
 
@@ -102,13 +102,13 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-054** Given the generation wizard in mode `selected` with no customer and no tag chosen, Then the quantity is the total number of contacts in the database and one card is created per contact.
 
-**AC-LOY-055** Given the generation wizard with a quantity of 0, When the generation is confirmed, Then it is refused with `Invalid quantity.`
+**AC-LOY-055** Given the generation wizard with a quantity of 0, When the generation is confirmed, Then it is refused with "Invalid quantity."
 
-**AC-LOY-056** Given a card of a program of type `loyalty`, When a user types an expiration date on it, Then the entry is refused immediately with `Expiration date cannot be set on a loyalty card.`
+**AC-LOY-056** Given a card of a program of type `loyalty`, When a user types an expiration date on it, Then the entry is refused immediately with "Expiration date cannot be set on a loyalty card."
 
 **AC-LOY-057** Given a card whose balance is 40 and whose program's point name is `Loyalty point(s)`, Then its formatted balance is `40 Loyalty point(s)`; Given a card of a gift card program whose point name is the currency symbol and whose balance is 40.5, Then its formatted balance is the amount 40.50 rendered in that currency.
 
-**AC-LOY-058** Given a card with balance 30, When the balance wizard is confirmed with a new balance of 30, Then it is refused with `New Balance should be positive and different then old balance.`; When it is confirmed with a new balance of −5, Then it is refused with the same message.
+**AC-LOY-058** Given a card with balance 30, When the balance wizard is confirmed with a new balance of 30, Then it is refused with "New Balance should be positive and different then old balance."; When it is confirmed with a new balance of −5, Then it is refused with the same message.
 
 **AC-LOY-059** Given a card with balance 30, When the balance wizard is confirmed with a new balance of 50 and the description `Compensation`, Then a history movement is created with `issued` 20, `used` 0 and that description, and the card's balance becomes 50.
 
@@ -134,19 +134,19 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-074** Given a program restricted to pricelist A, When an order priced with pricelist B is evaluated, Then the program grants nothing and no reward line is produced; When the order's pricelist is changed to A and the order is evaluated again, Then the program applies.
 
-**AC-LOY-075** Given a program with `limit_usage` true and `max_usage` 1, and one confirmed order already carrying one of its rewards, When a second order is evaluated, Then the program is not an automatic candidate and no reward line is produced; When its code is entered on the second order, Then it is refused with `This code is expired (<code>).`
+**AC-LOY-075** Given a program with `limit_usage` true and `max_usage` 1, and one confirmed order already carrying one of its rewards, When a second order is evaluated, Then the program is not an automatic candidate and no reward line is produced; When its code is entered on the second order, Then it is refused with "This code is expired (<code>)."
 
 **AC-LOY-076** Given an electronic wallet program whose trigger product list is empty and an order carrying any product, Then the program grants 0 points and creates no card.
 
 **AC-LOY-077** Given a program of type `coupons` with no rule and `applies_on` `current` and a card of that program, When the card's code is applied to an order, Then the reward is claimable without any condition being checked.
 
-**AC-LOY-078** Given a program whose only rule requires a code, When an order is evaluated without that code, Then the program reports `This program requires a code to be applied.`
+**AC-LOY-078** Given a program whose only rule requires a code, When an order is evaluated without that code, Then the program reports "This program requires a code to be applied."
 
-**AC-LOY-079** Given a program whose rule requires a minimum amount of 50 in the program currency and an order totalling 30 of eligible products, Then the program reports `To take advantage of this offer, your order must include at least 50 <currency name> of the eligible products.`
+**AC-LOY-079** Given a program whose rule requires a minimum amount of 50 in the program currency and an order totalling 30 of eligible products, Then the program reports "To take advantage of this offer, your order must include at least 50 <currency name> of the eligible products."
 
-**AC-LOY-080** Given a program whose rule requires a minimum quantity of 3 of product Alpha and an order carrying 2 units of Alpha, Then the program reports `You don't have the required product quantities on your sales order.`
+**AC-LOY-080** Given a program whose rule requires a minimum quantity of 3 of product Alpha and an order carrying 2 units of Alpha, Then the program reports "You don't have the required product quantities on your sales order."
 
-**AC-LOY-081** Given a nominative program and an online cart owned by the anonymous public visitor, Then the program reports `This program is not available for public users.`
+**AC-LOY-081** Given a nominative program and an online cart owned by the anonymous public visitor, Then the program reports "This program is not available for public users."
 
 **AC-LOY-082** Given a nominative program, an identified customer and an order that earns nothing, Then the program is reported applicable with 0 points, and the customer's existing card is attached to the order.
 
@@ -190,7 +190,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 ## 8. Global discount selection
 
-**AC-LOY-121** Given an order whose discountable amount is 500.00, an applied fixed discount of 80.00 and a candidate 10 percent discount worth 50.00, When the candidate is claimed, Then it is refused with `A better global discount is already applied.`
+**AC-LOY-121** Given an order whose discountable amount is 500.00, an applied fixed discount of 80.00 and a candidate 10 percent discount worth 50.00, When the candidate is claimed, Then it is refused with "A better global discount is already applied."
 
 **AC-LOY-122** Given an order whose discountable amount is 500.00, an applied 5 percent discount worth 25.00 and a candidate 10 percent discount worth 50.00, When the candidate is claimed, Then the applied one is reset and reused for the candidate, and the order carries a 50.00 discount.
 
@@ -236,21 +236,21 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-154** Given a free product reward whose reward product is also the rule product, When the free units are added, Then the points granted do not increase, because reward lines never count towards the quantity gate.
 
-**AC-LOY-155** Given a multi-product free reward and the reward wizard, When no product is chosen, Then the first eligible product is proposed; When a product that is not eligible is forced, Then the operation is refused with `Invalid product to claim.`
+**AC-LOY-155** Given a multi-product free reward and the reward wizard, When no product is chosen, Then the first eligible product is proposed; When a product that is not eligible is forced, Then the operation is refused with "Invalid product to claim."
 
 ## 11. Codes
 
-**AC-LOY-161** Given an unknown code, When it is applied to an order, Then it is refused with `This code is invalid (<code>).` and the refusal is flagged "not found".
+**AC-LOY-161** Given an unknown code, When it is applied to an order, Then it is refused with "This code is invalid (<code>)." and the refusal is flagged "not found".
 
-**AC-LOY-162** Given a card whose expiration date is yesterday, When its code is applied, Then it is refused with `This coupon is expired.`
+**AC-LOY-162** Given a card whose expiration date is yesterday, When its code is applied, Then it is refused with "This coupon is expired."
 
-**AC-LOY-163** Given a card whose balance is 0 and whose program's cheapest reward requires 1 point, When its code is applied, Then it is refused with `This coupon has already been used.`
+**AC-LOY-163** Given a card whose balance is 0 and whose program's cheapest reward requires 1 point, When its code is applied, Then it is refused with "This coupon has already been used."
 
-**AC-LOY-164** Given a program of type `ewallet`, When a card code of that program is applied to an order, Then it is refused with `This program cannot be applied with code.`
+**AC-LOY-164** Given a program of type `ewallet`, When a card code of that program is applied to an order, Then it is refused with "This program cannot be applied with code."
 
-**AC-LOY-165** Given a code already applied to an order whose program already has a reward line on that order, When the same code is applied again, Then it is refused with `This promo code is already applied.`
+**AC-LOY-165** Given a code already applied to an order whose program already has a reward line on that order, When the same code is applied again, Then it is refused with "This promo code is already applied."
 
-**AC-LOY-166** Given a coupon code applied to an order and the reward claimed, When the order is confirmed, Then the card's balance drops by the point cost; When a second order tries to apply the same code, Then it is refused with `This coupon has already been used.` for a single-use coupon.
+**AC-LOY-166** Given a coupon code applied to an order and the reward claimed, When the order is confirmed, Then the card's balance drops by the point cost; When a second order tries to apply the same code, Then it is refused with "This coupon has already been used." for a single-use coupon.
 
 **AC-LOY-167** Given two concurrent transactions applying the code of a program limited to one use, Then one of them obtains the program row lock and the other fails with a serialization error and is retried, so the program is used exactly once.
 
@@ -258,7 +258,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 ## 12. Confirmation and cancellation
 
-**AC-LOY-171** Given an order whose reward lines would leave a card with a negative available balance, When the order is confirmed, Then the confirmation is refused with `One or more rewards on the sale order is invalid. Please check them.`
+**AC-LOY-171** Given an order whose reward lines would leave a card with a negative available balance, When the order is confirmed, Then the confirmation is refused with "One or more rewards on the sale order is invalid. Please check them."
 
 **AC-LOY-172** Given an order granting 25.00 points to a card holding 90.00 and spending 100.00 points on a reward, When it is confirmed, Then the card's balance becomes 15.00 and one history movement is created with `issued` 25.00, `used` 100.00, the description `Order <order name>` and a reference to the order.
 
@@ -268,7 +268,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-175** Given an order that created a gift card which has already been spent on another order, When the first order is cancelled, Then the gift card survives because its use count is not zero.
 
-**AC-LOY-176** Given an order with a claimable reward that the user did not add, When it is confirmed, Then the confirmation succeeds and an informational notification titled `Rewards Available` with the message `There are available rewards not added to this order.` is returned.
+**AC-LOY-176** Given an order with a claimable reward that the user did not add, When it is confirmed, Then the confirmation succeeds and an informational notification titled "Rewards Available" with the message "There are available rewards not added to this order." is returned.
 
 **AC-LOY-177** Given an order that earned a card of a program whose `applies_on` is `future`, When it is confirmed, Then the "at creation" communication of that card is sent immediately rather than queued.
 
@@ -302,7 +302,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-199** Given an expired electronic wallet, Then its reward is not claimable.
 
-**AC-LOY-200** Given a gift card program whose communication plan sends a template at card creation, an order whose salesperson's contact carries the address `sales@company.co`, and a copy of that order with no salesperson whose company contact carries the address `noreply@company.co`, When both orders are confirmed by an anonymous public visitor and each produces one gift card, Then exactly two messages are queued; the message of the first order has the salesperson's contact as its author and `sales@company.co` as its sender address, and the message of the second order has the company contact as its author and `noreply@company.co` as its sender address. A message is never left without a sender (section 4.3 of [entities.md](entities.md)).
+**AC-LOY-200** Given a gift card program whose communication plan sends a template at card creation, an order whose salesperson's contact carries the address `sales@company.co`, and a copy of that order with no salesperson whose company contact carries the address `noreply@company.co`, When both orders are confirmed by an anonymous public visitor and each produces one gift card, Then exactly two messages are queued; the message of the first order has the salesperson's contact as its author and `sales@company.co` as its sender address, and the message of the second order has the company contact as its author and `noreply@company.co` as its sender address. A message is never left without a sender (section 4.5 of [entities.md](entities.md)).
 
 ## 14. Next-order coupons
 
@@ -326,31 +326,31 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-216** Given an order whose only line is a free shipping reward line, When a user tries to delete it, Then the order remains valid and the reward may be removed only through the ordinary reward removal.
 
-**AC-LOY-217** Given an automatic promotion giving 10 percent on the order with a rule requiring a minimum quantity of 2 and a minimum amount of 0, and an order carrying one unit of a product plus one shipping line of quantity 1, When the programs are evaluated, Then no reward line is created and the order still has exactly two lines, because the shipping line is a threshold-neutral line and does not count towards the quantity gate (`LOY-069`); When a second unit of the product is added, Then the quantity gate is met and the discount line is created.
+**AC-LOY-217** Given an automatic promotion giving 10 percent on the order with a rule requiring a minimum quantity of 2 and a minimum amount of 0, and an order carrying one unit of a product plus one shipping line of quantity 1, When the programs are evaluated, Then no reward line is created and the order still has exactly two lines, because the shipping line is a threshold-neutral line and does not count towards the quantity gate (LOY-069); When a second unit of the product is added, Then the quantity gate is met and the discount line is created.
 
 ## 16. Counter behavior
 
 **AC-LOY-221** Given a counter whose currency differs from a program's currency, When the session is opened, Then that program is not loaded onto the device.
 
-**AC-LOY-222** Given a program with a free product reward whose product is not available at a counter, When a session of a counter that publishes that program is opened, Then the opening is refused with `To continue, make the following reward products available in Point of Sale.` followed by a line naming the program and the product.
+**AC-LOY-222** Given a program with a free product reward whose product is not available at a counter, When a session of a counter that publishes that program is opened, Then the opening is refused with "To continue, make the following reward products available in Point of Sale." followed by a line naming the program and the product.
 
-**AC-LOY-223** Given a gift card program with two rewards published at a counter, When a session is opened, Then it is refused with `Invalid gift card program. More than one reward.`
+**AC-LOY-223** Given a gift card program with two rewards published at a counter, When a session is opened, Then it is refused with "Invalid gift card program. More than one reward."
 
-**AC-LOY-224** Given a gift card program whose rule grants 2 points per unit of currency spent, When a session is opened, Then it is refused with `Invalid gift card program rule. Use 1 point per currency spent.`
+**AC-LOY-224** Given a gift card program whose rule grants 2 points per unit of currency spent, When a session is opened, Then it is refused with "Invalid gift card program rule. Use 1 point per currency spent."
 
-**AC-LOY-225** Given a ticket and a scanned coupon code whose card belongs to another customer and whose program is not a gift card program, Then the redemption returns `This coupon is invalid (<code>).`
+**AC-LOY-225** Given a ticket and a scanned coupon code whose card belongs to another customer and whose program is not a gift card program, Then the redemption returns "This coupon is invalid (<code>)."
 
-**AC-LOY-226** Given a ticket and a scanned code whose program starts tomorrow, Then the redemption returns `This coupon is not yet valid (<code>).`
+**AC-LOY-226** Given a ticket and a scanned code whose program starts tomorrow, Then the redemption returns "This coupon is not yet valid (<code>)."
 
-**AC-LOY-227** Given a ticket and a scanned card whose balance pays for no reward of its program, Then the redemption returns `No reward can be claimed with this coupon.`
+**AC-LOY-227** Given a ticket and a scanned card whose balance pays for no reward of its program, Then the redemption returns "No reward can be claimed with this coupon."
 
-**AC-LOY-228** Given a ticket and a scanned gift card whose card has no source document, Then the cashier is asked `This gift card is not linked to any order. Do you really want to apply its reward?`; a refusal answers `Unpaid gift card rejected.`
+**AC-LOY-228** Given a ticket and a scanned gift card whose card has no source document, Then the cashier is asked "This gift card is not linked to any order. Do you really want to apply its reward?"; a refusal answers "Unpaid gift card rejected."
 
-**AC-LOY-229** Given a device that has already activated a promotional code rule, When the same code is entered again, Then the device answers `That promo code program has already been activated.`
+**AC-LOY-229** Given a device that has already activated a promotional code rule, When the same code is entered again, Then the device answers "That promo code program has already been activated."
 
-**AC-LOY-230** Given a ticket with a point change on a card whose balance on the server is smaller than the points to spend, When the payment is validated, Then the server answers `There are not enough points for the coupon: <code>.` and the device rewrites its local balances.
+**AC-LOY-230** Given a ticket with a point change on a card whose balance on the server is smaller than the points to spend, When the payment is validated, Then the server answers "There are not enough points for the coupon: <code>." and the device rewrites its local balances.
 
-**AC-LOY-231** Given a ticket that creates a physical gift card whose typed code already exists on the server, When the payment is validated, Then the server answers `The following codes already exist in the database, perhaps they were already sold?` followed by the colliding code.
+**AC-LOY-231** Given a ticket that creates a physical gift card whose typed code already exists on the server, When the payment is validated, Then the server answers "The following codes already exist in the database, perhaps they were already sold?" followed by the colliding code.
 
 **AC-LOY-232** Given a confirmed ticket with a locally created nominative card and a customer who already owns a card of that program, When the confirmation exchange runs, Then the points land on the existing card and no duplicate card is created.
 
@@ -366,7 +366,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-238** Given a free product reward claimed at a counter, Then the ticket carries the paid product line unchanged plus a negative line on the hidden discount product cancelling the price of the free units.
 
-**AC-LOY-239** Given a ticket carrying a gift card top-up line, When the cashier tries to refund it, Then the notification `Refunding a top up or reward product for an eWallet or gift card program is not allowed.` is shown and the refund is refused.
+**AC-LOY-239** Given a ticket carrying a gift card top-up line, When the cashier tries to refund it, Then the notification "Refunding a top up or reward product for an eWallet or gift card program is not allowed." is shown and the refund is refused.
 
 **AC-LOY-240** Given a restaurant counter carrying an automatic promotion that gives 10 percent on the order for a minimum quantity of 1, and a ticket opened at a table with one product priced 2.20, so that the ticket total is 1.98 after the discount, When the cashier leaves the table and later selects that table again, Then the reward line is still on the ticket, the rewards are re-evaluated once as part of selecting the table, and the ticket total is still 1.98.
 
@@ -378,9 +378,9 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-252** Given that cart, When the shopper deletes the reward line, Then the reward is recorded among the manually removed rewards and is not claimed again automatically.
 
-**AC-LOY-253** Given a visitor with no cart who follows a coupon link, Then the landing page shows `The coupon will be automatically applied when you add something in your cart.` and the code stays in the session; When the visitor adds a product, Then the code is applied at the next cart evaluation.
+**AC-LOY-253** Given a visitor with no cart who follows a coupon link, Then the landing page shows "The coupon will be automatically applied when you add something in your cart." and the code stays in the session; When the visitor adds a product, Then the code is applied at the next cart evaluation.
 
-**AC-LOY-254** Given a visitor with a cart who follows a valid coupon link, Then the landing page shows `The following promo code was applied on your order: <code>` and, when exactly one card offers exactly one non-multi-product reward, that reward is already claimed.
+**AC-LOY-254** Given a visitor with a cart who follows a valid coupon link, Then the landing page shows "The following promo code was applied on your order: <code>" and, when exactly one card offers exactly one non-multi-product reward, that reward is already claimed.
 
 **AC-LOY-255** Given a cart and a code that matches nothing, When it is submitted through the promotional code form, Then the text is handed to the pricelist code handling; when that also fails, the shopper sees the pricelist handling's own outcome.
 
@@ -388,7 +388,7 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 
 **AC-LOY-257** Given a cart carrying a free product reward of quantity 2, Then the cart quantity badge does not count those 2 units.
 
-**AC-LOY-258** Given a cart whose reward expired between the moment it was displayed and the moment payment is finalized, Then the payment is refused with `Cannot process payment: applied reward was changed or has expired.` followed by a new line and `Please refresh the page and try again.`
+**AC-LOY-258** Given a cart whose reward expired between the moment it was displayed and the moment payment is finalized, Then the payment is refused with "Cannot process payment: applied reward was changed or has expired." followed by a new line and "Please refresh the page and try again."
 
 **AC-LOY-259** Given a cart carrying a free gift whose product has a sale price of 0.00, Then the checkout is not blocked by the zero-priced line rule.
 
@@ -441,3 +441,113 @@ Given/When/Then scenarios that a replacement implementation must pass. Every sce
 **AC-LOY-294** Given a reward applied twice on the same order (a payment reward from two cards), Then the two applications carry different reward grouping codes and are deleted independently.
 
 **AC-LOY-295** Given an order whose prices are reset to the pricelist and that carries at least one reward line, Then the full evaluation runs and every percentage discount follows the new prices.
+
+## 20. Baseline scenarios
+
+These eight scenarios are the shortest complete demonstrations of the domain. Each one is stated
+with every intermediate number, so that a rebuild can be checked against them before the longer
+scenarios above are attempted. All amounts are in a currency with two decimal places and a rounding
+step of 0.01, and no tax applies unless the scenario says otherwise.
+
+**AC-LOY-301 A tenth off two hundred.** Given a program of type `promotion`, `applies_on` `current`,
+`trigger` `auto`, one rule granting 1 point per order with `minimum_amount` 0 and `minimum_qty` 0,
+and one reward of `reward_type` `discount`, `discount_mode` `percent`, `discount` 10,
+`discount_applicability` `order`, `required_points` 1; and given a quotation carrying one line of 2
+units of a product priced 100.00 with no tax, so that the order totals 200.00 tax excluded, 0.00 tax
+and 200.00 tax included, When the programs are recomputed and the reward is claimed, Then the point
+result is `[1]`, one card is created for the order with a pending promise of 1 point, the
+discountable amount is 200.00 with a single breakdown entry of 200.00 under the empty tax set,
+`max_discount` is `min(200.00, 200.00 × 0.10) = 20.00`, `discount_factor` is
+`min(1, 20.00 ÷ 200.00) = 0.10`, exactly one reward line is created with quantity 1, unit price
+−20.00, no tax, description `10% on your order` and `points_cost` 1, and the order totals 180.00 tax
+excluded and 180.00 tax included; And When the order is confirmed, Then the card's balance moves to
+`0 + 1 − 1 = 0`, one history movement is written with `issued` 1, `used` 1 and the description
+`Order ` followed by the order name, and the card is not deleted, because a reward line uses it.
+
+**AC-LOY-302 A discount on the cheapest line.** Given a reward of `discount_mode` `percent`,
+`discount` 50, `discount_applicability` `cheapest` whose discountable-product filter matches every
+product, and an order carrying 3 units at 30.00 (tax-included total 90.00) and 2 units at 10.00
+(tax-included total 20.00), When the reward is claimed, Then the cheapest line is the second one
+because its unit price of 10.00 is the smallest, the discountable amount is `20.00 ÷ 2 = 10.00`, the
+single breakdown entry under the empty tax set is `10.00 × (1 − 0 ÷ 100) = 10.00`, `max_discount` is
+`10.00 × 0.50 = 5.00`, and one reward line of −5.00 is created; the order totals
+`90.00 + 20.00 − 5.00 = 105.00`.
+
+**AC-LOY-303 A free product.** Given a program of type `buy_x_get_y` whose rule grants 1 point per
+unit paid on product Cabinet with `minimum_qty` 3, and whose reward gives
+`reward_product_qty` 1 unit of Cabinet for `required_points` 3, Cabinet being priced 320.00 with no
+tax, When the order carries 3 Cabinets, Then the point result is `[3]`, `claimable_count` is
+`floor(3 ÷ 3) = 1`, one reward line is created carrying the real product Cabinet, quantity 1, unit
+price 320.00, a line discount of 100 percent, a tax-excluded subtotal of 0.00 and `points_cost` 3,
+and the order totals `3 × 320.00 = 960.00`; When a fourth Cabinet is added, Then the point result is
+`[4]`, `claimable_count` is `floor(4 ÷ 3) = 1` and the free quantity stays 1; When two more are
+added, so that six are paid for, Then `claimable_count` is `floor(6 ÷ 3) = 2` and the free line's
+quantity becomes 2 at a point cost of 6.
+
+**AC-LOY-304 Free shipping.** Given a program whose reward has `reward_type` `shipping`,
+`required_points` 1 and `discount_max_amount` 0, and an order whose shipping line is priced 12.50,
+When the reward is claimed, Then `max_discount` is unbounded, one reward line is created with
+quantity 1, unit price `−min(unbounded, 12.50) = −12.50`, the shipping product's taxes mapped
+through the order's fiscal position, the description `Free Shipping - Free shipping` and
+`points_cost` 1, and the shipping becomes free; And Given the same reward with
+`discount_max_amount` 8.00, Then the reward line is `−min(8.00, 12.50) = −8.00` and the customer
+still pays 4.50 of shipping.
+
+**AC-LOY-305 A gift card of fifty, partly spent.** Given a gift card program with the shipped
+preset and a bearer card holding 50.00, and an order carrying 80.00 of goods with no tax, When the
+card's code is applied and its reward claimed, Then the card is attached to the order, the points
+available are 50.00, the discountable amount is 80.00, `max_discount` is
+`min(80.00, 1 × 50.00) = 50.00`, `point_cost` is
+`round_currency(min(50.00, 80.00) ÷ 1, card currency) = 50.00`, one reward line of −50.00 with no
+tax and the description `Gift Card` is created, and the order totals 30.00; When the order is
+confirmed, Then the card's balance becomes 0.00 and one history movement records `used` 50.00; And
+Given instead an order of 30.00, Then the reward line is −30.00, the order totals 0.00 and the card
+keeps 20.00.
+
+**AC-LOY-306 One point per unit of currency, redeemed at a hundred.** Given a program of type
+`loyalty`, `applies_on` `both`, `trigger` `auto`, `portal_point_name` `Loyalty point(s)`, one rule
+with `reward_point_mode` `money` and `reward_point_amount` 1, and one reward with
+`discount_mode` `per_order`, `discount` 5, `discount_applicability` `order` and
+`required_points` 100; and given a customer whose card of that program holds 40.00 points and an
+order of 90.00 with no tax, When the order is recomputed, Then the card is attached automatically,
+the point result is `round_down(1 × 90.00, 2) = 90.00`, a pending promise of 90.00 is recorded, the
+points available are `40.00 + 90.00 − 0 = 130.00`, and the reward is claimable because
+`130.00 ≥ 100`; When it is claimed, Then `max_discount` is `min(90.00, 5.00) = 5.00`,
+`discount_factor` is `5.00 ÷ 90.00`, one reward line of −5.00 with `points_cost` 100.00 is created
+and the order totals 85.00; And When the order is confirmed, Then the card's balance becomes
+`40.00 + 90.00 − 100.00 = 30.00` and one history movement carries `issued` 90.00 and `used` 100.00.
+
+**AC-LOY-307 Two programs competing.** Given an order whose discountable amount is 500.00, an
+applied global discount of a fixed 80.00 and a second program offering 10 percent on the order,
+When the second is claimed, Then the two amounts are compared against 500.00: the applied one gives
+80.00, the candidate gives `500.00 × 0.10 = 50.00`, neither exceeds 500.00, the applied one is
+larger, and the claim is refused with "A better global discount is already applied."; And Given the
+same order with an applied 5 percent discount worth 25.00 and the same 10 percent candidate, Then
+the candidate wins, the applied lines are completely reset and reused, and the order carries a
+single discount of 50.00; And Given an order whose discountable amount is only 40.00 with an applied
+fixed 80.00 and a candidate fixed 50.00, Then both exceed 40.00, the **smaller** is preferred, and
+the candidate replaces the applied one so that the eighty-unit voucher stays unspent.
+
+**AC-LOY-308 A code that does not apply.** Given a program of type `promo_code` whose rule carries
+the code `WELCOME` and whose reward is 5 percent on the order, and an order that already carries a
+10 percent global discount from an automatic program, When `WELCOME` is entered, Then the rule is
+found and added to the order's code-enabled rules, the program row is locked, the usage cap check
+passes, the attach step compares the two global discounts against the discountable amount ignoring
+the applied one, finds the applied 10 percent better, and refuses with the message "This discount (5% on your order) is not compatible with “10% on
+your order”. Please remove it in order to apply this one.", where the inner quotation marks are
+the ones the message itself carries around the applied reward description,
+and the rule activation is undone so that the order is left exactly as it was; And Given a text that
+matches no rule and no card, When it is entered, Then it is refused with "This code is invalid (" +
+the text + ")." and the refusal is flagged "not found", so that the storefront may still hand the
+text to the price-list code handling.
+
+## 21. Reconciliation notes
+
+1. **Card code length (AC-LOY-051).** One of the two merged versions stated a thirteen-character
+   code. The generated code is **fourteen** characters long and begins with `044`; the scenario
+   asserts the corrected length, and the sample code used in AC-LOY-025 is fourteen characters long
+   for the same reason.
+2. **Rule citations.** Scenarios that cite a rule use the contiguous LOY-nnn scheme of
+   [business-rules.md](business-rules.md); section 18 of that file maps the former identifiers.
+3. **Field identifiers.** Every field asserted by a scenario is named by its reproduced storage
+   name, so that a rebuild can key its tests on the same strings.

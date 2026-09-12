@@ -166,3 +166,45 @@ Observations a replacement must reproduce:
 2. Line 4 carries the same tax as line 1 and therefore reduces the tax payable by exactly the proportion discounted. Splitting the discount is what makes this exact; a single discount line carrying an average tax would misstate the tax payable.
 3. Line 6 discharges the liability created when the gift card was sold. Had the gift card product and the hidden discount product been mapped to different accounts, the liability would never clear.
 4. The receivable is the tax-included total of the order, 462.00, which is what the customer actually owes after the discounts and after the gift card has paid part of it.
+
+## 12A. Itemisation of every journal item this domain causes
+
+Every ledger item is stated here attribute by attribute. The domain produces four shapes of document line; the table below states, for each, every
+attribute of the journal item that line becomes when the document is invoiced. Nothing else in this
+domain reaches the ledger.
+
+| Attribute | Discount reward line | Free product reward line | Payment reward line (gift card, electronic wallet) | Free shipping reward line |
+|---|---|---|---|---|
+| Journal | The sales journal of the invoice, chosen by the ordinary invoicing rules of [../sales/](../sales/); this domain never selects a journal. | Same. | Same. | Same. |
+| Account selection rule | The income account of the reward's `discount_line_product_id`, else the income account of that product's category, else the company's default sales income account; then mapped through the customer's fiscal position. | The income account of the **real** product given away, resolved by the same precedence. | The income account of the reward's `discount_line_product_id`, resolved by the same precedence; a deployment that defers gift-card revenue points it at the same liability account as the gift-card product. | The income account of the reward's `discount_line_product_id`, resolved by the same precedence. |
+| Debit or credit | Debit of the income account, because the line amount is negative; the receivable is credited by the same amount. | Neither: the net amount is zero. | Debit of the income or liability account; the receivable is credited. | Debit of the income account; the receivable is credited. |
+| Amount formula | The absolute value of the line's tax-excluded subtotal, which is `discountable_per_tax` entry × `discount_factor`, rounded by the document currency. | Zero: `unit price × quantity × (1 − 100 ÷ 100)`. | The absolute value of the line's tax-excluded subtotal, which is the value spent minus the tax-included taxes adopted from the gift-card product. | The absolute value of the line's tax-excluded subtotal, at most the shipping amount and at most `discount_max_amount`. |
+| Currency and rate | The document currency; the ledger carries the company-currency counter-value at the invoice's exchange rate, exactly as for any other line. The reward's own monetary parameters were already converted from the program currency at the rate of the day the line was written. | Not applicable; the amount is zero in every currency. | Same as a discount line. | Same as a discount line. |
+| Date | The invoice date, as for every other line of that invoice. | Same. | Same. | Same. |
+| Counterparty | The invoice's customer. | The invoice's customer. | The invoice's customer; **not** the card, which is never a counterparty. | The invoice's customer. |
+| Analytic distribution | The distribution the ordinary rules of [../analytic-accounting/](../analytic-accounting/) derive for the hidden discount product; negative, because the amount is negative. | The distribution derived for the real product; the amount being zero, the analytic line is zero. | The distribution derived for the hidden discount product. | The distribution derived for the hidden discount product. |
+| Tax treatment | Exactly the tax combination the line compensates, mapped through the fiscal position; one journal item per tax, of the opposite sign to the taxes it offsets. Fixed-amount taxes are never present, because they are excluded from the discountable amount. | The product's own taxes mapped through the fiscal position, applied to a base of zero, so every tax item is zero. | For an electronic wallet, no tax at all. For a gift card, the taxes of the hidden discount product mapped through the fiscal position, recomputed so that the tax-included total equals the value spent; fixed-amount taxes may be reduced. | The shipping product's taxes mapped through the fiscal position. |
+| Reconciliation counterpart | None. The item is a revenue item and is never reconciled; only the receivable it contributes to is reconciled, against the customer's payment. | None. | None. A gift card is not a payment: it produces no open item, carries no payment reference and never appears in a bank reconciliation. | None. |
+
+Two consequences follow from the table and must be reproduced:
+
+1. **A discount never touches the account of the line it discounts.** It debits the account of its
+   own hidden discount product. A deployment that wants discounts netted against the revenue they
+   reduce must map the hidden discount products to the same accounts as the products sold, which is
+   a configuration decision, not a behaviour of this domain.
+2. **The tax items are exact, not proportional estimates.** Because the discount is split into one
+   line per tax combination, each tax item is the exact negative of the proportion discounted from
+   that combination, to the rounding of the document currency.
+
+## 13. Reconciliation notes
+
+1. **Which domain owns the ledger effects.** Both merged versions agree that this domain writes no
+   journal entry of its own. One of them stated only the conclusion; the itemised journal entries of
+   sections 2, 6 and 12 come from the other and are kept in full.
+2. **Field and account naming.** Reward amounts are named by their reproduced field identifiers; the
+   accounts are named by their role, because the account itself is a configuration decision of the
+   deployment and is not shipped.
+3. **Two completions are marked.** The deferral of gift-card revenue and the allocation of a portion
+   of a sale to the loyalty points earned are both **industry-standard default** completions: the
+   reference behaviour does neither, and a rebuild that only needs behavioural equivalence must not
+   do them either, because they would change the amounts of the documents produced.

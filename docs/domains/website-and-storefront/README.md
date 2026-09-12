@@ -30,7 +30,7 @@ by step:
    [calculations.md](calculations.md) §2).
 2. The **copy-on-write algorithm** — what happens the first time a shared template or page is edited
    in the context of one site, including the fate of every template that inherits from the copied one
-   ([multi-site-and-languages.md](multi-site-and-languages.md) §3, [workflows.md](workflows.md) §15).
+   ([multi-site-and-languages.md](multi-site-and-languages.md) §3, [workflows.md](workflows.md) §19).
 3. The **cart algorithm** — how a line is found, added, updated, verified and removed, how the
    quantity actually granted may differ from the quantity requested, and how the cart is revalidated
    after every change ([storefront-checkout.md](storefront-checkout.md) §2,
@@ -94,7 +94,7 @@ by step:
 | Administrator | System administrator. | Everything above, plus theme template records, global settings, verification service keys and the audience measurement keys. |
 | Scheduled job runner | The background process that runs recurring jobs. | Deletes inactive visitors, deactivates unused content-block assets, sends abandoned-cart and back-in-stock messages, releases abandoned coupons. |
 | Search engine crawler | An automated agent identified by its user agent text. | Reads published pages without being tracked and without being redirected by browser language preference. |
-| External services | Anti-robot verification, address autocompletion, product syndication, parcel-shop network, print-on-demand fulfilment, image library, mapping and audience measurement. | Contact the system, or are contacted by it, through the contracts of [interfaces.md](interfaces.md) §11. |
+| External services | Anti-robot verification, address autocompletion, product syndication, parcel-shop network, print-on-demand fulfilment, image library, mapping and audience measurement. | Contact the system, or are contacted by it, through the contracts of [interfaces.md](interfaces.md) §10. |
 
 ---
 
@@ -223,8 +223,8 @@ them in the wrong place.
 
 | Entity | Owned by | Why it appears in this scope |
 |---|---|---|
-| Portal Record mixin (`portal.mixin`), Portal Share Wizard (`portal.share`), Portal Access Wizard (`portal.wizard`), Portal Access Wizard Line (`portal.wizard.user`) | [customer portal](../customer-portal/) | The authenticated document area shares the site layout and the pager of this folder; this folder only adds the site-aware duplicate-account detection described in [entities.md](entities.md) §3.16. |
-| Tracked Link (`link.tracker`), Tracked Link Click (`link.tracker.click`), Tracked Link Code (`link.tracker.code`) | [marketing and mass mailing](../marketing-and-mass-mailing/) | The short-address service is served from the site; the site-specific behaviour is specified in [entities.md](entities.md) §3.17 and [interfaces.md](interfaces.md) §7. |
+| Portal Record mixin (`portal.mixin`), Portal Share Wizard (`portal.share`), Portal Access Wizard (`portal.wizard`), Portal Access Wizard Line (`portal.wizard.user`) | [customer portal](../customer-portal/) | The authenticated document area shares the site layout and the pager of this folder; this folder only adds the site-aware duplicate-account detection described in [entities.md](entities.md) §6.15. |
+| Tracked Link (`link.tracker`), Tracked Link Click (`link.tracker.click`), Tracked Link Code (`link.tracker.code`) | [marketing and mass mailing](../marketing-and-mass-mailing/) | The short-address service is served from the site; the site-specific behaviour is specified in [entities.md](entities.md) §6.16 and [interfaces.md](interfaces.md) §2.7. |
 | Event Track, Event Track Stage, Event Track Tag, Event Track Location, Event Track Visitor, Event Sponsor, Event Sponsor Type, Event Quiz and its questions and answers, Website Event Menu | [events](../events/) | The event capability publishes agendas, talks, exhibitors and booths on the site through the mixins of this folder. |
 | Course, Course Slide, Slide Tag, Slide Channel Tag, Slide Channel Partner, Slide Answer, Slide Question, Slide Resource, Slide Embed, Course Invitation | [learning, surveys and gamification](../learning-surveys-and-gamification/) | Courses are published, searched and sold through this folder; the paid-enrolment link is specified in [storefront-engagement.md](storefront-engagement.md) §8. |
 | Lead assignment, lead forwarding, partner assignment report, reveal rule and reveal view | [customer relationship management](../customer-relationship-management/) | The public contact form and the partner assignment pages are served by this folder; the lead itself belongs to that folder. |
@@ -297,7 +297,7 @@ The deep topic files are read after the document that introduces them:
 | Sales | The sales order, its lines, the confirmation algorithm, the invoicing policy and the sales analysis report. | [`../sales/workflows.md`](../sales/workflows.md) |
 | Taxes | Tax computation for displayed prices and for the order, and fiscal position mapping. | [`../taxes/calculations.md`](../taxes/calculations.md) |
 | Payment providers | Transactions, tokens, the express-checkout contract and the post-processing that confirms the order. | [`../payment-providers/state-machines.md`](../payment-providers/state-machines.md) |
-| Delivery and shipping | Delivery methods, rate requests, pickup points and the shipping line. | [`../delivery-and-shipping/calculations.md`](../delivery-and-shipping/calculations.md) |
+| Delivery and shipping | Delivery methods, rate requests, pickup points and the shipping line. | [`../delivery-and-shipping/README.md`](../delivery-and-shipping/README.md) |
 | Inventory operations | Quantities free to use, warehouses and transfers. | [`../inventory-operations/calculations.md`](../inventory-operations/calculations.md) |
 | Manufacturing | The availability of a product whose composition is a kit. | [`../manufacturing/calculations.md`](../manufacturing/calculations.md) |
 | Loyalty and promotions | Programs, codes, rewards, gift cards and electronic wallets applied to the cart. | [`../loyalty-and-promotions/workflows.md`](../loyalty-and-promotions/workflows.md) |

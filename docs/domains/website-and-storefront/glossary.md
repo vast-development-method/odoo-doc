@@ -51,11 +51,29 @@ the closest word found in the searched fields and searches that word instead.
 **Architecture.** The stored markup tree of a template. A page's content is the architecture of the
 template it delegates to.
 
+**Asset customisation.** A replacement file stored per site under the customisation address
+prefix, together with the asset record that makes the compiled bundle use it instead of the
+shipped file.
+
 **Attribute filter.** The shop listing filter carried by repeated query parameters of the form
 attribute identifier, a hyphen, then one or more attribute value identifiers separated by commas.
 Values of one attribute widen the result; different attributes narrow it.
 
+**Autocompletion answer.** The compact search answer returned while a visitor types, carrying the
+rendered results, the total count, the mapped slot names and the substituted term when one was
+used.
+
+**Badge.** A reward shown on a public profile when a participant reaches a stated achievement.
+Owned by [learning, surveys and gamification](../learning-surveys-and-gamification/); this folder
+ships the forum badges and adds the publication flag that shows or hides one.
+
 **Base unit.** See reference unit.
+
+**Blog.** A publication channel holding blog posts, with a cover, a subtitle, free landing-page
+content and an optional site restriction.
+
+**Blog post.** One article of a blog, with an author, a content, a teaser, tags, a cover, a
+publishing date and a view counter.
 
 **Business-to-business fields.** The optional address form block that collects a company name and a
 tax identification number.
@@ -103,6 +121,10 @@ enabled. It is never taxed.
 **Content block.** A reusable, editable markup fragment dropped into a page by the editor. A *dynamic*
 content block renders records selected by a Website Content Block Filter.
 
+**Content delivery network.** An external service that serves static asset files. When it is
+enabled, an asset address matching one of the configured patterns is rewritten to the network base
+address.
+
 **Copy-on-write.** The rule that writing to a generic record while acting for one site creates and
 writes a site-specific copy instead, leaving the other sites untouched.
 
@@ -118,6 +140,10 @@ what they may fetch and where the site index is.
 **Custom value.** A free-text value a shopper types for an attribute value marked as accepting one.
 It is stored on the cart line and prevents that line from merging with another.
 
+**Decoy field.** A form field that no human fills, used to recognise an automated submission. Also
+called a honeypot field. The observed behaviour records its value as free text; refusing the
+submission is the industry-standard default WS-900 of [business-rules.md](business-rules.md).
+
 **Delivery line.** The ordinary Sales Order Line carrying the delivery product of the selected
 shipping method, at the computed rate, quantity one.
 
@@ -126,6 +152,12 @@ list in force during a storefront request, and the company currency otherwise.
 
 **Editable region.** An element of a rendered page that the editor may change, either because it
 carries the editable marker or because it is bound to a record field.
+
+**Editor and Designer.** The internal group responsible for a site. It implies the Restricted
+Editor group and the sanitisation override, and it may create and delete structural records.
+
+**Embargo.** The state of a published page or blog post whose publishing date is still in the
+future: visitors receive "not found" and designers still see it.
 
 **Express checkout.** A one-click flow in which a payment wallet supplies the addresses and the
 shipping choice, and the shopper pays the order amount excluding delivery.
@@ -146,6 +178,12 @@ resolves one per session and per cart.
 **Flagged post.** A forum post a participant reported for moderation; it leaves the public listings
 until a moderator validates or refuses it.
 
+**Forum.** One discussion space, with its own reputation table, answering mode, privacy,
+guidelines and welcome banner.
+
+**Forum tag.** A label attached to the questions of one forum. Its name is unique within the
+forum.
+
 **Free quantity.** The quantity of a product available to promise, that is on hand minus reserved.
 Owned by [inventory operations](../inventory-operations/README.md); the storefront reads it with the
 site warehouse or the selected store in context and rounds it down to a whole number.
@@ -165,10 +203,13 @@ account policy is optional or disabled.
 
 **Guidelines.** The page of a forum that explains its rules and its reputation table.
 
-**Honeypot field.** A form field that no human fills, used to recognise automated submissions.
-
 **Home page bootstrap.** The sequence that gives a newly created site a home page, a root menu tree
 and a menu entry pointing at that page.
+
+**Honeypot field.** Another name for the decoy field; see decoy field.
+
+**Indexing flag.** The page flag that decides whether the page is enumerated in the site index and
+whether a no-index instruction is emitted in the document head.
 
 **Language prefix.** The first path segment of an address when it names a language, for example
 `/fr/`. The default language of a site carries no prefix.
@@ -186,17 +227,33 @@ price range.
 **Mega menu.** A menu entry whose panel is a markup fragment rather than a list of child entries. A
 mega menu has no parent and no child.
 
+**Menu entry.** One node of a site's navigation tree. The tree is at most two levels deep; an
+entry targets a page, a model page or a free address.
+
 **Model page.** A page that exposes a whole business entity publicly under `/model/<segment>`, with a
 listing template, a record template and a restriction condition.
+
+**Moderator.** A forum participant whose reputation reaches the moderation threshold of that
+forum. Moderation is a score, not a group.
 
 **Most-specific selection.** The rule that, for one key or one address, the record bound to the
 current site wins over the shared record.
 
+**Multi-site user.** The flag group granted automatically as soon as a second site exists. It
+makes the site selector and the site column visible.
+
 **No-variant attribute.** An attribute whose values do not create variants. Its chosen values are
 stored on the cart line rather than on a variant, and they participate in line matching.
 
+**Page.** A static publishable address whose content is a template architecture, with a
+publication flag, a publishing date, an indexing flag, a visibility mode and optional menu
+entries.
+
 **Page visibility.** The gate applied to the main content template of a request: public, signed in,
 restricted group or password.
+
+**Palette.** The named set of colours a theme applies. Setting it resets the user palette, the
+grey palette, the semantic colours and the preset gradients.
 
 **Pending post.** A forum question created by a participant whose reputation is below the validation
 threshold. It waits for a moderator.
@@ -235,6 +292,9 @@ its own.
 **Quick add.** The add-to-cart action offered directly on a product card, without opening the product
 page.
 
+**Rank.** A named level derived from a reputation score, shown on a public profile. Owned by
+[learning, surveys and gamification](../learning-surveys-and-gamification/).
+
 **Recovery message.** The message sent for an abandoned cart, carrying a link that revives or merges
 that cart.
 
@@ -250,6 +310,9 @@ using the two parameters of the forum.
 
 **Reputation.** The numeric score a forum participant accumulates. Every forum operation is gated by
 a reputation threshold, and every vote, acceptance and moderation decision moves the score.
+
+**Restricted Editor.** The internal group allowed to edit page content and product presentation
+but not to create or delete structural records.
 
 **Revival method.** How an abandoned cart is brought back: "squash" replaces the current cart with the
 old one, "merge" moves the old lines into the current cart and cancels the old order.
@@ -276,10 +339,20 @@ the shop to signed-in users.
 **Short address.** A tracked link of the form `/r/<code>` that records a click and redirects to a
 target address.
 
+**Similarity index.** A storage-engine index on a text column that makes approximate matching
+affordable. The storefront search fields and the internal reference carry one.
+
 **Site.** One record of the Website entity. "Current site" is the one the present request resolved
 to.
 
+**Site configurator.** The guided first-run sequence that collects the industry, the purpose, the
+palette and the wanted features, installs the matching packages, creates the matching pages and
+menus and fills them with content blocks.
+
 **Site index.** The generated, cached document that enumerates the addresses of a site for crawlers.
+
+**Site resolution.** The algorithm that maps one incoming request onto exactly one site, described
+in [calculations.md](calculations.md) §2.
 
 **Slug.** A path segment made of a readable, language-dependent label, a hyphen and the record
 identifier, for example `my-first-post-7`.
@@ -295,17 +368,34 @@ be printed in the details block of the product page of one site.
 **Strikethrough price.** The reference price shown crossed out next to the price. It comes either
 from the price list rule or from the comparison price, never from both.
 
+**Style variable.** A named design value stored in a variable map inside a style source file.
+Editing a design option in the theme panel writes a pair into that map.
+
 **Tax display mode.** The site setting that decides whether storefront prices and cart subtotals are
 shown tax excluded or tax included. It never changes what is stored.
 
 **Teaser.** The short excerpt of a blog post shown in listings: the manual teaser when one is
 written, otherwise the first 200 characters of the plain text of the content followed by an ellipsis.
 
+**Template.** A stored, renderable markup tree. Pages, layouts and content blocks are all
+templates; a template may be shared by every site or specific to one.
+
 **Theme.** An installable capability package that ships templates, assets, attachments, pages and
 menus, copied into live records per site when it is applied.
 
+**Tracked link.** A short address that records each click before redirecting to its target. Owned
+by [marketing and mass mailing](../marketing-and-mass-mailing/); this folder serves it from the
+site.
+
 **Tracking payload.** The analytics description of the cart or of the order, listing each line with
 an item identifier, a name, a category, a price, a discount and a quantity.
+
+**Visit track.** One recorded page view of one visitor: the visitor, the full address, the page
+when the served content was a page, optionally the product viewed, and the moment.
+
+**Visitor.** One browsing identity, keyed by a browsing token, carrying the site, the language,
+the country, the time zone, the visit count and the page-view history. It becomes identified when
+the person signs in.
 
 **Vote.** A forum participant's up-vote, down-vote or withdrawn vote on one post. A participant may
 not vote on their own post.

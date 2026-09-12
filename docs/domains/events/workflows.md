@@ -428,7 +428,7 @@ Every rule below reacts **only** to a change of the template link itself. Editin
 
 The job selects every Event Automated Mailing matching **all** of:
 
-```
+```formula
 event.active = true
 AND event.kanban_state <> "cancel"
 AND scheduled_date <= now
@@ -861,3 +861,22 @@ its guards, its refusal messages, its side effects and a diagram, in
 [`state-machines.md`](state-machines.md). The procedures above name the operation that triggers each
 transition; the state machine document states what the transition is allowed to do and what it
 writes.
+
+---
+
+## Reconciliation notes
+
+1. **State machines.** Version M closed this file with a section 29 holding the transition tables of
+   every state field; version P announced a separate `state-machines.md`. The tables now live in
+   [`state-machines.md`](state-machines.md), completed with the stored value, the label and the
+   meaning of every state, the guards in evaluation order, the exact refusals and a diagram per
+   machine. Nothing was dropped: every row of the former section 29 is present there, and section 29
+   of this file now points at it.
+2. **Field identifiers and messages.** The procedures above name fields by their storage name, as the
+   database carries them, and quote user-facing messages between quotation marks. Version M used
+   readable substitutes for the storage names and code font for the messages; the behaviour described
+   is unchanged.
+3. **The name of the lead-generation job.** Version M named the scheduled job with an abbreviation.
+   Abbreviations are not used in the prose of this repository, so the job is named here by its label
+   without the abbreviation and by its external identifier `event_crm.ir_cron_generate_leads`, which
+   is the string a replacement has to reproduce.

@@ -465,7 +465,7 @@ collection change alone does not trigger it.
 | Positive point price (database check) | `required_points` greater than zero | "The required points for a reward must be strictly positive." |
 | Positive free quantity (database check) | `reward_type` is not `product`, **or** `reward_product_qty` greater than zero | "The reward product quantity must be strictly positive." |
 | Positive discount (database check) | `reward_type` is not `discount`, **or** `discount` greater than zero | "The discount must be strictly positive." |
-| No combination product as a free product | `reward_product_id` does not name a product of the combination type | "A reward product can't be of type \"combo\"." |
+| No combination product as a free product | `reward_product_id` does not name a product of the combination type | "A reward product can't be of type “combo”." |
 | Program keeps a reward | The program still has at least one reward after the deletion | "A program must have at least one reward." |
 
 ### 3.6 The generated description
@@ -481,8 +481,10 @@ one of those fields changes again. The rule, in order:
    is not zero, by ` (Max ` + the formatted amount + `)`.
 4. Else if `reward_type` is `product`:
    - with no claimable product: `Free Product`;
-   - with exactly one: `Free Product - ` + that product's display name;
-   - with several: `Free Product - [` + the display names joined by a comma and a space + `]`.
+   - with exactly one: the template `Free Product - <product display name>`, that is `Free Product - `
+     followed by that product's display name;
+   - with several: the template `Free Product - [<comma separated product display names>]`, that is
+     `Free Product - [` followed by the display names joined by a comma and a space, followed by `]`.
 5. Else (a discount) the description is built from three pieces:
    - the magnitude piece: for `percent`, the discount value followed by `% on `; for `per_point`,
      the formatted amount followed by ` per point on `; for `per_order`, the formatted amount
@@ -715,7 +717,7 @@ deleted only when the document that produced it is cancelled.
 |---|---|---|---|
 | `card_id` | Card | link to Loyalty Card | Required, indexed. On delete of the card: cascade. |
 | `company_id` | Company | link to Company | Unstored mirror of `card_id.company_id`. Used by the record rule. |
-| `description` | Description | long text | Required. Human-readable reason. For a sales order movement, the word `Order` followed by a space and the document's display name. For a counter movement, the word `Onsite` followed by a space and the ticket's display name. For a generation-wizard movement, the typed description or, when it is empty, `Gift For Customer`. For a balance adjustment, the typed description or, when it is empty, `Gift for customer`. When a bearer gift card is attached to a customer at a counter, `Assigning partner ` followed by the customer name; when it is attached to its source ticket, `Assigning order ` followed by the ticket's display name. |
+| `description` | Description | long text | Required. Human-readable reason. For a sales order movement, the word `Order` followed by a space and the document's display name. For a counter movement, the word `Onsite` followed by a space and the ticket's display name. For a generation-wizard movement, the typed description or, when it is empty, `Gift For Customer`. For a balance adjustment, the typed description or, when it is empty, `Gift for customer`. When a bearer gift card is attached to a customer at a counter, `Assigning partner ` followed by the customer name, for example `Assigning partner Jane Doe`; when it is attached to its source ticket, `Assigning order ` followed by the ticket's display name. Worked examples of the two document forms: `Order S00042` for a sales order and `Onsite Order 0001-005-0007` for a counter ticket. |
 | `issued` | Issued | decimal, two decimal places | Default zero. Points added by this movement. |
 | `used` | Used | decimal, two decimal places | Default zero. Points removed by this movement. |
 | `order_model` | Order Model | single line text | Read-only. The transport name of the entity that caused the movement — `sale.order` for a sales order, `pos.order` for a counter document. Empty for wizard movements. |

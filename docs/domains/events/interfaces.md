@@ -311,3 +311,16 @@ Over Event Registration Answer: a list of the answers with the question, the att
 | Talk page | the abstract, the speaker block, the video, the action button, the quiz and the suggested talks | watch, take the quiz, set a reminder, add to a calendar |
 | Proposal form | the talk fields, the speaker fields, the optional contact block and the tags | submit a proposal |
 | Leaderboard | the ranked visitors with their points, the top three highlighted, the reader highlighted | search a name, page through |
+
+---
+
+## Reconciliation notes
+
+1. **Provenance.** The operations, endpoints, documents, exported files, notifications and screens
+   come from version M. Version P announced the same subjects — menus, views, named operations,
+   routes, printable documents, message templates, external integrations, import and export — and
+   each is covered: the menu tree is in [`configuration.md`](configuration.md), the views are
+   described here as screens, and the printable documents and calendar exports are in sections 3 and
+   4 of this file.
+2. **Identifiers.** Operation names and route paths are reproduced exactly; the fields they read and
+   write are named by their storage names.

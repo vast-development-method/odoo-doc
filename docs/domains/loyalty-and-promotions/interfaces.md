@@ -13,15 +13,15 @@ Operations are named with full-word snake_case identifiers. Every operation runs
 | `get_program_templates` | the menu context (`gift_ewallet` or nothing) | a map from template key to title, description and icon name | none | none |
 | `create_program_from_template` | a template key | an instruction to open the created program in a form | Creates one Loyalty Program with the template name, type and family defaults, including its rules, rewards, communication rules and one hidden discount product per reward. | An unknown key returns nothing and creates nothing. |
 | `open_loyalty_cards` | one program | an instruction to open the card list filtered to that program, titled with the family noun, with creation disabled and the generation wizard pre-armed | none | none |
-| `share_program` | one program | an instruction to open the Coupon Share Wizard | none | `Provide either a coupon or a program.` |
+| `share_program` | one program | an instruction to open the Coupon Sharing Wizard | none | "Provide either a coupon or a program." |
 
 ### 1.2 On a Loyalty Card
 
 | Operation | Inputs | Output | Side effects | Errors |
 |---|---|---|---|---|
 | `send_card` | one card | an instruction to open a message composition window pre-filled with the card's default template | none until the message is sent | none |
-| `open_balance_update` | one card | an instruction to open the Update Loyalty Card Points Wizard | none | none |
-| `share_card` | one card | an instruction to open the Coupon Share Wizard | none | `Provide either a coupon or a program.` |
+| `open_balance_update` | one card | an instruction to open the Card Balance Wizard | none | none |
+| `share_card` | one card | an instruction to open the Coupon Sharing Wizard | none | "Provide either a coupon or a program." |
 | `archive_card` | one or more cards | nothing | Deletes every pending promise linking those cards to draft sales orders, then archives them. | none |
 | `get_gift_card_status` | a code, a counter | a flag saying whether the code may be used, and the card data when the code exists | none | none |
 | `get_loyalty_card_partner_by_code` | a code | the owner of the loyalty card carrying that code, or nothing | none | none |
@@ -37,11 +37,11 @@ Operations are named with full-word snake_case identifiers. Every operation runs
 | Operation | Inputs | Output | Side effects | Errors |
 |---|---|---|---|---|
 | `update_programs_and_rewards` | one order | nothing | The full evaluation of section 3.1 of [workflows.md](workflows.md): creates, updates and deletes reward lines, cards and pending promises. | none; individual refusals are absorbed |
-| `try_apply_code` | one order, a code | either a refusal, or the claimable rewards grouped by card | Records the rule among the activated code rules, records the card among the applied cards, attaches the program, locks the program row. | `This promo code is already applied.`, `This code is invalid (<code>).`, `This coupon is expired.`, `This coupon has already been used.`, `This program cannot be applied with code.`, `This code is expired (<code>).`, plus any refusal of `try_apply_program` |
-| `try_apply_program` | one order, a program, optionally a card | either a refusal, or the cards attached | Creates cards and pending promises. | `The program is not available for this order.`, `This program is already applied to this order.`, `This discount (<candidate>) is not compatible with "<applied>". Please remove it in order to apply this one.`, plus the point-computation refusals |
-| `apply_program_reward` | one order, a reward, a card, optionally a product, optionally reusable lines | an empty result on success, a refusal otherwise | Writes the reward lines. | `A better global discount is already applied.`, `The coupon can only be claimed on future orders.`, `The coupon does not have enough points for the selected reward.`, `There is nothing to discount`, `Invalid product to claim.` |
+| `try_apply_code` | one order, a code | either a refusal, or the claimable rewards grouped by card | Records the rule among the activated code rules, records the card among the applied cards, attaches the program, locks the program row. | "This promo code is already applied.", "This code is invalid (<code>).", "This coupon is expired.", "This coupon has already been used.", "This program cannot be applied with code.", "This code is expired (<code>).", plus any refusal of `try_apply_program` |
+| `try_apply_program` | one order, a program, optionally a card | either a refusal, or the cards attached | Creates cards and pending promises. | "The program is not available for this order.", "This program is already applied to this order.", "This discount (<candidate>) is not compatible with “<applied>”. Please remove it in order to apply this one.", plus the point-computation refusals |
+| `apply_program_reward` | one order, a reward, a card, optionally a product, optionally reusable lines | an empty result on success, a refusal otherwise | Writes the reward lines. | "A better global discount is already applied.", "The coupon can only be claimed on future orders.", "The coupon does not have enough points for the selected reward.", "There is nothing to discount", "Invalid product to claim." |
 | `get_claimable_rewards` | one order, optionally forced cards | the claimable rewards grouped by card | none | none |
-| `open_reward_wizard` | one order | true when nothing needs to be asked, otherwise an instruction to open the Loyalty Reward Selection Wizard | Re-evaluates the order; applies the reward directly when exactly one card offers exactly one non-multi-product reward. | the refusals of `apply_program_reward` |
+| `open_reward_wizard` | one order | true when nothing needs to be asked, otherwise an instruction to open the Reward Selection Wizard | Re-evaluates the order; applies the reward directly when exactly one card offers exactly one non-multi-product reward. | the refusals of `apply_program_reward` |
 | `view_gift_cards` | one order | an instruction to open the card list filtered to the gift cards generated by that order, with creation disabled | none | none |
 | `send_reward_coupon_mail` | one or more orders | nothing | Sends the "at creation" communication, with immediate delivery, of every card the orders granted points to whose program applies to future orders. | none |
 
@@ -49,8 +49,8 @@ Operations are named with full-word snake_case identifiers. Every operation runs
 
 | Operation | Inputs | Output | Side effects | Errors |
 |---|---|---|---|---|
-| `use_coupon_code` | a counter, a code, the ticket timestamp, a customer, a pricelist | success with the program, the card, its owner, its balance, its formatted balance and whether it has a source document; or failure with a message | none | `This coupon is invalid (<code>).`, `This coupon is expired (<code>).`, `This coupon is not yet valid (<code>).`, `No reward can be claimed with this coupon.`, `This coupon is not available with the current pricelist.`, `This programs requires a code to be applied.` |
-| `validate_coupon_programs` | a map from card identifier to net points, a list of new codes | success, or failure with a message and a corrective payload | none | `Some coupons are invalid. The applied coupons have been updated. Please check the order.`, `There are not enough points for the coupon: <code>.`, `The following codes already exist in the database, perhaps they were already sold?` |
+| `use_coupon_code` | a counter, a code, the ticket timestamp, a customer, a pricelist | success with the program, the card, its owner, its balance, its formatted balance and whether it has a source document; or failure with a message | none | "This coupon is invalid (<code>).", "This coupon is expired (<code>).", "This coupon is not yet valid (<code>).", "No reward can be claimed with this coupon.", "This coupon is not available with the current pricelist.", "This programs requires a code to be applied." |
+| `validate_coupon_programs` | a map from card identifier to net points, a list of new codes | success, or failure with a message and a corrective payload | none | "Some coupons are invalid. The applied coupons have been updated. Please check the order.", "There are not enough points for the coupon: <code>.", "The following codes already exist in the database, perhaps they were already sold?" |
 | `confirm_coupon_programs` | one ticket, the card data computed on the device | the card updates, the new usage counts, the new card information for the receipt and the documents to print | Creates cards, updates gift cards, applies points, binds reward lines to cards, sends creation communications, writes history movements. | none; invalid entries are skipped |
 | `get_program_identifiers` | a counter | the programs available at that counter | none | none |
 
@@ -58,13 +58,13 @@ Operations are named with full-word snake_case identifiers. Every operation runs
 
 | Operation | Inputs | Output | Side effects | Errors |
 |---|---|---|---|---|
-| `generate_coupons` | the generation wizard | the created cards | Creates cards and history movements; sends the creation communications. | `Can not generate coupon, no program is set.`, `Invalid quantity.` |
-| `update_card_points` | the balance wizard | nothing | Creates a history movement and writes the new balance. | `New Balance should be positive and different then old balance.` |
-| `apply_coupon_code` | the coupon code wizard | an instruction to open the reward selection wizard filtered to the rewards the code unlocked | Applies the code to the order. | `Invalid sales order.`, plus the refusal of `try_apply_code` |
-| `apply_selected_reward` | the reward selection wizard | true | Applies the reward, re-evaluates the order, deletes the unused current-order cards. | `No reward selected.`, `Coupon not found while trying to add the following reward: <description>` |
+| `generate_coupons` | the generation wizard | the created cards | Creates cards and history movements; sends the creation communications. | "Can not generate coupon, no program is set.", "Invalid quantity." |
+| `update_card_points` | the balance wizard | nothing | Creates a history movement and writes the new balance. | "New Balance should be positive and different then old balance." |
+| `apply_coupon_code` | the coupon code wizard | an instruction to open the reward selection wizard filtered to the rewards the code unlocked | Applies the code to the order. | "Invalid sales order.", plus the refusal of `try_apply_code` |
+| `apply_selected_reward` | the reward selection wizard | true | Applies the reward, re-evaluates the order, deletes the unused current-order cards. | "No reward selected.", "Coupon not found while trying to add the following reward: <description>" |
 | `cancel_reward_selection` | the reward selection wizard | nothing | Deletes the unused current-order cards. | none |
 | `generate_short_link` | the share wizard | an instruction to reopen the same wizard in short-link mode | Creates a tracked link when none exists for that address. | none |
-| `create_share_action` | a card or a program | an instruction to open the share wizard | none | `Provide either a coupon or a program.` |
+| `create_share_action` | a card or a program | an instruction to open the share wizard | none | "Provide either a coupon or a program." |
 
 ## 2. Request endpoints
 
@@ -152,7 +152,7 @@ Fields: the website, the program, the card, the landing page, the code and the r
 ### 3.12 Sales order form additions
 
 - A statistic button `Gift Cards` showing the number of gift cards generated by the order, hidden when there is none.
-- Two buttons placed before the discount button: `Coupon Code`, which opens the coupon code wizard, and `Reward`, which opens the reward flow with the help text `Update current promotional lines and select new rewards if applicable.` Both are shown disabled when the order is locked or cancelled.
+- Two buttons placed before the discount button: `Coupon Code`, which opens the coupon code wizard, and `Reward`, which opens the reward flow with the help text "Update current promotional lines and select new rewards if applicable." Both are shown disabled when the order is locked or cancelled.
 - On the line list, the reward flag is loaded invisibly and makes the quantity and the unit price read-only for a reward line, and the taxes read-only for a reward line while the order is a quotation.
 - Under the totals, a loyalty summary showing, for a confirmed order, the point name, the points issued with a plus sign and the points used with a minus sign.
 
@@ -181,13 +181,13 @@ Described in [point-of-sale-application.md](point-of-sale-application.md).
 
 One page per card, rendered in the language of the card's recipient when there is one.
 
-Content, in order: a congratulation line naming the recipient when the card has one; the sentence `Here is your reward from <company name>.`; then, for every reward of the card's program, the reward description, separated by the word `OR` when there are several; the line `on your next order` in large type; the sentence `Use this promo code before <expiration date>` when the card expires; the code in large type on a light background; `Minimum purchase of <quantity> products` when the first rule requires more than one unit; `Valid for purchase above <amount>` when the first rule requires an amount; the code again as a barcode; the closing `Thank you,`; the company logo; and the company address and email address.
+Content, in order: a congratulation line naming the recipient when the card has one; the sentence "Here is your reward from <company name>."; then, for every reward of the card's program, the reward description, separated by the word `OR` when there are several; the line `on your next order` in large type; the sentence "Use this promo code before <expiration date>" when the card expires; the code in large type on a light background; "Minimum purchase of <quantity> products" when the first rule requires more than one unit; "Valid for purchase above <amount>" when the first rule requires an amount; the code again as a barcode; the closing `Thank you,`; the company logo; and the company address and email address.
 
 ### 4.2 Gift card document
 
 One page per card, rendered in the language of the card's recipient when there is one.
 
-Content, in order: the line `Here is your gift card!`; the shipped gift card picture; the balance rendered as a monetary amount in the card's currency, in large type; a grey block containing the words `Gift Card Code` and the code; the line `Card expires <expiration date>` when the card expires; and the code as a barcode.
+Content, in order: the line "Here is your gift card!"; the shipped gift card picture; the balance rendered as a monetary amount in the card's currency, in large type; a grey block containing the words `Gift Card Code` and the code; the line "Card expires <expiration date>" when the card expires; and the code as a barcode.
 
 Both documents are bound to the Loyalty Card entity, so they can be printed from the card list, from the card form, from a communication plan and, at a counter, automatically when a card is created.
 
@@ -226,3 +226,54 @@ The domain ships no dedicated analysis model. The figures it exposes are:
 | Discount classification | the invoice lines | an invoice line coming from a reward of type `discount`, or from a reward discount product of the ticket behind the invoice, is flagged as a discount line |
 
 The full movement history of every card is queryable through the Loyalty History movement entity, grouped by card, by company or by document, and is the basis of any redemption analysis a deployment wishes to build.
+
+## 7A. Menus
+
+The menu tree is given in full, with its parents, its access groups and its sequence numbers, in
+[configuration.md](configuration.md), section 9.2. In summary the domain contributes two entries —
+one for discount and loyalty programs and one for gift cards and electronic wallets — under the
+sales product catalogue menu, the same two under the counter catalogue menu, and the same two again
+under a Loyalty entry of the storefront menu. Each opens the program list restricted to the
+program types that belong to it.
+
+## 7B. External integrations
+
+The domain contacts no external service. Three integration surfaces nevertheless exist and a rebuild
+must honour them:
+
+| Surface | Contract |
+|---|---|
+| Barcode scanning | A scanner at a counter feeds the code popup with the scanned text. The shipped barcode rule named `Coupon & Gift Card Barcodes`, sequence 50, any encoding, recognises codes that begin with `043` or `044`, which is why every generated code starts with `044`. A rebuild that changes the prefix must change the rule with it. |
+| Shareable coupon addresses | An address of the form base address + `/coupon/` + the code + a query string carrying the landing page under the key `r` is handed to customers, printed, mailed and pasted into other systems. It must keep working character for character. |
+| Shortened tracked links | When the sharing wizard is opened in short-link mode, the address above is registered with the storefront's link tracker and the short address is returned instead. The tracker belongs to [../website-and-storefront/](../website-and-storefront/). |
+
+## 7C. Import and export
+
+The domain ships no import template and no export definition of its own. What a deployment
+exchanges, and the constraints on doing so, are these:
+
+| Data | Import | Export |
+|---|---|---|
+| Loyalty Program, Loyalty Rule, Loyalty Reward, Loyalty Communication | Importable through the platform's generic record import. A program must arrive with at least one reward in the same batch, or the at-least-one-reward validation refuses it. A rule's `code` must be unique among active rules and must not collide with a card code. | Exportable through the generic record export. |
+| Loyalty Card | Importable. Each row must carry a `code` unique across the whole table; a row without one receives a generated code. Importing a balance does **not** create a history movement, so an import that must preserve an audit trail has to import the movements too. | Exportable. The `points_display` rendering is derived and is exported as text. |
+| Loyalty History movement | Importable and exportable. `order_model` and `order_id` together identify the document a movement refers to; a movement whose `order_model` names an entity that does not exist cannot render its document description. | Exportable. |
+| Sales Order Coupon Points | Importable in principle, but a rebuild should not: the entries are derived from the recomputation and an imported entry that does not match the order's content is overwritten at the next recomputation. | Exportable for inspection. |
+| Cards generated in bulk | The generation wizard is the supported bulk path; it creates the cards, their codes, their opening history movements and their creation messages in one operation. | The card list exports the codes, the balances, the owners and the expiry dates, which is what a printer or a mailing house needs. |
+
+Two rules govern any exchange: a card code and a rule code may never collide (LOY-022 in
+[business-rules.md](business-rules.md)), and a program may not be deleted while a card references
+it (LOY-012), so a migration must import programs before cards and delete cards before programs.
+
+## 8. Reconciliation notes
+
+1. **Operation names.** The named operations of section 1 are written in full words. They are the
+   contract's *behaviour*, not its spelling: a rebuild may name each operation as its own
+   conventions require, provided the inputs, the outputs, the side effects and the refusal messages
+   are those listed here. The request addresses of section 2, by contrast, are reproduced exactly,
+   because an existing link, an existing client or an existing shared coupon address depends on them
+   character for character.
+2. **Field identifiers.** Screens and payloads name fields by their reproduced storage names.
+3. **Where the channel screens are specified.** The cart, the checkout and the counter screens are
+   not repeated here; they are in [storefront-application.md](storefront-application.md) and
+   [point-of-sale-application.md](point-of-sale-application.md), which the other merged version did
+   not have as separate files.

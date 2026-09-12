@@ -19,13 +19,13 @@ in words.
 
 **LOY-002** A Loyalty Program must carry a currency. When the company of the program is set or changed and that company has a currency, the program currency is set to it; the user may override it afterwards.
 
-**LOY-003** Every pricelist listed in `pricelist_ids` must have the same currency as the program. Violation message: `The loyalty program's currency must be the same as all it's pricelists ones.` The selection list of the field is restricted to pricelists of the program currency, so the rule can only be violated by a programmatic write or by changing the currency after the pricelists were chosen.
+**LOY-003** Every pricelist listed in `pricelist_ids` must have the same currency as the program. Violation message: "The loyalty program's currency must be the same as all it's pricelists ones." The selection list of the field is restricted to pricelists of the program currency, so the rule can only be violated by a programmatic write or by changing the currency after the pricelists were chosen.
 
-**LOY-004** When both `date_from` and `date_to` are set, `date_from` must be earlier than or equal to `date_to`. Violation message: `The validity period's start date must be anterior or equal to its end date.` Both bounds are inclusive.
+**LOY-004** When both `date_from` and `date_to` are set, `date_from` must be earlier than or equal to `date_to`. Violation message: "The validity period's start date must be anterior or equal to its end date." Both bounds are inclusive.
 
-**LOY-005** A Loyalty Program must end every write with at least one reward. Violation message: `A program must have at least one reward.` The check is suspended for a write that changes the program type, because such a write deletes the old rewards and creates the new ones in a single operation.
+**LOY-005** A Loyalty Program must end every write with at least one reward. Violation message: "A program must have at least one reward." The check is suspended for a write that changes the program type, because such a write deletes the old rewards and creates the new ones in a single operation.
 
-**LOY-006** When `limit_usage` is true, `max_usage` must be strictly positive. This is enforced at the database level. Violation message: `Max usage must be strictly positive if a limit is used.`
+**LOY-006** When `limit_usage` is true, `max_usage` must be strictly positive. This is enforced at the database level. Violation message: "Max usage must be strictly positive if a limit is used."
 
 **LOY-007** Changing `program_type` rewrites `applies_on`, `trigger`, `portal_visible`, `portal_point_name`, the rules, the rewards and the communication plan with the family defaults of the new type. Every field the user had edited on those collections is lost. The screen forbids the change once the program has at least one card.
 
@@ -35,13 +35,13 @@ in words.
 
 **LOY-010** Writing `active` on a program propagates it to every rule, every reward, every communication rule and every reward discount product of the program, including records that are currently archived.
 
-**LOY-011** A program whose `active` is true may not be deleted. Violation message: `You can not delete a program in an active state`
+**LOY-011** A program whose `active` is true may not be deleted. Violation message: "You can not delete a program in an active state"
 
 **LOY-012** A program that has issued at least one card may not be deleted, because a card's reference to its program is a restricted reference. The cards must be deleted first.
 
-**LOY-013** Unarchiving a program re-runs the code uniqueness rules of its rules. When another active rule already carries one of the codes, or when two programs unarchived in the same operation share a code, the operation fails with `The promo code must be unique.`
+**LOY-013** Unarchiving a program re-runs the code uniqueness rules of its rules. When another active rule already carries one of the codes, or when two programs unarchived in the same operation share a code, the operation fails with "The promo code must be unique."
 
-**LOY-014** Setting the point-of-sale printed document on a gift card or electronic wallet program requires the email template to be set first. Violation message: `You must set 'Email template' before setting 'Print Report'.` The two names in the message are the on-screen labels of the two fields.
+**LOY-014** Setting the point-of-sale printed document on a gift card or electronic wallet program requires the email template to be set first. Violation message: "You must set 'Email template' before setting 'Print Report'." The two names in the message are the on-screen labels of the two fields.
 
 **LOY-015** Writing the simplified email template field on a gift card or electronic wallet program rewrites the whole communication plan: clearing it deletes every rule of the plan; setting it on a program with no plan creates one rule with trigger `create`; setting it on a program that already has rules rewrites every rule to trigger `create` with that template. On any other program type the write does nothing.
 
@@ -51,15 +51,15 @@ in words.
 
 ## 2. Rule definition
 
-**LOY-018** `reward_point_amount` must be strictly positive. Enforced at the database level. Violation message: `Rule points reward must be strictly positive.`
+**LOY-018** `reward_point_amount` must be strictly positive. Enforced at the database level. Violation message: "Rule points reward must be strictly positive."
 
-**LOY-019** `reward_point_split` may not be true when the program's `applies_on` is `both` or the program type is `ewallet`. Violation message: `Split per unit is not allowed for Loyalty and eWallet programs.` Splitting means issuing several cards, which makes no sense for a balance that must stay unique per customer.
+**LOY-019** `reward_point_split` may not be true when the program's `applies_on` is `both` or the program type is `ewallet`. Violation message: "Split per unit is not allowed for Loyalty and eWallet programs." Splitting means issuing several cards, which makes no sense for a balance that must stay unique per customer.
 
 **LOY-020** The split option only takes effect when the program's `applies_on` is `future` and `reward_point_mode` is not `order`. In every other configuration it is ignored.
 
-**LOY-021** Among all active rules, a promotional code is unique. Violation message: `The promo code must be unique.` The check covers both the rules being written together and the rules already in the database.
+**LOY-021** Among all active rules, a promotional code is unique. Violation message: "The promo code must be unique." The check covers both the rules being written together and the rules already in the database.
 
-**LOY-022** No active card may carry a code that an active rule carries. Violation message on the rule side: `A coupon with the same code was found.` Violation message on the card side: `A trigger with the same code as one of your coupon already exists.`
+**LOY-022** No active card may carry a code that an active rule carries. Violation message on the rule side: "A coupon with the same code was found." Violation message on the card side: "A trigger with the same code as one of your coupon already exists."
 
 **LOY-023** When the website capability package is present, LOY-021 is relaxed: two rules may share a code as long as they are not both reachable from the same website. A rule bound to a website conflicts with another rule bound to the same website and with any rule bound to no website; two rules bound to different websites never conflict. The message is unchanged.
 
@@ -73,13 +73,13 @@ in words.
 
 ## 3. Reward definition
 
-**LOY-028** `required_points` must be strictly positive. Enforced at the database level. Violation message: `The required points for a reward must be strictly positive.`
+**LOY-028** `required_points` must be strictly positive. Enforced at the database level. Violation message: "The required points for a reward must be strictly positive."
 
-**LOY-029** For a reward of type `product`, `reward_product_qty` must be strictly positive. Enforced at the database level. Violation message: `The reward product quantity must be strictly positive.`
+**LOY-029** For a reward of type `product`, `reward_product_qty` must be strictly positive. Enforced at the database level. Violation message: "The reward product quantity must be strictly positive."
 
-**LOY-030** For a reward of type `discount`, `discount` must be strictly positive. Enforced at the database level. Violation message: `The discount must be strictly positive.`
+**LOY-030** For a reward of type `discount`, `discount` must be strictly positive. Enforced at the database level. Violation message: "The discount must be strictly positive."
 
-**LOY-031** A reward product may not be a combination product. Violation message: `A reward product can't be of type "combo".`
+**LOY-031** A reward product may not be a combination product. Violation message: "A reward product can't be of type “combo”."
 
 **LOY-032** Every reward owns exactly one hidden discount product, created automatically when the reward is created or when its description is written while it has none. The product is a service, not sellable, not purchasable, priced zero, with no customer taxes, no vendor taxes and the "ordered quantities" invoicing policy. It is never copied when the reward is duplicated, so a duplicate receives its own product.
 
@@ -95,13 +95,13 @@ in words.
 
 ## 4. Card rules
 
-**LOY-038** A card code is globally unique. Enforced at the database level. Violation message: `A coupon/loyalty card must have a unique code.`
+**LOY-038** A card code is globally unique. Enforced at the database level. Violation message: "A coupon/loyalty card must have a unique code."
 
 **LOY-039** A card code is generated as the three characters `044` followed by eleven characters taken from a randomly generated universally unique value, giving a fourteen-character code that the shipped barcode rule recognizes (it matches codes beginning with `043` or `044`).
 
-**LOY-040** An expiration date may not be set on a card of a program of type `loyalty`. The entry is refused as soon as it is typed, with `Expiration date cannot be set on a loyalty card.`
+**LOY-040** An expiration date may not be set on a card of a program of type `loyalty`. The entry is refused as soon as it is typed, with "Expiration date cannot be set on a loyalty card."
 
-**LOY-041** A card whose `expiration_date` is strictly earlier than the reference date of the document is excluded from the claimable rewards, is removed from the document's applied cards at the next evaluation, and cannot be applied by code (`This coupon is expired.`).
+**LOY-041** A card whose `expiration_date` is strictly earlier than the reference date of the document is excluded from the claimable rewards, is removed from the document's applied cards at the next evaluation, and cannot be applied by code ("This coupon is expired.").
 
 **LOY-042** Creating a card runs the "at creation" communication plan of its program, unless the calling context suppresses loyalty emails or suppresses sending. A card without a resolvable recipient sends nothing.
 
@@ -123,7 +123,7 @@ in words.
 
 **LOY-051** A card that this document created, whose program is not nominative, and whose use count is zero, is deleted when the document is cancelled.
 
-**LOY-052** The pair (order, card) of a pending promise is unique. Enforced at the database level. Violation message: `The coupon points entry already exists.`
+**LOY-052** The pair (order, card) of a pending promise is unique. Enforced at the database level. Violation message: "The coupon points entry already exists."
 
 ## 5. Applicability
 
@@ -135,7 +135,7 @@ in words.
 
 **LOY-056** The evaluation time zone is the company contact's time zone, then the value of the system parameter `loyalty.timezone`, then coordinated universal time. For an online cart, the website salesperson's time zone takes precedence.
 
-**LOY-057** A program whose `limit_usage` is true and whose total document count has reached `max_usage` is excluded from the automatic candidates, and its code is refused with `This code is expired (<code>).`
+**LOY-057** A program whose `limit_usage` is true and whose total document count has reached `max_usage` is excluded from the automatic candidates, and its code is refused with "This code is expired (<code>)."
 
 **LOY-058** The total document count of a program is the number of distinct sales orders carrying one of its rewards plus the number of distinct point-of-sale tickets carrying one of its rewards. A document counts once per program however many reward lines it carries.
 
@@ -143,9 +143,9 @@ in words.
 
 **LOY-060** A program with no rule at all and `applies_on` equal to `current` is considered to have matched every gate, so a coupon program without rules is claimable as soon as its card is applied.
 
-**LOY-061** A non-nominative program whose gates were not all met reports, in this order of priority: `This program requires a code to be applied.` when no code gate was passed; then `To take advantage of this offer, your order must include at least <amount> <currency name> of the eligible products.` when no amount gate was passed, where the amount is the smallest `minimum_amount` among the program's rules; then `You don't have the required product quantities on your sales order.`
+**LOY-061** A non-nominative program whose gates were not all met reports, in this order of priority: "This program requires a code to be applied." when no code gate was passed; then "To take advantage of this offer, your order must include at least <amount> <currency name> of the eligible products." when no amount gate was passed, where the amount is the smallest `minimum_amount` among the program's rules; then "You don't have the required product quantities on your sales order."
 
-**LOY-062** A nominative program is reported as applicable even when it grants zero points, so that the customer's existing balance remains claimable. The only error it can report is `This program is not available for public users.`, raised when the document's customer is the public customer and the document does not allow nominative programs.
+**LOY-062** A nominative program is reported as applicable even when it grants zero points, so that the customer's existing balance remains claimable. The only error it can report is "This program is not available for public users.", raised when the document's customer is the public customer and the document does not allow nominative programs.
 
 **LOY-063** A sales order always allows nominative programs. An online cart allows them only when the visitor is not the anonymous public user.
 
@@ -163,9 +163,9 @@ in words.
 
 **LOY-070** Points granted in the `money` mode are truncated downward to two decimal places, never rounded up.
 
-**LOY-071** A program may only be attached once to a document. A second attempt is refused with `This program is already applied to this order.`
+**LOY-071** A program may only be attached once to a document. A second attempt is refused with "This program is already applied to this order."
 
-**LOY-072** A program that does not match the program filter is refused with `The program is not available for this order.`
+**LOY-072** A program that does not match the program filter is refused with "The program is not available for this order."
 
 ## 6. Claiming a reward
 
@@ -177,17 +177,17 @@ in words.
 
 **LOY-076** A free product reward is not claimable when its product is archived. A reward with a product tag needs at least one active product behind the tag; a reward without a tag needs its reward product to be active.
 
-**LOY-077** When a global discount is already applied and a second one is claimed, the better one wins (section 7 of [calculations.md](calculations.md)). When the applied one wins, the claim is refused with `A better global discount is already applied.` When the candidate wins, the applied lines are reset and reused.
+**LOY-077** When a global discount is already applied and a second one is claimed, the better one wins (section 7 of [calculations.md](calculations.md)). When the applied one wins, the claim is refused with "A better global discount is already applied." When the candidate wins, the applied lines are reset and reused.
 
 **LOY-078** When two global discounts both exceed the discountable amount, the smaller one is considered better, so that the customer keeps the more valuable voucher.
 
-**LOY-079** A reward of a non-nominative program whose `applies_on` is `future` may not be claimed on the document that created its card. Refusal message: `The coupon can only be claimed on future orders.`
+**LOY-079** A reward of a non-nominative program whose `applies_on` is `future` may not be claimed on the document that created its card. Refusal message: "The coupon can only be claimed on future orders."
 
-**LOY-080** A reward may not be claimed when the card does not hold enough points. Refusal message: `The coupon does not have enough points for the selected reward.`
+**LOY-080** A reward may not be claimed when the card does not hold enough points. Refusal message: "The coupon does not have enough points for the selected reward."
 
-**LOY-081** A discount with nothing to discount is refused with `There is nothing to discount`, except when a payment reward is applied on the document, in which case a placeholder line named `TEMPORARY DISCOUNT LINE` with quantity zero, price zero and point cost zero is produced instead.
+**LOY-081** A discount with nothing to discount is refused with "There is nothing to discount", except when a payment reward is applied on the document, in which case a placeholder line named `TEMPORARY DISCOUNT LINE` with quantity zero, price zero and point cost zero is produced instead.
 
-**LOY-082** A free product reward claimed with a product that is not among its eligible products is refused with `Invalid product to claim.`
+**LOY-082** A free product reward claimed with a product that is not among its eligible products is refused with "Invalid product to claim."
 
 **LOY-083** Only one free shipping reward may be applied at a time. When one is applied, every other shipping reward disappears from the claimable set.
 
@@ -211,13 +211,13 @@ in words.
 
 ## 7. Confirmation, cancellation and invoicing
 
-**LOY-093** Confirming an order whose available points on any involved card are negative is refused with `One or more rewards on the sale order is invalid. Please check them.`
+**LOY-093** Confirming an order whose available points on any involved card are negative is refused with "One or more rewards on the sale order is invalid. Please check them."
 
 **LOY-094** Confirming an order re-evaluates it first, so a reward that has become invalid is removed before the points move.
 
 **LOY-095** Confirming an order writes one Loyalty History movement per card involved, carrying both the points granted and the points spent, with the description `Order <order display name>` and a reference to the order.
 
-**LOY-096** Confirming a single order that still has claimable rewards shows an informational notification titled `Rewards Available` with the message `There are available rewards not added to this order.` The notification never blocks the confirmation.
+**LOY-096** Confirming a single order that still has claimable rewards shows an informational notification titled "Rewards Available" with the message "There are available rewards not added to this order." The notification never blocks the confirmation.
 
 **LOY-097** Confirming an order sends the "at creation" communication of every card the order granted points to whose program has `applies_on` equal to `future`, with immediate delivery rather than queued delivery.
 
@@ -245,13 +245,13 @@ in words.
 
 **LOY-108** A code is first looked up among the rules that match the rule filter, then among the cards. A rule and a card may never carry the same code (LOY-022).
 
-**LOY-109** A code whose rule is already activated on the document and whose program already has a reward line on the document is refused with `This promo code is already applied.`
+**LOY-109** A code whose rule is already activated on the document and whose program already has a reward line on the document is refused with "This promo code is already applied."
 
-**LOY-110** A code that matches nothing, or whose card belongs to an archived program, a program without rewards or a program that does not match the program filter, is refused with `This code is invalid (<code>).` and the refusal is flagged "not found", which lets the online shop fall back to interpreting the text as a pricelist code.
+**LOY-110** A code that matches nothing, or whose card belongs to an archived program, a program without rewards or a program that does not match the program filter, is refused with "This code is invalid (<code>)." and the refusal is flagged "not found", which lets the online shop fall back to interpreting the text as a pricelist code.
 
-**LOY-111** A card whose balance is strictly less than the smallest `required_points` among its program's rewards is refused with `This coupon has already been used.`
+**LOY-111** A card whose balance is strictly less than the smallest `required_points` among its program's rewards is refused with "This coupon has already been used."
 
-**LOY-112** A program of type `loyalty` or `ewallet` may never be applied by code. Refusal message: `This program cannot be applied with code.`
+**LOY-112** A program of type `loyalty` or `ewallet` may never be applied by code. Refusal message: "This program cannot be applied with code."
 
 **LOY-113** Before the usage ceiling is checked, the program row is locked for update without waiting. A concurrent transaction that already holds the lock makes the current one fail with a serialization error, and the whole request is retried. This is what makes the usage ceiling exact under concurrency.
 
@@ -307,15 +307,15 @@ in words.
 
 The complete contract is in [point-of-sale-application.md](point-of-sale-application.md); the rules that a replacement must enforce on the server side are listed here.
 
-**LOY-135** A counter session may not open while a reward product of one of its programs, or a gift card rule product of one of its gift card programs, is not available at the counter. Refusal message: `To continue, make the following reward products available in Point of Sale.` followed, for each offending product, by a new line, a tab and either `Program: <program name>, Reward Product: <product name>` or `Program: <program name>, Rule Product: <product name>`.
+**LOY-135** A counter session may not open while a reward product of one of its programs, or a gift card rule product of one of its gift card programs, is not available at the counter. Refusal message: "To continue, make the following reward products available in Point of Sale." followed, for each offending product, by a new line, a tab and either "Program: <program name>, Reward Product: <product name>" or "Program: <program name>, Rule Product: <product name>".
 
-**LOY-136** A gift card program usable at a counter must have exactly one rule and exactly one reward, the rule must grant one point per unit of currency spent, and the reward must be a discount of one unit of currency per point. Refusal messages, in the order they are checked: `Invalid gift card program. More than one reward.`, `Invalid gift card program. More than one rule.`, `Invalid gift card program rule. Use 1 point per currency spent.`, `Invalid gift card program reward. Use 1 currency per point discount.`
+**LOY-136** A gift card program usable at a counter must have exactly one rule and exactly one reward, the rule must grant one point per unit of currency spent, and the reward must be a discount of one unit of currency per point. Refusal messages, in the order they are checked: "Invalid gift card program. More than one reward.", "Invalid gift card program. More than one rule.", "Invalid gift card program rule. Use 1 point per currency spent.", "Invalid gift card program reward. Use 1 currency per point discount."
 
-**LOY-137** When the counter is set to print gift cards, the gift card program must have an email template and a printed document. Refusal messages: `There is no email template on the gift card program and your point of sale is set to print them.` and `There is no print report on the gift card program and your point of sale is set to print them.`
+**LOY-137** When the counter is set to print gift cards, the gift card program must have an email template and a printed document. Refusal messages: "There is no email template on the gift card program and your point of sale is set to print them." and "There is no print report on the gift card program and your point of sale is set to print them."
 
-**LOY-138** The server revalidates every point change the device computed before a ticket is accepted. A card that no longer exists or whose program is archived produces `Some coupons are invalid. The applied coupons have been updated. Please check the order.` together with the list of removed cards. A card whose balance is smaller than the points the device wants to spend produces `There are not enough points for the coupon: <code>.` together with the current balances. A new code that already exists in the database produces `The following codes already exist in the database, perhaps they were already sold?` followed by a new line and the list of colliding codes.
+**LOY-138** The server revalidates every point change the device computed before a ticket is accepted. A card that no longer exists or whose program is archived produces "Some coupons are invalid. The applied coupons have been updated. Please check the order." together with the list of removed cards. A card whose balance is smaller than the points the device wants to spend produces "There are not enough points for the coupon: <code>." together with the current balances. A new code that already exists in the database produces "The following codes already exist in the database, perhaps they were already sold?" followed by a new line and the list of colliding codes.
 
-**LOY-139** The counter code redemption service refuses, in this order: an unknown code or an archived program with `This coupon is invalid (<code>).`; an expired card, a program past its end date, or a program that reached its usage ceiling with `This coupon is expired (<code>).`; a program that has not started with `This coupon is not yet valid (<code>).`; a program with no reward the balance can pay for with `No reward can be claimed with this coupon.`; a program restricted to pricelists that do not include the counter's pricelist with `This coupon is not available with the current pricelist.`; and a program of type `promo_code` reached through a card code with `This programs requires a code to be applied.`
+**LOY-139** The counter code redemption service refuses, in this order: an unknown code or an archived program with "This coupon is invalid (<code>)."; an expired card, a program past its end date, or a program that reached its usage ceiling with "This coupon is expired (<code>)."; a program that has not started with "This coupon is not yet valid (<code>)."; a program with no reward the balance can pay for with "No reward can be claimed with this coupon."; a program restricted to pricelists that do not include the counter's pricelist with "This coupon is not available with the current pricelist."; and a program of type `promo_code` reached through a card code with "This programs requires a code to be applied."
 
 **LOY-140** The counter code redemption searches cards of the counter's programs whose owner is empty or is the ticket's customer, or whose program type is `gift_card`, ordered by owner and then by balance descending, and takes the first one. The ordering lets a bearer coupon be used several times when several identical ones exist.
 
@@ -327,9 +327,9 @@ The complete contract is in [storefront-application.md](storefront-application.m
 
 **LOY-142** Removing a reward line from the cart adds its reward to the cart's list of manually removed rewards, which prevents the automatic claiming from putting it back.
 
-**LOY-143** A coupon link visited without a cart stores the code in the session and answers `The coupon will be automatically applied when you add something in your cart.` The stored code is applied at the first evaluation of the cart that follows.
+**LOY-143** A coupon link visited without a cart stores the code in the session and answers "The coupon will be automatically applied when you add something in your cart." The stored code is applied at the first evaluation of the cart that follows.
 
-**LOY-144** Before a payment is finalized, the cart is re-evaluated; when the total including tax changed, the payment is refused with `Cannot process payment: applied reward was changed or has expired.` followed by a new line and `Please refresh the page and try again.`
+**LOY-144** Before a payment is finalized, the cart is re-evaluated; when the total including tax changed, the payment is refused with "Cannot process payment: applied reward was changed or has expired." followed by a new line and "Please refresh the page and try again."
 
 **LOY-145** Several discount lines produced by one reward are merged into a single visual line in the cart; the merged line carries no tax and its amount is the sum of the underlying lines.
 
@@ -341,26 +341,26 @@ The complete contract is in [storefront-application.md](storefront-application.m
 
 | Wizard | Condition | Message |
 |---|---|---|
-| Loyalty Coupon Generation Wizard | No program set | `Can not generate coupon, no program is set.` |
-| Loyalty Coupon Generation Wizard | Quantity zero or negative | `Invalid quantity.` |
-| Update Loyalty Card Points Wizard | New balance equal to the old one, or negative | `New Balance should be positive and different then old balance.` |
-| Sale Loyalty - Apply Coupon Wizard | No order | `Invalid sales order.` |
-| Sale Loyalty - Apply Coupon Wizard | The code application refused | the refusal text, verbatim |
-| Loyalty Reward Selection Wizard | No reward picked | `No reward selected.` |
-| Loyalty Reward Selection Wizard | No card offers the picked reward | `Coupon not found while trying to add the following reward: <reward description>` |
-| Coupon Share Wizard | A `coupons` program without a card | `A coupon is needed for coupon programs.` |
-| Coupon Share Wizard | The website differs from the program's website | `The shared website should correspond to the website of the program.` |
-| Coupon Share Wizard | Opened with both a card and a program, or with neither | `Provide either a coupon or a program.` |
+| Card Generation Wizard | No program set | "Can not generate coupon, no program is set." |
+| Card Generation Wizard | Quantity zero or negative | "Invalid quantity." |
+| Card Balance Wizard | New balance equal to the old one, or negative | "New Balance should be positive and different then old balance." |
+| Coupon Entry Wizard | No order | "Invalid sales order." |
+| Coupon Entry Wizard | The code application refused | the refusal text, verbatim |
+| Reward Selection Wizard | No reward picked | "No reward selected." |
+| Reward Selection Wizard | No card offers the picked reward | "Coupon not found while trying to add the following reward: <reward description>" |
+| Coupon Sharing Wizard | A `coupons` program without a card | "A coupon is needed for coupon programs." |
+| Coupon Sharing Wizard | The website differs from the program's website | "The shared website should correspond to the website of the program." |
+| Coupon Sharing Wizard | Opened with both a card and a program, or with neither | "Provide either a coupon or a program." |
 
 ## 15. Guards on records owned by other domains
 
 These five guards live on entities owned by other domains but are installed and enforced by this domain, because they protect the master data that programs and rewards depend on. They are cited from [workflows.md](workflows.md) section 5.4 and from [configuration.md](configuration.md) section 8.1.
 
-**LOY-148** Archiving a Product is refused while at least one **active** Loyalty Reward either names that product as its hidden discount product or lists it among its discounted products. The check runs on any write that sets `active` to false on a set in which at least one product is currently active; a write that leaves `active` untrue or that reactivates a product is never checked. The search for the offending reward is performed with elevated rights, so a user who may not see the program is stopped just the same. Violation message: `This product may not be archived. It is being used for an active promotion program.`
+**LOY-148** Archiving a Product is refused while at least one **active** Loyalty Reward either names that product as its hidden discount product or lists it among its discounted products. The check runs on any write that sets `active` to false on a set in which at least one product is currently active; a write that leaves `active` untrue or that reactivates a product is never checked. The search for the offending reward is performed with elevated rights, so a user who may not see the program is stopped just the same. Violation message: "This product may not be archived. It is being used for an active promotion program."
 
-**LOY-149** The shipped gift card product and the shipped wallet top-up product may not be deleted, neither as a product variant nor as the product template that carries the variant. Violation message: `You cannot delete <name> as it is used in 'Coupons & Loyalty'. Please archive it instead.` The placeholder is the display name of the product with the internal reference omitted from it. The guard is not applied when the capability package that ships the two products is itself being removed, because the two products are removed together with it.
+**LOY-149** The shipped gift card product and the shipped wallet top-up product may not be deleted, neither as a product variant nor as the product template that carries the variant. Violation message: "You cannot delete <name> as it is used in 'Coupons & Loyalty'. Please archive it instead." The placeholder is the display name of the product with the internal reference omitted from it. The guard is not applied when the capability package that ships the two products is itself being removed, because the two products are removed together with it.
 
-**LOY-150** Archiving a Pricelist is refused while at least one **active** Loyalty Program lists that pricelist among its `pricelist_ids`. Violation message: `This pricelist may not be archived. It is being used for active promotion programs: <program names>` where the placeholder is the names of every offending active program, separated by a comma and a space, in the order the programs are returned by the search. The search is performed with elevated rights.
+**LOY-150** Archiving a Pricelist is refused while at least one **active** Loyalty Program lists that pricelist among its `pricelist_ids`. Violation message: "This pricelist may not be archived. It is being used for active promotion programs: <program names>" where the placeholder is the names of every offending active program, separated by a comma and a space, in the order the programs are returned by the search. The search is performed with elevated rights.
 
 **LOY-151** The hidden discount product of a reward may not be deleted while that reward exists: the reward's reference to its hidden discount product is a restricted reference and the deletion is refused at the database level. The product has to be archived instead, which is what the cascade of LOY-010 does.
 

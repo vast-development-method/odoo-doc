@@ -322,3 +322,18 @@ A replacement needs the following before the domain can be used at all:
 | Website content > Events | the website content menu | 40 | the event page list, with a shortcut that creates an event through the quick form | website editor |
 
 "Hidden by default" means the menu exists but is reserved for the technical role; it is not shown to an ordinary Event User.
+
+---
+
+## Reconciliation notes
+
+1. **Provenance.** The settings, parameters, jobs, groups, record rules and shipped master data come
+   from version M, which was the only version that carried a configuration document. Version P
+   announced the same subjects in its reading order and its dependency table, and every one of them
+   is present here.
+2. **Names.** The entities are named with the full names of the entity dictionary of this repository,
+   so the access matrix reads Event Automated Mailing, Registration Mail Scheduler, Event Sponsor
+   Level and Track / Visitor Link where version M read Event Communication, Event Communication
+   Registration, Event Sponsor Type and Event Track Visitor.
+3. **The lead-generation job.** Its label is given without the abbreviation version M used, together
+   with its external identifier `event_crm.ir_cron_generate_leads`, which is the contractual string.

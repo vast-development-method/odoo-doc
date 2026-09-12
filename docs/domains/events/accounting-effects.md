@@ -71,3 +71,18 @@ The following rules are **not** observed in the reference behaviour. They are st
 3. **Booth revenue.** Booths behave exactly like tickets: the revenue is recognised when the booth invoice is posted, and the `is_paid` flag of the booth is an operational marker only.
 4. **Multi-company and inter-company events.** An event may belong to no company at all, which makes it visible to every company. The documents it generates always belong to the company of the sales order or of the counter session, never to the company of the event. A replacement should keep that separation: the event is an operational object, the order is the accounting object.
 5. **Tax on a price that includes tax.** The ticket and booth prices stored in this domain are entered **excluding** tax, and the tax-included figures (`price_incl`, `price_reduce_taxinc`) are derived for display only. A replacement that lets organisers enter a tax-included price must convert to a tax-excluded unit price before writing the sales order line, otherwise the invoice totals will not match the advertised price.
+
+---
+
+## Reconciliation notes
+
+1. **Agreement.** Both versions state that this domain posts no journal entry of its own and that
+   every financial consequence reaches the ledger through the selling domain that carried the
+   transaction. Version P added that the account selection depends on the product behind the ticket
+   or the booth category and that the moment the seat becomes occupied differs from the moment the
+   revenue is recognised; both statements are kept, in sections 2 and 5.
+2. **The one inbound hook.** Only version M described the paid-invoice hook that stamps booths as
+   paid. It is kept in section 3, with its irreversibility recorded as observed behaviour.
+3. **Names.** The figures are named by their storage names, `sale_price_total`, `sale_price` and
+   `sale_price_untaxed`, so that they can be found in the field tables of
+   [`entities.md`](entities.md).

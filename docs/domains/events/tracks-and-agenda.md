@@ -50,7 +50,7 @@ A stage carries three independent flags plus a folding flag and an optional mess
 
 The flags are kept coherent automatically, forming the ladder of `EV-RULE-080`:
 
-```
+```formula
 is_cancel = true            ⇒ is_visible_in_agenda = false and is_fully_accessible = false
 is_fully_accessible = true  ⇒ is_visible_in_agenda = true
 is_visible_in_agenda = false⇒ is_fully_accessible = false
@@ -80,7 +80,7 @@ A talk carries two contact blocks that behave differently.
 
 The one-line speaker description is derived as follows:
 
-```
+```formula
 if partner_name is empty:            tag_line = empty
 else if partner_function is set:
         if partner_company_name is set:  tag_line = "<name>, <function> at <company>"
@@ -111,7 +111,7 @@ When a message is sent from the talk and the talk has no contact with a usable a
 
 The three values form a triangle; writing any one of them recomputes the third:
 
-```
+```formula
 date      = date_end − duration hours
 date_end  = date + duration hours
 duration  = (date_end − date) in hours     when either datetime is written directly
@@ -146,7 +146,7 @@ An organiser may show a button while the talk plays: a title, a target address a
 
 **Which talks are shown.** The base condition is:
 
-```
+```formula
 event = this event AND ( is_published = true OR stage.is_visible_in_agenda = true )
 ```
 
@@ -182,7 +182,7 @@ The agenda is a table of quarter-hour rows by room, one table per day.
 
 1. For each talk, convert the start into the display time zone and round it **down** to the previous quarter hour:
 
-```
+```formula
 rounded = start with seconds and sub-seconds cleared,
           and minutes replaced by 15 × ⌊minutes ÷ 15⌋
 ```
@@ -217,7 +217,7 @@ The page shows the abstract, the speaker block, the picture, the video when one 
 
 ### Talk picture address
 
-```
+```formula
 if the talk has a website picture:      the 1024-pixel rendering of that picture
 else if the talk has a video code:      the maximum-resolution thumbnail of that video,
                                         taken from the video service
@@ -253,7 +253,7 @@ The reminder state of a talk **for the current reader** is derived as follows:
 4. Read the links matching that condition for the talks being computed, with elevated rights.
 5. For each talk:
 
-```
+```formula
 if a link exists:   is_reminder_on = link.is_wishlisted
                                      OR (wishlisted_by_default AND NOT link.is_blacklisted)
 else:               is_reminder_on = wishlisted_by_default
@@ -323,7 +323,7 @@ A quiz belongs to exactly one talk, has a name, an unlimited-tries flag and a li
 
 Two derivations help the organiser:
 
-```
+```formula
 question.correct_answer  = the answers of the question whose correctness flag is true
 question.awarded_points  = Σ over every answer of the question of its points
 ```
@@ -395,3 +395,17 @@ The programme package turns the event site into an installable application.
 | Manifest | served at `/event/manifest.webmanifest`, carrying the application name and the icon |
 | Background worker | served at `/event/service-worker.js`, scoped to the event pages |
 | Offline page | served at `/event/offline`, shown when the event site is opened without a connection |
+
+---
+
+## Reconciliation notes
+
+1. **Provenance.** This topic file comes from version M. Version P covered the same ground inside its
+   capability table — sessions with speakers, stages, live broadcasting, quizzes, wish lists and the
+   community page — and every one of those subjects is specified here.
+2. **Vocabulary.** Version P called a programme item a session; this folder calls it a talk, because
+   the entity is Event Track. The synonym is recorded in [`glossary.md`](glossary.md).
+3. **Identifiers.** The action-button fields are named `website_cta`, `website_cta_title`,
+   `website_cta_url`, `website_cta_delay`, `is_website_cta_live` and `website_cta_start_remaining`,
+   which is what the database carries; version M had renamed them. Their full names are in
+   [`entities.md`](entities.md).

@@ -131,10 +131,10 @@ The `money` mode deliberately counts what was actually paid, so a discount alrea
 ### 4.3 Result or error
 
 1. When the program is **not** nominative:
-   - `code_matched` false: the result is the error `This program requires a code to be applied.`
-   - otherwise `minimum_amount_matched` false: the result is the error `To take advantage of this offer, your order must include at least <amount> <currency name> of the eligible products.`, where `<amount>` is the smallest `minimum_amount` among the program's rules and `<currency name>` is the name of the program currency.
-   - otherwise `product_qty_matched` false: the result is the error `You don't have the required product quantities on your sales order.`
-2. When the program **is** nominative and the document's customer is the public customer and the document does not allow nominative programs, the result is the error `This program is not available for public users.`
+   - `code_matched` false: the result is the error "This program requires a code to be applied."
+   - otherwise `minimum_amount_matched` false: the result is the error "To take advantage of this offer, your order must include at least <amount> <currency name> of the eligible products.", where `<amount>` is the smallest `minimum_amount` among the program's rules and `<currency name>` is the name of the program currency.
+   - otherwise `product_qty_matched` false: the result is the error "You don't have the required product quantities on your sales order."
+2. When the program **is** nominative and the document's customer is the public customer and the document does not allow nominative programs, the result is the error "This program is not available for public users."
 3. Otherwise the result is the list `[points] + split_points`.
 
 A nominative program with no matching rule therefore still produces the list `[0]`, which is what keeps a customer's loyalty card and electronic wallet attached to the document even when the document earns nothing.
@@ -210,7 +210,7 @@ Only one global discount may be applied at a time. When a second one appears, th
 
 When `A` loses, its lines are reset and reused for `B`.
 
-Worked example: the order's discountable amount is 500.00. The applied reward is a fixed discount of 80.00 and the candidate is a 10 percent discount. `A` gives 80.00, `B` gives 50.00. Neither exceeds 500.00, so `A` wins because 80.00 is greater than 50.00; the candidate is refused with `A better global discount is already applied.`
+Worked example: the order's discountable amount is 500.00. The applied reward is a fixed discount of 80.00 and the candidate is a 10 percent discount. `A` gives 80.00, `B` gives 50.00. Neither exceeds 500.00, so `A` wins because 80.00 is greater than 50.00; the candidate is refused with "A better global discount is already applied."
 
 Second worked example: the order's discountable amount is 40.00. The applied reward is a fixed discount of 80.00 and the candidate is a fixed discount of 50.00. Both exceed 40.00, so the smaller one wins: `A` gives 80.00 which is greater than 50.00, so `A` loses and the candidate replaces it, leaving the eighty-unit voucher unspent.
 
@@ -345,7 +345,7 @@ Input: a discount reward `W`, a card `C`.
 1. Obtain `discountable` and `discountable_per_tax` from section 8.2, 8.3 or 8.4 according to `W.discount_applicability`.
 2. When `discountable` is zero or absent:
    - when `W`'s program is not a payment program and at least one line of the document carries a payment reward, produce a single **placeholder line**: description `TEMPORARY DISCOUNT LINE`, unit price zero, quantity zero, point cost zero. The placeholder keeps the reward attached to the document so that it can come back if the payment reward is removed.
-   - otherwise refuse with `There is nothing to discount`.
+   - otherwise refuse with "There is nothing to discount".
 3. Compute the ceiling:
    ```formula
    max_discount = convert(W.discount_max_amount, program currency, document currency)
@@ -384,7 +384,7 @@ Input: a discount reward `W`, a card `C`.
 Input: a free product reward `W`, a card `C`, optionally a chosen product.
 
 1. Let `eligible` be `W.reward_product_ids`. The product is the chosen one, or the first eligible one when none was chosen.
-2. When there is no product, or the chosen product is not in `eligible`, refuse with `Invalid product to claim.`
+2. When there is no product, or the chosen product is not in `eligible`, refuse with "Invalid product to claim."
 3. Map the product's company taxes through the document's fiscal position.
 4. Let `points` be the points available on `C`.
 5. ```
@@ -643,7 +643,7 @@ The customer already owns a card of this program holding 90.00 points. The custo
 6. Ceiling: `max_discount = min(+infinity, 250.00) = 250.00`; mode `per_order` gives `max_discount = min(250.00, 5.00) = 5.00`.
 7. `discount_factor = min(1, 5.00 ÷ 250.00) = 0.02`.
 8. Point cost: mode is not `per_point`, so `point_cost = 100.00`.
-9. One reward line: the description derived by section 3.5 of [entities.md](entities.md) is the formatted amount followed by ` on your order`, which for a program currency whose symbol is placed after the amount reads `5 <symbol> on your order`; quantity 1, unit price `−(250.00 × 0.02) = −5.00`, no tax, point cost 100.00.
+9. One reward line: the description derived by section 3.6 of [entities.md](entities.md) is the formatted amount followed by ` on your order`, which for a program currency whose symbol is placed after the amount reads `5 <symbol> on your order`; quantity 1, unit price `−(250.00 × 0.02) = −5.00`, no tax, point cost 100.00.
 10. Order total: 245.00.
 11. Points available now: `90.00 + 25.00 − 100.00 = 15.00`, so the reward is no longer claimable a second time.
 12. On confirmation, the net change for the card is `+25.00 − 100.00 = −75.00` and the balance becomes 15.00. One history movement is written on the card: `issued` 25.00, `used` 100.00, description `Order S00042`, referencing the order.
@@ -690,3 +690,22 @@ Payment rewards are always last because their amount depends on the total after 
 ## 17. Automatic invoicing of a fully rewarded order
 
 When an order is confirmed, its total including tax is zero and its reward total is not zero, and the deployment enables automatic invoicing, an invoice is produced anyway: the lines are forced to the "ordered quantities" invoicing policy, an invoice is created and posted, and, when it is ready to be sent, it is marked as sent and dispatched with the configured invoice email template. Without this rule a fully discounted order would never produce an accounting document.
+
+## 18. Reconciliation notes
+
+1. **Applicability filters.** The two merged versions expressed the programme filter and the rule
+   filter as condition expressions. They are written here as lists of conditions in words, because
+   the specification carries no query notation.
+2. **System parameter keys.** One version named the discountable-product expansion parameter by an
+   invented key. The reproduced key is `loyalty.compute_all_discount_product_ids`, whose absent
+   value is read as `enabled` and whose shipped value is `False`; the reproduced key for the
+   evaluation time zone is `loyalty.timezone`.
+3. **The discount magnitude field.** One version called it *discount percentage* even in the modes
+   where it is an amount. The reproduced identifier is `discount`, and section 9.2 states which
+   meaning each `discount_mode` gives it.
+4. **Point rounding.** Both versions agree that a point computation in the per-unit-of-currency mode
+   truncates downward to two decimals on the server. The counter computes the same quantity by
+   rounding half away from zero at the product price precision; the difference is deliberate and is
+   stated in [point-of-sale-application.md](point-of-sale-application.md), section 4.
+5. **Rule citations and field identifiers.** As in the rest of the folder, rules are cited by the
+   contiguous LOY-nnn scheme and fields by their reproduced storage names.

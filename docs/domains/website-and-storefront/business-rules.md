@@ -1718,7 +1718,7 @@ root and appends the site's custom crawler exclusion text under a banner block.
 pages, menus, attachments, because pages need templates and menus need pages.
 
 **WS-501 — Deferred conversion.** A theme record whose dependency has not yet produced a copy for this site is
-skipped in the current pass and retried in a later pass over the same entity.
+skipped in the current pass and retried on a subsequent pass over the same entity.
 
 **WS-502 — Copies are updated, not duplicated.** When a copy already exists for this site, it is updated with
 the converted values except the fields the update protects; otherwise a copy is created.

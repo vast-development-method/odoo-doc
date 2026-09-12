@@ -34,7 +34,7 @@ Every formula and algorithm of the domain: its inputs, its output, its precision
 
 Three scopes count seats with the same shape: the Event, the Event Slot and the Event Ticket. In every scope, only registrations that are **active** and whose state is `open` or `done` are counted.
 
-```
+```formula
 seats_reserved = count(registrations WHERE active AND state = "open")
 seats_used     = count(registrations WHERE active AND state = "done")
 seats_taken    = seats_reserved + seats_used
@@ -42,7 +42,7 @@ seats_taken    = seats_reserved + seats_used
 
 The remaining seats depend on the scope:
 
-```
+```formula
 Event:
   effective_maximum = seats_max × event_slot_count   if is_multi_slots
                     = seats_max                      otherwise
@@ -64,7 +64,7 @@ A zero maximum therefore produces a zero "available" figure that must be read as
 
 **Worked example 1 (the canonical figures).** An event caps 100 seats, has no slot and no ticket. It has 60 registrations in `open`, 10 in `done` and 5 in `cancel`.
 
-```
+```formula
 seats_reserved  = 60
 seats_used      = 10
 seats_taken     = 60 + 10 = 70
@@ -76,7 +76,7 @@ The 5 cancelled registrations are invisible to every counter. Archiving one of t
 
 **Worked example 2 (multi-slot).** The same event is switched to multi-slot with 3 slots and keeps `seats_max = 100`, which now means 100 seats **per slot**. The 70 taken seats are spread as 40 on slot A, 20 on slot B and 10 on slot C.
 
-```
+```formula
 Event:  effective_max = 100 × 3 = 300, seats_taken = 70, seats_available = 300 − 70 = 230
 Slot A: seats_taken = 40, seats_available = 100 − 40 = 60
 Slot B: seats_taken = 20, seats_available = 100 − 20 = 80
@@ -85,7 +85,7 @@ Slot C: seats_taken = 10, seats_available = 100 − 10 = 90
 
 **Worked example 3 (ticket counters are independent of the event cap).** The same event offers ticket "Standard" capped at 50 and ticket "Premium" capped at 20, and keeps its own cap of 100. Of the 70 taken seats, 55 are Standard and 15 are Premium.
 
-```
+```formula
 Standard: seats_taken = 55, seats_available = 50 − 55 = −5
 Premium:  seats_taken = 15, seats_available = 20 − 15 = 5
 Event:    seats_available = 100 − 70 = 30
@@ -136,7 +136,7 @@ A request for 3 seats of Standard on slot A fails with *"Standard - <slot A disp
 
 ### Registrations started
 
-```
+```formula
 event_registrations_started =
     true                                            if start_sale_datetime is empty
     tz(now) >= tz(start_sale_datetime)              otherwise
@@ -144,7 +144,7 @@ event_registrations_started =
 
 where
 
-```
+```formula
 start_sale_datetime = min( ticket.start_sale_datetime for every non-expired ticket )
                       but only when every one of those tickets has a start date;
                       empty otherwise (and empty when there is no ticket at all)
@@ -154,7 +154,7 @@ A single non-expired ticket without a start date therefore makes the whole event
 
 ### Registrations open
 
-```
+```formula
 event_registrations_open =
       kanban_state <> "cancel"
   AND event_registrations_started
@@ -165,7 +165,7 @@ event_registrations_open =
 
 with
 
-```
+```formula
 ticket_condition (single-slot event) =
       there is no ticket
    OR at least one ticket has sale_available = true
@@ -180,7 +180,7 @@ ticket_condition (multi-slot event) =
 
 ### Sold out
 
-```
+```formula
 event_registrations_sold_out =
       (seats_limited AND seats_max > 0 AND NOT seats_available > 0)
    OR (there is at least one ticket AND
@@ -191,7 +191,7 @@ event_registrations_sold_out =
 
 **Worked example.** Event with 100 seats, 70 taken, one ticket "Standard" capped at 50 with 55 taken and a sales window that opened yesterday and closes tomorrow, single slot.
 
-```
+```formula
 start_sale_datetime  = yesterday → event_registrations_started = true
 date_end in the future → true
 seats_limited and seats_max = 100 and seats_available = 30 > 0 → true
@@ -211,7 +211,7 @@ The event still has 30 free seats but cannot sell them, because the only ticket 
 
 **Inputs:** the two sales datetimes of the ticket, the display time zone of its event, the ticket seat figures, the sold-out flag of the event and, with the product bridge, the archived state of the product.
 
-```
+```formula
 is_launched = true                             if start_sale_datetime is empty
             = tz(start_sale_datetime) <= tz(now)   otherwise
 
@@ -265,7 +265,7 @@ sale_available = is_launched AND NOT is_expired AND NOT is_sold_out
 | `after_event` | `event.date_end` (slot trace: `slot.end_datetime`) | `+` |
 | `before_event_end` | `event.date_end` (slot trace: `slot.end_datetime`) | `−` |
 
-```
+```formula
 scheduled_date = anchor with sub-seconds cleared  +  sign × interval(interval_nbr, interval_unit)
 ```
 
@@ -273,7 +273,7 @@ An empty anchor gives an empty scheduled date. Recomputing any scheduled date wa
 
 **Worked example 1 (two days before the event).** An event starts on `2026-06-15 09:00:00` in coordinated universal time. A schedule has interval number 2, unit `days`, type `before_event`.
 
-```
+```formula
 scheduled_date = 2026-06-15 09:00:00 − 2 days = 2026-06-13 09:00:00
 ```
 
@@ -326,7 +326,7 @@ Algorithm:
 3. `diff = event_date_tz − today_tz` in whole days.
 4. Return, in this order:
 
-```
+```formula
 diff <= 0                              → "today"
 diff = 1                               → "tomorrow"
 diff < 7                               → "in <diff> days"
@@ -358,7 +358,7 @@ Note the month test: it compares calendar months, not day counts, therefore an e
 
 ### Ticket
 
-```
+```formula
 price             = the stored ticket price (proposed from the product sales price when a product is chosen)
 price_incl        = total including tax of ( price, quantity 1, currency of the ticket, product )
                     using only the taxes of the product
@@ -372,7 +372,7 @@ The contextual discount is the discount that the pricelist of the reading contex
 
 ### Booth category
 
-```
+```formula
 price               = product sales price + product extra price, whenever the product has a non-zero sales price;
                       otherwise the stored value, editable
 price_incl          = total including tax of ( price, quantity 1, category currency, product )
@@ -396,7 +396,7 @@ line carries pending booths and an event →
          = sum over the booths of booth.price                           (rule may show a discount)
     unit price = convert(base, from the currency of the company of the event,
                          to the currency of the line)
-```
+```text
 
 ### Public strike-through price of a ticket
 
@@ -407,7 +407,7 @@ ticket.price <> 0
 AND a pricelist applies to the reader
 AND the pricelist rule matching the ticket product for a quantity of 1 is itself allowed to show a discount
 AND (ticket.price − ticket.price_reduce) > 0
-```
+```formula
 
 **Worked example.** A ticket has `price = 100.00` in a currency with two decimal places. The product carries one tax of 21 percent, price-excluded. The reader has a pricelist granting 10 percent on that product.
 
@@ -416,7 +416,7 @@ price                = 100.00
 price_incl           = 100.00 × 1.21 = 121.00
 price_reduce         = (1 − 0.10) × 100.00 = 90.00
 price_reduce_taxinc  = 90.00 × 1.21 = 108.90
-```
+```formula
 
 If the matching pricelist rule may show a discount, the sales order line takes the unit price `100.00` and the storefront displays `100.00` crossed out next to `90.00`. If the rule may not show a discount, the line takes `90.00` and no crossed-out price is shown.
 
@@ -436,13 +436,13 @@ Algorithm:
    - the absolute ceiling of 30 otherwise.
 2. When tickets exist, compute the availability of every `(chosen slot, ticket)` pair with the algorithm of section 2. Then, per ticket:
 
-```formula
+```
 availability = no limit →
     limit = ticket.limit_max_per_order   when it is non-zero
           = 30                           otherwise
 availability is a number →
     limit = min( ticket.limit_max_per_order or availability , availability )
-```
+```formula
 
    In words: an unconstrained ticket is bounded by its own per-order limit, or by the absolute ceiling; a constrained ticket is bounded by the smaller of its per-order limit and the seats that really remain.
 
@@ -453,7 +453,7 @@ availability(A, Standard) = min(100 − 96, 50 − 48) = min(4, 2) = 2
   limit(Standard) = min(6, 2) = 2
 availability(A, Premium)  = 100 − 96 = 4      (the event limit still applies)
   limit(Premium)  = min(0 or 4, 4) = min(4, 4) = 4
-```
+```formula
 
 The visitor may therefore select at most 2 Standard and at most 4 Premium, and the combined check of the registration form additionally refuses a total above the 4 seats remaining on the slot.
 
@@ -480,7 +480,7 @@ open_to   = the calendar date of now_tz at hour_to, in the event time zone
 from      = max(dt_begin, open_from)
 to        = min(dt_end,   open_to)
 answer    = from <= now_tz < to
-```
+```formula
 
 **Worked example.** An event runs from `2026-06-12 08:00` to `2026-06-14 20:00` in `Europe/Paris`. A sponsor has `hour_from = 9.5` (nine thirty) and `hour_to = 17.0`. The current moment is `2026-06-12 09:15` Paris time.
 
@@ -490,7 +490,7 @@ open_to   = 2026-06-12 17:00
 from      = max(2026-06-12 08:00, 2026-06-12 09:30) = 09:30
 to        = min(2026-06-14 20:00, 2026-06-12 17:00) = 17:00
 09:30 <= 09:15 is false ⇒ closed
-```
+```formula
 
 At `2026-06-12 10:00` the same computation gives open. On `2026-06-14` with `hour_to = 22.0`, `to = min(2026-06-14 20:00, 2026-06-14 22:00) = 20:00`, therefore the virtual booth closes with the event rather than at 22:00.
 
@@ -506,7 +506,7 @@ The three fields form a triangle in which any two determine the third:
 date      = date_end − duration hours     (recomputed when the end or the duration changes)
 date_end  = date + duration hours         (recomputed when the start or the duration changes)
 duration  = (date_end − date) in hours    (recomputed when the start or the end is written directly)
-```
+```formula
 
 The default duration is `0.5`, that is thirty minutes.
 
@@ -527,7 +527,7 @@ track_start_relative  = ⌊date − now⌋ in seconds      when date >= now
 track_start_remaining = track_start_relative         when date >= now
                       = 0                            otherwise
 is_one_day            = the start and the end fall on the same calendar day in the event time zone
-```
+```formula
 
 When the talk has neither a start nor an end, all five booleans are false and both counters are zero.
 
@@ -540,7 +540,7 @@ otherwise:
   is_website_cta_live        = button_start <= now <= date_end
   website_cta_start_remaining = ⌊button_start − now⌋ in seconds  when button_start >= now
                                  = 0                                otherwise
-```
+```formula
 
 **Worked example.** A talk runs `14:00`–`15:30` with a button delay of 20 minutes. The button appears at `14:20` and disappears at `15:30`. At `14:05` the remaining time is `900` seconds.
 
@@ -570,7 +570,7 @@ rounded end   = 10:00 + 1.5 h = 11:30 → already on a quarter
 rows occupied = (11:30 − 10:00) × 4 = 6 rows
 displayed times = "10:07 AM" to "11:37 AM" (the real times, not the rounded ones)
 occupied cells = (10:00, Main Hall), (10:15, Main Hall), … , (11:15, Main Hall)
-```
+```formula
 
 A second talk of 30 minutes starting at `10:20` in "Room B" is rounded to `10:15` and occupies 2 rows. The grid of that day runs from `10:00` to `11:30` in six rows, with two columns.
 
@@ -609,7 +609,7 @@ The electronic mail address is deliberately **not** used as an identity criterio
 points of a question = the points attached to the answer the visitor selected
 points of the quiz   = Σ over the submitted answers of (answer.awarded_points)
 question.awarded_points (shown to the organiser) = Σ over all answers of that question of awarded_points
-```
+```formula
 
 Validity gates, in this order: an already completed quiz gives `track_quiz_done`; a submission whose distinct questions do not number exactly the questions of the quiz gives `quiz_incomplete`. A valid submission writes `quiz_completed = true` and `quiz_points = points of the quiz` on the visitor link.
 
@@ -643,7 +643,7 @@ Ranking: 1 → 40 points
          3 → 30 points, visitor 87
          4 → 10 points
          5 → 5 points
-```
+```formula
 
 Searching for the name of visitor 87 returns a single row displayed at position 3.
 
@@ -672,13 +672,13 @@ The deliberate use of today's rates keeps the figure cheap to compute; the conse
 EUR group: 1,200.00 → 1,200.00 EUR
 USD group: 3,000.00 ÷ 1.10 = 2,727.27 EUR   (rounded to the currency precision)
 sale_price_total = 1,200.00 + 2,727.27 = 3,927.27 EUR
-```
+```text
 
 ### Number of attendees on an order
 
 ```
 attendee_count = count( registrations of the order WHERE state <> "cancel" )
-```
+```formula
 
 On a counter order, the attendee count is the number of registrations carried by the lines of the order, without a state filter.
 
@@ -691,7 +691,7 @@ On a counter order, the attendee count is the number of registrations carried by
 ```
 barcode = the decimal text of an unsigned integer built from 8 pseudo-random bytes,
           read in little-endian order
-```
+```formula
 
 The value therefore lies between `0` and `18,446,744,073,709,551,615` and is at most 20 characters long. A decimal rendering is longer than a hexadecimal one but encodes into a denser linear barcode, because a numeric-only symbology can be used. Eight bytes are used rather than sixteen, because 16-byte barcodes are not readable by every scanner. Uniqueness is enforced by the database (`EV-RULE-025`); a collision simply makes the insert fail and the caller retries with a new value.
 
@@ -700,7 +700,7 @@ The value therefore lies between `0` and `18,446,744,073,709,551,615` and is at 
 ```
 hash = keyed digest over the pair ( event identifier , the sorted list of registration identifiers )
        using the platform secret and the purpose label "event-registration-ticket-report-access"
-```
+```formula
 
 The comparison performed when the link is used is constant-time. Because the sorted list is part of the input, a link generated for attendees `{4, 9}` does not open the ticket of attendee `7`, and reordering the identifiers in the address does not change the result.
 
@@ -716,7 +716,7 @@ local_start = combine( date , time_of(start_hour) )   interpreted in the event d
 local_end   = combine( date , time_of(end_hour)   )   interpreted in the event display time zone
 start_datetime = local_start converted to coordinated universal time
 end_datetime   = local_end   converted to coordinated universal time
-```
+```formula
 
 where `time_of(h)` turns a fractional hour into hours and minutes: `time_of(9.5) = 09:30`, `time_of(13.25) = 13:15`, `time_of(23.99) = 23:59`.
 
@@ -725,7 +725,7 @@ where `time_of(h)` turns a fractional hour into hours and minutes: `time_of(9.5)
 ```
 local_start = 2026-06-12 09:30 Paris → start_datetime = 2026-06-12 07:30
 local_end   = 2026-06-12 12:00 Paris → end_datetime   = 2026-06-12 10:00
-```
+```formula
 
 The same slot in January (one hour ahead) would store `08:30` and `11:00`.
 
@@ -749,7 +749,7 @@ The same slot in January (one hour ahead) would store `08:30` and `11:00`.
   number of tags shared with the current talk,
   the room equals the room of the current talk,
   a pseudo-random integer between 0 and 20 )
-```
+```formula
 
 3. Return the first `limit` candidates.
 
@@ -779,7 +779,7 @@ Event Slot (always):
   and, only when availability is requested and the event limits seats and the event is NOT multi-slot:
       seats_available = 0 → "<base> (Sold out)"
       otherwise           → "<base> (<seats_available> seats remaining)"
-```
+```formula
 
 The seat count is formatted with **zero** decimal places using the language of the reader, which means a thousands separator may appear. Availability is deliberately hidden on a ticket of a multi-slot event, and on the slot of a multi-slot event, because a single number cannot describe every slot-and-ticket combination and would mislead the reader.
 
@@ -803,7 +803,7 @@ sale_price_untaxed =
     order_line.subtotal_excluding_tax
       ÷ (order.currency_rate, replaced by 1.0 when it is zero or missing)
       ÷ order_line.quantity                                   otherwise
-```
+```formula
 
 Both measures are therefore **per seat** and expressed in the company currency, since dividing by the order rate removes the order currency. A registration with no order line shows zero on both measures.
 
@@ -812,6 +812,24 @@ Both measures are therefore **per seat** and expressed in the company currency, 
 ```
 sale_price         = 484.00 ÷ 1.10 ÷ 4 = 110.00 per seat
 sale_price_untaxed = 400.00 ÷ 1.10 ÷ 4 =  90.909… per seat
-```
+```formula
 
 Summing `sale_price` over the four rows of that line gives `440.00`, the order total expressed in the company currency.
+
+---
+
+## Reconciliation notes
+
+1. **Provenance.** Every formula of this file comes from version M, which was the only version that
+   carried calculations; version P announced the same list in its reading order (seat availability,
+   communication scheduling arithmetic, price derivations, time-zone arithmetic, quiz point awards)
+   and each of those five subjects is present here.
+2. **Identifiers inside the formulas.** The quantities are named by the storage names the database
+   carries — `seats_max` rather than the readable substitute version M used, `limit_max_per_order`,
+   `date_tz`, `color` — so that a formula can be checked against a field table without a translation
+   step.
+3. **Effective maximum of a multi-slot event.** The event-level available figure uses `seats_max`
+   multiplied by the slot count, while each slot uses `seats_max` alone. That asymmetry is deliberate
+   and is confirmed by the source; the worked example in section 1 carries it through.
+
+```

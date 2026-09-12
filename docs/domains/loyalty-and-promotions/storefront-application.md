@@ -42,10 +42,10 @@ A shareable link has the shape `/coupon/<code>?r=<landing page>`.
 3. When the visitor has a cart, the pending code is applied immediately:
    - on refusal, the landing page receives the refusal text under the key `coupon_error`;
    - on success, the pending code is removed from the session and the landing page receives the code under the key `notify_coupon`; when exactly one card offers exactly one reward and that reward is not a multi-product free product reward, that reward is claimed at once.
-4. When the visitor has no cart, the landing page receives `The coupon will be automatically applied when you add something in your cart.` under the key `coupon_error`, with `coupon_error_type` set to `warning`, and the code stays in the session until a cart exists.
+4. When the visitor has no cart, the landing page receives "The coupon will be automatically applied when you add something in your cart." under the key `coupon_error`, with `coupon_error_type` set to `warning`, and the code stays in the session until a cart exists.
 5. The visitor is redirected to the landing page with the modified query string.
 
-The site layout renders the two keys: a failure appears as a message beginning with `Could not apply the promo code: ` followed by the code, and a success appears as `The following promo code was applied on your order: ` followed by the code.
+The site layout renders the two keys: a failure appears as a message beginning with "Could not apply the promo code: " followed by the code, and a success appears as "The following promo code was applied on your order: " followed by the code; the trailing space of each is part of the message.
 
 ## 4. The promotional code form
 
@@ -57,10 +57,10 @@ The cart page carries a form that submits a code. The same form is used for pric
 4. On success:
    - when exactly one card is returned and it offers exactly one reward, that reward is the candidate; when it offers several, the candidate is the one whose identifier the form carried, if any;
    - a candidate that is not a multi-product free product reward, or a multi-product one for which a product was chosen, is applied. A refusal during the application is stored as the promotional code error and the success message is not shown.
-   - the code is stored in the session as the successful code and displayed once as `You have successfully applied the following code: <code>`.
+   - the code is stored in the session as the successful code and displayed once as "You have successfully applied the following code: <code>".
 5. The shopper is redirected to the page named by the form, defaulting to the cart.
 
-A refusal produced outside this flow, for instance by a stale link, is rendered as `Invalid or expired promo code.`
+A refusal produced outside this flow, for instance by a stale link, is rendered as "Invalid or expired promo code."
 
 ## 5. Claiming a reward from the cart
 
@@ -115,7 +115,7 @@ Before a payment transaction is tied to the order:
 
 1. Remember the order total including tax.
 2. Re-evaluate the order.
-3. When the total including tax changed by more than the currency's rounding step, refuse the payment with `Cannot process payment: applied reward was changed or has expired.` followed by a new line and `Please refresh the page and try again.`
+3. When the total including tax changed by more than the currency's rounding step, refuse the payment with "Cannot process payment: applied reward was changed or has expired." followed by a new line and "Please refresh the page and try again."
 
 This closes the window in which a promotion expires, a program is archived or a card is emptied between the moment the shopper saw the total and the moment they paid.
 
@@ -133,12 +133,12 @@ The portal dialog that shows a card's balance and history is extended in the sto
 
 1. A program that names a website is only applicable to carts of that website; a program that names none is applicable to every website.
 2. The channel flag used by the program filter is the online shop flag, not the sales flag, as soon as the order belongs to a website.
-3. Two programs may carry the same promotional code as long as they are not both reachable from the same website (rule `LOY-023` in [business-rules.md](business-rules.md)). Unarchiving a program whose code collides on the same website fails; unarchiving one whose code only collides on another website succeeds.
+3. Two programs may carry the same promotional code as long as they are not both reachable from the same website (rule LOY-023 in [business-rules.md](business-rules.md)). Unarchiving a program whose code collides on the same website fails; unarchiving one whose code only collides on another website succeeds.
 4. The evaluation time zone of a cart is the website salesperson's time zone when that user has one.
 
 ## 12. Nominative programs and anonymous visitors
 
-1. A cart belonging to the anonymous public visitor does **not** allow nominative programs: the loyalty and electronic wallet cards of a customer are not loaded onto it, and a nominative program evaluated against it reports `This program is not available for public users.`
+1. A cart belonging to the anonymous public visitor does **not** allow nominative programs: the loyalty and electronic wallet cards of a customer are not loaded onto it, and a nominative program evaluated against it reports "This program is not available for public users."
 2. A card created while the cart belonged to the public visitor has the public contact as its owner. As soon as the cart names a real customer, the evaluation rewrites the owner of every such card to that customer. This is what lets an anonymous shopper accumulate a next-order coupon and keep it after signing in at checkout.
 
 ## 13. Cleaning up abandoned carts
@@ -150,3 +150,14 @@ A scheduled cleanup detaches manually applied cards from draft carts that belong
 When a product is added to the cart, the search for an existing line to increment **ignores reward lines**. A free product given by a reward and the same product bought by the shopper therefore live on two separate lines, and adding the product never silently consumes the free one.
 
 When a reward line's quantity is set to zero or less through the cart, the deletion is flagged so that the reward is recorded among the manually removed rewards.
+
+## 15. Reconciliation notes
+
+1. **Where this content lives.** Only one of the two merged versions carried the storefront contract
+   as a file of its own; the other folded a summary of it into its capability list. This file is the
+   full contract, and [README.md](README.md) links it as an extra topic file of the folder.
+2. **Sibling folder keys.** The storefront folder is [../website-and-storefront/](../website-and-storefront/);
+   the links that named *commerce-storefront* and *website-and-content-management* were rewritten.
+3. **Rule citations.** The storefront rules are numbered LOY-141 to LOY-147 in
+   [business-rules.md](business-rules.md); the abandoned-cart delay is the system parameter
+   `website_sale_coupon.abandonned_coupon_validity`.
