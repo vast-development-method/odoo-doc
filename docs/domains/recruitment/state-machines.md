@@ -114,15 +114,20 @@ Two context flags suppress this message:
 
 ### 1.6 The target adjustment
 
-On every stage write, **per record**:
+On every stage write, **per record**, exactly one of the four cases below applies:
+
+| Origin stage carries the hired flag | Destination stage carries the hired flag | Effect on the position's remaining target |
+|---|---|---|
+| no | yes | Remaining target − 1, but only while the remaining target is greater than zero |
+| yes | no | Remaining target + 1, without any upper bound |
+| no | no | unchanged |
+| yes | yes | unchanged |
+
+Written as arithmetic over the quantities:
 
 ```formula
-if destination_is_hired_stage and not origin_is_hired_stage:
-    if position_remaining_target > 0:
-        position_remaining_target = position_remaining_target − 1
-
-if not destination_is_hired_stage and origin_is_hired_stage:
-    position_remaining_target = position_remaining_target + 1
+remaining target after a hire  =  maximum of ( 0 , remaining target before − 1 person )
+remaining target after leaving the hired stage  =  remaining target before + 1 person
 ```
 
 - *position_remaining_target* is the Job Position's `no_of_recruitment` field, labelled
@@ -254,6 +259,7 @@ reports depend on them:
 | `refused` | `ongoing` | Restore | — | Stage reset to the first non-folded stage of the position; refusal reason cleared; record reactivated; the template message of the landing stage is suppressed |
 | `ongoing` or `hired` | `archived` | Archive | — | Record deactivated; nothing else changes; the hire date, if any, survives, so restoring returns the application to `ongoing` only because the restore also resets the stage, which clears the hire date |
 | `archived` | `ongoing` | Restore | — | As above |
+| any | (the record ceases to exist) | Delete | The acting user must hold the Officer privilege; an Interviewer has no delete right | The skill lines of the Application are deleted with it; the meetings that referenced it survive with an empty application reference; the attachments owned by the record are removed by the platform's attachment cleanup |
 
 ### 2.5 Diagram
 
@@ -353,6 +359,7 @@ interface change to one sets the other.
 | unpublished | published | The publish control on the position, or the publish switch on the public page | The acting user must be allowed to publish (the derived permission `can_publish`) | The published date becomes today. Public and portal visitors gain read access to the position through the publication record rules. |
 | published | unpublished | The unpublish control | Same | The published date is cleared. |
 | published | unpublished | Archiving the position | Only positions that were active are touched | Combined with the base archival effect, which also deactivates every application of the position. |
+| published | unpublished | The *set open* operation of the publication mixin | — | The recruitment publication flag is cleared first, then the mixin clears the generic publication flag. |
 
 ### 4.3 Who can see a published position
 
@@ -453,3 +460,80 @@ Transitions:
 
 A talent cannot be duplicated (`You cannot duplicate the talent(s).`) and is not shown the
 pipeline status bar, the refuse button or the add-to-pool button on its form.
+
+---
+
+## 7. Guards and refusal messages, transition by transition
+
+Every guard that can stop a transition of this domain is listed here in the order it is
+evaluated, with the exact text shown when it stops. Rule identifiers refer to
+[business-rules.md](business-rules.md).
+
+### 7.1 Moving an Application into another stage
+
+| Order | Guard | Refusal when it fails |
+|---|---|---|
+| 1 | The acting user must be allowed to write the Application: the Officer privilege, or the Interviewer privilege together with being named on the Application or on its Job Position | The platform's access refusal for a write on a record the user may not reach. No message of this domain is added. |
+| 2 | The destination stage must be unrestricted or attached to the Application's Job Position | Enforced by the field's selection domain in every screen. No server-side constraint exists, so a write that bypasses the screen is accepted; a rebuild that enforces it server-side is a deliberate improvement and must be declared as such. **compatibility finding** — the corrected behaviour is to refuse a stage that belongs to a different position. |
+
+No guard forbids moving backwards, skipping stages, or moving an application whose derived
+status is `hired` or `refused`.
+
+### 7.2 Refusing an Application
+
+| Order | Guard | Refusal when it fails |
+|---|---|---|
+| 1 | A refusal reason must be chosen; the field is required and defaults to the first reason in sequence order | The platform's required-field refusal on the dialog. |
+| 2 | When the message option is on, the acting user must have an electronic mail address | `Unable to post message, please configure the sender's email address.` |
+| 3 | When the message option is on, every selected Application must have either its own address or an address on its Contact | `At least one applicant doesn't have a email; you can't use send email option.` |
+
+### 7.3 Restoring an Application
+
+Restoring has no guard. It always sets the record active, clears the refusal reason and
+writes the first non-folded stage of the Job Position, or an empty stage when the
+Application has no position.
+
+### 7.4 Entering the hired state and creating the Employee
+
+| Order | Guard | Refusal when it fails |
+|---|---|---|
+| 1 | Entering a hired stage has no guard beyond the stage-write guards of §7.1 | — |
+| 2 | The *Create Employee* control is offered only when the Application is active, carries a hire date and has no Employee yet, and only to the Human Resources Officer privilege | The control is absent; no message. |
+| 3 | The acting user must not hold the Interviewer privilege without the Officer privilege | `You are not allowed to perform this action.` |
+| 4 | When the Application has no Contact, the applicant's name must not be empty | `Please provide an applicant name.` |
+
+### 7.5 Becoming a talent, and leaving the talent condition
+
+| Order | Guard | Refusal when it fails |
+|---|---|---|
+| 1 | An Application offered to the add-to-pool dialog must already be a talent, or be linked to no pool directly or indirectly | The record is not offered by the dialog's selection domain. |
+| 2 | A record whose canonical pool copy is itself must keep at least one pool | `Talent must belong to at least one Talent Pool.` |
+| 3 | A talent may not be duplicated | `You cannot duplicate the talent(s).` |
+
+### 7.6 Publishing a Job Position
+
+| Order | Guard | Refusal when it fails |
+|---|---|---|
+| 1 | The acting user must be allowed to publish, which the derived permission of the publication mixin decides | The publish control is not offered; the mixin refuses a direct write with the platform's access refusal. |
+
+### 7.7 Submitting the public application form
+
+| Order | Guard | Refusal when it fails |
+|---|---|---|
+| 1 | The Application entity must be declared as accepting public form submissions | The generic endpoint refuses the submission as not permitted for that entity. |
+| 2 | The forgery token is validated **only** when the visitor has a signed-in session | The platform's expired-session refusal. An anonymous submission carries no token and is accepted, because an embedded form routinely loses its session marker. |
+| 3 | The public-form challenge configured on the platform must pass | The challenge's own refusal. |
+| 4 | The Job Position named in the submission must still be active | `The job offer has been closed.` |
+| 5 | Every field declared required on the entity must be present | The generic endpoint answers with the list of offending field names. |
+
+---
+
+## 8. Reconciliation notes
+
+| Point | Resolution |
+|---|---|
+| Number of machines | One version described five machines and one structural condition; the other folded the machines into its workflow file and added the talent shape as a fourth table. Both sets are present here: the pipeline stage, the derived application status, the readiness colour, the publication flag, the answer-set state, and the talent condition as a structural table rather than a machine. |
+| Whether restoring posts the landing stage's message | Both versions agree that it does not, and both give the same reason: the archive and restore operations run with a context flag that suppresses the stage message. Confirmed. |
+| The search translation of the derived status | Both versions give the same four translations. The two asymmetries between the derivation and the search — an active refused record reads as refused but is not found by the refused search, and the archived search returns refused records too — are stated once, in §2.3. |
+| The target arithmetic when several records are written at once | One version noted that the previous-stage value is shared across the records of a single write. The target arithmetic is applied per record and is correct; only the previous-stage stamp is affected. The anomaly is recorded as a compatibility finding in [business-rules.md](business-rules.md#9-multi-record-stage-writes). |
+| Deleting an Application | Only one version described it. It is a transition of the status machine in the sense that the record leaves every state, and it is listed in §2.4 with its guard and its side effects. |

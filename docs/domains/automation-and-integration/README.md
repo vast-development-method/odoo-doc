@@ -56,7 +56,7 @@ whole database that mentions one person and offers to archive or delete them one
 | Guided tours: the tour, its steps, the consumption record, the shareable address, the export | `entities.md`, `workflows.md`, `interfaces.md` |
 | Onboarding panels: panels, steps, per-company progress, the three completion states, the once-only celebration | `entities.md`, `state-machines.md`, `workflows.md` |
 | Connected device foundation: the local agent, the action and event contracts, the long-poll protocol, device detection | `interfaces.md`, `workflows.md` |
-| Remote interfaces: the two historic call endpoints, the current typed endpoint, the fault codes, the version endpoint | `interfaces.md`, `business-rules.md` |
+| Remote interfaces: the two long-standing call endpoints, the typed endpoint, the fault codes, the version endpoint | `interfaces.md`, `business-rules.md` |
 | Reflection documentation service: the index, the per-record-type document, the caching, the restricted group | `interfaces.md`, `configuration.md` |
 | Attachment content extraction for five document families | `calculations.md`, `workflows.md` |
 | Sparse storage of rarely filled fields | `entities.md`, `calculations.md` |
@@ -168,8 +168,8 @@ identifier an outside caller uses; the storage name is the database table.
 
 1. [`README.md`](README.md) — this file: scope, entities, dependencies.
 2. [`entities.md`](entities.md) — every record and every field.
-3. [`state-machines.md`](state-machines.md) — the six state fields and their transitions.
-4. [`workflows.md`](workflows.md) — the twenty-one end-to-end procedures.
+3. [`state-machines.md`](state-machines.md) — the eight state machines and their transitions.
+4. [`workflows.md`](workflows.md) — the twenty-six end-to-end procedures.
 5. [`business-rules.md`](business-rules.md) — every refusal, with its exact message.
 6. [`calculations.md`](calculations.md) — every formula, with worked examples.
 7. [`accounting-effects.md`](accounting-effects.md) — why the domain writes no ledger entry, and what it triggers elsewhere.
@@ -183,15 +183,15 @@ identifier an outside caller uses; the storage name is the database table.
 | File | Content |
 |---|---|
 | [`README.md`](README.md) | Scope, entity inventory, dependencies, reading order, file list |
-| [`entities.md`](entities.md) | All thirty owned entities in full, plus the extension points added to eleven foreign entities |
-| [`state-machines.md`](state-machines.md) | The six state machines with stored values, transitions, guards and diagrams |
-| [`workflows.md`](workflows.md) | Twenty-one operational procedures, step by step |
-| [`business-rules.md`](business-rules.md) | Ninety-four numbered rules with their exact refusal text |
-| [`calculations.md`](calculations.md) | Twenty-six formulas and algorithms with worked examples |
+| [`entities.md`](entities.md) | All thirty owned entities in full, plus the extension points added to fourteen foreign entities |
+| [`state-machines.md`](state-machines.md) | The eight state machines with stored values, transitions, guards and diagrams |
+| [`workflows.md`](workflows.md) | Twenty-six operational procedures, step by step |
+| [`business-rules.md`](business-rules.md) | One hundred and thirty-four numbered rules with their exact refusal text |
+| [`calculations.md`](calculations.md) | Nineteen groups of formulas and algorithms, fifty-seven arithmetic blocks in all, each with a worked example |
 | [`accounting-effects.md`](accounting-effects.md) | The reasoned statement that the domain posts nothing, and the indirect effects |
 | [`configuration.md`](configuration.md) | Settings, system parameters, groups, access rights, record rules, scheduled jobs, templates, shipped data |
 | [`interfaces.md`](interfaces.md) | Menus, views, named operations, routes, external services, import and export |
-| [`acceptance-criteria.md`](acceptance-criteria.md) | Eighty-eight numbered scenarios |
+| [`acceptance-criteria.md`](acceptance-criteria.md) | One hundred and forty-five numbered scenarios |
 | [`glossary.md`](glossary.md) | Every term of the domain, defined |
 
 ## Dependencies on other domains

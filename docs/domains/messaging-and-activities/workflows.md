@@ -865,3 +865,237 @@ The plugin may create a contact from the open message, supplying at least a cont
 ### Creating a record from the open message
 
 The plugin may create a record of an enabled model from the open message; the created record is returned with its display name and a link.
+
+---
+
+## 26. Delivering a notification by text message or by post
+
+The notification pass of section 4 gains two further delivery passes when the corresponding capability is present. Both run after the browser-push pass.
+
+### The text-message pass
+
+1. Keep the recipients whose delivery channel is the text-message one.
+2. The body is the plain-text form of the message body, or a text the caller supplied explicitly.
+3. For each recipient contact, the number is the one the caller forced for that contact, otherwise the contact's own number formatted to the strict international form, falling back to the raw value when formatting fails.
+4. For each extra number the caller supplied, produce one message unless that number already appears among the contact numbers. A number that resolves to nothing produces a Text Message already in the error state with the missing-number failure type.
+5. Create one Notification of the text-message channel per produced message, already marked read, in the ready status when the message is queued and in the exception status when it already failed, carrying the number used, the plain identifier of the Text Message and a Text Message Tracker keyed by the correlation token.
+6. Unless the caller asked to queue, send the queued rows immediately without raising.
+
+### The postal pass
+
+1. Keep the recipients whose delivery channel is the postal one.
+2. Create one Postal Letter per recipient, following section 21.
+3. Create one Notification of the postal channel per letter, already marked read, in the ready status.
+
+---
+
+## 27. Registering the text-message sending account
+
+**Role:** a settings administrator.
+
+1. Open the registration window and supply a telephone number.
+2. A verification code is texted to that number. A failure is reported with the service's own explanation, quoted in [business-rules.md](business-rules.md), rule MSG-345.
+3. Enter the code. A wrong code, an unknown account and too many attempts each have their own explanation.
+4. On success the account is marked registered and the sender-name window opens.
+5. Set the sender name: three to eleven characters, letters and digits only. An account that already has one may not change it.
+
+With the external telephony provider the flow is different: the company stores an account identifier and a token, the available sending numbers are fetched from the provider and stored with their country and preference order, and a test message may be sent to a chosen number.
+
+---
+
+## 28. Resolving the acting user of an incoming route
+
+**Role:** the gateway, once per route, before the route is applied.
+
+1. Normalize the sender address. When it cannot be normalized there is no user and the gateway's own user acts.
+2. Choose the context record: the alias's owner record when the alias names both a parent model and a parent record; otherwise nothing.
+3. Look the address up among contacts in that context, restricted to contacts that have a user, creating nothing.
+4. Prefer an internal user over a portal user, then the lowest identifier.
+5. The candidate must be allowed to create records in the route's target model; when the alias is known it refines the check.
+6. When no user qualifies, the gateway's own user acts.
+
+Running each route as the resolved user is what makes a created record owned by the right person while the gateway itself runs with system rights.
+
+---
+
+## 29. Post-processing the author and the recipients of an incoming message
+
+**Role:** the gateway, after routing and before the routes are applied.
+
+A record gives far better matching than a bare address, so both are recomputed with the routed record as the context.
+
+1. For each route the context is the target record, else the alias's owner record, else nothing.
+2. When the author is still unknown and a sender address exists, resolve the contact in that context without creating one. The resolution prefers, in order, a contact that follows the context record, then a contact linked to an active internal user, then any contact, always excluding an address that belongs to the installation.
+3. When the recipients are still unknown, resolve the envelope recipients to contacts in the same way, creating none.
+
+---
+
+## 30. Creating a record from an incoming message: the contract
+
+A model that wants to be creatable by an incoming message implements the creation operation. The default implementation:
+
+1. starts from the route's default values;
+2. sets the model's display-name field — its declared name field, or the field named `name` (the record name) — to the message subject, when that field exists and no default already sets it;
+3. sets the model's primary address field to the sender address, when the model declares one;
+4. creates the record.
+
+A model that wants to be updatable implements the update operation. The default implementation writes the supplied values when there are any and does nothing otherwise.
+
+Models commonly override both to map the subject, the body and the attachments onto their own fields, to set a stage, or to attach the message to a container record.
+
+A model adopting the carbon-copy behavior additionally stores, at creation, the carbon-copy addresses of the message and, at update, merges newly seen carbon-copy addresses into the stored list without duplicating a normalized address.
+
+### Worked example — a customer replies to an invoice notification
+
+Company Acme uses the alias domain `acme.example` with the catch-all local part `catchall` and the bounce local part `bounce`. Invoice 42 was mailed to `customer@client.example`; the notification carried the message identifier `<abc-42-account.move@server>` and the reply address formatted from `catchall@acme.example`.
+
+A message arrives from `Jane Customer <customer@client.example>`, addressed to `catchall@acme.example`, with the subject "Re: Invoice 42" and that identifier in its in-reply-to header.
+
+1. Parsing yields the sender, the recipient list `catchall@acme.example`, an empty filtered "to" list because the only recipient belongs to the installation, and the reference.
+2. Parent detection finds the original notification; its subtype is not internal, so the derived internal flag is false.
+3. The message is not a bounce: no recipient is a bounce address, the sender's local part is not the daemon name and the content type is plain.
+4. The bounce counters of every blacklist-enabled record holding `customer@client.example` are reset.
+5. The duplicate check finds nothing and the advisory lock is taken.
+6. The reference resolves to the invoice message, so the reply target is invoice 42.
+7. No alias of another model matches the recipient, so this is a reply and not a forward.
+8. No alias of the invoice model matches either, so the single route is the invoice model, record 42, no default values, the resolved user, no alias.
+9. Validation passes: the record exists and the model accepts updates; with no alias there is no contact-security check.
+10. Loop detection counts the incoming messages of the invoice from Jane inside the window: one, below twenty.
+11. Author post-processing resolves `customer@client.example` to the invoice's customer contact, because that contact follows the record.
+12. The update operation is called, writing nothing by default, and the message is posted with the Discussions subtype, Jane's contact as author, the reply body, no direct recipients, and empty already-reached lists.
+13. The notification pass notifies the invoice's followers; Jane, being the author, is not notified.
+
+Nothing was created, and the catch-all produced no bounce because the message was routed as a reply before the catch-all test ran.
+
+### Worked example — an unknown sender writes to a followers-only alias
+
+A project owns the alias `redesign@acme.example`, which creates tasks, with the contact-security policy "followers".
+
+A message arrives from `stranger@elsewhere.example` addressed to that alias.
+
+1. Not a bounce, not a duplicate, no references, so no reply target.
+2. The strict catch-all test fails: the recipient is not a catch-all address.
+3. The alias matches, so the candidate route is the task model, no record, the alias's default values, the resolved user, the alias.
+4. Validation: the model accepts creation. The policy is "followers"; there is no target record yet, so the checked object is the alias's owner record, the project. The author is resolved: no contact holds `stranger@elsewhere.example`, so the author stays unknown and is therefore not a follower. The refusal is "restricted to followers".
+5. Because the refusal is not a configuration error, the alias status stays as it was.
+6. The security bounce is mailed to the sender with the subject "Re: <original subject>", sent from the daemon name plus `bounce@acme.example`, and its body names the alias and says that only some specific addresses are allowed to contact it.
+7. No route is produced, no task is created and no message is stored.
+
+---
+
+## 31. Completing an activity and scheduling the next one by hand
+
+**Role:** the assignee, or any user with the required permission on the record.
+
+1. Complete the activity as in section 13.
+2. When the type chains by trigger, the successor already exists and nothing more happens.
+3. Otherwise the scheduling window reopens, pre-filled with: the previous type, the previous due date placed in the context so that a successor counting from the previous due date computes correctly, the model and the record.
+4. The person picks one of the previous type's suggested successors, or any other type, and confirms.
+
+### The automation interface used by other domains
+
+Four operations let business code manage the activities it created, restricted by default to the automated ones. All four do nothing when the "skip activity automation" switch is on.
+
+| Operation | Behaviour |
+|---|---|
+| search | Return the activities of the given types on the current records. An external identifier that resolves to nothing is ignored; when none resolves the result is empty. |
+| reschedule | Move the due date and, when asked, reassign. Used when a business date moves. |
+| complete | Complete the matches with a feedback text, which posts the completion message. Used when the awaited business event happened. |
+| remove | Delete the matches silently. Used when the business event became irrelevant. |
+
+Worked example. A purchase order schedules an automated activity of the exception type when a supplier confirms a later date. When the receipt is finally validated, the receiving code completes the activity of that type with the feedback "Received", which archives it and posts the completion message. Had the order been cancelled instead, the cancelling code would have removed the activity and nothing would have been posted.
+
+### The summary note of a plan
+
+Launching a plan logs one note on each target record listing the activities the plan created, so the conversation shows what the plan set in motion.
+
+---
+
+## 32. Serving the live chat widget
+
+**Role:** the public page, on every load.
+
+### The widget data contract
+
+The answer to the initialisation request carries:
+
+| Key | Value | Present |
+|---|---|---|
+| availability | true when the entry point has at least one Chatbot Script on a rule or at least one available operator | always |
+| server address | the base address the widget must talk to | always |
+| worker version | the version string of the real-time connection worker, so a stale cached worker is replaced | always |
+| header background colour, button background colour, title colour, button text colour | the entry point's look settings | only when the entry point is available |
+| button text | the label written on the chat button | only when available |
+| welcome line | the automated line shown before the visitor writes | only when available |
+| entry point name and identifier | as stored | only when available |
+| review address | the address a satisfied visitor is offered | only when available |
+| default visitor name | the name to use for the visitor, "Visitor" when the caller supplies none | only when available |
+
+When the availability flag is false none of the option keys is returned and the widget shows nothing at all.
+
+### Opening a session
+
+1. The visitor interacts. The client requests a session, passing the entry point, the previous operator when the visitor is returning, the script named by the matched rule, and whether the session must be persisted. An entry point identifier that does not exist is answered as a missing page.
+2. The visitor's country is resolved: the country of the signed-in user when there is one, otherwise the country inferred from the request's network address.
+3. The operator is resolved as in section 17. When none can be resolved the request answers false and nothing is created.
+4. **Not persisted**: the client is given a temporary conversation identified as −1 — only one temporary conversation exists at a time, so the identifier need not be unique — described by the loaded flag, the live chat type, the operator contact, the "do not scroll to unread" flag and, for a bot, the script identifier together with the ordered list of welcome step identifiers. Nothing is written.
+5. **Persisted**: the session is created as in section 17, one participation history is created per member, the welcome steps are played for a bot, and a public visitor is given a Guest, reusing an existing one when the request carries a valid token.
+6. The session is announced on the operator's own broadcast channel so it appears in their interface, except when the operator is the bot's own contact.
+7. The answer carries the session identifier and the store payload the client must merge: the session with its loaded flag — set except for a bot session, which is loaded only once the welcome steps have been posted — and the "do not scroll to unread" flag; the acting party's own initial data; for a newly created guest, the guest token as a value the widget must keep; and, for a signed-in visitor, that visitor's own contact with its address.
+
+### Choosing the next script step
+
+Given the answers the visitor has chosen so far:
+
+1. The candidates are the steps of the same script whose sequence is greater than the current one and whose triggering-answer set is empty or intersects the chosen answers.
+2. Candidates are examined in sequence order. A candidate with no condition is taken at once.
+3. A candidate with a condition is taken when, **for every earlier step that contributes answers to the condition**, at least one of that step's contributed answers was chosen. Answers of one step therefore combine with "or", and answers of different steps with "and".
+4. When nothing matches, the script is finished.
+
+Worked example. Step 1 offers the answers A and B; step 2 offers C and D; step 3 offers E. Step 4 is conditioned on {A, B, C, E}. Choosing A, C and E satisfies it: A belongs to step 1, C to step 2 and E to step 3. Choosing B, D and E does not, because no answer of step 2 that appears in the condition was chosen.
+
+### Collecting what the visitor typed
+
+The stored raw answers can be collected at any point, keyed by step type: the address step gives an address, the telephone step gives a number. From them: a public visitor may be turned into a contact carrying that name, address and number; a signed-in visitor has the missing address and number written onto their contact; and a description is composed of the address and the number on separate lines followed by a blank line, ready to be used as the description of a record another domain creates from the conversation.
+
+### The transcript
+
+- **By electronic mail**: the conversation is rendered into a transcript body in the visitor's time zone — the first customer participant that declares one wins, otherwise coordinated universal time — local links are made absolute, and one Outgoing Mail is created with the subject "Conversation with <operator display name>", sent from the company catch-all or the company address, authored by the acting user, addressed to the given address, and handed to the relay immediately.
+- **By download**: the same content is served as a printable document, and only a participant may download it.
+
+An image attachment inside a transcript is rendered inline; any other attachment is rendered as a link.
+
+---
+
+## 33. The weekly publisher announcement exchange
+
+**Role:** the platform, weekly.
+
+1. Build the request: the installation reference, the installation creation date, the installation name, the platform version, the number of active users, the number of active users who signed in within the last fifteen days, the number of active external users, the number of active external users who signed in within the last fifteen days, the language of the acting user, the base address, the list of installed capability packages, the subscription code and, when the acting user's contact belongs to a company, that company's name, address and telephone number.
+2. Send it to the announcement service.
+3. Post every announcement in the answer in the company-wide channel with the Discussions subtype, addressed to the root user's contact. A failure while posting one announcement is swallowed so the rest are still delivered.
+4. When the answer carries subscription information, write the system parameters for the expiry date, the expiry reason defaulting to the trial value, the subscription code, the address to reach when the subscription is already linked elsewhere, the address recorded for that link and the address used to send the reminder for it.
+5. When the run comes from the scheduled job every error is caught and the run reports failure without raising; when it is triggered by hand a transport failure aborts with "Error during communication with the publisher warranty server." and any other error is re-raised.
+
+---
+
+## 34. Confirming a mailing-list subscription
+
+**Role:** a visitor.
+
+1. The visitor types an address on the public page and asks to subscribe or to unsubscribe.
+2. A signed-in user is served at once; an anonymous visitor is not.
+3. For an anonymous visitor the platform builds a token that binds the list, the normalized address and the action, sends the shipped confirmation body carrying the signed link, and stores nothing.
+4. Following the link applies the action. Replaying a link generated for one address with another address is refused, so one address can never be used to act on another.
+5. Subscribing creates a Mailing Group Member; when the list publishes guidelines to newcomers, the guidelines template is sent to the new member unless their address carries a permanent ban rule.
+6. Unsubscribing removes the member row matching the identified contact, or, when several rows share the address, the row that carries a contact. The one-click header removes **every** row with that normalized address.
+
+---
+
+## Reconciliation notes
+
+1. **Where the incoming gateway lives.** One source version kept the whole gateway in a separate topic file and the other spread it over the workflow and calculation documents. This folder keeps the algorithm in [calculations.md](calculations.md), section 16, and the operational procedure here, in sections 10, 11, 28, 29 and 30, with the two worked examples of the separate file reproduced in section 30. Nothing of either version was dropped.
+2. **The catch-all test.** One version described only the strict test — every recipient is a catch-all address. Both tests exist: the strict one is applied before alias matching, the relaxed one — any recipient is a catch-all address — at the end of routing when no route was found. Section 10 and [business-rules.md](business-rules.md), rule MSG-151, state both.
+3. **Who the message is posted as.** One version said the gateway posts as the resolved user. The record is created on behalf of the resolved user, but the **message** is posted with the system identity so that the real author resolves to the sender's contact. Sections 28 and 30 state both halves.
+4. **The plan summary note.** One version recorded that launching a plan logs a summary note on each record; the other did not mention it. It is kept, in section 31.
+5. **The live chat widget contract.** One version documented the initialisation answer field by field and the other only in outline. The field-by-field contract is kept, in section 32.

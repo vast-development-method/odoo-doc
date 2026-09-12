@@ -512,8 +512,8 @@ are kept, and the client resumes from the reported position.
 
 ## 11.2 Installing one package from the working directory
 
-1. The website scoping carried in the session is put aside and restored at the end, so that the
-   import does not become website-specific.
+1. The website scoping carried in the session is put aside and restored at the end, so that an
+   imported package does not become website-specific.
 2. The package description is read. When it cannot be read, the package is skipped and the
    procedure reports that nothing was installed.
 3. The catalogue values are derived from the description. The icon is taken from the description, or
@@ -941,9 +941,10 @@ Also run by the nightly job, after the search.
 4. The notification counts the candidates of that rule created on or after today minus the duration.
    When the count is zero, nobody is notified.
 5. Otherwise a message is sent to the recipients' Contacts, on the rule itself, with the subject
-   "Data to Recycle" and a body rendered from the shipped template: "We've identified <count>
-   records to clean with the '<record type name>' recycling rule." followed by a line offering a
-   link to the candidate list.
+   "Data to Recycle" and a body rendered from the shipped template: the words "We've identified",
+   the count, the words "records to clean with the", the record type's display name between single
+   quotation marks, and the words "recycling rule." — followed by a line offering a link to the
+   candidate list.
 
 ## 19.4 Decide
 
@@ -986,12 +987,12 @@ Deleting the rule deletes them by cascade.
      operation is irreversible. Do you wish to proceed to the record deletion?";
    - an *Open Record* button, shown only when the record can be read;
    - two mass operations on the selection, *Archive Selection* and *Delete Selection*.
-6. Toggling the archive switch writes it onto the found record with elevated rights and records
-   `Archived <record type name> #<identifier>` or `Unarchived <record type name> #<identifier>` in
-   the line's execution details.
-7. Pressing *Delete* deletes the found record with elevated rights, records `Deleted <record type
-   name> #<identifier>`, and marks the line as deleted. **Failure**: deleting an already deleted
-   line is refused with "The record is already unlinked." — rule
+6. Toggling the archive switch writes it onto the found record with elevated rights and records,
+   in the line's execution details, the word `Archived` or `Unarchived`, a space, the record type's
+   display name, a space, a hash sign and the identifier.
+7. Pressing *Delete* deletes the found record with elevated rights, records the word `Deleted`
+   followed by the same three parts, and marks the line as deleted. **Failure**: deleting an already
+   deleted line is refused with "The record is already unlinked." — rule
    [`AUT-096`](business-rules.md#aut-096).
 8. Every change to a line's execution details recomputes the wizard's own execution details and, as
    a side effect of that recomputation, writes the Privacy Log: the log is created the first time
@@ -1222,7 +1223,7 @@ in program text and the record only describes the tour.
 
 ## 24.5 Export
 
-*Export JS* on a tour builds a client script that registers the tour under its name with its
+The action labelled "Export JS" on a tour builds a client script that registers the tour under its name with its
 starting address and its step descriptions, stores it as an attachment named after the tour with the
 script media type, attached to the tour record, and answers with a download address for it. The
 operation is offered as a contextual action bound to the tour form.

@@ -303,20 +303,21 @@ Worked example. Catch-all `catchall@example.com` (20 characters) and author "Ana
 Every Message receives a globally unique identifier at creation if none was supplied. The grammar is:
 
 ```formula
-message_identifier = "<" + random_fraction + "." + unix_timestamp + "-openerp-" + tag + "@" + host_name + ">"
+message_identifier = "<" + random_fraction + "." + epoch_seconds + fixed_marker + tag + "@" + host_name + ">"
 ```
 
 where:
 
 - `random_fraction` is the decimal expansion of a random number in the half-open interval from zero to one, with the leading "0." removed, taken from the operating system's cryptographic source when available;
-- `unix_timestamp` is the current moment as seconds since the start of 1970, written with 15 decimal places;
+- `epoch_seconds` is the current moment as seconds since the start of 1970, written with 15 decimal places;
+- `fixed_marker` is the reproduced literal `-openerp-`, a contractual string that the incoming router matches on and that a compatible rebuild must emit unchanged;
 - `tag` depends on the case;
 - `host_name` is the name of the machine that generated it.
 
 | Case | Tag |
 |---|---|
 | The message forces answers to be treated as new | `reply_to` |
-| The message is attached to a record | `<record identifier>-<model transport name>` |
+| The message is attached to a record | `<the record identifier>-<model transport name>` |
 | Anything else | `private` |
 | A notification produced by the notify operation | `message-notify` |
 | A batch log entry | `message-notify` |
@@ -553,7 +554,7 @@ Models override this to add their own responsible-like fields.
 
 ### The assignment notification
 
-Subject: "You have been assigned to <record display name>". Body: the shipped assignment template rendered with the access link, the company, the model description and the record; local links in the rendered body are made absolute. Layout: the standard notification layout. Delivered through the notify operation, so it lands in the inbox or in the mailbox according to the recipient's preference.
+Subject: "You have been assigned to <the record display name>". Body: the shipped assignment template rendered with the access link, the company, the model description and the record; local links in the rendered body are made absolute. Layout: the standard notification layout. Delivered through the notify operation, so it lands in the inbox or in the mailbox according to the recipient's preference.
 
 It is suppressed when: the caller set the silent switch; the platform is still installing; or demonstration data is being loaded.
 
@@ -1607,3 +1608,252 @@ token = keyed_digest( installation_secret ,
 ```
 
 The token is then added to the parameters and the final address is the base link followed by the parameters, again sorted by key. Sorting is what makes the token reproducible.
+
+---
+
+## 31. Telephone number parsing and formatting
+
+The text-message channel depends entirely on this. It is specified here because two other computations — the recipient resolution of section 28 and the staleness of a telephone field — read its output.
+
+### Parsing
+
+1. Parse the raw number with the interpretation country as the default region, keeping the raw input.
+2. Reformat the parsed value to the international form and parse it again, so that country-specific corrections are applied. Several countries have changed their numbering plan; the correction adds a leading digit for Brazilian mobile numbers, removes one for Mexican mobile numbers, and applies the published equivalents for Ivory Coast, Colombia, Israel, Morocco, Mauritius, Kenya, Panama and Senegal.
+3. A value that cannot be parsed at all aborts with "Unable to parse <number>: <details>".
+
+### Possibility and validity
+
+| Condition | Message |
+|---|---|
+| the country prefix is not a valid one | "Impossible number <number>: not a valid country prefix." |
+| the number is too short | "Impossible number <number>: not enough digits." |
+| the number is too long and neither repair works | "Impossible number <number>: too many digits." |
+| the number is impossible for another reason | "The phone number <number> is invalid! Let's fix it - you are not dialing aliens." |
+| the number is possible but not valid for its region | "Invalid number <number>: probably incorrect prefix." |
+
+Two repairs are attempted for a number that is too long, in this order: a value beginning with a double zero is retried with that prefix replaced by a plus sign; a value with no leading plus sign is retried with one added. Both repairs keep the original value in the final message, so the person recognizes what they typed.
+
+### Formatting
+
+| Requested form | Result |
+|---|---|
+| strict international | the country prefix followed by the national number with no separator; this is what is stored and what is handed to the sending service |
+| international | the country prefix followed by the national number with readable separators |
+| national | the national number without the country prefix; used only when the number's country matches the interpretation country |
+| address form | the form used inside a structured link |
+
+When the requested form is international, **or** when the number's country code differs from the interpretation country's dialling code, the international form is used even if the national form was asked for. When the caller asks not to raise, an unformattable value is returned unchanged.
+
+### Interpretation country of a record
+
+In order: the record's own country field when the model declares one; otherwise the country of the first contact found through the model's customer fields; otherwise the acting company's country.
+
+### Worked example
+
+A contact in Belgium, whose dialling code is 32, stores the number `0470 12 34 56`. Formatting in the strict international form gives `+32470123456`. Formatting in the national form with Belgium as the interpretation country gives `0470 12 34 56`. The same raw value with France as the interpretation country parses as a French number and is rejected as invalid, because `0470123456` is not a valid French mobile number; the operation then either aborts or, when the caller asked not to raise, returns the raw input unchanged.
+
+---
+
+## 32. Event bus announcement splitting
+
+At the end of a transaction the list of touched broadcast channels is serialized and announced. When the serialized form exceeds the transport limit it is split.
+
+```formula
+payload = serialize( channels )
+
+emit payload                                        when count(channels) = 1
+                                                     or length_in_bytes(payload) < maximum_announcement_length
+
+otherwise split channels at ceiling( count ÷ 2 ) and recurse on each half
+```
+
+The recursion terminates because a single channel is always emitted, whatever its length.
+
+Worked example. A message posted in a channel of 900 members touches 901 broadcast channels: the channel itself plus each member's personal channel. The serialized list is 12 000 bytes and the maximum is 8 000. The list is split into 451 and 450 entries, each serializing to roughly 6 000 bytes, and two announcements are emitted.
+
+---
+
+## 33. Rating aggregation as live chat uses it
+
+### The grade of one value
+
+| Condition on the value | Grade | Label |
+|---|---|---|
+| at least 4 | `top` | Happy |
+| at least 3 and below 4 | `ok` | Neutral |
+| at least 1 and below 3 | `ko` | Unhappy |
+| below 1 | `none` | Not Rated yet |
+
+A three-value grouping is used for the satisfaction percentage: great from 4, okay from 3 to below 4, bad below 3.
+
+### The grade of an average
+
+Compared at two decimals:
+
+| Condition on the average | Grade |
+|---|---|
+| at least 3.66 | `top` |
+| at least 2.33 and below 3.66 | `ok` |
+| at least 1 and below 2.33 | `ko` |
+| below 1 | `none` |
+
+### Count, average and percentage
+
+```formula
+considered = the ratings of the record whose value ≥ 1
+count      = number of considered ratings
+average    = ( Σ of their values ) ÷ count
+percentage = great_count × 100 ÷ count           when count > 0
+percentage = −1                                   when count = 0
+```
+
+A rating stored with the value zero is an unanswered request and is excluded from all three. The value −1 is deliberately distinguishable from zero: it means "never rated", while zero means "rated, and nobody was satisfied".
+
+### The parent aggregate
+
+The same three formulas are applied over the consumed ratings whose **parent** record is the aggregating record. One extra measure exists:
+
+```formula
+average_on_a_hundred_point_scale = average × 20
+```
+
+### Worked example
+
+A live chat entry point received the session ratings 5, 5, 4, 3, 1, 1 and one unanswered request stored as 0.
+
+- Considered ratings: 5, 5, 4, 3, 1, 1. Count 6.
+- Average = (5 + 5 + 4 + 3 + 1 + 1) ÷ 6 = 19 ÷ 6 = 3.166666…, displayed as 3.17. Its grade is `ok`, because 3.17 is below 3.66 and at or above 2.33.
+- Grades: great, great, great, okay, bad, bad. Great count 3.
+- Percentage = 3 × 100 ÷ 6 = 50.0.
+- With an average of 4.20 over 55 consumed ratings, the hundred-point form is 4.20 × 20 = 84.0.
+
+---
+
+## 34. Further live chat reporting measures
+
+Section 26 gives the capacity and the duration arithmetic. The reporting view adds the following.
+
+### Duration in minutes
+
+```formula
+duration_minutes = ( ( session_end_moment or now ) − session_start_moment ) in seconds ÷ 60
+```
+
+Two decimals, averaged across sessions.
+
+### Response time in hours
+
+```formula
+response_time_hours = undefined
+    when the session is closed and its only operator-side message is later than the end moment
+
+response_time_hours = ( first_operator_message_moment − last_bot_message_moment ) ÷ 3600
+    when the session had both a bot and a human operator
+
+response_time_hours = ( first_operator_message_moment − session_start_moment ) ÷ 3600
+    when the session had a human operator and no bot
+
+response_time_hours = ( first_operator_side_message_moment − session_start_moment ) ÷ 3600
+    otherwise
+```
+
+Six decimals, averaged across sessions. The undefined branch removes a session whose only operator message arrived after the session was closed, which would otherwise report a negative or meaningless time.
+
+Worked example. A session starts at 10:00:00, a bot posts its last line at 10:00:12, a human answers at 10:01:42 and the session closes at 10:09:00. The session had both a bot and a human, so the response time is (10:01:42 − 10:00:12) ÷ 3600 = 90 ÷ 3600 = 0.025000 hours. The duration is (10:09:00 − 10:00:00) ÷ 60 = 540 ÷ 60 = 9.00 minutes.
+
+### Call measures
+
+```formula
+call_duration_hours  = Σ over the session's finished calls of ( end_moment − start_moment ) in seconds ÷ 3600
+has_call             = 1 when call_duration_hours is defined, otherwise 0
+sessions_with_calls  = Σ of has_call
+share_of_calls       = average of has_call
+```
+
+Worked example. Over 40 sessions, 6 had at least one call: the sum is 6 and the average is 6 ÷ 40 = 0.15, displayed as 15 percent.
+
+### Satisfaction of a session
+
+A last rating value of 1 reports Unhappy, 3 reports Neutral and 5 reports Happy; anything else, the value zero included, reports no rating at all.
+
+### Handling flags
+
+```formula
+handled_by_agent = 1 when at least one participant history is of the operator type, otherwise 0
+handled_by_bot   = 1 when at least one participant history is of the bot type
+                     and none is of the operator type, otherwise 0
+```
+
+A session escalated from a bot to a human therefore counts as handled by an operator only.
+
+### The chatbot answer path
+
+The identifiers of the answers the visitor chose, in the order they were recorded, joined by a space, a hyphen and a space; and the same list rendered with the answer labels in the reader's language, falling back to the reference language, then to any stored translation, then to the literal label "Unknown" for an answer that no longer exists. Grouping on the path therefore still groups the sessions whose answers were deleted.
+
+---
+
+## 35. Batch sizes and their effect
+
+| Quantity | Parameter | Default | Effect |
+|---|---|---|---|
+| Recipients per generated notification electronic mail | `mail.batch_size` | 50 | The recipients of one rendering group are split into chunks of this size and each chunk becomes one Outgoing Mail. A stored value of zero is replaced by 50 so the loop always progresses. The same size splits the records of one template rendering pass. |
+| Outgoing mails per queue run | `mail.mail.queue.batch.size` | 1000 | The upper bound of one scheduled run. With an explicit list of identifiers the search limit is ten times this value and the result is intersected with that list. |
+| Immediate-sending limit | `mail.mail.force.send.limit` | 100 | Above this number of produced mails, immediate sending is refused and the queue takes over. |
+| Rows per transport session | `mail.session.batch.size` | 1000 | One connection carries at most this many mails before a new one is opened. |
+| Members per mailing-list relay chunk | `mail.session.batch.size` | 500 in the relay path | The member list is processed in chunks of this size. |
+| Text messages per queue run and per provider call | `sms.session.batch.size` | 500 | The upper bound of one scheduled run, also used to split one run into provider calls. |
+| Text messages per call to the external telephony provider | `sms_twilio.session.batch.size` | 10 | The provider accepts smaller calls. |
+| Records per composer rendering pass | fixed | 50 | The composer renders and creates in passes of this size. |
+| Records per activity scheduling pass | fixed | 500 | The scheduling window creates in passes of this size. |
+| Scheduled messages posted per run | fixed | 50 | More are left for the next wake-up, which is triggered immediately when any remain. |
+| Activities purged per run | fixed | 10000 | More are left for the next run. |
+
+Worked example. A message is posted on a record followed by 320 people, of whom 260 prefer electronic mail and are all classified as customers. With the generation batch size at 50, the customer group produces ceiling(260 ÷ 50) = 6 Outgoing Mails: five carrying 50 recipients and one carrying 10, plus 260 Notifications. Because 6 is below the immediate-sending limit of 100, the six mails are handed to the relay right after the transaction commits. Had those 260 recipients been spread over four rendering groups in different languages, each pair of language and group would produce its own chunks and the total would be the sum of the per-pair chunk counts.
+
+---
+
+## 36. The message preview line
+
+```formula
+plain_text = the body with every markup element removed and every run of whitespace collapsed to one space, trimmed
+preview    = plain_text                                       when its length ≤ 190 characters
+preview    = plain_text shortened to 190 characters on a word boundary, with the marker " [...]" appended
+                                                              otherwise
+```
+
+The 190 characters include the marker: the shortening keeps whole words and reserves room for the marker, so the result never exceeds 190 characters.
+
+Worked example. A body whose plain text is 300 characters long produces the first whole words that fit in 190 characters minus the six characters of the marker, followed by that marker.
+
+**Compatibility finding.** The explanatory comment beside the implementation states a limit of 100 characters and calls it the longest preview line a widely used mail client shows; the constant actually applied is 190. A rebuild that must produce byte-identical previews uses 190. A corrected behaviour would make the comment and the constant agree, and, if the shorter value were chosen, would shorten to 100.
+
+---
+
+## 37. The consent code of the electronic-mail client plugin
+
+```formula
+grant_name   = add_in_name                                    when no extra information was supplied
+grant_name   = add_in_name + ": " + extra_information         otherwise
+
+payload      = the structure { scope , grant_name , issue_moment_in_seconds_since_1970 , acting_user_identifier }
+               serialized with its keys in ascending order
+
+signature    = keyed_digest( installation_secret , purpose "mail_plugin" , payload )
+
+consent_code = base_64( payload ) + "." + base_64( signature )
+```
+
+Validation recomputes the signature over the decoded payload and compares it **in constant time**; a mismatch and an issue moment more than three minutes old both answer the invalid-code error. The application key issued in exchange lives for one day.
+
+Worked example. A code issued at 09:00:00 and exchanged at 09:02:59 is accepted; the same code exchanged at 09:03:01 is refused, and no key is created.
+
+---
+
+## 38. Reconciliation notes
+
+1. **The preview length.** One source version computed the preview as the first 100 characters plus a six-character marker; the other as at most 190 characters including the marker. 190 is the observable behaviour and is what section 36 states, with the discrepancy recorded there as a compatibility finding. Section 30 refers to the same rule.
+2. **The unread counter.** One source version subtracted the member's own messages from the counter. The observable counter excludes the two notification message types and counts everything else at or above the separator; the author's own messages never appear because the posting hook advances the author's separator. Section 23 states the observable rule and the worked example counts accordingly.
+3. **The reply address length rule.** One source version described a middle step in which the display name is "simplified". The observable rule tries three candidates in order — the author's name plus the address, the acting user's name plus the address, then the bare address — and section 4 states those three.
+4. **The message identifier grammar.** One source version described the identifier as "a random token, a context string, a host name"; the other gave the full grammar including the fixed marker. Section 5 keeps the full grammar, because the incoming router matches on the marker.
+5. **The personal relay throttle.** One source version presented the throttle as a simple allowance of whole mails; the observable behaviour also **splits** a mail whose recipient count would cross the limit and strips the free addresses from the remainder. Section 20 keeps the split.
+6. **The loop-detection worked example.** One source version counted the twentieth message as still creating a record and the twenty-first as suppressed; the threshold is compared with "at or above", so the message that finds twenty existing records is the one suppressed. Section 17 states that comparison.

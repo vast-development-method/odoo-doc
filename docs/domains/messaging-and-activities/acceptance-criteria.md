@@ -286,7 +286,7 @@ Then no Message, no Follower and no Scheduled Message referring to it remains.
 Given a model whose responsible field is tracked,
 When Marc sets the responsible to Alice,
 Then Alice's contact becomes a Follower with the default subtypes,
-And Alice receives a notification whose subject is "You have been assigned to <record display name>".
+And Alice receives a notification whose subject is "You have been assigned to <the record display name>".
 
 **AC-058 Assigning oneself sends no assignment notice** `[calculations.md section 10]`
 When Alice sets herself as the responsible,
@@ -932,7 +932,7 @@ Then it no longer exists and no message was posted.
 
 **AC-280 Assigning to somebody else notifies them** `[MSG-210]`
 When Marc creates an Activity assigned to Alice,
-Then Alice receives a notification whose subject is ""<record name>: <summary>" assigned to you" and whose subtitles are "Activity: <type name>" and "Deadline: <due date in Alice's date format>",
+Then Alice receives a notification whose subject is ""<the record name>: <summary>" assigned to you" and whose subtitles are "Activity: <type name>" and "Deadline: <due date in Alice's date format>",
 And Alice's contact becomes a Follower of the record,
 And the notification is rendered in Alice's language.
 

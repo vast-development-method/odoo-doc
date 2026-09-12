@@ -336,7 +336,6 @@ stateDiagram-v2
     state "Archived" as ARC
     OFF --> PRE: the employee checks in
     ABS --> PRE: the employee checks in
-    ARC --> PRE: never — archiving closes the record first
     PRE --> OFF: the employee checks out, outside working hours
     PRE --> ABS: the employee checks out, inside working hours
     OFF --> ABS: inside working hours and still checked out

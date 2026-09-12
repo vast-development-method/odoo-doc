@@ -58,44 +58,32 @@ bound this way appear in the action menu.
 | Navigation trail | The action stack, described above. |
 | Company selector | Shown when the user may access several companies. It lets the user switch the active company and toggle further companies on and off; the set of active companies filters every list and defaults every new record. |
 | Search bar | Present on every multi-record view; described in part 3. |
-| Systray | The activity counter and its list, the messaging counter and its list, the presence and check-in control when the attendance capability is installed, the running timer when time tracking is installed, the debug indicator when diagnostics are on, and the user menu. |
-| User menu | The profile of the user, the documentation link, the support link, the shortcut list, the log-out action and, for an administrator, the developer tools. |
-| Command palette | Opened from the keyboard; it searches menu entries, records of the current entity, and offers the actions of the current screen. |
+| Systray | The activity counter and its list, the messaging counter and its list, the presence and check-in control when the attendance capability is installed, the running timer when time tracking is installed, the debug indicator when diagnostics are on, and the user menu. The counters are kept current by pushed notifications, specified in part 3. |
+| User menu | The profile of the user, the documentation link, the support link, the keyboard shortcut list (part 3), the log-out action and, for an administrator, the developer tools. |
+| Command palette | Opened from the keyboard; it searches menu entries, conversations and the commands of the current screen. Specified in part 3. |
 
 ## Part 2: the menu map of every application
 
-The tables below list every menu entry of the installation, with the action it runs, the entity that action shows, the
+The tables below list every menu entry that opens an action, with the action it runs, the entity that action shows, the
 views it offers in order (the first is the one opened), the default filters, groupings and new-record values the action
 applies, and the access groups the entry is restricted to. An empty entity means the action is not a set of views over
 one entity (a client screen, an address, or work that returns another action).
 
-The installation ships eight hundred and fifty-eight menu entries. The tables list the seven hundred and sixty-five
-entries that open an action; the remaining entries only group other entries and appear as the intermediate segments of
-the menu paths. Two applications (the administration tree and the settings tree) share the same set of technical
-entries, therefore those entries are listed under both.
+The installation ships eight hundred and ninety-three menu entries, of which six hundred and forty-five open an action;
+the remaining two hundred and forty-eight only group other entries and appear as the intermediate segments of the menu
+paths. The tables below list six hundred and thirty of them, spread over the thirty-five applications a user works in.
+Fifteen entries that open an action are deliberately not listed: the ten entries of the application that drives the
+automated test suite, the single entry of a translation test fixture application, one page-configuration entry of the
+same fixture inside the site application, and the three application entries whose own action is repeated by a child
+entry that is listed (the discussion application, the dashboard application and the course application each carry an
+action on the application entry itself, and that same action already appears as a child entry).
 
-### Email
-
-Menu order 3; contributed by the Discuss capability package. The application contains 12 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Emails | Emails | Outgoing Email | list, form |  |  |
-| Outgoing Mail Servers | Outgoing Mail Servers | Outgoing Mail Server | list, form |  | Technical Features |
-| Incoming Mail Servers | Incoming Mail Servers | Incoming Mail Server | list, form |  | Technical Features |
-| Email Templates | Email Templates | Email Template | form, list | filter: base templates |  |
-| Aliases | Aliases | Email Alias |  | filter: active | Technical Features |
-| Alias Domains | Alias Domains | Email Alias Domain | list, form |  | Technical Features |
-| Channels | Join a group | Discussion Channel | card, list, form |  | Technical Features |
-| Channels/Members | Channels/Members | Discussion Channel Member | list, form |  | Technical Features |
-| Mail Gateway Allowed | Mail Gateway Allowed | Mail Gateway Allowed Sender | list |  | Technical Features |
-| Snailmail Letters | Snailmail Letters | Postal Letter | form, list |  |  |
-| Digest Emails | Digest Emails | Digest Email |  | filter: activated | Access Rights |
-| Digest Tips | Digest Tips | Digest Tip |  |  | Access Rights |
+An application entry that carries an action of its own and has no child entry is listed as a single row bearing the name
+of the application, as the personal task application is.
 
 ### Discuss
 
-Menu order 5; contributed by the Discuss capability package; visible to the access groups: Role / User. The application contains 7 menu entries.
+Menu order 5; contributed by the Discuss capability package; visible to the access groups: Role / User. The application contains 7 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -109,7 +97,7 @@ Menu order 5; contributed by the Discuss capability package; visible to the acce
 
 ### Calendar
 
-Menu order 10; contributed by the Calendar capability package; visible to the access groups: Role / User. The application contains 4 menu entries.
+Menu order 10; contributed by the Calendar capability package; visible to the access groups: Role / User. The application contains 4 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -120,7 +108,7 @@ Menu order 10; contributed by the Calendar capability package; visible to the ac
 
 ### Contacts
 
-Menu order 20; contributed by the Contacts capability package; visible to the access groups: Role / User, Creation. The application contains 12 menu entries.
+Menu order 20; contributed by the Contacts capability package; visible to the access groups: Role / User, Creation. The application contains 12 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -139,7 +127,7 @@ Menu order 20; contributed by the Contacts capability package; visible to the ac
 
 ### Customer Relationship Management
 
-Menu order 25; contributed by the Customer Relationship Management capability package; visible to the access groups: User: Own Documents Only, Administrator. The application contains 26 menu entries.
+Menu order 25; contributed by the Customer Relationship Management capability package; visible to the access groups: User: Own Documents Only, Administrator. The application contains 26 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -172,7 +160,7 @@ Menu order 25; contributed by the Customer Relationship Management capability pa
 
 ### Sales
 
-Menu order 30; contributed by the Sales capability package. The application contains 20 menu entries.
+Menu order 30; contributed by the Sales capability package. The application contains 32 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -196,10 +184,22 @@ Menu order 30; contributed by the Sales capability package. The application cont
 | Configuration > Sales Orders > Quotation Templates | Quotation Templates | Quotation Template | list, form |  | Quotation Templates |
 | Configuration > Sales Orders > Headers/Footers | Headers/Footers | Quotation Document | card, list, form |  |  |
 | Configuration > Sales Orders > Delivery Methods | Delivery Methods | Shipping Method | list, form | group by: provider |  |
+| Configuration > Sales Orders > Tags | Tags | Sales Tag |  |  |  |
+| Configuration > Products > Attributes | Attributes | Product Attribute | list, form |  | Manage Product Variants |
+| Configuration > Products > Categories | Categories | Product Category |  |  |  |
+| Configuration > Products > Combo Choices | Combo Choices | Product Combo | list, form |  |  |
+| Configuration > Products > Product Tags | Product Tags | Product Tag | list, form |  |  |
+| Configuration > Products > Units & Packagings | Units & Packagings | Unit of Measure |  |  | Manage Multiple Units of Measure |
+| Configuration > Activities > Activity Types | Activity Types | Activity Type | list, card, form | new records apply to: Sales Order | Technical Features |
+| Configuration > Activities > Activity Plans | Sale Order Plans | Activity Plan | list, card, form | new records apply to: Sales Order | Administrator |
+| Configuration > Online Payments > Payment Providers | Payment Providers | Payment Provider | card, list, form |  |  |
+| Configuration > Online Payments > Payment Methods | Payment Methods | Payment Method | list, card, form | filter: available pms |  |
+| Configuration > Online Payments > Payment Tokens | Payment Tokens | Payment Token | list, form |  | Technical Features |
+| Configuration > Online Payments > Payment Transactions | Payment Transactions | Payment Transaction | list, card, form, chart, pivot |  | Technical Features |
 
 ### Dashboards
 
-Menu order 37; contributed by the Spreadsheet dashboard capability package. The application contains 3 menu entries.
+Menu order 37; contributed by the Spreadsheet dashboard capability package. The application contains 3 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -209,7 +209,7 @@ Menu order 37; contributed by the Spreadsheet dashboard capability package. The 
 
 ### Point of Sale
 
-Menu order 50; contributed by the Point of Sale capability package; visible to the access groups: Administrator, User. The application contains 30 menu entries.
+Menu order 50; contributed by the Point of Sale capability package; visible to the access groups: Administrator, User. The application contains 30 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -246,7 +246,7 @@ Menu order 50; contributed by the Point of Sale capability package; visible to t
 
 ### Invoicing
 
-Menu order 55; contributed by the Invoicing capability package; visible to the access groups: Show Accounting Features - Readonly, Invoicing. The application contains 48 menu entries.
+Menu order 55; contributed by the Invoicing capability package; visible to the access groups: Show Accounting Features - Readonly, Invoicing. The application contains 67 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -266,10 +266,15 @@ Menu order 55; contributed by the Invoicing capability package; visible to the a
 | Vendors > Own Checks | Own Checks | Account payment check | list, form, calendar, chart, pivot | filter: checks on hand |  |
 | Vendors > Products | Products | Product Template |  | filter: to purchase |  |
 | Vendors > Vendors | Vendors | Contact | list, card, form | filter: supplier; new records: is company = True, supplier rank = 1 |  |
+| Accounting > Transactions > Journal Entries | Journal Entries | Journal Entry | list, card, form, activity | filter: posted; new records: move type = entry | Show Accounting Features - Readonly |
+| Accounting > Transactions > Analytic Items | Analytic Items | Analytic Line | list, card, form, chart, pivot |  | Analytic Accounting |
 | Accounting > Transactions > Permanent Account Number Entity | Permanent Account Number Entity | Indian Permanent Account Number Entity | list, form |  |  |
 | Accounting > Closing > Secure Entries | Secure Journal Entries (dialog) | Entry Securing Wizard | form |  | Technical Features, Show Inalterability Features |
+| Review > Control > Journal Items | Journal Items | Journal Item | list, pivot, chart, card | filter: posted | Show Accounting Features - Readonly |
 | Review > Logs > Audit Trail | Audit Trail | Message | list |  |  |
 | Reporting > Management > Product Margins… | Product Margins (dialog) | Product Margin Wizard | form |  |  |
+| Reporting > Management > Invoice Analysis | Invoices Analysis | Invoices Statistics | chart, pivot | filter: current, customer; group by: invoice date by month |  |
+| Reporting > Management > Analytic Report | Analytic Reporting | Analytic Line |  | filter: group by analytic account, fiscal date, profit and loss accounts | Show Accounting Features - Readonly |
 | Reporting > Argentinean Statements > Gross Income Tax - Sales by jurisdiction | Gross Income Tax - Sales by jurisdiction | Invoices Statistics | pivot | filter: current, customer, with document, company, group by provincial jurisdiction, group by account, accounting date this year |  |
 | Reporting > Argentinean Statements > Gross Income Tax - Purchases by jurisdiction | Gross Income Tax - Purchases by jurisdiction | Invoices Statistics | pivot | filter: current, supplier, with document, company, group by provincial jurisdiction, group by account, accounting date this year |  |
 | Reporting > France > E-reporting | E-Reporting | French Approved Dematerialization Platform Flow | list, form |  |  |
@@ -277,11 +282,25 @@ Menu order 55; contributed by the Invoicing capability package; visible to the a
 | Reporting > Hungary > Tax audit export - Adóhatósági Ellenőrzési Adatszolgáltatás | Tax audit export - Adóhatósági Ellenőrzési Adatszolgáltatás (dialog) | Tax audit export - Adóhatósági Ellenőrzési Adats | form |  |  |
 | Reporting > Accounting Tests | Accounting Tests | Accounting Assert Test | list, form |  | Technical Features |
 | Configuration > Settings | Settings | Configuration Settings | form |  | Role / Administrator |
+| Configuration > Accounting > Chart of Accounts | Chart of Accounts | Account | list, card, form |  | Show Accounting Features - Readonly |
+| Configuration > Accounting > Taxes | Taxes | Tax | list, card, form | filter: sale, purchase |  |
+| Configuration > Accounting > Tax Groups | Tax Groups | Tax Group | list, form |  | Technical Features |
+| Configuration > Accounting > Journals | Journals | Journal | list, card, form |  | Administrator |
+| Configuration > Accounting > Multi-Ledger | Multi-ledger | Journal Group |  |  | Show Accounting Features - Readonly |
+| Configuration > Accounting > Fiscal Positions | Fiscal Positions | Fiscal Position | list, card, form |  |  |
+| Configuration > Accounting > Currencies | Currencies | Currency | list, card, form |  |  |
+| Configuration > Accounting > Cash Roundings | Cash Roundings | Cash Rounding | list, form |  | Allow the cash rounding management |
 | Configuration > Accounting > GIB Codes | GIB Codes | Turkish Tax Codes (GIB Codes) |  |  | Technical Features |
 | Configuration > Accounting > DDT | Transport Document | Transport Document | list, form |  | Technical Features |
 | Configuration > Accounting > Document Types | Document Types | Latam Document Type |  |  |  |
+| Configuration > Invoicing > Payment Terms | Payment Terms | Payment Terms | list, card, form |  |  |
+| Configuration > Invoicing > Incoterms | Incoterms | International Commercial Term | list, form |  | Technical Features |
+| Configuration > Invoicing > Product Categories | Categories | Product Category |  |  |  |
 | Configuration > Invoicing > Electronic Data Interchange Proxy Users | Electronic Data Interchange Proxy User | Electronic Interchange Proxy User | list, form |  | Technical Features |
 | Configuration > Invoicing > Tax Office | Tax Office | Tax office in Czech Republic | list, form | group by: region | Administrator |
+| Configuration > Analytic Accounting > Analytic Accounts | Analytic Accounts | Analytic Account | list, card, form | filter: active | Analytic Accounting |
+| Configuration > Analytic Accounting > Analytic Distribution Models | Analytic Distribution Models | Analytic Distribution Model | list, form |  | Analytic Accounting |
+| Configuration > Analytic Accounting > Analytic Plans | Analytic Plans | Analytic Plan | list, form |  | Analytic Accounting |
 | Configuration > ARCA > Document Types | Document Types | Latam Document Type |  | filter: localization |  |
 | Configuration > ARCA > Responsibility Types | ARCA Responsibility Types | ARCA Responsibility Type |  |  |  |
 | Configuration > ARCA > Earnings Scale | ARCA tax | Argentinean Earnings Scale | list, form |  |  |
@@ -290,7 +309,7 @@ Menu order 55; contributed by the Invoicing capability package; visible to the a
 | Configuration > Online Payments > Payment Methods | Payment Methods | Payment Method | list, card, form | filter: available pms |  |
 | Configuration > Online Payments > Payment Tokens | Payment Tokens | Payment Token | list, form |  | Technical Features |
 | Configuration > Online Payments > Payment Transactions | Payment Transactions | Payment Transaction | list, card, form, chart, pivot |  | Technical Features |
-| Configuration > Estimated Time of Arrival > Thumb Drive | Thumb Drive | Thumb drive used to sign invoices in Egypt | list |  |  |
+| Configuration > Egyptian Tax Authority > Thumb Drive | Thumb Drive | Thumb drive used to sign invoices in Egypt | list |  |  |
 | Configuration > SInvoice > Symbols | Symbols | SInvoice symbol | list, form |  |  |
 | Configuration > SInvoice > Templates | Templates | SInvoice template | list, form |  |  |
 | Configuration > Spain Facturae Electronic Data Interchange > Certificates | Certificates for Facturae Electronic Data Interchange invoices on Spain | Digital Certificate | list, form | filter: scope facturae |  |
@@ -301,13 +320,13 @@ Menu order 55; contributed by the Invoicing capability package; visible to the a
 
 ### Project
 
-Menu order 70; contributed by the Project capability package; visible to the access groups: Administrator, User. The application contains 15 menu entries.
+Menu order 70; contributed by the Project capability package; visible to the access groups: Administrator, User. The application contains 15 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
 | Projects | All projects |  |  |  |  |
 | Projects | All projects grouped by stage |  |  |  | Use Stages on Project |
-| Tasks > My Tasks | My tasks |  |  | filter: open tasks; new records: users = [(4, user_identifier)] |  |
+| Tasks > My Tasks | My tasks |  |  | filter: open tasks; new records: assignees include the current user |  |
 | Tasks > All Tasks | All tasks |  |  | filter: open tasks; new records: users = [(4, user_identifier)] |  |
 | Reporting > Tasks Analysis | Task analysis |  |  |  |  |
 | Reporting > Customer Ratings | Customer Ratings | Rating | card, list, pivot, chart, form | filter: rated on |  |
@@ -323,7 +342,7 @@ Menu order 70; contributed by the Project capability package; visible to the acc
 
 ### Timesheets
 
-Menu order 75; contributed by the Task Logs capability package; visible to the access groups: User: own timesheets only. The application contains 6 menu entries.
+Menu order 75; contributed by the Task Logs capability package; visible to the access groups: User: own timesheets only. The application contains 9 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -331,12 +350,15 @@ Menu order 75; contributed by the Task Logs capability package; visible to the a
 | Timesheets > My Timesheets | My Timesheets | Analytic Line | list, form, card, pivot, chart |  | User: all timesheets |
 | My Timesheets | My Timesheets | Analytic Line | list, form, card, pivot, chart |  | User: own timesheets only |
 | Reporting > Timesheets > By Billing Type | Timesheets by Billing Type | Timesheet Analysis Report | pivot, chart |  |  |
+| Reporting > Timesheets > By Employee | Timesheets by Employee | Timesheet Analysis Report | pivot, chart |  | User: all timesheets |
+| Reporting > Timesheets > By Project | Timesheets by Project | Timesheet Analysis Report | pivot, chart |  |  |
+| Reporting > Timesheets > By Task | Timesheets by Task | Timesheet Analysis Report | pivot, chart |  |  |
 | Reporting > Timesheets / Attendance Analysis | Timesheets / Attendance Analysis | Timesheet Attendance Report | chart, pivot |  |  |
 | Configuration | Settings | Configuration Settings | form |  | Role / Administrator |
 
 ### Website
 
-Menu order 95; contributed by the Website capability package; visible to the access groups: Role / User. The application contains 57 menu entries.
+Menu order 95; contributed by the Website capability package; visible to the access groups: Role / User. The application contains 57 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -354,7 +376,7 @@ Menu order 95; contributed by the Website capability package; visible to the acc
 | Site > This page > Properties | Site preview (opens the public site inside the client) |  |  |  |  |
 | Site > This page > Optimize SEO | Site preview (opens the public site inside the client) |  |  |  |  |
 | Site > This page > Link Tracker | Site preview (opens the public site inside the client) |  |  |  |  |
-| Site > This page > Rich Text / CSS Editor | Site preview (opens the public site inside the client) |  |  |  |  |
+| Site > This page > Page source editor | Site preview (opens the public site inside the client) |  |  |  |  |
 | Site > This page > Edit Menu | Site preview (opens the public site inside the client) |  |  |  |  |
 | Electronic Commerce > Orders > Orders | Orders | Sales Order | list, form, card, activity | filter: order confirmed, from website |  |
 | Electronic Commerce > Orders > Unpaid Orders | Unpaid Orders | Sales Order | list, card, form, activity |  |  |
@@ -400,7 +422,7 @@ Menu order 95; contributed by the Website capability package; visible to the acc
 
 ### Electronic Learning
 
-Menu order 100; contributed by the Electronic Learning capability package; visible to the access groups: Officer. The application contains 14 menu entries.
+Menu order 100; contributed by the Electronic Learning capability package; visible to the access groups: Officer. The application contains 14 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -421,7 +443,7 @@ Menu order 100; contributed by the Electronic Learning capability package; visib
 
 ### Email Marketing
 
-Menu order 115; contributed by the Email Marketing capability package; visible to the access groups: User. The application contains 13 menu entries.
+Menu order 115; contributed by the Email Marketing capability package; visible to the access groups: User. The application contains 13 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -441,7 +463,7 @@ Menu order 115; contributed by the Email Marketing capability package; visible t
 
 ### Text Message Marketing
 
-Menu order 120; contributed by the Text Message Marketing capability package; visible to the access groups: User. The application contains 7 menu entries.
+Menu order 120; contributed by the Text Message Marketing capability package; visible to the access groups: User. The application contains 7 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -455,16 +477,22 @@ Menu order 120; contributed by the Text Message Marketing capability package; vi
 
 ### Events
 
-Menu order 125; contributed by the Events Organization capability package; visible to the access groups: Registration Desk. The application contains 17 menu entries.
+Menu order 125; contributed by the Events Organization capability package; visible to the access groups: Registration Desk. The application contains 23 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
+| Events | Events | Event | card, calendar, list, form, pivot, chart, activity |  | Registration Desk |
 | Registration Desk | Attendance scanning surface |  |  |  | Registration Desk |
 | Tracks | Event Tracks | Event Track | card, list, form, calendar, chart, activity |  | Technical Features |
 | Reporting > Attendees | Attendees | Event Registration | chart, pivot, card, list, form | filter: last month creation, taken, status, group event; group by: create date day | User |
 | Reporting > Revenues | Revenues | Event Sales Report | chart, pivot | filter: priced tickets, event date start | User |
 | Configuration > Settings | Settings | Configuration Settings | form |  | Role / Administrator |
 | Configuration > Lead Generation | Lead Generation Rule | Event Lead Rules | list, form |  | Administrator |
+| Configuration > Event Templates | Event Templates | Event Template |  |  |  |
+| Configuration > Event Stages | Event Stages | Event Stage | list, form |  |  |
+| Configuration > Event Tags Categories | Event Tags Categories | Event Tag Category | list, form |  |  |
+| Configuration > Event Questions | Event Question | Event Question | list, form |  |  |
+| Configuration > Mail Schedulers | Events Mail Schedulers | Event Communication |  |  | Technical Features |
 | Configuration > Booth Categories | Booth Category | Event Booth Category | list, form |  |  |
 | Configuration > Booths | Booths | Event Booth | card, list, form, chart, pivot | group by: state | Technical Features |
 | Configuration > Track Stages | Track Stages | Event Track Stage | list, card, form |  | Technical Features |
@@ -479,7 +507,7 @@ Menu order 125; contributed by the Events Organization capability package; visib
 
 ### Surveys
 
-Menu order 130; contributed by the Surveys capability package; visible to the access groups: User. The application contains 5 menu entries.
+Menu order 130; contributed by the Surveys capability package; visible to the access groups: User. The application contains 5 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -491,7 +519,7 @@ Menu order 130; contributed by the Surveys capability package; visible to the ac
 
 ### Purchase
 
-Menu order 135; contributed by the Purchase capability package; visible to the access groups: Administrator, User. The application contains 12 menu entries.
+Menu order 135; contributed by the Purchase capability package; visible to the access groups: Administrator, User. The application contains 12 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -510,7 +538,7 @@ Menu order 135; contributed by the Purchase capability package; visible to the a
 
 ### Inventory
 
-Menu order 140; contributed by the Inventory capability package; visible to the access groups: Administrator, User. The application contains 54 menu entries.
+Menu order 140; contributed by the Inventory capability package; visible to the access groups: Administrator, User. The application contains 38 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -518,8 +546,8 @@ Menu order 140; contributed by the Inventory capability package; visible to the 
 | Operations > Transfers > Receipts | Receipts of every incoming operation type |  |  |  | Administrator, User |
 | Operations > Transfers > Deliveries | Deliveries of every outgoing operation type |  |  |  | Administrator, User |
 | Operations > Transfers > Internal | Internal transfers of every internal operation type |  |  |  | Manage Multiple Stock Locations |
-| Operations > Transfers > Manufacturings | Manufacturings | Manufacturing Order | list, card, form, calendar, activity | new records: company = allowed_companys[0] | Administrator, User |
-| Operations > Transfers > Dropships | Dropships | Transfer | list, card, form, calendar | filter: dropships; new records: company = allowed_companys[0] | Administrator, User |
+| Operations > Transfers > Manufacturings | Manufacturings | Manufacturing Order | list, card, form, calendar, activity | new records: company = the first active company | Administrator, User |
+| Operations > Transfers > Dropships | Dropships | Transfer | list, card, form, calendar | filter: dropships; new records: company = the first active company | Administrator, User |
 | Operations > Jobs > Batch Transfers | Batch Transfers | Batch Transfer | list, card, form | filter: draft, in progress |  |
 | Operations > Jobs > Wave Transfers | Wave Transfers | Batch Transfer | list, card, form | filter: draft, in progress |  |
 | Operations > Adjustments > Physical Inventory | Physical inventory count |  |  |  |  |
@@ -552,37 +580,21 @@ Menu order 140; contributed by the Inventory capability package; visible to the 
 | Configuration > Delivery > Package Types | Package Types | Package Type |  |  | Manage Packages |
 | Configuration > Delivery > Zip Prefix | Zip Prefix | Delivery Postal Code Prefix | list, form |  | Technical Features |
 | Configuration > GİB e-Dispatch > GİB Plate Numbers | GİB Plate Numbers | GİB Plate numbers | list, form |  |  |
-| Configuration > Settings | Settings | Configuration Settings | form |  | Role / Administrator |
-| Configuration > Warehouse Management > Warehouses | Warehouses | Warehouse |  |  |  |
-| Configuration > Warehouse Management > Operations Types | Operations Types | Operation Type | list, form |  |  |
-| Configuration > Warehouse Management > Locations | Locations | Location | list, form | filter: internal location | Manage Multiple Stock Locations |
-| Configuration > Warehouse Management > Routes | Routes | Route | list, form |  | Manage Push and Pull inventory flows |
-| Configuration > Warehouse Management > Rules | Rules | Stock Rule | list, form |  | Manage Push and Pull inventory flows |
-| Configuration > Warehouse Management > Storage Categories | Storage Categories | Storage Category | list, form |  | Manage Multiple Stock Locations |
-| Configuration > Warehouse Management > Putaway Rules | Putaway Rules | Putaway Rule | list |  | Manage Multiple Stock Locations |
-| Configuration > Products > Categories | Categories | Product Category |  |  |  |
-| Configuration > Products > Attributes | Attributes | Product Attribute | list, form |  | Manage Product Variants |
-| Configuration > Products > Units & Packagings | Units & Packagings | Unit of Measure |  |  | Manage Multiple Units of Measure |
-| Configuration > Products > Barcode Nomenclatures | Barcode Nomenclatures | Barcode Nomenclature | list, card, form |  | Technical Features |
-| Configuration > Delivery > Delivery Methods | Delivery Methods | Shipping Method | list, form | group by: provider |  |
-| Configuration > Delivery > Package Types | Package Types | Package Type |  |  | Manage Packages |
-| Configuration > Delivery > Zip Prefix | Zip Prefix | Delivery Postal Code Prefix | list, form |  | Technical Features |
-| Configuration > GİB e-Dispatch > GİB Plate Numbers | GİB Plate Numbers | GİB Plate numbers | list, form |  |  |
 
 ### Manufacturing
 
-Menu order 145; contributed by the Manufacturing capability package; visible to the access groups: User, Administrator. The application contains 14 menu entries.
+Menu order 145; contributed by the Manufacturing capability package; visible to the access groups: User, Administrator. The application contains 14 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
-| Operations > Manufacturing Orders | Manufacturing Orders | Manufacturing Order | list, card, form, calendar, pivot, chart, activity | filter: todo; new records: company = allowed_companys[0] |  |
+| Operations > Manufacturing Orders | Manufacturing Orders | Manufacturing Order | list, card, form, calendar, pivot, chart, activity | filter: to do; new records: company = the first active company |  |
 | Operations > Work Orders | Work Orders | Work Order | list, card, form, calendar, pivot, chart | filter: ready, progress, blocked | Manage Work Order Operations |
 | Operations > Unbuild Orders | Unbuild Orders | Unbuild Order | list, card, form, activity |  |  |
 | Operations > Scrap | Scrap Orders | Scrap Order | list, form, card, pivot, chart |  |  |
 | Planning > Procurement Compute Manufacturing | Scheduled actions |  |  |  | Technical Features |
 | Products > Products | Products | Product Template | card, list, form | new records: is storable = True |  |
 | Products > Product Variants | Product Variants | Product Variant | card, list, form |  | Manage Product Variants |
-| Products > Bills of Materials | Bills of Materials | Bill of Materials | list, card, form | new records: company = allowed_companys[0] |  |
+| Products > Bills of Materials | Bills of Materials | Bill of Materials | list, card, form | new records: company = the first active company |  |
 | Products > Lots/Serial Numbers | Lots / Serial Numbers | Lot or Serial Number |  | group by: location | Manage Lots / Serial Numbers |
 | Reporting > Work Orders | Work Orders Analysis | Work Order | chart, pivot, list, form | filter: workcenter, ready, blocked, progress | Manage Work Order Operations |
 | Reporting > Overall Equipment Effectiveness | Overall Equipment Effectiveness | Work Center Productivity Record | chart, pivot, list, form | filter: workcenter group, loss group | Manage Work Order Operations |
@@ -592,13 +604,13 @@ Menu order 145; contributed by the Manufacturing capability package; visible to 
 
 ### Maintenance
 
-Menu order 160; contributed by the Maintenance capability package. The application contains 10 menu entries.
+Menu order 160; contributed by the Maintenance capability package. The application contains 10 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
 | Dashboard | Maintenance Teams | Maintenance Team | card, form |  | Equipment Manager, Role / User |
 | Maintenance > Maintenance Requests | Maintenance Requests | Maintenance Request | card, list, form, pivot, chart, calendar, activity | filter: active; new records: user = user_identifier | Equipment Manager, Role / User |
-| Maintenance > Maintenance Calendar | Maintenance Requests | Maintenance Request | calendar, card, list, form, pivot, chart, activity | filter: active, todo | Equipment Manager, Role / User |
+| Maintenance > Maintenance Calendar | Maintenance Requests | Maintenance Request | calendar, card, list, form, pivot, chart, activity | filter: active, to do | Equipment Manager, Role / User |
 | Equipment | Equipment | Equipment | card, list, form |  | Equipment Manager, Role / User |
 | Reporting > Maintenance Requests Analysis | Maintenance Requests Analysis | Maintenance Request | chart, pivot, card, list, form, calendar, activity | filter: active |  |
 | Configuration > Settings | Settings | Configuration Settings | form |  | Role / Administrator |
@@ -609,7 +621,7 @@ Menu order 160; contributed by the Maintenance capability package. The applicati
 
 ### Repairs
 
-Menu order 165; contributed by the Repairs capability package; visible to the access groups: User. The application contains 5 menu entries.
+Menu order 165; contributed by the Repairs capability package; visible to the access groups: User. The application contains 5 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -621,7 +633,7 @@ Menu order 165; contributed by the Repairs capability package; visible to the ac
 
 ### Employees
 
-Menu order 185; contributed by the Employees capability package; visible to the access groups: Administrator, Officer: Manage all employees, Role / User. The application contains 25 menu entries.
+Menu order 185; contributed by the Employees capability package; visible to the access groups: Administrator, Officer: Manage all employees, Role / User. The application contains 23 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -630,8 +642,6 @@ Menu order 185; contributed by the Employees capability package; visible to the 
 | Departments | Departments | Department | card, list, form |  | Role / User |
 | Learning > Certifications | Certifications | Employee Skill | list, form | group by: type |  |
 | Learning > Training Attendances | Training Attendances | Resume Line | list, card, form, calendar |  |  |
-| Learning > Courses > Electronic Learning | Electronic Learning Courses | Course | list, card, form |  |  |
-| Learning > Courses > Onsite | Onsite Courses | Event | card, calendar, list, form, pivot, chart, activity |  |  |
 | Learning > Courses > Electronic Learning | Electronic Learning Courses | Course | list, card, form |  |  |
 | Learning > Courses > Onsite | Onsite Courses | Event | card, calendar, list, form, pivot, chart, activity |  |  |
 | Reporting > Skills > Skills Inventory | Skills Inventory | Employee Skills Report | list, pivot | filter: skill type, skill |  |
@@ -653,7 +663,7 @@ Menu order 185; contributed by the Employees capability package; visible to the 
 
 ### Attendances
 
-Menu order 205; contributed by the Attendances capability package; visible to the access groups: Officer: Manage attendances. The application contains 9 menu entries.
+Menu order 205; contributed by the Attendances capability package; visible to the access groups: Officer: Manage attendances. The application contains 9 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -669,7 +679,7 @@ Menu order 205; contributed by the Attendances capability package; visible to th
 
 ### Recruitment
 
-Menu order 210; contributed by the Recruitment capability package; visible to the access groups: Officer: Manage all applicants, Interviewer. The application contains 19 menu entries.
+Menu order 210; contributed by the Recruitment capability package; visible to the access groups: Officer: Manage all applicants, Interviewer. The application contains 19 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -695,7 +705,7 @@ Menu order 210; contributed by the Recruitment capability package; visible to th
 
 ### Fleet
 
-Menu order 220; contributed by the Fleet capability package; visible to the access groups: Officer: Manage all vehicles. The application contains 14 menu entries.
+Menu order 220; contributed by the Fleet capability package; visible to the access groups: Officer: Manage all vehicles. The application contains 14 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -716,7 +726,7 @@ Menu order 220; contributed by the Fleet capability package; visible to the acce
 
 ### Time Off
 
-Menu order 225; contributed by the Time Off capability package; visible to the access groups: Role / User. The application contains 16 menu entries.
+Menu order 225; contributed by the Time Off capability package; visible to the access groups: Role / User. The application contains 16 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -739,7 +749,7 @@ Menu order 225; contributed by the Time Off capability package; visible to the a
 
 ### Expenses
 
-Menu order 230; contributed by the Expenses capability package. The application contains 6 menu entries.
+Menu order 230; contributed by the Expenses capability package. The application contains 6 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -752,7 +762,7 @@ Menu order 230; contributed by the Expenses capability package. The application 
 
 ### Lunch
 
-Menu order 235; contributed by the Lunch capability package; visible to the access groups: User : Order your meal. The application contains 13 menu entries.
+Menu order 235; contributed by the Lunch capability package; visible to the access groups: User : Order your meal. The application contains 13 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -772,7 +782,7 @@ Menu order 235; contributed by the Lunch capability package; visible to the acce
 
 ### Live Chat
 
-Menu order 240; contributed by the Live Chat capability package; visible to the access groups: User. The application contains 16 menu entries.
+Menu order 240; contributed by the Live Chat capability package; visible to the access groups: User. The application contains 16 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -795,7 +805,7 @@ Menu order 240; contributed by the Live Chat capability package; visible to the 
 
 ### Data Cleaning
 
-Menu order 250; contributed by the Data Recycle capability package. The application contains 2 menu entries.
+Menu order 250; contributed by the Data Recycle capability package. The application contains 2 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -804,7 +814,7 @@ Menu order 250; contributed by the Data Recycle capability package. The applicat
 
 ### Link Tracker
 
-Menu order 270; contributed by the Campaign Tracking Trackers capability package; visible to the access groups: Technical Features. The application contains 4 menu entries.
+Menu order 270; contributed by the Campaign Tracking Trackers capability package; visible to the access groups: Technical Features. The application contains 4 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -815,7 +825,7 @@ Menu order 270; contributed by the Campaign Tracking Trackers capability package
 
 ### Marketing Card
 
-Menu order 270; contributed by the Marketing Card capability package; visible to the access groups: Marketing Card User. The application contains 1 menu entries.
+Menu order 270; contributed by the Marketing Card capability package; visible to the access groups: Marketing Card User. The application contains 1 menu entry that opens an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -823,7 +833,7 @@ Menu order 270; contributed by the Marketing Card capability package; visible to
 
 ### Apps
 
-Menu order 500; contributed by the Base capability package; visible to the access groups: Role / Administrator. The application contains 6 menu entries.
+Menu order 500; contributed by the Base capability package; visible to the access groups: Role / Administrator. The application contains 6 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -836,7 +846,7 @@ Menu order 500; contributed by the Base capability package; visible to the acces
 
 ### Settings
 
-Menu order 550; contributed by the Base capability package; visible to the access groups: Access Rights. The application contains 97 menu entries.
+Menu order 550; contributed by the Base capability package; visible to the access groups: Access Rights. The application contains 97 menu entries that open an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -872,7 +882,7 @@ Menu order 550; contributed by the Base capability package; visible to the acces
 | Technical > Discuss > ICE Servers | ICE Servers | Interactive Connectivity Server | list, form, card |  |  |
 | Technical > Discuss > Message Reactions | Message Reactions | Message Reaction | list, form |  |  |
 | Technical > Discuss > Link Previews | Link Previews | Link Preview | list, form |  |  |
-| Technical > Discuss > GIF favorite | GIF favorite | Save favorite GIF from Tenor Application Program | list, form |  |  |
+| Technical > Discuss > Favourite animated images | Favourite animated images | Favourite Animated Image | list, form |  |  |
 | Technical > Email > Emails | Emails | Outgoing Email | list, form |  |  |
 | Technical > Email > Outgoing Mail Servers | Outgoing Mail Servers | Outgoing Mail Server | list, form |  | Technical Features |
 | Technical > Email > Incoming Mail Servers | Incoming Mail Servers | Incoming Mail Server | list, form |  | Technical Features |
@@ -937,239 +947,10 @@ Menu order 550; contributed by the Base capability package; visible to the acces
 | Technical > Resource > Working Schedules | Working Schedules | Working Schedule | list, form |  |  |
 | Technical > Resource > Resource Time Off | Resource Time Off | Resource Time Off | list, form, calendar |  |  |
 | Technical > Resource > Resources | Resources | Resource | list, form |  |  |
-
-### Account Reports Fr Statements Menu
-
-Contributed by the France Localization: Electronic Invoicing (Approved Platform) capability package. The application contains 2 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| E-reporting | E-Reporting | French Approved Dematerialization Platform Flow | list, form |  |  |
-| Sales Closings | Sales Closings | Sale Closing | list, form |  |  |
-
-### Administration
-
-Contributed by the Base capability package. The application contains 97 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| General Settings | Settings | Configuration Settings | form |  | Role / Administrator |
-| Users & Companies > Users | Users | User | list, card, form | filter: no share |  |
-| Users & Companies > Groups | Groups | Access Group |  | filter: no share | Technical Features |
-| Users & Companies > Privileges | Privileges | Access Privilege |  |  | Technical Features |
-| Users & Companies > Companies | Companies | Company | list, card, form |  |  |
-| Users & Companies > Open Authorization Providers | Providers | Open Authorization Provider | list, form |  | Technical Features |
-| Translations > Languages | Languages | Language |  |  |  |
-| Translations > Import / Export > Export Translation | Export Translation (dialog) | Translation Export Wizard | form |  |  |
-| Translations > Import / Export > Import Translation | Import Translation (dialog) | Translation Import Wizard | form |  |  |
-| Translations > Application Terms > Transifex Code Translations | Interface translations |  |  |  |  |
-| Gamification Tools > Challenges | Challenges | Challenge | card, list | filter: inprogress; new records: inprogress = True |  |
-| Gamification Tools > Goals | Goals | Goal | list, form, card | group by: user, definition |  |
-| Gamification Tools > Goal Definitions | Goal Definitions | Goal Definition | list, form |  |  |
-| Gamification Tools > Badges | Badges | Badge | card, list, form |  |  |
-| Gamification Tools > Ranks | Ranks | Karma Rank | list, form |  |  |
-| Gamification Tools > Karma Tracking | Karma Tracking | Karma Tracking | list, form |  |  |
-| Technical > Discuss > Messages | Messages | Message | list, form |  |  |
-| Technical > Discuss > Scheduled Messages | Scheduled Messages | Scheduled Messages | list, form |  |  |
-| Technical > Discuss > Subtypes | Subtypes | Message Subtype | list, form |  |  |
-| Technical > Discuss > Tracking Values | Tracking Values | Field Change Tracking Value | list, form |  |  |
-| Technical > Discuss > Notifications | Notifications | Notification | list, form |  | Technical Features |
-| Technical > Discuss > Followers | Followers | Follower | list, form |  | Technical Features |
-| Technical > Discuss > Email Blacklist | Blacklisted Email Addresses | Email Blacklist |  |  |  |
-| Technical > Discuss > Ratings | Ratings | Rating | card, list, chart, pivot, form |  |  |
-| Technical > Discuss > Mail Groups | Mail Groups | Mail Group | card, list, form |  |  |
-| Technical > Discuss > User Settings | User Settings | User Preferences | list, form |  |  |
-| Technical > Discuss > Guests | Guests | Guest | list, form |  |  |
-| Technical > Discuss > Moderation Rules | Moderation | Mailing List black/white list | list, form |  |  |
-| Technical > Discuss > RTC sessions | RTC sessions | Real Time Communication Session | list, form | group by: channel |  |
-| Technical > Discuss > ICE Servers | ICE Servers | Interactive Connectivity Server | list, form, card |  |  |
-| Technical > Discuss > Message Reactions | Message Reactions | Message Reaction | list, form |  |  |
-| Technical > Discuss > Link Previews | Link Previews | Link Preview | list, form |  |  |
-| Technical > Discuss > GIF favorite | GIF favorite | Save favorite GIF from Tenor Application Program | list, form |  |  |
-| Technical > Email > Emails | Emails | Outgoing Email | list, form |  |  |
-| Technical > Email > Outgoing Mail Servers | Outgoing Mail Servers | Outgoing Mail Server | list, form |  | Technical Features |
-| Technical > Email > Incoming Mail Servers | Incoming Mail Servers | Incoming Mail Server | list, form |  | Technical Features |
-| Technical > Email > Email Templates | Email Templates | Email Template | form, list | filter: base templates |  |
-| Technical > Email > Aliases | Aliases | Email Alias |  | filter: active | Technical Features |
-| Technical > Email > Alias Domains | Alias Domains | Email Alias Domain | list, form |  | Technical Features |
-| Technical > Email > Channels | Join a group | Discussion Channel | card, list, form |  | Technical Features |
-| Technical > Email > Channels/Members | Channels/Members | Discussion Channel Member | list, form |  | Technical Features |
-| Technical > Email > Mail Gateway Allowed | Mail Gateway Allowed | Mail Gateway Allowed Sender | list |  | Technical Features |
-| Technical > Email > Snailmail Letters | Snailmail Letters | Postal Letter | form, list |  |  |
-| Technical > Email > Digest Emails | Digest Emails | Digest Email |  | filter: activated | Access Rights |
-| Technical > Email > Digest Tips | Digest Tips | Digest Tip |  |  | Access Rights |
-| Technical > Activities > Activity Overview | Activity Overview | Activity | list, form |  |  |
-| Technical > Activities > Activity Types | Activity Types | Activity Type | list, card, form |  |  |
-| Technical > Activities > Activity Plans | Activity Plans | Activity Plan | list, card, form |  |  |
-| Technical > Phone / Text Message > Text Message | Text Message | Outgoing Text Message | list, form |  |  |
-| Technical > Phone / Text Message > Text Message Templates | Templates | Text Message Template | list, form |  |  |
-| Technical > Phone / Text Message > Phone Blacklist | Blacklisted Phone Numbers | Phone Blacklist |  |  |  |
-| Technical > Marketing Card > Card Template | Card Template | Marketing Card Template | list, form |  | Marketing Card Manager, Technical Features |
-| Technical > Mass Mailing > Mailing Traces | Mailing Traces | Mailing Trace | list, form, chart, pivot |  |  |
-| Technical > Actions > Actions | Actions | Action |  |  |  |
-| Technical > Actions > Client Actions | Client Actions | Client Action |  |  |  |
-| Technical > Actions > Configuration Wizards | Configuration Wizards | Configuration Step |  |  |  |
-| Technical > Actions > Embedded Actions | Embedded Actions | Embedded Action |  |  |  |
-| Technical > Actions > Reports | Reports | Report Action |  |  |  |
-| Technical > Actions > Server Actions | Server Actions | Server Action | list, form | filter: toplevel actions |  |
-| Technical > Actions > User-defined Defaults | User-defined Defaults | User Default Value | list, form |  |  |
-| Technical > Actions > Window Actions | Window Actions | Window Action |  |  |  |
-| Technical > In Application Purchase > In Application Purchase Accounts | In Application Purchase Account | In-Application Purchase Account | list, form |  |  |
-| Technical > In Application Purchase > In Application Purchase Partners | In Application Purchase Partner | Contact Enrichment | list, form |  |  |
-| Technical > Automation > Automation Rules | Automation Rules | Automation Rule | card, list, form | filter: inactive |  |
-| Technical > Automation > base.ir_cron_act | Scheduled actions |  |  |  |  |
-| Technical > Automation > Scheduled Actions Triggers | Scheduled Actions Triggers | Scheduled Action Trigger | list, form |  |  |
-| Technical > Database Structure > Assets | Assets | Web Asset |  | filter: active |  |
-| Technical > Database Structure > Decimal Accuracy | Decimal Accuracy | Decimal Precision |  |  |  |
-| Technical > Database Structure > Fields | Fields | Field Definition |  |  |  |
-| Technical > Database Structure > Fields Selection | Fields Selection | Selection Value Definition |  |  |  |
-| Technical > Database Structure > Logging | Logging | Log Entry | list, form |  |  |
-| Technical > Database Structure > ManyToMany Relations | ManyToMany Relations | Relation Table Registry |  |  | Technical Features |
-| Technical > Database Structure > Model Constraints | Model Constraints | Model Constraint Registry |  |  | Technical Features |
-| Technical > Database Structure > Models | Models | Model Definition |  |  |  |
-| Technical > Database Structure > Profiling | Ir profile | Performance Profile | list, form | filter: group session |  |
-| Technical > Database Structure > base.action_attachment | Attachments |  | card, list, form |  |  |
-| Technical > User Interface > Menu Items | Menu Items | Menu Item |  |  |  |
-| Technical > User Interface > Onboardings | Onboardings | Onboarding Panel | list, form |  |  |
-| Technical > User Interface > Onboardings Steps | Onboarding Steps | Onboarding Step | list, form |  |  |
-| Technical > User Interface > Views | Views | View Definition |  | filter: active |  |
-| Technical > User Interface > Customized Views | Customized Views | User Customized View |  |  |  |
-| Technical > User Interface > Tours | Tours | Guided Tour |  |  |  |
-| Technical > User Interface > User-defined Filters | User-defined Filters | Saved Filter |  |  |  |
-| Technical > Reporting > Paper Format | Paper Format General Configuration | Paper Format | list, form |  | Technical Features |
-| Technical > Reporting > Reports | Reports | Report Action | list, form |  | Technical Features |
-| Technical > Sequences & Identifiers > External Identifiers | External Identifiers | External Identifier |  |  | Technical Features |
-| Technical > Sequences & Identifiers > Sequences | Sequences | Sequence |  |  |  |
-| Technical > Parameters > System Parameters | System Parameters | System Parameter |  |  |  |
-| Technical > Security > Record Rules | Record Rules | Record Rule |  |  |  |
-| Technical > Security > Access Rights | Access Rights | Model Access Rule |  |  |  |
-| Technical > Security > User Devices | User Devices | User Device | list, card, form |  |  |
-| Technical > Privacy > Privacy Logs | Privacy Logs | Privacy Log | list, form |  |  |
-| Technical > Calendar > Calendar Alarm | Calendar Alarm | Calendar Reminder | list, form |  | Technical Features |
-| Technical > Calendar > Meeting Types | Meeting Types | Calendar Event Tag |  |  | Technical Features |
-| Technical > Resource > Working Schedules | Working Schedules | Working Schedule | list, form |  |  |
-| Technical > Resource > Resource Time Off | Resource Time Off | Resource Time Off | list, form, calendar |  |  |
-| Technical > Resource > Resources | Resources | Resource | list, form |  |  |
-
-### Event Question
-
-Contributed by the Events Organization capability package. The application contains 1 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Event Question | Event Question | Event Question | list, form |  |  |
-
-### Event Stages
-
-Contributed by the Events Organization capability package. The application contains 1 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Event Stages | Event Stages | Event Stage | list, form |  |  |
-
-### Event Tags Categories
-
-Contributed by the Events Organization capability package. The application contains 1 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Event Tags Categories | Event Tags Categories | Event Tag Category | list, form |  |  |
-
-### Event Templates
-
-Contributed by the Events Organization capability package. The application contains 1 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Event Templates | Event Templates | Event Template |  |  |  |
-
-### Events
-
-Contributed by the Events Organization capability package. The application contains 1 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Events | Events | Event | card, calendar, list, form, pivot, chart, activity |  |  |
-
-### Events Mail Schedulers
-
-Contributed by the Events Organization capability package. The application contains 1 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Events Mail Schedulers | Events Mail Schedulers | Event Communication |  |  |  |
-
-### Management
-
-Contributed by the Base - Module Install Request capability package. The application contains 6 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Apps > Main Apps | Capability packages |  |  |  |  |
-| Apps > Theme Store | Appearance themes |  |  |  |  |
-| Apps > Third-Party Apps | Third-party checks |  |  |  |  |
-| Update Apps List | Module Update (dialog) | Module List Update Wizard | form |  | Technical Features |
-| Apply Scheduled Upgrades | Apply Schedule Upgrade (dialog) | Module Upgrade Wizard | form |  | Technical Features |
-| Import Module | Import Module (dialog) | Import Module Wizard | form |  | Technical Features |
-
-### Product Inch Configuration Purchase
-
-Contributed by the Purchase capability package. The application contains 3 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Attributes | Attributes | Product Attribute | list, form |  | Manage Product Variants |
-| Categories | Categories | Product Category |  |  |  |
-| Units & Packagings | Units & Packagings | Unit of Measure |  |  | Manage Multiple Units of Measure |
-
-### Res Partner Configuration
-
-Contributed by the Customer Relationship Management capability package. The application contains 11 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Contact Tags | Contact Tags | Contact Tag |  |  |  |
-| Website Tags | Website Tags | Partner Tags - These tags can be used on website |  |  |  |
-| Industries | Industries | Industry | list, form |  |  |
-| Localization > Countries | Countries | Country |  |  |  |
-| Localization > Cities | Cities | City | list |  |  |
-| Localization > Fed. States | Fed. States | Country Subdivision |  |  |  |
-| Localization > Country Group | Country Group | Country Group |  |  |  |
-| Localization > GIB Tax Offices | GIB Tax Offices | Turkish Tax Office |  |  |  |
-| Bank Accounts > Banks | Banks | Bank | list, form |  |  |
-| Bank Accounts > Bank Accounts | Bank Accounts | Bank Account | list, form |  |  |
-| Identification Type | Identification Type | Localization Latam Identification Type | list |  |  |
-
-### Sale Root
-
-Contributed by the Sales capability package. The application contains 20 menu entries.
-
-| Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
-|---|---|---|---|---|---|
-| Orders > Quotations | Quotations | Sales Order | list, card, form, calendar, pivot, chart, activity | filter: my quotation | User: Own Documents Only |
-| Orders > Orders | Sales Orders | Sales Order | list, card, form, calendar, pivot, chart, activity | filter: sales | User: Own Documents Only |
-| Orders > Sales Teams | Sales Teams | Sales Team | card, form |  | Administrator |
-| Orders > Customers | Customers | Contact | list, card, form | filter: customer; new records: is company = True, customer rank = 1 | User: Own Documents Only |
-| To Invoice > Orders to Invoice | Orders to Invoice | Sales Order | list, form, calendar, chart, pivot, card, activity |  |  |
-| To Invoice > Orders to Upsell | Orders to Upsell | Sales Order | list, form, calendar, chart, pivot, card, activity |  |  |
-| Products > Products | Products | Product Template |  |  |  |
-| Products > Product Variants | Product Variants | Product Variant | card, list, form, activity |  | Manage Product Variants |
-| Products > Pricelists | Pricelists | Pricelist | list, card, form |  | Basic Pricelists |
-| Products > Discount & Loyalty | Discount & Loyalty | Loyalty Program | list, form |  | Administrator |
-| Products > Gift cards & Electronic Wallet | Gift cards & Electronic Wallet | Loyalty Program | list, form | new records: program type = gift_card | Administrator |
-| Reporting > Sales | Sales Analysis | Sales Analysis Report | chart, pivot, list, form | filter: Sales, order date |  |
-| Reporting > Salespersons | Sales Analysis By Salespersons | Sales Analysis Report | chart, pivot | filter: User, order date; group by: user |  |
-| Reporting > Products | Sales Analysis By Products | Sales Analysis Report | chart, pivot | filter: Sales, Product, order date; group by: product |  |
-| Reporting > Customers | Sales Analysis By Customers | Sales Analysis Report | chart, pivot | filter: Customer, order date; group by: partner |  |
-| Configuration > Settings | Settings | Configuration Settings | form |  | Role / Administrator |
-| Configuration > Sales Teams | Sales Teams | Sales Team | list, form |  |  |
-| Configuration > Sales Orders > Quotation Templates | Quotation Templates | Quotation Template | list, form |  | Quotation Templates |
-| Configuration > Sales Orders > Headers/Footers | Headers/Footers | Quotation Document | card, list, form |  |  |
-| Configuration > Sales Orders > Delivery Methods | Delivery Methods | Shipping Method | list, form | group by: provider |  |
 
 ### To-do
 
-Contributed by the To-Do capability package. The application contains 1 menu entries.
+Contributed by the To-Do capability package. The application contains 1 menu entry that opens an action.
 
 | Menu path | Action | Entity | Views (first is the default) | Default filters, groupings and values | Restricted to |
 |---|---|---|---|---|---|
@@ -1311,6 +1092,103 @@ are listed with their name, size and preview; images and printable documents pre
 deleted by its author or by a user with write access on the record. The main attachment of a document (the printed form
 of an invoice, the received vendor bill) is the one previewed beside the form.
 
+### The command palette
+
+The command palette is a single search box opened from the keyboard with `control` and `k`, from anywhere in the client
+and even while a field is being edited. It replaces hunting through menus.
+
+The first character typed may select a **namespace**, which decides what is searched:
+
+| First character | Namespace | Prompt shown | Message when nothing matches | What is searched |
+|---|---|---|---|---|
+| none | Commands | "Search for a command..." | the default empty message | The commands the current screen offers, including every control of the screen that declares a shortcut letter. |
+| `/` | Menus | "Search for a menu..." | "No menu found" | The applications and every menu entry the user may see. |
+| `@` | Conversations | "Search a conversation" | "No conversation found" | The user's conversations, channels and the people they may write to; a search that matches nobody offers to open a new conversation. |
+
+Rules of the palette:
+
+1. Results are grouped by category and the categories appear in a fixed order. In the menu namespace, applications come
+   first and menu entries second.
+2. Matching is tolerant: the typed characters must appear in the label in order, not necessarily consecutively. A menu
+   entry is matched on its whole path with the segments reversed, therefore typing the name of the leaf finds it even
+   when the path is long.
+3. Duplicate results with the same label in the same category are shown once.
+4. Every control of the current screen that declares a shortcut letter becomes a command automatically: its label is the
+   control's own text, or its placeholder text when it has no text, its category is the one its container declares, and
+   the palette displays its shortcut beside it. A container may declare that its controls are excluded.
+5. Choosing a result performs exactly the same operation as operating the control it stands for, and the palette closes.
+6. The conversation namespace waits 200 milliseconds after the last keystroke before searching, because that search
+   reaches the server; the other namespaces search what the client already holds.
+
+Commands the standard screens contribute, beyond the controls: switch the active company, show a named view of the
+current screen, move the record to the next or the previous state, set the priority, assign the record to oneself,
+schedule an activity, and, when diagnostics are on, the developer tools.
+
+### Keyboard shortcuts
+
+The shortcut modifier is the `alt` key. Holding it alone reveals a small badge on every control that has a shortcut
+letter, so the shortcuts of the current screen are discoverable without documentation.
+
+| Shortcut | Control |
+|---|---|
+| `alt` + `h` | Open the application switcher. |
+| `alt` + `b` | Go back one step: the last but one entry of the navigation trail. |
+| `alt` + `c` | New record. |
+| `alt` + `s` | Save the record. |
+| `alt` + `j` | Discard the changes, or close the dialog. |
+| `alt` + `n` | Save and start another record; on a pager, the next page. |
+| `alt` + `p` | On a pager, the previous page. |
+| `alt` + `x` | Remove the current line, or the record from the dialog that owns it. |
+| `alt` + `k` | Remove the record shown in a relational dialog. |
+| `alt` + `v` | The confirming action of a dialog (export, select) and the scale selector of the calendar. |
+| `alt` + `z` | Close a dialog without acting. |
+| `alt` + `q` | Confirm a confirmation dialog. |
+| `alt` + `u` | Open the action menu of the current screen. |
+| `alt` + `shift` + `u` | Open the action menu over the selected records, and open the company selector. |
+| `alt` + `shift` + `q` | Open the search options: filters, groupings and favourites. |
+| `alt` + `shift` + `v` | Cycle through the views the current action offers. |
+| `alt` + `x` / `alt` + `shift` + `x` | Move the record to the next or the previous state of its status bar. |
+| `alt` + `r` | Raise the priority of the record. |
+| `control` + `k` | Open the command palette. |
+| `control` + `enter` | Confirm the dialog, and confirm the company selection. |
+| `escape` | Cancel a quick creation, close an overlay, leave an inline edit. |
+| arrow keys | Move the focus between cards of the card view. |
+| `space`, `shift` + `space` | Select or unselect the focused card, extending the selection with `shift`. |
+
+Three rules govern dispatch:
+
+1. A shortcut is ignored while the focus is in a text field, unless the shortcut declares that it bypasses that
+   protection; the command palette shortcut does.
+2. Only the controls of the top-most active layer answer. A dialog masks the shortcuts of the screen behind it.
+3. A shortcut bound to a control that is hidden or disabled does nothing.
+
+### Notifications
+
+A notification is a transient message shown in a corner of the screen, stacked with the others.
+
+| Property | Values | Meaning |
+|---|---|---|
+| Severity | success, warning, danger, info | Selects the colour and the icon. |
+| Title | text, optional | The heading. |
+| Message | text | The body. |
+| Buttons | a list, optional | Each with a label, an optional icon and an action; one may be marked as the suggested one. |
+| Sticky | true or false, default false | A sticky notification stays until the user dismisses it; a non-sticky one closes itself after 4000 milliseconds. |
+
+Notifications arrive from three sources:
+
+1. **The operation the user just ran.** A business operation may answer with a notification instead of, or in addition
+   to, an action; the client shows it and then runs the follow-up action the answer carries. The structure of that
+   answer is in [`service-layer.md`](service-layer.md).
+2. **The client itself,** when it catches a failure it can express in one sentence, when a save succeeded, or when a
+   long download has been prepared.
+3. **The server, outside any request the user made.** The server pushes the same structure on the user's own channel and
+   the client displays it when it arrives. This is how the result of a background job, an action taken by another user
+   on a record the user follows, and an incoming message reach the screen. The transport is specified in
+   [`remote-transport-contracts.md`](remote-transport-contracts.md).
+
+The same channel updates the counters of the systray: the number of pending activities grouped by application with the
+overdue ones first, and the number of unread conversations.
+
 ## Part 4: the form workflow of each major document
 
 Each subsection gives the status bar of the document, the header buttons in the order they appear with the condition
@@ -1410,7 +1288,7 @@ shown when the record is in them.
 
 | Button | Operation | Hidden when | Group |
 |---|---|---|---|
-| Mark as Todo | `action_confirm` | the state is not `draft` | Any internal user |
+| Mark as To Do (label reproduced as "Mark as Todo") | `action_confirm` | the state is not `draft` | Any internal user |
 | Check Availability | `action_assign` | the availability button is not applicable (nothing is reservable) | Any internal user |
 | Validate | `button_validate` | the state is `draft`, `confirmed`, `done` or `cancel` | Inventory user |
 | Validate | `button_validate` | the state is `waiting`, `assigned`, `done` or `cancel` | Inventory user |
@@ -1602,39 +1480,99 @@ personal dashboard.
 | DSK-RULE-008 | Duplicating a record produces an unsaved copy in which fields declared as not copyable are reset. |
 | DSK-RULE-009 | The active company selection filters every list and defaults every new record; a record of a company the user has not activated is read-only when visible at all. |
 | DSK-RULE-010 | A favourite marked as default applies to its action for its owner only; a shared favourite is offered to every user but is not applied automatically. |
+| DSK-RULE-011 | A shortcut is dispatched only to the top-most active layer, and only when the focus is not in a text field, unless the shortcut declares that it bypasses that protection. |
+| DSK-RULE-012 | A non-sticky notification closes itself after 4000 milliseconds; a sticky one stays until the user dismisses it. |
+| DSK-RULE-013 | A command palette result performs exactly the operation of the control it stands for, and never one the user could not reach on the screen. |
+| DSK-RULE-014 | A duplicated menu entry that opens the same action as an entry of another application is a separate entry: opening it starts a new navigation stack rooted at that entry. |
 
-```
-Given a user who belongs to no accounting group
-When the user opens the application switcher
-Then the invoicing application is not listed
-And opening its address directly answers with the access refusal
-```
+### Acceptance criteria
 
-```
-Given a sales order in the quotation state
-When the user opens its form
-Then the status bar shows Quotation, Quotation Sent and Sales Order with Quotation highlighted
-And the header offers Send, Confirm, Print, Preview and Cancel
-And it does not offer Create Invoice
-```
+**AC-DESKTOP-001 — A hidden application is unreachable.** Given a user who belongs to no accounting group, when the user
+opens the application switcher, then the invoicing application is not listed, and opening its address directly answers
+with the access refusal.
 
-```
-Given a transfer in the ready state whose products are tracked by lot
-When the user presses Validate without filling the lot numbers
-Then the operation is refused with the message of the inventory domain
-And the transfer stays in the ready state
-```
+**AC-DESKTOP-002 — The status bar and the header of a quotation.** Given a sales order in the quotation state, when the
+user opens its form, then the status bar shows Quotation, Quotation Sent and Sales Order with Quotation highlighted, the
+header offers Send, Confirm, Print, Preview and Cancel, and it does not offer Create Invoice.
 
-```
-Given a list of invoices grouped by customer
-When the user adds the view to the personal dashboard under the name "Open invoices"
-Then a block named "Open invoices" appears on the personal dashboard
-And opening the dashboard re-runs the same filter, grouping and ordering
-```
+**AC-DESKTOP-003 — A refused operation leaves the record where it was.** Given a transfer in the ready state whose
+products are tracked by lot, when the user presses Validate without filling the lot numbers, then the operation is
+refused with the message of the inventory domain and the transfer stays in the ready state.
 
-```
-Given a user with two allowed companies, both active
-When the user creates a quotation
-Then the company of the quotation defaults to the first active company
-And the price list, the sales team and the journals proposed are those of that company
-```
+**AC-DESKTOP-004 — A view added to the personal dashboard.** Given a list of invoices grouped by customer, when the user
+adds the view to the personal dashboard under the name "Open invoices", then a block named "Open invoices" appears on the
+personal dashboard and opening the dashboard re-runs the same filter, grouping and ordering.
+
+**AC-DESKTOP-005 — The active company defaults a new record.** Given a user with two allowed companies, both active,
+when the user creates a quotation, then the company of the quotation defaults to the first active company and the price
+list, the sales team and the journals proposed are those of that company.
+
+**AC-DESKTOP-006 — Unsaved changes are guarded.** Given a form with one changed field, when the user presses a menu
+entry that opens another action, then the client asks to save or discard, and choosing discard reopens the record with
+its stored values.
+
+**AC-DESKTOP-007 — Batch action over a whole filter.** Given a list of 500 matching records with a page size of 80, when
+the user selects the page and then chooses to select every matching record, then an action run from the action menu
+applies to all 500, and the client passes the filter rather than the 500 keys once the active-keys limit is exceeded.
+
+**AC-DESKTOP-008 — A favourite marked as default.** Given a user who saves the current facets as a favourite and marks
+it as the default of the action, when the user opens that action from a menu the next day, then the favourite's facets,
+groupings and ordering are applied instead of the action's own default filters, and another user opening the same action
+sees the action's default filters.
+
+**AC-DESKTOP-009 — The command palette finds a deep menu entry.** Given the menu entry Invoicing, Configuration,
+Accounting, Chart of Accounts, when the user opens the palette, types `/` and then the word `chart`, then the entry is
+offered with its full path, and choosing it opens the chart of accounts with the navigation stack rooted at that entry.
+
+**AC-DESKTOP-010 — The shortcut overlay.** Given a form in edit, when the user holds the shortcut modifier, then a badge
+appears on Save, Discard and every other control that declares a letter, and releasing the modifier removes them.
+
+**AC-DESKTOP-011 — A pushed notification.** Given a user whose screen is a list, when another user assigns a record to
+them, then a notification appears without the list being reloaded, and the activity counter of the systray increases by
+one.
+
+**AC-DESKTOP-012 — Grouped list paging.** Given a list grouped by customer where one group holds 200 records and the
+per-group page size is 80, when the user opens that group, then 80 rows are loaded, the group header shows the count 200
+and the aggregates of all 200, and paging inside the group loads the next 80.
+
+## Reconciliation notes
+
+The two drafts merged into this document disagreed with each other and, in places, with the menu tree the system
+actually declares. Each point was settled against the source of the system and against the generated catalogues
+[`../references/actions-and-menus.md`](../references/actions-and-menus.md) and
+[`../references/views.md`](../references/views.md); the resolutions are recorded here.
+
+1. **Applications that do not exist.** One draft carried twelve extra sections whose headings were derived from the
+   technical identifier of a menu rather than from an application: an "administration" section identical to the settings
+   section, an "email" section that is the technical mail branch of the settings tree, a French statement section, six
+   event sections, an application-management section, and three sections derived from the sales, purchasing and contact
+   configuration branches. Every one of them repeats entries that already belong to a real application. They were
+   removed, and the five event configuration entries and the event list entry they carried were moved into the events
+   application, where the menu tree puts them.
+2. **Duplicated rows.** The inventory table repeated its whole configuration block (sixteen rows) and the employee table
+   repeated two learning rows. The repetitions were removed.
+3. **Missing entries.** Compared with the menu tree, the sales application was missing twelve configuration entries
+   (product attributes, categories, combination choices, product tags, units and packagings, order tags, the two
+   activity entries and the four online payment entries), the invoicing application was missing nineteen entries (the
+   journal entry and analytic item lists, the journal item review list, the chart of accounts, taxes, tax groups,
+   journals, the multi-ledger, fiscal positions, currencies, cash roundings, payment terms, international commercial
+   terms, product categories, the three analytic configuration entries and the two management reports), and the
+   timesheet application was missing three reporting entries. All were added.
+4. **Counts.** The stated totals (858 entries, 765 listed) matched neither the menu tree nor the tables. The menu tree
+   declares 893 entries, 645 of which open an action; the tables now list 630 of them and the introduction states
+   exactly which fifteen are left out and why.
+5. **Mis-expanded abbreviations.** One draft expanded the abbreviation in the Egyptian electronic invoicing
+   configuration branch as "Estimated Time of Arrival"; it stands for the Egyptian Tax Authority, and the branch is now
+   named after it.
+6. **Labels that carry abbreviations.** Two menu labels are reproduced by the system with abbreviations in them. The
+   animated image entries of the technical messaging branch are displayed as "GIF favorite", and the page editor entry
+   of the site menu is displayed as "HTML / CSS Editor". The tables use the abbreviation-free wording ("Favourite
+   animated images", "Page source editor"); the displayed labels are reproduced here so that a rebuild can show the same
+   text. The confirmation button of a transfer is displayed as "Mark as Todo" and the table states both forms.
+7. **Acceptance criteria.** One draft ended with five unnumbered scenarios in plain blocks. They are now numbered
+   scenarios with stable identifiers, and seven further scenarios were added to cover the guard on unsaved changes,
+   batch actions over a whole filter, default favourites, the command palette, the shortcut overlay, pushed
+   notifications and grouped paging.
+8. **Command palette, keyboard shortcuts and notifications.** Neither draft specified them beyond a single line in the
+   frame table. They are now specified in full in part 3, because they are the only way several operations can be
+   reached and because the shortcut letters are observable behaviour.

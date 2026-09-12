@@ -115,3 +115,33 @@ An implementation should treat the following as the complete list of points at w
 | reads the suppression list before sending | maintains the suppression list and the bounce counters |
 
 No value crosses this boundary in the other direction. In particular, **nothing in this folder may be implemented as a hook that writes to a ledger**, and an implementation that finds itself needing one has mislocated a rule.
+
+### 7. Postal mail as a sending method of an accounting document
+
+One capability of this domain exists only to bridge into the receivable ledger's documents: it adds "by post" as a sending method of a customer invoice and of a follow-up report. What it adds is entirely on this side of the boundary.
+
+| What the bridge adds | Where it is specified |
+|---|---|
+| The sending method "by Post" on a Contact, alongside the electronic-mail method | [entities.md](entities.md), section 46 |
+| A Postal Letter created from the invoice or the follow-up report, with the report to render | [workflows.md](workflows.md), section 21 |
+| The Notification of the postal channel that the document then displays | [state-machines.md](state-machines.md), section 8 |
+| The estimate call that shows how many stamps a batch will consume before anything is sent | [workflows.md](workflows.md), section 21 |
+
+The bridge creates **no** Journal Entry and **no** Journal Item. The stamps it consumes are a balance held by the external printing service; whatever purchase document eventually records the purchase of those stamps is created by the party that sells them, in the purchasing and payable folders, and never by this one.
+
+### 8. What a reader must check in a rebuild
+
+An implementation of this folder is correct with respect to the ledger when all of the following hold.
+
+1. No operation of the folder opens, writes, posts, reverses or deletes a Journal Entry or a Journal Item.
+2. No record of the folder carries a monetary amount. The single currency link, on a Tracking Value, is a label and participates in no arithmetic.
+3. Every figure a Digest displays is read from the domain that owns it and is formatted for display only.
+4. Every credit consumption — text messages, postal mail, contact enrichment — is recorded as a state and a failure type on the record that requested it, and never as an amount.
+5. Every accounting flow that calls into this folder does so through one of the seven contact points of the table above, and no value crosses the boundary in the other direction.
+
+---
+
+## Reconciliation notes
+
+1. **Scope of the statement.** Both source versions agree that the domain posts nothing to the ledger. One of them stopped at that statement; the other listed the contact points with the accounting folders. This document keeps the statement, the contact points, the boundary table and the postal bridge, so a reader can verify the claim rather than take it on trust.
+2. **The currency on a Tracking Value.** One version listed the currency link among the domain's fields without saying what it is for. It is a rendering label for a monetary value that some other domain's field carried; section 6 says so explicitly.
