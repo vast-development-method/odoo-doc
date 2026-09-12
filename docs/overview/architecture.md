@@ -244,7 +244,7 @@ A resolved entity definition is the result of composing, in dependency order, ev
 - the **display-name rule**;
 - the set of **declared constraints** (both entity-level checks and database-level constraints);
 - the set of **parents** contributed by embedding (delegation) and the fields they expose;
-- the **automatic behaviours** the entity opted into: audit fields, the archive flag, messaging, activities, ordering by a sequence field, and so on;
+- the **automatic behaviours** the entity opted into. The list is closed and is tabulated with its defaults in [the entity and field system, section 3](entity-and-field-system.md#3-entity-attributes): audit fields, the archive flag, the materialised ancestor path of a hierarchy, the fold field that collapses a group on a grouped screen, the default ordering (by a sequence field where the entity declares one), the automatic company consistency check, the refusal of relational write commands in an elevated environment, the export of translatable values to catalogues, the declared query dependencies of an entity backed by a stored query, the custom-entity marker, and the shared behaviour bundles the definition adopted — discussion threads, activities, electronic-mail aliases, template rendering, composition fields, tracked-duration accumulation, notification-bus listening and portal access, catalogued in full in [inheritance and extension, section 5.3](inheritance-and-extension.md#53-catalogue-of-shared-behaviour-bundles);
 - the operations callable on it, both generic and named.
 
 ### 4.4 Identity and lifetime

@@ -845,7 +845,9 @@ The export dialog builds a tree of exportable fields. Listing the fields of an e
 
 The two modes differ in intent. The **import-compatible** mode offers only what can be read back by the importer, which means external identifiers for relations and no read-only field. The plain mode offers the numeric key and every readable field.
 
-An export template stores a named list of field paths for reuse. Resolving one turns the stored paths back into labelled entries, fetching the descriptions of each level in one request per level rather than one per field.
+An export template stores a named list of field paths for reuse. Its transport name is `ir.exports` and its full name is Export Template; it holds the export name, the transport name of the entity the template applies to, and the ordered list of its paths. Each path is one record of the entity whose transport name is `ir.exports.line` and whose full name is Export Template Line, which holds the path text and the link back to its template. Export templates are ordered by name, then by key; their lines are ordered by key, which is what preserves the column order the user chose. Deleting a template deletes its lines.
+
+Resolving a template turns the stored paths back into labelled entries, fetching the descriptions of each level in one request per level rather than one per field.
 
 ### 9.2 The export request
 
@@ -1075,3 +1077,4 @@ A template asks for the symbology `EAN8` and the value `11111111`.
 8. Data export was specified in the same document as printing. It stays with printing here, because it is the second way the platform turns records into a file, it shares the request layer and the file-naming rules, and no other document of this folder owns it.
 9. The label chooser's field identifiers were paraphrased. They are reproduced as `print_format`, `custom_quantity`, `product_ids`, `product_tmpl_ids`, `extra_html`, `pricelist_id`, `rows` and `columns`.
 10. The endpoint catalogue the source document linked to does not exist in this repository. The request paths are listed in section 10, and the read-only decision that governs them is in [`request-lifecycle.md`](request-lifecycle.md).
+11. The export template was described without its transport name, while every other entity of this document carries one. It is `ir.exports`, and the record that holds one stored path is `ir.exports.line`; both are given in section 9.1 with their full names, their ordering and their deletion behaviour.

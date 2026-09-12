@@ -202,12 +202,23 @@ A record is covered when it is posted **and** its journal has the inalterability
 
 ### 6.2 The values that are hashed
 
-| Level | Values, in this order |
-|---|---|
-| The entry | Its name, its accounting date, its journal, its company. |
-| Each of its lines | Its label, its debit amount, its credit amount, its account, its counterparty. |
+Nine values enter the computation of one entry's digest: four of the entry itself and five of each of its lines. The key under which each value is placed in the serialized payload is contractual, because the payload is hashed byte for byte; the keys are therefore reproduced exactly here.
 
-Each value is rendered as text. A link to one record is rendered as its key. A monetary amount is rendered with exactly the number of decimal places of the record's currency, which is why the same figures produce different digests under currencies with different precisions.
+| Level | Value | Reproduced field identifier | Key in the serialized payload |
+|---|---|---|---|
+| The entry | Its name, that is its number | `name` | `name` |
+| The entry | Its accounting date | `date` | `date` |
+| The entry | Its journal | `journal_id` | `journal_id` |
+| The entry | Its company | `company_id` | `company_id` |
+| Each of its lines | Its label | `name` | `line_`, the line's numeric key, `_name` |
+| Each of its lines | Its debit amount | `debit` | `line_`, the line's numeric key, `_debit` |
+| Each of its lines | Its credit amount | `credit` | `line_`, the line's numeric key, `_credit` |
+| Each of its lines | Its account | `account_id` | `line_`, the line's numeric key, `_account_id` |
+| Each of its lines | Its counterparty | `partner_id` | `line_`, the line's numeric key, `_partner_id` |
+
+No other value enters the payload, and no key other than these appears in it. Every line of the entry contributes its five keys, including a line with a zero debit and a zero credit.
+
+Each value is rendered as text. A link to one record is rendered as the decimal text of the key of the linked record, and an empty link is rendered as the text `False`. A date is rendered as four-digit year, hyphen, two-digit month, hyphen, two-digit day. A monetary amount is rendered with exactly the number of decimal places of the record's currency, which is why the same figures produce different digests under currencies with different precisions.
 
 ### 6.3 The algorithm
 
@@ -216,8 +227,8 @@ Given the records in ascending sequence number and the digest of the record befo
 1. Set the carry to the previous digest, or to the empty text when there is none.
 2. For each record in turn:
    1. If the carry begins with the version marker, replace it by the part after the second marker separator. The version prefix does not take part in the computation.
-   2. Build an ordered map: for each entry-level value, the value name mapped to its rendered value; then, for each line and each line-level value, the text `line_`, the line key, an underscore and the value name, mapped to its rendered value.
-   3. Serialize the map compactly, with the keys sorted and only plain-alphabet characters.
+   2. Build a map holding exactly the nine kinds of key of section 6.2 and nothing else: the four entry-level keys `name`, `date`, `journal_id` and `company_id`, each mapped to the rendered value of the corresponding entry value; then, for every line of the entry, the five line-level keys `line_<line key>_name`, `line_<line key>_debit`, `line_<line key>_credit`, `line_<line key>_account_id` and `line_<line key>_partner_id`, in which `<line key>` stands for the line's numeric key written in decimal, each mapped to the rendered value of the corresponding line value.
+   3. Serialize the map as one line of text: an opening brace; then its entries in ascending order of key, separated by single commas with no spaces; each entry being the key between double quotation marks, then a single colon with no spaces, then the rendered value between double quotation marks; then a closing brace. There is no whitespace anywhere, no indentation and no line break. Any character outside the plain alphabet is escaped so that the serialization contains only plain-alphabet characters, which makes the payload independent of the text encoding a reader uses. The ordering is by the key text, so `company_id` precedes `date`, `date` precedes `journal_id`, every `line_` key precedes `name`, and lines sort by the decimal text of their key rather than by their numeric value.
    4. Compute the digest of the carry followed by the serialization, using the 256-bit member of the standard secure hash family, rendered in hexadecimal.
    5. The stored form is the marker `$`, the version number, the marker `$` and the digest.
    6. Assign the stored form to the record and set the carry to it.
@@ -396,17 +407,32 @@ Had the alteration gone through the application, it would have been refused with
 
 ### 10.3 A hash computation with numbers
 
-An entry has the name `INV/2026/0007`, the accounting date `2026-02-14`, the journal key 3 and the company key 1, and one line with the label `Consulting`, a debit of 1200.00, a credit of 0.00, the account key 55 and no counterparty. The company currency has 2 decimal places. The previous stored digest begins with the version marker.
+An entry has the name `INV/2026/0007`, the accounting date `2026-02-14`, the journal key 3 and the company key 1, and one line whose numeric key is 91, with the label `Consulting`, a debit of 1200.00, a credit of 0.00, the account key 55 and no counterparty. The company currency has 2 decimal places. The previous record in the chain carries the stored form `$4$263f836f3d60b4fd118045b80a68d64e74652088508965a5108ca50ffff87ad1`.
 
 | Step | Value |
 |---|---|
-| The carry after stripping the version prefix | The digest part alone, without the marker and the version. |
-| The ordered map | The company key mapped to `1`; the accounting date mapped to `2026-02-14`; the journal mapped to `3`; the line account mapped to `55`; the line credit mapped to `0.00`; the line debit mapped to `1200.00`; the line label mapped to `Consulting`; the line counterparty mapped to `False`; the entry name mapped to `INV/2026/0007`. Each line key is prefixed with `line_`, the line key and an underscore. |
-| The serialization | The compact, key-sorted rendering of that map, with no spaces and no separators beyond the minimal ones. |
-| The digest | The hexadecimal 256-bit digest of the carry followed by the serialization. |
-| The stored form | The marker, the version 4, the marker again, then the digest. |
+| The carry after stripping the version prefix | `263f836f3d60b4fd118045b80a68d64e74652088508965a5108ca50ffff87ad1`, that is the digest part alone, without the marker and the version. |
+| The map, key by key | `company_id` mapped to `1`; `date` mapped to `2026-02-14`; `journal_id` mapped to `3`; `line_91_account_id` mapped to `55`; `line_91_credit` mapped to `0.00`; `line_91_debit` mapped to `1200.00`; `line_91_name` mapped to `Consulting`; `line_91_partner_id` mapped to `False`; `name` mapped to `INV/2026/0007`. Nine keys, already written here in the ascending order the serialization uses. |
+| The serialization, 211 characters | `{"company_id":"1","date":"2026-02-14","journal_id":"3","line_91_account_id":"55","line_91_credit":"0.00","line_91_debit":"1200.00","line_91_name":"Consulting","line_91_partner_id":"False","name":"INV/2026/0007"}` |
+| The text that is hashed, 275 characters | The carry immediately followed by the serialization, with nothing between them: `263f836f3d60b4fd118045b80a68d64e74652088508965a5108ca50ffff87ad1{"company_id":"1","date":"2026-02-14","journal_id":"3","line_91_account_id":"55","line_91_credit":"0.00","line_91_debit":"1200.00","line_91_name":"Consulting","line_91_partner_id":"False","name":"INV/2026/0007"}` |
+| The digest | `9553fbe1c14118a7bc599cd9c15e0530075e44971317c524c413493e1e715a4f` |
+| The stored form | `$4$9553fbe1c14118a7bc599cd9c15e0530075e44971317c524c413493e1e715a4f` |
 
-The two monetary amounts are rendered with exactly two decimal places because the currency declares two. A currency with three would render the debit as `1200.000`, producing an entirely different digest for the same business figures.
+The arithmetic of the two monetary amounts is the only rounding in the computation:
+
+```formula
+rendered debit = debit amount in company currency rounded to (decimal places of the company currency) decimal places, written with exactly that many decimal places
+             = 1200 rounded to 2 decimal places, written with 2 decimal places
+             = 1200.00
+
+rendered credit = credit amount in company currency rounded to (decimal places of the company currency) decimal places, written with exactly that many decimal places
+              = 0 rounded to 2 decimal places, written with 2 decimal places
+              = 0.00
+```
+
+Rounding is half away from zero and the trailing zeros are kept, because the rendering is fixed-width in the currency's precision rather than shortest-form. A currency declaring three decimal places would render the debit as `1200.000` and the credit as `0.000`, changing the serialization and therefore producing an entirely different digest for the same business figures.
+
+Two further details decide the bytes. The empty counterparty renders as the text `False`, not as an empty text and not as a null, so the key `line_91_partner_id` is present with a four-character value. And the line key 91 is written in decimal inside the key, so a line numbered 100 would sort before a line numbered 91, the ordering being by key text and not by numeric value.
 
 ### 10.4 A profiling session
 
@@ -458,15 +484,18 @@ The two monetary amounts are rendered with exactly two decimal places because th
 26. **Given** an empty set to seal, **when** sealing is attempted, **then** the no-document warning is raised.
 27. **Given** a monetary value of 1200 in a currency with 2 decimal places, **when** the digest is computed, **then** the rendered value is `1200.00`; in a currency with 3 it is `1200.000` and the digest differs.
 28. **Given** a stored digest that carries no version prefix, **when** the chain is verified, **then** the earliest value list is used for that record.
-29. **Given** the profiling parameter unset and a settings user asking to profile, **when** the request is served, **then** the assistant for enabling profiling is returned rather than a refusal.
-30. **Given** the profiling parameter unset and a user who is not a settings user asking to profile, **when** the request is served, **then** the refusal `Profiling is not enabled on this database. Please contact an administrator.` is produced.
-31. **Given** an active profiling session whose expiration has passed, **when** the next request is served, **then** the marker is cleared, the warning `Profiling expiration reached, disabling profiling` is logged, and the request is not profiled.
-32. **Given** two profiles whose initial stacks differ, **when** they are displayed together, **then** the operation is refused with `All profiles must have the same initial stack trace to be displayed together.`
-33. **Given** three memory samples of 120.0, 138.5 and 131.25 mebibytes, **when** the memory view is produced, **then** the displayed series is 0.00, 18.50 and 11.25.
-34. **Given** a profile created 31 days ago, **when** the cleanup runs, **then** it is deleted.
-35. **Given** a Server Action with 130 history entries, **when** the cleanup runs, **then** exactly 100 remain, the most recent ones.
-36. **Given** an automation rule with callback logging enabled whose record resolution fails, **when** the callback arrives, **then** a Log Entry at the level `ERROR` exists naming the rule key and carrying the traceback, and the caller receives a failure.
-37. **Given** an automation rule with callback logging **disabled** whose rule body fails, **when** the callback arrives, **then** no Log Entry is created and the technical logger still emits the warning.
+29. **Given** the entry of section 10.3 and the carry stated there, **when** the digest is computed, **then** the serialized payload is exactly the 211-character text of that section, the hashed text is exactly the 275-character concatenation of the carry and that payload, and the stored form is `$4$9553fbe1c14118a7bc599cd9c15e0530075e44971317c524c413493e1e715a4f`.
+30. **Given** the same entry with a second line whose numeric key is 100, **when** the digest is computed, **then** the payload carries fourteen keys and `line_100_account_id` sorts before `line_91_account_id`, because keys are ordered as text.
+31. **Given** an entry line with no counterparty, **when** the digest is computed, **then** its `line_<line key>_partner_id` key is present in the payload with the value `False`, not omitted and not empty.
+32. **Given** the profiling parameter unset and a settings user asking to profile, **when** the request is served, **then** the assistant for enabling profiling is returned rather than a refusal.
+33. **Given** the profiling parameter unset and a user who is not a settings user asking to profile, **when** the request is served, **then** the refusal `Profiling is not enabled on this database. Please contact an administrator.` is produced.
+34. **Given** an active profiling session whose expiration has passed, **when** the next request is served, **then** the marker is cleared, the warning `Profiling expiration reached, disabling profiling` is logged, and the request is not profiled.
+35. **Given** two profiles whose initial stacks differ, **when** they are displayed together, **then** the operation is refused with `All profiles must have the same initial stack trace to be displayed together.`
+36. **Given** three memory samples of 120.0, 138.5 and 131.25 mebibytes, **when** the memory view is produced, **then** the displayed series is 0.00, 18.50 and 11.25.
+37. **Given** a profile created 31 days ago, **when** the cleanup runs, **then** it is deleted.
+38. **Given** a Server Action with 130 history entries, **when** the cleanup runs, **then** exactly 100 remain, the most recent ones.
+39. **Given** an automation rule with callback logging enabled whose record resolution fails, **when** the callback arrives, **then** a Log Entry at the level `ERROR` exists naming the rule key and carrying the traceback, and the caller receives a failure.
+40. **Given** an automation rule with callback logging **disabled** whose rule body fails, **when** the callback arrives, **then** no Log Entry is created and the technical logger still emits the warning.
 
 ## 12. Reconciliation notes
 
@@ -477,3 +506,6 @@ The two monetary amounts are rendered with exactly two decimal places because th
 5. The memory view was described without arithmetic. The subtraction and a worked example are in section 7.4.
 6. The absence of a retention rule for log entries was stated as an explicit gap. It is now marked as an **industry-standard default** with the completion a replacement should implement, as the documentation rules require.
 7. The reference to the document that owns the digest slow-down rule was renamed: that rule is in [`background-workers.md`](background-workers.md), section 7.4.
+8. The keys of the map that is serialized and hashed were described by their meaning rather than reproduced. Because the digest is the hash of the key-sorted serialization of that map, the keys are part of the arithmetic and a rebuild cannot reproduce a single stored digest without them. They are reproduced in section 6.2 and repeated in the procedure of section 6.3: `name`, `date`, `journal_id` and `company_id` for the entry, and `line_<line key>_name`, `line_<line key>_debit`, `line_<line key>_credit`, `line_<line key>_account_id` and `line_<line key>_partner_id` for each line.
+9. The entry-level company key was given as `company`. The reproduced identifier, and therefore the key in the payload, is `company_id`.
+10. The worked example of section 10.3 stated the shape of the serialization without producing it. It now carries the exact 211-character payload, the exact 275-character text that is hashed, the resulting digest and the stored form, so that the example can be replayed byte for byte.

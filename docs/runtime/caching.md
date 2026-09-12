@@ -400,7 +400,7 @@ The result is a map with two optional members: the fields to change on the calle
 
 ### 9.2 Conditional user defaults
 
-A field declared as changing defaults gets an implicit on-change rule: when the field changes, the user default values for the entity are looked up under a condition formed by the field name, an equals sign and the field's write-format value, and every default found is applied to the working record.
+A field whose declaration carries the conditional-default attribute `change_default`, the marker that the field may trigger a user-level default lookup, gets an implicit on-change rule: when the field changes, the user default values for the entity are looked up under a condition formed by the field name, an equals sign and the field's write-format value, and every default found is applied to the working record.
 
 ### 9.3 The snapshot difference
 
@@ -840,3 +840,4 @@ A list view shows 80 orders and reads the customer name of each. Reading the cus
 3. The two sources named the flush, invalidation and locking operations differently. The reproduced names are `flush_all`, `flush_model`, `flush_recordset`, `invalidate_all`, `invalidate_model`, `invalidate_recordset`, `lock_for_update` and `try_lock_for_update`; the earlier spellings were paraphrases and are not contractual.
 4. One source stated that registering a transaction callback is idempotent when a key is supplied, the other that adding the same callback twice queues it twice. The queue is not de-duplicated: two additions run twice. Callers that need once-only behaviour aggregate their work in the queue's data dictionary and register one callback that consumes it. This is recorded in [`transactions-and-concurrency.md`](transactions-and-concurrency.md), section 4.
 5. The cache-key computation was referred to by section number in another document. It is written out in full in section 3.2 so that this folder stands alone.
+6. The attribute that makes a field trigger a user-level default lookup was described only by its effect. It is declared on the field as `change_default`, and section 9.2 now names it, because a rebuild has to know which declaration produces the implicit on-change rule.
