@@ -1,6 +1,6 @@
 # Request lifecycle
 
-A request arrives at the server process as a network message and leaves it as a response. Between those two points the platform performs a fixed, ordered sequence of steps: it prepares per-request bookkeeping, rewrites the client address when a trusted reverse proxy is in front, wraps the raw message, resolves a session and a database, decides between three serving branches (a static file, a database-free endpoint, a database-backed endpoint), acquires an entity registry and a database transaction, resolves the path to an endpoint, applies the authentication level declared by that endpoint, builds the execution context (acting user, language, time zone, company), dispatches to the endpoint, and turns the return value or the raised exception into a response. This document specifies that sequence completely, including the read-only optimization, the retry behaviour, the error envelopes and the limits enforced on the way in. The wire spellings of paths, headers and envelope members are the contract of [`../interfaces/remote-transport-contracts.md`](../interfaces/remote-transport-contracts.md); this document specifies the behaviour around them.
+A request arrives at the server process as a network message and leaves it as a response. Between those two points the platform performs a fixed, ordered sequence of steps: it prepares per-request bookkeeping, rewrites the client address when a trusted reverse proxy is in front, wraps the raw message, resolves a session and a database, decides between three serving branches (a static file, a database-free endpoint, a database-backed endpoint), acquires an entity registry and a database transaction, resolves the path to an endpoint, applies the authentication level declared by that endpoint, builds the execution context (acting user, language, time zone, company), dispatches to the endpoint, and turns the return value or the raised exception into a response. This document specifies that sequence completely, including the read-only optimization, the retry behaviour, the error envelopes and the limits enforced on the way in. The wire spellings of paths, headers and envelope members are the contract of [`../interfaces/`](../interfaces/); this document specifies the behaviour around them.
 
 ## 1. Vocabulary
 
@@ -181,7 +181,7 @@ Fallback serving always runs with the read-only intent.
 
 ## 9. Transport families and parameter deserialization
 
-Three transport families exist. Their envelopes are specified in [`../interfaces/remote-transport-contracts.md`](../interfaces/remote-transport-contracts.md). The lifecycle-relevant behaviour is:
+Three transport families exist. Their envelopes are specified in [`../interfaces/`](../interfaces/). The lifecycle-relevant behaviour is:
 
 | Family | Where the parameters come from | What the return value becomes |
 |---|---|---|

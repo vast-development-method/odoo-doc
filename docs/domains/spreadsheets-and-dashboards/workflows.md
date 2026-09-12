@@ -1,6 +1,6 @@
 # Workflows
 
-Sixteen end-to-end procedures. Each step states what it reads, what it creates or changes, and how it can fail. Rule references point at [`business-rules.md`](business-rules.md); formula references at [`calculations.md`](calculations.md).
+Eighteen end-to-end procedures. Each step states what it reads, what it creates or changes, and how it can fail. Rule references point at [`business-rules.md`](business-rules.md); formula references at [`calculations.md`](calculations.md).
 
 ## 1. Configuring a dashboard group
 
@@ -277,3 +277,33 @@ On a small screen the board is forced to the single-column style without storing
 8. Otherwise one entry is written to the application log, at informational level, naming the acting user's identifier, the operation, every rendered description, and the network address the request came from.
 
 The rendering is specified in [`business-rules.md`](business-rules.md) §11.
+
+## 17. Printing a dashboard
+
+**Actor.** Any reader of an open workbook.
+
+1. The reader presses the print combination — the control key or the command key together with the letter `p` — or chooses the print entry of a menu. Both call the same preparation, and the key press is intercepted before the browser's own print handling.
+2. When no workbook is open the preparation ends at once and the ordinary print of the page happens.
+3. The printing assets are loaded.
+4. The current viewing rectangle, the current scroll position and the current presentation mode are recorded, so that they can be put back afterwards.
+5. When the workbook is already in dashboard presentation, the preparation continues at step 7.
+6. Otherwise the workbook is switched to dashboard presentation, and the preparation waits, checking every fiftieth of a second, until no drawing animation is running.
+7. The viewport is scrolled to the first cell.
+8. The viewing rectangle is resized so that it covers the whole used area of the active sheet: its width is the right edge of the last used column and its height is the bottom edge of the last used row. The whole sheet is therefore rendered, not the part that was on screen.
+9. Printing begins.
+10. When printing ends, the recorded viewing rectangle, scroll position and presentation mode are restored.
+11. In the dashboard workspace, the end of printing also logs an export of the operation `print`, by §16.
+
+**Failures.** None of the steps refuses. A workbook whose active sheet is empty prints an empty page.
+
+## 18. Downloading a workbook as a workbook file
+
+**Actor.** Any user, from inside the application.
+
+1. The download action is invoked with: a name for the archive, either a workbook document with its revisions or a set of already-exported workbook-file parts, and, when the parts were supplied, the descriptions of the loaded data sources.
+2. The action is registered lazily. The registered handler first loads the workbook bundle, which is expected to replace the handler with the real one, and then repeats the action. When the bundle loads but does not replace the handler — which is what happens when the bundle itself failed — the handler is replaced by one that shows the notice "%s couldn't be loaded", with the action's name substituted, as a failure, so that the action cannot loop for ever.
+3. The real handler checks that the acting user holds the export group. Without it, the notice of rule [SD-066](business-rules.md#sd-066) is shown, with the title "Access Error", and nothing further happens.
+4. When no workbook-file parts were supplied, a workbook model is built from the supplied document and revisions; every data source is loaded and every cell re-evaluated until none holds the loading marker, by the waiting procedure of [`calculations.md`](calculations.md) §19.1; the descriptions of the loaded data sources are collected; and the workbook is exported as file parts, which appends the "Active Filters" sheet of [`document-format.md`](document-format.md) §9 when the workbook has at least one filter.
+5. The archive name, the parts and the descriptions are posted to the workbook-file address of [`interfaces.md`](interfaces.md) §8.3, which packages the parts into one archive, answers it as a download, and logs an export of the operation `download`.
+
+**Records created or changed.** None. The download produces a file and a log entry and touches no record.

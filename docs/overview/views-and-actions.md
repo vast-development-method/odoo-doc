@@ -37,8 +37,12 @@ Read [the architecture](architecture.md), [the entity and field system](entity-a
 25. [Saved filters](#25-saved-filters)
 26. [Embedded actions](#26-embedded-actions)
 27. [Pending configuration steps](#27-pending-configuration-steps)
-28. [Invariants a rebuild must preserve](#28-invariants-a-rebuild-must-preserve)
-29. [Acceptance criteria](#29-acceptance-criteria)
+28. [Further view kinds contributed by capability packages](#28-further-view-kinds-contributed-by-capability-packages)
+29. [Field presentation widgets](#29-field-presentation-widgets)
+30. [Embedded sub-views](#30-embedded-sub-views)
+31. [Invariants a rebuild must preserve](#31-invariants-a-rebuild-must-preserve)
+32. [Acceptance criteria](#32-acceptance-criteria)
+33. [Reconciliation notes](#33-reconciliation-notes)
 
 ---
 
@@ -57,7 +61,7 @@ Three consequences a rebuild must accept:
 
 - Adding a capability must not require changing the client.
 - Every attribute the client interprets must be in the grammar; a capability that needs new behaviour contributes a **widget** name, which the client resolves to a renderer, and falls back gracefully when it does not know the name.
-- Expressions embedded in a view — visibility conditions, candidate restrictions, default values — are evaluated **by the client**, against the record being edited. They are therefore guidance, never enforcement ([security model, section 12](security-model.md#12-what-is-not-enforcement)).
+- Expressions embedded in a view — visibility conditions, candidate restrictions, default values — are evaluated **by the client**, against the record being edited. They are therefore guidance, never enforcement ([security model, section 12](security-model.md#20-what-is-not-enforcement)).
 
 ```mermaid
 flowchart LR
@@ -118,7 +122,7 @@ Privileged relational commands on this entity are forbidden, so an elevated oper
 | Cross-table | Aggregates as a two-dimensional table | Analysis |
 | Template | Arbitrary rendered content | Printed documents, public pages, electronic mail bodies |
 
-A ninth kind, the **activity** view, is contributed by the messaging capability and is specified in [section 11](#11-the-activity-view) because its grammar belongs with the others.
+A ninth kind, the **activity** view, is contributed by the messaging capability and is specified in [section 11](#11-the-activity-view) because its grammar belongs with the others. Three further kinds — the hierarchy chart, the scheduling chart and the map — are contributed by other capability packages and are specified in [section 28](#28-further-view-kinds-contributed-by-capability-packages). The settings form is not a kind of its own but a variant of the form, specified in [section 4.4](#44-the-settings-form-variant).
 
 ---
 
@@ -206,6 +210,39 @@ Rules:
 3. **A condition is never enforcement.** A read-only condition does not prevent a transport write; a required condition does not prevent a transport creation with the field empty.
 4. Decoration attributes — attributes whose name begins with the decoration prefix — also hold conditions and are combined the same way; they colour a row or a cell.
 
+#### The evaluation environment
+
+A condition is a side-effect-free expression evaluated once per rendered record — once per view for the column condition. The notation is the same expression language the platform uses for stored conditions, restricted to reading names, attribute access, indexing, comparison, boolean composition, arithmetic, membership and the construction of literal values. Calls are limited to the helper names below. Assignment, loading of other definitions, loops and definitions of new names are not part of the notation.
+
+| Name available | Value |
+|---|---|
+| Every field name present in the view description | The value of that field on the record being rendered. A many-to-one evaluates to its identifier or to false; a to-many evaluates to the list of identifiers; a date or an instant evaluates to its canonical text form |
+| `parent` | The record of the containing form, available only inside an embedded sub-view of a relational field; fields of it are read as the name, a full stop and the field name |
+| `context` | The mapping of context keys in force for this view |
+| `uid` | The identifier of the acting user |
+| `today` | The current local date, as canonical text |
+| `now` | The current local date and time, as canonical text |
+| `datetime`, `dateutil`, `time`, `relativedelta`, `context_today` | Date helpers, available in the conditions of search filters |
+
+The column condition is evaluated **without** the record values: only the context, the parent record, the acting user's identifier, the current date and the current instant are available, because the attribute governs a whole column and not one row.
+
+#### A field used in a condition must be present in the view
+
+A field name can be read only when the field is part of the view description. When a condition or a decoration mentions a field the description does not contain, the post-processing pass of [section 14.7](#147-the-post-processing-passes-in-full) **adds it automatically** as an invisible, read-only node and records why it was added. The rule exists so that the client never has to fetch values it was not told about.
+
+#### Worked examples
+
+| Attribute | Condition | Effect |
+|---|---|---|
+| `invisible` | `state != 'draft'` | The node is rendered only while the record is in the draft state |
+| `invisible` | `context.get('hide_price') or list_price == 0` | On a record whose list price is zero and with an empty context, the condition is true and the node is not rendered |
+| `invisible` | `parent.company != company` | Hidden on a line whose company differs from the enclosing document's |
+| `readonly` | `state in ('posted', 'cancelled')` | Not editable once the record has left the editable states |
+| `required` | `delivery_method == 'carrier'` | Must be filled when a carrier was chosen |
+| `column_invisible` | `not context.get('show_costs')` | The whole column is hidden unless the context asks for costs |
+| `decoration-danger` | `quantity_on_hand < reordering_minimum` | The row is drawn in the danger style |
+| `decoration-muted` | `state == 'cancelled'` | The row is drawn muted |
+
 ### 3.5 Layout nodes
 
 | Node | Meaning |
@@ -219,9 +256,26 @@ Rules:
 
 ### 3.6 The group requirement
 
-Every node accepts a `groups` attribute holding a comma-separated list of group external identifiers, optionally negated ([security model, section 3.7](security-model.md#37-declaring-group-requirements)). A node whose requirement the acting user does not satisfy is **removed** from the resolved description before it reaches the client.
+Every node accepts a `groups` attribute holding a comma-separated list of group external identifiers, optionally negated ([security model, section 3.7](security-model.md#45-declaring-group-requirements)). A node whose requirement the acting user does not satisfy is **removed** from the resolved description before it reaches the client.
 
 This is presentation only. The field remains readable over the transport unless the field itself carries a restriction.
+
+### 3.7 Reserved presentation classes
+
+A handful of style class names carry behaviour rather than appearance alone, and a rebuild must honour them.
+
+| Class | Behaviour |
+|---|---|
+| `oe_inline` | The node does not force a line break and does not take the full width |
+| `oe_left`, `oe_right` | The node floats to that side |
+| `oe_read_only`, `oe_edit_only` | The node is rendered only in that editing state |
+| `oe_avatar` | An image field is rendered as a square portrait of at most ninety units on each side |
+| `oe_stat_button` | A button is rendered as a statistics button — a large value with a caption — placed in the button container |
+| `oe_title` | A container whose content is rendered as the record's title |
+| `oe_chatter` | The container that carries the discussion thread, the followers and the planned activities |
+| `o_attachment_preview` | An empty container reserving the side area for previewing the record's attachments |
+
+One reserved **node name** behaves the same way: a container named `button_box` is the container of statistics buttons at the top right of a form.
 
 ---
 
@@ -264,6 +318,16 @@ The form view has no schema file; it is validated in the following ways:
 4. Every page must be inside a notebook.
 5. Every condition's field references must be present in the view.
 6. Accessibility checks are applied to icon-only elements and to link elements with no text.
+
+### 4.4 The settings form variant
+
+A settings view is a form view with a search field and a side bar. It adds three nodes.
+
+| Node | Attributes | Meaning |
+|---|---|---|
+| `app` | `string`, mandatory, the application name; `name`, mandatory, the capability package's technical name; `logo`, a path whose default is the package's conventional icon; `groups`; `invisible` | Declares one application section. It creates one entry in the side bar and acts as the boundary when searching within the settings |
+| `block` | `title`, `help`, `groups`, `invisible` | A titled group of settings. Both the title and the help text are searchable |
+| `setting` | `type`, which is `header` for a scope banner and empty otherwise; `string`, the label, defaulting to the first field's label; `title`, the hover text; `help`, the description under the label; `company_dependent`, which accepts only the value one and shows a per-company marker; `documentation`, a path shown as a link; `groups`; `invisible` | One setting. Its first field child is the main field: a boolean is placed on the left panel and anything else at the top of the right panel. Every other child is rendered in the right panel |
 
 ---
 
@@ -567,7 +631,7 @@ Root node name `activity`. Attributes: `string`, `create` (switch off creation),
 
 Children are field nodes declaring what to load, and a `templates` node holding the rendering template for a cell.
 
-Only entities that have adopted the activity behaviour may have an activity view ([messaging model](messaging-model.md#7-activities)).
+Only entities that have adopted the activity behaviour may have an activity view ([messaging model](messaging-model.md#8-activities)).
 
 ---
 
@@ -621,6 +685,20 @@ Priority does two things: it orders sibling extensions, and it decides which pri
 ### 13.4 Tenant-local customisations
 
 A user may store a personal variant of a view; it is a record of the View Customisation entity (`ir.ui.view.custom`, table `ir_ui_view_custom`) holding the user, the base view and the customised description. The most recently created one for that user and view wins. Customisations are per user and are never shared.
+
+### 13.5 Generated default views
+
+When no view exists for a pair of entity and kind, the platform generates one.
+
+| Kind | Generated description |
+|---|---|
+| Form | A sheet titled with the entity's description, holding a two-column grid built from every field of the entity except the automatic fields and except a read-only display name. Fields that are to-many, association, long text or markup are each placed in their own full-width group; every other field is distributed alternately between a left and a right column. A non-stored binary field that is not an image is skipped. The description ends with an empty group holding a separator |
+| List | A single column showing the entity's display-name field, titled with the entity's description |
+| Card | A single card template showing the display-name field |
+| Search | A single search field on the display-name field |
+| Chart | A single axis field on the display-name field |
+| Cross-table | An empty cross table titled with the entity's description |
+| Calendar | Titled with the entity's description, showing the display-name field. The start field is the first filterable field among the entity's declared date field, then `date`, `date_start`, `x_date` and `x_date_start`; when none exists the generation fails with **"Insufficient fields for Calendar View!"**. The colouring field is the first among `user`, `partner`, `x_user` and `x_partner` that exists. The end field is the first among `date_stop`, `date_end`, `x_date_stop` and `x_date_end`; when none exists, the duration field is the first among `date_delay`, `planned_hours`, `x_date_delay` and `x_planned_hours`; when neither exists the generation fails with **"Insufficient fields to generate a Calendar View for "** followed by the transport name and **", missing a date_stop or a date_delay"** |
 
 ---
 
@@ -689,6 +767,36 @@ When the toolbar is requested, the bound actions of the entity are resolved ([se
 
 An action is included in a kind's toolbar when its declared view kinds include that kind, or when it declares none, in which case it appears in every kind requested.
 
+### 14.7 The post-processing passes in full
+
+Step 4 of [section 14.3](#143-resolution-steps) is not one operation but seven passes, applied in this order to the combined description.
+
+**Pass one: group annotation.** Every node carrying a group requirement, and every node under a field whose *entity declaration* restricts it to groups, is annotated with the resulting group expression: the intersection of the requirements inherited from the containing nodes, the groups of the entity's read right, and the requirement declared on the node itself. The requirement attribute is then removed from the node. The annotation is a compact key, so that the cached description can be pruned cheaply per user.
+
+**Pass two: pruning and permission flags.** For each annotated node, when the acting user does not satisfy the annotation, the node **and its subtree are removed**. The removed node's trailing text is reattached to its preceding sibling, or to the parent's leading text, so that the layout does not lose its spacing. An annotated neutral node — a grouping wrapper with no other attribute — whose annotation the user *does* satisfy is itself removed while its children stay in place, so that a grouped set of fields still behaves as direct children of the enclosing group.
+
+The root node then receives the permission flags:
+
+| Flag | Rule |
+|---|---|
+| Creation disabled | Added when the attribute is not already written and the user may not create records of the entity |
+| Editing disabled | Added when the attribute is not already written and the user may not write records of the entity |
+| Deletion disabled | Added when the attribute is not already written and the user may not delete records of the entity |
+
+For a card view whose default grouping names a many-to-one, the same rule is applied for the **related** entity to the three group-level flags that govern creating, renaming and deleting a column.
+
+Every field node pointing at a relation, inside an editable view, receives two further flags reporting whether the user may create and whether the user may write records of the related entity.
+
+**Pass three: injection of missing fields.** Every condition, every decoration, every context expression and every dynamic candidate restriction of the description is scanned for field names. A name not already present is appended to the root node as a field node marked invisible and read-only — marked column-invisible instead when the root is a list — carrying a diagnostic attribute that records every place that forced the injection. The injected field is read-only unless the reason for the injection is a file-name reference, in which case the read-only state of the referencing node, or of the binary field itself, is used. When the places that use the field are themselves restricted to groups, the injected node is annotated with the intersection of those groups, so that a user who cannot see any of the uses does not fetch the value either.
+
+**Pass four: sub-view embedding.** A missing multi-record sub-view is resolved and appended inside the field node, by the rule of [section 30.2](#302-automatic-embedding).
+
+**Pass five: recomputation flags.** For a form, list or card view, every field node whose field is a declared input of a derived field that is **also present in the description** receives the on-change flag. The client uses it to decide whether changing the value must trigger the recomputation round trip. The flag is not added when the description already carries it.
+
+**Pass six: diagnosis-mode adjustment.** A node whose group requirement mentions the technical-features group is treated specially: the group name is stripped from the requirement and a marker records whether the node is meant to be visible **only** in debug mode. After pruning, when the acting user's debug state does not match the marker, the node receives the invisible and column-invisible conditions instead of being removed. The rule exists because the technical-features group is a display switch and not a security boundary, and because combining it with a real group in one requirement must mean "and", not "or".
+
+**Pass seven: field description collection.** The set of field names used by the description and by every sub-view is collected per entity and returned beside the description, so that the client can obtain their descriptions in the same round trip. The attributes returned per field are: the change-default flag, the context, the currency field, the definition record and its field, the digits, the minimum display digits, the candidate restriction, the aggregate, the group requirement, the help text, the entity-name field, the name, the read-only flag, the related path, the target entity, the inverse field, the required flag, the filterable flag, the selection list, the size, the sortable flag, the stored flag, the label, the translatable flag, the trim flag, the type, the groupable flag and the label shown for the empty value. The collected set is then widened per kind exactly as [section 14.4](#144-implicit-fields-per-kind) states.
+
 ---
 
 ## 15. View validation
@@ -722,6 +830,40 @@ A view whose validation fails aborts the package update, and the failure names t
 ### 15.4 Broken anchors
 
 An extension whose specification no longer matches anything records the offending specification in the invalid-anchors field of the view, so that an administrator can find extensions broken by another package's change without reading every view.
+
+### 15.5 Accessibility warnings
+
+These do not block saving; they are recorded in the log.
+
+| Situation | Warning |
+|---|---|
+| An image node without alternative text | "\<img\> tag must contain an alt attribute" |
+| A link styled as a button without the button role | "\"\<a\>\" tag with \"btn\" class must have \"button\" role" |
+| A drop-down container without the menu role | "dropdown-menu class must have menu role" |
+| A progress indicator without the progress role | "o_progressbar class must have progressbar role" |
+| A progress indicator without a current value | "o_progressbar class must have aria-valuenow attribute" |
+| A progress indicator without a lower bound | "o_progressbar class must have aria-valuemin attribute" |
+| A progress indicator without an upper bound | "o_progressbar class must have aria-valuemaxattribute" |
+| A dialog container without the dialog role | "\"modal\" class should only be used with \"dialog\" role" |
+| A tab link without the tab role | "tab link (data-bs-toggle=\"tab\") must have \"tab\" role" |
+| A tab link without the controlled node | "tab link (data-bs-toggle=\"tab\") must have \"aria_control\" defined" |
+| A controlled-node reference containing a fragment marker | "aria-controls in tablink cannot contains \"#\"" |
+| A node declared as decorative | "A role cannot be `none` or `presentation`. All your elements must be accessible with screen readers, describe it." |
+| The singular spelling of the group-requirement attribute | "attribute 'group' is not valid.  Did you mean 'groups'?" |
+| An icon-only button with no accessible description | A warning naming the icon, beginning "A button with icon attribute (" the icon ")", followed by the missing-description reason |
+
+**Compatibility finding.** The upper-bound warning is emitted as "o_progressbar class must have aria-valuemaxattribute", with no space between the attribute name and the word "attribute", while the two sibling warnings carry the space. The text is reproduced as observed because tests and support procedures key on it; a corrected behaviour would insert the missing space, matching the two siblings.
+
+**Compatibility finding.** The singular-spelling warning carries two consecutive spaces between the two sentences. The text is reproduced as observed; a corrected behaviour would use one.
+
+### 15.6 Diagnostics stored on the view record
+
+Two fields on the view record hold the outcome of the most recent validation, and both are what the maintenance screens list.
+
+| Field | Content |
+|---|---|
+| The warning report | The readable result of re-running the resolution and the post-processing in debug mode. Its most common content is the group-inconsistency report: a field used by a condition is available to a narrower set of groups than the nodes that use it, which means some users would see a node whose condition reads a value they never receive. The report names the field, the groups it is available to, and the nodes that use it |
+| The broken anchors | For an extending view, the list of its anchors that no longer match, each with the reason; this is what the maintenance screen lists after a package is updated |
 
 ---
 
@@ -1155,7 +1297,302 @@ After an interactive package installation the system looks for the first open st
 
 ---
 
-## 28. Invariants a rebuild must preserve
+## 28. Further view kinds contributed by capability packages
+
+Three further kinds are declared by capability packages. Their grammar belongs with the others, and a rebuild that installs the packages must serve them.
+
+### 28.1 The hierarchy view
+
+Root node `hierarchy`. Draws the records of a self-referencing entity as an organisation chart.
+
+| Attribute | Type | Default | Meaning |
+|---|---|---|---|
+| `parent_field` | Field name | The entity's parent field | The many-to-one of the same entity pointing at the parent. It must exist, must be a many-to-one and must target the same entity; otherwise the view is refused |
+| `child_field` | Field name | Empty | The inverse list of children. It must exist, must be a to-many and must target the same entity |
+| `draggable` | Boolean | False | Whether a node may be dragged onto another to change its parent |
+| `icon` | Text | The shipped hierarchy icon | The icon of the view |
+| `default_order` | Ordering list | Empty | Overrides the default ordering |
+| `create`, `edit`, `delete` | Boolean | True | Enable creation, modification and deletion |
+
+Children are field nodes and a templates node holding one mandatory template for a node box, rendered once per node. A missing node-box template is refused with **"Missing 'hierarchy-box' template."**
+
+### 28.2 The scheduling chart
+
+Root node `gantt`. Draws records as bars on a time axis.
+
+| Attribute | Type | Default | Meaning |
+|---|---|---|---|
+| `date_start` | Field name | Mandatory | The start of the bar |
+| `date_stop` | Field name | Mandatory | The end of the bar |
+| `dependency_field` | Field name | Empty | The to-many of records this record depends on, used to draw the dependency arrows |
+| `dependency_inverted_field` | Field name | Mandatory when the previous one is set | The inverse to-many |
+| `color` | Field name | Empty | Colours the bars by value |
+| Decoration attributes | Condition | False | Style the bar caption. The styles are danger, information, secondary, success, warning and bold |
+| `default_group_by` | Field name | Empty | The grouping applied when nothing else specifies one |
+| `default_scale` | Day, week, month or year | Month | The initial scale |
+| `scales` | Comma-separated list | All | The scales the user may switch to |
+| `offset` | Integer | Zero | The number of scale units added to today to compute the window the view opens on |
+| `precision` | Mapping from scale to snapping step | Day scale to the hour, week and month scales to the half day | How a dragged bar snaps. The day scale accepts the hour, the half hour and the quarter hour; the week and month scales accept the day and the half day; the year scale always snaps to a full day |
+| `progress` | Field name | Empty | A completion percentage between zero and one hundred drawn inside the bar |
+| `consolidation` | Field name | Empty | A value summed per cell and shown in the consolidation row |
+| `consolidation_max` | Mapping from grouping field to a threshold | Empty | Above the threshold the consolidation cell is drawn as exceeded |
+| `consolidation_exclude` | Field name | Empty | A boolean field marking records excluded from consolidation; excluded intervals are drawn striped |
+| `total_row` | Boolean | False | Show a row with the total count |
+| `collapse_first_level` | Boolean | False | Allow collapsing each row when grouped by a single field; without it collapsing starts at two grouping levels |
+| `display_unavailability` | Boolean | False | Draw the unavailable periods the entity reports. Records may still be scheduled inside them |
+| `dynamic_range` | Boolean | False | Start the window at the first record instead of at the beginning of the calendar unit |
+| `pill_label` | Boolean | False | Include the times in the bar caption at the week and month scales |
+| `thumbnails` | Mapping from a link field of this entity to a picture field of the related entity | Empty | Draw a thumbnail beside each group caption |
+| `create`, `edit`, `delete` | Boolean | True | Enable creation, modification and deletion |
+| `cell_create` | Boolean | True | With creation enabled, offer an add control when the pointer rests on a free slot |
+| `plan` | Boolean | True | With editing enabled, offer a control that plans an unscheduled record into a slot |
+| `on_create` | External identifier | Empty | An action to run instead of the generic creation dialog |
+| `form_view_id` | View reference | The form of the current action | The form used when creating or editing |
+| `disable_drag_drop` | Boolean | False | Disable all dragging |
+| `string` | Text | Empty | The title |
+| `sample` | Boolean | False | Generate demonstration records when the query returns nothing |
+
+A templates child may define one template for the hover card of a bar. Its environment exposes the current row and a helper that turns an integer into a colour.
+
+### 28.3 The map view
+
+Root node `map`. Draws records as pins on a map, optionally with the route between them. The entity must carry a many-to-one to a contact, because the address and coordinates of that contact locate the record.
+
+| Attribute | Type | Default | Meaning |
+|---|---|---|---|
+| `res_partner` | Field name | Empty | The link to the contact that locates each record. Without it an empty map is drawn |
+| `default_order` | Field name | Empty | Overrides the default ordering. The field must belong to this entity and not to the contact |
+| `routing` | Boolean | False | Draw the route between the records. It requires a routing credential and at least two located records |
+| `hide_name` | Boolean | False | Hide the record's name in the pin's hover card |
+| `hide_address` | Boolean | False | Hide the address in the pin's hover card |
+| `hide_title` | Boolean | False | Hide the title of the pin list |
+| `panel_title` | Text | The action's name, otherwise "Items" | The title of the pin list |
+| `limit` | Positive integer | 80 | The greatest number of records fetched |
+
+Each field child becomes one line of the pin's hover card; the name attribute selects the field and the label attribute prefixes it with a caption.
+
+Two location providers are supported. The default provider needs no credential and can fetch map tiles and turn addresses into coordinates. When a credential for the second provider is configured in the general settings, that provider is used instead; it is faster and it is the one that can compute routes.
+
+### 28.4 A template view opened directly
+
+A view whose description is a pure rendering template has no fixed root node, so its kind must be stated explicitly as the template kind. Two uses exist: a fragment of a public page, and a view opened directly by a window action. When a template is used as an openable view, the renderer adds four names to the template environment:
+
+| Name | Meaning |
+|---|---|
+| The entity | The entity the view is bound to |
+| The condition | The filter produced by the search view |
+| The context | The context keys produced by the search view |
+| The records | A lazily evaluated proxy over the records matching the condition, suitable for simple iteration |
+
+One special case applies: a navigation container carrying the reserved control-panel class is removed from the rendered fragment and its children, which must be buttons, are moved into the button area of the control panel.
+
+---
+
+## 29. Field presentation widgets
+
+A field node that names no widget is rendered by the default widget of its data type. Naming a widget in the node's `widget` attribute selects another one. A widget declares the data types it accepts; pairing a widget with an unsupported type is a view error. Some widgets exist in a kind-specific variant: a name prefixed by `list.`, `form.`, `kanban.` or `calendar.` is selected automatically when the plain name is requested inside that kind, and it is never written in a view description.
+
+The field node's `options` attribute carries the widget's configuration as a mapping. Options that are shared by several widgets are listed once in [section 29.8](#298-options-shared-by-relation-widgets).
+
+### 29.1 Defaults per data type
+
+| Data type | Default widget |
+|---|---|
+| `boolean` | `boolean` |
+| `integer` | `integer` |
+| `decimal` | `float` |
+| `monetary` | `monetary` |
+| `text` | `char` |
+| `long_text` | `text` |
+| `rich_text` | `html` |
+| `date` | `date` |
+| `datetime` | `datetime` |
+| `selection` | `selection` |
+| `binary` | `binary` |
+| `image` | `image` |
+| `reference` | `reference` |
+| `many_to_one` | `many2one` |
+| `one_to_many` | `one2many` |
+| `many_to_many` | `many2many` |
+| `structured_data` | `json` |
+| `properties` | `properties` |
+
+### 29.2 Text, number and date widgets
+
+| Widget | Accepts | Behavior | Options |
+|---|---|---|---|
+| `char` | `text`, `long_text` | Single-line input showing the raw value. Honours the `password` attribute by masking the characters. | `placeholder_field` (name of a field whose value is used as the hint when the value is empty), `dynamic_placeholder`, `dynamic_placeholder_model_reference_field` |
+| `text` | `long_text`, `rich_text`, `text` | Multi-line input that grows with the content. | `line_breaks` (default true; when false the value is stored on one line), `placeholder_field` |
+| `password` | `text`, `long_text` | Single-line input whose characters are masked at all times. | none |
+| `email` | `text` | Shows the value as an electronic-mail link and validates that it looks like an address while typing. | `placeholder_field` |
+| `phone` | `text` | Shows the value as a telephone link. | `placeholder_field` |
+| `url` | `text` | Shows the value as a hyperlink. | `website_path` (when true the value is used as-is with no prefix added), `placeholder_field`; the node's `text` attribute overrides the displayed caption |
+| `integer` | `integer` | Number input with thousands separators. | `enable_formatting` (default true; when false the digits are shown without separators), `type` (the input mode), `step`, `human_readable` (abbreviate large numbers), `decimals` (digits kept in the abbreviated form) |
+| `float` | `decimal`, `monetary` | Number input honouring the precision of the field. | `enable_formatting`, `digits` (a pair total-digits and decimal-places), `minDigits`, `type`, `step`, `human_readable`, `hide_trailing_zeros`, `decimals` |
+| `monetary` | `monetary`, `decimal`, `integer` | Number formatted with the symbol and the decimal places of the currency, placed before or after the amount according to the currency's convention. | `currency_field` (the field holding the currency; by default the currency field declared on the monetary field, otherwise the first currency link of the entity), `no_symbol`, `hide_trailing_zeros` |
+| `percentage` | `integer`, `decimal` | Displays the value multiplied by one hundred followed by a percent sign, and divides the typed number by one hundred when writing. | none |
+| `float_factor` | `decimal` | Multiplies the stored value by a fixed factor for display and divides it back when writing. | `factor` |
+| `float_time` | `decimal` | Renders a number of hours as hours and minutes, for instance `1.5` as `01:30`, and parses the same form. | `display_seconds`, `type` |
+| `float_toggle` | `decimal` | Cycles the value through a fixed list of allowed values when activated instead of accepting free input. | `digits`, `type`, `range` (the list of allowed values), `factor`, `force_button` |
+| `date` | `date` | Date input with a calendar picker. | `min_date`, `max_date` (a date in the year-month-day form, or the keyword `today`), `warn_future` (mark dates in the future), `min_precision` and `max_precision` (`days`, `months`, `years`, `decades`), `numeric` (numeric rather than abbreviated month rendering), `placeholder_field`, `start_date_field`, `end_date_field` |
+| `datetime` | `datetime` | Date and time input, displayed in the time zone of the acting user and stored in coordinated universal time. | all `date` options plus `rounding` (the minute step of the time picker, default `5`), `show_time` (default true), `show_seconds` (default false) |
+| `daterange` | `date`, `datetime` | One control editing a pair of fields as a period. | all `datetime` options plus `start_date_field`, `end_date_field`, `always_range` (default false; when true both ends are always shown even when empty) |
+| `remaining_days` | `date`, `datetime` | Shows the signed number of days between the value and today in words (`Today`, `Tomorrow`, `In 3 days`, `3 days ago`) and colours it when the value is in the past. | none |
+
+Declaring both `start_date_field` and `end_date_field` on the same node is a configuration mistake; the end field is ignored and a warning is logged.
+
+### 29.3 Boolean, selection and status widgets
+
+| Widget | Accepts | Behavior | Options |
+|---|---|---|---|
+| `boolean` | `boolean` | A tick box. | none |
+| `boolean_toggle` | `boolean` | A switch. | `autosave` (default true: flipping the switch saves the record immediately) |
+| `boolean_favorite` | `boolean` | A star that is filled when true. | `autosave` (default true) |
+| `boolean_icon` | `boolean` | An icon that is highlighted when true. | `icon` (the icon class name) |
+| `selection` | `selection`, `many_to_one` | A drop-down list of the allowed values; for a link to one record the drop-down lists the records allowed by the condition. | `placeholder_field` |
+| `filterable_selection` | `selection` | Like `selection`, but the offered values are restricted to those listed in another field of the record. | `allowed_selection_field` |
+| `radio` | `selection`, `many_to_one` | The values as radio buttons. | `horizontal` (lay the buttons out on one line) |
+| `selection_badge` | `selection`, `many_to_one` | The values as a row of badges, one of which is highlighted. | `size` (`sm`, `md` (default), `lg`) |
+| `selection_badge_with_filter` | `selection` | Like `selection_badge`, restricted to the values listed in another field. | `allowed_selection_field`, `size` |
+| `badge` | `selection`, `many_to_one`, `text` | The value as a single coloured badge. | `color_field` (an integer field that chooses the colour) |
+| `label_selection` | `selection` | The value as a label whose style comes from a mapping of value to style class. | `classes` (mapping from value to class name) |
+| `state_selection` | `selection` | A small coloured circle per value, used for the status of a task; activating it changes the value. | `autosave` (default true), `hide_label` |
+| `statusbar` | `selection`, `many_to_one` | The status bar of section 4.4. | `clickable` (default true), `fold_field` |
+| `priority` | `selection` | A row of stars; activating the n-th star sets the n-th value. | `autosave` (default true) |
+| `timezone_mismatch` | `selection` | A time zone selection that warns when the chosen zone differs from the one reported by the browser, with the message `Timezone Mismatch : This timezone is different from that of your browser.\nPlease, set the same timezone as your browser's to avoid time discrepancies in your system.` | `tz_offset_field` (default `tz_offset`), `mismatch_title` |
+
+### 29.4 Relation widgets
+
+| Widget | Accepts | Behavior | Options |
+|---|---|---|---|
+| `many2one` | `many_to_one` | A search-and-select input. Typing searches the related entity by display name; the drop-down offers the matches plus the creation entries allowed by the options. | `no_open`, `no_create`, `no_quick_create`, `no_create_edit`, `search_threshold` (the number of characters before searching), `placeholder_field` |
+| `many2one_avatar` | `many_to_one` | Like `many2one` with the picture of the related record shown before the name. | the `many2one` options |
+| `many2one_barcode` | `many_to_one` | Like `many2one` with an extra control that opens the device camera and selects the record whose barcode was read. | the `many2one` options |
+| `many2one_reference` | `many_to_one` by key | Renders a numeric key field paired with a model-name field as if it were a link to one record. | `model_field` (the field holding the entity name) |
+| `many2one_reference_integer` | `many_to_one` by key | Renders the same pair as a plain integer, without resolving the display name. | none |
+| `reference` | `reference`, `text` | Two controls: one selecting the entity and one selecting the record inside it. | `hide_model` (hide the entity selector when the entity is fixed), `model_field` (the field holding the entity name) |
+| `one2many` | `one_to_many` | Renders the related records through an embedded sub-view ([section 30](#30-embedded-sub-views)). | `create`, `delete`, `create_text`, `reload_on_button`, plus the list controls of [section 5](#5-the-list-view) |
+| `many2many` | `many_to_many` | Same as `one2many` but the edit semantics differ ([client architecture, section 10](client-architecture.md#10-editing-a-list-of-related-records)). | `create`, `delete`, `link`, `unlink`, `no_create`, `no_quick_create`, `no_create_edit` |
+| `many2many_tags` | `many_to_many`, `one_to_many` | The related records as removable tags with a search-and-select input. | `color_field` (an integer field of the related entity that colours each tag), `no_create`, `no_quick_create`, `no_create_edit`, `create`, `search_threshold`, `placeholder_field` |
+| `many2many_tags_avatar` | `many_to_many`, `one_to_many` | Tags showing the picture of each related record. | the `many2many_tags` options |
+| `many2many_tags_avatar_popover` | `many_to_many`, `one_to_many` | Avatar tags whose hover card shows a summary of the related record. | the `many2many_tags` options |
+| `many2many_checkboxes` | `many_to_many` | Every candidate record as a tick box; ticking links it, unticking unlinks it. | none |
+| `many2many_binary` | `many_to_many` to attachments | A drop area that uploads files and links the resulting attachments. | `accepted_file_extensions`, `number_of_files` (the greatest number of files accepted) |
+| `attachment_image` | `many_to_one` to an attachment | Renders the linked attachment as an image. | none |
+| `contact_image` | `many_to_one` to a contact | Renders the picture of the linked contact. | none |
+| `handle` | `integer` | A drag grip. Dragging a row rewrites the ordering field of the moved row and of the rows between the old and the new position. | none |
+| `res_user_group_ids` | `many_to_many` to access groups | The group membership editor: one selector per privilege category plus a technical list for the remaining groups. | none |
+| `res_user_group_ids_privilege` | `many_to_many` to access groups | One privilege category of that editor. | none |
+
+### 29.5 File, image and drawing widgets
+
+| Widget | Accepts | Behavior | Options |
+|---|---|---|---|
+| `binary` | `binary` | Upload and download control showing the file name taken from the companion field named by the `filename` attribute. | `accepted_file_extensions`, `allowed_mime_type` |
+| `image` | `binary`, `image`, `many_to_one` | Shows the stored picture, with upload, delete and zoom controls. Requests the last-update timestamp of the record in order to refresh the picture after a change. | `size` (a pair width and height), `alt` (alternative text or the field holding it), `reload` (re-fetch after each change), `zoom`, `zoom_delay`, `convert_to_webp`, `accepted_file_extensions`, `preview_image` (the field holding a smaller variant to display) |
+| `image_url` | `text` | Shows the picture found at the stored web address. | `size` |
+| `signature` | `binary` | Opens a drawing surface on which a signature is drawn or generated from a name, and stores the result as a picture. | `full_name` (the field holding the name used to generate a signature), `default_font`, `size` (`[0,90]`, `[0,180]` or `[0,270]`), `preview_image` |
+| `pdf_viewer` | `binary` | Embeds a portable-document viewer with page navigation. | `preview_image` |
+| `google_slide_viewer` | `text` | Recognizes a presentation address of the online document service and embeds the matching read-only preview, optionally at a given slide. | `page` |
+| `iframe_wrapper` | `long_text`, `rich_text` | Renders untrusted markup inside an isolated frame, in order that its styles cannot leak into the page. | none |
+
+### 29.6 Rich content, code and structured-data widgets
+
+| Widget | Accepts | Behavior | Options |
+|---|---|---|---|
+| `html` | `rich_text` | The rich-text editor: formatting, lists, tables, links, images and embedded blocks. | `sanitize` behavior follows the field declaration; `codeview`, `style-inline`, `height`, `resizable` |
+| `ace` | `long_text`, `rich_text` | A source-code editor with syntax colouring and line numbers. | `mode` (the language) |
+| `code` | `long_text` | A lighter code editor with syntax colouring. | `mode` |
+| `code_ir_ui_view` | `long_text` | The code editor pre-configured for editing a view description, with the matching syntax rules. | none |
+| `json` | `structured_data` | Shows the structured value formatted and indented, read-only. | none |
+| `json_checkboxes` | `structured_data` | Renders a structured value shaped as a mapping from key to a record with a label and a boolean into a list of tick boxes; ticking rewrites the mapping. Changes are grouped and written after a short idle delay. | `stacked` (lay the boxes out vertically) |
+| `account_json_checkboxes` | `structured_data` | An alternative registered name of `json_checkboxes`. | as `json_checkboxes` |
+| `domain` | `text`, `long_text` | A condition editor: a tree of leaves with field selectors, operators and values, plus a live count of the matching records. | `model` (the entity the condition applies to, or the field holding its name), `in_dialog`, `foldable`, `allow_expressions`, `count_limit` |
+| `field_selector` | `text` | A picker that stores the path to a field of a given entity. | `model` (the entity or the field holding its name), `follow_relations` (default true), `only_searchable` |
+| `properties` | `properties` | The editor of user-defined fields: it reads the definition from the parent record named by the field declaration and renders one control per defined property, with the property types `text`, `long_text`, `integer`, `decimal`, `date`, `datetime`, `boolean`, `selection`, `tags`, `many_to_one`, `many_to_many` and `separator`. | none |
+| `property_tags` | `properties` sub-field | The tag editor used for a property of the tags kind, including creating a new tag value in the definition. | none |
+| `contact_statistics` | `structured_data` | Renders a precomputed list of counters about a contact as a compact table. | none |
+| `profiling_qweb_view` | `long_text` | Renders a template-rendering profile: each template line with its own and cumulated timings. | none |
+
+### 29.7 Indicator and utility widgets
+
+| Widget | Accepts | Behavior | Options |
+|---|---|---|---|
+| `progressbar` | `integer`, `decimal` | A bar showing the current value against a maximum, with both numbers written beside it. | `editable` (allow typing the value), `edit_max_value`, `current_value` (the field holding the current value), `max_value` (the field holding the maximum), `overflow_class` (the style applied when the current value exceeds the maximum) |
+| `percentpie` | `decimal`, `integer` | A circular gauge filled to the value expressed as a percentage, with the value written in the middle and at most two decimals, trailing zeros removed. | none |
+| `gauge` | `integer`, `decimal` | A half-circle gauge with a caption. | `title`, `max_value` (a fixed maximum, default `100`), `max_value_field` |
+| `statinfo` | `decimal`, `integer`, `monetary`, `text`, `one_to_many`, `many_to_one` | The value and a caption, stacked, as used inside a statistics button. For a list of records the value is the count. | `label_field` (a field holding the caption), `digits`; the node's `nolabel` and `digits` attributes are also honoured |
+| `dashboard_graph` | `long_text` | Renders a small chart from a structured value holding the series; used on summary cards. | `graph_type` (`line` or `bar`) |
+| `color` | `text` | A colour picker storing the colour as a hexadecimal string. | none |
+| `color_picker` | `integer` | A palette of twelve numbered colours storing the chosen index. | `can_toggle` |
+| `kanban_color_picker` | `integer` | The same palette rendered inside a card menu; choosing a colour saves the record immediately. | none |
+| `CopyClipboardChar` | `text` | The value with a control that copies it. | `string` (the caption of the control) |
+| `CopyClipboardURL` | `text` | The value as a hyperlink with a control that copies it. | `string` |
+| `CopyClipboardButton` | any | A control that copies the value with no visible value beside it. | `btn_class`, `string` |
+| `upgrade_boolean` | `boolean` | A tick box that, instead of changing the value, opens the dialog that explains that the feature belongs to a higher subscription level. | none |
+| `base_settings.binary` | `binary` | The file control adapted to the settings view. | as `binary` |
+| `base_settings.radio` | `selection` | The radio control adapted to the settings view, with the highlighting used by the settings search. | as `radio` |
+
+### 29.8 Options shared by relation widgets
+
+| Option | Effect |
+|---|---|
+| `no_open` | Do not offer opening the related record. |
+| `no_create` | Do not offer creating a related record at all. It implies `no_quick_create` and `no_create_edit`. |
+| `no_quick_create` | Do not offer creating a record from the typed text alone. |
+| `no_create_edit` | Do not offer creating a record through a dialog prefilled with the typed text. |
+| `create` | The explicit opposite of `no_create`, used when the embedding view disables creation by default. |
+| `search_threshold` | The number of typed characters before the search request is issued. |
+| `color_field` | An integer field of the related entity that gives each tag its colour. |
+| `placeholder_field` | A field of the current record whose value is used as the hint when the control is empty. |
+
+### 29.9 Non-field widgets
+
+A widget node with a mandatory name renders a registered component that is not bound to a single field. The platform registers the following.
+
+| Name | Behavior |
+|---|---|
+| `web_ribbon` | A diagonal banner across the top right of the form, with `title`, `tooltip` and `bg_color` attributes; used to mark a record as archived, cancelled or otherwise exceptional. |
+| `attach_document` | A control that uploads a file and attaches it to the record, optionally calling an operation afterwards. |
+| `documentation_link` | A control that opens a documentation page at the given path. |
+| `notification_alert` | A coloured panel that shows a message, typically a configuration warning. |
+| `signature` | A control that captures a signature into a target field, usable outside a plain field node. |
+| `week_days` | A grid of tick boxes editing seven boolean fields, one per weekday. |
+| `res_config_dev_tool` | The developer-tools panel of the settings view. |
+| `res_config_edition` | The subscription and version panel of the settings view. |
+| `res_config_invite_users` | The panel that invites users by electronic-mail address from the settings view. |
+
+Capability packages register further non-field widgets under their own names; a replacement must provide the registry and the lookup, and each package's own additions are specified in the interfaces document of the domain that owns it.
+
+---
+
+## 30. Embedded sub-views
+
+A relational field rendered as a table, a board or a set of cards needs a view for the related records. That view can be written inline inside the field node, or resolved separately.
+
+### 30.1 Inline sub-views
+
+A field node may contain one or more of a list, a form, a card, a chart or a calendar description. Each is a complete view description written against the **related** entity. Inside it, the parent name refers to the record of the enclosing form.
+
+A sales order's lines field, for example, carries two inline descriptions: a list marked editable at the bottom, showing the product, the quantity and the unit price; and a form holding a group with the product, the quantity, and a discount percentage whose invisible condition reads the enclosing order's "discounts allowed" flag through the parent name.
+
+### 30.2 Automatic embedding
+
+When a form description contains a visible to-many field that carries **no** widget attribute, is **not** itself inside a sub-view, and none of the kinds listed in its mode attribute is present inline, the server resolves the first missing kind and appends the resolved description inside the field node before delivering the form. The default mode for this purpose is the card kind followed by the list kind; the kind actually resolved is the first entry of the mode attribute, or the list kind on a wide screen and the card kind on a narrow screen when the attribute is absent. The rule exists so that the client receives one self-contained description and never has to make a second round trip for the sub-view.
+
+The resolution of the embedded description runs **without** the acting user's elevated rights, and with the view references described in [section 30.3](#303-choosing-a-specific-sub-view) taken from the field node's own context; the references of the enclosing call are deliberately not propagated.
+
+### 30.3 Choosing a specific sub-view
+
+A context key named after the kind, followed by the view-reference suffix, selects a specific view by external identifier for that kind. It may be written in the field node's own context, or carried by the action that opened the screen.
+
+The reference must be fully qualified — the owning package's technical name, a full stop and the local name. An unqualified reference is ignored and a warning is logged, beginning with the key's name and stating that it "requires a fully-qualified external identifier (got: " the value " for model " the transport name "). Please use the complete " the qualified form " instead."
+
+The same keys drive the top-level resolution of [section 14.3](#143-resolution-steps), which is why they are part of the cache key of a resolved view.
+
+---
+
+## 31. Invariants a rebuild must preserve
 
 1. No screen is hard-coded; every screen is a view record, an action record and a menu record.
 2. The resolved view a client receives may depend only on the requested kinds, the user's groups and access, the options, the language and the per-kind view-reference keys.
@@ -1175,7 +1612,7 @@ After an interactive package installation the system looks for the first open st
 
 ---
 
-## 29. Acceptance criteria
+## 32. Acceptance criteria
 
 ### Views
 
@@ -1281,6 +1718,54 @@ After an interactive package installation the system looks for the first open st
 
 **AC-VIEW-47.** *Given* a saved filter bound to an action, *when* a different action on the same entity is opened, *then* the filter is not offered.
 
+### Conditions, post-processing and widgets
+
+**AC-VIEW-48.** *Given* a form whose invisible condition on one node reads a field the description does not contain, *when* the view is resolved, *then* the field is appended to the root as an invisible read-only node carrying the record of what forced the injection, and the client receives its value.
+
+**AC-VIEW-49.** *Given* the same field used only by nodes restricted to one group, *when* the view is resolved for a user outside that group, *then* the injected node carries the same restriction and the value is not sent.
+
+**AC-VIEW-50.** *Given* a list whose root is the injection target, *when* a field is injected, *then* it carries the column-invisible condition rather than the plain invisible condition.
+
+**AC-VIEW-51.** *Given* a column condition, *when* the client evaluates it, *then* only the context, the parent record, the acting user's identifier, the current date and the current instant are available, and no field of the row is.
+
+**AC-VIEW-52.** *Given* a user who may not create records of the entity, *when* the view is resolved, *then* the root carries the creation-disabled flag; *given* the description already writes that attribute, *then* it is left as written.
+
+**AC-VIEW-53.** *Given* a card view grouped by a many-to-one, *when* the view is resolved, *then* the three group-level flags are computed against the **related** entity.
+
+**AC-VIEW-54.** *Given* a node whose group requirement names only the technical-features group, *when* the view is resolved for a user outside debug mode, *then* the node is present but carries the invisible and column-invisible conditions rather than being removed.
+
+**AC-VIEW-55.** *Given* a field that is a declared input of a derived field also present in the description, *when* the view is resolved, *then* the field node carries the on-change flag.
+
+**AC-VIEW-56.** *Given* a form containing a to-many field with no widget and no inline sub-view, *when* the view is resolved, *then* the first kind of its mode attribute is resolved and appended inside the field node, using the field node's own context and without the acting user's elevated rights.
+
+**AC-VIEW-57.** *Given* a sub-view reference key whose value is not fully qualified, *when* the view is resolved, *then* the reference is ignored and the qualification warning is logged.
+
+**AC-VIEW-58.** *Given* an entity with no view of a requested kind, *when* the kind is requested, *then* a default description is generated by the rules of [section 13.5](#135-generated-default-views); *given* a calendar is requested on an entity with no usable date field, *then* the generation fails with "Insufficient fields for Calendar View!".
+
+**AC-VIEW-59.** *Given* a field of the decimal type with no widget named, *when* the view is resolved, *then* the default decimal widget is used; *given* a widget is named that does not accept the field's type, *then* the view is refused.
+
+**AC-VIEW-60.** *Given* a monetary field whose widget names no currency field, *when* it is rendered, *then* the currency declared on the field is used, and failing that the entity's first currency link.
+
+**AC-VIEW-61.** *Given* a relation widget declared with the no-creation option, *when* the drop-down is opened, *then* neither the create-from-text entry nor the create-through-dialog entry is offered.
+
+**AC-VIEW-62.** *Given* a hierarchy view whose parent attribute names a field that is not a many-to-one to the same entity, *when* the view is validated, *then* it is refused; *given* the templates node holds no node-box template, *then* it is refused with "Missing 'hierarchy-box' template."
+
+**AC-VIEW-63.** *Given* a map view whose contact attribute is absent, *when* the view is opened, *then* an empty map is drawn and no location request is made.
+
+---
+
+## 33. Reconciliation notes
+
+The two drafts merged into this document disagreed on four points, and three organisational decisions are recorded with them.
+
+1. **How many view kinds there are.** One draft listed eight kinds plus the activity view; the other listed twelve. Both are right at different scopes: the foundation defines the eight of [section 2.1](#21-the-eight-kinds), and the activity view, the hierarchy chart, the scheduling chart and the map are contributed by capability packages. [Section 2.1](#21-the-eight-kinds) now says so and [section 28](#28-further-view-kinds-contributed-by-capability-packages) specifies the three that were missing.
+2. **What the resolution step "post-process for access rights" does.** One draft described it as a single pruning pass. It is seven passes in a fixed order, and three of them — the group annotation that precedes pruning, the injection of fields used only by conditions, and the embedding of a missing sub-view — change the description in ways a client depends on. [Section 14.7](#147-the-post-processing-passes-in-full) states all seven; [section 14.3](#143-resolution-steps) keeps the outline.
+3. **Whether a condition may name a field that is not in the view.** One draft said it may not and that validation refuses it. Validation checks the reference, but the resolution **adds the field automatically** rather than refusing, which is why a working description can mention a field it does not display. [Section 3.4](#34-the-conditions) and criterion AC-VIEW-48 state the observed behaviour.
+4. **The group requirement and the technical-features group.** One draft treated every group requirement identically. A requirement that names the technical-features group is handled separately: the node is hidden rather than removed, because that group is a display switch and not a security boundary, and combining it with a real group must mean "and". [Section 14.7](#147-the-post-processing-passes-in-full), pass six, states it.
+5. **Where the widget catalogue belongs.** One draft placed it with the client, the other with the views. It is here, in [section 29](#29-field-presentation-widgets), because a widget is selected by an attribute of a view description and its options are part of that description; [client architecture](client-architecture.md) states only how the client resolves a widget name to a component.
+6. **Where asset bundles belong.** Neither the view grammar nor the client owns them: a bundle's content is decided by which packages are installed, so it is specified in [the package system, section 22](package-system.md#22-client-asset-bundles).
+7. **Acceptance criteria identifiers.** The two drafts numbered their scenarios independently. They are unified here in one series with the prefix `AC-VIEW`, and scenarios that appeared in both are stated once.
+
 ---
 
 ## Related documents
@@ -1293,3 +1778,7 @@ After an interactive package installation the system looks for the first open st
 - [Desktop workflows](../interfaces/desktop-workflows.md) — how a working client composes these into usable screens.
 - [Report rendering](../runtime/report-rendering.md) — from a report action to a finished document.
 - [Actions and menus reference](../references/actions-and-menus.md) — the complete catalogues.
+- [Client architecture](client-architecture.md) — how a client turns these descriptions into working screens, and how it resolves a widget name.
+- [Record operations and query notation](record-operations-and-query-notation.md) — the operations a view drives and the filter notation a search view produces.
+- [Multi-company](multi-company.md) — the candidate filters and company groupings a view renders.
+- [Views reference](../references/views.md) — the complete catalogue of shipped views.

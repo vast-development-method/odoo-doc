@@ -430,8 +430,8 @@ Then at most five lines, one per inconsistency, in one of three shapes:
 | Situation | Line |
 |---|---|
 | The record is itself a company | "- Record is company “\<company name\>” while “\<field label\>” (\<field name\>: \<target display names\>) belongs to another company." |
-| The record points at itself through its own company link | "- Only a root company can be set on “\<record display name\>”. Currently set to “\<company name\>”" |
-| Any other case | "- “\<record display name\>” belongs to company “\<company names\>” while “\<field label\>” (\<field name\>: \<target display names\>) belongs to another company." |
+| The record points at itself through its own company link | "- Only a root company can be set on “\<the record's display name\>”. Currently set to “\<company name\>”" |
+| Any other case | "- “\<the record's display name\>” belongs to company “\<company names\>” while “\<field label\>” (\<field name\>: \<target display names\>) belongs to another company." |
 
 The last line is always:
 
@@ -818,9 +818,9 @@ Creating or deleting a company clears the registry caches unconditionally; writi
 | Two companies with the same name | "The company name must be unique!" |
 | A contact representing a company but attached to another | "The company assigned to this partner does not match the company this partner represents." |
 | Company inconsistency, header | "Uh-oh! You’ve got some company inconsistencies here:" |
-| Company inconsistency, ordinary line | "- “\<record display name\>” belongs to company “\<company names\>” while “\<field label\>” (\<field name\>: \<target display names\>) belongs to another company." |
+| Company inconsistency, ordinary line | "- “\<the record's display name\>” belongs to company “\<company names\>” while “\<field label\>” (\<field name\>: \<target display names\>) belongs to another company." |
 | Company inconsistency, the record is a company | "- Record is company “\<company name\>” while “\<field label\>” (\<field name\>: \<target display names\>) belongs to another company." |
-| Company inconsistency, a non-root company where a root is required | "- Only a root company can be set on “\<record display name\>”. Currently set to “\<company name\>”" |
+| Company inconsistency, a non-root company where a root is required | "- Only a root company can be set on “\<the record's display name\>”. Currently set to “\<company name\>”" |
 | Company inconsistency, footer | "To avoid a mess, no company crossover is allowed!" |
 | A currency rate attached to a branch | "Currency rates should only be created for main companies" |
 | Archiving a currency used by a company | "This currency is set on a company and therefore cannot be deactivated." |

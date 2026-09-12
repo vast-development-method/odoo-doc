@@ -256,7 +256,7 @@ The second only succeeds if no existing row violates it. The synchronisation the
 1. Add the column if missing, with the field's default written into every existing row.
 2. Attempt to add the not-null constraint.
 3. If it fails, record a warning naming the entity and the field, leave the constraint off, and continue. The field remains required at the client level but is not enforced by the database.
-4. At the end of the build, verify agreement: for every field the registry believes is not null, confirm that the column really is. The registry's record of which fields are truly not-null is what the filter compiler consults in order to decide whether a condition needs to consider empty values ([section 20.7](#207-empty-values-and-the-null-question)).
+4. At the end of the build, verify agreement: for every field the registry believes is not null, confirm that the column really is. The registry's record of which fields are truly not-null is what the filter compiler consults in order to decide whether a condition needs to consider empty values ([record operations and query notation, section 4.6](record-operations-and-query-notation.md#46-empty-values-and-the-three-valued-logic)).
 
 A required field on a **company-dependent** field is contradictory and records a warning: the per-company mapping cannot be non-empty for a company that has no value.
 
@@ -313,7 +313,7 @@ Filtering: the only meaningful conditions are equality and inequality against tr
 
 ### 6.3 Integer
 
-Stores a whole number in four bytes. The empty value is zero, and **zero and empty are indistinguishable**: the column may be null, and a null reads as zero. This matters for filtering ([section 20.7](#207-empty-values-and-the-null-question)).
+Stores a whole number in four bytes. The empty value is zero, and **zero and empty are indistinguishable**: the column may be null, and a null reads as zero. This matters for filtering ([record operations and query notation, section 4.6](record-operations-and-query-notation.md#46-empty-values-and-the-three-valued-logic)).
 
 Default aggregate: sum.
 
@@ -843,7 +843,7 @@ The capabilities are computed once when the registry is built and are served to 
 | A self-dependency that was not declared | "Field \<transport name\>.\<field\> should be declared with recursive=True" |
 | Precomputation is not feasible because a dependency is not precomputed | "Field \<transport name\>.\<field\> cannot be precomputed as it depends on non-precomputed field \<transport name\>.\<field\>" |
 | An intermediate dependency step is not filterable | "Field \<transport name\>.\<field\> in dependency of \<transport name\>.\<field\> should be searchable. This is necessary to determine which records to recompute when \<transport name\>.\<field\> is modified. You should either make the field searchable, or simplify the field dependency." |
-| A computation assigns nothing on a read-only non-stored field | "Compute method failed to assign \<record set\>.\<field\>" |
+| A computation assigns nothing on a read-only non-stored field | "Compute method failed to assign \<the record set\>.\<field\>" |
 | A related field's type disagrees with its target's | "Type of related field \<transport name\>.\<field\> is inconsistent with \<transport name\>.\<field\>" |
 | A related field's path names an unknown field | "Field \<name\> referenced in related field definition \<transport name\>.\<field\> does not exist." |
 | A filter rule cannot serve the operator | "Unsupported operator on \<field label\> '\<entity description\>' (\<transport name\>) in \<condition\>" |

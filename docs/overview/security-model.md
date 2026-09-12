@@ -686,7 +686,7 @@ where the operation word is the word for read, write, create or unlink.
 
 **Paragraph two, debug mode.** Available only to an internal user who belongs to the technical-features group and whose request is in debug mode. Up to six of the offending records, each on its own line:
 
-> "- \<entity description\>, \<record display name\> (\<transport name\>: \<identifier\>)"
+> "- \<entity description\>, \<the record's display name\> (\<transport name\>: \<identifier\>)"
 
 and, when any failing rule's filter mentions the company field and the record's company is one the user belongs to, the line additionally carries ", company=\<company display name\>".
 
@@ -1008,7 +1008,7 @@ Exporting a selection requires, in addition to the read permissions, membership 
 
 ### 8.12 In-memory records
 
-A record with no database identifier yet, used by the form on-change protocol, is exempt from the record rules, because there is no stored record to test. The access right and the field restrictions still apply. A record set may not mix in-memory and stored records on any write path; attempting it is refused with **"\<record set\> contains a mix of real and new records. It is not supported."**
+A record with no database identifier yet, used by the form on-change protocol, is exempt from the record rules, because there is no stored record to test. The access right and the field restrictions still apply. A record set may not mix in-memory and stored records on any write path; attempting it is refused with **"\<the record set\> contains a mix of real and new records. It is not supported."**
 
 ---
 
@@ -1312,7 +1312,7 @@ A session is the server-side state that turns a browser cookie into an acting id
 | Debug flags | The debug-mode flags of the session |
 | Device traces | The list of device traces: platform, browser, network address, first and last activity |
 | Pending identifier and pending sign-in name | A **partial** session: the credential was accepted but the second factor is still pending |
-| Last identity check | The instant of the last successful re-authentication ([15.8](#158-the-re-authentication-gate)) |
+| Last identity check | The instant of the last successful re-authentication ([15.7](#157-the-re-authentication-gate)) |
 | Rotation bookkeeping | The next session key, the deletion instant, and the flag that says the previous sessions must be collected ([14.5](#145-rotation)) |
 
 Every value written into a session must be representable in the structured document format; a value that is not is refused at write time. A session is marked dirty by any modification and is written back at the end of the request when it is dirty, when the session identifier changed, and when session persistence is enabled for the endpoint.
@@ -1557,7 +1557,7 @@ Empty passwords are never accepted, in either direction: a user whose stored ver
 
 | Step | Rule |
 |---|---|
-| Enrolment | Only for oneself, refused otherwise with **"Two-factor authentication can only be enabled for yourself"**; only when not already enrolled, refused otherwise with **"Two-factor authentication already enabled"**; and only behind the re-authentication gate of [15.8](#158-the-re-authentication-gate). A secret of 160 bits is generated and shown, and the enrolment is confirmed by a matching code. |
+| Enrolment | Only for oneself, refused otherwise with **"Two-factor authentication can only be enabled for yourself"**; only when not already enrolled, refused otherwise with **"Two-factor authentication already enabled"**; and only behind the re-authentication gate of [15.7](#157-the-re-authentication-gate). A secret of 160 bits is generated and shown, and the enrolment is confirmed by a matching code. |
 | Code shape | Six decimal digits, derived from the secret and a 30-second counter with a keyed digest |
 | Acceptance window | Every counter from the one 30 seconds in the past to the one 30 seconds in the future inclusive, so a code is accepted for about 90 seconds around its nominal period |
 | Replay | The matched counter is stored; a code whose counter is not strictly greater than the stored one is refused with **"Verification failed, please use the latest 6-digit code"** |
@@ -1774,7 +1774,7 @@ Every portal page that shows one document uses this procedure, and nothing else:
 
 Three properties are load-bearing and must be reproduced exactly:
 
-1. The procedure returns an **unrestricted** record in both branches. A person who legitimately has read permission and a visitor holding a token are served by the same page, which therefore does not have to be written twice.
+1. The procedure returns an **unrestricted** record in both branches. A person who legitimately has read permission and a visitor holding a token are served by the same page, which therefore does not have to exist in two versions.
 2. Because the returned record is unrestricted, **the page itself is the authorisation boundary**: whatever the page renders from that record is disclosed. A rebuild must keep portal page templates narrow.
 3. The existence of the record is revealed before the token is checked, since step 2 precedes step 4, so a wrong identifier and a wrong token are distinguishable. This is deliberate: the identifier alone is not a secret, the token is.
 
@@ -2113,7 +2113,7 @@ Every message this document specifies, in one place, with its triggering situati
 | Opening a view whose own group list excludes the acting user | "View '\<view external identifier\>' accessible only to groups \<group names\>" |
 | Opening a view that may not be opened directly | "View '\<view external identifier\>' is private" |
 | Declaring a group list on a view extension record | "Inherited view cannot have 'groups' defined on the record. Use 'groups' attributes inside the view definition" |
-| Mixing saved and unsaved records in one set | "\<record set\> contains a mix of real and new records. It is not supported." |
+| Mixing saved and unsaved records in one set | "\<the record set\> contains a mix of real and new records. It is not supported." |
 
 ### 23.4 Sessions, sign-in and credentials
 
@@ -2161,7 +2161,7 @@ Every message this document specifies, in one place, with its triggering situati
 |---|---|
 | An external page asked for a record that does not exist | "This document does not exist." |
 | An attachment served with a wrong token | "Invalid access token" |
-| An attachment refused by the attachment layer | "Sorry, you are not allowed to access this document. Please contact your system administrator." then "(Operation: \<operation\>)" then "Records: \<record display names\>, User: \<user identifier\>" |
+| An attachment refused by the attachment layer | "Sorry, you are not allowed to access this document. Please contact your system administrator." then "(Operation: \<operation\>)" then "Records: \<the records' display names\>, User: \<user identifier\>" |
 | Writing on an attachment that could be served as a static resource | "Sorry, you are not allowed to write on this document" |
 | Requesting a correspondent signature on an entity that carries no access token field | "Model \<entity description\> does not support token signature, as it does not have \<field name\> field." |
 | Signing a payload with an empty scope | "Non-empty scope required" |
