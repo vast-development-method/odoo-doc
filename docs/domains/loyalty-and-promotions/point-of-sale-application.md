@@ -159,14 +159,14 @@ Refreshing the existing reward lines means: remember every applied reward with i
 4. Compute the point cost, exactly as on the server.
 5. **Payment programs** produce one line on the hidden discount product priced at the negative of the granted amount, with the discount product's taxes, computed in "total included" mode so that the tax breakdown of the negative line is exact, and carrying the extra tax details that the server needs to reproduce the same amounts.
 6. **Other programs** produce one line per non-empty bucket, priced at the negative of the bucket amount clamped by the ticket total and multiplied by the distribution factor, carrying the bucket's taxes, with the point cost on the first line only and a shared grouping code.
-7. An unknown applicability produces the message `Unknown discount type`.
+7. An unknown applicability produces the message "Unknown discount type".
 
 ### 7.2 Free product rewards
 
 Unlike the sales application, a free product at a counter is **not** a hundred-percent-discounted product line. The product must already be in the basket, and the reward adds a **negative line on the hidden discount product** that cancels its price.
 
 1. Determine the product: the one passed by the caller when it is among the reward's products, otherwise the first of them.
-2. Compute the unclaimed free quantity (section 10.2 of [calculations.md](calculations.md)). When it is zero or negative, answer `There are not enough products in the basket to claim this reward.`
+2. Compute the unclaimed free quantity (section 10.2 of [calculations.md](calculations.md)). When it is zero or negative, answer "There are not enough products in the basket to claim this reward."
 3. ```
    claimable_count = 1                                                   when clear_wallet
    claimable_count = min(ceiling(unclaimed ÷ reward_product_qty),
@@ -181,9 +181,9 @@ Unlike the sales application, a free product at a counter is **not** a hundred-p
 
 ### 7.3 Applying a reward
 
-1. Refuse with `There are not enough points on the coupon to claim this reward.` when the points available are below `required_points`.
-2. For a global discount, when another global discount is applied whose discount value is greater than or equal to the candidate's, refuse with `A better global discount is already applied.`; when it is smaller, delete its lines.
-3. Build the lines. An empty result is refused with `The reward could not be applied.`; a textual result is the refusal message itself.
+1. Refuse with "There are not enough points on the coupon to claim this reward." when the points available are below `required_points`.
+2. For a global discount, when another global discount is applied whose discount value is greater than or equal to the candidate's, refuse with "A better global discount is already applied."; when it is smaller, delete its lines.
+3. Build the lines. An empty result is refused with "The reward could not be applied."; a textual result is the refusal message itself.
 4. Create the lines on the ticket with a manual price type.
 
 ## 8. Codes at the counter
@@ -195,30 +195,30 @@ The cashier types a code in the code popup (placeholder `Gift card or Discount c
 1. Look for a loaded rule whose `mode` is `with_code` and whose code or whose barcode equals the text.
 2. Ask the server whether the code is the code of a loyalty card that belongs to a customer. When it is, select that customer on the ticket, fetching the contact when it is not loaded, re-evaluate the rewards and stop. This is how a loyalty card doubles as a customer card.
 3. **When a rule matched**:
-   - refuse with `That promo code program is not yet valid.` when the ticket date is before the program's start date taken at the beginning of the day;
-   - refuse with `That promo code program is expired.` when the ticket date is after the program's end date taken at the end of the day;
-   - refuse with `That promo code program requires a specific pricelist.` when the program's pricelist restriction does not contain the ticket's pricelist;
-   - refuse with `That promo code program has already been activated.` when the rule is already among the activated code rules;
+   - refuse with "That promo code program is not yet valid." when the ticket date is before the program's start date taken at the beginning of the day;
+   - refuse with "That promo code program is expired." when the ticket date is after the program's end date taken at the end of the day;
+   - refuse with "That promo code program requires a specific pricelist." when the program's pricelist restriction does not contain the ticket's pricelist;
+   - refuse with "That promo code program has already been activated." when the rule is already among the activated code rules;
    - otherwise add the rule to the activated code rules, re-evaluate the programs and compute the rewards claimable from that program.
 4. **When no rule matched**:
-   - refuse with `That coupon code has already been scanned and activated.` when a code-activated card already carries that code;
+   - refuse with "That coupon code has already been scanned and activated." when a code-activated card already carries that code;
    - otherwise ask the server to redeem the code (section 8.2). On refusal, show the server's message.
-   - On success, when the program is a gift card program and the card has no source document, ask the cashier `This gift card is not linked to any order. Do you really want to apply its reward?` under the title `Unpaid gift card`. A refusal answers `Unpaid gift card rejected.` and stops.
+   - On success, when the program is a gift card program and the card has no source document, ask the cashier "This gift card is not linked to any order. Do you really want to apply its reward?" under the title "Unpaid gift card". A refusal answers "Unpaid gift card rejected." and stops.
    - Create a local copy of the card with the identifier, code, program, owner, balance and formatted balance returned by the server, attach it to the ticket, re-evaluate the programs and compute the rewards claimable from that card.
 5. When exactly one reward is claimable and it is not a multi-product free product reward, claim it immediately and refresh.
-6. When no rule matched, the ticket is empty and a card was found, answer `<program name>: <code>` followed by a new line and `Balance: <formatted balance>`, so that scanning a gift card on an empty ticket simply reports its balance.
+6. When no rule matched, the ticket is empty and a card was found, answer `<program name>: <code>` followed by a new line and "Balance: <formatted balance>", so that scanning a gift card on an empty ticket simply reports its balance.
 
 ### 8.2 The server redemption service
 
 Input: the counter, the code, the ticket creation timestamp, the customer and the pricelist.
 
 1. Search among the cards of the counter's programs for one whose code matches and whose owner is empty or is the ticket's customer, or whose program type is `gift_card`, ordered by owner and then by balance descending, and take the first one.
-2. Refuse with `This coupon is invalid (<code>).` when no card is found or its program is archived.
-3. Refuse with `This coupon is expired (<code>).` when the card's expiration date is earlier than the date part of the ticket timestamp, or the program's end date is earlier than today, or the program's usage ceiling has been reached.
-4. Refuse with `This coupon is not yet valid (<code>).` when the program's start date is later than today.
-5. Refuse with `No reward can be claimed with this coupon.` when the program has no reward, or no reward whose `required_points` is at most the card's balance.
-6. Refuse with `This coupon is not available with the current pricelist.` when the program's pricelist restriction does not contain the ticket's pricelist.
-7. Refuse with `This programs requires a code to be applied.` when the program type is `promo_code`; such a program must be reached through its rule code, not through a card code.
+2. Refuse with "This coupon is invalid (<code>)." when no card is found or its program is archived.
+3. Refuse with "This coupon is expired (<code>)." when the card's expiration date is earlier than the date part of the ticket timestamp, or the program's end date is earlier than today, or the program's usage ceiling has been reached.
+4. Refuse with "This coupon is not yet valid (<code>)." when the program's start date is later than today.
+5. Refuse with "No reward can be claimed with this coupon." when the program has no reward, or no reward whose `required_points` is at most the card's balance.
+6. Refuse with "This coupon is not available with the current pricelist." when the program's pricelist restriction does not contain the ticket's pricelist.
+7. Refuse with "This programs requires a code to be applied." when the program type is `promo_code`; such a program must be reached through its rule code, not through a card code.
 8. Otherwise answer with the program identifier, the card identifier, the card owner, the balance, the formatted balance and whether the card has a source document.
 
 ## 9. Selling a physical gift card
@@ -229,28 +229,28 @@ A physical gift card is a pre-printed card whose code is not generated by the sy
 2. The dialog asks for the printed code and the amount, and proposes an expiration date one year from now.
 3. Each time the code field stops changing for half a second, the device asks the server for the status of that code:
    - the code is accepted when it does not exist at all, or when it exists, is not expired, has a positive balance, belongs to a gift card program, has no owner and has never been used on a document;
-   - a refused code shows `Invalid Gift Card Code` with the message `This code seems to be invalid, please check the Gift Card code and try again.` and clears the field;
+   - a refused code shows "Invalid Gift Card Code" with the message "This code seems to be invalid, please check the Gift Card code and try again." and clears the field;
    - an accepted code that already exists fills the amount with the card's balance rounded by the counter currency, fills the expiration date from the card, and locks both fields, so that an existing card can only be topped up at its own value;
-   - a communication failure shows `An error occurred while checking the gift card.`
+   - a communication failure shows "An error occurred while checking the gift card."
 4. Confirming with an empty code or an empty amount marks the field in error and does nothing.
-5. Confirming with a code that the ticket already uses shows `Validation Error` with the message `A coupon/loyalty card must have a unique code.`
+5. Confirming with a code that the ticket already uses shows "Validation Error" with the message "A coupon/loyalty card must have a unique code."
 6. Otherwise the ticket line is rewritten: the quantity is reduced by one, or the line is removed when it was the last unit; a new line is added with the typed amount as its price and the typed code stored on it; and a point change is recorded for a new local card carrying the program, the amount, the code, the owner, the product and the expiration date, flagged "manual". An existing non-manual point change with the same amount, program and product is consumed first, so that the manual card replaces the automatic one instead of doubling it.
-7. The quantity and the price of a line that carries a typed gift card code may not be changed afterwards: `You cannot change the quantity or price of a physical gift card.`
+7. The quantity and the price of a line that carries a typed gift card code may not be changed afterwards: "You cannot change the quantity or price of a physical gift card."
 
 ## 10. Electronic wallets at the counter
 
 1. The wallet button lists the wallet rewards claimable on the ticket whose card is not expired.
-2. When no wallet reward is claimable and the ticket total is not negative, the button answers `No valid eWallet found` with the message `Please select a customer and a valid eWallet.`
-3. When the ticket total is **negative** (a refund) and at least one wallet program exists, the cashier is offered the wallet programs under the title `Refund with eWallet`; choosing one adds a top-up line of the wallet's trigger product priced at the absolute value of the negative total, which credits the refund to the customer's wallet.
-4. When wallet rewards are claimable, the cashier picks one (title `Use eWallet to pay`, each entry labelled `<reward description> (<program name>)`) and it is applied; a refusal is shown in an error dialog titled `Error`.
-5. Paying a ticket that carries a wallet top-up line without a customer asks `Customer needed` with the message `eWallet requires a customer to be selected` and opens the customer selection.
-6. A negative quantity or a negative price may not be set on a gift card or wallet line: `You cannot set negative quantity or price to gift card or ewallet.`
-7. Refunding a top-up line or a reward line of a gift card or wallet program is refused with the notification `Refunding a top up or reward product for an eWallet or gift card program is not allowed.`
+2. When no wallet reward is claimable and the ticket total is not negative, the button answers "No valid eWallet found" with the message "Please select a customer and a valid eWallet."
+3. When the ticket total is **negative** (a refund) and at least one wallet program exists, the cashier is offered the wallet programs under the title "Refund with eWallet"; choosing one adds a top-up line of the wallet's trigger product priced at the absolute value of the negative total, which credits the refund to the customer's wallet.
+4. When wallet rewards are claimable, the cashier picks one (title "Use eWallet to pay", each entry labelled `<reward description> (<program name>)`) and it is applied; a refusal is shown in an error dialog titled `Error`.
+5. Paying a ticket that carries a wallet top-up line without a customer asks "Customer needed" with the message "eWallet requires a customer to be selected" and opens the customer selection.
+6. A negative quantity or a negative price may not be set on a gift card or wallet line: "You cannot set negative quantity or price to gift card or ewallet."
+7. Refunding a top-up line or a reward line of a gift card or wallet program is refused with the notification "Refunding a top up or reward product for an eWallet or gift card program is not allowed."
 
 ## 11. Editing and removing rewards on the ticket
 
 1. Deleting a reward line deletes every line sharing the same reward, card and grouping code.
-2. Pressing the removal key on a reward line that was not claimed manually first asks `Deactivating reward` with the message `Are you sure you want to remove <reward description> from this order?` followed by a new line and ` You will still be able to claim it through the reward button.`, with the buttons `Yes` and `No`.
+2. Pressing the removal key on a reward line that was not claimed manually first asks "Deactivating reward" with the message "Are you sure you want to remove <reward description> from this order?" followed by a new line and " You will still be able to claim it through the reward button.", whose leading space is part of the message, with the buttons `Yes` and `No`.
 3. Removing a reward line adds its reward to the disabled rewards of the ticket and, when its card was attached by code, deletes the local card.
 4. A reward line may not have its quantity or price edited; only removal is accepted.
 5. Reward lines are always displayed after the ordinary lines and in italics; a gift card or wallet reward line shows the remaining balance of its card.
@@ -269,11 +269,11 @@ The server answers success, or failure with one of:
 
 | Condition | Message | Extra payload |
 |---|---|---|
-| A card identifier no longer exists, or its program is archived | `Some coupons are invalid. The applied coupons have been updated. Please check the order.` | the list of invalid card identifiers, which the device deletes locally |
-| A card's balance is smaller than the points the ticket wants to spend, compared at two decimal places | `There are not enough points for the coupon: <code>.` | the current balances of the cards, which the device writes into its local copies |
-| One of the new codes already exists | `The following codes already exist in the database, perhaps they were already sold?` followed by a new line and the comma-separated colliding codes | none |
+| A card identifier no longer exists, or its program is archived | "Some coupons are invalid. The applied coupons have been updated. Please check the order." | the list of invalid card identifiers, which the device deletes locally |
+| A card's balance is smaller than the points the ticket wants to spend, compared at two decimal places | "There are not enough points for the coupon: <code>." | the current balances of the cards, which the device writes into its local copies |
+| One of the new codes already exists | "The following codes already exist in the database, perhaps they were already sold?" followed by a new line and the comma-separated colliding codes | none |
 
-A failure shows the message under the title `Error validating rewards` and stops the validation. A communication failure is ignored: the check is a convenience, not a gate, and the authoritative check happens at confirmation.
+A failure shows the message under the title "Error validating rewards" and stops the validation. A communication failure is ignored: the check is a convenience, not a gate, and the authoritative check happens at confirmation.
 
 ### 12.2 Confirmation after the ticket is pushed
 
@@ -327,7 +327,7 @@ When the receipt is emailed and the counter's gift card programs declare a print
 
 ## 16. Failure of a reward condition on the device
 
-When a reward's discounted-product condition cannot be evaluated on the device, the reward is dropped from the loaded data and the cashier sees the title `A reward could not be loaded` with the message `The reward "<description>" contain an error in its domain, your domain must be compatible with the point of sale client`, and a button to reload. This is why the condition is pre-translated on the server (section 1.2).
+When a reward's discounted-product condition cannot be evaluated on the device, the reward is dropped from the loaded data and the cashier sees the title "A reward could not be loaded" with the message "The reward “<description>” contain an error in its domain, your domain must be compatible with the point of sale client", and a button to reload. This is why the condition is pre-translated on the server (section 1.2).
 
 ## 17. The ticket line payload
 
@@ -367,3 +367,17 @@ name    = the program's point name when the program is portal visible, otherwise
 `total` is shown while the ticket is being built and `balance` once it is paid. The point correction removes the contribution of the free product lines, which would otherwise be counted as a payment by a rule that grants points per unit of currency spent.
 
 In the customer list, a card of an electronic wallet program is rendered as `<program name>: <formatted monetary balance>`; a card of any other program is rendered as `<balance with two decimals> <point name>` when the program is portal visible, and as `<balance with two decimals> Points` otherwise.
+
+## 19. Reconciliation notes
+
+1. **Where this content lives.** Only one of the two merged versions carried the counter contract as
+   a file of its own; the other folded a summary of it into its capability list. This file is the
+   full contract, and [README.md](README.md) links it as an extra topic file of the folder.
+2. **Field identifiers.** Every field of the payloads and of the loaded data is named by its
+   reproduced storage name.
+3. **Rule citations.** The counter rules a rebuild must enforce on the server side are numbered
+   LOY-135 to LOY-140 in [business-rules.md](business-rules.md).
+4. **Deliberate divergence from the server.** The three differences of section 4 — the rounding
+   method, the lines excluded, and the negative quantity of a free-product line — are observed
+   behaviour, not defects, because the two results are compared when the ticket is pushed. A rebuild
+   must reproduce them on both sides or the comparison will fail.

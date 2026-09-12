@@ -26,7 +26,7 @@ record through, with their guards and refusal messages, are tabulated in
 6. The actor edits the rewards: the reward type and all of its parameters, the point price, and the "clear the whole balance" flag.
    - Editing the description renames the hidden discount product and propagates the translations.
 7. The actor edits the communication plan when `applies_on` is not `current` and the program is not a gift card or an electronic wallet program: rows of (trigger, milestone, email template).
-8. Saving runs the validations of `LOY-001` to `LOY-010`.
+8. Saving runs the validations of LOY-001 to LOY-010.
 
 **Postcondition**: an active program that every enabled channel will start evaluating on its next document update.
 
@@ -40,7 +40,7 @@ record through, with their guards and refusal messages, are tabulated in
 1. The actor opens the gift card and electronic wallet list and asks for a new program, choosing the gift card or the electronic wallet template.
 2. The system creates the program with the family defaults: `applies_on` `future`, `trigger` `auto`, `portal_visible` true, `portal_point_name` the company currency symbol, one rule granting one point per unit of currency spent on the shipped trigger product (with the split option on for a gift card and off for an electronic wallet), one reward of mode `per_point` worth one unit of currency per point applicable to the order, and, for a gift card, one communication rule sending the shipped gift card email at creation.
 3. The actor replaces the trigger products with the company's own gift card or top-up products. Writing `trigger_product_ids` writes the product filter of the rules.
-4. The actor optionally sets the email template and, for a counter, the printed document. Setting the printed document before the email template is refused with `You must set 'Email template' before setting 'Print Report'.`
+4. The actor optionally sets the email template and, for a counter, the printed document. Setting the printed document before the email template is refused with "You must set 'Email template' before setting 'Print Report'."
 5. For an electronic wallet program on a website, a warning banner appears when at least one trigger product is not published; the shopper could otherwise never top up.
 
 **Postcondition**: buying a trigger product now issues a card; the card can then pay for orders.
@@ -52,13 +52,13 @@ record through, with their guards and refusal messages, are tabulated in
 1. The actor archives the program. `active` becomes false.
 2. The cascade archives every rule, every reward, every communication rule and every reward discount product of the program.
 3. Every document that carries a reward line of that program loses it at its next evaluation, because the program no longer satisfies the program filter.
-4. Unarchiving reverses the cascade. Before it completes, the code uniqueness rules are re-run; when another active rule already carries one of the codes being reactivated, the unarchive fails with `The promo code must be unique.` When several programs are unarchived at once and two of them share a code, the same message is raised.
+4. Unarchiving reverses the cascade. Before it completes, the code uniqueness rules are re-run; when another active rule already carries one of the codes being reactivated, the unarchive fails with "The promo code must be unique." When several programs are unarchived at once and two of them share a code, the same message is raised.
 
 **Postcondition**: the program is invisible to every channel while archived.
 
 ### 1.4 Delete a program
 
-1. Deleting an active program is refused with `You can not delete a program in an active state`.
+1. Deleting an active program is refused with "You can not delete a program in an active state".
 2. After archiving, deletion is still refused when at least one card references the program, because the card's reference to the program is a restricted reference.
 3. When the program has no card, deletion removes the program and cascades to its rules, rewards and communication rules. The reward discount products survive as ordinary archived products.
 
@@ -74,10 +74,10 @@ record through, with their guards and refusal messages, are tabulated in
    - In `anonymous` mode the actor types a quantity.
    - In `selected` mode the actor picks customers and customer tags; the quantity is recomputed as the number of resolved customers. **When both lists are left empty the resolution matches every contact in the database**, so the quantity becomes the total number of contacts.
 3. The actor types the grant (the starting balance), optionally a validity limit and optionally a description.
-4. The wizard shows `You're about to generate <program type label> with a value of <grant> for <quantity> customers`, and a warning when emails will be sent.
+4. The wizard shows "You're about to generate <program type label> with a value of <grant> for <quantity> customers", and a warning when emails will be sent.
 5. Pressing the confirm button runs `generate_coupons`:
-   1. Refuse with `Can not generate coupon, no program is set.` when no program is set.
-   2. Refuse with `Invalid quantity.` when the quantity is zero or negative.
+   1. Refuse with "Can not generate coupon, no program is set." when no program is set.
+   2. Refuse with "Invalid quantity." when the quantity is zero or negative.
    3. Create one Loyalty Card per customer (or per unit of quantity in anonymous mode) with `program_id`, `points` equal to the grant, `expiration_date` equal to the validity limit and `partner_id` equal to the customer or empty.
    4. Each card receives a generated unique code.
    5. The "at creation" communication plan runs for every card that has a recipient.
@@ -92,7 +92,7 @@ record through, with their guards and refusal messages, are tabulated in
 1. The actor opens the card and presses the balance, which opens the balance update wizard.
 2. The wizard shows the old balance and asks for the new balance and a mandatory description.
 3. Confirming:
-   1. Refuse with `New Balance should be positive and different then old balance.` when the new balance equals the old one or is negative.
+   1. Refuse with "New Balance should be positive and different then old balance." when the new balance equals the old one or is negative.
    2. Create a Loyalty History movement: `issued` equal to the positive difference, or `used` equal to the absolute negative difference; `description` equal to the typed text, or `Gift for customer` when empty.
    3. Write the new balance into `points`. This write is tracked in the card's discussion thread and triggers the milestone communications.
 
@@ -101,7 +101,7 @@ record through, with their guards and refusal messages, are tabulated in
 **Actor**: Salesperson or Sales Administrator.
 
 1. The actor presses the send button on the card list, or the send action on the card form.
-2. The system opens a message composition window pre-filled with the default template of the card (section 4.3 of [entities.md](entities.md)), the composition mode "comment", the light notification layout, and the forced-email flag.
+2. The system opens a message composition window pre-filled with the default template of the card (section 4.5 of [entities.md](entities.md)), the composition mode "comment", the light notification layout, and the forced-email flag.
 3. The actor edits and sends. The message is posted on the card's discussion thread and delivered to the resolved recipient.
 
 ### 2.4 Share a coupon or a program by link
@@ -109,14 +109,14 @@ record through, with their guards and refusal messages, are tabulated in
 **Actor**: Sales Administrator.
 **Preconditions**: the website capability package is enabled; the program is of type `coupons`, or its `trigger` is `with_code`, or one of its rules carries a code.
 
-1. From a card, the actor presses the share action; from a program, the actor presses the program share action. Calling the share action with both a card and a program, or with neither, is refused with `Provide either a coupon or a program.`
+1. From a card, the actor presses the share action; from a program, the actor presses the program share action. Calling the share action with both a card and a program, or with neither, is refused with "Provide either a coupon or a program."
 2. The wizard opens, titled `Share ` followed by the family noun of the program.
 3. The website defaults to the program's website, or to the only website when there is exactly one.
 4. The code shown is the card's code when a card is shared, and the code of the program's first coded rule otherwise.
 5. The actor edits the landing page (default `/shop`).
 6. The link is `<website base address>/coupon/<code>?r=<landing page>`.
 7. Pressing the short-link action reopens the wizard in short-link mode, where an existing tracked link for that address is reused or a new one created, and the shortened address is shown instead.
-8. Validations: a `coupons` program requires a card (`A coupon is needed for coupon programs.`); a program restricted to a website may only be shared on that website (`The shared website should correspond to the website of the program.`).
+8. Validations: a `coupons` program requires a card ("A coupon is needed for coupon programs."); a program restricted to a website may only be shared on that website ("The shared website should correspond to the website of the program.").
 
 ### 2.5 Archive a card
 
@@ -151,7 +151,7 @@ This is the routine that every other sales workflow calls. It is idempotent: run
 
 **Step 1 - collect the programs to examine**
 
-1. When the order allows nominative programs (`LOY-063`), search for cards that are not yet among the order's applied cards, that are owned by the order's customer, that have a strictly positive balance, and whose program is either an electronic wallet program or a loyalty program whose `applies_on` is not `current`. Add every such card to `applied_coupon_ids`. This is what silently puts a customer's wallet and loyalty card on every one of their orders.
+1. When the order allows nominative programs (LOY-063), search for cards that are not yet among the order's applied cards, that are owned by the order's customer, that have a strictly positive balance, and whose program is either an electronic wallet program or a loyalty program whose `applies_on` is not `current`. Add every such card to `applied_coupon_ids`. This is what silently puts a customer's wallet and loyalty card on every one of their orders.
 2. `points_programs` are the programs of the cards named by the order's pending promises that carry a non-zero number of points.
 3. `coupon_programs` are the programs of the order's applied cards.
 4. `automatic_programs` are the programs matching the automatic candidate filter (section 3.3 of [calculations.md](calculations.md)) that are not already in `points_programs`.
@@ -186,7 +186,7 @@ For every program of `coupon_programs` (programs attached by a code): when the p
 2. Walk the order lines and collect one entry per distinct reward grouping code: the reward, the card, the grouping code and the product. Entries whose reward belongs to a payment program are collected separately.
 3. Process the ordinary entries first, then the payment entries (section 16 of [calculations.md](calculations.md)). For each entry:
    - skip it when its card is no longer in `all_coupons`, when the points available on the card are less than the reward's required points, or when the reward's program no longer matches the program filter; the pool lines of that entry will simply be deleted at the end;
-   - otherwise compute the reward line values. When the computation refuses with `There is nothing to discount`, treat the result as an empty list.
+   - otherwise compute the reward line values. When the computation refuses with "There is nothing to discount", treat the result as an empty list.
    - Write the values over the pool lines: pair each value with a pool line and update it in place (preserving the line description when the product is unchanged), create extra lines when there are more values than pool lines, and leave the surplus pool lines in the pool.
 4. Whatever remains in the pool is scheduled for deletion.
 
@@ -209,7 +209,7 @@ Used by step 4 above and by the code application.
 1. `points` is the first value of the result.
 2. **When a card is given**: when the program is nominative, record a pending promise of `points` towards that card. Return the card.
 3. **When no card is given and the program is nominative**: search for a card of that program owned by the order's customer.
-   - When none exists and `points` is zero, refuse with `No card found for this loyalty program and no points will be given with this order.`
+   - When none exists and `points` is zero, refuse with "No card found for this loyalty program and no points will be given with this order."
    - When one exists, record a pending promise of `points` towards it and return it.
 4. **When no card is given and none was found**: keep the non-zero values of the result; create one card per value with `program_id` the program, `partner_id` the order's customer when the program is nominative or of type `next_order_coupons` and empty otherwise, `points` zero and `order_id` this order; record one promise per card with its value. Return the cards.
 
@@ -217,9 +217,9 @@ Cards created here are created with elevated rights, with loyalty emails suppres
 
 ### 3.3 Apply a program with the full check
 
-1. Refuse with `The program is not available for this order.` when the program does not match the program filter.
-2. Refuse with `This program is already applied to this order.` when the program is already among the applied programs. The refusal is flagged as "already applied" so that callers can distinguish it.
-3. When the program has rewards, determine its best global discount: when it has more than one global discount reward, the one with the largest discount amount against the order's discountable amount; otherwise the single one, if any. When that reward exists, a global discount is already applied, and the applied one is at least as good (section 7 of [calculations.md](calculations.md)), refuse with `This discount (<candidate description>) is not compatible with "<applied description>". Please remove it in order to apply this one.`
+1. Refuse with "The program is not available for this order." when the program does not match the program filter.
+2. Refuse with "This program is already applied to this order." when the program is already among the applied programs. The refusal is flagged as "already applied" so that callers can distinguish it.
+3. When the program has rewards, determine its best global discount: when it has more than one global discount reward, the one with the largest discount amount against the order's discountable amount; otherwise the single one, if any. When that reward exists, a global discount is already applied, and the applied one is at least as good (section 7 of [calculations.md](calculations.md)), refuse with "This discount (<candidate description>) is not compatible with “<applied description>”. Please remove it in order to apply this one."
 4. Run the point computation. When it returns an error, return that error.
 5. Otherwise attach the program (section 3.2).
 
@@ -228,16 +228,16 @@ Cards created here are created with elevated rights, with loyalty emails suppres
 **Actor**: Salesperson through the coupon code wizard, shopper through the online promotional code form, or the system through a pending coupon link.
 
 1. Search among the rules that match the rule filter for one whose `mode` is `with_code` and whose `code` equals the typed text.
-2. When such a rule exists and it is already among the order's activated code rules **and** its program already has a reward line on the order, refuse with `This promo code is already applied.`
+2. When such a rule exists and it is already among the order's activated code rules **and** its program already has a reward line on the order, refuse with "This promo code is already applied."
 3. **When no rule matched**, search for a Loyalty Card whose `code` equals the typed text.
-   - When there is none, or its program is archived, or its program has no reward, or its program does not match the program filter, refuse with `This code is invalid (<code>).` and flag the result as "not found" so that the caller can fall back to interpreting the text as a pricelist code.
-   - When the card has an expiration date strictly before the order's reference date, refuse with `This coupon is expired.`
-   - When the card's balance is strictly less than the smallest required points among its program's rewards, refuse with `This coupon has already been used.`
+   - When there is none, or its program is archived, or its program has no reward, or its program does not match the program filter, refuse with "This code is invalid (<code>)." and flag the result as "not found" so that the caller can fall back to interpreting the text as a pricelist code.
+   - When the card has an expiration date strictly before the order's reference date, refuse with "This coupon is expired."
+   - When the card's balance is strictly less than the smallest required points among its program's rewards, refuse with "This coupon has already been used."
    - Otherwise the program is the card's program.
-4. When there is still no program, or the program is archived, refuse with `This code is invalid (<code>).` flagged as "not found".
-5. When the program type is `loyalty` or `ewallet`, refuse with `This program cannot be applied with code.` A nominative balance is attached automatically and is never claimed by code.
+4. When there is still no program, or the program is archived, refuse with "This code is invalid (<code>)." flagged as "not found".
+5. When the program type is `loyalty` or `ewallet`, refuse with "This program cannot be applied with code." A nominative balance is attached automatically and is never claimed by code.
 6. **Lock the program row** for update without waiting. When the row is already locked by a concurrent transaction, the operation fails with a serialization error and the whole request is retried. This is what prevents two shoppers from consuming the last remaining use of a limited program at the same time.
-7. When the program limits its usage and its total document count has reached the ceiling, refuse with `This code is expired (<code>).`
+7. When the program limits its usage and its total document count has reached the ceiling, refuse with "This code is expired (<code>)."
 8. When a rule matched, add it to the order's activated code rules.
 9. When a card was found, add it to the order's applied cards.
 10. **Branch**:
@@ -256,12 +256,12 @@ Cards created here are created with elevated rights, with loyalty emails suppres
 3. **Shortcut**: when no reward is claimable, the workflow ends with nothing.
 4. Otherwise the reward selection wizard opens, listing every claimable reward. The actor picks one and, for a multi-product reward, a product.
 5. Applying:
-   1. Refuse with `No reward selected.` when nothing was picked.
-   2. Recompute the claimable rewards and find the card that offers the chosen reward. Refuse with `Coupon not found while trying to add the following reward: <description>` when none does.
+   1. Refuse with "No reward selected." when nothing was picked.
+   2. Recompute the claimable rewards and find the card that offers the chosen reward. Refuse with "Coupon not found while trying to add the following reward: <description>" when none does.
    3. Apply the reward:
-      - **Global discount guard**: when the reward is a global discount and a different global discount is already applied and the applied one is at least as good, refuse with `A better global discount is already applied.` When the applied one is worse, its lines are completely reset and added to the pool of lines the new reward may reuse.
-      - **Future guard**: when the program is not nominative, its `applies_on` is `future` and the card is one this order promises points to, refuse with `The coupon can only be claimed on future orders.`
-      - **Balance guard**: when the points available on the card are less than the reward's required points, refuse with `The coupon does not have enough points for the selected reward.`
+      - **Global discount guard**: when the reward is a global discount and a different global discount is already applied and the applied one is at least as good, refuse with "A better global discount is already applied." When the applied one is worse, its lines are completely reset and added to the pool of lines the new reward may reuse.
+      - **Future guard**: when the program is not nominative, its `applies_on` is `future` and the card is one this order promises points to, refuse with "The coupon can only be claimed on future orders."
+      - **Balance guard**: when the points available on the card are less than the reward's required points, refuse with "The coupon does not have enough points for the selected reward."
       - Otherwise build the reward lines (section 9 of [calculations.md](calculations.md)) and write them onto the order.
    4. Re-evaluate the order, which reorders the discounts and recomputes every amount.
    5. Delete every card created by this order for a program whose `applies_on` is `current` that no reward line uses.
@@ -282,14 +282,14 @@ Cards created here are created with elevated rights, with loyalty emails suppres
 **Actor**: Salesperson, or the storefront on payment.
 **Preconditions**: the order is a quotation.
 
-1. For each order being confirmed, gather every card involved: the applied cards, the cards of the pending promises and the cards referenced by the lines. When the points available on any of them are negative, refuse the whole confirmation with `One or more rewards on the sale order is invalid. Please check them.`
+1. For each order being confirmed, gather every card involved: the applied cards, the cards of the pending promises and the cards referenced by the lines. When the points available on any of them are negative, refuse the whole confirmation with "One or more rewards on the sale order is invalid. Please check them."
 2. Re-evaluate the order (section 3.1). This is the last chance for an expired program, an archived card or a no-longer-met condition to remove its reward lines.
 3. Write the history movements (section 3.8).
 4. When exactly one order is being confirmed, remember whether it still has claimable rewards.
 5. Delete every card whose program has `applies_on` equal to `current` that this order promises points to and that no reward line uses. Such a card could never be spent and would be lost forever.
 6. For every order that is not already confirmed, apply the point changes (section 5.1 of [calculations.md](calculations.md)) to the cards: `card.points = card.points + change`.
 7. Run the ordinary confirmation of the order.
-8. When the ordinary confirmation returned a plain success and step 4 found claimable rewards, return instead an informational notification titled `Rewards Available` with the message `There are available rewards not added to this order.`
+8. When the ordinary confirmation returned a plain success and step 4 found claimable rewards, return instead an informational notification titled "Rewards Available" with the message "There are available rewards not added to this order."
 9. Send the reward coupons: every card of the order's non-zero promises whose program has `applies_on` equal to `future` receives its "at creation" communication, forced to send immediately rather than through the outgoing queue. This is what emails the gift card the customer just bought and the next-order coupon the order just earned.
 
 **Postcondition**: the cards carry their new balances, the history records the movement, the reward lines are frozen with the order, and the customer has received the cards the order produced.
@@ -355,7 +355,7 @@ When a salesperson resets the prices of an order to the pricelist, the ordinary 
 2. The code application (section 3.4) attaches the card to the order and returns the gift card reward as claimable.
 3. Claiming it produces the single payment line described in section 9.2 of [calculations.md](calculations.md): unit price the negative of the smaller of the balance and the order's discountable amount, taxes taken from the gift card discount product.
 4. The payment line is always recomputed last, after every other discount, so that it pays the discounted total.
-5. On confirmation the card's balance drops by the point cost and a history movement records the use. When the balance reaches zero the card can no longer be applied; the code application then answers `This coupon has already been used.`
+5. On confirmation the card's balance drops by the point cost and a history movement records the use. When the balance reaches zero the card can no longer be applied; the code application then answers "This coupon has already been used."
 
 ### 4.3 Top up and spend an electronic wallet
 
@@ -363,7 +363,7 @@ When a salesperson resets the prices of an order to the pricelist, the ordinary 
    - The wallet program is nominative, so the card is always attached to a customer; an anonymous order cannot top up a wallet.
    - The bottomless-wallet guard stops the evaluation of a wallet program that names no trigger product, so a misconfigured wallet can never grant points on every purchase.
 2. **Spend**: on any later order of the same customer, the evaluation automatically attaches every wallet card of that customer with a positive balance. The wallet reward then appears among the claimable rewards without any code.
-   - A wallet code may never be applied by hand: the code application refuses with `This program cannot be applied with code.`
+   - A wallet code may never be applied by hand: the code application refuses with "This program cannot be applied with code."
 3. The wallet payment line carries **no tax**, unlike the gift card line.
 4. The discountable amount of a wallet payment excludes the lines whose product is one of the wallet's own trigger products, so a wallet may not pay for its own top-up.
 
@@ -406,13 +406,13 @@ When a salesperson resets the prices of an order to the pricelist, the ordinary 
 
 | Attempted operation | Guard | Rule |
 |---|---|---|
-| Archive a product that is the hidden discount product of an active reward, or one of its discounted products | Refused with `This product may not be archived. It is being used for an active promotion program.` | `LOY-148` |
-| Delete the shipped gift card product or the shipped wallet top-up product, as a variant or as a template | Refused with `You cannot delete <name> as it is used in 'Coupons & Loyalty'. Please archive it instead.` | `LOY-149` |
-| Archive a pricelist referenced by an active program | Refused with `This pricelist may not be archived. It is being used for active promotion programs: <program names>` | `LOY-150` |
-| Delete the hidden discount product of an existing reward | Refused by the restricted reference at the database level; the product must be archived instead. | `LOY-151` |
-| Archive a program that owns a free product reward | Allowed. The hidden discount products of the rewards are archived, the reward products themselves stay active, and the product archiving guard does not fire because the rewards are archived first. | `LOY-152` |
-| Delete a reward already used on a sales order line or a point-of-sale line | Silently converted into an archive of that reward. | `LOY-035` |
-| Delete a program that is active | Refused with `You can not delete a program in an active state` | `LOY-011` |
+| Archive a product that is the hidden discount product of an active reward, or one of its discounted products | Refused with "This product may not be archived. It is being used for an active promotion program." | LOY-148 |
+| Delete the shipped gift card product or the shipped wallet top-up product, as a variant or as a template | Refused with "You cannot delete <name> as it is used in 'Coupons & Loyalty'. Please archive it instead." | LOY-149 |
+| Archive a pricelist referenced by an active program | Refused with "This pricelist may not be archived. It is being used for active promotion programs: <program names>" | LOY-150 |
+| Delete the hidden discount product of an existing reward | Refused by the restricted reference at the database level; the product must be archived instead. | LOY-151 |
+| Archive a program that owns a free product reward | Allowed. The hidden discount products of the rewards are archived, the reward products themselves stay active, and the product archiving guard does not fire because the rewards are archived first. | LOY-152 |
+| Delete a reward already used on a sales order line or a point-of-sale line | Silently converted into an archive of that reward. | LOY-035 |
+| Delete a program that is active | Refused with "You can not delete a program in an active state" | LOY-011 |
 
 ## 6. The state machines these workflows drive
 
@@ -469,7 +469,7 @@ The customer owns a Club card holding 250.00 points and a gift card holding 60.0
 
 1. A rule with that code is found and matches the rule filter. It is added to the order's activated code rules.
 2. The program row is locked. There is no usage ceiling, so the check passes.
-3. The program is not yet granting points, its `applies_on` is `current`, so it is attached with the full check: it is a global discount and a global discount (Spring sale, 10 percent) is already applied. Comparing the two against the discountable amount ignoring Spring sale: 10 percent gives 58.00 and 5 percent gives 29.00, neither exceeds the discountable amount, and the applied one is larger, so the attachment is refused with `This discount (5% on your order) is not compatible with "10% on your order". Please remove it in order to apply this one.` The rule activation is undone.
+3. The program is not yet granting points, its `applies_on` is `current`, so it is attached with the full check: it is a global discount and a global discount (Spring sale, 10 percent) is already applied. Comparing the two against the discountable amount ignoring Spring sale: 10 percent gives 58.00 and 5 percent gives 29.00, neither exceeds the discountable amount, and the applied one is larger, so the attachment is refused with "This discount (5% on your order) is not compatible with “10% on your order”. Please remove it in order to apply this one." The rule activation is undone.
 
 **Step 4: the Club discount is claimed**
 
@@ -503,3 +503,21 @@ The customer owns a Club card holding 250.00 points and a gift card holding 60.0
 **Step 7: cancellation**
 
 Cancelling the order deletes the three history movements, restores the Club card to 250.00 and the gift card to 60.00, deletes the five reward lines, deletes the Spring sale card (not nominative, created by this order, use count zero once its lines are gone) and deletes the three promises.
+
+## 8. Reconciliation notes
+
+1. **State tables.** One of the two merged versions closed this file with four state tables
+   (programme, card, reward line, pending point entry). They are superseded by
+   [state-machines.md](state-machines.md), which carries the same transitions plus the three
+   machines that version did not tabulate — card ownership, the attachment of a card or a rule to an
+   order, and the counter point change — each with its guards, its refusal messages and a diagram.
+   Nothing was dropped: every row of the four former tables appears there.
+2. **Rule citations.** The identifiers `LOY-RULE-nnn` used in the former text were renumbered into
+   the contiguous scheme LOY-nnn of [business-rules.md](business-rules.md); section 18 of that file
+   maps the two schemes.
+3. **Field identifiers.** Every field named in a procedure now carries its reproduced storage name
+   (`applied_coupon_ids`, `code_enabled_rule_ids`, `coupon_point_ids`, `points_cost`,
+   `reward_identifier_code` and the rest) rather than the full-word form one version had invented.
+4. **Sibling folder keys.** Links to *commerce-storefront*, *website-and-content-management* and
+   *messaging-and-collaboration* now point to [../website-and-storefront/](../website-and-storefront/)
+   and [../messaging-and-activities/](../messaging-and-activities/).

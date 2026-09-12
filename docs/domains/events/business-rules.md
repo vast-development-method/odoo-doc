@@ -1,8 +1,24 @@
 # Business rules of the Events domain
 
-The complete rule catalogue: validations, guards, permissions, consistency rules, uniqueness rules, date rules, rounding rules and the exact messages shown to the user. Each rule carries a stable number so that the other documents of this folder, and other domains, can cite it. A message reproduced between backticks is shown verbatim; a placeholder written between angle brackets is replaced by the value named.
+The complete rule catalogue: validations, guards, permissions, consistency rules, uniqueness rules,
+date rules, rounding rules and the exact message the system shows when it refuses. Each rule carries
+a stable identifier of the form `EV-RULE-nnn`, so that the other documents of this folder, and other
+domains, can cite it.
 
-Rules are grouped as follows: `001`–`010` the event record, `011`–`014` time slots, `015`–`017` tickets, `018`–`020` questions, `021`–`030` registrations, `031`–`040` automatic communications, `041`–`049` products and prices, `050`–`059` selling on a sales order, `060`–`069` the online shop, `070`–`079` booths, `080`–`089` the programme, `090`–`099` access, website and cross-cutting rules.
+Conventions: a verbatim user-facing message is reproduced between quotation marks; a stored value,
+an identifier or a short interface label is reproduced in code font; a placeholder written between
+angle brackets is replaced by the value named inside it. Where the text of the system contains an
+irregularity — a double space, a space before a colon, a missing article — the irregularity is
+reproduced exactly, because a replacement must produce the same text.
+
+Rules are grouped as follows: `001`–`010` the event record, `011`–`014` time slots, `015`–`017`
+tickets, `018`–`020` questions, `021`–`031` registrations, `032`–`040` automatic communications,
+`041`–`049` products and prices, `050`–`059` selling on a sales order, `060`–`068` the online shop
+and the configurators, `070`–`079` booths, `080`–`089` the programme, `090`–`099` access, website
+and cross-cutting rules. The identifier `069` is not used; every other number in those ranges is.
+A complete index is in section [Rule identifier index](#rule-identifier-index), and the mapping of
+the identifiers used by the two source versions is in section
+[Mapping of former rule identifiers](#mapping-of-former-rule-identifiers).
 
 ---
 
@@ -36,7 +52,7 @@ Rules are grouped as follows: `001`–`010` the event record, `011`–`014` time
 
 **Registrations are open only when every one of these conditions holds.**
 
-```
+```formula
 event.kanban_state <> "cancel"
 AND event_registrations_started
 AND (date_end, read in date_tz, >= now, read in date_tz)
@@ -67,7 +83,7 @@ event_registrations_sold_out =
                             or strictly positive availability
         single-slot event → every ticket has is_sold_out = true
      )
-```
+```formula
 
 The event maximum and the sum of the ticket maximums are deliberately independent: an event may cap 20 seats while offering a 20-seat ticket A and a 20-seat ticket B, and it may also leave its own cap empty while capping each ticket.
 
@@ -309,6 +325,15 @@ The count passed for a plain state change or an un-archiving is **zero**, which 
 
 **Anonymous visitors may read the image of an unpublished ticket product.** The image fields of a product variant in the sizes 1920, 1024, 512, 256 and 128 are readable by anyone when that variant is used by at least one event ticket, even if the product is not published. When such a product has no image, the placeholder used is the event ticket placeholder rather than the generic one.
 
+### EV-RULE-049
+
+**A product used by a ticket or by a booth category cannot be deleted.** The product link of an
+Event Template Ticket, of an Event Ticket and of an Event Booth Category is required, and a required
+link refuses the deletion of its target. Deleting such a product is therefore refused by the
+platform with its standard referential message naming the records that still point at it. To retire
+a ticket product, archive it instead: an archived product makes every ticket that uses it
+unavailable for sale (`sale_available` becomes false) without destroying anything.
+
 ---
 
 ## Selling tickets on a sales order
@@ -394,6 +419,14 @@ The count passed for a plain state change or an un-archiving is **zero**, which 
 ### EV-RULE-067
 
 **Lowering the quantity of a ticket cart line cancels the surplus seats.** The non-cancelled registrations of that order, that slot and that ticket are ordered by creation date ascending; the first `new quantity` are kept and the next `old quantity − new quantity` are cancelled.
+
+### EV-RULE-068
+
+**A booth configuration must name at least one booth.** The booth configurator refuses to close
+while its booth list is empty. Message: *"You have to select at least one booth."* The same
+configurator clears the chosen category whenever the event changes, and clears the chosen booths
+whenever the event or the category changes, so an empty list is the normal state after either
+change.
 
 ---
 
@@ -543,3 +576,163 @@ The count passed for a plain state change or an un-archiving is **zero**, which 
 ### EV-RULE-099
 
 **Registration Desk users may post messages on an event they may only read.** A member of the Registration Desk group is allowed to create a message on an Event with read access only. This exception does not extend to anonymous or portal readers, who can read published events but never post on them.
+
+---
+
+## Rule identifier index
+
+Every rule of this file, in order, with the property it protects.
+
+| Rule | Subject |
+|---|---|
+| `EV-RULE-001` | An event always has a name, a start date, an end date, a display time zone and a seat-limit flag |
+| `EV-RULE-002` | The end date cannot precede the start date |
+| `EV-RULE-003` | The online-event link must be a complete web address |
+| `EV-RULE-004` | The online-event link belongs to events without a venue |
+| `EV-RULE-005` | The website of an event must belong to the company of the event |
+| `EV-RULE-006` | Lowering the seat maximum below the seats already taken is allowed but warned about |
+| `EV-RULE-007` | Registrations are open only when every one of these conditions holds |
+| `EV-RULE-008` | An event is sold out when its own seats are exhausted, or when every sellable combination is exhausted |
+| `EV-RULE-009` | Multi-company visibility |
+| `EV-RULE-010` | The organiser and the venue must belong to the company of the event, or to no company |
+| `EV-RULE-011` | A slot hour must lie inside a day |
+| `EV-RULE-012` | A slot must end after it starts |
+| `EV-RULE-013` | A slot must lie inside the time range of its event |
+| `EV-RULE-014` | A slot with registrations cannot be deleted |
+| `EV-RULE-015` | The sales window of a ticket must be coherent |
+| `EV-RULE-016` | The per-order limit of a ticket is bounded |
+| `EV-RULE-017` | A ticket with registrations cannot be deleted |
+| `EV-RULE-018` | A default question must be reusable |
+| `EV-RULE-019` | The type of an answered question cannot change |
+| `EV-RULE-020` | An answered question cannot be deleted, and a default question cannot be deleted at all |
+| `EV-RULE-021` | A slot must belong to the event, and a multi-slot event requires a slot |
+| `EV-RULE-022` | A ticket must belong to the event |
+| `EV-RULE-023` | An answer must carry a value |
+| `EV-RULE-024` | An answer may only reference a question of its event |
+| `EV-RULE-025` | Barcodes are unique across the whole system |
+| `EV-RULE-026` | The public registration form may write only eight fields on a registration: |
+| `EV-RULE-027` | A ticket posted to the public registration form must be sellable |
+| `EV-RULE-028` | Contact details are filled from the contact but never overwritten |
+| `EV-RULE-029` | Telephone numbers are reformatted against a country, best effort |
+| `EV-RULE-030` | Seats are verified for every combination of slot and ticket, and overbooking is refused |
+| `EV-RULE-031` | Deleting an order deletes its registrations; deleting a registration never deletes the order |
+| `EV-RULE-032` | A schedule must reference a template of the model matching its notification type |
+| `EV-RULE-033` | Deleting a template deletes the schedules that used it |
+| `EV-RULE-034` | The scheduler only picks live work |
+| `EV-RULE-035` | A message scheduled before the start is never sent after the end |
+| `EV-RULE-036` | Attendee-based messages ignore the mass-mailing exclusion list; global messages honour it |
+| `EV-RULE-037` | A failing schedule is reported at most once per hour |
+| `EV-RULE-038` | Traces of attendees that fell back to `draft` or `cancel` are deleted, not sent |
+| `EV-RULE-039` | A slot-based schedule creates its per-slot traces lazily |
+| `EV-RULE-040` | Two configuration parameters govern batching, and one governs synchronous execution |
+| `EV-RULE-041` | A product used by a ticket must have its service tracking set to the event value |
+| `EV-RULE-042` | A product used by a booth category must have its service tracking set to the booth value |
+| `EV-RULE-043` | The service tracking of a product already used by a booth category cannot be changed |
+| `EV-RULE-044` | Event and booth products invoice on ordered quantities |
+| `EV-RULE-045` | Event and booth products may be sold at price zero online |
+| `EV-RULE-046` | Event and booth products are excluded from the product catalogue of a sales order |
+| `EV-RULE-047` | A pricelist rule with a positive minimum quantity does not apply to ticket products |
+| `EV-RULE-048` | Anonymous visitors may read the image of an unpublished ticket product |
+| `EV-RULE-049` | A product used by a ticket or by a booth category cannot be deleted |
+| `EV-RULE-050` | The configurator refuses an incoherent choice |
+| `EV-RULE-051` | An order line selling a ticket product must name an event, a ticket, and a slot when the event uses slots |
+| `EV-RULE-052` | The price of a ticket line comes from the ticket, not from the product |
+| `EV-RULE-053` | A sales order carrying event lines cannot be confirmed while a line is unconfigured |
+| `EV-RULE-054` | Confirming an order tops the registrations up to the ordered quantity |
+| `EV-RULE-055` | Paid seats of a single confirmed order start unconfirmed |
+| `EV-RULE-056` | Changing the customer of an order rewrites the contact of its registrations |
+| `EV-RULE-057` | Changing the slot or the ticket of a registration attached to an order raises a warning activity |
+| `EV-RULE-058` | The unit of measure of an event line is read-only |
+| `EV-RULE-059` | A configured line description is never overwritten by the product template description |
+| `EV-RULE-060` | Adding tickets to a cart is capped by the remaining seats |
+| `EV-RULE-061` | The quantity of a ticket line can never be raised by hand from the cart |
+| `EV-RULE-062` | A cart line is reused only for the exact same combination |
+| `EV-RULE-063` | Seats are verified again before a payment is accepted |
+| `EV-RULE-064` | Abandoned-cart reminders skip carts whose tickets are no longer sellable |
+| `EV-RULE-065` | A ticket-only order does not require a full billing address |
+| `EV-RULE-066` | A ticket order whose tickets are all free is confirmed without checkout |
+| `EV-RULE-067` | Lowering the quantity of a ticket cart line cancels the surplus seats |
+| `EV-RULE-068` | A booth configuration must name at least one booth |
+| `EV-RULE-070` | A booth category always names a product |
+| `EV-RULE-071` | All reservations of one order line must belong to a single event |
+| `EV-RULE-072` | A booth linked to a sales order cannot be deleted |
+| `EV-RULE-073` | One reservation per order line and booth |
+| `EV-RULE-074` | A booth must still be available when the order that reserves it is confirmed |
+| `EV-RULE-075` | Confirming a booth cancels the competing reservations and their orders |
+| `EV-RULE-076` | The public booth form validates three situations before booking |
+| `EV-RULE-077` | A booth line always sells exactly one unit |
+| `EV-RULE-078` | Paying the invoice stamps the booths as paid |
+| `EV-RULE-079` | Booking a booth of a sponsoring category creates or reuses a sponsor |
+| `EV-RULE-080` | The three stage flags of a talk stage form a ladder |
+| `EV-RULE-081` | Talk tag names are unique |
+| `EV-RULE-082` | A quiz question must have exactly one correct answer and at least one incorrect answer |
+| `EV-RULE-083` | A quiz submission must cover every question exactly once |
+| `EV-RULE-084` | Resetting a quiz requires either unlimited tries or the administrator role |
+| `EV-RULE-085` | A talk reminder is only sent for an upcoming, visible talk to a valid address |
+| `EV-RULE-086` | A talk proposal with a separate contact block needs a contact address or a telephone |
+| `EV-RULE-087` | A talk proposal may only carry existing, readable tags |
+| `EV-RULE-088` | "Not in" searches on visitor wish lists are refused |
+| `EV-RULE-089` | A talk is shown in the public agenda when it is published or when its stage is visible in the agenda; an anonymous visitor additionally requires publication |
+| `EV-RULE-090` | The name of the event application on the website is required |
+| `EV-RULE-091` | The static-map signing secret must be a valid base-encoded value |
+| `EV-RULE-092` | Only an Event Administrator may regenerate the leads of an event |
+| `EV-RULE-093` | One lead-generation request per event at a time |
+| `EV-RULE-094` | Lead generation never duplicates a lead for the same rule and the same attendee |
+| `EV-RULE-095` | A visitor who registered to an event, or wish-listed a talk, is never purged |
+| `EV-RULE-096` | Merging two visitors moves their registrations and their talk links to the surviving visitor |
+| `EV-RULE-097` | Rounding rules |
+| `EV-RULE-098` | Date and time zone rules |
+| `EV-RULE-099` | Registration Desk users may post messages on an event they may only read |
+
+---
+
+## Mapping of former rule identifiers
+
+Two independently written versions of this folder were merged. Version M numbered its rules
+`EV-RULE-001` to `EV-RULE-099`; version P carried no rule catalogue at all, only a reading order
+that announced one. The consolidated scheme therefore keeps the identifiers of version M unchanged,
+so that every citation already written elsewhere in this folder still resolves, and adds two rules
+that neither version had numbered.
+
+| Identifier in version P | Identifier in version M | Identifier here | Note |
+|---|---|---|---|
+| none: version P had no `business-rules.md` | `EV-RULE-001` … `EV-RULE-048` | unchanged | Same rule, same wording, messages moved from code font into quotation marks. |
+| none | `EV-RULE-050` … `EV-RULE-067` | unchanged | Same rule. |
+| none | `EV-RULE-070` … `EV-RULE-099` | unchanged | Same rule. |
+| none | none | `EV-RULE-049` | Added here: a product used by a ticket or a booth category cannot be deleted. Version M described the required product link in `entities.md` but never numbered the consequence. |
+| none | none | `EV-RULE-068` | Added here: a booth configuration must name at least one booth. Version M carried the refusal *"You have to select at least one booth."* in `workflows.md` and in `booths-and-exhibitors.md` without a rule number. |
+| none | `069` | not used | The number was already unused in version M and is left unused, so that every existing citation keeps its meaning. |
+
+No identifier was reused for a different rule, and no rule of either version was dropped.
+
+---
+
+## Reconciliation notes
+
+1. **Rule scheme.** Only version M carried numbered rules, so the consolidation is a superset: the
+   numbering is unchanged and two previously unnumbered refusals were given the free numbers `049`
+   and `068`. The mapping table above records that.
+2. **Message formatting.** Version M reproduced every message in code font. The documentation rules
+   of this repository reserve code font for stored values and identifiers and require quotation
+   marks for verbatim user-facing text, so every message in this file is now quoted. The text
+   itself, including its irregular spacing, is untouched: for example the refusal
+   *"The following booths are unavailable, please remove them to continue : "* keeps the space
+   before the colon and the trailing space.
+3. **Field identifiers.** Version M used readable substitutes for several storage names. This file
+   now names the fields exactly as the database does — `seats_max`, `date_tz`, `event_url`,
+   `interval_nbr`, `template_ref`, `limit_max_per_order`, `pos_order_line_id`, `color`,
+   `is_in_opening_hours`, `website_cta` and the rest — because a rule that names a field is only
+   testable if the name is the real one. The full name of each field is given in
+   [`entities.md`](entities.md).
+4. **Seat verification.** Both versions agree that the check counts only active registrations in
+   state `open` or `done`, and that a plain state change or an un-archiving passes a requested count
+   of zero. The source confirms it: the counters are read in one grouped query restricted to those
+   two states and to active records, and the effective maximum of a multi-slot event is the seat
+   maximum multiplied by the number of slots. `EV-RULE-030` and
+   [`calculations.md`](calculations.md#1-seat-counters) state it in the same terms.
+5. **The absolute per-order ceiling.** Version M stated thirty tickets per order both as the upper
+   bound of the per-order limit and as the fallback limit of the public form. The source confirms a
+   single constant used in both places, so `EV-RULE-016` and
+   [`calculations.md`](calculations.md#9-per-order-ticket-limits) quote the same number.
+
+```

@@ -672,7 +672,7 @@ Behavioural scenarios a replacement must pass, written as Given / When / Then wi
 
 **Given** an event with the identification questions Name, Email and Phone, a second Phone question, a Company question, one per-attendee selection question and two order-level questions, and the posted form:
 
-```
+```text
 1-name-<name question>          = Pixis
 1-email-<email question>        = pixis@gmail.com
 1-phone-<phone question>        = +32444444444
@@ -1495,3 +1495,17 @@ custom-field                    = custom-value
 **Given** no stage flagged as an ending stage
 **When** the housekeeping runs
 **Then** nothing is written.
+
+---
+
+## Reconciliation notes
+
+1. **Provenance.** Every scenario comes from version M, which was the only version that carried
+   acceptance criteria. Version P announced numbered scenarios covering the ordinary path, every
+   validation failure, every transition, rounding edges, several currencies and several companies;
+   those are present here as sections 1 to 18, with `EV-AC-143` and `EV-AC-230` covering the
+   second-currency cases and `EV-AC-312` covering the multi-company case.
+2. **Messages.** The expected texts are reproduced between quotation marks and are unchanged from the
+   source, including their irregular spacing.
+3. **Identifiers.** The fields named in the scenarios use the storage names the database carries, so
+   that a scenario can be executed against a replacement without a translation step.

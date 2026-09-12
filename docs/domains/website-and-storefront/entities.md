@@ -138,7 +138,7 @@ them, `default_lang_id` is set to the first language of the new list.
 1. **Create.** The normalisation above runs. When `user_id` is not supplied, the public user of the
    supplied company is used, or the global public user when no company is supplied. After insertion
    the derived site link of every affected company is recomputed, the home page bootstrap runs
-   ([workflows.md](workflows.md) §22), the per-site checkout steps are created (§5.7), the forum
+   ([workflows.md](workflows.md) §11), the per-site checkout steps are created (§5.7), the forum
    count is refreshed, and, when the creating user is not in the multi-site group and more than one
    site now exists, that group is implied into the portal, internal user and public groups so that
    everyone sees the site dimension.
@@ -575,7 +575,7 @@ the site preview at that address. Only the administrator group may read it.
 | Blocked Domain List Editor | `website.custom_blocked_third_party_domains` | transient | One long text field carrying the custom blocked-domain list of the current site. On save each line is trimmed and lower-cased, blank lines are dropped, a line starting with `#` is kept verbatim as a comment, and any other line is reduced to its host part; a line that cannot be parsed is refused with `The following domain is not valid:` followed by a newline and the offending line. |
 | Assets Utility | `website.assets` | abstract | Reads, customises and resets style-sheet source and script files per site; the algorithm is [content-management.md](content-management.md) §4. |
 | Theme Utilities | `theme.utils` | abstract | Enables and disables theme templates and assets and resets the default style configuration; the algorithm is [content-management.md](content-management.md) §6. |
-| Text Processor | `website.html.text.processor` | abstract | Turns rendered content blocks into placeholders, requests generated text from the content suggestion service and re-applies the original formatting; the algorithm is [content-management.md](content-management.md) §7.13. |
+| Text Processor | `website.html.text.processor` | abstract | Turns rendered content blocks into placeholders, requests generated text from the content suggestion service and re-applies the original formatting; the algorithm is [content-management.md](content-management.md) §7.4. |
 
 ---
 
@@ -1157,7 +1157,7 @@ Reference page: [`forum.post.reason`](../../references/entities/forum.post.reaso
 | `name` | Reason | text | yes | none | The reason shown in the closing dialogue, translated. |
 | `reason_type` | Reason kind | selection: `basic` = Basic, `offensive` = Offensive | no | `basic` | Basic reasons are offered when closing a question; offensive reasons are offered when marking a post as offensive. |
 
-The shipped reasons are listed in [configuration.md](configuration.md) §5.4. Two of them carry a
+The shipped reasons are listed in [configuration.md](configuration.md) §5.3. Two of them carry a
 reputation consequence: the reason `Contains offensive or malicious remarks` and the reason
 `Spam or advertising` deduct the flagging award from the author when a question is closed with them,
 and restore it when the question is reopened; for the spam reason the deduction is multiplied by ten
@@ -1423,7 +1423,7 @@ this specification's own. Only the meaning, the lifetime and the reset triggers 
 | Page geometry helpers | See [storefront-catalogue.md](storefront-catalogue.md) §7.3. |
 | Canonical product address | Strips the category segment from a product page address so that one product has one canonical address. |
 | Feed helpers | See §5.8. |
-| Configurator helpers | See [configuration.md](configuration.md) §7. |
+| Configurator helpers | See [configuration.md](configuration.md) §8. |
 | Dashboard redirection | Redirects users holding the sales user group to the site dashboard instead of the generic destination. |
 | Suggested pages | Adds the entries `("eCommerce", "/shop")` and `("Forum", "/forum")` to the list of pages an editor may link to. |
 
@@ -2443,7 +2443,7 @@ This folder adds the site-aware serving of short addresses:
   site of the acting company, otherwise the base address of that company, joined with `/r/`. Outside
   a frontend request the platform base address is used.
 * The statistics action of a tracked link opens the short address followed by `+`, which is the
-  statistics page of §7 of [interfaces.md](interfaces.md).
+  statistics page of §2.7 of [interfaces.md](interfaces.md).
 * The public redirection endpoint records one click — network address and country resolved from it —
   unless the caller is identified as a crawler, and then answers a permanent redirect to the target
   address, which may leave the site.

@@ -381,8 +381,8 @@ and container rules WS-090 to WS-092.
 
 **Actor.** Any visitor.
 
-1. The visitor selects a language; the language endpoint is called with the prefix and the address to
-   return to.
+1. The visitor selects a language; the language endpoint is called with the prefix and the
+   address to go back to.
 2. The special value `default` resolves to the site's default language prefix, and the return address is
    rebuilt as the prefix followed by the return address, or by `/` when there is none.
 3. The language code is resolved from the prefix and put in the execution context, so that the redirect

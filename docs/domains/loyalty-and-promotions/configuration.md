@@ -125,7 +125,7 @@ The company of a rule, a reward, a card and a history movement is a stored mirro
 | Gift card product | `Gift Card` | 50 | service | not purchasable, in the services category, carries the shipped gift card picture; when the sales package is present it carries no customer tax; when the point-of-sale package is present it is available at a counter and carries no customer tax. |
 | Wallet top-up product | `Top-up eWallet` | 50 | service | not purchasable, in the services category; when the sales package is present it carries no customer tax; when the point-of-sale package is present it is available at a counter and carries no customer tax. |
 
-Neither product may be deleted, as a variant or as a template; the attempt is refused with `You cannot delete <name> as it is used in 'Coupons & Loyalty'. Please archive it instead.` See `LOY-149` in [business-rules.md](business-rules.md).
+Neither product may be deleted, as a variant or as a template; the attempt is refused with "You cannot delete <name> as it is used in 'Coupons & Loyalty'. Please archive it instead." See LOY-149 in [business-rules.md](business-rules.md).
 
 ### 8.2 The shipped gift card program
 
@@ -139,8 +139,8 @@ Neither product may be deleted, as a variant or as a template; the attempt is re
 
 | Template | Subject | Recipient | Attachment |
 |---|---|---|---|
-| `Gift Card: Gift Card Information` | `Your Gift Card at <company name>` | the default recipients of the card | the printed gift card |
-| `Coupon: Coupon Information` | `Your reward coupon from <company name> ` | the default recipients of the card | the printed coupon |
+| `Gift Card: Gift Card Information` | "Your Gift Card at <company name>" | the default recipients of the card | the printed gift card |
+| `Coupon: Coupon Information` | "Your reward coupon from <company name> ", whose trailing space is part of the subject | the default recipients of the card | the printed coupon |
 
 Both templates are defined on the Loyalty Card entity, use the default recipient resolution of the card, send from the company email address for the coupon template, and are deleted once they have been sent.
 
@@ -210,3 +210,21 @@ The program list of both program actions is shown before the form, and the gift 
 | Expansion of the discounted-product filter | disabled (shipped) or enabled | Enabled makes a counter evaluate faster but stores a product list per reward that must be recomputed whenever a product changes. |
 | Evaluation time zone | the company contact's time zone, or the `loyalty.timezone` parameter | Determines on which calendar day a validity window opens and closes. |
 | Abandonment delay for online carts | four days, or any other number of days | Determines how long a shopper's applied coupon stays reserved on an abandoned cart. |
+
+## 11. Reconciliation notes
+
+1. **System parameter keys.** One of the two merged versions invented descriptive keys and said a
+   rebuild could store them under any name. The keys are contractual and are reproduced exactly:
+   `loyalty.compute_all_discount_product_ids`, `loyalty.timezone`,
+   `website_sale_coupon.abandonned_coupon_validity`, `sale.automatic_invoice` and
+   `sale.default_invoice_email_template`. The spelling of the third key, including its doubled
+   consonant, is part of the stored value.
+2. **Access group identifiers.** The groups are reproduced as `base.group_user`,
+   `sales_team.group_sale_salesman`, `sales_team.group_sale_manager`,
+   `point_of_sale.group_pos_user` and `point_of_sale.group_pos_manager`, each with its role in
+   words, in place of the invented identifiers one version used. The technical-features group is
+   `base.group_no_one`.
+3. **Record rule shape.** The condition is stated in words rather than as an expression.
+4. **Master data owned elsewhere.** The prerequisite that named a shipping method now links to
+   [../delivery-and-shipping/](../delivery-and-shipping/) rather than to the inventory folder, which
+   does not own delivery methods.

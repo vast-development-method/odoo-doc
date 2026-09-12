@@ -690,8 +690,8 @@ option.
 7. Answer with the order's customer identifier.
 
 Two addresses are considered the same when every key of the supplied payload equals the corresponding field
-of the contact. The telephone number is not always part of the comparison, because some wallets do not
-return it.
+of the contact. The telephone number is not always part of the comparison, because some wallets omit
+it.
 
 ---
 

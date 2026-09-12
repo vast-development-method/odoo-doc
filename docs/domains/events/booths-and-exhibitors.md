@@ -48,7 +48,7 @@ The essential asymmetry of the model: a **booth** is a physical object that can 
 
 Without the sales bridge, booths carry no price at all: they are simply allocated. With the sales bridge:
 
-```
+```formula
 category.price       = product sales price + product extra price,
                        whenever the product has a non-zero sales price;
                        otherwise the stored value, which stays editable
@@ -62,7 +62,7 @@ The price is deliberately editable on the category, because one product may serv
 
 **Price written on a sales order line** carrying pending booths:
 
-```
+```formula
 base = Σ over the pending booths of booth.booth_category.price_reduce
          when the matching pricelist rule may NOT show a discount
      = Σ over the pending booths of booth.price
@@ -238,7 +238,7 @@ A level carries a name, a sequence and a ribbon style among `no_ribbon`, `Gold`,
 
 The logo address used on the public pages is derived as:
 
-```
+```formula
 if the sponsor has a logo:            the 256-pixel rendering of the sponsor logo
 else if the contact has an image:     the 256-pixel rendering of the contact image
 else:                                 the shipped default sponsor picture
@@ -266,7 +266,7 @@ A sponsor holding an online booth publishes daily opening hours, `hour_from` and
 
 Reachable at `/event/<event slug>/exhibitors`. The base condition is:
 
-```
+```formula
 event = this event AND exhibitor_type IN ("exhibitor", "online")
 ```
 
@@ -310,3 +310,17 @@ A small structured answer feeds the dialog shown when a visitor clicks a sponsor
 The two counters are read in a single grouped query over the booths of the events being displayed; while an event is still being edited in a form and has no identifier yet, they are counted from the lines held in the form instead.
 
 **Worked example.** An event has 10 booths: 4 Standard (2 booked), 4 Premium (all free) and 2 Very Important Person (1 booked). Then `event_booth_count = 10`, `event_booth_count_available = 7`, the category list holds the three categories, and the available category list holds Standard, Premium and Very Important Person, because each of them still has at least one free booth. Booking the last Standard booths would remove Standard from the second list and therefore from the public page.
+
+---
+
+## Reconciliation notes
+
+1. **Provenance.** This topic file comes from version M. Version P covered the same ground inside its
+   capability table — stands grouped in categories, availability, renters, sale through an order line
+   that may reserve several competing candidates, sponsors and exhibitors — and every one of those
+   subjects is specified here.
+2. **Vocabulary.** Version P called a booth a stand. This folder says booth, because the entity is
+   Event Booth; the synonym is recorded in [`glossary.md`](glossary.md).
+3. **Counters.** Version M named the two derived category lists with invented plurals. They are named
+   here as the database carries them, `event_booth_category_ids` and
+   `event_booth_category_available_ids`, and section 13 states what each contains.

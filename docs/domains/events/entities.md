@@ -67,7 +67,7 @@ The central record of the domain. It holds the dates, the place, the seat policy
 
 **Display name rule:** normally the `name`. When the caller asks for availability in the name, the display name becomes:
 
-```
+```formula
 if event_registrations_sold_out:        "<name> (Sold out)"
 else if seats_limited AND seats_max: "<name> (<seats_available> seats remaining)"
 else:                                    "<name>"
@@ -306,7 +306,7 @@ One dated occurrence of a multi-slot event. The seat maximum of the event is app
 
 **Constraint `_check_time_range`** on `date`, `start_hour` and `end_hour`: both `start_datetime` and `end_datetime` must lie inside `[event.date_begin, event.date_end]`; otherwise:
 
-```
+```formula
 A slot cannot be scheduled outside of its event time range.
 
 Event:          <event start in medium format> - <event end in medium format>
@@ -327,7 +327,7 @@ Slot:           <slot display name>
 
 **Display name rule:** normally the `name`. When the caller asks for availability in the name:
 
-```
+```formula
 if seats_max is zero OR the event is multi-slot: "<name>"
 else if seats_available is zero:                     "<name> (Sold out)"
 else:                                                "<name> (<seats_available> seats remaining)"
@@ -1262,7 +1262,7 @@ value = order line total (including tax, or excluding tax
         ÷ (order currency rate, replaced by 1.0 when it is
            zero or absent)
         ÷ order line quantity                                otherwise
-```
+```formula
 
 Dividing by the order currency rate expresses the amount in the company currency of the order. The view is restricted per company by the record rule "Event Sales Report multi-company".
 
@@ -1385,3 +1385,34 @@ A background job ticket created when a user asks to regenerate the leads of an e
 **Database constraint `_uniq_event`:** `unique(event_id)` with the message *"You can only have one generation request per event at a time."*
 
 The batch size is 200 attendees and at most 100 requests are processed per run of the scheduled job.
+
+---
+
+## Reconciliation notes
+
+1. **Field identifiers.** Version M of this folder rewrote the stored field names into a readable
+   form — `date_time_zone`, `seats_maximum`, `event_web_address`, `interval_number`,
+   `template_reference`, `limit_maximum_per_order`, `color_index`, `is_within_opening_hours`, the
+   `call_to_action_*` family, `point_of_sale_order_line` and the plural forms of every relation.
+   Version P used the transport names of the entities but wrote no field tables. Storage names are
+   contractual, so this file reproduces them exactly as the database carries them (`date_tz`,
+   `seats_max`, `event_url`, `interval_nbr`, `template_ref`, `limit_max_per_order`, `color`,
+   `is_in_opening_hours`, `website_cta` and the rest) and adds the **Full name** column that the
+   documentation rules require. No behaviour was changed by that substitution; each statement was
+   checked against the field catalogue of the entity concerned.
+2. **Entity names.** The two versions disagreed on the readable name of six entities. This file uses
+   the name each entity carries in the entity dictionary of this repository: Event Automated Mailing
+   (version P: Communication Schedule; version M: Event Communication), Registration Mail Scheduler
+   (version P: Communication per Attendee), Slot Mail Scheduler (version P: Communication per Slot),
+   Event Sponsor Level (version M: Event Sponsor Type), Track / Visitor Link (version M: Event Track
+   Visitor) and Mail Scheduling on Event Category (version P: Template Communication). The alternative
+   wordings are listed in [`glossary.md`](glossary.md).
+3. **Scope.** Website Event Menu (`website.event.menu`) is owned by this folder. Version P omitted it
+   from its entity list while describing the per-event menu behaviour in prose; version M owned it.
+   The union is documented here, in section 27.
+4. **Multi-slot capacity.** Both versions state that the seat maximum of a multi-slot event applies
+   per slot and that the event-level available figure uses the maximum multiplied by the number of
+   slots. The source confirms both statements, and the seat counter section of
+   [`calculations.md`](calculations.md#1-seat-counters) carries the worked example.
+
+```

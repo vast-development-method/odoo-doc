@@ -16,6 +16,11 @@ Terms of the Loyalty and Promotions domain, with full-word definitions. A term w
 
 **Buy some get some** A **program** family in which every purchased unit grants one credit and a number of credits is exchanged for free units of a product.
 
+**Buy-some-take-some distribution** The arithmetic that turns a number of items and a "buy so many,
+take so many" ratio into a number of free items, defined in [calculations.md](calculations.md),
+section 10.1. It is what a counter uses to decide how many units of a free-product reward a ticket
+has earned.
+
 **Card** See **Loyalty Card**.
 
 **Channel flag** One of the three booleans that say on which channel a **program** may be used: sales, point of sale, online shop.
@@ -26,21 +31,28 @@ Terms of the Loyalty and Promotions domain, with full-word definitions. A term w
 
 **Communication plan** The set of **Loyalty Communication** rules of a **program**: what to send when a card is created and when a balance crosses a milestone.
 
+**Confirmation exchange** The second and last conversation between a counter device and the server,
+run once the ticket exists on the server: it creates the cards, applies the points, binds the reward
+lines, sends the creation communications and writes the history.
+
 **Counting lines** The document lines that carry a product and no **reward**, used to compute quantities and to judge the quantity gate of a **rule**. Shipping lines are excluded when the shipping capability package is present.
 
 **Coupon** A **card** of a program of the `coupons` family: a bearer code that grants immediate access to a reward.
 
+**Discount factor** The ratio of the granted discount to the **discountable amount**, capped at one, by which every entry of the **discountable per tax** breakdown is multiplied to produce the reward lines.
+
 **Discountable amount** What a discount is allowed to reduce on a document, computed differently for each **applicability**. Every computation produces a total and a breakdown per tax combination.
 
 **Discountable per tax** The breakdown of the **discountable amount** by tax combination. It is what lets a single discount become one document line per tax combination, so that the tax amounts stay exact.
-
-**Discount factor** The ratio of the granted discount to the **discountable amount**, capped at one, by which every entry of the **discountable per tax** breakdown is multiplied to produce the reward lines.
 
 **Electronic wallet** A **program** family that stores a monetary balance on a nominative **card**, credited by buying a top-up product and spent as a means of payment.
 
 **Evaluation** The routine that re-examines a document against every applicable **program**, recomputes the points it grants, rebuilds its reward lines and cleans up what is no longer justified.
 
 **Evaluation time zone** The time zone in which the **reference date** of a document is computed.
+
+**Exhausted card** A **card** whose **balance** no longer reaches the smallest point price among the
+**rewards** of its **program**. Its code is refused with "This coupon has already been used."
 
 **Family defaults** The set of field values, rules, rewards and communication rules that a **program** receives when its type is set or changed.
 
@@ -58,6 +70,9 @@ Terms of the Loyalty and Promotions domain, with full-word definitions. A term w
 
 **History entry** See **Loyalty History movement**.
 
+**Local identifier** The negative identifier a counter device gives a **card** that does not exist on
+the server yet. The confirmation exchange returns the mapping from local identifiers to real ones.
+
 **Loyalty Card** An individual coupon, gift card, electronic wallet or loyalty card: a unique code, a **balance**, an optional owner and an optional expiration date.
 
 **Loyalty Communication** One rule of a **communication plan**: when to send, which email template to use, and which document to print at a counter.
@@ -74,21 +89,39 @@ Terms of the Loyalty and Promotions domain, with full-word definitions. A term w
 
 **Milestone** A **balance** threshold that triggers an email when a **card** crosses it upward. Only the highest milestone crossed by one movement is sent.
 
-**Nominative program** A **program** whose points belong to an identified customer and are kept on a single **card** per customer. A program is nominative when its point usage mode is "current and future orders", or when it is a loyalty or electronic wallet program whose points apply to future orders.
-
 **Next-order coupon** A **program** family that issues a bearer **card** to the customer when an order meets its rules, for use on a later order.
+
+**Nominative program** A **program** whose points belong to an identified customer and are kept on a single **card** per customer. A program is nominative when its point usage mode is "current and future orders", or when it is a loyalty or electronic wallet program whose points apply to future orders.
 
 **Payment program** A **gift card** or **electronic wallet** program. Its reward behaves as a means of payment: it applies to the whole document total including every tax, it may reduce **fixed-amount taxes**, and it is always recomputed after every other reward.
 
 **Pending promise** See **Sales Order Coupon Points**.
 
-**Point cost** The number of **points** that claiming a **reward** consumes on a **card**. When a reward produces several document lines, only the first carries the cost.
+**Placeholder line** The single line named `TEMPORARY DISCOUNT LINE`, of quantity zero, price zero
+and point cost zero, that keeps a discount **reward** attached to a document whose discountable
+amount fell to zero because a **payment program** already paid it all.
 
-**Points** The unit in which a **card**'s **balance** is expressed. For a gift card or an electronic wallet one point is one unit of the program currency; for a loyalty program it is whatever the program's point name says.
+**Plural item name** The word a **program** type uses for its **cards** in a count, for example
+`Gift Cards` or `Promos`. Listed in [entities.md](entities.md), section 1.7.
+
+**Point correction** The adjustment that removes the contribution of free-product **reward lines**
+from a point count, so that a rule granting points per unit of currency spent does not treat a
+give-away as a payment. Defined in [calculations.md](calculations.md), section 10.3.
+
+**Point cost** The number of **points** that claiming a **reward** consumes on a **card**. When a reward produces several document lines, only the first carries the cost.
 
 **Point name** The label under which **points** are shown to the customer, for example "Loyalty point(s)" or a currency symbol.
 
+**Points** The unit in which a **card**'s **balance** is expressed. For a gift card or an electronic wallet one point is one unit of the program currency; for a loyalty program it is whatever the program's point name says.
+
 **Points available** The number of **points** of a **card** that may be spent on a given document right now: the stored balance, plus what the document will grant when it is confirmed, minus what its reward lines already consume.
+
+**Pooled line** A **reward line** that a recomputation has neutralised — point cost, unit price and
+technical unit price set to zero, references kept — so that it can be rewritten in place and keep a
+description a salesperson edited.
+
+**Preset** The set of field values, rules, rewards and communication plans a **program** receives
+when its type is set or changed. Also called the family defaults.
 
 **Program** See **Loyalty Program**.
 
@@ -121,3 +154,18 @@ Terms of the Loyalty and Promotions domain, with full-word definitions. A term w
 **Usage ceiling** The maximum number of documents that may use a **program**, counted across the sales, point-of-sale and online shop channels together.
 
 **Use count** The number of document lines that reference a **card**. A card with a non-zero use count is never deleted automatically.
+
+**Validation exchange** The first conversation between a counter device and the server, run just
+before the payment screen accepts a ticket: it checks that every card still exists, that every
+balance is sufficient and that no new code collides.
+
+## Reconciliation notes
+
+1. Two independently written descriptions of this domain were merged into this folder. Their two
+   vocabularies agreed on every term they shared; the terms above marked with a section reference
+   were added during the merge so that every word used in the other files is defined here.
+2. One version called a row of the movement log a *history entry* and the other a *movement*. The
+   folder now uses **Loyalty History movement** for the record and *movement* for one of its rows,
+   with *history entry* kept as a pointer to it.
+3. One version spelled the common noun *programme*. The folder uses *program* throughout, which is
+   also the spelling of the entity's own name, Loyalty Program.
