@@ -186,10 +186,10 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 
 ### LEAD-AC-034 Email domain criterion
 
-**When** the email of a Lead is `robert.poilvert@mycompany.com`
-**Then** the email domain criterion is `@mycompany.com`.
-**When** the email is `robert.poilvert@gmail.com`, a generic provider domain
-**Then** the email domain criterion is `robert.poilvert@gmail.com`.
+**When** the email of a Lead is `robert.poilvert@mycompany.example`
+**Then** the email domain criterion is `@mycompany.example`.
+**When** the email is `robert.poilvert@freemail.example`, a generic provider domain
+**Then** the email domain criterion is `robert.poilvert@freemail.example`.
 **When** the email is cleared
 **Then** the email domain criterion is empty.
 
@@ -540,7 +540,7 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 
 ### LEAD-AC-130 Duplicates by email domain
 
-**Given** three Leads carrying the emails `robert@mycompany.com`, `accounting@mycompany.com` and `robert@gmail.com`
+**Given** three Leads carrying the emails `robert@mycompany.example`, `accounting@mycompany.example` and `robert@freemail.example`
 **When** the potential duplicates of the first are read
 **Then** the second is among them and the third is not.
 
@@ -680,7 +680,7 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 **Then** a contact is created and its language is the default customer language of the platform, `en_US`, not the archived one.
 **And given** a second Lead whose language is the active language `en_US`
 **When** the same conversion runs
-**Then** the created contact carries the language `en_US` because that language is active (see [calculations.md](calculations.md) section 5.2).
+**Then** the created contact carries the language `en_US` because that language is active (see [entities.md](entities.md) section 8.7).
 
 ## 9. Merging
 
@@ -710,7 +710,7 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 
 ### LEAD-AC-164 Merging two records with conflicting fields
 
-**Given** the two records of [calculations.md](calculations.md) section 4.4
+**Given** the two records of [calculations.md](calculations.md) section 7.6.1
 **When** they are merged
 **Then** the survivor is the opportunity `Nibbler Spacecraft Request`, which keeps its own probability of fifty, receives the type `opportunity`, the salesperson Lucy, the team `Direct Sales`, the description `Wants a quotation for 3 units.` followed by a blank line and `Asked for a demonstration.`, the priority `2`, the tags Service and Training, an expected revenue of `1 500.00`, the customer `Nibbler`, the email `contact@nibbler.example.com`, the whole address `Test street`, empty, `Test City`, `5000`, empty, Belgium, and no lost reason
 **And** the merged-away record is deleted.
@@ -1460,32 +1460,32 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 
 ### LEAD-AC-336 Website identification
 
-**Given** an active Customer Relationship Management Lead Generation Rules record for the country Belgium matching the path pattern `/pricing*`
+**Given** an active Lead Generation Rule record for the country Belgium matching the path pattern `/pricing*`
 **When** a visitor located in Belgium opens `/pricing/plans`
-**Then** a Customer Relationship Management Reveal View is created for the pair of that rule and that network address, and a second visit from the same address creates nothing more.
+**Then** a Reveal View is created for the pair of that rule and that network address, and a second visit from the same address creates nothing more.
 **And when** the scheduled job resolves that address into a company
-**Then** a record is created with the type, the team, the salesperson, the tags, the priority and the name suffix of the rule, the company data, the network address, the credits consumed and the rule, and the Customer Relationship Management Reveal View is deleted.
+**Then** a record is created with the type, the team, the salesperson, the tags, the priority and the name suffix of the rule, the company data, the network address, the credits consumed and the rule, and the Reveal View is deleted.
 **And when** the service cannot resolve it
-**Then** the Customer Relationship Management Reveal View moves to the state `not found`.
+**Then** the Reveal View moves to the state `not found`.
 
-### LEAD-AC-337 A Customer Relationship Management Reveal View is not repeated for a recent lead
+### LEAD-AC-337 A Reveal View is not repeated for a recent lead
 
 **Given** a record created six weeks ago from the network address `203.0.113.7`, with a retention window of six months
-**When** the scheduled job runs and a Customer Relationship Management Reveal View exists for that address
-**Then** the Customer Relationship Management Reveal View is deleted before processing and no new record is created.
+**When** the scheduled job runs and a Reveal View exists for that address
+**Then** the Reveal View is deleted before processing and no new record is created.
 
-### LEAD-AC-338 A Customer Relationship Management Reveal View expires
+### LEAD-AC-338 A Reveal View expires
 
-**Given** a Customer Relationship Management Reveal View older than one month
+**Given** a Reveal View older than one month
 **When** the cleanup runs
 **Then** it is deleted.
 
 ### LEAD-AC-339 An invalid path pattern is refused
 
-**When** an administrator types a pattern that does not compile in a Customer Relationship Management Lead Generation Rules record
+**When** an administrator types a pattern that does not compile in a Lead Generation Rule record
 **Then** the save is refused with `Enter Valid Regex.`
 
-### LEAD-AC-340 The contact count of a Customer Relationship Management Lead Generation Rules record is bounded
+### LEAD-AC-340 The contact count of a Lead Generation Rule record is bounded
 
 **When** an administrator sets the number of tracked contacts to zero or to six
 **Then** the save is refused with `Maximum 5 contacts are allowed!`
@@ -1665,7 +1665,7 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 **And when** a user who belongs to the salesperson group and to the website editor group does the same
 **Then** the publication control is offered and switching it publishes the page.
 **And when** a user who belongs to the salesperson group but not to the website editor group does the same
-**Then** the publication control is still offered and switching it publishes the page, because the right comes from write access on the contact (`LEAD-RULE-177`).
+**Then** the publication control is still offered and switching it publishes the page, because the right comes from write access on the contact (`LEAD-152`).
 
 ### LEAD-AC-381 Website editing rights alone do not allow publishing
 
@@ -1679,7 +1679,7 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 **Given** exactly one listable reseller, a company contact with a published grade, published, located in Belgium
 **And given** a visitor whose network address is located in Mexico
 **When** that visitor requests the directory without naming a country
-**Then** the country inferred from the address, Mexico, holds no listable reseller, the country filter is dropped, the Belgian reseller is listed, and the country selector shows **All Countries** as the active entry (`LEAD-RULE-178`).
+**Then** the country inferred from the address, Mexico, holds no listable reseller, the country filter is dropped, the Belgian reseller is listed, and the country selector shows **All Countries** as the active entry (`LEAD-153`).
 **And when** a second reseller located in Mexico is published
 **Then** the same request lists the Mexican reseller only, because the inferred country now holds one.
 
@@ -1954,7 +1954,7 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 **When** the text message composer is opened from the visitor screen
 **Then** it opens on that Lead, taking the number from the telephone field of the Lead.
 **And given** a visitor linked to several Leads carrying that number
-**Then** it opens on the most confident of them, the confidence order being the one of [business-rules.md](business-rules.md) `LEAD-RULE-078`.
+**Then** it opens on the most confident of them, the confidence order being the one of [business-rules.md](business-rules.md) `LEAD-068`.
 
 ### LEAD-AC-443 Texting a website visitor that has a customer
 
@@ -1997,7 +1997,7 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 **When** a message is posted on the first Lead naming the contact `Robert Poilvert`, whose address is `robert@nibbler.example.com`
 **Then** that contact becomes the customer of the first and of the second Lead
 **And** the third Lead keeps no customer because its stage is folded
-**And** the fourth Lead keeps `Somebody Else` (`LEAD-RULE-038`).
+**And** the fourth Lead keeps `Somebody Else` (`LEAD-038`).
 
 ### LEAD-AC-448 Suggested recipients of a record whose address carries a display name
 
@@ -2036,10 +2036,244 @@ Unless a scenario says otherwise, the shipped master data of [configuration.md](
 
 ### LEAD-AC-453 The suggested creation values repeat the whole contact block of the record
 
-**Given** a Lead with the contact name `ContactAndCompany`, the company name `Delivery Boy company`, the address `default_create_with_partner@example.com`, the internal note `<p>Top</p>`, the job position `Delivery Boy`, the telephone `678-728-0949`, the street `3rd Floor, Room 3-C`, the street line two `123 Arlington Avenue`, the postal code `13202`, the city `New York`, the country subdivision `New York`, the country `United States`, the web address `https://www.arlington123.com/3f3c`, with the salesperson Lucy
+**Given** a Lead with the contact name `ContactAndCompany`, the company name `Delivery Boy company`, the address `default_create_with_partner@example.com`, the internal note `<p>Top</p>`, the job position `Delivery Boy`, the telephone `678-728-0949`, the street `3rd Floor, Room 3-C`, the street line two `123 Arlington Avenue`, the postal code `13202`, the city `New York`, the country subdivision `New York`, the country `United States`, the web address `https://www.arlington123.example/3f3c`, with the salesperson Lucy
 **When** the suggested recipients are requested
 **Then** one recipient is suggested, named `ContactAndCompany`, with that address, and its creation values hold the street, the street line two, the postal code, the city, the country, the country subdivision, the web address, the telephone, the job position, the salesperson Lucy, the internal note as the contact note, the company name `Delivery Boy company`, no parent company, and the flag that says the contact is not a company.
 **And when** the record has no contact name and its address carries the display name `"Contact Name" <default_create_with_name_in_email@example.com>`
 **Then** the suggested name is `Contact Name` and the suggested address is `default_create_with_name_in_email@example.com`.
 **And when** the record has neither a contact name nor a display name in the address
 **Then** the suggested name is the address itself.
+
+## 18. Scenarios carried over from the second description
+
+These scenarios restate, as verifiable criteria, the worked examples that the other description of
+this domain carried. They use its numbers, so that both sets of numbers are covered.
+
+### LEAD-AC-460 A lead converted with a newly created company and contact
+
+**Given** a Lead with the type `lead`, the title `Spare parts for the Antwerp line`, the company name
+`Northwind Parts`, the contact name `Anna Devries`, the job position `Procurement Manager`, the
+email `anna@northwind-parts.example`, the telephone `+32 3 555 22 10`, the street `Rue Haute 12`, the
+postal code `1000`, the city `Brussels`, the country Belgium, the active language Dutch, the notes
+`Called on Monday.`, no customer, the salesperson Ines, the team `Direct Sales`, the stage
+`Qualified` and an expected revenue of `18 000`
+**And** no contact anywhere in the database carrying the address `anna@northwind-parts.example`
+**When** the salesperson opens the conversion dialogue and confirms with the proposed defaults
+**Then** the dialogue proposes `Create a new customer`, because no contact matched, and the action
+`Convert to opportunity`, because the duplicate search returned only this record
+**And** a company contact is created with the name `Northwind Parts`, the company flag set, no
+parent, the salesperson Ines, the note `Called on Monday.`, the telephone `+32 3 555 22 10`, the
+email `anna@northwind-parts.example`, the job position `Procurement Manager`, the address `Rue Haute
+12`, `1000`, `Brussels`, Belgium, an empty stored company name, the contact kind `contact` and the
+language Dutch
+**And** a second contact is created with the name `Anna Devries`, the company flag clear, the parent
+`Northwind Parts`, and the same salesperson, note, telephone, email, job position, address, contact
+kind and language, its stored company name staying empty because it has a parent
+**And** the Lead is linked to `Anna Devries`, its type becomes `opportunity`, its conversion date is
+the instant of the operation, its stage is unchanged because it already had one, and its derived
+contact fields re-derive to the same values
+**And** exactly two contacts were created and exactly one Lead was updated.
+
+### LEAD-AC-461 Two leads that share a postal address and an email domain are merged
+
+**Given** two active leads, both of type `lead`, detected as duplicates because their email domain
+criterion is `@northwind-parts.example`:
+
+| Field | Lead Alpha | Lead Beta |
+|---|---|---|
+| stage | `Qualified`, sequence 2 | `New`, sequence 1 |
+| probability | 22 | 35 |
+| identifier | 5101 | 5140 |
+| title | `Northwind — spare parts` | `Parts enquiry` |
+| salesperson | empty | Karl |
+| company name | `Northwind Parts` | empty |
+| contact name | empty | `Bruno Adler` |
+| email | `anna@northwind-parts.example` | `bruno@northwind-parts.example` |
+| telephone | empty | `+32 2 555 01 44` |
+| expected revenue | 18 000 | 0 |
+| tags | Training | Service |
+| priority | `1` | `2` |
+| notes | `Called on Monday.` | `Sent the catalogue.` |
+| street | `Rue Haute 12` | `Rue Haute 12` |
+| street line two | empty | `Box 4` |
+| postal code | `1000` | `1000` |
+| city | `Brussels` | `Brussels` |
+| state | empty | empty |
+| country | Belgium | Belgium |
+
+**When** they are merged
+**Then** the confidence order is Alpha then Beta, because both are active leads and Alpha's stage
+sequence is the higher, so record 5101 survives
+**And** the merged values are: type `lead`; title `Northwind — spare parts`; salesperson Karl;
+company name `Northwind Parts`; contact name `Bruno Adler`; email
+`anna@northwind-parts.example`; telephone `+32 2 555 01 44`; expected revenue 18 000; stage
+`Qualified`; tags Training **and** Service; priority `2`; notes `Called on Monday.` then a blank line
+then `Sent the catalogue.`; and no lost reason, because the survivor's probability is not zero
+**And** the whole address comes from Beta, which has five non-empty address fields against Alpha's
+four: `Rue Haute 12`, `Box 4`, `1000`, `Brussels`, an **empty** state and Belgium
+**And** the probability of the survivor is not taken from the merge; it is recomputed by the write
+unless it was manual
+**And** record 5140 is deleted after its messages, activities, attachments and meetings have been
+re-pointed at record 5101.
+
+### LEAD-AC-462 Thirty leads and three members with capacities ten, fifteen and five
+
+**Given** one team with three members of capacities ten, fifteen and five, none paused, none with an
+assignment condition, none having received a lead in the last twenty-four hours
+**And** thirty leads already attached to the team with no salesperson and no assignment date
+**When** a sales administrator presses the assignment control on that team, which forces the quota
+**Then** the allocation phase finds nothing to allocate, because all thirty already have a team
+**And** the daily quotas are `round_half_up_to_integer(10 ÷ 30) = 0`,
+`round_half_up_to_integer(15 ÷ 30) = 1` and `round_half_up_to_integer(5 ÷ 30) = 0`
+**And** only the member of capacity fifteen is eligible; the thirty leads are ordered by probability
+descending, the first is given to that member and converted into an opportunity, the member's quota
+falls to zero and the member leaves the rotation
+**And** the remaining twenty-nine leads stay unassigned, and the notification reads `1 leads assigned
+among 1 salespersons.`
+**And when** the capacities are changed to three hundred, four hundred and fifty and one hundred and
+fifty, which give daily quotas of ten, fifteen and five
+**Then** a single run distributes all thirty: ten to the first member, fifteen to the second and five
+to the third.
+
+### LEAD-AC-463 An opportunity whose quotation is confirmed and which is then won
+
+**Given** an opportunity titled `Antwerp line — spare parts` with an expected revenue of `18 000.00`
+in the company currency, the stage `Proposition` of sequence 3, an automatic probability of `62.40`,
+the salesperson Ines and the team `Direct Sales`
+**And** one quotation of `21 400.00` untaxed in the same currency, in the sent state, referencing
+that opportunity
+**When** the quotation is confirmed
+**Then** the quotation count falls from `1` to `0`, the order count rises from `0` to `1` and the sum
+of orders becomes `21 400.00`
+**And** the expected revenue becomes `21 400.00`, because `18 000.00` is strictly less and the
+currency matches, and the change is tracked with `Expected revenue has been updated based on the
+linked Sales Orders.`
+**And** the prorated revenue becomes `round(21 400.00 × 62.40 ÷ 100, 2) = 13 353.60`
+**When** the salesperson then presses the won control
+**Then** the only won stage available to `Direct Sales` is `Won` of sequence 70, which is strictly
+greater than 3, so it is chosen; the stage becomes `Won`, the probability and the automated
+probability become one hundred, the active flag is forced true and the closing date is stamped
+**And** the prorated revenue becomes `21 400.00`
+**And** the won status becomes `won`, the won counters of `New`, `Qualified`, `Proposition` and `Won`
+each rise by one, and so do the cells of the country, the state, the source, the language, the email
+quality, the telephone quality and each tag of the record
+**And** the days to close is computed from the creation instant to the closing instant
+**And** a message with the subtype Opportunity Won is posted and the celebration is evaluated
+**And** no journal entry is produced.
+
+### LEAD-AC-464 An opportunity lost with a reason and a closing note
+
+**Given** an opportunity titled `Ghent depot — conveyor belts` with an expected revenue of
+`9 500.00`, a probability of `41.00`, the stage `Qualified` of sequence 2, the team `Direct Sales`,
+the country Belgium, the source `Search Engine`, an email quality of `correct`, a telephone quality
+of `correct` and one tag `Service`
+**When** the salesperson presses the lost control, picks the reason `Too expensive` and types the
+closing note `Competitor quoted 20 per cent below.`
+**Then** the record is archived, its lost reason becomes `Too expensive`, its probability and its
+automated probability become zero, its closing date is stamped and its days to close is computed
+**And** the prorated revenue becomes `round(9 500.00 × 0 ÷ 100, 2) = 0.00`
+**And** the won status becomes `lost`
+**And** the lost counters of the stage cells `New` and `Qualified` rise by one and those of
+`Proposition` and `Won` do not, because their sequences are above the record's
+**And** the lost counters of the country, the source, the email quality and the telephone quality
+cells rise by one, as do the language and state cells when those fields are set, and the cell of the
+tag `Service` rises too — the threshold of fifty applies when the table is read, not when it is
+written
+**And** a message with the subtype Opportunity Lost is posted, showing the tracked change of the
+lost reason and, below it, the block `Lost Comment:` followed by the note.
+
+### LEAD-AC-465 The confidence order of four active leads
+
+**Given** four active leads of type `lead`: P in a stage of sequence 3 with a probability of 25 and
+identifier 41; Q in a stage of sequence 3 with a probability of 15 and identifier 42; R in a stage of
+sequence 1 with a probability of 20 and identifier 40; S with no stage, therefore a stage sequence of
+zero, a probability of 10 and identifier 43
+**When** they are ordered by confidence, most trustworthy first
+**Then** the order is P, Q, R, S: P beats Q because at an equal stage sequence its probability is
+higher, and S ranks last because it has no stage
+**And when** an archived lead T is added
+**Then** T ranks last whatever its other values, because the first component of the key is false for
+it alone.
+
+### LEAD-AC-466 The celebration message for a deal that never left the first stage
+
+**Given** an opportunity whose salesperson has already closed several deals this year, whose
+expected revenue beats no record, and which spent at least sixty seconds in exactly one stage, that
+stage being the first stage available to its team
+**When** it is marked won from the form
+**Then** the message is `No detours, no delays - from <stage name> straight to the win! 🚀`
+**And given** the same record but a single stage that is **not** the first available one
+**Then** that message is not returned and the country and source rules are still evaluated.
+
+### LEAD-AC-467 Days to assign counts complete days only
+
+**Given** a Lead created on the fifteenth of January at 09:12:44.318 and assigned on the eighteenth
+of January at 09:12:43
+**When** the days to assign is read
+**Then** it is `2.0`: the creation instant is truncated to the second, the difference is two days,
+twenty-three hours, fifty-nine minutes and fifty-nine seconds, and only complete days count.
+
+### LEAD-AC-468 The unique-name counter
+
+**Given** a Source named `test` already stored
+**When** the names `test`, `test [3]`, `bob`, `test` and `test` are created in that order
+**Then** the stored names are `test [2]`, `test [3]`, `bob`, `test [4]` and `test [5]`.
+
+### LEAD-AC-469 Delivered attribution records that may not be deleted
+
+**When** the delivered Source named `Referral` is deleted
+**Then** the deletion is refused with `You cannot delete the 'Referral' UTM source record.`
+**And when** one of the six delivered Media is deleted
+**Then** the deletion is refused with `Oops, you can't delete the Medium '<name>'. Doing so would be
+like tearing down a load-bearing wall — not the best idea.`
+
+### LEAD-AC-470 A recurring revenue needs a plan
+
+**Given** a form open on an opportunity, for a user in the recurring revenue group
+**When** the user types a recurring revenue of `1 200.00` and leaves the plan empty
+**Then** the record cannot be saved until a plan is chosen
+**And when** the plan `Yearly` is chosen
+**Then** the monthly recurring revenue reads `100.00` and, at a probability of twenty-five, the
+prorated monthly recurring revenue reads `25.00` and the prorated recurring revenue reads `300.00`.
+
+### LEAD-AC-471 A blacklisted telephone number is unique and reactivated rather than duplicated
+
+**Given** the number `+12025550122` already on the telephone blacklist and then removed, which
+archives the record
+**When** the same number is blacklisted again
+**Then** the archived record is reactivated and no second record is created
+**And when** a second record is created for a number that already exists and is active
+**Then** the existing record is returned
+**And when** a value that cannot be sanitised is submitted
+**Then** it is refused with the parsing error followed by `Please correct the number and try again.`
+
+### LEAD-AC-472 The lead generation credit estimate
+
+**Given** a request for twenty-five leads targeting companies and their contacts, with three
+contacts per company
+**When** the estimate is read
+**Then** the company credits read `25`, the contact credits read `75` and the total reads `100`
+**And given** the same request targeting companies alone
+**Then** the total reads `25`.
+
+### LEAD-AC-473 The stage search helper
+
+**Given** the stages `New` (no team, sequence 1, not folded), `Europe qualified` (team `Europe`,
+sequence 2, not folded), `Asia qualified` (team `Asia`, sequence 2, not folded) and `Archived` (no
+team, sequence 90, folded)
+**When** a Lead of the team `Europe` looks for its first non-folded stage
+**Then** the answer is `New`
+**And when** a Lead with no team looks for it
+**Then** only `New` and `Archived` are candidates and the answer is `New`.
+
+---
+
+## 19. Reconciliation notes
+
+| Subject | The two statements | Resolution |
+|---|---|---|
+| Which worked examples are mandatory | One description carried a set of mandated worked examples inside its calculation and workflow documents; the other carried a numbered scenario catalogue. | Both are here. Sections 1 to 17 are the numbered catalogue; section 18 restates the mandated worked examples of the other description as scenarios, keeping its numbers so that neither set of figures is lost. |
+| The assignment example | One description used capacities of ten, fifteen and five, which give daily quotas of zero, one and zero; the other used ninety, sixty and thirty, which give three, two and one. | Both are scenarios — `LEAD-AC-197` and `LEAD-AC-462` — because together they show that a capacity is a monthly figure and that the rounding of the daily quota is what decides who is eligible. |
+| The merge example | The two descriptions merged different pairs of records. | Both are scenarios — `LEAD-AC-164` and `LEAD-AC-461` — one where an opportunity wins on the second key of the confidence order, one where two leads are separated by their stage sequence. |
+| The probability example | Both descriptions computed the same deal and reached `74.30`. | Kept once, as `LEAD-AC-234`, with the frequency table stated in full in [predictive-lead-scoring.md](predictive-lead-scoring.md). |
+| Scenario identifiers | Only one description numbered its scenarios. | Its scheme is kept and extended; the scenarios added in section 18 continue the same numbering. |

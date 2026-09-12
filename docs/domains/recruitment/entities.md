@@ -22,6 +22,13 @@ Conventions used in every field table:
   message thread, company scoping, indexing, deletion behaviour of the reference, and the
   selection values with their labels.
 
+The general meaning of these categories — what a stored derived value is, how a reference
+behaves when its target is deleted, how a mixin contributes fields — is defined once for the
+whole repository in [the entity and field system](../../overview/entity-and-field-system.md)
+and in [inheritance and extension](../../overview/inheritance-and-extension.md). The
+company scoping used throughout this file follows
+[multi-company behaviour](../../overview/multi-company.md).
+
 ---
 
 ## 1. Entity map
@@ -56,6 +63,36 @@ erDiagram
 The diagram shows only the structural links. The behavioural links — the target
 decrement, the message templates, the interviewer privilege grant — are described in
 [workflows.md](workflows.md) and [business-rules.md](business-rules.md).
+
+### 1.1 Generated reference pages
+
+Every entity named in this file has a generated reference page carrying its machine-read
+field list. Those pages are the mechanical counterpart of the prose below; where the two
+differ, this file is the specification and the reference page is the extract.
+
+| Entity | Transport name | Reference page |
+|---|---|---|
+| Application | `hr.applicant` | [hr.applicant.md](../../references/entities/hr.applicant.md) |
+| Recruitment Stage | `hr.recruitment.stage` | [hr.recruitment.stage.md](../../references/entities/hr.recruitment.stage.md) |
+| Refusal Reason | `hr.applicant.refuse.reason` | [hr.applicant.refuse.reason.md](../../references/entities/hr.applicant.refuse.reason.md) |
+| Application Tag | `hr.applicant.category` | [hr.applicant.category.md](../../references/entities/hr.applicant.category.md) |
+| Degree | `hr.recruitment.degree` | [hr.recruitment.degree.md](../../references/entities/hr.recruitment.degree.md) |
+| Recruitment Source | `hr.recruitment.source` | [hr.recruitment.source.md](../../references/entities/hr.recruitment.source.md) |
+| Job Board | `hr.job.platform` | [hr.job.platform.md](../../references/entities/hr.job.platform.md) |
+| Talent Pool | `hr.talent.pool` | [hr.talent.pool.md](../../references/entities/hr.talent.pool.md) |
+| Application Skill | `hr.applicant.skill` | [hr.applicant.skill.md](../../references/entities/hr.applicant.skill.md) |
+| Refusal dialog | `applicant.get.refuse.reason` | [applicant.get.refuse.reason.md](../../references/entities/applicant.get.refuse.reason.md) |
+| Message dialog | `applicant.send.mail` | [applicant.send.mail.md](../../references/entities/applicant.send.mail.md) |
+| Add-to-pool dialog | `talent.pool.add.applicants` | [talent.pool.add.applicants.md](../../references/entities/talent.pool.add.applicants.md) |
+| Add-to-job dialog | `job.add.applicants` | [job.add.applicants.md](../../references/entities/job.add.applicants.md) |
+
+Entities owned elsewhere and extended here, whose reference pages this folder also relies
+on:
+
+| Entity | Transport name | Reference page |
+|---|---|---|
+| Job Position | `hr.job` | [hr.job.md](../../references/entities/hr.job.md) |
+| Job Skill | `hr.job.skill` | [hr.job.skill.md](../../references/entities/hr.job.skill.md) |
 
 ---
 
@@ -961,7 +998,7 @@ on the same shared individual-skill definition.
 | Aspect | Value |
 |---|---|
 | Default ordering | `skill_type_id, skill_level_id desc` — grouped by type, strongest level first |
-| Display field | the skill |
+| Display field | `skill_id`, the skill, but the display name is overridden: it is the skill's name, a colon, a space, and the level's name, for example `Test Skill 1: Level 2` |
 | Linked-record field name | `applicant_id` — the shared definition uses this to know which record owns the line |
 
 **Current skills.** Grouping all lines by (Application, skill), a line is current when its
@@ -977,7 +1014,7 @@ every offending line at once.
 
 | Condition that fails | Exact message |
 |---|---|
-| Two lines of the same Application carry the same non-certification skill and their validity windows overlap | `The following skills can't be created as they overlap or exactly match existing skills:` followed by one bullet line per conflict reading the new line's display name, then ` conflicts with the existing skill/certification `, then the existing line's display name, then ` from `, the existing validity start, ` to ` and the existing validity end |
+| Two lines of the same Application carry the same non-certification skill and their validity windows overlap | `The following skills can't be created as they overlap or exactly match existing skills:` then a line break, then one bullet line per **existing** line in conflict. A bullet line begins with `• `, then the display names of the new lines that clash with it, separated by a comma and a space, then ` conflicts with the existing skill/certification `, then the existing line's display name, then ` from `, the existing validity start, ` to `, and the existing validity end |
 | Two lines of the same Application carry the same certification skill, the same level, the same validity start and the same validity end | The same message as above |
 | A line's validity end is earlier than its validity start | `The following skills have their valid stop date prior to their valid start date:` followed by one bullet line per offending record reading the skill's display name, then ` from `, the validity start, ` to ` and the validity end |
 | The chosen skill does not belong to the chosen skill type | `The skill %(name)s and skill type %(type)s don't match`, where the first placeholder is the skill's name and the second the skill type's name |
@@ -1266,3 +1303,5 @@ are recorded here.
 | Ordering of Degrees | One version stated an ordering by sequence, the other by identifier. The stored default ordering is by identifier; the configuration list re-orders by sequence through its drag handle, which is a screen behaviour, not the entity's ordering. Both statements are now given, in §7.2 and §15. |
 | Default of the favourites list on a Job Position | One version said the creator becomes a favourite. The field's own default does name the acting user, but the creation rule overwrites the list with whatever was submitted, or with the empty list when nothing was submitted, so a position created through the interface starts with **no** favourite. Recorded in §3.4. |
 | Public form writable fields | Both versions list the same seven entries. Confirmed: the electronic mail address, the applicant's name, the telephone number, the Job Position, the Department, the professional network profile address and the custom application properties. |
+| Display name of a skill line | One version said the display name is the skill, the other that it is the skill's name followed by a colon and the level's name. The second is correct: the shared individual-skill definition overrides the display name. Recorded in §11. |
+| Where the skill validations live | One version listed them on the entity, the other referred them to the shared definition. They are enforced by the shared definition and are reproduced in §11.1, because every message a recruiter can see must be in this folder. |

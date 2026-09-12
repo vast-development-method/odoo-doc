@@ -2,7 +2,7 @@
 
 Rule-based assignment distributes incoming Leads that nobody has claimed. It runs in two phases: first every unclaimed Lead is allocated to a Sales Team by a weighted random draw proportional to the capacity of the teams, and deduplicated on the way; then, inside each team, the Leads that have a team but no salesperson are distributed to the members according to their daily quota and their filters, and converted into opportunities. This file specifies the configuration, both phases, the arithmetic, the notifications, the manual variant and four worked examples.
 
-The arithmetic used here (daily quota, team capacity, weighted draw, round robin) is also stated in [calculations.md](calculations.md) sections 3.1 to 3.7; this file gives the complete procedure.
+The arithmetic used here (daily quota, team capacity, weighted draw, round robin) is also stated in [calculations.md](calculations.md) sections 8.1 to 8.6; this file gives the complete procedure.
 
 ## 1. Configuration
 
@@ -10,7 +10,7 @@ The arithmetic used here (daily quota, team capacity, weighted draw, round robin
 
 | Setting | Type | Effect |
 |---|---|---|
-| Rule-Based Assignment | boolean, stored in a system parameter | When false, no assignment is offered at all: the team screen shows no assignment section, no scheduled run happens, and Leads created without a salesperson fall back on the team leader rule (`LEAD-RULE-123`). When true, the assignment section appears on every team and on every membership. |
+| Rule-Based Assignment | boolean, stored in a system parameter | When false, no assignment is offered at all: the team screen shows no assignment section, no scheduled run happens, and Leads created without a salesperson fall back on the team leader rule (`LEAD-107`). When true, the assignment section appears on every team and on every membership. |
 
 ### 1.2 The mode
 
@@ -45,8 +45,8 @@ Changing the unit or the number recomputes the next execution date as `now + num
 
 | Field | Type | Meaning |
 |---|---|---|
-| `assignment_optout` | boolean | When true, the scheduled run skips the team entirely. A manual run started on that team still works; the assignment button of the settings screen skips it (`LEAD-RULE-122`). |
-| `assignment_domain` | condition expression, tracked | The extra condition a Lead must satisfy to be allocated to this team. Empty means no extra condition. Validated by `LEAD-RULE-100`. |
+| `assignment_optout` | boolean | When true, the scheduled run skips the team entirely. A manual run started on that team still works; the assignment button of the settings screen skips it (`LEAD-106`). |
+| `assignment_domain` | condition expression, tracked | The extra condition a Lead must satisfy to be allocated to this team. Empty means no extra condition. Validated by `LEAD-084`. |
 | `assignment_max` | integer, derived | The sum of the capacities of the active memberships. A team with a capacity of zero never receives anything. |
 | `assignment_enabled` | boolean, derived | True when the master switch is on. |
 | `assignment_auto_enabled` | boolean, derived | True when the master switch is on and the scheduled action is active. |
@@ -60,8 +60,8 @@ Changing the unit or the number recomputes the next execution date as `now + num
 |---|---|---|---|
 | `assignment_max` | integer | 30 | The average number of Leads the member can absorb over thirty days. |
 | `assignment_optout` | boolean | false | Pauses assignment for this member. |
-| `assignment_domain` | condition expression, tracked | empty | The condition a Lead must satisfy for this member to receive it. Validated by `LEAD-RULE-101`. |
-| `assignment_domain_preferred` | condition expression, tracked | empty | The condition describing the Leads this member should receive first. Validated by `LEAD-RULE-102`. |
+| `assignment_domain` | condition expression, tracked | empty | The condition a Lead must satisfy for this member to receive it. Validated by `LEAD-085`. |
+| `assignment_domain_preferred` | condition expression, tracked | empty | The condition describing the Leads this member should receive first. Validated by `LEAD-086`. |
 | `lead_day_count` | integer, derived | | Leads assigned to this member in this team in the last twenty-four hours, archived records included. |
 | `lead_month_count` | integer, derived | | The same over thirty days. |
 
@@ -109,7 +109,7 @@ Points to note.
 
 - A Lead already attached to a team, or already having a salesperson, is never reconsidered.
 - An archived Lead **is** considered, as long as it is not won: the condition is on the won status, not on the active flag. An archived lost Lead has a won status of `lost`, not `won`, and therefore passes the filter; in practice such records are rarely produced without a salesperson.
-- The duplicate lookup uses the search of `LEAD-RULE-071` on the email of the Lead, with lost records excluded. It is performed once per Lead and cached, so that the loop below never repeats it.
+- The duplicate lookup uses the search of `LEAD-061` on the email of the Lead, with lost records excluded. It is performed once per Lead and cached, so that the loop below never repeats it.
 - Teams whose candidate list is empty are still in the population at the start; they are removed the first time they are drawn (see 4.2).
 
 ### 4.2 The draw loop
@@ -142,9 +142,9 @@ Drawing one Lead at a time, rather than a slice per team, is what makes teams wi
 3. Otherwise write the team into `team_id` on the candidate and classify the candidate as
    *assigned*.
 
-The order of the two steps matters and must be reproduced. Writing the team on the candidate **before** the merge means that, when the merge elects a different survivor, the merged values follow the precedence of `LEAD-RULE-084`: the first non-empty team in confidence order wins. An existing opportunity that already had a team and a salesperson therefore keeps them, and the new duplicate lead is absorbed into it.
+The order of the two steps matters and must be reproduced. Writing the team on the candidate **before** the merge means that, when the merge elects a different survivor, the merged values follow the precedence of `LEAD-074`: the first non-empty team in confidence order wins. An existing opportunity that already had a team and a salesperson therefore keeps them, and the new duplicate lead is absorbed into it.
 
-The merge itself uses no size limit, because the caller is the system identity, so `LEAD-RULE-077` does not apply.
+The merge itself uses no size limit, because the caller is the system identity, so `LEAD-067` does not apply.
 
 ### 4.4 The result of phase one
 

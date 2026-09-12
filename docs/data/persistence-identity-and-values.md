@@ -250,7 +250,7 @@ A named decimal precision is a configuration record of the entity Decimal Precis
 4. Reducing a precision does not rewrite the stored values. The user is warned when the value is lowered in a form: "The precision has been reduced for <usage>.\nNote that existing data WON'T be updated by this change.\n\nAs decimal precisions impact the whole system, this may cause critical issues.\nE.g. reducing the precision could disturb your financial balance.\n\nTherefore, changing decimal precisions in a running database is not recommended."
 5. A usage name is unique: "Only one value can be defined for each given usage!"
 
-The precisions that a fresh installation ships, with their defaults, are listed in [`reference-data.md`](reference-data.md), section 10.
+The precisions that a fresh installation ships, with their defaults, are listed in [`reference-data.md`](reference-data.md), section 7.
 
 ### 5.3 Currency precision
 
@@ -540,7 +540,7 @@ The pattern is matched against the **name search fields** of the entity: the ord
 
 ### 7.4 Creating a record from a name alone
 
-"Create from name" takes one text and creates a record with the record name field set to that text, applying every default value and every validation of a normal creation, and returns the identifier and the display name. When the entity declares no record name field the operation does nothing and logs a warning. This is the operation behind "create <typed text>" offers in link fields, and behind the option of an import to create missing targets from their name (section 7.5 of [`data-loading-and-exchange.md`](data-loading-and-exchange.md)).
+"Create from name" takes one text and creates a record with the record name field set to that text, applying every default value and every validation of a normal creation, and returns the identifier and the display name. When the entity declares no record name field the operation does nothing and logs a warning. This is the operation behind "create <typed text>" offers in link fields, and behind the option of an import to create missing targets from their name (section 6.5 of [`data-loading-and-exchange.md`](data-loading-and-exchange.md)).
 
 ### 7.5 Default ordering
 
@@ -709,7 +709,7 @@ Rules:
 
 ### 11.1 Where the bytes live
 
-A binary field stores its content in an attachment record (the default) or, for seven fields, directly in a byte-string column. An attachment holds: the owning entity name, the owning record identifier, the field name, the file name, the content type, the size, the checksum of the content, and either the bytes or a reference into the file store. The file store keys content by its checksum, which means two identical files are stored once.
+A binary field stores its content in an attachment record (the default) or, for twelve fields listed in section 4.3 of [`physical-data-catalog.md`](physical-data-catalog.md), directly in a byte-string column. An attachment holds: the owning entity name, the owning record identifier, the field name, the file name, the content type, the size, the checksum of the content, and either the bytes or a reference into the file store. The file store keys content by its checksum, which means two identical files are stored once.
 
 ### 11.2 Rules
 
@@ -783,7 +783,7 @@ Specified in section 1.2 of [`physical-data-catalog.md`](physical-data-catalog.m
 1. They are written by the store, never by a caller. A value supplied for them is removed silently.
 2. `create_date` and `write_date` carry the **transaction** timestamp, not the wall clock at the moment of the statement: every record created in one transaction shares one creation timestamp, and two records written by one operation share one update timestamp.
 3. `write_date` and `write_uid` are refreshed by every write, including a write performed only to store a recomputed derived value. A record whose visible values did not change can therefore have a fresh update timestamp.
-4. Ten entities carry no audit fields at all; they are listed in [`physical-data-catalog.md`](physical-data-catalog.md), section 12.
+4. Ten entities carry no audit fields at all; they are marked "no audit columns" in the catalogue of [`physical-data-catalog.md`](physical-data-catalog.md), section 12.
 5. The update timestamp is the invalidation key of derived stored images (resized pictures, cached renderings) and of the transient record cleanup; a replacement must keep it accurate.
 
 ### 13.2 Tracked fields
@@ -1107,5 +1107,6 @@ This document consolidates two drafts of the same material. The target branch ca
 | Constraint message for the external identifier | "External identifiers cannot contain spaces". | The message declared with the check constraint is "External IDs cannot contain spaces"; the verbatim text is reproduced and the surrounding prose names the concept in full. |
 | Access refusal on an external identifier | The message was shown with the identifier inside code font. | The refusal embeds the package part and the local part in double quotation marks; the sentence now says so instead of showing a code-font placeholder that the system never prints. |
 | Counter sequence fields | The field list omitted the derived, writable next-number field and did not list the subsequence entity. | Both added from the entity definitions, because the derived field is the one a user edits and a rebuild must offer it. |
+| Binary content held inline | The draft said seven fields keep their bytes in a column of their own table. | Twelve do, and the observed schema carries exactly twelve binary-string columns. All twelve are named in section 4.3 of [`physical-data-catalog.md`](physical-data-catalog.md). |
 | Companion documents | The draft pointed at a single combined document for loading and shipped records. | The material is split here into [`data-loading-and-exchange.md`](data-loading-and-exchange.md) and [`reference-data.md`](reference-data.md), and the references now point at the right one. |
 | Translation of static text | The draft pointed at an overview document. | The repository specifies all three kinds of translatable text in [`../runtime/translation.md`](../runtime/translation.md); the reference points there. |

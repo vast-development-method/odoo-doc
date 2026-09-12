@@ -12,10 +12,10 @@ These settings live on the configuration screen of the application. Settings who
 |---|---|---|---|
 | Leads | boolean, backed by the access group **Show Lead Menu** | false | When true, incoming requests are qualified as Leads before being converted into opportunities: the Leads menu appears, the default `type` of a new record becomes `lead`, and the alias of every team that uses opportunities is switched to create Leads. When switched off, the same teams are switched back to creating opportunities. |
 | Recurring Revenues | boolean, backed by the access group **Show Recurring Revenues Menu** | false | When true, the recurring revenue amount, the recurring plan and the four derived recurring figures are visible and the Recurring Plans menu appears. |
-| Multi Teams | boolean, stored in the system parameter for multiple memberships | false | When true a user may belong to several Sales Teams; when false, creating or activating a membership archives the other active memberships of that user (`LEAD-RULE-105`). |
+| Multi Teams | boolean, stored in the system parameter for multiple memberships | false | When true a user may belong to several Sales Teams; when false, creating or activating a membership archives the other active memberships of that user (`LEAD-089`). |
 | Membership / Partnership | capability package | not installed | Adds partner grades, the membership product kind and the grade granted by a confirmed Sales Order. |
 
-Switching the Leads setting has an immediate side effect on every team: every team whose `use_opportunities` is true receives `use_leads` equal to the new value, and the alias of every team is rewritten (`LEAD-RULE-113`).
+Switching the Leads setting has an immediate side effect on every team: every team whose `use_opportunities` is true receives `use_leads` equal to the new value, and the alias of every team is rewritten (`LEAD-097`).
 
 ### 1.2 Lead assignment
 
@@ -33,8 +33,8 @@ Switching the Leads setting has an immediate side effect on every team: every te
 |---|---|---|---|
 | Generate new leads based on their country, industries and size | capability package | not installed | Adds the Lead Mining Request entity and its menus. The label shown on the settings screen is `Generate new leads based on their country, industries, size, etc.` |
 | Enrich your leads automatically with company data based on their email address | capability package | not installed | Adds the enrichment operation, its scheduled action and the enrichment fields. |
-| Create Leads/Opportunities from your website's traffic | capability package | not installed | Adds the Customer Relationship Management Lead Generation Rules and the Customer Relationship Management Reveal View entities. |
-| Enrich lead automatically | selection `manual` "Enrich leads on demand only", `auto` "Enrich all leads automatically", stored in a system parameter | `auto` | With `auto`, creating any Lead triggers the enrichment job; with `manual`, only the button on the record triggers it. |
+| Create Leads/Opportunities from your website's traffic | capability package | not installed | Adds the Lead Generation Rule and the Reveal View entities. |
+| Enrich lead automatically | selection `manual` "Enrich leads on demand only", `auto` "Enrich all leads automatically", backed by the active flag of the enrichment scheduled job | `auto` | With `auto`, creating any Lead triggers the enrichment job; with `manual`, only the control on the record triggers it. The setting never gates the control itself. |
 | Create a lead mining request directly from the opportunity pipeline | boolean, stored in a system parameter | false | Adds the mining action to the pipeline screen. |
 
 ### 1.4 Predictive lead scoring
@@ -49,18 +49,27 @@ The settings screen also offers the buttons **Manage Recurring Plans**, **Update
 
 ## 2. System parameters
 
-| Key meaning | Type of the stored value | Default | Read by |
-|---|---|---|---|
-| Scoring variable list | text: field names separated by commas | `phone_state,email_state,state_id,country_id,source_id,lang_id,tag_ids` | the scoring model; writing it reloads the Lead entity (`LEAD-RULE-135`) |
-| Scoring start date | text: a date written as year, month and day separated by hyphens | the date eight days before installation | the scoring model and the settings screen |
-| Rule-based assignment master switch | text read as a truth value | absent, which reads as false | the assignment algorithm and the team screen |
-| Multiple memberships allowed | text read as a truth value | absent, which reads as false | the membership rules |
-| Automatic enrichment mode | text: `manual` or `auto` | `auto` | the enrichment job |
-| Lead mining from the pipeline | text read as a truth value | absent | the pipeline screen |
-| Assignment delay, in hours | text read as a number | `0` | phase one of the assignment |
-| Assignment commit batch size | text read as a whole number | `100` | both phases of the assignment |
-| Enrichment notification throttle | text: an instant | set by the enrichment job | limits how often the "not enough credits" notification is repeated |
-| Website identification retention, in months | text read as a whole number | `6` | the cleanup of the Customer Relationship Management Reveal View records that already produced a Lead |
+| Key | Meaning | Type of the stored value | Default | Read by |
+|---|---|---|---|---|
+| `crm.pls_fields` | Scoring variable list | text: field names separated by commas | `phone_state,email_state,state_id,country_id,source_id,lang_id,tag_ids` | the scoring model; writing it reloads the Lead entity (`LEAD-113`) |
+| `crm.pls_start_date` | Scoring start date | text: a date written as year, month and day separated by hyphens | the date eight days before installation | the scoring model and the settings screen |
+| `crm.lead.auto.assignment` | Rule-based assignment master switch | text read as a truth value | absent, which reads as false | the assignment algorithm and the team screen |
+| `sales_team.membership_multi` | Multiple memberships allowed | text read as a truth value | absent, which reads as false | the membership rules |
+| `crm.assignment.delay` | Assignment delay, in hours | text read as a number | `0` | phase one of the assignment |
+| `crm.assignment.commit.bundle` | Assignment commit batch size | text read as a whole number | `100` | both phases of the assignment |
+| the lead generation shortcut key | Lead generation request offered from the pipeline | text read as a truth value | absent | the pipeline screen |
+| the enrichment throttle key | Enrichment notification throttle | text: an instant | set by the enrichment job | limits how often the "not enough credits" notification is repeated |
+| the identification retention key | Website identification retention, in months | text read as a whole number | `6` | the cleanup of the Reveal View records that already produced a Lead |
+
+The six keys reproduced in code font are contractual: an integration, an import or a support
+procedure reads or writes them by name. The three named in words are internal to the pipeline
+shortcut, the credit-notification throttle and the cleanup routine, cross no external boundary, and
+a rebuild chooses its own names for them.
+
+**How the enrichment mode is actually stored.** The mode is not held in a parameter at all: the
+enrichment scheduled job is what decides. The settings screen reads `auto` when that job is active
+and `manual` when it is not, and saving the setting writes the active flag of the job. The manual
+enrichment control on a record never consults the mode — see `LEAD-126`.
 
 ## 3. Scheduled actions
 
@@ -70,7 +79,7 @@ The settings screen also offers the buttons **Manage Recurring Plans**, **Update
 | Customer Relationship Management: Lead Assignment | inactive | every 1 day | the system identity | Runs both phases of the assignment over every team that uses leads or opportunities and is not opted out, with the quota reduced by the last twenty-four hours and a creation window of seven days. |
 | Customer Relationship Management: enrich leads | active once the enrichment package is installed | every 24 hours | the system identity | Enriches the eligible Leads created in the last twenty-four hours, in batches of fifty, each batch locked and committed separately. |
 | Event Customer Relationship Management: Generate Leads based on Rules | active once the event bridge is installed | every 1 day | the record owner of the action | Processes the pending event lead generation requests in batches, resuming from the last processed registration. |
-| Lead Generation: Leads/Opportunities Generation | active once the website identification package is installed | every 1 day | the system identity | Resolves the Customer Relationship Management Reveal View records into companies and creates the Leads. |
+| Lead Generation: Leads/Opportunities Generation | active once the website identification package is installed | every 1 day | the system identity | Resolves the Reveal View records into companies and creates the Leads. |
 
 Every scheduled action of this domain is idempotent in the sense that a second run immediately after the first produces no additional record: the assignment finds no unclaimed Lead, the enrichment finds every record already marked, the event generation finds every registration already processed, and the scoring rebuild produces the same table.
 
@@ -115,15 +124,15 @@ The following identities of other domains also matter here: the platform adminis
 | Discussion Channel Membership | Sales users read and create members on the channel of a lead | User: Own Documents Only | the channel produced a Lead; read and create only |
 | Text Message Template | Administrator on lead and contact templates | Administrator | the template's model is Lead or Contact, for create, update and delete |
 | Event Lead Rules | Multi-company | Multi-company users | `company_id` is among the reader's allowed companies or is empty |
-| Customer Relationship Management Lead Generation Rules | All Rules | User: All Documents | everything |
-| Customer Relationship Management Lead Generation Rules | Personal or Global Rules | User: Own Documents Only | `user_id` is the reading user or is empty |
-| Customer Relationship Management Reveal View | All Views | User: All Documents | everything |
-| Customer Relationship Management Reveal View | Personal or Global Views | User: Own Documents Only | the rule of the view has `user_id` is the reading user or is empty |
-| Partnership Analysis | All Assignations | User: All Documents | everything |
-| Partnership Analysis | Personal or Global Assignations | User: Own Documents Only | `user_id` is the reading user or is empty |
+| Lead Generation Rule | All Rules | User: All Documents | everything |
+| Lead Generation Rule | Personal or Global Rules | User: Own Documents Only | `user_id` is the reading user or is empty |
+| Reveal View | All Views | User: All Documents | everything |
+| Reveal View | Personal or Global Views | User: Own Documents Only | the rule of the view has `user_id` is the reading user or is empty |
+| Partner Assignment Analysis | All Assignations | User: All Documents | everything |
+| Partner Assignment Analysis | Personal or Global Assignations | User: Own Documents Only | `user_id` is the reading user or is empty |
 | Partner Grade | Published grades only | Portal user, Public user | `published = true`, read only |
 
-The per-entity create, read, update and delete matrix is in [business-rules.md](business-rules.md), rule `LEAD-RULE-180`.
+The per-entity create, read, update and delete matrix is in [business-rules.md](business-rules.md), rule `LEAD-155`.
 
 ## 7. Shipped master data
 
@@ -163,7 +172,7 @@ None of them is restricted to a team, which matters for the scoring model (see [
 | Website | not set | none | none | **no** | **no** | none |
 | Point of Sale | not set | none | none | **no** | **no** | none |
 
-The two inactive teams exist so that the storefront and the point of sale have a team to attach their documents to; they cannot be deleted (`LEAD-RULE-109`).
+The two inactive teams exist so that the storefront and the point of sale have a team to attach their documents to; they cannot be deleted (`LEAD-093`).
 
 ### 7.5 Sales team memberships
 
@@ -187,9 +196,9 @@ The two inactive teams exist so that the storefront and the point of sale have a
 
 | Name | Colour index | Used by |
 |---|---|---|
-| No more partner available | 3 | added when the geographic search finds no partner (`LEAD-RULE-168`) |
-| Spam | 3 | added when a reseller declines a lead as spam (`LEAD-RULE-170`) |
-| Created by Partner | 4 | added to an opportunity created by a reseller on the portal (`LEAD-RULE-164`) |
+| No more partner available | 3 | added when the geographic search finds no partner (`LEAD-143`) |
+| Spam | 3 | added when a reseller declines a lead as spam (`LEAD-145`) |
+| Created by Partner | 4 | added to an opportunity created by a reseller on the portal (`LEAD-139`) |
 
 ### 7.8 Partner grades and activation levels
 
@@ -240,7 +249,7 @@ The script is named `Lead Generation Bot`.
 
 | Template | Model | Purpose |
 |---|---|---|
-| Lead Forward: Send to partner | Lead Forward to Partner Wizard | Sent to a reseller when one or several Leads are forwarded. The subject is `Fwd: Lead: <partner name>`; the sender is the acting user; the recipient is the partner; the language is the language of the partner; the message is deleted after sending. |
+| Lead Forward: Send to partner | Forward to Partner Wizard | Sent to a reseller when one or several Leads are forwarded. The subject is `Fwd: Lead: <partner name>`; the sender is the acting user; the recipient is the partner; the language is the language of the partner; the message is deleted after sending. |
 | Lead Generation Notification | the external credit account entity | Sent when a lead mining or lead generation request runs out of credits. |
 
 ### 7.13 Sales goal definitions
@@ -298,8 +307,8 @@ The lead mining package ships no industry, role or seniority record: those lists
 | Email aliases and the incoming mail gateway | [Messaging, Activities and Collaboration](../messaging-and-activities/README.md) | The alias of a Sales Team that creates Leads from incoming email. |
 | Activity types and activity plans | [Messaging, Activities and Collaboration](../messaging-and-activities/README.md) | Next activity of a Lead; the shipped activity type list is filtered to those with no model or with the model Lead or Contact. |
 | Email and telephone blacklists, telephone formatting | [Messaging, Activities and Collaboration](../messaging-and-activities/README.md) | Quality flags, blacklist flags, telephone reformatting. |
-| Campaigns, sources and mediums | [Marketing](../marketing-and-mass-mailing/README.md) | Campaign tracking fields of a Lead and the shipped source `Livechat`. |
-| Meetings | [Calendar and Scheduling](../calendar-and-scheduling/README.md) | Meetings of an opportunity. |
+| Campaigns, sources and mediums | [Marketing](../marketing-and-mass-mailing/) | Campaign tracking fields of a Lead and the shipped source `Livechat`. |
+| Meetings | [Calendar and Scheduling](../calendar-and-scheduling/) | Meetings of an opportunity. |
 | Contact grades and activation levels | [Contacts and Organizations](../contacts-and-organizations/README.md) | Reseller programme; the entities are shipped by this domain's reseller package but belong to the contacts domain. |
 
 ## 9. Menus
@@ -366,4 +375,15 @@ The Lead entity is published as a form target with the key `create_lead`, the de
 | Lead creation | Survey Answer Option | boolean | Choosing this answer creates a Lead. |
 | Sales Team | Chatbot Script Step | many_to_one to Sales Team | The team written on the Lead created by a step of kind "create a lead" or "create a lead and forward". |
 
-Event lead rules are full records rather than settings; see [entities.md](entities.md) section 13.1.
+Event lead rules are full records rather than settings; see [entities.md](entities.md) section 17.1.
+
+## 13. Reconciliation notes
+
+| Subject | The two statements | Resolution |
+|---|---|---|
+| The keys of the system parameters | One description named the parameters in words; the other reproduced their keys. | The six contractual keys are reproduced in code font in section 2; the three internal ones stay named in words, with the reason stated there. |
+| Where the enrichment mode lives | One description said a system parameter holds it; the other said the setting only reflects the scheduled job. | The scheduled job is the store. Section 1.3 and section 2 now say so, and the manual enrichment control does not consult the mode. |
+| The delivered pipeline | Both descriptions listed the same four stages with the same sequences, won flags and colour indexes. | Kept once, in section 7.1, with the note that none of them is restricted to a team — which is what keeps the scoring model able to find a census stage. |
+| The delivered teams | One description named three teams; the other named three teams and their aliases. | Section 7.4 carries the three teams, their sequence, their company, their leader, their active flag, their pipeline usage and their alias. |
+| The recognition goals | One description listed five goal definitions; the other listed ten definitions and two challenges. | All ten definitions and both challenges are in section 7.13, and `workflows.md` section 17.4 names the five that read the Lead entity. |
+| The menus | Only one description enumerated them. | The enumeration is kept, in section 9, because a rebuild has to place the same entry points. |

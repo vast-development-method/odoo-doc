@@ -22,7 +22,12 @@ The domain presents four working surfaces and one public surface.
 | The public job list, detail page, application form and thank-you page | Any visitor | The site menu entry *Jobs* |
 
 The menu tree and its visibility are in
-[configuration.md](configuration.md#12-menus).
+[configuration.md](configuration.md#12-menus). The conventions these screens follow — what a
+card view, a list, a form, a graph and a matrix are, and how an action reaches them — are
+defined once in [views and actions](../../overview/views-and-actions.md). The public routes of
+§5 are listed alongside every other route of the platform in
+[the endpoint catalogue](../../interfaces/endpoint-catalog.md), and the operation style of §3
+and §4 follows [the service layer](../../interfaces/service-layer.md).
 
 ## 2. Screens
 

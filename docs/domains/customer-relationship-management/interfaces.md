@@ -4,19 +4,22 @@ Everything a client, an integration or a user touches: the service operations in
 
 ## 1. Service operations on the Lead
 
-Operation names are given as stable full-word identifiers. Every operation applies to a set of records unless stated otherwise.
+Operation names are given as stable full-word identifiers. They are the names **this specification
+assigns** so that the other documents can cite an operation unambiguously; they are not strings
+taken from an external contract, and a rebuild may choose its own. Every operation applies to a set
+of records unless stated otherwise.
 
 ### 1.1 Life-cycle operations
 
 | Operation | Inputs | Effect | Output | Errors |
 |---|---|---|---|---|
-| `create_lead` | the field values | Creates one or several Leads, cleans the web address, computes the derived fields, sets the closing date when the record lands in a won stage, links the commercial entity as customer when the conditions of [entities.md](entities.md) section 1.14 hold, runs the won and lost bookkeeping, posts the creation message. | the created records | the storage-level refusals of `LEAD-RULE-001`, `LEAD-RULE-005`, `LEAD-RULE-006`, `LEAD-RULE-009`, `LEAD-RULE-141` |
-| `update_lead` | the field values | Writes the values, applying the date rules `LEAD-RULE-043` to `LEAD-RULE-045`, the won stage forcing of `LEAD-RULE-041`, and the won and lost bookkeeping. | true | the same refusals, plus `LEAD-RULE-007` |
+| `create_lead` | the field values | Creates one or several Leads, cleans the web address, computes the derived fields, sets the closing date when the record lands in a won stage, links the commercial entity as customer when the conditions of [entities.md](entities.md) section 1.12 hold, runs the won and lost bookkeeping, posts the creation message. | the created records | the storage-level refusals of `LEAD-001`, `LEAD-005`, `LEAD-006`, `LEAD-009`, `LEAD-119` |
+| `update_lead` | the field values | Writes the values, applying the date rules `LEAD-043` to `LEAD-045`, the won stage forcing of `LEAD-041`, and the won and lost bookkeeping. | true | the same refusals, plus `LEAD-007` |
 | `duplicate_lead` | none | Copies a record. `stage_id`, `probability` and `date_closed` are not copied; `type` and `team_id` are re-imposed from the source; `date_open` becomes the current instant for an opportunity whose salesperson is active and is empty otherwise; an inactive salesperson is dropped; the recurring amount and plan are dropped for a user outside the recurring revenue group. | the copy | none |
 | `archive_lead` | none | Sets `active = false`. Does not by itself make the record lost. | true | none |
 | `unarchive_lead` | none | Sets `active = true`, clears the lost reason, recomputes the automated probability. Does not realign the probability. | true | none |
 | `restore_lead` | none | Performs `unarchive_lead` and then writes `probability` set equal to `automated_probability`. | true | none |
-| `set_lead_lost` | optionally a lost reason and additional values | Archives, then writes a probability of zero, an automated probability of zero, and the additional values. | true | `LEAD-RULE-006` |
+| `set_lead_lost` | optionally a lost reason and additional values | Archives, then writes a probability of zero, an automated probability of zero, and the additional values. | true | `LEAD-006` |
 | `set_lead_won` | none | Unarchives, chooses a won stage per record, writes the stage and a probability of one hundred grouped by target stage. | true | none |
 | `set_lead_won_with_celebration` | none, single record | Performs `set_lead_won` and returns the celebration effect when a message applies. | a celebration effect or true | none |
 | `get_celebration_message` | none, single record | Returns the celebration message when the record currently sits in a won stage, and nothing otherwise. | text or nothing | none |
@@ -28,12 +31,12 @@ Operation names are given as stable full-word identifiers. Every operation appli
 | Operation | Inputs | Effect | Output | Errors |
 |---|---|---|---|---|
 | `convert_lead_to_opportunity` | the customer to link, optionally a list of salespeople, optionally a team | Per record, skipping archived and won records: writes `type = "opportunity"`, the conversion instant, the customer when it differs, and a stage when the record had none. Then distributes the salespeople round robin and writes the team. | true | none |
-| `merge_leads` | optionally a salesperson, optionally a team, optionally a flag telling whether to delete the merged-away records | Orders by confidence, computes the merged values, moves followers, logs the summary, moves history, activities, attachments and meetings, repairs the stage, writes the survivor, deletes the merged-away records unless asked not to. | the surviving record | `LEAD-RULE-076`, `LEAD-RULE-077` |
+| `merge_leads` | optionally a salesperson, optionally a team, optionally a flag telling whether to delete the merged-away records | Orders by confidence, computes the merged values, moves followers, logs the summary, moves history, activities, attachments and meetings, repairs the stage, writes the survivor, deletes the merged-away records unless asked not to. | the surviving record | `LEAD-066`, `LEAD-067` |
 | `assign_customers` | optionally a customer to force, a flag telling whether to create the missing customers, optionally a parent company | Writes the forced customer on every record; creates a customer from the record data for the records that still have none, when creation is allowed. | true | none |
 | `assign_salespeople` | a list of salespeople, optionally a team | Distributes the salespeople over the records in strides, as described in [lead-assignment.md](lead-assignment.md) section 11. | true | none |
-| `find_lead_duplicates` | optionally a customer, optionally an email, a flag telling whether to include lost records | Returns the records matching the search of `LEAD-RULE-071`. | a set of records | none |
+| `find_lead_duplicates` | optionally a customer, optionally an email, a flag telling whether to include lost records | Returns the records matching the search of `LEAD-061`. | a set of records | none |
 | `find_matching_contact` | none, single record | Returns the customer of the record, or the contact found from its email, without creating one. | a contact or nothing | none |
-| `create_customer_from_lead` | optionally a parent company | Creates the contact described in [calculations.md](calculations.md) section 5 and returns it. | a contact | none |
+| `create_customer_from_lead` | optionally a parent company | Creates the contact described in [entities.md](entities.md) section 8.8 and returns it. | a contact | none |
 
 ### 1.3 Scoring operations
 
@@ -41,9 +44,9 @@ Operation names are given as stable full-word identifiers. Every operation appli
 |---|---|---|---|---|
 | `compute_probabilities` | none | Recomputes `automated_probability` for the records in scope and realigns `probability` where the record is active and automatic. | true | none |
 | `prepare_scoring_explanation` | none, single record | Recomputes the record, writes the automated value and the probability when automatic, and returns the explanation structure of [predictive-lead-scoring.md](predictive-lead-scoring.md) section 5. | a structure with the probability, the team name, the three positive factors and the three negative factors | none |
-| `rebuild_scoring_frequency_table` | none | Empties and rebuilds the frequency table. | true | `LEAD-RULE-134` |
+| `rebuild_scoring_frequency_table` | none | Empties and rebuilds the frequency table. | true | `LEAD-112` |
 | `update_automated_probabilities` | none | Recomputes every open record created on or after the scoring start date, in batches. | true | none |
-| `recompute_scoring` | none | Performs the rebuild and then the recomputation. | true | `LEAD-RULE-134` |
+| `recompute_scoring` | none | Performs the rebuild and then the recomputation. | true | `LEAD-112` |
 
 ### 1.4 Navigation operations
 
@@ -69,8 +72,8 @@ These return a screen definition rather than changing data.
 
 | Operation | Inputs | Effect | Output | Errors |
 |---|---|---|---|---|
-| `assign_leads` | none | Runs both phases of the assignment over the teams in scope, with the quota forced and no creation window, logs a note per team and returns a notification. | a notification | `LEAD-RULE-114` |
-| `assign_leads_scheduled` | optionally a force flag, optionally a creation window in days | Runs both phases over every team that uses leads or opportunities and is not opted out. | true | `LEAD-RULE-114` |
+| `assign_leads` | none | Runs both phases of the assignment over the teams in scope, with the quota forced and no creation window, logs a note per team and returns a notification. | a notification | `LEAD-098` |
+| `assign_leads_scheduled` | optionally a force flag, optionally a creation window in days | Runs both phases over every team that uses leads or opportunities and is not opted out. | true | `LEAD-098` |
 | `allocate_leads_to_teams` | optionally a creation window in days | Phase one only. | the per-team result structure | none |
 | `distribute_leads_to_members` | optionally a force flag | Phase two only. | the per-member result structure | none |
 | `open_my_pipeline` | none | Returns the pipeline screen positioned on the reader's own team. | a screen | none |
@@ -102,7 +105,7 @@ These return a screen definition rather than changing data.
 
 | Operation | Effect | Errors |
 |---|---|---|
-| `submit_mining_request` | Assigns a number when the request is still named `New`, builds the payload, calls the service, creates the Leads, posts a message per Lead, and sets the state. | `LEAD-RULE-147` |
+| `submit_mining_request` | Assigns a number when the request is still named `New`, builds the payload, calls the service, creates the Leads, posts a message per Lead, and sets the state. | `LEAD-125` |
 | `reset_mining_request_to_draft` | Sets the state to draft and resets the number to the literal text `New`. | none |
 | `open_generated_leads` | Returns the Leads screen restricted to the records of the request. | none |
 | `open_generated_opportunities` | Returns the opportunities screen restricted to the records of the request. | none |
@@ -112,15 +115,15 @@ These return a screen definition rather than changing data.
 
 | Operation | Effect | Errors |
 |---|---|---|
-| `enrich_leads` | Calls the enrichment service for the records in scope and applies the answer as described in [workflows.md](workflows.md) section 2.8. | `LEAD-RULE-151` |
+| `enrich_leads` | Calls the enrichment service for the records in scope and applies the answer as described in [workflows.md](workflows.md) section 2.8. | `LEAD-129` |
 | `enrich_leads_scheduled` | Selects the eligible records created in the last twenty-four hours and enriches them in batches. | the same, suppressed |
 
 ### 2.7 Website identification
 
 | Operation | Effect |
 |---|---|
-| `generate_leads_from_visits` | Deletes the Customer Relationship Management Reveal View records whose address already produced a Lead within the retention window, groups the remaining ones by address, resolves them and creates the Leads. |
-| `clean_customer_relationship_management_reveal_views` | Deletes the Customer Relationship Management Reveal View records older than one month. |
+| `generate_leads_from_visits` | Deletes the Reveal View records whose address already produced a Lead within the retention window, groups the remaining ones by address, resolves them and creates the Leads. |
+| `clean_reveal_views` | Deletes the Reveal View records older than one month. |
 | `open_rule_leads` / `open_rule_opportunities` | Returns the Lead or opportunity screen restricted to the records of the rule. |
 
 ### 2.8 Event lead rules
@@ -128,7 +131,7 @@ These return a screen definition rather than changing data.
 | Operation | Effect | Errors |
 |---|---|---|
 | `run_event_lead_rules` | Applies the rules in scope to a set of registrations, creating or updating the Leads. | none |
-| `regenerate_event_leads` | Regenerates the Leads of an event, synchronously below the volume threshold and through a generation request above it. | `LEAD-RULE-145`, `LEAD-RULE-144` |
+| `regenerate_event_leads` | Regenerates the Leads of an event, synchronously below the volume threshold and through a generation request above it. | `LEAD-123`, `LEAD-122` |
 | `generate_event_leads_scheduled` | Processes the pending generation requests in batches, resuming from the last processed registration. | none |
 | `add_lead_rule_from_answer` | Called on one Event Question Answer. Returns the creation dialogue of an Event Lead Rules record, opened as a modal and pre-filled with the label of the answer as the rule name, the acting user as the salesperson written on the created records, and the registration condition `registration_answers.question IN (the question of this answer) AND registration_answer_options.answer_option IN (this answer)`. Nothing is written until the user saves the dialogue. | none |
 
@@ -136,15 +139,15 @@ These return a screen definition rather than changing data.
 
 | Operation | Inputs | Effect | Errors |
 |---|---|---|---|
-| `assign_partner_geographically` | none | Geolocates the records that have a country, searches candidates in widening windows, draws one weighted by level weight, writes it, and writes the salesperson of the partner. | `LEAD-RULE-165` (a warning, not a refusal) |
+| `assign_partner_geographically` | none | Geolocates the records that have a country, searches candidates in widening windows, draws one weighted by level weight, writes it, and writes the salesperson of the partner. | `LEAD-140` (a warning, not a refusal) |
 | `assign_partner` | optionally a partner to force | The same, with the search skipped when a partner is forced. | none |
-| `forward_leads_to_partner` | the forwarding mode, the partner or the proposed pairs, the message body | Groups the records by recipient, renders and sends the template once per recipient, writes the assigned partner and the salesperson without notifying, subscribes the partner. | `LEAD-RULE-169` |
-| `partner_accepts_lead` | optionally a comment | Posts the acceptance message and converts the record into an opportunity. | `LEAD-RULE-161` |
-| `partner_declines_lead` | optionally a comment, a contacted flag, a spam flag | Posts the refusal message, unsubscribes the partner family, clears the assigned partner, records the family as having declined, adds the spam tag when asked. | `LEAD-RULE-161` |
-| `partner_updates_lead` | expected revenue, probability, priority, expected closing date, activity type, activity summary, activity deadline | Writes the four record values and updates or creates the portal user's own activity. | `LEAD-RULE-161` |
-| `partner_updates_contact_details` | a map of field values | Writes only the allowed fields. | `LEAD-RULE-161`, `LEAD-RULE-163` |
-| `partner_updates_stage` | a stage | Writes the stage. | `LEAD-RULE-161` |
-| `partner_creates_opportunity` | contact name, description, title | Creates a record with priority `2`, the reader's commercial entity as assigned partner and the shipped tag, assigns the salesperson of that partner and converts it. | `LEAD-RULE-164` |
+| `forward_leads_to_partner` | the forwarding mode, the partner or the proposed pairs, the message body | Groups the records by recipient, renders and sends the template once per recipient, writes the assigned partner and the salesperson without notifying, subscribes the partner. | `LEAD-144` |
+| `partner_accepts_lead` | optionally a comment | Posts the acceptance message and converts the record into an opportunity. | `LEAD-136` |
+| `partner_declines_lead` | optionally a comment, a contacted flag, a spam flag | Posts the refusal message, unsubscribes the partner family, clears the assigned partner, records the family as having declined, adds the spam tag when asked. | `LEAD-136` |
+| `partner_updates_lead` | expected revenue, probability, priority, expected closing date, activity type, activity summary, activity deadline | Writes the four record values and updates or creates the portal user's own activity. | `LEAD-136` |
+| `partner_updates_contact_details` | a map of field values | Writes only the allowed fields. | `LEAD-136`, `LEAD-138` |
+| `partner_updates_stage` | a stage | Writes the stage. | `LEAD-136` |
+| `partner_creates_opportunity` | contact name, description, title | Creates a record with priority `2`, the reader's commercial entity as assigned partner and the shipped tag, assigns the salesperson of that partner and converts it. | `LEAD-139` |
 
 ### 2.10 Activities and meetings
 
@@ -181,7 +184,7 @@ The created record carries the company of the contact, the plain text of the sub
 | `/my/lead/<lead_id>` | read | an authenticated portal user | The detail page of one Lead. |
 | `/my/opportunity/<lead_id>` | read | an authenticated portal user | The detail page of one opportunity, with the acceptance, refusal, update and stage operations. |
 
-Every one of them is restricted by the portal visibility rule of `LEAD-RULE-160` and by the write guard of `LEAD-RULE-161`.
+Every one of them is restricted by the portal visibility rule of `LEAD-135` and by the write guard of `LEAD-136`.
 
 ### 3.4 Public reseller directory
 
@@ -193,20 +196,20 @@ Every one of them is restricted by the portal visibility rule of `LEAD-RULE-160`
 | `/partners/grade/<grade_name>/country/<country_name>` and its paginated form | read | public | The directory filtered on both. |
 | the detail path of one published reseller | read | public | The public page of one reseller, with its address, its grade, its description and its implementation references. |
 
-**Which resellers the directory lists.** A reseller appears only when it is a company contact, carries a grade, is itself published, and its grade is not archived. A reader who is not a website editor additionally sees only resellers whose grade is published (`LEAD-RULE-179` and the grade rule of [configuration.md](configuration.md) section 6). A free-text search matches the name, the public description, the two street lines, the city, the postal code, the country subdivision and the country. An industry filter keeps the resellers having at least one implementation reference in that industry.
+**Which resellers the directory lists.** A reseller appears only when it is a company contact, carries a grade, is itself published, and its grade is not archived. A reader who is not a website editor additionally sees only resellers whose grade is published (`LEAD-154` and the grade rule of [configuration.md](configuration.md) section 6). A free-text search matches the name, the public description, the two street lines, the city, the postal code, the country subdivision and the country. An industry filter keeps the resellers having at least one implementation reference in that industry.
 
 **Ordering and paging.** Grade sequence ascending, then implementation reference count descending, then complete name ascending, then identifier ascending. Forty resellers per page. When no reseller at all matches, the page is still rendered but answered with the not-found status, so that an empty directory is not indexed as a valid page.
 
-**Country of the visitor.** When neither a country nor the explicit "all countries" choice is part of the request, the country is inferred from the network address of the visitor. When the inferred country holds no listable reseller, the country filter is dropped and the whole directory is shown instead, with the country selector back on **All Countries** (`LEAD-RULE-178`). The country selector always shows every country that holds at least one listable reseller with its count, plus an **All Countries** entry carrying the total; the grade selector is built the same way over the grades.
+**Country of the visitor.** When neither a country nor the explicit "all countries" choice is part of the request, the country is inferred from the network address of the visitor. When the inferred country holds no listable reseller, the country filter is dropped and the whole directory is shown instead, with the country selector back on **All Countries** (`LEAD-153`). The country selector always shows every country that holds at least one listable reseller with its count, plus an **All Countries** entry carrying the total; the grade selector is built the same way over the grades.
 
-**Publication.** The publication control of a reseller page is offered only to a reader who may write on the Contact record behind it (`LEAD-RULE-177`). Website editing rights alone do not grant it.
+**Publication.** The publication control of a reseller page is offered only to a reader who may write on the Contact record behind it (`LEAD-152`). Website editing rights alone do not grant it.
 
 **Page inventory.** The directory path is registered as listable website content under the name `Partners`, so that it appears among the site pages and in the site map together with one entry per grade and per country that holds a listable reseller.
 
 
 ### 3.5 Website contact form
 
-The Lead entity is registered as a public form target under the key `create_lead`, with `description` as the default free-text field and the label `Create an Opportunity`. The form handler applies `LEAD-RULE-140`, the telephone reformatting and the subdivision inference described in [workflows.md](workflows.md) section 2.3.
+The Lead entity is registered as a public form target under the key `create_lead`, with `description` as the default free-text field and the label `Create an Opportunity`. The form handler applies `LEAD-118`, the telephone reformatting and the subdivision inference described in [workflows.md](workflows.md) section 2.3.
 
 ## 4. Screens
 
@@ -246,7 +249,7 @@ The Lead entity is registered as a public form target under the key `create_lead
 
 **Blacklist buttons.** Next to the email and next to the telephone, a button appears when the address or the number is blacklisted, or when the customer is blacklisted, and removes it from the blacklist.
 
-**Warnings.** A note appears next to the email and next to the telephone when saving will also modify the customer record (`LEAD-RULE-028`).
+**Warnings.** A note appears next to the email and next to the telephone when saving will also modify the customer record (`LEAD-028`).
 
 **Notebook.**
 
@@ -260,12 +263,12 @@ The Lead entity is registered as a public form target under the key `create_lead
 
 ### 4.2 The pipeline (kanban of opportunities)
 
-- Grouped by stage by default, with the column set expanded by `LEAD-RULE-194`.
+- Grouped by stage by default, with the column set expanded by `LEAD-169`.
 - Quick creation opens a reduced form asking for the title, the customer or the company, the expected revenue and the recurring figures.
 - Cards are coloured by the colour index of the record and highlighted when the record is rotting.
 - Archiving from the kanban is disabled; losing a record goes through the Lost dialogue.
 - A card shows the title, the customer, the expected revenue, the tags, the priority stars, the next activity indicator and the salesperson avatar.
-- Dragging a card into a column flagged as won triggers `LEAD-RULE-041`.
+- Dragging a card into a column flagged as won triggers `LEAD-041`.
 
 ### 4.3 The Leads list
 
@@ -385,11 +388,11 @@ Source: the Lead entity, restricted to opportunities, grouped by expected closin
 
 ### 5.4 Activity Analysis
 
-Source: the Activity Analysis Report database view, one row per message on a Lead carrying an activity type. Columns are listed in [entities.md](entities.md) section 10. Typical uses: number of calls per salesperson per month, distribution of activity types by stage.
+Source: the Activity Analysis Report database view, one row per message on a Lead carrying an activity type. Columns are listed in [entities.md](entities.md) section 11.2. Typical uses: number of calls per salesperson per month, distribution of activity types by stage.
 
-### 5.5 Partnership Analysis
+### 5.5 Partner Assignment Analysis
 
-Source: the Partnership Analysis database view, one row per contact carrying a grade or an activation level, joined with the opportunities forwarded to it and with the customer invoice analysis. Columns: partner, grade, activation, salesperson, latest review, partnership date, country, number of opportunities, invoiced turnover, invoice accounting date. Default condition: a grade is set. Default presentation: a graph.
+Source: the Partner Assignment Analysis database view, one row per contact carrying a grade or an activation level, joined with the opportunities forwarded to it and with the customer invoice analysis. Columns: partner, grade, activation, salesperson, latest review, partnership date, country, number of opportunities, invoiced turnover, invoice accounting date. Default condition: a grade is set. Default presentation: a graph.
 
 ### 5.6 Live chat channel report
 
@@ -444,7 +447,7 @@ This domain ships no printed document. The exchanges that leave the system are:
 | Partner assignment skips records with no country | danger | title `Warning`, body `There is no country set in addresses for <lead names>.` |
 | The live chat command creates a record | transient chat message | `Created a new lead: <link to the record>` |
 | The live chat command is used with no title | transient chat message | `Create a new lead with: /lead <lead title>` |
-| An opportunity is won from the form | celebration effect | the message chosen by [calculations.md](calculations.md) section 6, with the picture of the team leader when they have one and a default picture otherwise |
+| An opportunity is won from the form | celebration effect | the message chosen by [calculations.md](calculations.md) section 11, with the picture of the team leader when they have one and a default picture otherwise |
 
 ### 7.3 Emails
 
@@ -474,7 +477,7 @@ Three external services are used. Each is described by what is sent and what is 
 
 **Expected back.** A map from record identifier to either nothing, or a company description holding: the company name, the external company identifier, the postal address (street, city, postal code), a telephone number, a country code, a subdivision code, and any additional descriptive data the provider offers.
 
-**Applied.** Only onto empty fields, as stated in `LEAD-RULE-150`.
+**Applied.** Only onto empty fields, as stated in `LEAD-128`.
 
 ### 9.2 Lead mining
 
@@ -488,4 +491,48 @@ Three external services are used. Each is described by what is sent and what is 
 
 **Expected back.** Per network address, either nothing, or a company description of the same shape as the mining answer, plus the number of credits consumed.
 
-In all three cases, an answer stating that credits are exhausted must be distinguishable from an empty answer, because the two lead to different states (`LEAD-RULE-147`).
+In all three cases, an answer stating that credits are exhausted must be distinguishable from an empty answer, because the two lead to different states (`LEAD-125`).
+
+## 10. Menus, window actions and views
+
+The menu tree, with its parents, its sequences and the groups each entry is visible to, is in
+[configuration.md](configuration.md), section 9. Each menu entry opens one window action; the window
+actions of this domain, and the presentations they offer, are:
+
+| Window action | Entity | Presentations | Restriction and defaults |
+|---|---|---|---|
+| My pipeline | Lead | kanban, list, form, calendar, pivot, graph, activity, map | type `opportunity`; the reader's own records first; grouped by stage. |
+| Leads | Lead | list, kanban, form, calendar, pivot, graph, activity | type `lead`; visible only with the group *Show Lead Menu*. |
+| Opportunities (configuration entry point) | Lead | kanban, list, form | type `opportunity`. |
+| Forecast | Lead | kanban, list, pivot, graph | type `opportunity`; grouped by expected closing month; measures the prorated revenue. |
+| Pipeline analysis | Lead | graph, pivot, list | type `opportunity`; the current period. |
+| Leads analysis | Lead | graph, pivot, list | both the active and the archived filters pre-selected. |
+| Activities analysis | Activity Analysis | pivot, graph | none. |
+| Partnership analysis | Partner Assignment Analysis | graph | restricted to rows whose level is set. |
+| Teams | Sales Team | kanban, list, form | the dashboard presentation of the team cards. |
+| Team members | Sales Team Member | list, form | reserved to the technical group. |
+| Stages | Stage | list, form | reserved to the technical group. |
+| Tags | Tag | list, form | none. |
+| Lost reasons | Lost Reason | list, form | none. |
+| Recurring plans | Recurring Plan | list, form | visible only with the group *Show Recurring Revenues Menu*. |
+| Levels and Partner activations | Partner Grade, Partner Activation | list, form | present with the membership capability. |
+| Lead generation requests | Lead Generation Request | list, form | present with the lead generation capability. |
+| Visits to leads rules | Lead Generation Rule | list, form | present with the website identification capability. |
+| Lead generation views | Reveal View | list, form | reserved to the technical group. |
+| Blacklisted telephone numbers | Telephone Blacklist | list, form | reserved to the system administration group. |
+| Forward to partner | Forward to Partner Wizard | form, in a dialogue | one variant defaults the composition to the batch mode. |
+
+Every list presentation of the Lead supports editing several records at once; every kanban
+presentation groups by stage by default and expands the column set by `LEAD-169`.
+
+---
+
+## 11. Reconciliation notes
+
+| Subject | The two statements | Resolution |
+|---|---|---|
+| Operation names | One description named the operations in prose; the other gave each a stable identifier. | The stable identifiers are kept, with the sentence at the head of section 1 saying plainly that they are assigned by this specification and are not contractual strings. |
+| Menus | One description put the menu tree in the interface document; the other in the configuration document. | The tree is in [configuration.md](configuration.md), section 9, and section 10 here lists the window actions the entries open. |
+| The celebration animation | One description mentioned only the message; the other described the picture. | Both are here: the message is chosen by [calculations.md](calculations.md) section 11, and the animation shows the team leader's portrait when the leader has one and a generic smiling face otherwise. |
+| The activity-deadline ordering | One description called it a two-pass search; the other stated it as a rule. | It is stated once as `LEAD-167` and referred to from section 4 here and from [workflows.md](workflows.md). |
+| Reports | Both descriptions listed the same five reports. | Kept once, in section 5, with the measures and the default groupings of each. |
