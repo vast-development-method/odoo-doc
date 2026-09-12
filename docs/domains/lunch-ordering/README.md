@@ -118,7 +118,7 @@ belong to the platform foundation and are specified in
    ordering, display-name rule, archival behaviour and company behaviour.
 3. [`state-machines.md`](state-machines.md) — the order pipeline, the archive flag machines and the
    vendor availability machine, each with its transition table and diagram.
-4. [`workflows.md`](workflows.md) — the eleven end-to-end procedures, step by step.
+4. [`workflows.md`](workflows.md) — the sixteen end-to-end procedures, step by step.
 5. [`business-rules.md`](business-rules.md) — every validation, constraint, permission check and
    invariant, numbered, with its exact refusal message.
 6. [`calculations.md`](calculations.md) — every formula: line price, account balance, permitted
@@ -141,7 +141,7 @@ belong to the platform foundation and are specified in
 | [`README.md`](README.md) | Scope, questions answered, capabilities, actors, owned and extended entities, reading order, dependencies. |
 | [`entities.md`](entities.md) | The nine owned entities and the extension fields, each with a complete field table, relations, uniqueness, ordering, display name, archival and company behaviour. |
 | [`state-machines.md`](state-machines.md) | The order pipeline with five states, the three archive machines, and the vendor availability and cut-off machine, with transition tables, guards, refusal messages and diagrams. |
-| [`workflows.md`](workflows.md) | Vendor set-up, catalogue set-up, browsing, cart building, cart confirmation, dispatch by electronic mail, dispatch by telephone, receipt, delivery notice, account crediting and notice pushing. |
+| [`workflows.md`](workflows.md) | Vendor set-up, catalogue set-up, locations, browsing, cart building, cart adjustment, cart confirmation, dispatch by electronic mail, dispatch by telephone, receipt and delivery notice, account crediting, notice pushing, withdrawal of a vendor or a meal, the ordering screen interaction by interaction, period settlement, and an index of symptoms. |
 | [`business-rules.md`](business-rules.md) | Numbered rules with the prefix `MEAL`, each with condition, refusal message, enforcement point and severity, plus the rule index. |
 | [`calculations.md`](calculations.md) | Line price, cart totals, account balance, permitted overdraft, add-control availability, decimal hour conversion, next dispatch instant, availability on a date and cut-off, each with a worked example. |
 | [`accounting-effects.md`](accounting-effects.md) | The reasoned statement that the domain produces no journal entries, the internal account it keeps instead, and the ledger effects it triggers in other domains. |

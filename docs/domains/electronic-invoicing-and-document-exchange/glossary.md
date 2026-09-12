@@ -78,6 +78,8 @@ The terms of the Electronic Invoicing and Document Exchange domain, in full word
 
 **Global discount line.** A line of an accounting document that carries a discount or an upsell applying to the whole document. It is never reported as a document line; it becomes a document level allowance or charge.
 
+**Global location number.** The code that identifies one physical location in the international article number location scheme, whose scheme identifier is `0088`. It is held on a delivery address, is free text and is not validated by the system. On export it becomes the identifier of the delivery location in the universal business language family and the identifier of the ship-to trade party in the cross industry invoice family; no import step ever writes it. Specified in section 15.6 of [entities.md](entities.md).
+
 **Goods and services tax area.** The set of countries listed in section 8.7 of [universal-business-language-mapping.md](universal-business-language-mapping.md) whose parties use the goods and services tax scheme code instead of the value added tax scheme code.
 
 **Hybrid document.** A printed document that carries a structured file inside it, so that one file serves both a human reader and a machine.

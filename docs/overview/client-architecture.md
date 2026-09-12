@@ -159,7 +159,33 @@ The client loads the whole tree once, as specified in [views and actions, sectio
 | `set_current_menu(entry)` | Record which entry is highlighted, without running anything. |
 | `reload()` | Re-fetch the tree, used after a package installation. |
 
-Each entry carries the keys listed in [views and actions, section 24](views-and-actions.md#24-menus) plus two derived values used by the palette and the application switcher: the concatenation of the ancestor labels (`parents`), and a link target built from the entry key and its action key.
+### 3.1 The delivered payload
+
+What the server delivers is **not** the stored Menu record of [views and actions, section 24](views-and-actions.md#24-menus). It is a purpose-built payload, keyed by entry key, and every entry carries exactly these keys:
+
+| Key | Value |
+|---|---|
+| `identifier` | The entry's own key. |
+| `name` | The label, translated into the acting user's language. |
+| `application` | The key of the application root this entry belongs to. Every delivered entry has one. |
+| `action_model` | The transport name of the entity of the entry's action, or false when the entry has no action. |
+| `action_identifier` | The identifier of the entry's action, or false. |
+| `action_path` | The path of the entry's action ([views and actions, section 16.1](views-and-actions.md#161-common-fields)), or false. |
+| `web_icon` | The icon descriptor of the entry. |
+| `web_icon_data` | The icon's content, rendered as text. |
+| `web_icon_data_mimetype` | The media type of that content, so that the client can render it without sniffing. |
+| `external_identifier` | The complete external identifier of the entry — package name, a full stop, local name — or the empty text when the entry has none. |
+| `children` | The keys of this entry's **visible** children, in the order of [views and actions, section 24.2](views-and-actions.md#242-ordering). |
+
+To those eleven the client adds two derived values of its own, used by the command palette and the application switcher: the concatenation of the ancestor labels (`parents`), and a link target built from the entry key and its action key.
+
+**The synthetic root entry.** The payload additionally carries one entry under the key `root`, which corresponds to no Menu record: its `identifier` is false, its `name` is the literal text `root`, and its `children` are the keys of the application roots. It exists so that the tree has a single entry point and the client can walk it without a special case for the top level.
+
+**Broken chains are dropped.** An entry that is itself visible but whose chain of ancestors to an application root is broken — because an intermediate folder is not visible to this user ([views and actions, section 24.1](views-and-actions.md#241-visibility)) — is **removed** from the payload rather than reparented. The rule guarantees the invariant the client depends on: every delivered entry belongs to exactly one application, so `get_current_app()` always has an answer and the application switcher never shows an orphan.
+
+**The roots-only operation.** A second operation returns only the application roots, each with its label, its sequence, its parent, its action and its icon content, plus the list of all root keys. A client loads that first and draws the application switcher with it, then loads the full tree; the switcher is therefore usable before the whole tree has arrived, which matters because the full tree of a large installation is the largest single payload of the bootstrap.
+
+**Caching.** Both results are cached per user and per language — per user because visibility is computed from the user's groups, per language because the labels are translated. The full tree is additionally cached per diagnostic state, because diagnostic mode adds entries that are otherwise hidden. Installing or removing a package invalidates all of them, which is what the reload operation above relies on.
 
 ## 4. The action manager
 
@@ -1034,6 +1060,12 @@ Records created offline receive a locally generated marker rather than a server 
 **AC-CLI-54.** *Given* paid orders written locally and not yet confirmed, *when* the page is about to be closed, *then* the closing is refused.
 **AC-CLI-55.** *Given* the client is offline, *when* a record that is not in the local database is requested, *then* no request is issued and the caller receives nothing.
 
+**AC-CLI-56.** *Given* a menu entry that the acting user may see but whose parent folder is restricted to a group the user does not hold, *when* the navigation tree is delivered, *then* the entry is absent from the payload, and every delivered entry names an application root that is present.
+
+**AC-CLI-57.** *Given* a delivered navigation tree, *when* the payload is inspected, *then* it holds an entry under the key `root` whose identifier is false, whose name is the text `root` and whose children are the keys of the application roots.
+
+**AC-CLI-58.** *Given* the same user and the same language, *when* the navigation tree is requested twice in diagnostic mode and once outside it, *then* two cache entries exist, one per diagnostic state, and each is reused on the second request.
+
 ---
 
 ## 19. Invariants a rebuild must preserve
@@ -1053,13 +1085,14 @@ Records created offline receive a locally generated marker rather than a server 
 
 ## 20. Reconciliation notes
 
-Only one of the two drafts described the client at all; the other described the platform's presentation contract from the server's side. Three decisions were therefore about placement rather than about facts.
+Three topics could reasonably have been specified here and are specified elsewhere instead, and two further decisions are recorded so that a reader who expects to find a subject in this document knows where it went. Everything stated here was verified against the running system.
 
 1. **What belongs here and what belongs with the views.** The grammar of a view description, the widget catalogue, the resolution passes and the actions are specified in [views and actions](views-and-actions.md), because they are what the server produces. This document specifies what the client does with them, and repeats none of the grammar.
 2. **Where the asset bundles are specified.** A bundle's content is decided by which packages are installed and in what order, so it is specified in [the package system, section 22](package-system.md#22-client-asset-bundles). [Section 2.1](#21-the-startup-sequence) names the step at which the bundles are loaded and nothing more.
 3. **Where printing belongs.** A report action is dispatched by the action manager of [section 4.2](#42-running-an-action) and rendered by [report rendering](../runtime/report-rendering.md); the rendering pipeline is not repeated here.
-4. **The period-comparison control.** The base platform examined for this specification does not carry the comparison mechanism the reference behaviour offers. It is stated as an **industry-standard default** in [section 6.7](#67-period-comparison-industry-standard-completion), marked as such, and a rebuild that implements it that way is conformant.
-5. **Acceptance criteria identifiers.** The scenarios are numbered in one series with the prefix `AC-CLI`.
+4. **The period-comparison control.** The platform examined for this specification does not carry the comparison mechanism that comparable systems offer. It is stated as an **industry-standard default** in [section 6.7](#67-period-comparison-industry-standard-completion), marked as such, and a rebuild that implements it that way is conformant.
+5. **Acceptance criteria identifiers.** The scenarios of this document are numbered in one series with the prefix `AC-CLI`.
+6. **The delivered navigation payload against the stored menu record.** These are two different things and are easy to confuse. The stored record is in [views and actions, section 24](views-and-actions.md#24-menus); the eleven keys a client actually receives, the synthetic root entry and the dropping of entries whose chain to an application root is broken are in [section 3.1](#31-the-delivered-payload).
 
 ---
 

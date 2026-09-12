@@ -6,7 +6,7 @@ Every setting, parameter, shipped record, scheduled action, access group, record
 
 # 1. Capability packages
 
-The domain is delivered as ten installable capability packages. A package is named here by its function; the deployment unit boundaries matter because several behaviours only exist when a given package is present.
+The domain is delivered as eleven installable capability packages. A package is named here by its function; the deployment unit boundaries matter because several behaviours only exist when a given package is present.
 
 | Package | Requires | What it adds |
 |---|---|---|
@@ -16,7 +16,8 @@ The domain is delivered as ten installable capability packages. A package is nam
 | Interchange proxy client | the general ledger and Certificates and keys | The Electronic Interchange Proxy User record, the request signing, the token renewal and the generic proxy call. |
 | Document exchange network | Interchange proxy client and Structured invoice formats | The participant registration, the participant lookup, the sending over the network, the inbox polling, the delivery state polling, the callbacks and the demonstration mode. Restricted to the countries listed in section 3.3 of [peppol-network.md](peppol-network.md). |
 | Business responses | Document exchange network | The Peppol Business Response and Peppol Clarification records, the rejection wizard, the response transaction in the published document types, and the automatic acknowledgement and approval. Installed automatically whenever the exchange network package is installed. |
-| Advanced document fields | the general ledger and Structured invoice formats | Seven further reference fields on an accounting document, described in section 14 of [peppol-network.md](peppol-network.md). |
+| Advanced document fields | the general ledger and Structured invoice formats | Seven further reference fields on an accounting document, listed with their transport names in section 12.3 of [entities.md](entities.md) and described in section 14 of [peppol-network.md](peppol-network.md). |
+| Delivery location code | the general ledger | The location code of a delivery address in the international article number location scheme `0088`, on a contact, together with its place on the contact form. Installed automatically whenever the general ledger is installed. The field is read by the delivery node of both format families; section 15.6 of [entities.md](entities.md) gives the behaviour. |
 | Sales order interchange | sales and Structured invoice formats | The ordering profile for a sales order, its export, its import and the two variant product matching strategies. Installed automatically whenever both prerequisites are installed. |
 | Purchase order interchange | purchasing and Structured invoice formats | The ordering profile for a purchase order, its export and its import. Installed automatically whenever both prerequisites are installed. |
 | Point of sale receipt interchange | point of sale and Structured invoice formats | The receipt profile and its export. |

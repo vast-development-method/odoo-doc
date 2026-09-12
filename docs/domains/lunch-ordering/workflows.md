@@ -5,7 +5,7 @@ preconditions, its numbered steps, the records each step creates or changes, the
 invokes and its failure conditions. Refusal messages are quoted in full in
 [`business-rules.md`](business-rules.md); the rule identifier is given at each failure point.
 
-The eleven procedures are:
+The sixteen procedures are:
 
 1. Setting up a vendor.
 2. Setting up the meal catalogue.
@@ -19,10 +19,13 @@ The eleven procedures are:
 10. Receiving the delivery and notifying employees.
 11. Crediting an employee's internal account.
 
-Two further procedures, both automatic, close the document:
+Two further procedures, both automatic, and three reference sections close the document:
 
 12. Pushing a scheduled notice.
 13. Withdrawing a vendor, a category or a meal.
+14. The ordering screen, interaction by interaction.
+15. Reviewing and settling accounts at the end of a period.
+16. What can go wrong, and where it is specified.
 
 ---
 
@@ -251,3 +254,64 @@ and renders each message inside a single warning block at the top of the panel.
 | 6 | To bring the category back, the administrator un-archives it. | Every meal in it whose vendor is active is un-archived; the rest stay archived. | None. |
 | 7 | To withdraw a single meal, the administrator archives it. | The meal leaves the catalogue. Existing orders keep pointing at it. Confirming such an order is refused with MEAL-002. | None. |
 | 8 | To delete a vendor outright, the administrator deletes the record. | The vendor's extras are deleted by cascade; then the scheduled action and the server action behind it are deleted. | Deletion is refused while any meal points at the vendor. |
+
+---
+
+## 14. The ordering screen, interaction by interaction
+
+This procedure specifies what the ordering screen does at each moment, because the screen is the
+only place where several of the domain's rules are visible and because a rebuild must reproduce the
+sequence of service calls to reproduce the observed behaviour.
+
+| # | Trigger | What the screen does | What the server does | What the screen then shows |
+|---|---|---|---|---|
+| 1 | The screen is opened. | Calls the endpoint at the route `/lunch/user_location_get` with no employee named. | Returns the employee's current location when it is set and visible to one of the request's active companies, otherwise the oldest visible location, otherwise nothing. | Remembers the location and narrows the catalogue query to the meals available there. |
+| 2 | The catalogue is about to load. | Adds a condition on the availability-at-location field to whatever the search panel already produced. | Resolves that condition into: the meal's vendor serves the given location, **or** the meal's vendor declares no location at all. | The card or row set. When the screen has no location it lists nothing and shows the two lines "No location found" and "Please create a location to start ordering." |
+| 3 | The panel is about to render. | Calls the endpoint at the route `/lunch/infos`. | Assembles the employee's name and picture address, both balances, the administrator flag of the **requesting** user, the portal group identifier, every location, the currency symbol and position, the current location, the banner notices, and — when the employee has current lines — the three totals, the collapsed state and the line entries. | The whole panel. |
+| 4 | The employee picks a date. | Switches off any active weekday filter and switches on the one matching the chosen date; stores the date so that the order dialogue receives it as a default. | Nothing. | A catalogue narrowed to the meals of that weekday. |
+| 5 | An administrator picks another employee. | Stores that employee and re-calls the endpoint at the route `/lunch/infos` naming them. | Checks the impersonation rule, then answers for the named employee. | A panel showing the named employee's balance, location and lines. |
+| 6 | The employee picks a location. | Calls the endpoint at the route `/lunch/user_location_set`. | Writes the location onto the employee with elevated rights. | The panel is reloaded and the catalogue re-narrowed. |
+| 7 | The employee clicks a card or a row. | Opens the order dialogue titled "Configure Your Order", passing the meal as a default and, when they are set, the impersonated employee, the chosen date and the chosen location. | Nothing until the dialogue saves. | The dialogue. |
+| 8 | The dialogue is saved by "Add To Cart". | Saves the record, then invokes the named add-to-cart operation, which does nothing, then closes and asks the panel to refresh. | Creates or merges the line, running the extras discipline and the balance check. | The refreshed panel. |
+| 9 | The employee presses an increment or decrement control. | Calls the quantity operation on that line with a step of plus or minus one, then refreshes the panel. | Adjusts the quantity or archives the line, then re-checks the balance. | The refreshed panel. |
+| 10 | The employee presses "Order Now". | Calls the endpoint at the route `/lunch/pay`, then refreshes the panel. | Confirms the employee's to-order lines. | The refreshed panel, with the confirmed lines now shown as ordered. |
+| 11 | The employee presses "Clear Order". | Calls the endpoint at the route `/lunch/trash`, then refreshes the panel. | Cancels and deletes the employee's lines that are not sent and not received. | The refreshed panel, emptied of those lines. |
+| 12 | The screen is narrow. | Renders a bottom bar with a control reading "Your Cart" and the cart total, which opens the panel as a sliding drawer. | Nothing. | The same panel content in a drawer. |
+
+**Failure conditions of the sequence.** Every call in steps 3, 5, 6, 10 and 11 that names another
+employee is refused for a non-administrator with the impersonation message. Step 8 may be refused by
+the extras discipline or by the balance check. Step 10 may be refused by the availability check, the
+archived-meal check or the balance check. In every case the screen reports the refusal and the panel
+is left as it was, because the whole transaction is rolled back.
+
+---
+
+## 15. Reviewing and settling accounts at the end of a period
+
+**Actor.** Meal ordering administrator, then the accountant.
+
+| Step | What happens | Records created or changed | Failure |
+|---|---|---|---|
+| 1 | The administrator opens "Control Accounts", which shows the merged statement grouped by employee with a summed total per group and a grand total. | None. | None. |
+| 2 | The administrator reads each employee's balance. A negative balance means the employee has consumed more than they have paid in; a positive balance means the opposite. | None. | None. |
+| 3 | For each employee in debt, the administrator collects the money and records a Lunch Cash Move with the collected amount. | One Lunch Cash Move per employee. | Rules MEAL-023 to MEAL-025. |
+| 4 | Where the employer recovers through the payroll instead, the administrator records the same amounts as Lunch Cash Move records anyway, so that the internal balances return to zero, and passes the figures to the payroll capability. | One Lunch Cash Move per employee. | Nothing links the two automatically; an administrator who forgets step 4 leaves every recovered employee permanently in debt inside this domain. |
+| 5 | The accountant reads the grand total of the same screen and writes the entries described in [`accounting-effects.md`](accounting-effects.md), in the domains that own them. | Journal entries in other domains. | None here. |
+| 6 | Nothing in this domain is closed, locked or carried forward. The statement remains a complete history from the first movement onwards. | None. | None. |
+
+---
+
+## 16. What can go wrong, and where it is specified
+
+| Symptom | Cause | Where it is specified |
+|---|---|---|
+| The catalogue is empty although meals exist. | The screen has no location, or the vendors of the meals do not serve the chosen location, or the chosen weekday is not served. | Procedures 3 and 4; rule MEAL-034 for the company case. |
+| The add control is missing on the dialogue. | The vendor's cut-off has passed for the chosen date, or the balance would not cover the line. | Rules MEAL-021 and MEAL-046. |
+| Confirming the cart is refused. | The vendor does not serve one line's date, a meal is archived, or the balance would fall below the permitted overdraft. | Rules MEAL-001, MEAL-002 and MEAL-020. |
+| A quantity disappears after receipt. | An identical line was merged into a line already sent or received. | The compatibility finding in [`state-machines.md`](state-machines.md#18-merge-on-write-and-what-it-does-to-a-state-change). |
+| A balance rises between dispatch and receipt. | Sent lines are absent from the statement. | The compatibility finding in [`entities.md`](entities.md#82-nature-and-composition). |
+| A notice is never pushed on its last day. | The displayability rule and the scheduled action's activity rule compare the show-until date differently. | The compatibility finding in [`state-machines.md`](state-machines.md#54-the-gap-on-the-show-until-date-itself). |
+| The vendor message shows no delivery addresses. | The location block reads a name the payload does not supply. | The compatibility finding in [`interfaces.md`](interfaces.md#7-the-vendor-order-message). |
+| Un-archiving a vendor fails. | One of its meals sits in a still-archived category. | The compatibility finding in [`entities.md`](entities.md#16-archival-and-company-behaviour). |
+| Historical orders change company. | The vendor's company was rewritten. | Rule MEAL-048. |
+| Two identical lines exist where one was expected. | Two simultaneous additions each found no match. | Rule MEAL-055. |

@@ -57,10 +57,11 @@ Constraints and indexes: a unique index `module_name_uniq_index` over the pair (
 ### 2.4 Resolution
 
 1. Resolving a complete form returns the pair (entity name, record identifier), or fails with "External ID not found in the system: " followed by the identifier.
-2. Resolution is cached; creating, changing or deleting an entry clears the cache.
-3. The convenience resolution used throughout the system additionally reads the record and checks that it still exists. A vanished record yields "No record found for unique ID " followed by the identifier " . It may have been deleted."
-4. Resolution does not check access rights. A separate operation resolves the identifier and then verifies that the acting user may read the record; it returns the entity name with no identifier when the record exists but is not readable, or refuses with "Not enough access rights on the external ID" followed by the package part and the local part in double quotation marks when the caller asks for an error.
-5. During a load, an identifier written without a dot is completed with the contributing package's name. An identifier whose package part is not the contributing package refers to another package's record; that package must be installed.
+2. Resolution is cached, and the cache is maintained as follows. Creating an entry leaves the resolution cache alone, because a complete form that resolves to nothing was never cached. Changing an entry and deleting an entry each clear the resolution cache. Bulk assignment (section 2.5) does not clear it either: it writes the resolved pair straight into the cache for every row it inserted or updated, and, for a row whose creation stamp and modification stamp differ — that is, a row that already existed and really changed — it marks the general cache as invalidated so that the other worker processes drop their copies.
+3. Creating, changing or deleting an entry whose entity is the access-group entity (`res.groups`) additionally clears the access-group cache, and so does a bulk assignment in which at least one row names that entity. The access-group cache holds the resolved membership and implication graph, which is read on every permission check; an external identifier that starts, stops or moves pointing at an access group changes what that graph resolves to, so the cache must be dropped with it. A change to an entry of any other entity leaves the access-group cache alone.
+4. The convenience resolution used throughout the system additionally reads the record and checks that it still exists. A vanished record yields "No record found for unique ID " followed by the identifier " . It may have been deleted."
+5. Resolution does not check access rights. A separate operation resolves the identifier and then verifies that the acting user may read the record; it returns the entity name with no identifier when the record exists but is not readable, or refuses with "Not enough access rights on the external ID" followed by the package part and the local part in double quotation marks when the caller asks for an error.
+6. During a load, an identifier written without a dot is completed with the contributing package's name. An identifier whose package part is not the contributing package refers to another package's record; that package must be installed.
 
 ### 2.5 Assignment
 
@@ -118,7 +119,15 @@ For a declared record with no external identifier: create it, unless the values 
 | Update | false | Record updated |
 | Update | true | Record untouched |
 
-The flag is the mechanism by which a package ships a **starting value that the user may then change**: a default sequence, a sample message template, a suggested account, a chart of accounts. Without it every package update would overwrite the tenant's own configuration. The flag can be toggled from the interface for a single record, which requires the right to modify that record. Demonstration data is always loaded with the flag set, so that updating a package never re-imposes demonstration records a user has edited or deleted.
+The flag is the mechanism by which a package ships a **starting value that the user may then change**: a default sequence, a sample message template, a suggested account, a chart of accounts. Without it every package update would overwrite the tenant's own configuration. The flag can be toggled from the interface for a single record, which requires the right to modify that record.
+
+**The flag of an existing identifier row is never changed by a later load.** It is decided once, at the moment the identifier row is first created, by the enclosing scope of the data file that created it: a record declared inside a scope marked not updatable gets a row with the flag set, and a record declared outside such a scope gets a row with the flag clear. When a later load writes the same identifier again, the bulk assignment of section 2.5 updates only the entity, the record identifier and the modification stamp; the flag column is left exactly as it was. Three consequences follow, and a package author must know all three:
+
+1. Moving a record in a data file from an ordinary scope into a not-updatable scope does not protect the records already installed in existing tenants; it protects only the tenants that install the package afterwards.
+2. Moving a record out of a not-updatable scope does not expose the already-installed records to the package's updates either; they stay protected.
+3. The only ways the flag of an existing row changes are the toggle from the interface and the deletion of the row followed by a fresh creation.
+
+Demonstration data is always loaded with the flag set, so that updating a package never re-imposes demonstration records a user has edited or deleted.
 
 ### 3.4 Orphan cleanup
 
@@ -188,12 +197,14 @@ A field node naming a list of records may contain record nodes. Each child is cr
 
 ### 4.3 Tabular data files
 
-1. Decode the file as an eight-bit Unicode transformation format; the quoting character is the double quote and the separator is the comma.
-2. The first row is the list of field paths. A name containing the at sign designates a translation column; it is removed together with its values, because translations are loaded separately.
-3. When the load is not in initial mode, the field list must contain the identifier column; otherwise the file is refused with a message saying that the import specification does not contain the identifier column.
-4. Rows that are empty, or that contain only empty cells, are dropped.
-5. The remaining rows are passed to the generic import operation of section 6, with a context recording the load mode, the contributing package, the file name and the not-updatable flag.
-6. If the import produces any message of kind error, the whole installation fails with "Module loading " the package name " failed: file " the file name " could not be processed:" followed by the messages.
+1. Decode the file as an eight-bit Unicode transformation format; the quoting character is the double quote and the separator is the comma. The transport name of the entity to load is the file name up to the first hyphen.
+2. The first row is the list of field paths.
+3. When the load is not in initial mode, the field list must contain the identifier column `id`; otherwise the file is not executed at all, an error is recorded saying that the import specification does not contain the identifier column and that the load cannot continue, and the loader moves on to the next file. This check is made on the first row as written, before any column is removed.
+4. A heading containing the at sign designates a translation column; it is removed, together with its cell in every row, because translations are loaded separately by the translation machinery (section 9).
+5. If removing the translation columns leaves no column at all — that is, every heading of the file was a translation column — the file is skipped: no row is loaded from it, no message is produced, and the loader moves on to the next file.
+6. Rows that are empty, or that contain only empty cells once the translation columns have been removed, are dropped.
+7. The remaining rows are passed to the generic import operation of section 6, with a context recording the load mode, the contributing package, the file name and the not-updatable flag.
+8. If the import produces any message of kind error, the whole installation fails with "Module loading " the package name " failed: file " the file name " could not be processed:" followed by the messages.
 
 ## 5. Field path notation
 
@@ -299,10 +310,12 @@ For a link to one record, a list on both sides, or a link property, the cell is 
 | Form | Resolution |
 |---|---|
 | By display name, when the path ends at the field itself | Search the target entity for a record whose name matches the value exactly. When several match, take the first and add the warning "Found multiple matches for value \"" the value "\" in field \"" the field label "\" (" the number of matches " matches)". An empty value resolves to no link. |
-| By external identifier, when the path ends in `id` | Complete a bare name with the contributing package, flush the pending batch so that a record created earlier in the same file can be found, then look the identifier up, checking that the row's entity is the expected one. A value that the boolean converter reads as false resolves to no link. |
+| By external identifier, when the path ends in `id` | Complete a bare name with the contributing package, flush the pending batch so that a record created earlier in the same file can be found, then look the identifier up. The lookup returns the entity and the record identifier of the row only when the row's record still exists in the table of the target entity, so a row that points at a deleted record resolves to nothing. When the row exists but its entity is not the entity the link points at, the cell is refused with "Invalid external ID " the complete identifier ": expected model " the transport name of the entity the link points at, between apostrophes ", found " the transport name of the entity the row records, between apostrophes. A value that the boolean converter reads as false resolves to no link. |
 | By numeric identifier, when the path ends in `.id` | Parse the value as a whole number and check that the record exists. A value that the boolean converter reads as false resolves to no link. A value that is not a number is refused with "Invalid database id '" the value "' for the field '" the field label "'". |
 
 When nothing is found, the cell is refused with "No matching record found for " the form, one of the words "name", "external id" or "database id", " '" the value "' in field '" the field label "'". The message carries an action that opens the list of possible values: the target entity itself for the name form, and the external identifier registry restricted to the target entity for the two identifier forms. When the field is named in the set-empty set the value becomes empty instead; when it is named in the skip-records set the whole row is skipped instead.
+
+A referencing form other than these three is refused with "Unknown sub-field “" the name of the form "”", where the name is written between the same curly quotation marks the message uses. A file cannot reach this refusal through the ordinary paths, because a sub-path that is neither `id` nor `.id` nor a field of the target entity is already refused by the indirect-creation rule of section 5.2 before the resolver is called; it is the guard that protects the resolver when an integration calls it directly with a sub-field it invented.
 
 A list on both sides splits the cell on commas and resolves each part with the same rule; the result is a set command that replaces the whole list, or, when the caller asks for it, one link command per part, which adds without removing. When the field is in the set-empty set, the parts that did not resolve are dropped; when it is in the skip-records set and any part did not resolve, the whole row is skipped.
 
@@ -406,7 +419,7 @@ For each column heading, in order:
 3. **Fuzzy match.** Otherwise, the fields whose type is among the types inferred for the column are compared with the heading, and the distance is one minus the similarity ratio of the two texts, taken as the smallest of the distances to the field name, to the label in the user's language and to the label in the base language. The closest field wins, and only if its distance is below **0.2**; a larger distance means no proposal.
 4. **Deduplication.** When two columns propose the same single field, only the one with the smaller distance keeps it; the other is left unmapped. Columns whose proposal is a path of more than one step are exempt, because a deliberate mapping into a relation is treated as advanced.
 
-A heading that contains slashes is matched step by step: the first segment is matched against the fields of the target entity, the next against the fields of the entity that field points at, and so on. Any segment that fails to match abandons the whole heading.
+A heading that contains slashes is matched one segment at a time, for a heading of any number of segments. The heading is split on the slash and each segment is stripped of the spaces a writer may have put around the slash for readability. The first segment is matched, by the exact and fuzzy rules of steps 2 and 3 above, against the fields offered for the target entity. Every later segment is matched, by the same rules, against the fields offered for the entity reached by the segment before it, so that the entity searched for segment number *n* is always the entity that the field chosen for segment number *n* − 1 points at. The saved-mapping step is not applied to a segment, because a saved mapping stores a whole heading and not a part of one. The field names chosen for the segments, joined by slashes in the order the segments appeared, are the proposed path, and no distance is reported for it. A segment that matches nothing abandons the whole heading, whatever the earlier segments matched, and the column is left unmapped.
 
 ### 7.7 The preview
 
@@ -586,48 +599,55 @@ Each criterion is independently verifiable against a replacement.
 8. Given a package at one version whose data file declares three updatable records, when the package is updated to a version whose data file declares only two of them, then the third record is deleted and the other two are updated.
 9. Given the same situation where the removed record is marked not updatable, when the package is updated, then the record survives.
 
+**The not-updatable flag**
+
+10. Given a package whose data file declares a record outside a not-updatable scope, when the package is installed, then the identifier row is created with the flag clear.
+11. Given that same tenant and a later version of the package that declares the same record inside a not-updatable scope, when the package is updated, then the identifier row still carries the flag clear and the record is overwritten by the package's value.
+12. Given a tabular data file all of whose headings are translation columns, when the package is installed, then no record is created from that file and the installation continues.
+
 **Field paths**
 
-10. Given the column headings `partner_id.id`, `partner_id:id` and `partner_id`, when each is normalised, then the results are `partner_id/.id`, `partner_id/id` and `partner_id` respectively.
-11. Given a file with the columns `id`, `name`, `order_line/product_id/id` and `order_line/product_uom_qty` and the three rows of section 5.3, when it is imported, then one order is created with three lines, in the order of the rows.
-12. Given a row that supplies both `partner_id` and `partner_id/id`, when it is imported, then it is refused with "Ambiguous specification for field '" the field label "', only provide one of name, external id or database id".
+13. Given the column headings `partner_id.id`, `partner_id:id` and `partner_id`, when each is normalised, then the results are `partner_id/.id`, `partner_id/id` and `partner_id` respectively.
+14. Given a file with the columns `id`, `name`, `order_line/product_id/id` and `order_line/product_uom_qty` and the three rows of section 5.3, when it is imported, then one order is created with three lines, in the order of the rows.
+15. Given a row that supplies both `partner_id` and `partner_id/id`, when it is imported, then it is refused with "Ambiguous specification for field '" the field label "', only provide one of name, external id or database id".
 
 **Conversion**
 
-13. Given a boolean column holding the value "maybe", when it is imported, then the value written is true and a warning is produced whose hint is "Use '1' for yes and '0' for no".
-14. Given a date column holding "31/12/2012" and a detected date pattern of day, month and year separated by slashes, when it is imported, then the stored value is the last day of December 2012.
-15. Given a date and time column holding "2012-12-31 23:59:59" and an acting environment whose zone is two hours ahead of coordinated universal time, when it is imported, then the stored value is 2012-12-31 21:59:59.
-16. Given a closed-list column holding a label in the reader's language that is not the technical value, when it is imported, then the technical value is written.
-17. Given a closed-list column holding a value that matches nothing and a fallback value declared for that field, when it is imported, then the fallback is written and no error is produced.
+16. Given a boolean column holding the value "maybe", when it is imported, then the value written is true and a warning is produced whose hint is "Use '1' for yes and '0' for no".
+17. Given a date column holding "31/12/2012" and a detected date pattern of day, month and year separated by slashes, when it is imported, then the stored value is the last day of December 2012.
+18. Given a date and time column holding "2012-12-31 23:59:59" and an acting environment whose zone is two hours ahead of coordinated universal time, when it is imported, then the stored value is 2012-12-31 21:59:59.
+19. Given a closed-list column holding a label in the reader's language that is not the technical value, when it is imported, then the technical value is written.
+20. Given a closed-list column holding a value that matches nothing and a fallback value declared for that field, when it is imported, then the fallback is written and no error is produced.
 
 **Resolution**
 
-18. Given a link column resolved by name whose value matches two records, when it is imported, then the first match is used and a warning naming the number of matches is produced.
-19. Given a link column resolved by name whose value matches nothing, when it is imported, then the row fails with "No matching record found for name '" the value "' in field '" the field label "'".
-20. Given the same file with that field named in the set-empty set, when it is imported, then the record is created with the link empty and no error is produced.
-21. Given the same file with that field named in the skip-records set, when it is imported, then the row is dropped and no record is created for it.
-22. Given a file whose second row refers by external identifier to a record created by its first row, when it is imported, then the reference resolves, because the batch is flushed before the lookup.
+21. Given a link column resolved by name whose value matches two records, when it is imported, then the first match is used and a warning naming the number of matches is produced.
+22. Given a link column resolved by name whose value matches nothing, when it is imported, then the row fails with "No matching record found for name '" the value "' in field '" the field label "'".
+23. Given the same file with that field named in the set-empty set, when it is imported, then the record is created with the link empty and no error is produced.
+24. Given the same file with that field named in the skip-records set, when it is imported, then the row is dropped and no record is created for it.
+25. Given a file whose second row refers by external identifier to a record created by its first row, when it is imported, then the reference resolves, because the batch is flushed before the lookup.
+26. Given a link column resolved by external identifier whose value names a row that records a different entity from the one the link points at, when it is imported, then the cell is refused with the message of section 6.4, naming the identifier, the entity the link points at and the entity the row records.
 
 **Errors and batching**
 
-23. Given a file of one hundred rows of which twelve fail, when the import runs, then the whole import is rolled back, no record is created, and the messages include the twelve failures.
-24. Given a file of two hundred rows of which forty fail from the first row on, when the import runs, then the loop stops after the eleventh failure and appends the message about more than ten errors.
-25. Given a file of one thousand rows and a row limit of two hundred, when the import runs, then two hundred records are created and the returned next row is two hundred and one.
-26. Given a test import that fails, when it completes, then the store holds no new record and the registry cache holds no change from the attempt.
+27. Given a file of one hundred rows of which twelve fail, when the import runs, then the whole import is rolled back, no record is created, and the messages include the twelve failures.
+28. Given a file of two hundred rows of which forty fail from the first row on, when the import runs, then the loop stops after the eleventh failure and appends the message about more than ten errors.
+29. Given a file of one thousand rows and a row limit of two hundred, when the import runs, then two hundred records are created and the returned next row is two hundred and one.
+30. Given a test import that fails, when it completes, then the store holds no new record and the registry cache holds no change from the attempt.
 
 **Export**
 
-27. Given a user who is neither an administrator nor a member of the export group, when an export is requested, then it is refused with "You don't have the rights to export data. Please contact an Administrator."
-28. Given one order with three lines exported in import-compatible mode with the columns `id`, `name`, `order_line/product_id/id` and `order_line/product_uom_qty`, then the file holds three rows, the first carrying the identifier and the name and the other two carrying only the line columns; and importing that file back produces one order with three lines.
-29. Given a record whose text field is "=SUM(A1:A9)", when it is exported to comma-separated values, then the cell begins with an apostrophe.
-30. Given a grouped export to a workbook with a decimal column that declares a sum, then each group header row carries the sum of its rows in that column and the parent group carries the sum of its children.
-31. Given a grouped export requested in the comma-separated format, then it is refused with "Exporting grouped data to csv is not supported."
+31. Given a user who is neither an administrator nor a member of the export group, when an export is requested, then it is refused with "You don't have the rights to export data. Please contact an Administrator."
+32. Given one order with three lines exported in import-compatible mode with the columns `id`, `name`, `order_line/product_id/id` and `order_line/product_uom_qty`, then the file holds three rows, the first carrying the identifier and the name and the other two carrying only the line columns; and importing that file back produces one order with three lines.
+33. Given a record whose text field is "=SUM(A1:A9)", when it is exported to comma-separated values, then the cell begins with an apostrophe.
+34. Given a grouped export to a workbook with a decimal column that declares a sum, then each group header row carries the sum of its rows in that column and the parent group carries the sum of its children.
+35. Given a grouped export requested in the comma-separated format, then it is refused with "Exporting grouped data to csv is not supported."
 
 **Mapping**
 
-32. Given a saved column mapping from the heading "Client" to the field path `partner_id/id` for one entity, when a file with that heading is previewed for that entity, then the proposal is that path, whatever the fuzzy match would have produced.
-33. Given two columns headed "Name" and "Nom" and a field whose label is "Name", when the file is previewed, then only the closer of the two columns keeps the proposal and the other is left unmapped.
-34. Given a successful import of a file with headers, when it completes, then a saved column mapping exists for every mapped column, and re-running the preview proposes the same mapping.
+36. Given a saved column mapping from the heading "Client" to the field path `partner_id/id` for one entity, when a file with that heading is previewed for that entity, then the proposal is that path, whatever the fuzzy match would have produced.
+37. Given two columns headed "Name" and "Nom" and a field whose label is "Name", when the file is previewed, then only the closer of the two columns keeps the proposal and the other is left unmapped.
+38. Given a successful import of a file with headers, when it completes, then a saved column mapping exists for every mapped column, and re-running the preview proposes the same mapping.
 
 ## 12. Reconciliation notes
 
@@ -642,3 +662,8 @@ The target branch carried no file for this topic. The material comes from the re
 | The fuzzy-match threshold | Not stated. | The distance must be below 0.2, where the distance is one minus the similarity ratio of the two texts. Below that the closest field is proposed; at or above it no field is proposed. |
 | The error cut-off | Not stated. | The row-by-row retry stops after ten errors, and only when the errors also exceed one per ten rows processed, so that a small file with a few errors still reports all of them. |
 | The formula guard on export | Not stated. | A comma-separated cell beginning with an equals sign, a hyphen or a plus sign is prefixed with an apostrophe. This is observable behaviour of the exported file and a rebuild must reproduce it, or spreadsheet applications will evaluate exported text. |
+| The refusal for an external identifier of the wrong entity | The working branch described the check in words: the lookup verifies that the row's entity is the one expected. | The declared text is reproduced verbatim in section 6.4: "Invalid external ID " the identifier ": expected model " the expected transport name between apostrophes ", found " the recorded transport name between apostrophes. Rule eight of the documentation rules requires the exact text. |
+| The unknown sub-field guard | The working branch listed the message in its table of import messages without saying when it fires. | Reproduced in section 6.4 as "Unknown sub-field “" the name "”", together with the condition: it is the guard of the resolver, and an ordinary file is stopped earlier by the indirect-creation refusal of section 5.2, so only a caller that invents a referencing form reaches it. |
+| The not-updatable flag of an existing identifier row | The working branch stated the flag's effect on a load but not its own lifetime. | Section 3.3 now states that the flag is written once, when the identifier row is first created, from the enclosing scope of the data file, and that a later load updates only the entity, the record identifier and the modification stamp of the row. This was checked against the conflict clause of the bulk assignment, which names those three columns and no other. |
+| The caches an external identifier clears | The working branch said only that the resolution cache is cleared. | Section 2.4 now separates the two caches: the resolution cache, cleared on a change and on a deletion and written through on a bulk assignment, and the access-group cache, cleared in addition whenever the entry names the access-group entity, because the permission graph is derived from those entries. |
+| A tabular data file of translation columns only | The working branch's procedure had no equivalent step. | Section 4.3 step 5 now states that a file left with no column after the translation columns are removed is skipped in silence. Without the step a rebuild would pass an empty field list to the import operation. |

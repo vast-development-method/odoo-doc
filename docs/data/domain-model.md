@@ -2,7 +2,7 @@
 
 The complete map of every entity the system stores, grouped by the domain that specifies it, with the role of each entity, the relations that link entities together, and the reference traffic between domains. This file is the index of the data model: it states what exists and how it is connected. The field-by-field specification of each entity lives in the domain folders under [`../domains/`](../domains/) and on the generated reference page of the entity under [`../references/entities/`](../references/entities/); the value and identity rules are in [`persistence-identity-and-values.md`](persistence-identity-and-values.md); the storage shapes are in [`physical-data-catalog.md`](physical-data-catalog.md); how records reach the tables is in [`data-loading-and-exchange.md`](data-loading-and-exchange.md); and the records a fresh installation must contain are in [`reference-data.md`](reference-data.md).
 
-The model holds 983 entities: 600 persistent, 222 interactive assistants and 161 shared behaviours, linked by 3,985 relation fields.
+The model holds 983 entities: 600 persistent, 222 interactive assistants and 161 shared behaviours, linked by 4,012 relation fields: 3,985 links and lists that name one target entity, and 27 polymorphic relations whose target entity varies from row to row.
 
 ## 1. How to read this map
 
@@ -12,7 +12,7 @@ The model holds 983 entities: 600 persistent, 222 interactive assistants and 161
 |---|---|---|
 | Persistent | A business record that is stored permanently and is visible to queries, access rules, reports and integrations. | One table, one row per record. |
 | Interactive assistant | A short-lived record that holds the input of a multi-step operation: a dialogue that asks the user for values, runs an operation and disappears. Assistant records are removed by the periodic cleanup. | One table, rows deleted by the periodic cleanup. |
-| Shared behaviour | A named bundle of fields, validations and operations merged into other entities — the discussion thread, scheduled activities, portal access, rating, image handling, address formatting and others. It never has records of its own. | No table. |
+| Shared behaviour | A named bundle of fields, validations and operations merged into other entities: the discussion thread, scheduled activities, portal access, rating, image handling and address formatting are examples. It never has records of its own. Section 5.3 lists every shared behaviour that at least one entity merges, with the number of entities that merge it; the shared behaviours that no entity merges are listed in the entity tables of section 3 under the domain that defines them. | No table. |
 
 ### 1.2 The name columns
 
@@ -41,25 +41,27 @@ Every entity appears exactly once, under the domain folder that specifies it. Mo
 | Link to one record | The source record names one target record. | `n : 1` when the link is required, `n : 0..1` when it is optional. | An integer column on the source table holding the target identifier. |
 | List of records | The inverse view of a link to one record: the list of records that point back at this record. | `1 : 0..n` | No column of its own; it is the mirror of the target column named by the inverse field. |
 | List on both sides | Both sides hold a list of the other. | `0..n : 0..n` | An association table with two identifier columns. |
-| Polymorphic link | The source stores the transport name of the target entity in one column and the target identifier in another. | `n : 0..1, polymorphic` | Two columns and no foreign key, because the target entity varies per row. |
-| Polymorphic reference | The source stores the transport name, a comma and the identifier in one text column. | `n : 0..1, polymorphic` | One text column and no foreign key. |
+| Polymorphic link | The source stores the transport name of the target entity in one column and the target identifier in another. | `n : 1, polymorphic` when the link is required, `n : 0..1, polymorphic` when it is optional. | Two columns and no foreign key, because the target entity varies per row. |
+| Polymorphic reference | The source stores the transport name, a comma and the identifier in one text column. | `n : 1, polymorphic` when the link is required, `n : 0..1, polymorphic` when it is optional. | One text column and no foreign key. |
 
 The deletion column states what happens when the target record is deleted: `restrict` refuses the deletion while a source record still points at the target, `cascade` deletes the source record with it, `set null` clears the link and keeps the source record. For a list on both sides, `cascade` removes the association row. For a list of records the behaviour is the one declared on the mirrored column of the target entity. "not declared" means the relation states no behaviour and the default of [`physical-data-catalog.md`](physical-data-catalog.md), section 9.2, applies.
 
 The storage column separates relations that are materialized — a column or an association row that a replacement must create — from relations that are derived at read time, computed or followed through another relation, and therefore not stored.
 
+For a polymorphic relation the target column names the entities the relation may point at. It reads `any entity` when the relation accepts a record of any entity, in which case the target column of a polymorphic link names the companion column that holds the transport name of the target entity, and the target column of a polymorphic reference states that the transport name is held in the same column as the identifier. Where the relation restricts the target to a fixed list of entities, that list is given in full. The deletion behaviour of a polymorphic relation is always `not enforced`: there is no foreign key, so deleting the target record leaves the source column pointing at a row that no longer exists, and the source entity is responsible for clearing or ignoring it. The 27 polymorphic relations of the model are listed in the relationship table of the domain that owns the source entity and counted in section 5.1; they are excluded from the cross-domain counts of section 4, because their target domain is not fixed.
+
 ## 2. Domain inventory
 
-Folder gives the folder under [`../domains/`](../domains/) that specifies the domain; the platform foundation is specified in the platform documents instead. Every folder is listed in the domain index [`../domains/README.md`](../domains/README.md).
+Folder gives the folder under [`../domains/`](../domains/) that specifies the domain; the platform foundation is specified in the platform documents instead. Where the folder is present in this repository the column links to it. Where the domain index [`../domains/README.md`](../domains/README.md) names the folder and the repository carries the material on the per-entity reference pages under [`../references/entities/`](../references/entities/) instead of in a folder, the folder name is written in code font rather than as a link, so that a link never points at a path the reader cannot open; the six domains written that way are Calendar and Scheduling, Fiscal Localizations, Fleet, Learning, Surveys and Gamification, Marketing and Mass Mailing, and Payment Providers. Customer Portal is written the same way for the same reason and is additionally the one domain the domain index does not name: it owns the four portal entities listed in section 3.34, and the pages it exposes are served by the machinery specified with Website and Storefront.
 
 | Domain | Group | Folder | Persistent | Assistants | Shared behaviours | Relation fields | Scope |
 |---|---|---|---|---|---|---|---|
-| Automation and Integration | framework | [`../domains/automation-and-integration/`](../domains/automation-and-integration/) | 14 | 4 | 3 | 30 | Automation rules and their triggers, the data import assistant and its saved column mappings, in-application purchase services and accounts, connectors to external mail, calendar and storage accounts, telephone number validation, record recycling and privacy tools, and the remote-call test assistant. |
+| Automation and Integration | framework | [`../domains/automation-and-integration/`](../domains/automation-and-integration/) | 14 | 4 | 3 | 31 | Automation rules and their triggers, the data import assistant and its saved column mappings, in-application purchase services and accounts, connectors to external mail, calendar and storage accounts, telephone number validation, record recycling and privacy tools, and the remote-call test assistant. |
 | Identity and Access | framework | [`../domains/identity-and-access/`](../domains/identity-and-access/) | 14 | 8 | 2 | 79 | Users, access groups and privileges, record rules, authentication methods including password change, two-factor devices, passkeys and application keys, sessions, devices and their logs, user settings and the deletion request queue. |
-| Platform Foundation | framework | the platform documents | 50 | 19 | 58 | 237 | Core persistence, the entity and field registry, external identifiers, access control objects, actions, views and menus, sequences, attachments, scheduled jobs, configuration parameters, asset bundles, report layouts, paper formats, user-defined field definitions, the import and export machinery and the request-routing objects. |
-| Calendar and Scheduling | shared | `../domains/calendar-and-scheduling/` | 6 | 4 | 7 | 29 | Calendar events, attendees, recurrence rules, reminders, providers and the synchronization with external calendars. |
+| Platform Foundation | framework | the platform documents | 50 | 19 | 58 | 242 | Core persistence, the entity and field registry, external identifiers, access control objects, actions, views and menus, sequences, attachments, scheduled jobs, configuration parameters, asset bundles, report layouts, paper formats, user-defined field definitions, the import and export machinery and the request-routing objects. |
+| Calendar and Scheduling | shared | `../domains/calendar-and-scheduling/` | 6 | 4 | 7 | 30 | Calendar events, attendees, recurrence rules, reminders, providers and the synchronization with external calendars. |
 | Contacts and Organizations | shared | [`../domains/contacts-and-organizations/`](../domains/contacts-and-organizations/) | 11 | 3 | 2 | 230 | Parties — individuals, organizations and bare addresses — companies, banks and bank accounts, countries, country subdivisions and country groups, cities, languages, partner tags, industries and the document layout. |
-| Messaging and Activities | shared | [`../domains/messaging-and-activities/`](../domains/messaging-and-activities/) | 59 | 15 | 14 | 297 | Discussion threads, messages, followers and notifications, activities and activity plans, message templates, aliases and the incoming and outgoing mail gateways, channels and channel members, live chat, chatbots, text messages, postal mail, push notifications, link previews, reactions and ratings. |
+| Messaging and Activities | shared | [`../domains/messaging-and-activities/`](../domains/messaging-and-activities/) | 59 | 15 | 14 | 303 | Discussion threads, messages, followers and notifications, activities and activity plans, message templates, aliases and the incoming and outgoing mail gateways, channels and channel members, live chat, chatbots, text messages, postal mail, push notifications, link previews, reactions and ratings. |
 | Multi-Currency | shared | [`../domains/multi-currency/`](../domains/multi-currency/) | 2 | 0 | 0 | 3 | Currencies and their dated rates, the rounding factor, currency conversion and the foreign-currency copy of every ledger amount. |
 | Spreadsheets and Dashboards | shared | [`../domains/spreadsheets-and-dashboards/`](../domains/spreadsheets-and-dashboards/) | 3 | 0 | 2 | 8 | Spreadsheet documents, spreadsheet revisions, dashboards and dashboard groups. |
 | Accounts Payable | accounting | [`../domains/accounts-payable/`](../domains/accounts-payable/) | 0 | 1 | 0 | 0 | Vendor bills, vendor credit notes, purchase receipts, debit notes, cheque printing, automatic bill posting and duplicate detection. |
@@ -81,13 +83,14 @@ Folder gives the folder under [`../domains/`](../domains/) that specifies the do
 | Replenishment and Procurement | supply chain | [`../domains/replenishment-and-procurement/`](../domains/replenishment-and-procurement/) | 1 | 0 | 0 | 3 | Routes and rules, reordering rules, make-to-order, lead times, the scheduler, forecasted quantities and drop shipping. |
 | Units of Measure and Packaging | supply chain | [`../domains/units-of-measure-and-packaging/`](../domains/units-of-measure-and-packaging/) | 1 | 0 | 0 | 6 | Unit of measure categories, conversion factors and rounding, product packagings and package types with dimensions and weight. |
 | Customer Relationship Management | sales | [`../domains/customer-relationship-management/`](../domains/customer-relationship-management/) | 25 | 8 | 3 | 110 | Leads and opportunities, pipeline stages, sales teams and members, predictive lead scoring, lead assignment and enrichment, lost reasons, merging and partnerships. |
-| Loyalty and Promotions | sales | [`../domains/loyalty-and-promotions/`](../domains/loyalty-and-promotions/) | 7 | 5 | 0 | 52 | Loyalty programs, rules, rewards, cards, coupons, gift cards and electronic wallets. |
+| Loyalty and Promotions | sales | [`../domains/loyalty-and-promotions/`](../domains/loyalty-and-promotions/) | 7 | 5 | 0 | 53 | Loyalty programs, rules, rewards, cards, coupons, gift cards and electronic wallets. |
 | Payment Providers | sales | `../domains/payment-providers/` | 4 | 2 | 0 | 41 | Payment providers, payment methods, tokens and transactions with their state machine, capture and refund flows. |
 | Point of Sale | sales | [`../domains/point-of-sale/`](../domains/point-of-sale/) | 17 | 6 | 2 | 162 | Point of sale configurations, sessions, orders and order lines, payments and payment methods, cash control, receipts, restaurant floors and tables, presets, self-ordering and payment terminals. |
 | Pricing and Pricelists | sales | [`../domains/pricing-and-pricelists/`](../domains/pricing-and-pricelists/) | 0 | 1 | 0 | 0 | Pricelists, pricelist rules, computation bases, minimum quantities, date validity and discount policies. |
-| Sales | sales | [`../domains/sales/`](../domains/sales/) | 10 | 4 | 0 | 146 | Quotations, sales orders and order lines, quotation templates, invoicing policies, down payments, margins and quotation documents. |
-| Website and Storefront | sales | [`../domains/website-and-storefront/`](../domains/website-and-storefront/) | 37 | 7 | 12 | 131 | Websites, pages and menus, themes, content blocks, the editor, forms, visitors and tracking, blogs, search-engine metadata, rewrites, the online shop, the cart and checkout, wishlists and comparison. |
-| Projects and Tasks | services | [`../domains/projects-and-tasks/`](../domains/projects-and-tasks/) | 12 | 8 | 3 | 98 | Projects, tasks, stages, milestones, recurrences, collaborators, project updates, profitability, tags and to-do items. |
+| Sales | sales | [`../domains/sales/`](../domains/sales/) | 10 | 4 | 0 | 147 | Quotations, sales orders and order lines, quotation templates, invoicing policies, down payments, margins and quotation documents. |
+| Website and Storefront | sales | [`../domains/website-and-storefront/`](../domains/website-and-storefront/) | 37 | 4 | 11 | 127 | Websites, pages and menus, themes, content blocks, the editor, forms, visitors and tracking, blogs, search-engine metadata, rewrites, the online shop, the cart and checkout, wishlists and comparison. |
+| Customer Portal | sales | `../domains/customer-portal/` | 0 | 3 | 1 | 7 | The portal an outside party reaches without an internal user account: granting a contact a portal user, sharing one record by a tokenized portal link, and the shared behaviour that gives a record its portal address, its access token, its access warning and its portal discussion thread. |
+| Projects and Tasks | services | [`../domains/projects-and-tasks/`](../domains/projects-and-tasks/) | 12 | 8 | 3 | 101 | Projects, tasks, stages, milestones, recurrences, collaborators, project updates, profitability, tags and to-do items. |
 | Timesheets | services | [`../domains/timesheets/`](../domains/timesheets/) | 3 | 1 | 0 | 24 | Timesheet lines on tasks and projects, employee hourly cost, timesheet billing to customers and the comparison with attendances. |
 | Attendances and Working Time | human resources | [`../domains/attendances-and-working-time/`](../domains/attendances-and-working-time/) | 9 | 0 | 1 | 36 | Working schedules and their attendance lines, resource calendars and leaves, resources, check-in and check-out records, overtime rules and rulesets. |
 | Expenses | human resources | [`../domains/expenses/`](../domains/expenses/) | 1 | 5 | 0 | 37 | Employee expenses, expense reports, approval, reimbursement or company payment and re-invoicing to customers. |
@@ -97,10 +100,10 @@ Folder gives the folder under [`../domains/`](../domains/) that specifies the do
 | Recruitment | human resources | [`../domains/recruitment/`](../domains/recruitment/) | 8 | 4 | 0 | 47 | Job openings, candidates, applicants, recruitment stages, sources, degrees, refuse reasons, interviews and the job board. |
 | Time Off | human resources | [`../domains/time-off/`](../domains/time-off/) | 11 | 4 | 0 | 70 | Time off types, requests, allocations, accrual plans and levels, approval flows, public holidays and mandatory days. |
 | Work Entries | human resources | [`../domains/work-entries/`](../domains/work-entries/) | 3 | 1 | 0 | 13 | Work entry types, generated work entries and their conflicts. |
-| Events | marketing | [`../domains/events/`](../domains/events/) | 33 | 4 | 0 | 159 | Events and event types, tickets, registrations and answers, booths and booth categories, tracks and track stages, sponsors, tags, stages and event communications. |
-| Learning, Surveys and Gamification | marketing | `../domains/learning-surveys-and-gamification/` | 25 | 4 | 0 | 143 | Surveys, questions and answers, participations and scoring, courses, slides and content, quizzes, certifications, forums and posts, badges, challenges, goals and karma. |
-| Marketing and Mass Mailing | marketing | `../domains/marketing-and-mass-mailing/` | 15 | 6 | 0 | 52 | Mass mailings, mailing lists, contacts and subscriptions, traces and trace statistics, link tracking, campaign tracking, marketing cards and social links. |
-| **Total** | | | **600** | **222** | **161** | **3,985** | |
+| Events | marketing | [`../domains/events/`](../domains/events/) | 33 | 4 | 0 | 161 | Events and event types, tickets, registrations and answers, booths and booth categories, tracks and track stages, sponsors, tags, stages and event communications. |
+| Learning, Surveys and Gamification | marketing | `../domains/learning-surveys-and-gamification/` | 25 | 4 | 0 | 144 | Surveys, questions and answers, participations and scoring, courses, slides and content, quizzes, certifications, forums and posts, badges, challenges, goals and karma. |
+| Marketing and Mass Mailing | marketing | `../domains/marketing-and-mass-mailing/` | 15 | 6 | 0 | 55 | Mass mailings, mailing lists, contacts and subscriptions, traces and trace statistics, link tracking, campaign tracking, marketing cards and social links. |
+| **Total** |  |  | **600** | **222** | **161** | **4,012** |  |
 
 ## 3. Entity map by domain
 
@@ -119,10 +122,10 @@ Specified in [`../domains/automation-and-integration/`](../domains/automation-an
 | Code Translation | `transifex.code.translation` | `transifex_code_translation` | Persistent record with 4 stored columns. | Transifex integration |
 | in-app purchase Account | `iap.account` | `iap_account` | In Application Purchase Account. | In-App Purchases |
 | in-app purchase Service | `iap.service` | `iap_service` | In Application Purchase Service. | In-App Purchases |
-| Onboarding | `onboarding.onboarding` | `onboarding_onboarding` | Persistent record with 5 stored columns; owns Onboarding Progress Tracker; states of `current_onboarding_state`: x; referenced by 2 relation fields. | Onboarding Toolbox |
-| Onboarding Progress Step Tracker | `onboarding.progress.step` | `onboarding_progress_step` | Persistent record with 3 stored columns; belongs to Onboarding Step; states of `step_state`: x; company scoped; referenced by 2 relation fields. | Onboarding Toolbox |
-| Onboarding Progress Tracker | `onboarding.progress` | `onboarding_progress` | Persistent record with 4 stored columns; belongs to Onboarding; states of `onboarding_state`: x; company scoped; referenced by 2 relation fields. | Onboarding Toolbox |
-| Onboarding Step | `onboarding.onboarding.step` | `onboarding_onboarding_step` | Persistent record with 10 stored columns; owns Onboarding Progress Step Tracker; states of `current_step_state`: x; referenced by 2 relation fields. | Onboarding Toolbox |
+| Onboarding | `onboarding.onboarding` | `onboarding_onboarding` | Persistent record with 5 stored columns; owns Onboarding Progress Tracker; states of `current_onboarding_state`: Not done, Just done, Done; referenced by 2 relation fields. | Onboarding Toolbox |
+| Onboarding Progress Step Tracker | `onboarding.progress.step` | `onboarding_progress_step` | Persistent record with 3 stored columns; belongs to Onboarding Step; states of `step_state`: Not done, Just done, Done; company scoped; referenced by 2 relation fields. | Onboarding Toolbox |
+| Onboarding Progress Tracker | `onboarding.progress` | `onboarding_progress` | Persistent record with 4 stored columns; belongs to Onboarding; states of `onboarding_state`: Not done, Just done, Done; company scoped; referenced by 2 relation fields. | Onboarding Toolbox |
+| Onboarding Step | `onboarding.onboarding.step` | `onboarding_onboarding_step` | Persistent record with 10 stored columns; owns Onboarding Progress Step Tracker; states of `current_step_state`: Not done, Just done, Done; referenced by 2 relation fields. | Onboarding Toolbox |
 | Privacy Log | `privacy.log` | `privacy_log` | Persistent record with 7 stored columns; belongs to User; referenced by 1 relation field. | Privacy |
 | Recycling Model | `data_recycle.model` | `data_recycle_model` | Persistent record with 14 stored columns; belongs to Models; owns Recycling Record; referenced by 1 relation field. | Data Recycle |
 | Recycling Record | `data_recycle.record` | `data_recycle_record` | Persistent record with 6 stored columns; company scoped. | Data Recycle |
@@ -146,7 +149,7 @@ Specified in [`../domains/automation-and-integration/`](../domains/automation-an
 | in-app purchase Partner Autocomplete application programming interface | `iap.autocomplete.api` | `none` | In Application Purchase Partner Autocomplete Application Programming Interface. | Partner Autocomplete |
 | Transifex Translation | `transifex.translation` | `none` | Shared behaviour definition reused through composition. | Transifex integration |
 
-#### Relationships (30)
+#### Relationships (31)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -166,6 +169,7 @@ Specified in [`../domains/automation-and-integration/`](../domains/automation-an
 | Privacy Lookup Wizard | `privacy.lookup.wizard` | `line_ids` | list of records | Privacy Lookup Wizard Line | `privacy.lookup.wizard.line` | `1 : 0..n` | `mirror of the target column` | derived |
 | Privacy Lookup Wizard | `privacy.lookup.wizard` | `log_id` | link to one record | Privacy Log | `privacy.log` | `n : 0..1` | `not declared` | stored |
 | Privacy Lookup Wizard Line | `privacy.lookup.wizard.line` | `res_model_id` | link to one record | Models | `ir.model` | `n : 0..1` | `cascade` | stored |
+| Privacy Lookup Wizard Line | `privacy.lookup.wizard.line` | `resource_ref` | polymorphic reference | any entity | held in the same column | `n : 0..1, polymorphic` | `not enforced` | derived |
 | Privacy Lookup Wizard Line | `privacy.lookup.wizard.line` | `wizard_id` | link to one record | Privacy Lookup Wizard | `privacy.lookup.wizard` | `n : 0..1` | `not declared` | stored |
 | Recycling Model | `data_recycle.model` | `notify_user_ids` | list on both sides | User | `res.users` | `0..n : 0..n` | `not declared` | stored |
 | Recycling Model | `data_recycle.model` | `recycle_record_ids` | list of records | Recycling Record | `data_recycle.record` | `1 : 0..n` | `mirror of the target column` | derived |
@@ -458,7 +462,7 @@ Specified in the platform documents of [`../overview/`](../overview/), [`../runt
 | Unknown | `_unknown` | `none` | Shared behaviour definition reused through composition. | Base |
 | websocket message handling | `ir.websocket` | `none` | Shared behaviour definition reused through composition. | Instant Messaging Bus |
 
-#### Relationships (237)
+#### Relationships (242)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -478,6 +482,7 @@ Specified in the platform documents of [`../overview/`](../overview/), [`../runt
 | Asset | `ir.asset` | `website_id` | link to one record | Website | `website` | `n : 0..1` | `cascade` | stored |
 | Attachment | `ir.attachment` | `company_id` | link to one record | Companies | `res.company` | `n : 0..1` | `not declared` | stored |
 | Attachment | `ir.attachment` | `original_id` | link to one record | Attachment | `ir.attachment` | `n : 0..1` | `not declared` | stored |
+| Attachment | `ir.attachment` | `res_id` | polymorphic link | any entity | named by `res_model` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Attachment | `ir.attachment` | `theme_template_id` | link to one record | Theme Attachments | `theme.ir.attachment` | `n : 0..1` | `not declared` | stored |
 | Attachment | `ir.attachment` | `voice_ids` | list of records | Metadata for voice attachments | `discuss.voice.metadata` | `1 : 0..n` | `mirror of the target column` | derived |
 | Attachment | `ir.attachment` | `website_id` | link to one record | Website | `website` | `n : 0..1` | `not declared` | stored |
@@ -486,6 +491,7 @@ Specified in the platform documents of [`../overview/`](../overview/), [`../runt
 | Automation Rule | `base.automation` | `on_change_field_ids` | list on both sides | Fields | `ir.model.fields` | `0..n : 0..n` | `not declared` | stored |
 | Automation Rule | `base.automation` | `trg_date_calendar_id` | link to one record | Resource Working Time | `resource.calendar` | `n : 0..1` | `not declared` | stored |
 | Automation Rule | `base.automation` | `trg_date_id` | link to one record | Fields | `ir.model.fields` | `n : 0..1` | `not declared` | stored |
+| Automation Rule | `base.automation` | `trg_field_ref` | polymorphic link | any entity | named by `trg_field_ref_model_name` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Automation Rule | `base.automation` | `trg_selection_field_id` | link to one record | Fields Selection | `ir.model.fields.selection` | `n : 0..1` | `not declared` | stored |
 | Automation Rule | `base.automation` | `trigger_field_ids` | list on both sides | Fields | `ir.model.fields` | `0..n : 0..n` | `not declared` | stored |
 | Change Production Qty | `change.production.qty` | `mo_id` | link to one record | Manufacturing Order | `mrp.production` | `n : 1` | `cascade` | stored |
@@ -582,6 +588,7 @@ Specified in the platform documents of [`../overview/`](../overview/), [`../runt
 | Mail Server | `ir.mail_server` | `active_mailing_ids` | list of records | Mass Mailing | `mailing.mailing` | `1 : 0..n` | `mirror of the target column` | derived |
 | Mail Server | `ir.mail_server` | `mail_template_ids` | list of records | Email Templates | `mail.template` | `1 : 0..n` | `mirror of the target column` | derived |
 | Mail Server | `ir.mail_server` | `owner_user_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
+| Menu | `ir.ui.menu` | `action` | polymorphic reference | Report Action, Action Window, Action uniform resource locator, Server Actions or Client Action | `ir.actions.report`, `ir.actions.act_window`, `ir.actions.act_url`, `ir.actions.server`, `ir.actions.client` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Menu | `ir.ui.menu` | `child_id` | list of records | Menu | `ir.ui.menu` | `1 : 0..n` | `mirror of the target column` | derived |
 | Menu | `ir.ui.menu` | `group_ids` | list on both sides | Access Groups | `res.groups` | `0..n : 0..n` | `not declared` | stored |
 | Menu | `ir.ui.menu` | `parent_id` | link to one record | Menu | `ir.ui.menu` | `n : 0..1` | `restrict` | stored |
@@ -589,6 +596,7 @@ Specified in the platform documents of [`../overview/`](../overview/), [`../runt
 | Model Access | `ir.model.access` | `model_id` | link to one record | Models | `ir.model` | `n : 1` | `cascade` | stored |
 | Model Constraint | `ir.model.constraint` | `model` | link to one record | Models | `ir.model` | `n : 1` | `cascade` | stored |
 | Model Constraint | `ir.model.constraint` | `module` | link to one record | Module | `ir.module.module` | `n : 1` | `cascade` | stored |
+| Model Data | `ir.model.data` | `res_id` | polymorphic link | any entity | named by `model` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Model Inheritance Tree | `ir.model.inherit` | `model_id` | link to one record | Models | `ir.model` | `n : 1` | `cascade` | stored |
 | Model Inheritance Tree | `ir.model.inherit` | `parent_field_id` | link to one record | Fields | `ir.model.fields` | `n : 0..1` | `cascade` | stored |
 | Model Inheritance Tree | `ir.model.inherit` | `parent_id` | link to one record | Models | `ir.model` | `n : 1` | `cascade` | stored |
@@ -663,6 +671,7 @@ Specified in the platform documents of [`../overview/`](../overview/), [`../runt
 | Server Actions | `ir.actions.server` | `model_id` | link to one record | Models | `ir.model` | `n : 1` | `cascade` | stored |
 | Server Actions | `ir.actions.server` | `parent_id` | link to one record | Server Actions | `ir.actions.server` | `n : 0..1` | `cascade` | stored |
 | Server Actions | `ir.actions.server` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
+| Server Actions | `ir.actions.server` | `resource_ref` | polymorphic reference | any entity | held in the same column | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Server Actions | `ir.actions.server` | `selection_value` | link to one record | Fields Selection | `ir.model.fields.selection` | `n : 0..1` | `cascade` | stored |
 | Server Actions | `ir.actions.server` | `sequence_id` | link to one record | Sequence | `ir.sequence` | `n : 0..1` | `not declared` | stored |
 | Server Actions | `ir.actions.server` | `sms_template_id` | link to one record | text message Templates | `sms.template` | `n : 0..1` | `set null` | stored |
@@ -738,7 +747,7 @@ Specified in the domain folder `../domains/calendar-and-scheduling/`, listed in 
 | Synchronize a record with Google Calendar | `google.calendar.sync` | `none` | Shared behaviour merged into 2 entities. | Google Calendar |
 | Synchronize a record with Microsoft Calendar | `microsoft.calendar.sync` | `none` | Shared behaviour merged into 2 entities. | Outlook Calendar |
 
-#### Relationships (29)
+#### Relationships (30)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -756,6 +765,7 @@ Specified in the domain folder `../domains/calendar-and-scheduling/`, listed in 
 | Calendar Event | `calendar.event` | `partner_id` | link to one record | Contact | `res.partner` | `n : 0..1` | `not declared` | derived |
 | Calendar Event | `calendar.event` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
 | Calendar Event | `calendar.event` | `recurrence_id` | link to one record | Event Recurrence Rule | `calendar.recurrence` | `n : 0..1` | `not declared` | stored |
+| Calendar Event | `calendar.event` | `res_id` | polymorphic link | any entity | named by `res_model` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Calendar Event | `calendar.event` | `res_model_id` | link to one record | Models | `ir.model` | `n : 0..1` | `cascade` | stored |
 | Calendar Event | `calendar.event` | `unavailable_partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
 | Calendar Event | `calendar.event` | `user_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
@@ -1153,7 +1163,7 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 | Publisher Warranty Contract | `publisher_warranty.contract` | `none` | Shared behaviour definition reused through composition. | Discuss |
 | Template Reset Mixin | `template.reset.mixin` | `none` | Shared behaviour merged into 2 entities. | Discuss |
 
-#### Relationships (297)
+#### Relationships (303)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -1163,6 +1173,7 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 | Activity | `mail.activity` | `previous_activity_type_id` | link to one record | Activity Type | `mail.activity.type` | `n : 0..1` | `not declared` | stored |
 | Activity | `mail.activity` | `recommended_activity_type_id` | link to one record | Activity Type | `mail.activity.type` | `n : 0..1` | `not declared` | stored |
 | Activity | `mail.activity` | `request_partner_id` | link to one record | Contact | `res.partner` | `n : 0..1` | `cascade` | stored |
+| Activity | `mail.activity` | `res_id` | polymorphic link | any entity | named by `res_model` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Activity | `mail.activity` | `res_model_id` | link to one record | Models | `ir.model` | `n : 0..1` | `cascade` | stored |
 | Activity | `mail.activity` | `user_id` | link to one record | User | `res.users` | `n : 0..1` | `cascade` | stored |
 | Activity Mixin | `mail.activity.mixin` | `activity_calendar_event_id` | link to one record | Calendar Event | `calendar.event` | `n : 0..1` | `not declared` | derived |
@@ -1255,6 +1266,7 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 | Discussion Channel | `discuss.channel` | `sub_channel_ids` | list of records | Discussion Channel | `discuss.channel` | `1 : 0..n` | `mirror of the target column` | derived |
 | Discussion Channel | `discuss.channel` | `subscription_department_ids` | list on both sides | Department | `hr.department` | `0..n : 0..n` | `not declared` | stored |
 | Document Followers | `mail.followers` | `partner_id` | link to one record | Contact | `res.partner` | `n : 1` | `cascade` | stored |
+| Document Followers | `mail.followers` | `res_id` | polymorphic link | any entity | named by `res_model` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Document Followers | `mail.followers` | `subtype_ids` | list on both sides | Message subtypes | `mail.message.subtype` | `0..n : 0..n` | `not declared` | stored |
 | Email Aliases | `mail.alias` | `alias_domain_id` | link to one record | Email Domain | `mail.alias.domain` | `n : 0..1` | `restrict` | stored |
 | Email Aliases | `mail.alias` | `alias_model_id` | link to one record | Models | `ir.model` | `n : 1` | `cascade` | stored |
@@ -1266,6 +1278,7 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 | Email Template Preview | `mail.template.preview` | `mail_template_id` | link to one record | Email Templates | `mail.template` | `n : 1` | `not declared` | stored |
 | Email Template Preview | `mail.template.preview` | `model_id` | link to one record | Models | `ir.model` | `n : 0..1` | `not declared` | derived |
 | Email Template Preview | `mail.template.preview` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | derived |
+| Email Template Preview | `mail.template.preview` | `resource_ref` | polymorphic reference | any entity | held in the same column | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Email Templates | `mail.template` | `attachment_ids` | list on both sides | Attachment | `ir.attachment` | `0..n : 0..n` | `not declared` | stored |
 | Email Templates | `mail.template` | `mail_server_id` | link to one record | Mail Server | `ir.mail_server` | `n : 0..1` | `not declared` | stored |
 | Email Templates | `mail.template` | `model_id` | link to one record | Models | `ir.model` | `n : 0..1` | `cascade` | stored |
@@ -1388,6 +1401,7 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 | Message | `mail.message` | `reaction_ids` | list of records | Message Reaction | `mail.message.reaction` | `1 : 0..n` | `mirror of the target column` | derived |
 | Message | `mail.message` | `record_alias_domain_id` | link to one record | Email Domain | `mail.alias.domain` | `n : 0..1` | `set null` | stored |
 | Message | `mail.message` | `record_company_id` | link to one record | Companies | `res.company` | `n : 0..1` | `set null` | stored |
+| Message | `mail.message` | `res_id` | polymorphic link | any entity | named by `model` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Message | `mail.message` | `starred_partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
 | Message | `mail.message` | `subtype_id` | link to one record | Message subtypes | `mail.message.subtype` | `n : 0..1` | `set null` | stored |
 | Message | `mail.message` | `tracking_value_ids` | list of records | Mail Tracking Value | `mail.tracking.value` | `1 : 0..n` | `mirror of the target column` | derived |
@@ -1424,6 +1438,7 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 | Scheduled Message | `mail.scheduled.message` | `attachment_ids` | list on both sides | Attachment | `ir.attachment` | `0..n : 0..n` | `not declared` | stored |
 | Scheduled Message | `mail.scheduled.message` | `author_id` | link to one record | Contact | `res.partner` | `n : 1` | `not declared` | stored |
 | Scheduled Message | `mail.scheduled.message` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
+| Scheduled Message | `mail.scheduled.message` | `res_id` | polymorphic link | any entity | named by `model` | `n : 1, polymorphic` | `not enforced` | stored |
 | Scheduled Messages | `mail.message.schedule` | `mail_message_id` | link to one record | Message | `mail.message` | `n : 1` | `cascade` | stored |
 | Send text message Wizard | `sms.composer` | `mailing_id` | link to one record | Mass Mailing | `mailing.mailing` | `n : 0..1` | `not declared` | stored |
 | Send text message Wizard | `sms.composer` | `template_id` | link to one record | text message Templates | `sms.template` | `n : 0..1` | `not declared` | stored |
@@ -1449,6 +1464,7 @@ Specified in [`../domains/messaging-and-activities/`](../domains/messaging-and-a
 | text message Account Sender Name Wizard | `sms.account.sender` | `account_id` | link to one record | in-app purchase Account | `iap.account` | `n : 1` | `not declared` | stored |
 | text message Account Verification Code Wizard | `sms.account.code` | `account_id` | link to one record | in-app purchase Account | `iap.account` | `n : 1` | `not declared` | stored |
 | text message Template Preview | `sms.template.preview` | `model_id` | link to one record | Models | `ir.model` | `n : 0..1` | `not declared` | derived |
+| text message Template Preview | `sms.template.preview` | `resource_ref` | polymorphic reference | any entity | held in the same column | `n : 0..1, polymorphic` | `not enforced` | stored |
 | text message Template Preview | `sms.template.preview` | `sms_template_id` | link to one record | text message Templates | `sms.template` | `n : 1` | `cascade` | stored |
 | text message Template Reset | `sms.template.reset` | `template_ids` | list on both sides | text message Templates | `sms.template` | `0..n : 0..n` | `not declared` | stored |
 | text message Templates | `sms.template` | `model_id` | link to one record | Models | `ir.model` | `n : 1` | `cascade` | stored |
@@ -3906,7 +3922,7 @@ Specified in [`../domains/loyalty-and-promotions/`](../domains/loyalty-and-promo
 | Sale Loyalty - Reward Selection Wizard | `sale.loyalty.reward.wizard` | `sale_loyalty_reward_wizard` | Interactive assistant with 3 stored columns; belongs to Sales Order. | Sale Loyalty |
 | Update Loyalty Card Points | `loyalty.card.update.balance` | `loyalty_card_update_balance` | Interactive assistant with 3 stored columns; belongs to Loyalty Coupon. | Coupons & Loyalty |
 
-#### Relationships (52)
+#### Relationships (53)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -3918,6 +3934,7 @@ Specified in [`../domains/loyalty-and-promotions/`](../domains/loyalty-and-promo
 | Generate Coupons | `loyalty.generate.wizard` | `customer_tag_ids` | list on both sides | Partner Tags | `res.partner.category` | `0..n : 0..n` | `not declared` | stored |
 | Generate Coupons | `loyalty.generate.wizard` | `program_id` | link to one record | Loyalty Program | `loyalty.program` | `n : 1` | `not declared` | stored |
 | History for Loyalty cards and Electronic Wallets | `loyalty.history` | `card_id` | link to one record | Loyalty Coupon | `loyalty.card` | `n : 1` | `cascade` | stored |
+| History for Loyalty cards and Electronic Wallets | `loyalty.history` | `order_id` | polymorphic link | any entity | named by `order_model` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Loyalty Communication | `loyalty.mail` | `mail_template_id` | link to one record | Email Templates | `mail.template` | `n : 1` | `cascade` | stored |
 | Loyalty Communication | `loyalty.mail` | `pos_report_print_id` | link to one record | Report Action | `ir.actions.report` | `n : 0..1` | `not declared` | stored |
 | Loyalty Communication | `loyalty.mail` | `program_id` | link to one record | Loyalty Program | `loyalty.program` | `n : 1` | `cascade` | stored |
@@ -4286,7 +4303,7 @@ Specified in [`../domains/sales/`](../domains/sales/).
 | Discount Wizard | `sale.order.discount` | `sale_order_discount` | Interactive assistant with 4 stored columns; belongs to Sales Order. | Sales |
 | Sales Advance Payment Invoice | `sale.advance.payment.inv` | `sale_advance_payment_inv` | Interactive assistant with 10 stored columns; company scoped. | Sales |
 
-#### Relationships (146)
+#### Relationships (147)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -4320,6 +4337,7 @@ Specified in [`../domains/sales/`](../domains/sales/).
 | Sales Analysis Report | `sale.report` | `currency_id` | link to one record | Currency | `res.currency` | `n : 0..1` | `not declared` | derived |
 | Sales Analysis Report | `sale.report` | `industry_id` | link to one record | Industry | `res.partner.industry` | `n : 0..1` | `not declared` | derived |
 | Sales Analysis Report | `sale.report` | `medium_id` | link to one record | campaign tracking parameter Medium | `utm.medium` | `n : 0..1` | `not declared` | derived |
+| Sales Analysis Report | `sale.report` | `order_reference` | polymorphic reference | Sales Order or Point of Sale Orders | `sale.order`, `pos.order` | `n : 0..1, polymorphic` | `not enforced` | derived |
 | Sales Analysis Report | `sale.report` | `partner_id` | link to one record | Contact | `res.partner` | `n : 0..1` | `not declared` | derived |
 | Sales Analysis Report | `sale.report` | `pricelist_id` | link to one record | Pricelist | `product.pricelist` | `n : 0..1` | `not declared` | derived |
 | Sales Analysis Report | `sale.report` | `product_id` | link to one record | Product Variant | `product.product` | `n : 0..1` | `not declared` | derived |
@@ -4485,19 +4503,16 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Website Theme Page | `theme.website.page` | `theme_website_page` | Persistent record with 10 stored columns; belongs to Theme user interface View; owns Page; referenced by 2 relation fields. | Website |
 | Website Visitor | `website.visitor` | `website_visitor` | Persistent record with 9 stored columns; owns Discussion Channel, Event Registration, Track / Visitor Link and 1 further collections; referenced by 6 relation fields. | Website |
 
-#### Interactive assistant entities (7)
+#### Interactive assistant entities (4)
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
-| Grant Portal Access | `portal.wizard` | `portal_wizard` | Interactive assistant with 1 stored column; owns Portal User Config; referenced by 1 relation field. | Customer Portal |
 | Page Properties | `website.page.properties` | `website_page_properties` | Interactive assistant with 3 stored columns. | Website |
 | Page Properties Base | `website.page.properties.base` | `website_page_properties_base` | Interactive assistant with 3 stored columns; belongs to Website; owns Website Menu. | Website |
-| Portal Sharing | `portal.share` | `portal_share` | Interactive assistant with 3 stored columns. | Customer Portal |
-| Portal User Config | `portal.wizard.user` | `portal_wizard_user` | Interactive assistant with 3 stored columns; belongs to Contact, Grant Portal Access; states of `email_state`: Valid, Invalid, Already Registered. | Customer Portal |
 | Robots.txt Editor | `website.robots` | `website_robots` | Interactive assistant with 1 stored column. | Website |
 | User list of blocked 3rd-party domains | `website.custom_blocked_third_party_domains` | `website_custom_blocked_third_party_domains` | Interactive assistant with 1 stored column. | Website |
 
-#### Shared behaviour entities (12)
+#### Shared behaviour entities (11)
 
 | Entity | Transport name | Table | Purpose | Defining capability package |
 |---|---|---|---|---|
@@ -4506,7 +4521,6 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Field rich text History | `html.field.history.mixin` | `none` | Shared behaviour merged into 1 entity. | hypertext markup language Editor |
 | hypertext markup language Text Processor Abstract Model | `website.html.text.processor` | `none` | Shared behaviour definition reused through composition. | Website |
 | Multi Website Mixin | `website.multi.mixin` | `none` | Shared behaviour merged into 6 entities. | Website |
-| Portal Mixin | `portal.mixin` | `none` | Shared behaviour merged into 8 entities. | Customer Portal |
 | search engine optimization metadata | `website.seo.metadata` | `none` | Shared behaviour merged into 16 entities. | Website |
 | Theme Utils | `theme.utils` | `none` | Shared behaviour definition reused through composition. | Website |
 | Website page/record specific options | `website.page_options.mixin` | `none` | Shared behaviour merged into 2 entities. | Website |
@@ -4514,7 +4528,7 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Website Published Mixin | `website.published.mixin` | `none` | Shared behaviour merged into 8 entities. | Website |
 | Website Searchable Mixin | `website.searchable.mixin` | `none` | Shared behaviour merged into 15 entities. | Website |
 
-#### Relationships (131)
+#### Relationships (127)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -4551,8 +4565,6 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Forum Post | `forum.post` | `write_uid` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
 | Forum Tag | `forum.tag` | `forum_id` | link to one record | Forum | `forum.forum` | `n : 1` | `not declared` | stored |
 | Forum Tag | `forum.tag` | `post_ids` | list on both sides | Forum Post | `forum.post` | `0..n : 0..n` | `not declared` | stored |
-| Grant Portal Access | `portal.wizard` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
-| Grant Portal Access | `portal.wizard` | `user_ids` | list of records | Portal User Config | `portal.wizard.user` | `1 : 0..n` | `mirror of the target column` | derived |
 | Model Page | `website.controller.page` | `menu_ids` | list of records | Website Menu | `website.menu` | `1 : 0..n` | `mirror of the target column` | derived |
 | Model Page | `website.controller.page` | `record_view_id` | link to one record | View | `ir.ui.view` | `n : 0..1` | `cascade` | stored |
 | Model Page | `website.controller.page` | `view_id` | link to one record | View | `ir.ui.view` | `n : 1` | `cascade` | stored |
@@ -4563,12 +4575,9 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Page | `website.page` | `view_write_uid` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | derived |
 | Page Properties | `website.page.properties` | `target_model_id` | link to one record | Page | `website.page` | `n : 0..1` | `not declared` | stored |
 | Page Properties Base | `website.page.properties.base` | `menu_ids` | list of records | Website Menu | `website.menu` | `1 : 0..n` | `mirror of the target column` | derived |
+| Page Properties Base | `website.page.properties.base` | `target_model_id` | polymorphic reference | any entity | held in the same column | `n : 1, polymorphic` | `not enforced` | stored |
 | Page Properties Base | `website.page.properties.base` | `website_id` | link to one record | Website | `website` | `n : 1` | `not declared` | stored |
 | Partner Tags - These tags can be used on website to find customers by sector, or ... | `res.partner.tag` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
-| Portal Sharing | `portal.share` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
-| Portal User Config | `portal.wizard.user` | `partner_id` | link to one record | Contact | `res.partner` | `n : 1` | `cascade` | stored |
-| Portal User Config | `portal.wizard.user` | `user_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | derived |
-| Portal User Config | `portal.wizard.user` | `wizard_id` | link to one record | Grant Portal Access | `portal.wizard` | `n : 1` | `cascade` | stored |
 | Post Vote | `forum.post.vote` | `forum_id` | link to one record | Forum | `forum.forum` | `n : 0..1` | `not declared` | stored |
 | Post Vote | `forum.post.vote` | `post_id` | link to one record | Forum Post | `forum.post` | `n : 1` | `cascade` | stored |
 | Post Vote | `forum.post.vote` | `recipient_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
@@ -4588,6 +4597,7 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Theme Asset | `theme.ir.asset` | `copy_ids` | list of records | Asset | `ir.asset` | `1 : 0..n` | `mirror of the target column` | derived |
 | Theme Attachments | `theme.ir.attachment` | `copy_ids` | list of records | Attachment | `ir.attachment` | `1 : 0..n` | `mirror of the target column` | derived |
 | Theme user interface View | `theme.ir.ui.view` | `copy_ids` | list of records | View | `ir.ui.view` | `1 : 0..n` | `mirror of the target column` | derived |
+| Theme user interface View | `theme.ir.ui.view` | `inherit_id` | polymorphic reference | View or Theme user interface View | `ir.ui.view`, `theme.ir.ui.view` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Visited Pages | `website.track` | `page_id` | link to one record | Page | `website.page` | `n : 0..1` | `cascade` | stored |
 | Visited Pages | `website.track` | `product_id` | link to one record | Product Variant | `product.product` | `n : 0..1` | `cascade` | stored |
 | Visited Pages | `website.track` | `visitor_id` | link to one record | Website Visitor | `website.visitor` | `n : 1` | `cascade` | stored |
@@ -4650,7 +4660,41 @@ Specified in [`../domains/website-and-storefront/`](../domains/website-and-store
 | Website rewrite | `website.rewrite` | `route_id` | link to one record | All Website Route | `website.route` | `n : 0..1` | `not declared` | stored |
 | Website rewrite | `website.rewrite` | `website_id` | link to one record | Website | `website` | `n : 0..1` | `cascade` | stored |
 
-### 3.34 Projects and Tasks
+### 3.34 Customer Portal
+
+Portal access for customers, vendors and any other outside party: the assistant that turns a contact into a portal user, the assistant that shares one record by portal link, and the shared behaviour that gives a record a portal address, an access token and a portal discussion thread.
+
+Specified in the domain folder `../domains/customer-portal/`. The pages this domain exposes to an outside party are served by the request-routing and page machinery specified in [`../domains/website-and-storefront/`](../domains/website-and-storefront/), and the records a portal user may read are governed by the record rules specified in [`../domains/identity-and-access/`](../domains/identity-and-access/).
+
+This domain owns no persistent entity. The portal keeps no records of its own: it gives records owned by other domains an address, a token and a reader, and the three entities it does own are assistants and a shared behaviour.
+
+#### Interactive assistant entities (3)
+
+| Entity | Transport name | Table | Purpose | Defining capability package |
+|---|---|---|---|---|
+| Grant Portal Access | `portal.wizard` | `portal_wizard` | Interactive assistant with 1 stored column; owns Portal User Config; referenced by 1 relation field. | Customer Portal |
+| Portal Sharing | `portal.share` | `portal_share` | Interactive assistant with 3 stored columns. | Customer Portal |
+| Portal User Config | `portal.wizard.user` | `portal_wizard_user` | Interactive assistant with 3 stored columns; belongs to Contact, Grant Portal Access; states of `email_state`: Valid, Invalid, Already Registered. | Customer Portal |
+
+#### Shared behaviour entities (1)
+
+| Entity | Transport name | Table | Purpose | Defining capability package |
+|---|---|---|---|---|
+| Portal Mixin | `portal.mixin` | `none` | Shared behaviour merged into 8 entities. | Customer Portal |
+
+#### Relationships (7)
+
+| From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
+|---|---|---|---|---|---|---|---|---|
+| Grant Portal Access | `portal.wizard` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
+| Grant Portal Access | `portal.wizard` | `user_ids` | list of records | Portal User Config | `portal.wizard.user` | `1 : 0..n` | `mirror of the target column` | derived |
+| Portal Sharing | `portal.share` | `partner_ids` | list on both sides | Contact | `res.partner` | `0..n : 0..n` | `not declared` | stored |
+| Portal Sharing | `portal.share` | `resource_ref` | polymorphic reference | any entity | held in the same column | `n : 0..1, polymorphic` | `not enforced` | derived |
+| Portal User Config | `portal.wizard.user` | `partner_id` | link to one record | Contact | `res.partner` | `n : 1` | `cascade` | stored |
+| Portal User Config | `portal.wizard.user` | `user_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | derived |
+| Portal User Config | `portal.wizard.user` | `wizard_id` | link to one record | Grant Portal Access | `portal.wizard` | `n : 1` | `cascade` | stored |
+
+### 3.35 Projects and Tasks
 
 Projects, tasks, stages, milestones, recurrences, collaborators, project updates, profitability, tags and to-do items.
 
@@ -4694,7 +4738,7 @@ Specified in [`../domains/projects-and-tasks/`](../domains/projects-and-tasks/).
 | Rating Mixin | `rating.mixin` | `none` | Shared behaviour merged into 4 entities. | Customer Rating |
 | Rating Parent Mixin | `rating.parent.mixin` | `none` | Shared behaviour merged into 2 entities. | Customer Rating |
 
-#### Relationships (98)
+#### Relationships (101)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -4759,11 +4803,14 @@ Specified in [`../domains/projects-and-tasks/`](../domains/projects-and-tasks/).
 | Project role to users mapping | `project.template.role.to.users.map` | `user_ids` | list on both sides | User | `res.users` | `0..n : 0..n` | `not declared` | stored |
 | Project role to users mapping | `project.template.role.to.users.map` | `wizard_id` | link to one record | Project Template create Wizard | `project.template.create.wizard` | `n : 0..1` | `not declared` | stored |
 | Rating | `rating.rating` | `message_id` | link to one record | Message | `mail.message` | `n : 0..1` | `cascade` | stored |
+| Rating | `rating.rating` | `parent_ref` | polymorphic reference | any entity | held in the same column | `n : 0..1, polymorphic` | `not enforced` | derived |
 | Rating | `rating.rating` | `parent_res_model_id` | link to one record | Models | `ir.model` | `n : 0..1` | `cascade` | stored |
 | Rating | `rating.rating` | `partner_id` | link to one record | Contact | `res.partner` | `n : 0..1` | `not declared` | stored |
 | Rating | `rating.rating` | `publisher_id` | link to one record | Contact | `res.partner` | `n : 0..1` | `set null` | stored |
 | Rating | `rating.rating` | `rated_partner_id` | link to one record | Contact | `res.partner` | `n : 0..1` | `not declared` | stored |
+| Rating | `rating.rating` | `res_id` | polymorphic link | any entity | named by `res_model` | `n : 1, polymorphic` | `not enforced` | stored |
 | Rating | `rating.rating` | `res_model_id` | link to one record | Models | `ir.model` | `n : 0..1` | `cascade` | stored |
+| Rating | `rating.rating` | `resource_ref` | polymorphic reference | any entity | held in the same column | `n : 0..1, polymorphic` | `not enforced` | derived |
 | Rating Parent Mixin | `rating.parent.mixin` | `rating_ids` | list of records | Rating | `rating.rating` | `1 : 0..n` | `mirror of the target column` | derived |
 | Task | `project.task` | `attachment_ids` | list of records | Attachment | `ir.attachment` | `1 : 0..n` | `mirror of the target column` | derived |
 | Task | `project.task` | `child_ids` | list of records | Task | `project.task` | `1 : 0..n` | `mirror of the target column` | derived |
@@ -4797,7 +4844,7 @@ Specified in [`../domains/projects-and-tasks/`](../domains/projects-and-tasks/).
 | Task Stage | `project.task.type` | `sms_template_id` | link to one record | text message Templates | `sms.template` | `n : 0..1` | `not declared` | stored |
 | Task Stage | `project.task.type` | `user_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
 
-### 3.35 Timesheets
+### 3.36 Timesheets
 
 Timesheet lines on tasks and projects, employee hourly cost, timesheet billing to customers and the comparison with attendances.
 
@@ -4846,7 +4893,7 @@ Specified in [`../domains/timesheets/`](../domains/timesheets/).
 | Timesheets Analysis Report | `timesheets.analysis.report` | `timesheet_invoice_id` | link to one record | Journal Entry | `account.move` | `n : 0..1` | `not declared` | stored |
 | Timesheets Analysis Report | `timesheets.analysis.report` | `user_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
 
-### 3.36 Attendances and Working Time
+### 3.37 Attendances and Working Time
 
 Working schedules and their attendance lines, resource calendars and leaves, resources, check-in and check-out records, overtime rules and rulesets.
 
@@ -4913,7 +4960,7 @@ Specified in [`../domains/attendances-and-working-time/`](../domains/attendances
 | Work Detail | `resource.calendar.attendance` | `calendar_id` | link to one record | Resource Working Time | `resource.calendar` | `n : 1` | `cascade` | stored |
 | Work Detail | `resource.calendar.attendance` | `work_entry_type_id` | link to one record | human resources Work Entry Type | `hr.work.entry.type` | `n : 0..1` | `not declared` | stored |
 
-### 3.37 Expenses
+### 3.38 Expenses
 
 Employee expenses, expense reports, approval, reimbursement or company payment and re-invoicing to customers.
 
@@ -4932,7 +4979,7 @@ Specified in [`../domains/expenses/`](../domains/expenses/).
 | Expense Approve Duplicate | `hr.expense.approve.duplicate` | `hr_expense_approve_duplicate` | Interactive assistant with 0 stored columns. | Expenses |
 | Expense Posting Wizard | `hr.expense.post.wizard` | `hr_expense_post_wizard` | Interactive assistant with 3 stored columns; company scoped. | Expenses |
 | Expense Refuse Reason Wizard | `hr.expense.refuse.wizard` | `hr_expense_refuse_wizard` | Interactive assistant with 1 stored column. | Expenses |
-| Expense Split | `hr.expense.split` | `hr_expense_split` | Interactive assistant with 14 stored columns; belongs to Employee, Product Variant; states of `approval_state`: x; company scoped. | Expenses |
+| Expense Split | `hr.expense.split` | `hr_expense_split` | Interactive assistant with 14 stored columns; belongs to Employee, Product Variant; states of `approval_state`: Submitted, Approved, Refused; company scoped. | Expenses |
 | Expense Split Wizard | `hr.expense.split.wizard` | `hr_expense_split_wizard` | Interactive assistant with 1 stored column; belongs to Expense; owns Expense Split; referenced by 1 relation field. | Expenses |
 
 #### Relationships (37)
@@ -4977,7 +5024,7 @@ Specified in [`../domains/expenses/`](../domains/expenses/).
 | Expense Split Wizard | `hr.expense.split.wizard` | `expense_id` | link to one record | Expense | `hr.expense` | `n : 1` | `not declared` | stored |
 | Expense Split Wizard | `hr.expense.split.wizard` | `expense_split_line_ids` | list of records | Expense Split | `hr.expense.split` | `1 : 0..n` | `mirror of the target column` | derived |
 
-### 3.38 Fleet
+### 3.39 Fleet
 
 Vehicles, models, brands and categories, contracts, services, odometer readings, assignment logs, states, tags and cost reporting.
 
@@ -5064,7 +5111,7 @@ Specified in the domain folder `../domains/fleet/`, listed in the domain index [
 | Vehicle Contract | `fleet.vehicle.log.contract` | `user_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
 | Vehicle Contract | `fleet.vehicle.log.contract` | `vehicle_id` | link to one record | Vehicle | `fleet.vehicle` | `n : 1` | `not declared` | stored |
 
-### 3.39 Human Resources Core
+### 3.40 Human Resources Core
 
 Employees and employee versions, departments, job positions, work locations, skills and resumes, the organization chart, presence, remote work, departure reasons and hourly cost.
 
@@ -5285,7 +5332,7 @@ Specified in [`../domains/human-resources-core/`](../domains/human-resources-cor
 | Work Location | `hr.work.location` | `address_id` | link to one record | Contact | `res.partner` | `n : 1` | `not declared` | stored |
 | Work Location | `hr.work.location` | `company_id` | link to one record | Companies | `res.company` | `n : 1` | `not declared` | stored |
 
-### 3.40 Lunch Ordering
+### 3.41 Lunch Ordering
 
 Meal suppliers, products and categories, locations, orders, cash movements and alerts.
 
@@ -5345,7 +5392,7 @@ Specified in the domain folder `../domains/lunch-ordering/`, listed in the domai
 | Lunch Supplier | `lunch.supplier` | `topping_ids_2` | list of records | Lunch Extras | `lunch.topping` | `1 : 0..n` | `mirror of the target column` | derived |
 | Lunch Supplier | `lunch.supplier` | `topping_ids_3` | list of records | Lunch Extras | `lunch.topping` | `1 : 0..n` | `mirror of the target column` | derived |
 
-### 3.41 Recruitment
+### 3.42 Recruitment
 
 Job openings, candidates, applicants, recruitment stages, sources, degrees, refuse reasons, interviews and the job board.
 
@@ -5425,7 +5472,7 @@ Specified in [`../domains/recruitment/`](../domains/recruitment/).
 | Talent Pool | `hr.talent.pool` | `pool_manager` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
 | Talent Pool | `hr.talent.pool` | `talent_ids` | list on both sides | Applicant | `hr.applicant` | `0..n : 0..n` | `not declared` | stored |
 
-### 3.42 Time Off
+### 3.43 Time Off
 
 Time off types, requests, allocations, accrual plans and levels, approval flows, public holidays and mandatory days.
 
@@ -5531,7 +5578,7 @@ Specified in [`../domains/time-off/`](../domains/time-off/).
 | Time Off Type | `hr.leave.type` | `work_entry_type_id` | link to one record | human resources Work Entry Type | `hr.work.entry.type` | `n : 0..1` | `not declared` | stored |
 | human resources Time Off Summary Report By Employee | `hr.holidays.summary.employee` | `emp` | list on both sides | Employee | `hr.employee` | `0..n : 0..n` | `not declared` | stored |
 
-### 3.43 Work Entries
+### 3.44 Work Entries
 
 Work entry types, generated work entries and their conflicts.
 
@@ -5569,7 +5616,7 @@ Specified in [`../domains/work-entries/`](../domains/work-entries/).
 | human resources Work Entry Type | `hr.work.entry.type` | `country_id` | link to one record | Country | `res.country` | `n : 0..1` | `not declared` | stored |
 | human resources Work Entry Type | `hr.work.entry.type` | `leave_type_ids` | list of records | Time Off Type | `hr.leave.type` | `1 : 0..n` | `mirror of the target column` | derived |
 
-### 3.44 Events
+### 3.45 Events
 
 Events and event types, tickets, registrations and answers, booths and booth categories, tracks and track stages, sponsors, tags, stages and event communications.
 
@@ -5622,7 +5669,7 @@ Specified in [`../domains/events/`](../domains/events/).
 | Event Booth Configurator | `event.booth.configurator` | `event_booth_configurator` | Interactive assistant with 4 stored columns; belongs to Event, Event Booth Category. | Events Booths Sales |
 | Event Configurator | `event.event.configurator` | `event_event_configurator` | Interactive assistant with 4 stored columns. | Events Sales |
 
-#### Relationships (159)
+#### Relationships (161)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -5676,6 +5723,7 @@ Specified in [`../domains/events/`](../domains/events/).
 | Event Automated Mailing | `event.mail` | `last_registration_id` | link to one record | Event Registration | `event.registration` | `n : 0..1` | `not declared` | stored |
 | Event Automated Mailing | `event.mail` | `mail_registration_ids` | list of records | Registration Mail Scheduler | `event.mail.registration` | `1 : 0..n` | `mirror of the target column` | derived |
 | Event Automated Mailing | `event.mail` | `mail_slot_ids` | list of records | Slot Mail Scheduler | `event.mail.slot` | `1 : 0..n` | `mirror of the target column` | derived |
+| Event Automated Mailing | `event.mail` | `template_ref` | polymorphic reference | Email Templates or text message Templates | `mail.template`, `sms.template` | `n : 1, polymorphic` | `not enforced` | stored |
 | Event Booth | `event.booth` | `event_booth_registration_ids` | list of records | Event Booth Registration | `event.booth.registration` | `1 : 0..n` | `mirror of the target column` | derived |
 | Event Booth | `event.booth` | `event_id` | link to one record | Event | `event.event` | `n : 1` | `cascade` | stored |
 | Event Booth | `event.booth` | `partner_id` | link to one record | Contact | `res.partner` | `n : 0..1` | `not declared` | stored |
@@ -5770,6 +5818,7 @@ Specified in [`../domains/events/`](../domains/events/).
 | Event Track Tag | `event.track.tag` | `track_ids` | list on both sides | Event Track | `event.track` | `0..n : 0..n` | `not declared` | stored |
 | Event Track Tag Category | `event.track.tag.category` | `tag_ids` | list of records | Event Track Tag | `event.track.tag` | `1 : 0..n` | `mirror of the target column` | derived |
 | Mail Scheduling on Event Category | `event.type.mail` | `event_type_id` | link to one record | Event Template | `event.type` | `n : 1` | `cascade` | stored |
+| Mail Scheduling on Event Category | `event.type.mail` | `template_ref` | polymorphic reference | Email Templates or text message Templates | `mail.template`, `sms.template` | `n : 1, polymorphic` | `not enforced` | stored |
 | Question's Answer | `event.quiz.answer` | `question_id` | link to one record | Content Quiz Question | `event.quiz.question` | `n : 1` | `cascade` | stored |
 | Quiz | `event.quiz` | `event_id` | link to one record | Event | `event.event` | `n : 0..1` | `not declared` | stored |
 | Quiz | `event.quiz` | `event_track_id` | link to one record | Event Track | `event.track` | `n : 0..1` | `not declared` | stored |
@@ -5786,7 +5835,7 @@ Specified in [`../domains/events/`](../domains/events/).
 | Website Event Menu | `website.event.menu` | `menu_id` | link to one record | Website Menu | `website.menu` | `n : 0..1` | `cascade` | stored |
 | Website Event Menu | `website.event.menu` | `view_id` | link to one record | View | `ir.ui.view` | `n : 0..1` | `cascade` | stored |
 
-### 3.45 Learning, Surveys and Gamification
+### 3.46 Learning, Surveys and Gamification
 
 Surveys, questions and answers, participations and scoring, courses, slides and content, quizzes, certifications, forums and posts, badges, challenges, goals and karma.
 
@@ -5831,7 +5880,7 @@ Specified in the domain folder `../domains/learning-surveys-and-gamification/`, 
 | Gamification User Badge Wizard | `gamification.badge.user.wizard` | `gamification_badge_user_wizard` | Interactive assistant with 4 stored columns; belongs to Gamification Badge, User. | Gamification |
 | Survey Invitation Wizard | `survey.invite` | `survey_invite` | Interactive assistant with 11 stored columns; belongs to Survey. | Surveys |
 
-#### Relationships (143)
+#### Relationships (144)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -5977,9 +6026,10 @@ Specified in the domain folder `../domains/learning-surveys-and-gamification/`, 
 | Survey User Input Line | `survey.user_input.line` | `question_id` | link to one record | Survey Question | `survey.question` | `n : 1` | `cascade` | stored |
 | Survey User Input Line | `survey.user_input.line` | `suggested_answer_id` | link to one record | Survey Label | `survey.question.answer` | `n : 0..1` | `not declared` | stored |
 | Survey User Input Line | `survey.user_input.line` | `user_input_id` | link to one record | Survey User Input | `survey.user_input` | `n : 1` | `cascade` | stored |
+| Track Karma Changes | `gamification.karma.tracking` | `origin_ref` | polymorphic reference | User, Slides, Course or Forum Post | `res.users`, `slide.slide`, `slide.channel`, `forum.post` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Track Karma Changes | `gamification.karma.tracking` | `user_id` | link to one record | User | `res.users` | `n : 1` | `cascade` | stored |
 
-### 3.46 Marketing and Mass Mailing
+### 3.47 Marketing and Mass Mailing
 
 Mass mailings, mailing lists, contacts and subscriptions, traces and trace statistics, link tracking, campaign tracking, marketing cards and social links.
 
@@ -6016,7 +6066,7 @@ Specified in the domain folder `../domains/marketing-and-mass-mailing/`, listed 
 | schedule a mailing | `mailing.mailing.schedule.date` | `mailing_mailing_schedule_date` | Interactive assistant with 2 stored columns; belongs to Mass Mailing. | Email Marketing |
 | Test text message Mailing | `mailing.sms.test` | `mailing_sms_test` | Interactive assistant with 2 stored columns; belongs to Mass Mailing. | text message Marketing |
 
-#### Relationships (52)
+#### Relationships (55)
 
 | From entity | Transport name | Relation field | Kind | To entity | Transport name | Cardinality | On delete | Storage |
 |---|---|---|---|---|---|---|---|---|
@@ -6047,13 +6097,16 @@ Specified in the domain folder `../domains/marketing-and-mass-mailing/`, listed 
 | Mailing Statistics | `mailing.trace` | `links_click_ids` | list of records | Link Tracker Click | `link.tracker.click` | `1 : 0..n` | `mirror of the target column` | derived |
 | Mailing Statistics | `mailing.trace` | `mail_mail_id` | link to one record | Outgoing Mails | `mail.mail` | `n : 0..1` | `not declared` | stored |
 | Mailing Statistics | `mailing.trace` | `mass_mailing_id` | link to one record | Mass Mailing | `mailing.mailing` | `n : 0..1` | `cascade` | stored |
+| Mailing Statistics | `mailing.trace` | `res_id` | polymorphic link | any entity | named by `model` | `n : 0..1, polymorphic` | `not enforced` | stored |
 | Mailing Statistics | `mailing.trace` | `sms_id` | link to one record | Outgoing text message | `sms.sms` | `n : 0..1` | `not declared` | derived |
 | Mailing Statistics | `mailing.trace` | `sms_tracker_ids` | list of records | Link text message to mailing/text message tracking models | `sms.tracker` | `1 : 0..n` | `mirror of the target column` | derived |
 | Marketing Card | `card.card` | `campaign_id` | link to one record | Marketing Card Campaign | `card.campaign` | `n : 1` | `cascade` | stored |
+| Marketing Card | `card.card` | `res_id` | polymorphic link | any entity | named by `res_model` | `n : 1, polymorphic` | `not enforced` | stored |
 | Marketing Card Campaign | `card.campaign` | `card_ids` | list of records | Marketing Card | `card.card` | `1 : 0..n` | `mirror of the target column` | derived |
 | Marketing Card Campaign | `card.campaign` | `card_template_id` | link to one record | Marketing Card Template | `card.template` | `n : 1` | `not declared` | stored |
 | Marketing Card Campaign | `card.campaign` | `link_tracker_id` | link to one record | Link Tracker | `link.tracker` | `n : 0..1` | `restrict` | stored |
 | Marketing Card Campaign | `card.campaign` | `mailing_ids` | list of records | Mass Mailing | `mailing.mailing` | `1 : 0..n` | `mirror of the target column` | derived |
+| Marketing Card Campaign | `card.campaign` | `preview_record_ref` | polymorphic reference | any entity | held in the same column | `n : 1, polymorphic` | `not enforced` | stored |
 | Marketing Card Campaign | `card.campaign` | `tag_ids` | list on both sides | Marketing Card Campaign Tag | `card.campaign.tag` | `0..n : 0..n` | `not declared` | stored |
 | Marketing Card Campaign | `card.campaign` | `user_id` | link to one record | User | `res.users` | `n : 0..1` | `not declared` | stored |
 | Mass Mailing | `mailing.mailing` | `attachment_ids` | list on both sides | Attachment | `ir.attachment` | `0..n : 0..n` | `not declared` | stored |
@@ -6074,7 +6127,7 @@ Specified in the domain folder `../domains/marketing-and-mass-mailing/`, listed 
 | schedule a mailing | `mailing.mailing.schedule.date` | `mass_mailing_id` | link to one record | Mass Mailing | `mailing.mailing` | `n : 1` | `not declared` | stored |
 ## 4. Cross-domain relationship map
 
-Each row counts the materialized relation fields declared by entities of the source domain that point at entities of the target domain. Lists of records are excluded, because they are the mirror of a link already counted on the other side. A non-zero row means the source domain cannot be built without the target domain, because its records carry links that must resolve.
+Each row counts the relation fields declared by entities of the source domain that point at entities of the target domain, counting links to one record and lists on both sides whether the relation is stored or derived. Lists of records are excluded, because they are the mirror of a link already counted on the other side. Polymorphic links and polymorphic references are excluded as well, because the entity they point at is chosen per row and therefore names no fixed target domain; they are listed in section 3 and counted in section 5.1. A non-zero row means the source domain cannot be built without the target domain, because its records carry links that must resolve.
 
 ### 4.1 Outgoing references per domain
 
@@ -6350,8 +6403,8 @@ Each row counts the materialized relation fields declared by entities of the sou
 | Sales | Expenses | 1 |
 | Sales | Manufacturing | 1 |
 | Sales | Platform Foundation | 1 |
-| Website and Storefront | Identity and Access | 17 |
-| Website and Storefront | Contacts and Organizations | 14 |
+| Website and Storefront | Identity and Access | 16 |
+| Website and Storefront | Contacts and Organizations | 11 |
 | Website and Storefront | Platform Foundation | 9 |
 | Website and Storefront | Products and Catalog | 8 |
 | Website and Storefront | Messaging and Activities | 3 |
@@ -6363,6 +6416,8 @@ Each row counts the materialized relation fields declared by entities of the sou
 | Website and Storefront | Inventory Operations | 1 |
 | Website and Storefront | Learning, Surveys and Gamification | 1 |
 | Website and Storefront | Marketing and Mass Mailing | 1 |
+| Customer Portal | Contacts and Organizations | 3 |
+| Customer Portal | Identity and Access | 1 |
 | Projects and Tasks | Contacts and Organizations | 13 |
 | Projects and Tasks | Identity and Access | 9 |
 | Projects and Tasks | Messaging and Activities | 7 |
@@ -6461,10 +6516,10 @@ Each row counts the materialized relation fields declared by entities of the sou
 | Domain | Depends on | Referenced by |
 |---|---|---|
 | Automation and Integration | Contacts and Organizations (5); Identity and Access (4); Platform Foundation (3) | Messaging and Activities (3) |
-| Identity and Access | Attendances and Working Time (1); Contacts and Organizations (7); Human Resources Core (9); Inventory Operations (1); Learning, Surveys and Gamification (2); Lunch Ordering (2); Messaging and Activities (4); Platform Foundation (7); Projects and Tasks (1); Sales (2); Website and Storefront (1) | Analytic Accounting (1); Attendances and Working Time (2); Automation and Integration (4); Calendar and Scheduling (4); Contacts and Organizations (4); Customer Relationship Management (10); Events (3); Expenses (2); Fiscal Localizations (1); Fleet (3); General Ledger (3); Human Resources Core (14); Inventory Operations (7); Inventory Valuation and Costing (2); Learning, Surveys and Gamification (17); Lunch Ordering (5); Manufacturing (4); Marketing and Mass Mailing (3); Messaging and Activities (26); Platform Foundation (21); Point of Sale (7); Products and Catalog (1); Projects and Tasks (9); Purchasing (3); Recruitment (3); Repair and Maintenance (7); Sales (7); Spreadsheets and Dashboards (2); Time Off (3); Timesheets (2); Website and Storefront (17); Work Entries (1) |
+| Identity and Access | Attendances and Working Time (1); Contacts and Organizations (7); Human Resources Core (9); Inventory Operations (1); Learning, Surveys and Gamification (2); Lunch Ordering (2); Messaging and Activities (4); Platform Foundation (7); Projects and Tasks (1); Sales (2); Website and Storefront (1) | Analytic Accounting (1); Attendances and Working Time (2); Automation and Integration (4); Calendar and Scheduling (4); Contacts and Organizations (4); Customer Portal (1); Customer Relationship Management (10); Events (3); Expenses (2); Fiscal Localizations (1); Fleet (3); General Ledger (3); Human Resources Core (14); Inventory Operations (7); Inventory Valuation and Costing (2); Learning, Surveys and Gamification (17); Lunch Ordering (5); Manufacturing (4); Marketing and Mass Mailing (3); Messaging and Activities (26); Platform Foundation (21); Point of Sale (7); Products and Catalog (1); Projects and Tasks (9); Purchasing (3); Recruitment (3); Repair and Maintenance (7); Sales (7); Spreadsheets and Dashboards (2); Time Off (3); Timesheets (2); Website and Storefront (16); Work Entries (1) |
 | Platform Foundation | Attendances and Working Time (2); Contacts and Organizations (13); Customer Relationship Management (1); Electronic Invoicing and Document Exchange (1); Fiscal Localizations (1); General Ledger (25); Human Resources Core (1); Identity and Access (21); Inventory Operations (2); Manufacturing (1); Messaging and Activities (9); Multi-Currency (2); Payment Providers (1); Point of Sale (10); Products and Catalog (12); Projects and Tasks (8); Sales (2); Time Off (1); Units of Measure and Packaging (1); Website and Storefront (9) | Automation and Integration (3); Calendar and Scheduling (2); Contacts and Organizations (11); Customer Relationship Management (1); Electronic Invoicing and Document Exchange (1); Events (1); Fiscal Localizations (7); Fleet (1); General Ledger (22); Identity and Access (7); Inventory Operations (4); Learning, Surveys and Gamification (9); Loyalty and Promotions (2); Lunch Ordering (2); Marketing and Mass Mailing (4); Messaging and Activities (28); Payment Providers (5); Point of Sale (7); Products and Catalog (2); Projects and Tasks (3); Recruitment (2); Sales (1); Spreadsheets and Dashboards (1); Time Off (2); Website and Storefront (9) |
 | Calendar and Scheduling | Contacts and Organizations (7); Customer Relationship Management (1); Identity and Access (4); Messaging and Activities (3); Platform Foundation (2); Recruitment (1) | Contacts and Organizations (1); Messaging and Activities (2); Time Off (1) |
-| Contacts and Organizations | Attendances and Working Time (1); Calendar and Scheduling (1); Customer Relationship Management (2); Delivery and Shipping (1); Electronic Invoicing and Document Exchange (8); Fiscal Localizations (12); General Ledger (68); Human Resources Core (1); Identity and Access (4); Inventory Operations (7); Learning, Surveys and Gamification (1); Manufacturing (2); Messaging and Activities (4); Multi-Currency (5); Platform Foundation (11); Products and Catalog (5); Projects and Tasks (2); Sales (1); Time Off (1); Units of Measure and Packaging (2); Website and Storefront (2) | Analytic Accounting (10); Attendances and Working Time (7); Automation and Integration (5); Calendar and Scheduling (7); Customer Relationship Management (26); Delivery and Shipping (6); Electronic Invoicing and Document Exchange (7); Events (19); Expenses (4); Fiscal Localizations (31); Fleet (15); General Ledger (75); Human Resources Core (28); Identity and Access (7); Inventory Operations (40); Inventory Valuation and Costing (3); Learning, Surveys and Gamification (14); Loyalty and Promotions (6); Lunch Ordering (9); Manufacturing (7); Marketing and Mass Mailing (3); Messaging and Activities (57); Multi-Currency (1); Payment Providers (11); Payments and Bank Reconciliation (3); Platform Foundation (13); Point of Sale (12); Products and Catalog (10); Projects and Tasks (13); Purchasing (19); Recruitment (4); Repair and Maintenance (7); Replenishment and Procurement (1); Sales (19); Spreadsheets and Dashboards (1); Taxes (2); Time Off (11); Timesheets (4); Website and Storefront (14); Work Entries (3) |
+| Contacts and Organizations | Attendances and Working Time (1); Calendar and Scheduling (1); Customer Relationship Management (2); Delivery and Shipping (1); Electronic Invoicing and Document Exchange (8); Fiscal Localizations (12); General Ledger (68); Human Resources Core (1); Identity and Access (4); Inventory Operations (7); Learning, Surveys and Gamification (1); Manufacturing (2); Messaging and Activities (4); Multi-Currency (5); Platform Foundation (11); Products and Catalog (5); Projects and Tasks (2); Sales (1); Time Off (1); Units of Measure and Packaging (2); Website and Storefront (2) | Analytic Accounting (10); Attendances and Working Time (7); Automation and Integration (5); Calendar and Scheduling (7); Customer Portal (3); Customer Relationship Management (26); Delivery and Shipping (6); Electronic Invoicing and Document Exchange (7); Events (19); Expenses (4); Fiscal Localizations (31); Fleet (15); General Ledger (75); Human Resources Core (28); Identity and Access (7); Inventory Operations (40); Inventory Valuation and Costing (3); Learning, Surveys and Gamification (14); Loyalty and Promotions (6); Lunch Ordering (9); Manufacturing (7); Marketing and Mass Mailing (3); Messaging and Activities (57); Multi-Currency (1); Payment Providers (11); Payments and Bank Reconciliation (3); Platform Foundation (13); Point of Sale (12); Products and Catalog (10); Projects and Tasks (13); Purchasing (19); Recruitment (4); Repair and Maintenance (7); Replenishment and Procurement (1); Sales (19); Spreadsheets and Dashboards (1); Taxes (2); Time Off (11); Timesheets (4); Website and Storefront (11); Work Entries (3) |
 | Messaging and Activities | Automation and Integration (3); Calendar and Scheduling (2); Contacts and Organizations (57); Customer Relationship Management (2); General Ledger (3); Human Resources Core (3); Identity and Access (26); Marketing and Mass Mailing (7); Multi-Currency (1); Platform Foundation (28); Projects and Tasks (2); Sales (1); Website and Storefront (1) | Calendar and Scheduling (3); Contacts and Organizations (4); Customer Relationship Management (3); Events (1); General Ledger (1); Identity and Access (4); Learning, Surveys and Gamification (7); Loyalty and Promotions (2); Marketing and Mass Mailing (3); Platform Foundation (9); Point of Sale (2); Products and Catalog (1); Projects and Tasks (7); Recruitment (4); Sales (2); Time Off (2); Website and Storefront (3) |
 | Multi-Currency | Contacts and Organizations (1) | Contacts and Organizations (5); Customer Relationship Management (2); Delivery and Shipping (1); Events (1); Expenses (4); Fiscal Localizations (5); Fleet (3); General Ledger (21); Human Resources Core (1); Inventory Operations (3); Inventory Valuation and Costing (5); Loyalty and Promotions (1); Lunch Ordering (5); Manufacturing (2); Messaging and Activities (1); Payment Providers (4); Platform Foundation (2); Point of Sale (5); Products and Catalog (8); Projects and Tasks (1); Purchasing (5); Sales (4); Taxes (2); Timesheets (3); Website and Storefront (2) |
 | Spreadsheets and Dashboards | Contacts and Organizations (1); Identity and Access (2); Platform Foundation (1) | nothing |
@@ -6492,7 +6547,8 @@ Each row counts the materialized relation fields declared by entities of the sou
 | Point of Sale | Attendances and Working Time (1); Contacts and Organizations (12); Events (1); Fiscal Localizations (4); General Ledger (21); Human Resources Core (7); Identity and Access (7); Inventory Operations (5); Loyalty and Promotions (2); Messaging and Activities (2); Multi-Currency (5); Payment Providers (2); Platform Foundation (7); Products and Catalog (13); Sales (5); Units of Measure and Packaging (1) | Events (1); Fiscal Localizations (4); General Ledger (6); Inventory Operations (3); Loyalty and Promotions (2); Payment Providers (1); Platform Foundation (10); Products and Catalog (2) |
 | Pricing and Pricelists | nothing | nothing |
 | Sales | Analytic Accounting (1); Contacts and Organizations (19); Customer Relationship Management (6); Delivery and Shipping (1); Events (5); Expenses (1); Fiscal Localizations (2); General Ledger (9); Identity and Access (7); Inventory Operations (5); Loyalty and Promotions (5); Manufacturing (1); Messaging and Activities (2); Multi-Currency (4); Payment Providers (2); Platform Foundation (1); Products and Catalog (15); Projects and Tasks (6); Units of Measure and Packaging (6); Website and Storefront (2) | Analytic Accounting (1); Contacts and Organizations (1); Customer Relationship Management (13); Delivery and Shipping (1); Events (10); Expenses (3); General Ledger (3); Identity and Access (2); Inventory Operations (4); Learning, Surveys and Gamification (1); Loyalty and Promotions (4); Manufacturing (1); Messaging and Activities (1); Payment Providers (1); Platform Foundation (2); Point of Sale (5); Products and Catalog (2); Projects and Tasks (7); Purchasing (1); Repair and Maintenance (2); Timesheets (3); Website and Storefront (2) |
-| Website and Storefront | Contacts and Organizations (14); Customer Relationship Management (1); Delivery and Shipping (1); Events (2); Identity and Access (17); Inventory Operations (1); Learning, Surveys and Gamification (1); Marketing and Mass Mailing (1); Messaging and Activities (3); Multi-Currency (2); Platform Foundation (9); Products and Catalog (8); Sales (2) | Contacts and Organizations (2); Customer Relationship Management (2); Events (5); General Ledger (1); Identity and Access (1); Inventory Operations (1); Learning, Surveys and Gamification (2); Loyalty and Promotions (2); Messaging and Activities (1); Payment Providers (1); Platform Foundation (9); Products and Catalog (6); Sales (2) |
+| Website and Storefront | Contacts and Organizations (11); Customer Relationship Management (1); Delivery and Shipping (1); Events (2); Identity and Access (16); Inventory Operations (1); Learning, Surveys and Gamification (1); Marketing and Mass Mailing (1); Messaging and Activities (3); Multi-Currency (2); Platform Foundation (9); Products and Catalog (8); Sales (2) | Contacts and Organizations (2); Customer Relationship Management (2); Events (5); General Ledger (1); Identity and Access (1); Inventory Operations (1); Learning, Surveys and Gamification (2); Loyalty and Promotions (2); Messaging and Activities (1); Payment Providers (1); Platform Foundation (9); Products and Catalog (6); Sales (2) |
+| Customer Portal | Contacts and Organizations (3); Identity and Access (1) | nothing |
 | Projects and Tasks | Analytic Accounting (1); Attendances and Working Time (1); Contacts and Organizations (13); Identity and Access (9); Messaging and Activities (7); Multi-Currency (1); Platform Foundation (3); Products and Catalog (1); Sales (7); Units of Measure and Packaging (2) | Analytic Accounting (4); Contacts and Organizations (2); Identity and Access (1); Inventory Operations (1); Manufacturing (2); Messaging and Activities (2); Platform Foundation (8); Products and Catalog (3); Purchasing (1); Sales (6); Timesheets (5) |
 | Timesheets | Contacts and Organizations (4); General Ledger (1); Human Resources Core (6); Identity and Access (2); Multi-Currency (3); Projects and Tasks (5); Sales (3) | nothing |
 | Attendances and Working Time | Contacts and Organizations (7); Human Resources Core (6); Identity and Access (2); Time Off (1); Work Entries (2) | Analytic Accounting (1); Contacts and Organizations (1); Human Resources Core (7); Identity and Access (1); Inventory Operations (1); Manufacturing (1); Platform Foundation (2); Point of Sale (1); Projects and Tasks (1); Time Off (4) |
@@ -6591,18 +6647,20 @@ The entities that the largest number of relation fields point at. These are the 
 | Persistent entities | 600 |
 | Interactive assistant entities | 222 |
 | Shared behaviour entities | 161 |
-| Domains | 46 |
-| Relation fields in total | 3,985 |
+| Domains | 47 |
+| Relation fields in total | 4,012 |
 | Relations of kind link to one record | 2,659 |
 | Relations of kind list of records | 622 |
 | Relations of kind list on both sides | 704 |
-| Relations of kind polymorphic link | 0 |
-| Relations of kind polymorphic reference | 0 |
-| Relations materialized in storage | 2,754 |
-| Relations derived at read time | 1,231 |
+| Relations of kind polymorphic link | 12 |
+| Relations of kind polymorphic reference | 15 |
+| Relations materialized in storage | 2,776 |
+| Relations derived at read time | 1,236 |
 | Relations that cross a domain boundary | 2,063 |
 | Entities that embed a parent record | 12 |
 | Self-referencing relation fields | 190 |
+
+The 27 polymorphic relations are declared by twelve domains: Automation and Integration 1, Platform Foundation 5, Calendar and Scheduling 1, Messaging and Activities 6, Loyalty and Promotions 1, Sales 1, Website and Storefront 2, Customer Portal 1, Projects and Tasks 3, Events 2, Learning, Surveys and Gamification 1, and Marketing and Mass Mailing 3. Each is listed in the relationship table of its domain in section 3, with the entities it may point at, the column that carries the target entity name and whether the column is stored. Twenty-two of the twenty-seven are stored columns — the twelve polymorphic links and ten of the fifteen polymorphic references — and the physical shape of each is in [`physical-data-catalog.md`](physical-data-catalog.md), section 3.
 
 ### 5.2 Delegation: entities that embed a parent record
 
@@ -6642,7 +6700,7 @@ Every shared behaviour with at least one carrier, with the number of entities th
 | Analytic Mixin | `analytic.mixin` | Analytic Accounting | 10 |
 | Mail Composer Mixin | `mail.composer.mixin` | Messaging and Activities | 8 |
 | Mail Main Attachment management | `mail.thread.main.attachment` | Messaging and Activities | 8 |
-| Portal Mixin | `portal.mixin` | Website and Storefront | 8 |
+| Portal Mixin | `portal.mixin` | Customer Portal | 8 |
 | Universal Business Language 2.1 | `account.edi.xml.ubl_21` | Electronic Invoicing and Document Exchange | 8 |
 | Website Published Mixin | `website.published.mixin` | Website and Storefront | 8 |
 | Actions | `ir.actions.actions` | Platform Foundation | 6 |
@@ -6677,7 +6735,7 @@ Every shared behaviour with at least one carrier, with the number of entities th
 | Email Aliases Mixin (light) | `mail.alias.mixin.optional` | Messaging and Activities | 2 |
 | Google Gmail Mixin | `google.gmail.mixin` | Calendar and Scheduling | 2 |
 | Microsoft Outlook Mixin | `microsoft.outlook.mixin` | Calendar and Scheduling | 2 |
-| Portal Sharing | `portal.share` | Website and Storefront | 2 |
+| Portal Sharing | `portal.share` | Customer Portal | 2 |
 | Properties Base Definition Mixin | `properties.base.definition.mixin` | Platform Foundation | 2 |
 | Qweb Field Many to One | `ir.qweb.field.many2one` | Platform Foundation | 2 |
 | Rating Parent Mixin | `rating.parent.mixin` | Projects and Tasks | 2 |
@@ -6903,6 +6961,7 @@ Relations whose target entity is the source entity. They form hierarchies, where
 | Work Center Usage | `mrp.routing.workcenter` | `needed_by_operation_ids` | list on both sides | no | `not declared` | no |
 | Work Order | `mrp.workorder` | `blocked_by_workorder_ids` | list on both sides | no | `not declared` | no |
 | Work Order | `mrp.workorder` | `needed_by_workorder_ids` | list on both sides | no | `not declared` | no |
+
 ## 6. Reconciliation notes
 
 The target branch carried no file for this topic, so the structure comes from the working branch. Every enumeration was regenerated from the machine-readable catalogues of this repository, and the following differences were resolved against them and against the source tree.
@@ -6918,3 +6977,5 @@ The target branch carried no file for this topic, so the structure comes from th
 | Cross-domain traffic | Counted every relation field, including lists of records. | Counts only the materialized side. A list of records is the mirror of a link already counted on the other side, so counting both double-counts the dependency. |
 | Delegation | Twelve delegations were listed, with paraphrased link fields such as `journal_entry` and `partner`. | The registry reports the same delegations with their real link fields, for example `move_id` and `partner_id`; every one is listed with both transport names. |
 | Self-referencing relations | Listed with paraphrased field names and with `set_null` written as one word. | Regenerated with the real field names and with the deletion behaviour spelled as the registry reports it. |
+| Polymorphic relations | Twenty-two relations of the polymorphic kind were listed inside the relationship tables, with paraphrased field names such as `related_record_identifier` and `trg_field_reference`, and every one was shown as pointing at `any entity`. | Twenty-seven polymorphic relations are listed, with the field names the registry reports (`res_id`, `trg_field_ref`, `resource_ref`, `parent_ref`, `origin_ref`, `template_ref`, `preview_record_ref`, `order_id`, `order_reference`, `action`, `inherit_id`, `target_model_id`). The five the working branch did not carry are the computed references of Email Template Preview, text message Template Preview, Portal Sharing, Privacy Lookup Wizard Line and Page Properties Base. Five of the twenty-seven restrict their target to a fixed list of entities rather than accepting any entity, and those lists are given. The catalogue of relations records only links and lists, so these twenty-seven are taken from the per-entity definitions and from the observed columns; the totals of section 5.1 count them separately from the 3,985 links and lists. |
+| Customer Portal | The four portal entities — Grant Portal Access (`portal.wizard`), Portal User Config (`portal.wizard.user`), Portal Sharing (`portal.share`) and Portal Mixin (`portal.mixin`) — were placed in a customer portal domain of their own. | Kept in a customer portal domain of their own, section 3.34, because the portal is one of the domain folders of this repository and these four entities are the only entities it owns. The domain index does not name the folder, so the inventory gives its name in code font rather than as a link. The seven relation fields of these entities and the domain's share of the cross-domain counts of section 4 moved with them, which is why Website and Storefront counts 127 relation fields rather than 134 and four assistants rather than seven. |

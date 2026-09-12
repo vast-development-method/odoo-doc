@@ -580,7 +580,7 @@ A rejection with no reason from the reason list is refused with `At least one re
 
 # 14. Advanced document fields
 
-A capability package adds seven further text fields to an accounting document, each intended to feed one further element of the outgoing file: a contract document reference, a project reference, an originator document reference, a despatch document reference, one additional document reference, an accounting cost and a delivery location global location number. They are stored on the document and are available to a profile that maps them. The shipped profiles of this specification do not map them; a deployment that needs them maps them through the user defined extension mechanism of section 20.3 of [universal-business-language-mapping.md](universal-business-language-mapping.md).
+A capability package adds seven further text fields to an accounting document, each intended to feed one further element of the outgoing file: a contract document reference, a project reference, an originator document reference, a despatch document reference, one additional document reference, an accounting cost and a delivery location global location number. They are stored on the document and are available to a profile that maps them. Their transport names, their types and the element each one is meant to feed are tabulated in section 12.3 of [entities.md](entities.md), together with the compatibility finding that records that none of the shipped profiles reads them. A deployment that needs them maps them through the user defined extension mechanism of section 20.3 of [universal-business-language-mapping.md](universal-business-language-mapping.md).
 
 ---
 

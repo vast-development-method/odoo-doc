@@ -1598,19 +1598,29 @@ The bundle names below are reproduced because other packages target them by name
 
 **AC-PKG-51.** *Given* a bundle requested outside diagnosis mode without the minimisation marker, *when* the request is parsed, *then* it is rejected.
 
+**AC-PKG-52.** *Given* a manifest whose automatic-installation list names a package that is not among its declared dependencies, *when* the manifest is read, *then* the reading fails with "auto_install triggers must be dependencies, found non-dependencies [" the offending names "] for module " the technical name, and the package is not registered.
+
+**AC-PKG-53.** *Given* a selection of one application package on which three bridges and one further application depend, *when* the removal preview is drawn, *then* the impacted packages listed by default are the two applications, an option reveals the three bridges as well, and the impacted entities are exactly those whose external identifiers all belong to those five packages.
+
+**AC-PKG-54.** *Given* a selection containing only technical packages, *when* the removal preview is drawn, *then* it lists all impacted packages rather than the empty set of applications.
+
+**AC-PKG-55.** *Given* a package whose manifest names two countries and whose record is linked to one of them and to a third, *when* the package list is refreshed, *then* the missing country is linked, the third is unlinked, the retained one is left untouched, and the derived list of not-yet-installed country-specific packages is invalidated.
+
+**AC-PKG-56.** *Given* a package restricted to one country and a tenant whose companies are all established elsewhere, *when* an administrator selects that package explicitly, *then* it installs; automatic installation alone would not have selected it.
+
 ---
 
 ## 25. Reconciliation notes
 
-The two drafts merged into this document disagreed on four points, and three organisational decisions are recorded with them.
+Four behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below was verified against the running system.
 
-1. **What the empty automatic-installation list means.** One draft read an empty trigger list as "never automatic". It means the opposite: the condition over an empty set is vacuously satisfied, so the package is always installed automatically, and its own dependencies are pulled in with it. This is what makes the foundation package install itself on an empty database. [Section 11.1](#111-declaration) and [section 4.6](#46-bootstrapping-an-empty-database) state the corrected reading.
-2. **When external prerequisites are checked.** One draft checked them while the manifest was read, which would hide a package from the list because the host lacks a component. They are checked when the package is about to change state, and the three refusals differ by transition. [Section 2.10](#210-external-prerequisites) states it, and criterion AC-PKG-40 asserts it.
-3. **Version normalisation.** One draft treated the declared version as opaque. It is normalised — between two and five parts, every part a whole number, the series identifier prepended when there are three parts or fewer — and the outcome decides both comparability and installability. [Section 2.9](#29-version-normalisation) gives the algorithm and the table of worked cases.
-4. **What happens when demonstration data fails.** One draft treated it as a build failure. It is caught per package: the package installs, its demonstration flag becomes false, a failure record is kept and the build continues. [Section 13.5](#135-failure-and-recovery-during-a-build) states it, and criterion AC-PKG-34 asserts it.
-5. **Where the record declaration grammar lives.** Both drafts specified it. It stays here in [section 8](#8-the-data-declaration-grammar) because a package's data files are the only place the platform itself uses it; [data loading and exchange](../data/data-loading-and-exchange.md) specifies the import and export paths that share it, and neither document repeats the other.
-6. **Where asset bundles live.** One draft placed them with the client, the other with the package system. They are here, in [section 22](#22-client-asset-bundles), because a bundle's content is decided by which packages are installed and in what order; [client architecture](client-architecture.md) states only what the client does with the bundle it receives.
-7. **Acceptance criteria identifiers.** The two drafts numbered their scenarios independently. They are unified here in one series with the prefix `AC-PKG`, and scenarios that appeared in both are stated once.
+1. **What the empty automatic-installation list means.** An empty trigger list does not mean "never automatic"; it means the opposite. The condition over an empty set is vacuously satisfied, so the package is always installed automatically, and its own dependencies are pulled in with it. This is what makes the foundation package install itself on an empty database. [Section 11.1](#111-declaration) and [section 4.6](#46-bootstrapping-an-empty-database) state the reading.
+2. **When external prerequisites are checked.** They are not checked while the manifest is read — that would hide a package from the list because the host lacks a component. They are checked when the package is about to change state, and the three refusals differ by transition. [Section 2.10](#210-external-prerequisites) states it, and criterion AC-PKG-40 asserts it.
+3. **Version normalisation.** The declared version is not opaque text. It is normalised — between two and five parts, every part a whole number, the series identifier prepended when there are three parts or fewer — and the outcome decides both comparability and installability. [Section 2.9](#29-version-normalisation) gives the algorithm and the table of worked cases.
+4. **What happens when demonstration data fails.** It is not a build failure. It is caught per package: the package installs, its demonstration flag becomes false, a failure record is kept and the build continues. [Section 13.5](#135-failure-and-recovery-during-a-build) states it, and criterion AC-PKG-34 asserts it.
+5. **Where the record declaration grammar lives.** It stays here in [section 8](#8-the-data-declaration-grammar) because a package's data files are the only place the platform itself uses it; [data loading and exchange](../data/data-loading-and-exchange.md) specifies the import and export paths that share it, and neither document repeats the other.
+6. **Where asset bundles live.** They could sit with the client or here. They are here, in [section 22](#22-client-asset-bundles), because a bundle's content is decided by which packages are installed and in what order; [client architecture](client-architecture.md) states only what the client does with the bundle it receives.
+7. **Acceptance criteria identifiers.** The scenarios of this document are numbered in one series with the prefix `AC-PKG`.
 
 ---
 

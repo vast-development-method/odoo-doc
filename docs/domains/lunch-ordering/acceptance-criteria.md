@@ -904,7 +904,7 @@ Scenarios say which clock they use.
 ### Scenario 8.2 — A notice's action nine hours ahead is postponed
 
 - **Given** Clock B.
-- **When** Mark creates a Lunch Alert named "Tokyo UTC+9" in the pushed mode, with the notification
+- **When** Mark creates a Lunch Alert named "Tokyo lunch reminder" in the pushed mode, with the notification
   hour 8.0 in the morning half and a time zone nine hours ahead of universal time.
 - **Then** the scheduled action's next due instant is 29 January 2021 at 23:00:00 universal time,
   which is 30 January at 08:00 in the notice's own zone, because the candidate instant of 28 January
@@ -913,10 +913,10 @@ Scenarios say which clock they use.
 ### Scenario 8.3 — A notice's action five hours behind is not postponed
 
 - **Given** Clock B.
-- **When** Mark creates a Lunch Alert named "New York UTC-5" in the pushed mode, with the
+- **When** Mark creates a Lunch Alert named "New York lunch reminder" in the pushed mode, with the
   notification hour 10.0 in the morning half and a time zone five hours behind universal time.
 - **Then** the scheduled action's next due instant is 29 January 2021 at 15:00:00 universal time,
-  its name is "Lunch: alert chat notification (New York UTC-5)" and it is active.
+  its name is "Lunch: alert chat notification (New York lunch reminder)" and it is active.
 
 ### Scenario 8.4 — Archiving deactivates, un-archiving reactivates
 

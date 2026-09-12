@@ -556,6 +556,7 @@ The entity Message subtypes (`mail.message.subtype`, table `mail_message_subtype
 | `parent_id` and `relation_field` | Together they propagate a subscription from a parent record to a child: a follower of the parent, subscribed to the parent subtype, is notified of the child subtype through the named link field. |
 | `sequence` | The order in the subscription dialogue; the default is one. |
 | `track_recipients` | Whether the recipients of a tracked change are recorded on the message. |
+| `description` | The sentence shown under the subtype in the subscription dialogue. It may be left empty, and 41 of the 103 shipped subtypes leave it empty; an empty cell in the table below means the subtype ships without a description. |
 
 Three subtypes of the messaging package are the ones every entity with a discussion thread relies on: the discussion subtype, under which a user's own message is posted; the note subtype, which is internal only; and the activity subtype, under which the completion of an activity is logged.
 
@@ -564,7 +565,7 @@ Three subtypes of the messaging package are the ones every entity with a discuss
 | `account.mt_invoice_created` | "Invoice Created" | `account` | `account.move` | no |  | yes | Invoice Created |
 | `account.mt_invoice_paid` | "Paid" | `account` | `account.move` | no |  |  | Invoice paid |
 | `account.mt_invoice_validated` | "Validated" | `account` | `account.move` | no |  |  | Invoice validated |
-| `calendar.subtype_invitation` | "Invitation" | `calendar` | `calendar.event` | no |  |  | False |
+| `calendar.subtype_invitation` | "Invitation" | `calendar` | `calendar.event` | no |  |  |  |
 | `crm.mt_lead_create` | "Opportunity Created" | `crm` | `crm.lead` | no |  | yes | Lead/Opportunity created |
 | `crm.mt_lead_lost` | "Opportunity Lost" | `crm` | `crm.lead` | no |  |  | Opportunity lost |
 | `crm.mt_lead_restored` | "Opportunity Restored" | `crm` | `crm.lead` | no |  |  | Opportunity restored |

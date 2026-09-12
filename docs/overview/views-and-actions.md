@@ -109,6 +109,8 @@ Default ordering: priority, then name, then identifier.
 
 Privileged relational commands on this entity are forbidden, so an elevated operation cannot be made to rewrite views through a relation.
 
+**The parent chain may not loop.** A view whose inherits-from link reaches itself, directly or through any number of intermediate views, is refused with **"You cannot create recursive inherited views."** The check runs **before** every other check of [section 15](#15-view-validation), because resolution walks the chain and a loop would never terminate.
+
 ### 2.1 The eight kinds
 
 | Kind | Shows | Typical use |
@@ -122,7 +124,7 @@ Privileged relational commands on this entity are forbidden, so an elevated oper
 | Cross-table | Aggregates as a two-dimensional table | Analysis |
 | Template | Arbitrary rendered content | Printed documents, public pages, electronic mail bodies |
 
-A ninth kind, the **activity** view, is contributed by the messaging capability and is specified in [section 11](#11-the-activity-view) because its grammar belongs with the others. Three further kinds — the hierarchy chart, the scheduling chart and the map — are contributed by other capability packages and are specified in [section 28](#28-further-view-kinds-contributed-by-capability-packages). The settings form is not a kind of its own but a variant of the form, specified in [section 4.4](#44-the-settings-form-variant).
+A ninth kind, the **activity** view, is contributed by the messaging capability and is specified in [section 11](#11-the-activity-view) because its grammar belongs with the others. Three further kinds — the hierarchy chart, the scheduling chart and the map — are contributed by other capability packages and are specified in [section 28](#28-further-view-kinds-contributed-by-capability-packages). The settings form is not a kind of its own but a variant of the form, specified in [section 4.5](#45-the-settings-form-variant).
 
 ---
 
@@ -319,7 +321,23 @@ The form view has no schema file; it is validated in the following ways:
 5. Every condition's field references must be present in the view.
 6. Accessibility checks are applied to icon-only elements and to link elements with no text.
 
-### 4.4 The settings form variant
+### 4.4 The status bar
+
+A **status bar** is a field node placed inside the `header` node and rendered with the status widget ([section 29.3](#293-boolean-selection-and-status-widgets)). It shows the ordered set of values of a closed-list field, or the ordered set of records of a stage entity reached by a link to one record, highlights the value the record currently holds, and — unless clicking is switched off — lets the user move the record to another value by activating it.
+
+| Attribute or option | Meaning |
+|---|---|
+| `statusbar_visible` | A comma-separated list of stored values. A value in the list is **always** shown, whatever the record holds. A value outside the list is shown **only** while it is the record's current value, and disappears from the bar as soon as the record moves on. This is how a long lifecycle shows three ordinary steps plus whichever exceptional step the record happens to be in. |
+| Option `clickable` | Default true. When false the bar is display-only and activating an entry does nothing. |
+| Option `fold_field` | The name of a boolean field on the linked stage entity. Stages whose flag is set are collapsed into one folded entry at the end of the bar instead of taking a place of their own. |
+| `domain` | Restricts the set of stages offered, for a status bar over a link to one record. |
+| `context` | Parameterises the set of stages offered, for a status bar over a link to one record. |
+
+**Activating an entry writes the new value on the record.** In a form with unsaved changes the write is not sent immediately: it is kept as a pending change like any other edit, and reaches the server with the next save. A rebuild that sends the status change straight to the server would make the status bar the only control in a form that cannot be undone by discarding.
+
+The three options above are read from the widget's own option mapping, not from the field node's attributes, with the single exception of `statusbar_visible`, which is an attribute of the field node.
+
+### 4.5 The settings form variant
 
 A settings view is a form view with a search field and a side bar. It adds three nodes.
 
@@ -672,7 +690,8 @@ When a client asks for a view of a given kind on a given entity, the server choo
 1. If an identifier was given, use that view. If it is an extension, walk up to its closest primary ancestor and use that, then apply this view's own specifications on top of the fully combined result.
 2. Otherwise, if the context carries the key made of the kind and the view-reference suffix — for example the key naming a form view reference — resolve it as an external identifier and use that view.
 3. Otherwise, take the views of that kind on that entity that are active, that have no parent or whose parent is of another entity, and that the acting user's groups admit; choose the one with the **lowest priority**, then the lowest identifier.
-4. If none exists, produce a **default view**: for a form, every field of the entity in a single group; for a list, the display name column; for a search, the display-name field. The default is minimal and exists so that a new entity is usable before anyone writes a view for it.
+4. If none exists, produce a **default view** as specified in [13.5](#135-generated-default-views): for a form, every field of the entity in a single group; for a list, the display name column; for a search, the display-name field. The default is minimal and exists so that a new entity is usable before anyone writes a view for it.
+5. If none exists **and** no generator exists for that kind, the request fails with **"No default view of type '"** the kind **"' could be found!"**. Only the kinds listed in [13.5](#135-generated-default-views) have a generator; a request for any other kind on an entity that has no view of it reaches this refusal.
 
 ### 13.2 Group applicability
 
@@ -803,17 +822,66 @@ Every field node pointing at a relation, inside an editable view, receives two f
 
 A view is validated when its package is installed or updated, and whenever it is written.
 
-### 15.1 What is checked
+### 15.1 What is checked, and what it says when it refuses
 
-1. The description parses.
-2. For kinds that have a schema — list, search, chart, cross-table, calendar, activity — the description matches it.
-3. Every field node names an existing field of the relevant entity.
-4. Every button names an existing, public, argument-free operation, or an existing action.
-5. Every condition's field references are present in the view.
-6. Every candidate-restriction expression's left-hand names exist on the target entity and right-hand names are present in the view.
-7. Every group named in a group requirement exists.
-8. Kind-specific structural rules ([sections 4](#4-the-form-view) to [11](#11-the-activity-view)).
-9. Accessibility rules: an icon-only control must carry accessible text; a link with no text must carry a title.
+Validation happens on every create, on every write that touches the description, the parent view or the active flag, and on package installation and update. It resolves the view ([section 14](#14-view-resolution-the-contract-a-client-relies-on)), checks the result against the grammar of its kind, and checks every name the result mentions. A failure **aborts the transaction**: the view is not saved and, during an installation, the package does not install.
+
+Nine families of check exist — the description parses; the result matches the schema of its kind; every field node names an existing field; every button names an existing, public, argument-free operation or an existing action; every condition's field references are present in the view; every candidate-restriction expression resolves on both sides; every group named in a group requirement exists; the kind-specific structural rules of [sections 4](#4-the-form-view) to [11](#11-the-activity-view) hold; and the accessibility rules of [section 15.5](#155-accessibility-warnings) hold. The table below gives every rule of the first eight families with the exact text shown when it refuses.
+
+**How to read the table.** A fragment between angle brackets inside a quoted message is a placeholder, described in the rule column; it is not literal text. The symbol ⏎ marks a line break inside the message. Two messages name an implementation technology in the shipped text: the encoding refusal names the document notation and the context refusal names the expression language. Following [rule two](../references/documentation-rules.md), those two words are not reproduced here; the placeholders `<notation>` and `<expression language>` stand where the shipped text carries them, and a rebuild substitutes its own names. `<use>` names, in every message that carries it, the place the failing expression was written — the attribute name and its value, such as the visibility condition of a node or the context of a field.
+
+| Rule | Message when it refuses |
+|---|---|
+| The root node must be the node of the declared kind | "The root node of a `<kind>` view should be a `<<kind>>`, not a `<<node>>`" |
+| The entity named by the view must exist | "Model not found: `<entity>`" |
+| The kind must be a known one | "Invalid view type: '`<kind>`'.⏎You might have used an invalid starting tag in the architecture.⏎Allowed types are: `<list of kinds>`" |
+| A description must be present when the view is created | "Missing view architecture." |
+| The description must not carry an encoding declaration | "Unicode strings with encoding declaration are not supported in `<notation>`.⏎Remove the encoding declaration." |
+| A list view accepts only the children field, button, control, group-by, widget and header | "List child can only have one of field, button, control, groupby, widget, header tag (not `<node>`)" |
+| The editable attribute of a list view must be `top` or `bottom` | "The \"editable\" attribute of list views must be \"top\" or \"bottom\", received `<value>`" |
+| A chart view accepts only field children | "A `<graph>` can only contains `<field>` nodes, found a `<<node>>`" |
+| A search view should carry at least one search field | Warning, not a refusal: "Search tag requires at least one field element" |
+| A search view may hold at most one search panel | "Search tag can only contain one search panel" |
+| A search-panel entry that allows several selections may not carry a condition | "Searchpanel item with select multi cannot have a domain." |
+| A field node must name a field | "Field tag must have a \"name\" attribute defined" |
+| The named field must exist on the entity | "Field \"`<name>`\" does not exist in model \"`<entity>`\"" |
+| A candidate-restriction condition on a field that is not a relation is meaningless | "Domain on non-relational field \"`<name>`\" makes no sense (domain:`<condition>`)" |
+| A group-header field must be a link to one record | "Field '`<name>`' found in 'groupby' node can only be of type many2one, found `<type>`" |
+| A group-header field must exist | "Field '`<name>`' found in 'groupby' node does not exist in model `<entity>`" |
+| A label must name the node it labels | "Label tag must contain a \"for\". To match label style without corresponding field or button, use 'class=\"o_form_label\"'." |
+| A page must be a direct child of a notebook | "Page direct ancestor must be notebook" |
+| A special button's value must be `cancel`, `save` or `add` | "Invalid special '`<value>`' in button" |
+| An operation button must name an operation that exists on the entity | "`<name>` is not a valid action on `<entity>`" |
+| That operation must be callable from outside ([the security model](security-model.md)) | "`<name>` on `<entity>` is private and cannot be called from a button" |
+| That operation must take no required argument | Warning, not a refusal: "`<name>` on `<entity>` has parameters and cannot be called from a button" |
+| An action button must name an external identifier that resolves | "Invalid xmlid `<reference>` for button of type action." |
+| The record it resolves to must be an action | "`<reference>` is of type `<entity>`, expected a subclass of `ir.actions.actions`" |
+| The action it names must still exist | "Action `<reference>` (identifier: `<key>`) does not exist for button of type action." |
+| A name used by an expression must name a node of the view | "Name or identifier “`<name>`” in `<use>` does not exist." |
+| That node must be present in the delivered view, not removed by a group requirement | "Name or identifier “`<name>`” in `<use>` must be present in view but is missing." |
+| A field used by an expression must be a plain name, not a dotted path | "Invalid composed field `<path>` in `<use>`" |
+| A field used by an expression may not be a search-panel entry that allows several selections | "Field “`<name>`” used in `<use>` is present in view but is in select multi." |
+| A conditional expression must parse | "Invalid `<use>`: “`<expression>`”⏎`<parser message>`" |
+| A condition must parse | "Invalid `<use>`: “`<condition>`”⏎`<parser message>`" |
+| Every field path inside a condition must exist on the entity it applies to | "Unknown field \"`<entity>`.`<field>`\" in `<use>`)" |
+| A path inside a condition may not traverse a field that is not a relation | "Non-relational field “`<field>`” in path “`<path>`” in `<use>`)" |
+| A field used in a condition must be searchable | "Unsearchable field “`<field>`” in path “`<path>`” in `<use>`)" |
+| A context expression must parse | "Invalid context: “`<expression>`” is not a valid `<expression language>` expression ⏎⏎ `<parser message>`" |
+| A grouping key inside a context must be a literal text | "\"group_by\" value must be a string `<attribute>`=“`<value>`”" |
+| A grouping key must name an existing field | "Unknown field “`<field>`” in \"group_by\" value in `<attribute>`=“`<value>`”" |
+| The column-count and column-span attributes must be whole numbers | "“`<attribute>`” value must be an integer (`<value>`)" |
+| A period filter's default period must be one of the offered option keys | "Invalid default period `<value>` for date filter" |
+| A group named by a group requirement should exist | Warning, not a refusal: "The group “`<name>`” defined in view does not exist!" |
+| The hover-text data attributes the client generates may not be written by hand | "Forbidden attribute used in arch (`<attribute>`)." |
+| Only the template directives allowed for the kind may be written | "Forbidden owl directive used in arch (`<directive>`)." |
+| The internal component reference may not be written by hand | "Forbidden use of `__comp__` in arch." |
+| The whole description must satisfy the grammar of its kind | "Invalid view `<name>` definition in `<file>`" |
+| Any other resolution or validation failure | "Error while validating view near:⏎⏎`<the five lines of the description around the failure>`⏎`<reason>`", or, when no position can be shown, "Error while validating view (`<key>`):⏎⏎`<reason>`" |
+
+**Template directives permitted inside a view description.** A view description is not a template, so the directives of the template language are refused with the forbidden-directive message above — with two deliberate exceptions.
+
+1. In a **board** layout, which compiles its card templates through the template engine, exactly these directives are allowed and no others: `t-name`, `t-esc`, `t-out`, `t-set`, `t-value`, `t-if`, `t-else`, `t-elif`, `t-foreach`, `t-as`, `t-key`, every variant beginning `t-att` (the attribute-setting family, whether written as the bare form, the dynamic-name form or the mapping form), `t-call` and `t-debug`.
+2. In **every other kind of view**, exactly one directive is allowed: `t-translation`, which marks a subtree as not to be translated. Every other directive, including every directive allowed in a board layout, is refused.
 
 ### 15.2 Partial validation
 
@@ -883,6 +951,13 @@ An **action** is a record saying what to do next. Six kinds exist. All six inher
 | Bound entity (`binding_model_id`) | Many-to-one to Entity Catalogue, deletion behaviour cascade | See [section 23](#23-binding-actions-to-entities). |
 | Binding kind (`binding_type`) | Selection, values `action` and `report`, default `action` | Which toolbar heading the action appears under. |
 | Binding view kinds (`binding_view_types`) | Text, default `list,form` | The view kinds whose toolbar shows it. |
+
+**Rules on the path.** The path is what makes an action addressable by a readable address instead of by a numeric identifier, so it is constrained:
+
+1. The value must begin with a lowercase letter and continue with lowercase letters, digits, underscores and hyphens only. Any other value is refused with **"The path should contain only lowercase alphanumeric characters, underscore, and dash, and it should start with a letter."**
+2. Two prefixes are reserved, because the client's own address grammar uses them: a path beginning `m-` is refused with **"'m-' is a reserved prefix."** and a path beginning `action-` with **"'action-' is a reserved prefix."**
+3. The single word `new` is reserved, because it addresses an unsaved record: using it is refused with **"'new' is reserved, and can not be used as path."**
+4. A path must be unique across **every** kind of action, not merely within one kind, because the address carries the path alone. A duplicate is refused with **"Path to show in the URL must be unique! Please choose another one."**
 
 ### 16.2 The six kinds
 
@@ -1061,10 +1136,24 @@ Nothing else is reachable: no arbitrary import, no file access, no network acces
 
 ### 18.4 Running a server action
 
-1. Check that the acting user satisfies the group restriction.
-2. Bind the record set: the active record identifiers from the context, of the active entity, which must match the action's entity.
-3. Run the behaviour.
-4. If the behaviour produced an action description, return it; otherwise return nothing.
+1. **Check permission.** When the action declares access groups, the acting user must belong to at least one of them. When it declares none, the acting user must hold the write permission on the action's entity and, when the action addresses real records, the write permission on those records as well. All three failures raise the same text, **"You don't have enough access rights to run this action."**, and record a diagnostic line naming the action, the user and the entity. The three cases share one message deliberately: distinguishing them would tell an unauthorised caller which of the three gates it failed.
+2. **Refuse an action that carries warnings.** When the warning field of [18.1](#181-fields) is not empty, the action does not run and the refusal is **"Server action "** the action's name **" has one or more warnings, address them first."**
+3. Bind the record set: the active record identifiers from the context, of the active entity, which must match the action's entity.
+4. Run the behaviour.
+5. If the behaviour produced an action description, return it; otherwise return nothing.
+
+**What fills the warning field.** Each of the following conditions puts a line in the warning field, and each therefore blocks execution through step 2:
+
+| Condition | Warning text |
+|---|---|
+| A child action operates on another entity | **"Following child actions should have the same model ("** the parent's entity **"): "** the names of the offending children |
+| A child action declares different access groups | **"Following child actions should have the same groups ("** the parent's groups **"): "** the names of the offending children |
+| A child action itself carries warnings | **"Following child actions have warnings: "** the names of those children |
+| An update behaviour writes to a structured-document field | **"I'm sorry to say that structured-data fields (such as '"** the field's label **"') are currently not supported."** |
+| An update behaviour writes a generated sequence into a field that is not textual | **"A sequence must only be used with character fields."** |
+| A notification payload names a group-restricted field | **"Group-restricted fields cannot be included in webhook payloads, as it could allow any user to accidentally leak sensitive information. You will have to remove the following fields from the webhook payload:"** then a line break and the list of offending fields |
+
+The warning field is computed and recursive: a warning on a child reaches the parent, so a chain of actions is blocked by the deepest fault in it.
 
 A server action's own history of code changes is kept as records of the Server Action History entity (`ir.actions.server.history`, table `ir_actions_server_history`), so that an administrator can see and compare revisions.
 
@@ -1104,6 +1193,8 @@ A record of the Address Action entity (`ir.actions.act_url`, table `ir_act_url`)
 | Kind (`type`) | Text | `ir.actions.act_url` | |
 | Address (`url`) | Long text, required | | Where to go. May be relative or absolute. |
 | Target (`target`) | Selection | `new` | `new` opens a new window; `self` navigates the current one; `download` downloads the resource without navigating. |
+
+**When the new window cannot be opened.** A target of `new` asks the client to open a second window, which the browsing environment may suppress without telling the user why. The client detects the suppression and raises a sticky notice — one that stays until dismissed rather than fading — reading **"A popup window has been blocked. You may need to change your browser settings to allow popup windows for this page."** The action is then not performed at all; nothing is downloaded and nothing is navigated to.
 
 Address actions are how the system hands a user to a printable document, an external service, a public page or a downloadable file.
 
@@ -1204,6 +1295,8 @@ A menu is a record of the Menu entity (`ir.ui.menu`, table `ir_ui_menu`). Menus 
 | Icon image (`web_icon_data`) | Binary, stored as an attachment | | The icon's content. |
 | Action (`action`) | Polymorphic reference over the five runnable action kinds | | What the menu opens. Empty for a pure container. |
 
+**The parent chain may not loop.** A menu whose parent link reaches itself, directly or through any number of intermediate menus, is refused with **"Error! You cannot create recursive menus."** The check runs on every create and on every write that touches the parent link, because the full path and the materialised path are both computed by walking the chain upwards.
+
 ### 24.1 Visibility
 
 A menu is visible to a user when:
@@ -1215,6 +1308,8 @@ A menu is visible to a user when:
 Rule 3 is what makes an empty section disappear rather than opening onto nothing. It is evaluated bottom-up over the whole tree.
 
 The visible menu tree for a user is computed once and cached, keyed by the user's groups.
+
+The table above is the **stored** record. What a client receives is a different, purpose-built payload — eleven keys per entry, a synthetic root entry, and the rule that drops an entry whose chain to an application root is broken — specified in [client architecture, section 3.1](client-architecture.md#31-the-delivered-payload).
 
 ### 24.2 Ordering
 
@@ -1292,6 +1387,14 @@ A **pending configuration step** is a record of the Configuration Step entity (`
 | Sequence (`sequence`) | Integer | 10 | |
 | Status (`state`) | Selection, required | `open` | `open` means still to do; `done` means finished. |
 | Name (`name`) | Text | | |
+
+Default ordering: sequence, then identifier.
+
+**At most one step may be open at a time.** Creating a step whose status is `open`, or writing `open` onto an existing step, triggers a reconciliation: every open step is listed in order of **sequence ascending, then identifier descending**, the first of that list is kept open, and every other open step is set to `done`. A rebuild must use exactly that ordering, because it decides which of two steps opened in the same transaction survives: the lower sequence wins, and between two steps of equal sequence the **more recently created** one wins.
+
+**Launching a step** sets its status to `done` before anything else, so that a failure in the action it opens cannot leave the step open and re-offer itself for ever, and then returns the action. For a window action two adjustments are made to the returned action's context: a record key carried in the context is moved out of the context and onto the action's record field, so that the screen opens on that record; and the message-suppression key is added, so that opening an automatic configuration screen does not post a line in the record's discussion thread.
+
+**The shipped menu-opening step is protected from deletion.** One step ships with the foundation package and opens the main menu after an installation. A deletion that includes it does not remove it: it is taken out of the set being deleted and its action is reset to the shipped client action that opens the main menu. Every other step in the same deletion is removed normally. This is what guarantees that an installation always has something to return to, even after an administrator has cleared the queue.
 
 After an interactive package installation the system looks for the first open step and returns its action; when there is none, it returns the instruction to reload the client and open the first root menu ([package system, section 13.4](package-system.md#134-returning-to-the-user)).
 
@@ -1457,7 +1560,7 @@ Declaring both `start_date_field` and `end_date_field` on the same node is a con
 | `badge` | `selection`, `many_to_one`, `text` | The value as a single coloured badge. | `color_field` (an integer field that chooses the colour) |
 | `label_selection` | `selection` | The value as a label whose style comes from a mapping of value to style class. | `classes` (mapping from value to class name) |
 | `state_selection` | `selection` | A small coloured circle per value, used for the status of a task; activating it changes the value. | `autosave` (default true), `hide_label` |
-| `statusbar` | `selection`, `many_to_one` | The status bar of section 4.4. | `clickable` (default true), `fold_field` |
+| `statusbar` | `selection`, `many_to_one` | The status bar of [section 4.4](#44-the-status-bar), including the always-visible value list and the folded-stage rule. | `clickable` (default true), `fold_field` |
 | `priority` | `selection` | A row of stars; activating the n-th star sets the n-th value. | `autosave` (default true) |
 | `timezone_mismatch` | `selection` | A time zone selection that warns when the chosen zone differs from the one reported by the browser, with the message `Timezone Mismatch : This timezone is different from that of your browser.\nPlease, set the same timezone as your browser's to avoid time discrepancies in your system.` | `tz_offset_field` (default `tz_offset`), `mismatch_title` |
 
@@ -1752,19 +1855,46 @@ The same keys drive the top-level resolution of [section 14.3](#143-resolution-s
 
 **AC-VIEW-63.** *Given* a map view whose contact attribute is absent, *when* the view is opened, *then* an empty map is drawn and no location request is made.
 
+**AC-VIEW-64.** *Given* a view whose declared kind is the form kind and whose description has a list node as its root, *when* it is saved, *then* the save is refused with "The root node of a form view should be a `<form>`, not a `<list>`".
+
+**AC-VIEW-65.** *Given* a label node with no target attribute, *when* the view is validated, *then* the save is refused with "Label tag must contain a \"for\". To match label style without corresponding field or button, use 'class=\"o_form_label\"'."
+
+**AC-VIEW-66.** *Given* a page node placed directly inside a sheet, *when* the view is validated, *then* the save is refused with "Page direct ancestor must be notebook".
+
+**AC-VIEW-67.** *Given* a card view description carrying the iteration directive of the template language, *when* it is validated, *then* the save is refused with "Forbidden owl directive used in arch (t-foreach)."; *and given* the same directive in a board layout, *then* it is accepted.
+
+**AC-VIEW-68.** *Given* a status bar over a status field whose always-visible list names the draft and posted values, and a record in the cancelled state, *when* the form is opened, *then* the bar shows draft, posted and cancelled; *and when* the record moves to posted, *then* the bar shows draft and posted only.
+
+**AC-VIEW-69.** *Given* an unsaved form with a clickable status bar, *when* the user activates another entry, *then* the new value is held as a pending change and no write reaches the server until the form is saved.
+
+**AC-VIEW-70.** *Given* two pending configuration steps with sequences 10 and 20, both open, *when* a third step with sequence 5 is created open, *then* the step with sequence 5 stays open and the other two are set to done.
+
+**AC-VIEW-71.** *Given* two open pending configuration steps of equal sequence, *when* the reconciliation runs, *then* the one with the higher identifier stays open.
+
+**AC-VIEW-72.** *Given* a deletion naming the shipped menu-opening configuration step together with two other steps, *when* the deletion runs, *then* the two other steps are removed, the shipped step survives, and its action is reset to the shipped client action that opens the main menu.
+
+**AC-VIEW-73.** *Given* a menu whose parent link is set to one of its own descendants, *when* it is saved, *then* the save is refused with "Error! You cannot create recursive menus."
+
+**AC-VIEW-74.** *Given* two actions of different kinds both declaring the path `orders`, *when* the second is saved, *then* the save is refused with "Path to show in the URL must be unique! Please choose another one."
+
+**AC-VIEW-75.** *Given* a server action whose child action operates on another entity, *when* it is run, *then* it fails with "Server action " the action's name " has one or more warnings, address them first."
+
+**AC-VIEW-76.** *Given* a server action declaring access groups the acting user does not hold, *when* it is run, *then* it fails with "You don't have enough access rights to run this action." and a diagnostic line naming the action, the user and the entity is recorded.
+
 ---
 
 ## 33. Reconciliation notes
 
-The two drafts merged into this document disagreed on four points, and three organisational decisions are recorded with them.
+Four behaviours in this document contradict the reading a careful person would most naturally arrive at, and three organisational decisions about which document owns which topic are recorded with them. Each behaviour below was verified against the running system.
 
-1. **How many view kinds there are.** One draft listed eight kinds plus the activity view; the other listed twelve. Both are right at different scopes: the foundation defines the eight of [section 2.1](#21-the-eight-kinds), and the activity view, the hierarchy chart, the scheduling chart and the map are contributed by capability packages. [Section 2.1](#21-the-eight-kinds) now says so and [section 28](#28-further-view-kinds-contributed-by-capability-packages) specifies the three that were missing.
-2. **What the resolution step "post-process for access rights" does.** One draft described it as a single pruning pass. It is seven passes in a fixed order, and three of them — the group annotation that precedes pruning, the injection of fields used only by conditions, and the embedding of a missing sub-view — change the description in ways a client depends on. [Section 14.7](#147-the-post-processing-passes-in-full) states all seven; [section 14.3](#143-resolution-steps) keeps the outline.
-3. **Whether a condition may name a field that is not in the view.** One draft said it may not and that validation refuses it. Validation checks the reference, but the resolution **adds the field automatically** rather than refusing, which is why a working description can mention a field it does not display. [Section 3.4](#34-the-conditions) and criterion AC-VIEW-48 state the observed behaviour.
-4. **The group requirement and the technical-features group.** One draft treated every group requirement identically. A requirement that names the technical-features group is handled separately: the node is hidden rather than removed, because that group is a display switch and not a security boundary, and combining it with a real group must mean "and". [Section 14.7](#147-the-post-processing-passes-in-full), pass six, states it.
-5. **Where the widget catalogue belongs.** One draft placed it with the client, the other with the views. It is here, in [section 29](#29-field-presentation-widgets), because a widget is selected by an attribute of a view description and its options are part of that description; [client architecture](client-architecture.md) states only how the client resolves a widget name to a component.
+1. **How many view kinds there are.** Eight and twelve are both right, at different scopes: the foundation defines the eight of [section 2.1](#21-the-eight-kinds), and the activity view, the hierarchy chart, the scheduling chart and the map are contributed by capability packages. [Section 2.1](#21-the-eight-kinds) says so and [section 28](#28-further-view-kinds-contributed-by-capability-packages) specifies the four contributed kinds.
+2. **What the resolution step "post-process for access rights" does.** It is not a single pruning pass. It is seven passes in a fixed order, and three of them — the group annotation that precedes pruning, the injection of fields used only by conditions, and the embedding of a missing sub-view — change the description in ways a client depends on. [Section 14.7](#147-the-post-processing-passes-in-full) states all seven; [section 14.3](#143-resolution-steps) keeps the outline.
+3. **Whether a condition may name a field that is not in the view.** It may. Validation checks the reference, but the resolution **adds the field automatically** rather than refusing, which is why a working description can mention a field it does not display. [Section 3.4](#34-the-conditions) and criterion AC-VIEW-48 state the behaviour.
+4. **The group requirement and the technical-features group.** Group requirements are not all handled identically. A requirement that names the technical-features group is handled separately: the node is hidden rather than removed, because that group is a display switch and not a security boundary, and combining it with a real group must mean "and". [Section 14.7](#147-the-post-processing-passes-in-full), pass six, states it.
+5. **Where the widget catalogue belongs.** It is here, in [section 29](#29-field-presentation-widgets), because a widget is selected by an attribute of a view description and its options are part of that description; [client architecture](client-architecture.md) states only how the client resolves a widget name to a component.
 6. **Where asset bundles belong.** Neither the view grammar nor the client owns them: a bundle's content is decided by which packages are installed, so it is specified in [the package system, section 22](package-system.md#22-client-asset-bundles).
-7. **Acceptance criteria identifiers.** The two drafts numbered their scenarios independently. They are unified here in one series with the prefix `AC-VIEW`, and scenarios that appeared in both are stated once.
+7. **Two messages that name an implementation technology.** The encoding refusal and the context refusal of [section 15.1](#151-what-is-checked-and-what-it-says-when-it-refuses) carry, in the shipped text, the name of the document notation and the name of the expression language. Those two words are replaced by placeholders, as this repository replaces every other such name, and a rebuild substitutes its own.
+8. **Acceptance criteria identifiers.** The scenarios of this document are numbered in one series with the prefix `AC-VIEW`.
 
 ---
 
