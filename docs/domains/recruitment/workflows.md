@@ -26,7 +26,12 @@ step, and the failure conditions. Formulas referred to here are specified in
 **Performed by:** Officer or Administrator.
 **Precondition:** a Department exists if the position is to belong to one.
 
-1. The Officer creates a Job Position with at least a name. The following defaults apply:
+1. The Officer asks for a new position. A two-field dialog appears: the position name, and
+   the local part of the inbound address together with the alias domain. Typing the name is
+   enough; the address is optional, and leaving it empty leaves the position without a
+   working inbound address.
+2. The Officer confirms, and the position is created with at least a name. The following
+   defaults apply:
    - *Target* (the number of people to hire) is 1;
    - *Recruiter* is the acting user;
    - *Company* is the acting user's current company;
@@ -37,17 +42,27 @@ step, and the failure conditions. Formulas referred to here are specified in
    - *Sequence* is 10;
    - the favourites list is emptied by the creation rule, so the position is not
      automatically a favourite of its creator.
-2. The system creates the position's inbound electronic mail alias, with the Application
+3. The system creates the position's inbound electronic mail alias, with the Application
    entity as the target model and with default values carrying the position, its
    department, the company (the department's company when it has one, otherwise the
    position's company) and the recruiter. From now on, any message sent to that address
    creates an Application already attached to the position.
-3. The system grants the Interviewer privilege to every user named in the position's
+4. The system grants the Interviewer privilege to every user named in the position's
    interviewer list.
-4. The uniqueness rule is checked: the triple (name, company, department) must not already
+5. The uniqueness rule is checked: the triple (name, company, department) must not already
    exist. Failure message: `The name of the job position must be unique per department in company!`
-5. The database check on the target is applied: the target must not be negative. Failure
+6. The database check on the target is applied: the target must not be negative. Failure
    message: `The expected number of new employees must be positive.`
+7. A creation message is posted on the position's thread under the subtype *Job Position
+   created*, and the screen moves to the position's empty pipeline.
+8. The Officer completes the position from its configuration form, which groups the fields
+   as follows: the hiring-process group holds the recruiter, the interviewers, the written
+   interview questionnaire, the local part of the inbound address, its alias domain and the
+   website the position is published on; the job-posting group holds the recruitment target,
+   the required skills, the expected degree and the publication switch; the job group holds
+   the company, the department and the job location; the contract group holds the employment
+   type. Three tabs complete it: the summary shown on the public job list, the process
+   details shown beside the public application form, and the list of Recruitment Sources.
 
 **Optional configuration, each performed by the Officer:**
 
@@ -193,9 +208,11 @@ the position *Experienced Developer*, carrying one attachment named `resume.pdf`
 | Applied on | the moment the message was processed |
 
 A message from the shipped job board *Linkedin*, address `jobs-listings@linkedin.com`, with
-the subject `New application: ERP Implementation Consultant from John Doe`, produces an
+the subject `New application: Implementation Consultant from John Doe`, produces an
 Application whose name is `John Doe`, whose electronic mail address is **empty** and whose
-Contact is **empty**.
+Contact is **empty**. The same message with an unrelated subject and that sentence in the
+body produces the same result, because the pattern is applied to the body after the
+subject.
 
 ---
 
@@ -223,6 +240,25 @@ Contact is **empty**.
 | Short Introduction | `short_introduction` | no | a custom entry, not a field |
 | Job (hidden) | `job_id` | filled from the page | the position |
 | Department (hidden) | `department_id` | filled from the page | the department |
+
+Beside the form, the page repeats the position name, the location, the department, the
+employment type and the process details. The submission control carries the label
+`I'm feeling lucky`. The professional network field carries the placeholder
+`e.g. https://www.linkedin.com/in/fpodoo` and the résumé field the hint
+`Provide either a resume file or a linkedin profile`.
+
+Two checks run in the visitor's page, before anything is sent:
+
+1. When the professional network field loses the focus, its value is matched against the
+   shape of a professional network profile address. A value that does not match produces
+   the warning `The profile that you gave us doesn't seems like a linkedin profile` under
+   the field, and the field is highlighted. The warning is reproduced exactly, including its
+   grammar. **compatibility finding** — a corrected wording would read "The profile you gave
+   us does not look like a professional network profile"; the stored text must nevertheless
+   be reproduced by a rebuild that wants identical behaviour.
+2. When the visitor presses the submission control while **both** the résumé field and the
+   professional network field are empty, both fields become required and the page refuses to
+   send the form. Filling either one satisfies the check.
 
 ### 5.2 Live duplicate warning, before submission
 
@@ -258,9 +294,9 @@ The warning never blocks the submission. It is advisory.
 1. The form is posted to the generic public form endpoint for the Application entity. The
    endpoint verifies that the entity is declared as accepting public form submissions.
 2. A partial forgery check is applied: the token is validated **only when the visitor has a
-   signed-in session**. An anonymous submission is accepted without a token, because
-   embedded forms routinely lose their session cookie. A failed check for a signed-in
-   visitor is refused with `Session expired (invalid CSRF token)`.
+   signed-in session**. An anonymous submission is accepted without a token, because an
+   embedded form routinely loses its session marker. A failed check for a signed-in visitor
+   is refused with the platform's expired-session message.
 3. A challenge-response check is applied according to the platform's public-form challenge
    configuration.
 4. The submitted values are sorted into three buckets:
@@ -851,13 +887,62 @@ answers from the application.
    application view.
 5. At hire, the application's skill lines are transferred to the new employee (see §8.3).
 
+### 18.1 Recording or changing one skill, step by step
+
+Skill lines are never edited in place; the history of levels is kept as a chain of closed
+validity windows. Writing the current-skill list is translated into a sequence of
+operations:
+
+1. Collect the lines submitted by the user, in the order they were submitted.
+2. Drop an exact repetition: the same skill submitted twice in one save keeps one line.
+3. For each submitted line, look for a line of the same Application carrying the same skill.
+   - **None exists.** Create a line with the submitted skill, skill type and level, a
+     validity start of today and an empty validity end.
+   - **One exists and it was created today, or its validity end is already in the past.**
+     Delete it, then create the new line as above. Deleting rather than closing avoids a
+     window of zero length.
+   - **One exists and it was created on an earlier day and is still valid.** Write a
+     validity end of yesterday on it, then create the new line as above.
+4. For a skill whose type is a certification, several lines carrying the same skill and the
+   same level may coexist provided their validity windows differ; an exact repetition of
+   skill, level, validity start and validity end is dropped.
+5. Run every validation of [entities.md](entities.md#111-validations-on-a-skill-line).
+6. If the Application points at a canonical pool copy and is not itself a talent, translate
+   the same operations onto the talent: an update of a skill the talent already holds
+   becomes an update of the talent's own line for that skill; an update of a skill the
+   talent does not hold becomes a creation on the talent; a deletion of a skill the talent
+   holds becomes a deletion of the talent's line; a deletion of a skill the talent does not
+   hold is dropped; anything else is passed through unchanged.
+7. Recompute the distinct-skill list, the matching skills, the missing skills and the match
+   score.
+
+**Worked example.** A candidate holds `Test Skill 1` at a level whose progress is that of
+*Level 2*, recorded three months ago with no validity end. Today the recruiter records
+`Test Skill 1` at *Level 3*. The existing line receives a validity end of yesterday, and a
+second line is created starting today. The Application now carries two lines for that
+skill, and only the second is current.
+
+### 18.2 Finding matching candidates and matching positions
+
+**From a position.** The Officer chooses *Search Matching Applicants*. The application list
+opens, restricted to applications that do **not** belong to this position and that hold at
+least one of the skills the position requires, with the position named in the reading
+context so that each row shows its match score against it. When nothing matches, the list
+shows `No Matching Applicants` followed by
+`We do not have any applicants who meet the skill requirements for this job position in the database at the moment.`
+
+**From an application.** The Officer chooses *Matching Positions*. The position list opens
+with the application named in the reading context, so that every position shows its match
+score against that person.
+
 ---
 
 ## 19. Sending a text message to applicants
 
 **Performed by:** Officer or Interviewer, when the text-message companion is installed.
 
-The list and card views expose a *Send SMS* action bound to the Application entity. It opens
+The list and card views expose a contextual action bound to the Application entity, whose
+reproduced name is `Send SMS`. It opens
 the platform's text-message composer in mass mode, with the log-keeping option on and the
 selected applications as the targets. The number used is the application's telephone number;
 the telephone blacklist of the platform applies, and applications whose sanitised number is
@@ -877,3 +962,210 @@ blacklisted are skipped by the composer.
 | Pipeline by position | The matrix of applications with the position on rows and the stage on columns. |
 | New applications of a department | The list of applications of the department whose stage sequence is at most 1. |
 | Periodic digest indicator | The count of employees created in the period, shown to Officers only. |
+
+---
+
+## 21. Publishing a Job Position on the public job list
+
+**Performed by:** Officer. Installing the public job pages companion also grants the
+restricted site-editor privilege to the Officer privilege, which is what lets a recruiter
+edit the public pages.
+**Precondition:** the public job pages companion is installed and the position exists.
+
+1. The Officer turns on the publication switch on the position form, or opens the public
+   page of the position and publishes it from there.
+2. The publication flag and the generic publication flag are both set, and the published
+   date becomes today's date.
+3. The position now appears on the public job list of the website it is restricted to, or of
+   every website when it is restricted to none, because the public record rule exposes
+   exactly the positions whose publication flag is true.
+4. The public detail page renders: a bar linking back to the job list with the wording
+   *All Jobs*, the position name, the city of the job location or the word `Remote` when the
+   position has no location, two controls labelled `Apply Now!`, the website description, and
+   a structured job-posting description for search engines carrying the employment type, the
+   publication date, the position title, the direct-application flag, the hiring
+   organisation's name and logotype, and either the workplace address or the remote
+   indication together with the company's country.
+5. Turning the switch off clears both flags and empties the published date. Archiving the
+   position clears the publication flag of positions that were still active, and archives
+   every application of the position.
+
+**Postcondition:** the position is reachable at the relative path `/jobs/` followed by its
+readable identifier, and its application form at `/jobs/apply/` followed by the same
+readable identifier. The path `/jobs/detail/` followed by the readable identifier answers
+with a permanent redirection to the first of the two.
+
+---
+
+## 22. Creating a Recruitment Source and its two addresses
+
+**Performed by:** Officer.
+**Precondition:** the Job Position exists.
+
+1. The Officer opens the sources tab of the position, or the sources action from the
+   position card.
+2. The Officer adds a line, types the source name — for example `LinkedIn` or `Indeed` —
+   optionally changes the medium, which defaults to the shared medium named `website`, and
+   optionally names a campaign.
+3. On saving, the Recruitment Source is created and, through the shared attribution
+   definition, the underlying Tracking Source of the same name is created with it and
+   linked.
+4. The tracking address is derived at once: the absolute address of the position's public
+   page followed by the three attribution parameters. Its formula is in
+   [interfaces.md](interfaces.md#63-per-source-tracking-address). The Officer copies it and
+   publishes it on the external board. A visitor who arrives through it and applies produces
+   an Application already carrying the campaign, the medium and the source, because the
+   attribution values of the visit are read by the shared attribution definition at
+   creation.
+5. Optionally, the Officer clicks the address cell, which runs *create the address*: the
+   acting user's right to create a Recruitment Source is verified, then the alias is created
+   with elevated rights as specified in [entities.md](entities.md#83-creating-the-dedicated-alias),
+   and the resulting address is returned for display and copying.
+
+**Postcondition:** applications arriving through the tracking address carry the source's
+campaign, medium and source; applications arriving at the dedicated inbound address carry
+the position, the shipped campaign `Job Campaign`, the shared medium named `email` and this
+source's Tracking Source.
+
+**Branch:** when neither the position's company nor the acting user's company has an alias
+domain, the derived *has domain* value is false, the address cell is hidden and no inbound
+address can be built. Only the tracking address is usable.
+
+---
+
+## 23. Browsing the public job list
+
+**Performed by:** the candidate (a public visitor) and the System.
+**Precondition:** the public job pages companion is installed and at least one position is
+published on the website being visited.
+
+1. The visitor opens the job list, optionally with a page number, a search text and filter
+   values for country, department, office, employment type and industry, plus the four
+   "unspecified" switches (remote, other department, unspecified employment type,
+   unspecified industry), a switch asking for every country and a switch disabling tolerant
+   search.
+2. Each filter value is resolved into a record; a value that is not a whole number, or that
+   names a record that no longer exists, is treated as absent.
+3. **Default country.** When no country, department, office or employment-type filter is
+   set and the visitor did not ask for every country, the country is detected from the
+   visitor's network address. It is kept as the country filter only when at least one
+   published position of this website has a job location in that country; otherwise no
+   country filter is applied.
+4. The published positions of this website matching the search text are searched, with
+   tolerance for spelling mistakes unless the visitor disabled it, ordered by publication
+   state descending, then by sequence ascending, then by remaining target descending, and
+   limited to six hundred results.
+5. One counter map per filter is computed by the contamination rule of
+   [calculations.md](calculations.md#9-job-list-filter-counters-and-pagination), which is
+   what lets each filter show how many positions each of its values would yield while every
+   other filter stays applied.
+6. Every filter is applied, the result is counted, and the pager is computed with twelve
+   positions per page.
+7. The page renders the heading `Our Job Offers`, an optional search bar, the filter
+   controls with their counters, one card per position and the pager. A card shows the
+   position name, the number of openings with the wording `open position` or
+   `open positions`, the short description, the city of the job location or `Remote`, the
+   department and the employment type. Two editable areas frame the list, one above and one
+   below.
+8. The visitor opens a position, reads the detail page, and presses `Apply Now!`, which
+   continues with the procedure of §5.
+
+**Branches:**
+
+| Situation | What the page shows |
+|---|---|
+| The search matched nothing | `No results found for '` followed by the search text and `'.` |
+| Tolerant search corrected the text | `No results found for '` followed by the text typed and `'. Showing results for '` followed by the corrected text and `'.` |
+| The website has no published position at all | The invitation `There are currently no open job opportunities,` followed by `but feel free to contact us for a spontaneous application.` A site editor additionally sees the hint to create a page. |
+| The reader is a site editor | Unpublished positions are shown as well, each carrying a red badge reading `unpublished` |
+| A published position has no job location, or a location with no city | The card and the detail page show `Remote` in place of the city, and the page is produced without failure |
+
+---
+
+## 24. The guided chat script on the job list
+
+**Performed by:** the candidate, the chat script and the recruiting team.
+**Precondition:** the live-chat companion and the recruitment chat companion are installed,
+and the shipped script is attached to a chat channel through a rule that matches the job
+list address.
+
+1. The visitor stays on the job list. The channel rule whose address pattern matches the job
+   list opens the chat window by itself after a short delay.
+2. The script greets the visitor with `Hello, can I help you find the perfect job?` and
+   accepts a free answer.
+3. It then asks `What kind of job are you looking for?` and offers the departments as
+   choices; the shipped script offers `Sales` and `Services`, and the *Services* branch asks
+   a second question, `What are you looking for into the Services Department?`.
+4. For the chosen answer the script names a position with a sentence of the shape
+   *We have a … position in stock, it should fit your needs!*, then asks
+   `Do you want to chat with one of our HR about this job?` The two shipped answers are
+   `Yes please!` and `No I will discover by myself!`. The abbreviation in that question is
+   part of the shipped wording and is reproduced; it stands for the human-resources team.
+5. **The visitor accepts.** The script announces
+   `You will be forwarded to one of our HR agent.` and hands the conversation to an
+   available operator. When nobody is available it answers
+   `Hu-ho, it looks like none of our operators are available 🙁`, then asks
+   `Would you mind leaving your email address so that we can reach you back?`, collects the
+   address and closes with `Thank you, you should hear back from us very soon!`.
+6. **The visitor declines.** The script answers `There you go, have a look.` and links the
+   position page, from which the visitor may apply.
+
+The script and its wording are shipped as demonstration content. What a rebuild must
+support is the mechanism: attaching a scripted conversation to the job list with a rule
+that opens it automatically, offering departments as choices, proposing a position, and
+handing over to a human operator or collecting an address when none is available.
+
+---
+
+## 25. Linking pending applications to a Contact created from the thread
+
+**Performed by:** Officer or Interviewer, without meaning to: this is a side effect of
+answering a candidate.
+
+**Precondition:** the Application carries an electronic mail address and has no Contact.
+
+1. The user writes a message in the Application's thread. The composer proposes the
+   applicant as a recipient, because the record carries an address and no Contact. Accepting
+   the proposal creates a Contact for that address.
+2. After the message is posted, the recipients of the message are searched for a Contact
+   whose address equals the Application's address, comparing both the raw address and the
+   normalised address.
+3. When such a Contact is found:
+   - If that Contact was created **today**, its name is overwritten with the applicant's
+     name, or with the electronic mail address when the applicant's name is empty. A Contact
+     created on any earlier day keeps its name. This is what protects an existing customer
+     or an existing internal user who applies for a position.
+   - Every Application that has no Contact, whose address matches that Contact's address —
+     raw or normalised — and whose stage is **not folded**, is linked to that Contact.
+4. The effect is that answering one message attaches the whole set of pending applications
+   of the same person to one Contact in a single step, while applications parked in a folded
+   stage are deliberately left alone.
+
+---
+
+## 26. Loading the demonstration scenario
+
+**Performed by:** Administrator.
+
+A server operation reachable from the position screens loads a demonstration data set in
+initialisation mode and then reloads the screen. The set contains two departments, two
+positions — one with a target of two and one with a target of three — six applications
+spread over the stages with tags, degrees, evaluations, expected salaries, one attached
+curriculum vitae, two scheduled activities, and a history of stage-change messages and
+attribution values.
+
+This is an aid for evaluating the pipeline, not a business procedure. A rebuild may
+implement it or leave it out; nothing else in this domain depends on it.
+
+---
+
+## 27. Reconciliation notes
+
+| Point | Resolution |
+|---|---|
+| Number of intake channels | Both versions describe four: the public form, the position's inbound address, a job board's forwarding address and manual entry. A fifth path exists and is documented separately because it does not create an Application: the add-to-job dialog, which copies talents into positions (§10.3). |
+| The landing stage of an inbound message | One version stated that folded stages are excluded on every path. They are not excluded on the inbound-message path. Checked against the system and recorded in [state-machines.md](state-machines.md#13-choosing-the-landing-stage) and in §4.2 step 2. |
+| Whether the public form posts the acknowledgement message | One version said the stage template is posted at creation, the other that a computed stage sends nothing. Both are right about different paths: the public form **writes** the landing stage into the creation values, so the destination stage's template is applied at creation; an Application whose stage is only *computed* from the position sends nothing. §5.3 step 5 and §6.1 now state each case explicitly. |
+| Contact renaming on the public form | One version stated that the address inverse always renames the Contact. It renames a Contact only through the thread mechanism of §25, and only when that Contact was created on the same day. The address inverse itself renames the Contact when the applicant's name differs, which is why an application created by hand with a new name does rename its own Contact. Both behaviours are now stated, in §12 and §25. |
+| Who may create an employee | Both versions agree: the control is offered to the Human Resources Officer privilege, and a bare Interviewer is refused with `You are not allowed to perform this action.` |
+| The order of the two writes at hire | One version described a single write. Two writes occur, and the second one re-imposes the position, the job title, the department, the work address and the work telephone number after the Employee's own creation defaults have run. §8.3 states why the order is observable. |

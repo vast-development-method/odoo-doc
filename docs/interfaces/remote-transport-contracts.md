@@ -584,15 +584,24 @@ Programmatic management is disabled by default. It is enabled for system users a
 
 ### 6.5 Login-attempt guard
 
-A per-worker counter keyed by the source network address:
+The guard is a per-worker counter keyed by the source network address. It holds, per source address, the number of consecutive failures and the instant of the last one. An attempt is
+on cooldown when all three of the following hold:
 
+1. The parameter `base.login_cooldown_after`, the minimum number of failures, is not zero. A value of zero disables the
+   guard entirely. Its default is 5.
+2. The recorded number of failures is greater than or equal to that minimum.
+3. Less than the parameter `base.login_cooldown_duration` (default 60 seconds) has elapsed since the recorded instant of
+   the last failure.
+
+```formula
+elapsed since last failure (seconds) = current instant (seconds) − last failure instant (seconds)
+on cooldown = (minimum failures ≠ 0) and (recorded failures ≥ minimum failures) and (elapsed since last failure < cooldown duration)
 ```
-on_cooldown(failures, previous_failure_instant):
-    minimum := parameter base.login_cooldown_after   (default 5, 0 disables)
-    if minimum = 0: return false
-    delay := parameter base.login_cooldown_duration  (default 60 seconds)
-    return failures ≥ minimum AND (now − previous_failure_instant) < delay
-```
+
+Worked example. The parameters are at their defaults. Five wrong passwords arrive from one address, the last at second
+1000. A sixth attempt at second 1030 finds five recorded failures and an elapsed time of 30 seconds, which is less than
+60, therefore it is on cooldown and is refused without the credential being evaluated. An attempt at second 1061 finds
+an elapsed time of 61 seconds, which is not less than 60, therefore the credential is evaluated normally.
 
 While on cooldown, the attempt is not even evaluated: it fails with `"Too many login failures, please wait a bit before trying again."` and is logged. A successful attempt clears the counter; a failed one increments it and records the instant. The counter is not shared between workers; it is a brute-force dampener, not a distributed lock.
 
@@ -605,27 +614,39 @@ While on cooldown, the attempt is not even evaluated: it fails with `"Too many l
 
 ### 7.1 Token computation
 
+A token is produced in four steps:
+
+1. The expiry instant is the current instant in seconds plus the requested lifetime in seconds; when no lifetime is
+   requested the default lifetime is 31 536 000 seconds (one year).
+2. The signed message is the first 42 characters of the session identifier followed by the expiry written as decimal
+   digits.
+3. The signature is the hexadecimal message authentication code of that message, using a 160-bit digest, keyed by the
+   database secret.
+4. The token is the signature, then the single character `o`, then the expiry written as decimal digits.
+
+```formula
+expiry instant (seconds) = current instant (seconds) + requested lifetime (seconds, default 31 536 000)
 ```
-expiry     := now_in_seconds + (requested_lifetime or 31 536 000)     # one year by default
-message    := first_42_characters_of(session_identifier) + decimal(expiry)
-signature  := hexadecimal_hmac_sha1(key = database_secret, message)
-token      := signature + "o" + decimal(expiry)
-```
+
+Worked example. The current instant is 1 800 000 000 seconds and no lifetime is requested, therefore the expiry instant
+is 1 800 000 000 + 31 536 000 = 1 831 536 000. The signed message is the 42-character stable part of the session
+identifier followed by `1831536000`, and the token is the resulting signature followed by `o1831536000`.
 
 The database secret is a stored parameter; when it is missing, token generation and validation both fail with `"CSRF protection requires a configured database secret"`. The far expiry acts as a salt against compression-based attacks even when no lifetime is requested.
 
 ### 7.2 Validation
 
-```
-validate(token):
-    if token is empty: reject
-    signature, _, expiry := rpartition(token, "o")
-    if expiry is present:
-        if expiry is not an integer: reject
-        if expiry < now_in_seconds: reject
-    expected := hexadecimal_hmac_sha1(database_secret, first_42_characters_of(session_identifier) + expiry)
-    accept when constant_time_equal(signature, expected)
-```
+Validation is a numbered procedure; any step that rejects ends it.
+
+1. An empty token is rejected.
+2. The token is split at its **last** occurrence of the character `o`: what precedes it is the presented signature, what
+   follows it is the presented expiry.
+3. When an expiry is present and it is not a sequence of decimal digits, the token is rejected.
+4. When an expiry is present and it is earlier than the current instant in seconds, the token is rejected.
+5. The expected signature is recomputed from the first 42 characters of the current session identifier followed by the
+   presented expiry, keyed by the database secret.
+6. The presented signature and the expected signature are compared in constant time. Equal accepts, different
+   rejects.
 
 Because only the stable 42 characters take part, a soft rotation does not invalidate outstanding tokens; a hard rotation does.
 
@@ -637,7 +658,7 @@ A token is required when **all** of the following hold: the endpoint uses the pa
 2. The parameter named `csrf_token` is removed from the parameters and validated.
 3. On failure the request is answered with `400` and the body `"Session expired (invalid CSRF token)"`. A token that was present but invalid is logged as `"CSRF validation failed on path '<path>'"`; a missing token is logged with the long explanatory warning that names the three remedies (embed the token in the form, read it from the client bundle, or disable the requirement for a genuinely external caller and protect the endpoint otherwise).
 
-Endpoints that disable the requirement on purpose are exactly those called by third parties that cannot hold a token: the database-management endpoints and the legacy markup remote call endpoints (section 9).
+Endpoints that disable the requirement on purpose are exactly those called by third parties that cannot hold a token: the database-management endpoints (section 9.17) and the markup-encoded remote call endpoints (section 10.1). The complete list of the sixty-five page-transport endpoints that disable it is characterised in [`endpoint-catalog.md`](endpoint-catalog.md).
 
 ### 7.4 Why the remote call transports do not use a token
 
@@ -867,11 +888,42 @@ Rules a replacement must reproduce:
 
 ### 9.6 The data operations
 
-The four data operations of the desktop client are entity operations reached through the generic dispatch. Their transport form is given here; their full contract, including the read specification grammar, is in [`service-layer.md`](service-layer.md).
+The data operations are entity operations reached through the generic dispatch (section 8), not endpoints of their own.
+Their transport form — which arguments are positional and which are named — is given here; their full contract,
+including the read specification grammar, is in [`service-layer.md`](service-layer.md).
+
+**The plain entity operations.** Every integration uses these; the desktop client uses them too, beside the composites
+below. The record keys, when the operation is record-level, are always the **first** positional argument and are
+consumed by the dispatch (section 8.3).
+
+| Operation | Positional arguments | Named arguments | Result on the wire |
+|---|---|---|---|
+| `create` | the values mapping, or the array of values mappings | none | An integer key for a single mapping, an array of keys for an array (section 8.5). |
+| `read` | the record keys, then optionally the field list | `fields`, `load` | An array of payloads, one per record that still exists. |
+| `write` | the record keys, then the values mapping | none | `true`. |
+| `unlink` | the record keys | none | `true`. |
+| `copy` | the record keys | `default` | The array of keys of the copies. |
+| `search` | none (entity-level), then the filter | `domain`, `offset`, `limit`, `order` | The array of matching keys, in order. |
+| `search_count` | none (entity-level), then the filter | `domain`, `limit` | An integer. |
+| `search_read` | none (entity-level) | `domain`, `fields`, `offset`, `limit`, `order` | An array of payloads. |
+| `name_search` | none (entity-level) | `name`, `domain`, `operator`, `limit` | An array of `[key, display name]` pairs. |
+| `fields_get` | none (entity-level) | `allfields`, `attributes` | A mapping from field name to its attributes. |
+| `default_get` | none (entity-level), then the field list | `fields` | A mapping from field name to its default value. |
+| `formatted_read_group` | none (entity-level) | `domain`, `groupby`, `aggregates`, `having`, `offset`, `limit`, `order` | An array of group objects. |
+| `has_access` | the record keys, then the operation name | `operation` | `true` or `false`. |
+| `get_metadata` | the record keys | none | One entry per record. |
+| `export_data` | the record keys, then the field paths | `fields_to_export` | `{"datas": <matrix>}`. |
+| `load` | none (entity-level) | `fields`, `data` | `{"ids": …, "messages": […], "nextrow": <integer>}`. |
+
+An operation that this specification does not list is still callable through the generic dispatch when it satisfies the
+five conditions of section 8.2; the catalogue of the business operations each entity adds is in
+[`../references/operation-index.md`](../references/operation-index.md).
+
+**The composites the desktop client uses.**
 
 | Operation | Positional arguments | Named arguments | Result |
 |---|---|---|---|
-| `web_search_read` | none (entity-level) | `domain`, `specification`, `offset` (default 0), `limit`, `order`, `count_limit` | `{"length": <integer>, "records": [<record payload>]}` |
+| `web_search_read` | none (entity-level) | `domain`, `specification`, `offset` (default 0), `limit`, `order`, `count_limit` | `{"length": <integer>, "records": [<payload of one record>]}` |
 | `web_read` | the record keys | `specification` | An array of record payloads, one per existing record, in the order of the keys. |
 | `web_save` | the record keys (empty for a creation) | `vals`, `specification`, `next_id` | An array with one record payload. |
 | `web_read_group` | none (entity-level) | `domain`, `groupby`, `aggregates`, `limit`, `offset`, `order`, `auto_unfold`, `opening_info`, `unfold_read_specification`, `unfold_read_default_limit`, `groupby_read_specification` | `{"groups": [<group payload>], "length": <integer>}` |
@@ -1105,7 +1157,7 @@ These endpoints are answered by the database-free routing table, therefore they 
 
 ## 10. The alternative remote call protocols
 
-Two additional entry points expose the same service layer with a stateless, password-based scheme. They exist for integrations written against the older conventions; new integrations use the direct remote call transport of section 3.3.
+Two additional entry points expose the same service layer with a stateless, password-based scheme: the caller sends the database name, the user key and the password on every call and no session is created. They are fully supported and a rebuild must serve them, because integrations depend on them; the direct remote call transport of section 3.3, which authenticates with an application key instead of a password, is the one to choose when a new integration is free to pick.
 
 ### 10.1 Shape
 
@@ -1237,28 +1289,32 @@ When the session holds a recording configuration and a database is selected, eve
 
 Every database-backed request and every remote call runs inside this loop:
 
+The loop runs at most five attempts, numbered one to five. Each attempt performs these steps in order:
+
+1. Run the request and flush its pending writes to the database. If both succeed, leave the loop and go to step 10.
+2. A failure that is not an integrity violation, an operational failure or a concurrency failure is propagated at once;
+   the loop does not catch it.
+3. If the database connection is already closed, propagate the failure; nothing can be replayed on it.
+4. Roll the transaction back.
+5. Reset the in-memory record state and discard the pending registry changes.
+6. Re-read the session from storage, because the failed attempt may have modified it.
+7. Rewind every uploaded file to its start. A file that cannot be rewound makes a replay impossible and the request
+   fails with `"Cannot retry request on input file '<name>' after serialization failure"`.
+8. Decide whether to retry:
+   - An integrity violation is translated into a validation failure and propagated; it is never retried.
+   - A failure that is neither a serialization failure, nor a deadlock, nor a lock timeout is propagated.
+   - On the fifth attempt, propagate.
+9. Otherwise wait a random duration, drawn uniformly between zero and two raised to the power of the attempt number,
+   in seconds, then start the next attempt.
+10. Commit the transaction, run the post-commit work, and emit the registry change signal.
+
+```formula
+maximum wait after attempt number n (seconds) = 2 raised to the power of n
 ```
-for attempt in 1 .. 5:
-    try:
-        result := run()
-        flush pending writes to the database
-        break
-    except integrity violation, operational failure, concurrency failure:
-        if the connection is already closed: propagate
-        roll back the transaction
-        reset the in-memory state and the pending registry changes
-        reload the session from storage
-        rewind every uploaded file to its start
-        if the failure is an integrity violation:
-            translate it to a validation failure and propagate
-        if the failure is not a serialization failure, a deadlock or a lock timeout:
-            propagate
-        if attempt = 5:
-            propagate
-        sleep a random duration uniformly drawn from [0, 2^attempt) seconds
-commit
-signal registry changes
-```
+
+Worked example of the waiting times: after attempt 1 the wait is drawn from zero up to but not including 2 seconds,
+after attempt 2 from zero up to 4 seconds, after attempt 3 from zero up to 8 seconds, and after attempt 4 from zero up
+to 16 seconds. There is no wait after attempt 5, because the failure is propagated instead.
 
 Details a replacement must reproduce:
 

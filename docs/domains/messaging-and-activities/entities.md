@@ -829,7 +829,7 @@ Searching applies the same filter: rows assigned to the acting user always pass;
 For each activity, rendered in the **assignee's** language:
 
 - body: the shipped assignment template, which shows the activity type, the summary, the note and a button leading to the record;
-- subject: `"<record name>: <summary>" assigned to you`, where the summary falls back to the type name and then to the empty string;
+- subject: `"<the record name>: <summary>" assigned to you`, where the summary falls back to the type name and then to the empty string;
 - subtitles: `Activity: <type name>` (falling back to "Todo") and `Deadline: <due date formatted in the recipient's date format>`;
 - layout: the standard notification layout;
 - delivered through the notification operation, so it lands in the inbox or in the mailbox according to the recipient's preference.
@@ -2737,7 +2737,7 @@ One document to be printed and posted by an external service.
 | `state` | Selection, required, read-only, not copied | Default `pending`. `pending` ("In Queue"), `sent` ("Sent"), `error` ("Error"), `canceled` ("Cancelled"). |
 | `error_code` | Selection | One of: missing required fields, credit error, trial error, no price available, format error, unknown error, attachment error. |
 | `info_msg` | Rich text | The explanation shown to the user. |
-| `reference` | Text, computed, not stored, read-only | `<model>,<record identifier>`. |
+| `reference` | Text, computed, not stored, read-only | `<model>,<the record identifier>`. |
 | `message_id` | Link to Message, indexed when not empty | The conversation entry created when the letter was created. |
 | `notification_ids` | Sub-records: Notification | — |
 | `street`, `street2`, `zip`, `city` | Text | The address, **copied from the addressee at creation** so that a later change of the contact does not rewrite history. |
@@ -2870,3 +2870,280 @@ The attachment record also adopts the bus sender behavior, so its deletion can b
 ### 47.9 Window action view kind and view kind
 
 Both the window-action view list and the view kind gain the value `activity` ("Activity"), which is the calendar-like board of activities per record. Deleting the value cascades.
+
+---
+
+## 48. Behaviors and records shared with neighbouring domains
+
+The records of this section are used by this domain but are not all owned by it. Where another folder owns a record, the owning folder is named and only the part this domain depends on is specified here.
+
+### 48.1 Telephone behavior (abstract)
+
+Telephone behavior (`mail.thread.phone`, abstract). Adopts the Thread behavior. Adopted by every model that may be reached by a text message.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `phone_sanitized` | Text, computed, stored, computed with elevated rights | The record's telephone number in strict international form, derived from the first of the model's declared number fields that produces a valid value. Recomputed whenever any of those fields or the country source changes. |
+| `phone_sanitized_blacklisted` | Boolean, computed, not stored, computed with elevated rights | True when an active blocked number holds the same value. Readable only by internal users. |
+| `phone_blacklisted` | Boolean, computed, not stored | True when the blocked number is the record's telephone field rather than one of its other number fields. Readable only by internal users. |
+| `phone_mobile_search` | Text, not stored, search only | A pseudo-field that searches every declared number field plus the sanitized one, so a search for the international form finds a record storing the national form. |
+
+The model must declare its number fields; when it does not, searching aborts with "Missing definition of phone fields." and validation aborts with "Invalid primary phone field on model <model>". Searching with fewer than three characters aborts with "Please enter at least 3 characters when searching a Phone number."
+
+### 48.2 Blocked Number
+
+Blocked Number (`phone.blacklist`, table `phone_blacklist`). Adopts the Thread behavior. The telephone counterpart of the Blacklist Entry. It is used by this domain's text-message channel and by `../marketing-and-mass-mailing/`; the record itself is defined here because the text-message channel cannot work without it.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `number` | Text | Required, unique. The blocked number in strict international form. Tracked. |
+| `active` | Boolean | Default true. Tracked. Unblocking archives the row rather than deleting it, so the history of blocking and unblocking stays in its own conversation. |
+
+Uniqueness: the number — "Number already exists". Display name: the number. A value that cannot be parsed is refused with the parser error followed by " Please correct the number and try again."
+
+A record whose sanitized number is blocked is excluded from text-message sending when the exclusion switch is on, and the produced Text Message, if any, is cancelled with the suppressed-number failure type.
+
+### 48.3 Rating behaviors and the Rating record
+
+Ratings are owned by `../learning-surveys-and-gamification/`; the reference page is [../../references/entities/rating.rating.md](../../references/entities/rating.rating.md). Live chat is the only consumer inside this folder, and it depends on exactly the following.
+
+**Rating behavior** (`rating.mixin`, abstract), adopted by the Channel so that a live chat session can be rated:
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `rating_ids` | Sub-records: Rating | The ratings pointing at this record. Readable only by internal users. |
+| `rating_last_value` | Decimal with two decimals, computed, stored, averaged in reports | The value of the most recent consumed Rating, ordered by modification moment descending then identifier descending. |
+| `rating_last_feedback` | Long text, computed | The comment of that rating. |
+| `rating_last_image` | Image, computed | The face image of that rating. |
+| `rating_last_text` | Selection, computed, stored on the Channel for reporting | `top` (Happy), `ok` (Neutral), `ko` (Unhappy), `none` (Not Rated yet). |
+| `rating_count` | Integer, computed, not stored | The number of ratings of the record whose value is at least 1. |
+| `rating_avg` | Decimal with two decimals, computed, not stored | The arithmetic mean of those values. |
+| `rating_avg_text` | Selection, computed from the mean | The grade of the average, using the thresholds of [calculations.md](calculations.md), section 33. |
+| `rating_percentage_satisfaction` | Decimal, computed, not stored | The share of consumed ratings that are the top grade, or −1 when there is none. |
+
+**Rating parent behavior** (`rating.parent.mixin`, abstract), adopted by the Live Chat Channel so that the ratings of its sessions roll up:
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `rating_ids` | Sub-records: Rating | The ratings whose parent model is this model and whose parent record is this record. |
+| `rating_percentage_satisfaction` | Integer, computed, not stored | The share of consumed child ratings that are the top grade, or −1. |
+| `rating_count` | Integer, computed, not stored | The number of consumed child ratings. |
+| `rating_avg` | Decimal, computed, not stored | Their mean. |
+| `rating_avg_percentage` | Decimal, computed, not stored | The mean times 20, that is the five-point scale mapped onto a hundred-point scale. |
+
+**The Rating record** (`rating.rating`, table `rating_rating`) carries, of the parts this domain relies on: the rated model and record with their display name; the parent model and record with their display name; the rated party (the operator's contact for a live chat session); the party giving the rating; the value from 0 to 5; the face image and its address; the textual grade; the free-text comment; the Message that carries the rating in the conversation; the internal flag; the access token embedded in the rating link; the consumed flag; the moment the request was sent; and the public answer with its author and its moment. The value must lie between zero and five — "Rating should be between 0 and 5".
+
+When the field a record uses as its display name changes, the display name stored on its ratings is recomputed; when the field naming the rating parent changes, the parent stored on its ratings is rewritten. Deleting a rating deletes its Message when that message carries nothing else. Resetting a rating clears the value, the comment, the consumed flag and the grade so a new request can reuse the row.
+
+### 48.4 Contact Enrichment
+
+Contact Enrichment (`res.partner.iap`, table `res_partner_iap`). Present with the electronic-mail client plugin capability. It is a side table of Contact holding the answer of the external company-enrichment service, so the same company is never enriched twice and the heavy answer document does not sit on the Contact itself.
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `partner_id` | Link to Contact | Required. On deletion, the row is deleted. Unique — the refusal a rebuild shows is "Only one enrichment record is allowed per contact". |
+| `iap_search_domain` | Text | The key the enrichment was requested with: the address domain preceded by the at sign for a company domain, and the whole address for a generic mailbox provider. |
+| `iap_enrich_info` | Long text, read-only | The answer of the enrichment service, kept as a nested structure serialized to text. |
+
+Contact gains two computed, unstored fields that read and write this row: the enrichment answer and the search key. Writing either on a Contact updates the existing row or creates one; creating a Contact with either value creates the row in the same step.
+
+### 48.5 Publisher announcement exchange
+
+Publisher announcement exchange (`publisher_warranty.contract`, abstract). It stores nothing. Once a week a scheduled job contacts the publisher announcement service and applies the answer, as specified in [workflows.md](workflows.md), section 26, and in [business-rules.md](business-rules.md), section 27. Its only effect inside this domain is that the announcements it receives become ordinary Messages in the company-wide Channel.
+
+### 48.6 Websocket handler
+
+Websocket handler (`ir.websocket`, abstract). Owned by `../platform-foundation/`; this domain gives it the three operations the event bus needs: building the list of channels a client may subscribe to (section 6.3 of [interfaces.md](interfaces.md)), updating the Presence of the connected party, and clearing that Presence when the connection closes.
+
+### 48.7 Website records touched by live chat
+
+Owned by `../website-and-storefront/`.
+
+| Record | What this domain adds |
+|---|---|
+| Website | The Live Chat Channel whose widget the site serves. |
+| Website Visitor | The operator of the visitor's most recent open session, that operator's name, the visitor's live chat sessions and their count. Merging two visitors moves the sessions to the surviving one. An operator may send a chat request to one or more visitors, which creates a session already carrying the operator and marked as pending on the visitor's side; a request to visitors who are no longer reachable is refused with "Recipients are not available. Please refresh the page to get latest visitors status.", and a request on a site with no entry point with "No Livechat Channel allows you to send a chat request for website <site>." |
+| Website Page | Cached pages are post-processed so the chat widget loader is injected. |
+
+---
+
+## 49. Fields this domain adds that the first half did not list
+
+### 49.1 Further fields of the Message
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `website_message_ids` | Sub-records: Message, on the thread behavior | The messages of the record whose type is comment, incoming electronic mail or outgoing electronic mail. This is the list a public-facing conversation widget shows, so a note and a tracking entry can never appear on a public page. |
+| `message_has_sms_error` | Boolean, computed, not stored, on the thread behavior | Present with the text-message capability. True when a text-message Notification of a message of this record failed and the acting contact is its author. |
+| `has_sms_error` | Boolean, computed, not stored | The same on the Message itself. |
+| `snailmail_error` | Boolean, computed, not stored | Present with the postal capability. True when a Postal Letter of this message is in the error state. |
+| `letter_ids` | Sub-records: Postal Letter | The letters produced from this message. |
+| `message_type` extra values | Selection | The text-message capability adds `sms` ("SMS"), the postal capability adds `snailmail` ("Snailmail"). Uninstalling the text-message capability converts every message of the type `sms` back to `comment`. |
+| audit-trail companions | computed, not stored | Where an accounting capability is present, the Message exposes a plain-text summary of its tracking values and the audited record resolved from its model and record identifier, plus a flag saying the message belongs to a restricted audit trail and may not be deleted. |
+
+### 49.2 Further fields of the Notification
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| `sms_id_int` | Integer, indexed when not empty | The identifier of the Text Message as a plain number, so the Text Message row may be deleted without cascading and a late delivery report still finds its target. |
+| `sms_id` | Link to Text Message, computed, not stored | Resolved from that number when the channel is the text-message one. |
+| `sms_tracker_ids` | Sub-records: Text Message Tracker | The trackers waiting for a delivery report. |
+| `sms_number` | Text | The number actually used. Readable only by internal users. |
+| `letter_id` | Link to Postal Letter, indexed when not empty | On deletion, the row is deleted. |
+
+The displayed failure reason is the label of the failure type; when the type is the unknown one it is "Unknown error: <technical reason>", or simply "Unknown error" when no reason was captured.
+
+### 49.3 Further behavior of the Follower
+
+Creating, modifying or deleting a Follower invalidates the cached message and notification counters of the followed records, because a follower change alters who may read the record's messages.
+
+### 49.4 Further behavior of the main attachment behavior
+
+After a message is posted with attachments, the main attachment is set when it is not already set. Among the new attachments a portable document is preferred, then an image, then the first one. A forced update replaces an existing main attachment. A caller may exclude attachments whose content is a structured markup document.
+
+### 49.5 Further behavior of the Link Preview
+
+The feature is switched on by a system parameter. A per-host throttle limits how many previews are fetched from one host inside the throttling window. A link pointing at the installation's own base address is never previewed. Hiding or removing a preview broadcasts the change on the message's channel.
+
+### 49.6 Further rules on the Incoming Mail Server
+
+Confirming the connection reports, in order of what went wrong: "Invalid server name!\n <details>", "No response received. Check server information.\n <details>", "Server replied with following exception:\n <details>", "An SSL exception occurred. Check SSL/TLS configuration on server port.\n <details>". Using an archived server aborts with "The server "<name>" cannot be used because it is archived." Confirming the first server activates the polling job and sets its interval.
+
+### 49.7 Further rules on the Outgoing Mail Server
+
+Forcing a personal relay is refused with "The server "<name>" cannot be forced as it belongs to a user.", or "The server "<name>" cannot be forced as it belongs to a user and is archived." for an archived one, or "The server "<name>" cannot be forced as the owner does not use it anymore." when the owner's address no longer matches. Duplicating a personal relay clears the owner so the copy is usable. The default bounce address and the default sender address are resolved from the alias domain of the sending company.
+
+### 49.8 Further rules on the model registry entry and the field registry entry
+
+Only a custom model may have the three thread flags changed — "Only custom models can be modified." — and none of them may be switched off once on: "Field "Mail Thread" cannot be changed to "False".", "Field "Mail Activity" cannot be changed to "False".", "Field "Mail Blacklist" cannot be changed to "False"." Deleting a model deletes its followers, its messages and its activities. Deleting a tracked field fills the description snapshot of its existing Tracking Values so the history stays readable.
+
+### 49.9 Further rules on the User
+
+- Archiving or deleting a user unsubscribes the related contact from every group-restricted channel, unless another active user of the same contact still satisfies the group.
+- Deleting a portal user adds that user's address to the suppression list and logs a note on the contact explaining why; with the telephone capability the number is blocked as well.
+- A sensitive account change — the address, the login, the password — sends a security alert message to the user; an address change sends it to the **previous** address.
+
+### 49.10 Further rules on the Contact
+
+- **Find or create from an address**: the contact whose normalized address matches is returned; when none matches, a contact is created with the display name and the address parsed from the input. An input with no usable address aborts with "An email is required for find_or_create to work" and a malformed one with "<address> is not recognized as a valid email. This is required to create a new customer."
+- **Mention suggestions** prioritize the contacts of internal users, then the others; inside a channel only members, or contacts satisfying the authorization group, may be mentioned.
+- **Invitation suggestions** return the contacts that can actually be invited to a given channel, excluding current members and, for a group-restricted channel, contacts whose users are not in the authorization group.
+- **Scoped tokens**: a Contact exposes a token granting read access to its presence status alone, and a token proving that it may be mentioned. These are what let a guest see an operator's status without gaining any other access.
+- **Merging** two contacts logs the merge in the surviving contact's conversation and moves the conversations.
+
+---
+
+## Reconciliation notes
+
+1. **The message preview length.** One source version stated that the preview is capped at 100 characters with a trailing " [...]" marker; the other stated 190. The implementation shortens to 190 characters, the marker included, while an explanatory comment beside it still says 100. 190 is the observable behaviour and is what section 2 states. The mismatch between the comment and the code is recorded as a **compatibility finding** in [calculations.md](calculations.md), section 30; a corrected behaviour would make the comment and the constant agree, and a rebuild that must match the current output uses 190.
+2. **The unread counter of a Channel Member.** One version defined the counter as "messages at or above the separator that the member did not write"; the other as "messages at or above the separator whose type is neither a system notification nor a user-specific notification". The second is the observable rule; the author's own messages are excluded only because the posting hook moves the author's separator past them. Section 35 keeps the observable rule.
+3. **The display name of a Channel with no name.** One version joined the names of every other member; the other took the first three members by identifier and appended "1 other" or "<n> others" above three. The second is the observable rule and is what section 34 states.
+4. **The pin rule of a Channel Member.** One version compared with a strict "earlier than"; the observable comparison is "at or after", so a last-interest moment exactly equal to the unpin moment counts as pinned. Section 35 states the comparison with "at or after".
+5. **Naming.** One version replaced every transport name with a spelled-out identifier of its own invention. This folder reproduces the transport names, because they are contractual: an integration, an external identifier and a stored selection value all depend on them. Every reproduced name carries its full name in words on first use, and the generated reference page of each entity is linked from the entity's own section.
+6. **Ratings, blocked numbers and the enrichment side table.** One version listed these as entities of this domain. Ratings belong to `../learning-surveys-and-gamification/` and are specified here only to the extent live chat depends on them; the blocked number and the enrichment side table have no other home and are specified here in full.
+7. **Sequence numbering of a chatbot step.** One version said a step created together with its script is numbered from one; the observed rule is that steps created for one script are numbered consecutively from the current maximum plus one, or from zero when the script has no step, and an explicitly supplied sequence wins and resets the counter. Section 41.2 states the observed rule.
+
+---
+
+## 50. Generated reference pages
+
+Every entity this document specifies has a generated reference page carrying its machine-read field list, its constraints and its extracted messages. The pages are linked here once, in transport-name order, so a reader can jump from any section of this document to the raw definition. The generated pages follow the same documentation rules as this one, with the two accommodations that apply to generated material.
+
+| Entity | Transport name | Reference page |
+|---|---|---|
+| Event Bus Entry | `bus.bus` | [../../references/entities/bus.bus.md](../../references/entities/bus.bus.md) |
+| Bus sender behavior | `bus.listener.mixin` | [../../references/entities/bus.listener.mixin.md](../../references/entities/bus.listener.mixin.md) |
+| Chatbot Message | `chatbot.message` | [../../references/entities/chatbot.message.md](../../references/entities/chatbot.message.md) |
+| Chatbot Script | `chatbot.script` | [../../references/entities/chatbot.script.md](../../references/entities/chatbot.script.md) |
+| Chatbot Script Answer | `chatbot.script.answer` | [../../references/entities/chatbot.script.answer.md](../../references/entities/chatbot.script.answer.md) |
+| Chatbot Script Step | `chatbot.script.step` | [../../references/entities/chatbot.script.step.md](../../references/entities/chatbot.script.step.md) |
+| Digest | `digest.digest` | [../../references/entities/digest.digest.md](../../references/entities/digest.digest.md) |
+| Digest Tip | `digest.tip` | [../../references/entities/digest.tip.md](../../references/entities/digest.tip.md) |
+| Call History | `discuss.call.history` | [../../references/entities/discuss.call.history.md](../../references/entities/discuss.call.history.md) |
+| Channel | `discuss.channel` | [../../references/entities/discuss.channel.md](../../references/entities/discuss.channel.md) |
+| Channel Member | `discuss.channel.member` | [../../references/entities/discuss.channel.member.md](../../references/entities/discuss.channel.member.md) |
+| Call Session | `discuss.channel.rtc.session` | [../../references/entities/discuss.channel.rtc.session.md](../../references/entities/discuss.channel.rtc.session.md) |
+| Favorite Animated Image | `discuss.gif.favorite` | [../../references/entities/discuss.gif.favorite.md](../../references/entities/discuss.gif.favorite.md) |
+| Voice Metadata | `discuss.voice.metadata` | [../../references/entities/discuss.voice.metadata.md](../../references/entities/discuss.voice.metadata.md) |
+| Incoming Mail Server | `fetchmail.server` | [../../references/entities/fetchmail.server.md](../../references/entities/fetchmail.server.md) |
+| Live Chat Channel | `im_livechat.channel` | [../../references/entities/im_livechat.channel.md](../../references/entities/im_livechat.channel.md) |
+| Live Chat Member History | `im_livechat.channel.member.history` | [../../references/entities/im_livechat.channel.member.history.md](../../references/entities/im_livechat.channel.member.history.md) |
+| Live Chat Rule | `im_livechat.channel.rule` | [../../references/entities/im_livechat.channel.rule.md](../../references/entities/im_livechat.channel.rule.md) |
+| Conversation Tag | `im_livechat.conversation.tag` | [../../references/entities/im_livechat.conversation.tag.md](../../references/entities/im_livechat.conversation.tag.md) |
+| Expertise | `im_livechat.expertise` | [../../references/entities/im_livechat.expertise.md](../../references/entities/im_livechat.expertise.md) |
+| Live Chat Session Report | `im_livechat.report.channel` | [../../references/entities/im_livechat.report.channel.md](../../references/entities/im_livechat.report.channel.md) |
+| Outgoing Mail Server | `ir.mail_server` | [../../references/entities/ir.mail_server.md](../../references/entities/ir.mail_server.md) |
+| Websocket handler | `ir.websocket` | [../../references/entities/ir.websocket.md](../../references/entities/ir.websocket.md) |
+| Activity | `mail.activity` | [../../references/entities/mail.activity.md](../../references/entities/mail.activity.md) |
+| Activity behavior | `mail.activity.mixin` | [../../references/entities/mail.activity.mixin.md](../../references/entities/mail.activity.mixin.md) |
+| Activity Plan | `mail.activity.plan` | [../../references/entities/mail.activity.plan.md](../../references/entities/mail.activity.plan.md) |
+| Activity Plan Template | `mail.activity.plan.template` | [../../references/entities/mail.activity.plan.template.md](../../references/entities/mail.activity.plan.template.md) |
+| Activity Schedule window | `mail.activity.schedule` | [../../references/entities/mail.activity.schedule.md](../../references/entities/mail.activity.schedule.md) |
+| Activity Schedule Line | `mail.activity.schedule.line` | [../../references/entities/mail.activity.schedule.line.md](../../references/entities/mail.activity.schedule.line.md) |
+| Activity Type | `mail.activity.type` | [../../references/entities/mail.activity.type.md](../../references/entities/mail.activity.type.md) |
+| Alias | `mail.alias` | [../../references/entities/mail.alias.md](../../references/entities/mail.alias.md) |
+| Alias Domain | `mail.alias.domain` | [../../references/entities/mail.alias.domain.md](../../references/entities/mail.alias.domain.md) |
+| Alias behavior, required | `mail.alias.mixin` | [../../references/entities/mail.alias.mixin.md](../../references/entities/mail.alias.mixin.md) |
+| Alias behavior, optional | `mail.alias.mixin.optional` | [../../references/entities/mail.alias.mixin.optional.md](../../references/entities/mail.alias.mixin.optional.md) |
+| Blacklist Entry | `mail.blacklist` | [../../references/entities/mail.blacklist.md](../../references/entities/mail.blacklist.md) |
+| Blacklist Removal window | `mail.blacklist.remove` | [../../references/entities/mail.blacklist.remove.md](../../references/entities/mail.blacklist.remove.md) |
+| Assistant bot behavior | `mail.bot` | [../../references/entities/mail.bot.md](../../references/entities/mail.bot.md) |
+| Canned Response | `mail.canned.response` | [../../references/entities/mail.canned.response.md](../../references/entities/mail.canned.response.md) |
+| Composer | `mail.compose.message` | [../../references/entities/mail.compose.message.md](../../references/entities/mail.compose.message.md) |
+| Composer behavior | `mail.composer.mixin` | [../../references/entities/mail.composer.mixin.md](../../references/entities/mail.composer.mixin.md) |
+| Follower | `mail.followers` | [../../references/entities/mail.followers.md](../../references/entities/mail.followers.md) |
+| Followers Edit window | `mail.followers.edit` | [../../references/entities/mail.followers.edit.md](../../references/entities/mail.followers.edit.md) |
+| Gateway Allowed Sender | `mail.gateway.allowed` | [../../references/entities/mail.gateway.allowed.md](../../references/entities/mail.gateway.allowed.md) |
+| Mailing Group | `mail.group` | [../../references/entities/mail.group.md](../../references/entities/mail.group.md) |
+| Mailing Group Member | `mail.group.member` | [../../references/entities/mail.group.member.md](../../references/entities/mail.group.member.md) |
+| Mailing Group Message | `mail.group.message` | [../../references/entities/mail.group.message.md](../../references/entities/mail.group.message.md) |
+| Mailing Group Rejection window | `mail.group.message.reject` | [../../references/entities/mail.group.message.reject.md](../../references/entities/mail.group.message.reject.md) |
+| Mailing Group Moderation Rule | `mail.group.moderation` | [../../references/entities/mail.group.moderation.md](../../references/entities/mail.group.moderation.md) |
+| Guest | `mail.guest` | [../../references/entities/mail.guest.md](../../references/entities/mail.guest.md) |
+| Interactive Connectivity Server | `mail.ice.server` | [../../references/entities/mail.ice.server.md](../../references/entities/mail.ice.server.md) |
+| Link Preview | `mail.link.preview` | [../../references/entities/mail.link.preview.md](../../references/entities/mail.link.preview.md) |
+| Outgoing Mail | `mail.mail` | [../../references/entities/mail.mail.md](../../references/entities/mail.mail.md) |
+| Message | `mail.message` | [../../references/entities/mail.message.md](../../references/entities/mail.message.md) |
+| Message Link Preview | `mail.message.link.preview` | [../../references/entities/mail.message.link.preview.md](../../references/entities/mail.message.link.preview.md) |
+| Message Reaction | `mail.message.reaction` | [../../references/entities/mail.message.reaction.md](../../references/entities/mail.message.reaction.md) |
+| Message Notification Schedule | `mail.message.schedule` | [../../references/entities/mail.message.schedule.md](../../references/entities/mail.message.schedule.md) |
+| Message Subtype | `mail.message.subtype` | [../../references/entities/mail.message.subtype.md](../../references/entities/mail.message.subtype.md) |
+| Message Translation | `mail.message.translation` | [../../references/entities/mail.message.translation.md](../../references/entities/mail.message.translation.md) |
+| Notification | `mail.notification` | [../../references/entities/mail.notification.md](../../references/entities/mail.notification.md) |
+| Presence | `mail.presence` | [../../references/entities/mail.presence.md](../../references/entities/mail.presence.md) |
+| Push Notification | `mail.push` | [../../references/entities/mail.push.md](../../references/entities/mail.push.md) |
+| Push Device | `mail.push.device` | [../../references/entities/mail.push.device.md](../../references/entities/mail.push.device.md) |
+| Render behavior | `mail.render.mixin` | [../../references/entities/mail.render.mixin.md](../../references/entities/mail.render.mixin.md) |
+| Scheduled Message | `mail.scheduled.message` | [../../references/entities/mail.scheduled.message.md](../../references/entities/mail.scheduled.message.md) |
+| Template | `mail.template` | [../../references/entities/mail.template.md](../../references/entities/mail.template.md) |
+| Template Preview | `mail.template.preview` | [../../references/entities/mail.template.preview.md](../../references/entities/mail.template.preview.md) |
+| Template Reset window | `mail.template.reset` | [../../references/entities/mail.template.reset.md](../../references/entities/mail.template.reset.md) |
+| Thread behavior | `mail.thread` | [../../references/entities/mail.thread.md](../../references/entities/mail.thread.md) |
+| Blacklist behavior | `mail.thread.blacklist` | [../../references/entities/mail.thread.blacklist.md](../../references/entities/mail.thread.blacklist.md) |
+| Carbon-copy behavior | `mail.thread.cc` | [../../references/entities/mail.thread.cc.md](../../references/entities/mail.thread.cc.md) |
+| Main attachment behavior | `mail.thread.main.attachment` | [../../references/entities/mail.thread.main.attachment.md](../../references/entities/mail.thread.main.attachment.md) |
+| Telephone behavior | `mail.thread.phone` | [../../references/entities/mail.thread.phone.md](../../references/entities/mail.thread.phone.md) |
+| Duration tracking behavior | `mail.tracking.duration.mixin` | [../../references/entities/mail.tracking.duration.mixin.md](../../references/entities/mail.tracking.duration.mixin.md) |
+| Tracking Value | `mail.tracking.value` | [../../references/entities/mail.tracking.value.md](../../references/entities/mail.tracking.value.md) |
+| Blocked Number | `phone.blacklist` | [../../references/entities/phone.blacklist.md](../../references/entities/phone.blacklist.md) |
+| Publisher announcement exchange | `publisher_warranty.contract` | [../../references/entities/publisher_warranty.contract.md](../../references/entities/publisher_warranty.contract.md) |
+| Rating behavior | `rating.mixin` | [../../references/entities/rating.mixin.md](../../references/entities/rating.mixin.md) |
+| Rating parent behavior | `rating.parent.mixin` | [../../references/entities/rating.parent.mixin.md](../../references/entities/rating.parent.mixin.md) |
+| Rating | `rating.rating` | [../../references/entities/rating.rating.md](../../references/entities/rating.rating.md) |
+| Contact Enrichment | `res.partner.iap` | [../../references/entities/res.partner.iap.md](../../references/entities/res.partner.iap.md) |
+| Role | `res.role` | [../../references/entities/res.role.md](../../references/entities/res.role.md) |
+| User Settings | `res.users.settings` | [../../references/entities/res.users.settings.md](../../references/entities/res.users.settings.md) |
+| User Settings Volume | `res.users.settings.volumes` | [../../references/entities/res.users.settings.volumes.md](../../references/entities/res.users.settings.volumes.md) |
+| Sending account verification window | `sms.account.code` | [../../references/entities/sms.account.code.md](../../references/entities/sms.account.code.md) |
+| Sending account registration window | `sms.account.phone` | [../../references/entities/sms.account.phone.md](../../references/entities/sms.account.phone.md) |
+| Sending account sender-name window | `sms.account.sender` | [../../references/entities/sms.account.sender.md](../../references/entities/sms.account.sender.md) |
+| Text Message Composer | `sms.composer` | [../../references/entities/sms.composer.md](../../references/entities/sms.composer.md) |
+| Text Message | `sms.sms` | [../../references/entities/sms.sms.md](../../references/entities/sms.sms.md) |
+| Text Message Template | `sms.template` | [../../references/entities/sms.template.md](../../references/entities/sms.template.md) |
+| Text Message Template Preview | `sms.template.preview` | [../../references/entities/sms.template.preview.md](../../references/entities/sms.template.preview.md) |
+| Text Message Template Reset window | `sms.template.reset` | [../../references/entities/sms.template.reset.md](../../references/entities/sms.template.reset.md) |
+| Text Message Tracker | `sms.tracker` | [../../references/entities/sms.tracker.md](../../references/entities/sms.tracker.md) |
+| Provider connection window | `sms.twilio.account.manage` | [../../references/entities/sms.twilio.account.manage.md](../../references/entities/sms.twilio.account.manage.md) |
+| Provider Number | `sms.twilio.number` | [../../references/entities/sms.twilio.number.md](../../references/entities/sms.twilio.number.md) |
+| Postal Letter | `snailmail.letter` | [../../references/entities/snailmail.letter.md](../../references/entities/snailmail.letter.md) |
+| Template reset behavior | `template.reset.mixin` | [../../references/entities/template.reset.mixin.md](../../references/entities/template.reset.mixin.md) |

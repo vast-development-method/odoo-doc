@@ -71,8 +71,9 @@ identity, 11 use the plug-in key, 5 use the invitation token and 4 use an applic
 
 On the page-or-file transport the anti-forgery token of a submitted form is verified on every method that is not a
 reading method, unless the endpoint switches the check off. Sixty-five page-or-file endpoints switch it off, and they
-are exactly the endpoints whose caller is not a browser of the current session: every payment provider notification and
-return address, the document exchange network callbacks, the tax identification verification callback, the text message
+are exactly the endpoints whose caller is not a browser of the current session: every payment provider notification
+address and return address, the document exchange network callbacks, the tax identification verification callback, the
+text message
 delivery reports, the fulfilment notification of the print-on-demand partner, the mobile and terminal payment callbacks,
 the inbound automation hook, the mailing list confirmation links, the periodic activity summary links, the module import
 endpoint, and the installation administration endpoints, which run before any session exists.

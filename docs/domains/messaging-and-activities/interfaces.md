@@ -33,7 +33,7 @@ These are the operations every other domain calls. The rule identifiers in the e
 | log an internal note | body, subject, author, attachments, tracking values | the created Message | a Message only; no notification at all | — |
 | log a note on a batch | one body per record, a shared subject, an author | the created Messages | Messages only | MSG-049 |
 | log a note rendered from a view | a view reference, the render values, the message type | the created Message | renders the body first, then logs | MSG-043 |
-| post from a source | a Template or a view, plus the posting parameters | the created Messages | renders the body, then posts | MSG-043, MSG-097 to MSG-101 |
+| post from a source | a Template or a view, plus the posting parameters | the created Messages | renders the body, then posts | MSG-043, MSG-098 to MSG-101 |
 | mail from a source | a Template or a view, plus the mailing parameters | the created Outgoing Mails | renders per record and queues, without posting | same |
 | subscribe | contacts, optional subtypes | true or false | Follower rows created or rewritten | MSG-054 |
 | unsubscribe | contacts | nothing | Follower rows deleted | MSG-055 |
@@ -49,7 +49,7 @@ These are the operations every other domain calls. The rule identifiers in the e
 | receive a bounce | — | nothing | raises the record's bounce counter | — |
 | reset the bounce counter | — | nothing | sets the counter back to zero | — |
 
-**Source resolution errors**, shared by the two "from a source" operations, are quoted in [business-rules.md](business-rules.md), section 9, rules MSG-097 to MSG-101.
+**Source resolution errors**, shared by the two "from a source" operations, are quoted in [business-rules.md](business-rules.md), section 10, rules MSG-098 to MSG-101.
 
 ---
 
@@ -456,7 +456,7 @@ When the named layout cannot be found or renders empty, the raw message body is 
 
 | Body | Rendered with | Content |
 |---|---|---|
-| Responsible assignment notice | the record | "Dear <responsible name>," then "You have been assigned to the <model description or the word document> <record display name>." |
+| Responsible assignment notice | the record | "Dear <responsible name>," then "You have been assigned to the <model description or the word document> <the record display name>." |
 | Activity assignment notice | the activity and the model description | "Dear <assignee name>," then "<the person who created the activity> has just assigned you the following activity:" followed by a list carrying the document name with the model description in brackets, the summary when there is one, and the due date. |
 | Activity completion notice | the activity, the feedback text and the "different assignee" flag | The activity type icon and name followed by the word "done", then " (originally assigned to <assignee name>)" when somebody else closed it, then ": <summary>" when there is one; then, when the activity carried a note, the heading "Original note:" and the note; then, when feedback was given, the heading "Feedback:" and the feedback text with its line breaks preserved. |
 | Origin link notice | the record and the source records | "This <model description in lower case> has been created from:" followed by links to the source records separated by commas; the wording becomes "has been modified from:" when the caller says the record was edited rather than created. |

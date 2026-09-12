@@ -88,7 +88,7 @@ that are tracked in that thread are listed in the field table below.
 | `action_server_ids` | Actions | one to many | `ir.actions.server` (Server Action) through `base_automation_id` | no | none | computed by the rule in §1.6.1, depends on `model_id`; writable | yes | The ordered list of actions the rule runs. New lines created from the rule carry the usage value `base_automation` and the rule's record type as their default. |
 | `url` | Web address | single line text | — | no | none | computed by the formula in [`calculations.md`](calculations.md) §2.1, depends on `trigger` and `webhook_uuid` | no | The secret address an outside system calls for a webhook rule; empty for every other trigger. Its help text reads "Use this URL in the third-party app to call this webhook." |
 | `webhook_uuid` | Webhook universally unique identifier | single line text | — | no | a freshly generated universally unique identifier | — | yes | The secret path segment of the web address. Read-only in the interface, never copied when the rule is duplicated, and replaceable on demand. |
-| `record_getter` | Record getter | single line text | — | no | `model.env[payload.get('_model')].browse(int(payload.get('_id')))` | — | yes | The expression evaluated to decide which record an incoming webhook call applies to. Its help text reads "This code will be run to find on which record the automation rule should be run." |
+| `record_getter` | Record getter | single line text | — | no | the shipped expression described in [`calculations.md`](calculations.md) §2.2, which reads the record type from the payload key `_model`, reads the identifier from the payload key `_id`, converts it to a whole number and browses that record | — | yes | The expression evaluated to decide which record an incoming webhook call applies to. Its help text reads "This code will be run to find on which record the automation rule should be run." |
 | `log_webhook_calls` | Log Calls | boolean | — | no | false | — | yes | When set, every incoming webhook call — successful or not — writes a logging entry. |
 | `active` | Active | boolean | — | no | true | — | yes | When cleared the rule is hidden and never executes. Its help text reads "When unchecked, the rule is hidden and will not be executed." |
 | `trigger` | Trigger | selection | — | yes | none | computed to empty when `model_id` changes; writable | yes | The moment the rule reacts to. The nineteen values are listed in §1.4. Changes are recorded in the thread. |
@@ -309,7 +309,7 @@ specifies only what the automation package adds to it and what an automation rul
 | `mail_post` | Send Email | messaging | no | **no** |
 | `followers` | Add Followers | messaging | no | **no** |
 | `remove_followers` | Remove Followers | messaging | no | yes |
-| `sms` | Send SMS | messaging | no | yes |
+| `sms` | "Send SMS" | messaging | no | yes |
 
 The two "no" columns are enforced by the constraints in [`business-rules.md`](business-rules.md)
 §1.4 and §1.5.
@@ -699,7 +699,7 @@ will be installed as a consequence, followed by one button that installs them.
 2. Refuse with "The module is already installed." when the package's state is `installed`.
 3. Take every package the chosen package depends on, directly or indirectly.
 4. Keep the chosen package, plus those dependencies that are flagged as applications.
-5. Add, for each dependency, that dependency's own upstream dependencies.
+5. Add, for each of those dependencies, the packages it requires in turn, directly or indirectly.
 6. Return the accumulated set.
 
 ## 11.4 Operation
@@ -963,8 +963,8 @@ database, read with elevated rights, presented as the transport name and the rec
 
 | Operation | Behaviour |
 |---|---|
-| Toggle the archive switch | Writes the switch's new value onto the found record with elevated rights, and sets the execution details to `Archived <record type name> #<identifier>` or `Unarchived <record type name> #<identifier>`. Does nothing when the line has no record type or no identifier. |
-| Delete | Refuses when the line is already deleted. Otherwise deletes the found record with elevated rights, sets the execution details to `Deleted <record type name> #<identifier>`, and marks the line as deleted. |
+| Toggle the archive switch | Writes the switch's new value onto the found record with elevated rights, and sets the execution details to the word `Archived` or `Unarchived`, a space, the record type's display name, a space, a hash sign and the identifier. Does nothing when the line has no record type or no identifier. |
+| Delete | Refuses when the line is already deleted. Otherwise deletes the found record with elevated rights, sets the execution details to the word `Deleted`, a space, the record type's display name, a space, a hash sign and the identifier, and marks the line as deleted. |
 | Archive the selection | For each selected line that supports archiving and is currently active, clears the switch and applies it. |
 | Delete the selection | For each selected line that is not already deleted, deletes it. |
 | Open the record | Opens the found record's form. |

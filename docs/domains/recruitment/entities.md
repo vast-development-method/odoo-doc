@@ -165,7 +165,7 @@ never itself moved through a pipeline.
 All four fields below are readable and writable only by the Officer privilege and above.
 They are invisible to the Interviewer privilege: the interviewer form removes the whole
 group, and the field-level restriction means an interviewer's read of the record does not
-return them at all.
+include them at all.
 
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
@@ -230,6 +230,9 @@ The domain additionally protects two specific attribution records from deletion;
 | Bounce (`message_bounce`) | whole number | Counter of undeliverable messages sent to this address; provided by the blacklist mixin. |
 | Blacklist (`is_blacklisted`) | true or false | Derived, not stored. True when the normalised address is on the global blacklist. Provided by the blacklist mixin. |
 | Phone Blacklisted (`phone_sanitized_blacklisted`) | true or false | Derived, not stored. True when the sanitised number is on the telephone blacklist. Provided by the telephone mixin. |
+| Sanitized Number (`phone_sanitized`) | single line text | **Stored**, derived, read-only, computed with elevated rights. The international form of the telephone number produced by the telephone mixin from `partner_phone`. Empty when the number cannot be formatted. It is the number the blacklist is matched on and the number a text message is sent to. It is **not** the same field as `partner_phone_sanitized`, which falls back to the raw number; the two differ exactly when the number cannot be formatted. |
+| Phone Blacklisted (`phone_blacklisted`) | true or false | Derived, not stored, computed with elevated rights. True when the blacklisted number is the one held in `partner_phone`. |
+| Phone/Mobile (`phone_mobile_search`) | single line text | Not stored, usable only as a search key. Matches `partner_phone` and `phone_sanitized` after removing spaces, full stops, oblique strokes, brackets and hyphens, so that a recruiter can find a person whatever the punctuation of the number. |
 
 The Application also carries the full message-thread field set (followers, messages,
 unread counters, delivery-error counters, website messages), the full activity field set
@@ -484,6 +487,12 @@ When one or more Applications are written:
 | Trigram indexes | On the electronic mail address and on the normalised address, to make partial-string search fast. |
 | Sparse indexes | On the Contact, the telephone number, the sanitised telephone number, the professional network profile address, the Employee, the canonical pool copy and the main attachment; only non-empty values are indexed. |
 | Attachment content index | A separate trigram index over the extracted text content of attachments belonging to Applications, so that searching "resume's content" is fast. It is created on the attachment table, restricted to rows whose owning model is the Application entity, and uses the accent-insensitive form of the content when the database offers an indexable accent-stripping function. |
+| Ordering and filtering indexes | Single-column indexes exist on the stage, the Job Position, the interviewers, the last-stage-update moment, the manual sequence and the active flag; they support the default ordering and the standard filters. |
+
+There is **no uniqueness constraint of any kind on an Application**. The same person may
+apply any number of times to the same Job Position. Repetition is *reported* — by the
+application counter, by the live warning of the public form and by the duplicate list of
+the refusal dialog — and never prevented.
 
 ---
 
@@ -538,6 +547,8 @@ not receive the field at all when reading the record.
 | Employee Count (`employee_count`) | whole number | Derived, not stored, **not** privilege-restricted. Count of employees holding this position within the acting user's allowed companies, read with elevated rights. |
 | Alias (`alias_id`) | link to one Alias | The inbound electronic mail alias of the position. Required by the alias mixin. Deletion is restricted. Help text: *Email alias for this job position. New emails will automatically create new applicants for this job position.* |
 | Email Alias (`alias_email`) | single line text | Derived, not stored, read-only. The full inbound address. |
+| Alias Name (`alias_name`) | single line text | The local part of the inbound address, for example `sales-manager`. Held on the Alias record and surfaced on the position. Leaving it empty leaves the position without a working inbound address; applications must then arrive through the public form or be entered by hand. |
+| Alias Defaults (`alias_defaults`) | long text holding a set of default values | Held on the Alias record. The values stamped on every Application created from the address. Rebuilt by this domain at creation and whenever the department or the recruiter changes; see §3.6. |
 | Color Index (`color`) | whole number | Card colour. Not privilege-restricted. |
 | Is Favorite (`is_favorite`) | true or false | Derived, not stored, writable. True when the acting user is in the favourites list. Writing it adds or removes the acting user. Sorting by it is translated into a subquery over the favourites association table. |
 | Favorite User (`favorite_user_ids`) | link to many Login Users | Association table `job_favorite_user_rel`, columns `job_id` and `user_id`. Default at creation: the acting user — but see §3.4, where creation overrides this. |
@@ -557,12 +568,14 @@ not receive the field at all when reading the record.
 | Current Job Skill (`current_job_skill_ids`) | children (Job Skills) | Skills | Derived, not stored, writable. The required skills valid today. |
 | Skill (`skill_ids`) | link to many Skills | Skills | **Stored**, derived, read-only. The distinct required skills, for fast search. |
 | Matching Score(%) (`applicant_matching_score`) | decimal number | Skills | Derived, not stored. The match of one named Application against this position, used when browsing positions for a given person. The Application is named by the reading context flag `active_applicant_id`. Restricted to the Interviewer privilege. Formula in [calculations.md](calculations.md#82-position-to-applicant-match-score). |
-| Website description (`website_description`) | rich text | Public job pages | The rich content of the public page. Translated as rich text. Defaults to a shipped page skeleton. |
-| Process Details (`job_details`) | rich text | Public job pages | Complementary information shown on the application page. Translated. Defaults to a shipped block describing answer time, process and time to offer. |
+| Job Description (`description`) | rich text | Public job pages | The short summary shown on the public job list. The base field is widened by this companion so that it accepts translated rich text with attribute and form sanitisation switched off, which lets the visual editor place arbitrary blocks in it. |
+| Website description (`website_description`) | rich text | Public job pages | The rich content of the public detail page. Translated as rich text, with attribute and form sanitisation switched off. Defaults to a shipped page skeleton whose blocks are: the role summary, an evaluation block, the responsibilities, a *Must Have* list, a *Nice to have* list, a *What's great in the job?* block and a *What We Offer* block. |
+| Process Details (`job_details`) | rich text | Public job pages | Complementary information shown beside the application form. Translated. Its shipped default is a block reading, in order: *Time to Answer* — `2 open days`; *Process* — `1 Phone Call` then `1 Onsite Interview`; *Days to get an Offer* — `4 Days after Interview`. |
 | Visible on current website (`website_published`) | true or false | Public job pages | Whether the position is offered publicly. Tracked. Setting it also sets the generic publication flag; clearing it clears the generic flag. |
+| Published (`is_published`) | true or false | Public job pages | The generic publication flag of the page mixin. Kept in step with `website_published`: changing one on a form changes the other to the same value, and the *set open* operation of the mixin clears both. |
 | Published Date (`published_date`) | date | Public job pages | **Stored**, derived, read-only. Today's date while published; empty while unpublished. |
-| job URL (`full_url`) | single line text | Public job pages | Derived, not stored. The absolute address of the public page, built by joining the instance's base address with the relative page address, falling back to the job list path. |
-| Website URL (`website_url`) | single line text | Public job pages | Derived, not stored. The relative public path `/jobs/` followed by the position's readable identifier. |
+| Full job address (`full_url`) | single line text | Public job pages | Derived, not stored. The absolute address of the public page, built by joining the instance's base web address with the relative page address, falling back to the job list path `/jobs`. |
+| Website address (`website_url`) | single line text | Public job pages | Derived, not stored. The relative public path `/jobs/` followed by the position's readable identifier. |
 | Website (`website_id`) | link to one Website | Public job pages | Restricts the position to one website. Deletion restricted. |
 | Can Publish (`can_publish`) | true or false | Public job pages | Derived, not stored. Whether the acting user is allowed to publish. |
 | Search-engine metadata | several | Public job pages | Title, description, keywords, social image and the readable identifier name, from the shared metadata mixin. |
@@ -658,6 +671,10 @@ One stage attribute has a business consequence rather than a presentational one:
 | Grey Kanban Label (`legend_normal`) | single line text | Required, translated. Default *In Progress*. |
 | Is Warning Visible (`is_warning_visible`) | true or false | Derived, not stored. True when the stage **was** a hired stage, is being edited to no longer be one, and applications currently sit in it. The form uses it to warn the configurator that hire dates are about to be cleared. |
 
+The warning driven by *Is Warning Visible* reads, exactly:
+`All applications will lose their hired date and hired status.`
+It appears while the form is being edited, before the change is saved.
+
 ### 4.4 Default-value rule
 
 When a stage is created from a context that names a default Job Position — for example
@@ -668,11 +685,20 @@ inside a position's pipeline is global by default, not restricted to that positi
 configurator must restrict it explicitly. The flag exists for the places that do want the
 restriction.
 
-### 4.5 Deletion
+### 4.5 Deletion, duplication and reordering
 
 A stage referenced by any Application cannot be deleted: the Application's stage reference
-is declared with restricted deletion. The configurator must first move or delete the
-applications.
+is declared with restricted deletion. The configurator must first move, archive or delete
+the applications.
+
+Duplicating a stage copies every field, including the position restriction and the message
+template; stage names are not unique, so the copy is accepted.
+
+Raising or lowering the sequence changes which stage counts as the first stage of a
+position, and therefore where new applications land and where restored applications
+return.
+
+Stages have no archival flag: a stage exists or it does not.
 
 ---
 
@@ -765,12 +791,12 @@ tracking address (so that clicks arriving through it are attributed automaticall
 | Name (`name`) | single line text | Mirror of the underlying Tracking Source's name; writable through it. Not stored here. |
 | Source (`source_id`) | link to one Tracking Source | Required. The shared attribution record. Deletion restricted — and additionally protected by the rule of [business-rules.md](business-rules.md#12-protection-of-attribution-records). |
 | Job (`job_id`) | link to one Job Position | The position this source advertises. Indexed. Deleting the position deletes the source. |
-| Alias ID (`alias_id`) | link to one Alias | The inbound address dedicated to this source. Optional until created. Deletion restricted. |
+| Alias (`alias_id`) | link to one Alias | The inbound address dedicated to this source. Optional until created. Deletion restricted. |
 | Email (`email`) | single line text | Read-only mirror of the alias's display name, that is, the full inbound address. Not stored. |
 | Has Domain (`has_domain`) | single line text | Derived, not stored. Whether an alias domain is available: the alias's own domain when an alias exists, otherwise the domain of the position's company or, failing that, of the acting user's company. The interface uses it to hide the "create an address" control when no domain is configured. |
 | Medium (`medium_id`) | link to one Tracking Medium | Default: the shared medium named *website*, fetched or created on demand. |
 | Campaign (`campaign_id`) | link to one Tracking Campaign | Optional. |
-| Tracker URL (`url`) | single line text | Derived, not stored (present when the public job pages companion is installed). The public page address of the position with the three attribution parameters appended. Formula in [interfaces.md](interfaces.md#63-per-source-tracking-address). |
+| Tracker address (`url`) | single line text | Derived, not stored (present when the public job pages companion is installed). The public page address of the position with the three attribution parameters appended. Formula in [interfaces.md](interfaces.md#63-per-source-tracking-address). |
 
 | Aspect | Value |
 |---|---|
@@ -803,7 +829,17 @@ resulting address as a string, for the interface's copy-to-clipboard control.
 ### 8.4 Deletion
 
 Deleting a Recruitment Source deletes its alias as well, with elevated rights, so that no
-orphan inbound address survives.
+orphan inbound address survives. Deleting the Job Position deletes its Recruitment Sources,
+and therefore their aliases.
+
+The underlying Tracking Source cannot be deleted while a Recruitment Source points at it.
+The database reference already refuses it; a readable message is raised first, listing the
+positions concerned. The message and the exact list format are specified in
+[business-rules.md](business-rules.md#12-protection-of-attribution-records).
+
+Duplicating a Recruitment Source copies the name, the medium, the campaign and the
+position, and does **not** copy the alias; the copy therefore has no inbound address until
+*create the address* is run on it.
 
 ---
 
@@ -884,6 +920,21 @@ Opens a blank Application form with the pool pre-filled, titled *Create Talent*.
 the Application creation rule points a pooled Application's canonical pool copy at itself,
 the record saved from that form is immediately a talent.
 
+### 10.4 Removing a pool, archiving and deleting
+
+Removing the **last** pool from a talent is refused, because a record whose canonical pool
+copy is itself must keep at least one pool. The message is
+`Talent must belong to at least one Talent Pool.` A talent that is no longer wanted is
+deleted, not emptied.
+
+Archiving a pool sets its active flag to false; the pool and its talents stay linked, and
+the talents are untouched.
+
+Duplicating a pool copies every field including the talent list, so the copy shares the
+same talents. Deleting a pool is allowed; every talent of that pool loses it, which will
+violate the rule above for any talent that had no other pool, so a pool holding talents
+must be emptied by deleting or re-pooling its talents before it is deleted.
+
 ---
 
 ## 11. Application Skill (`hr.applicant.skill`, table `hr_applicant_skill`)
@@ -895,11 +946,11 @@ on the same shared individual-skill definition.
 | Field (storage name) | Type | Meaning and rules |
 |---|---|---|
 | Applicant (`applicant_id`) | link to one Application | Required. Indexed. Deleting the Application deletes the skill line. |
-| Skill (`skill_id`) | link to one Skill | Required. Deleting the skill deletes the line. |
-| Skill Level (`skill_level_id`) | link to one Skill Level | Required. Deleting the level deletes the line. |
-| Skill Type (`skill_type_id`) | link to one Skill Type | Required. Deleting the type deletes the line. |
-| Validity Start (`valid_from`) | date | Start of the validity window. |
-| Validity Stop (`valid_to`) | date | End of the validity window. A line with an empty or future end date is *current*. |
+| Skill (`skill_id`) | link to one Skill | Required. Stored, computed from the skill type and writable; the default is the first skill of the chosen type. Restricted by domain to the skills of the chosen type. Deleting the skill deletes the line. |
+| Skill Level (`skill_level_id`) | link to one Skill Level | Required. Stored, computed from the skill and writable; the default is the level the type marks as its default, or, when the type marks none, the first level of the type. Restricted by domain to the levels of the chosen type. Deleting the level deletes the line. |
+| Skill Type (`skill_type_id`) | link to one Skill Type | Required. Default: the first skill type, or the first certification type when the creating context asks for a certification. Deleting the type deletes the line. |
+| Validity Start (`valid_from`) | date | Start of the validity window. Default: today. |
+| Validity Stop (`valid_to`) | date | End of the validity window. A line with an empty or future end date is *current*. Empty means open-ended. |
 | Progress (`level_progress`) | whole number | Read-only mirror of the level's progress percentage, from zero knowledge to fully mastered. |
 | Certification (`is_certification`) | true or false | Read-only mirror of the skill type's certification flag. |
 | Levels Count (`levels_count`) | whole number | Read-only mirror of the number of levels the skill type offers. |
@@ -918,6 +969,34 @@ end date is empty or not before today. If, for a skill whose type is a certifica
 line is current, then the single line with the latest end date is treated as current
 anyway, so that an expired certification still shows. Full rule in
 [calculations.md](calculations.md#83-current-skills).
+
+### 11.1 Validations on a skill line
+
+Every rule below is enforced when skill lines are created or written, and the message names
+every offending line at once.
+
+| Condition that fails | Exact message |
+|---|---|
+| Two lines of the same Application carry the same non-certification skill and their validity windows overlap | `The following skills can't be created as they overlap or exactly match existing skills:` followed by one bullet line per conflict reading the new line's display name, then ` conflicts with the existing skill/certification `, then the existing line's display name, then ` from `, the existing validity start, ` to ` and the existing validity end |
+| Two lines of the same Application carry the same certification skill, the same level, the same validity start and the same validity end | The same message as above |
+| A line's validity end is earlier than its validity start | `The following skills have their valid stop date prior to their valid start date:` followed by one bullet line per offending record reading the skill's display name, then ` from `, the validity start, ` to ` and the validity end |
+| The chosen skill does not belong to the chosen skill type | `The skill %(name)s and skill type %(type)s don't match`, where the first placeholder is the skill's name and the second the skill type's name |
+| The chosen level does not belong to the chosen skill type | `The skill level %(level)s is not valid for skill type: %(type)s`, where the first placeholder is the level's name and the second the skill type's name |
+
+### 11.2 Versioning: lines are never edited in place
+
+A skill line is never updated in place. Adding a skill, or changing the level of a skill the
+person already holds, is translated into a sequence of operations on the line set, specified
+step by step in [workflows.md](workflows.md#18-skills). In outline: the previous line for
+the same skill receives a validity end of yesterday, or is deleted outright when it was
+created today or has already expired, and a new line is created starting today. For a
+certification type several lines of the same skill and level may coexist as long as their
+validity windows differ; an exact repetition is dropped.
+
+The algorithm itself belongs to the shared individual-skill definition of
+[Human Resources Core](../human-resources-core/README.md); this domain supplies only the
+link field to the Application and the propagation of the resulting operations to the
+canonical pool copy.
 
 ---
 
@@ -996,6 +1075,7 @@ Behaviour added:
 | Survey kind (`survey_type`) | selection | Extended with the value `recruitment` — *Recruitment*. When the referenced questionnaire kind is removed, records fall back to the default kind. |
 | Job Position (`hr_job_ids`) | children (Job Positions) | The positions using this questionnaire as their written interview. |
 | Applicant (`applicant_id`) | link to one Application | On the Answer Set: which application this set of answers belongs to. Sparse index. |
+| Applicant (`applicant_id`) | link to one Application | On the Interview Invitation dialog: the application being invited. |
 
 Behaviour added:
 
@@ -1008,6 +1088,11 @@ Behaviour added:
 - When an Answer Set linked to an Application is marked complete, a message is posted on the
   Application reading `The applicant "` followed by the applicant's name and
   `" has finished the survey.`, authored by the platform's system contact.
+- When a retry of an Answer Set is granted, the application reference is carried over to the
+  new Answer Set, so the retry stays attached to the same Application.
+- The Interview Invitation dialog, when it carries an application, creates the Answer Set,
+  posts two entries in the Application's thread and sends the message immediately; the full
+  procedure is in [workflows.md](workflows.md#17-the-written-interview).
 
 ### 12.7 Periodic Digest (`digest.digest`)
 
@@ -1017,6 +1102,68 @@ Behaviour added:
 | New Employees value (`kpi_hr_recruitment_new_colleagues_value`) | whole number | Derived, not stored. The company-scoped count of employees created in the digest period. Computing it raises an access error, with the text `Do not have access, skip this data for user's digest email`, for any user who does not hold the Officer privilege; the digest sender catches that error and omits the indicator for that recipient. |
 
 The indicator's click-through target is the employee list of the people register.
+
+### 12.8 Tracking Campaign (`utm.campaign`) and Tracking Source (`utm.source`)
+
+No field is added. Two deletion guards are added, both raised before the database
+constraint so that the user sees a sentence rather than a reference error:
+
+| Guard | When it fires | Exact message |
+|---|---|---|
+| The shipped recruitment campaign is protected | The campaign whose external identifier is `hr_recruitment.utm_campaign_job`, named `Job Campaign`, is among the records being deleted | `The UTM campaign '%s' cannot be deleted as it is used in the recruitment process.`, where the placeholder is that campaign's name. The three letters at the start of the message are the abbreviation the attribution convention uses for its own vocabulary; the message is reproduced because support procedures and tests key on it. |
+| A Tracking Source in use is protected | At least one Recruitment Source points at one of the Tracking Sources being deleted | `You cannot delete these UTM Sources as they are linked to the following recruitment sources in Recruitment:` followed by a new line and the names of the Job Positions concerned, each between double quotation marks and separated by a comma and a space. Same remark on the abbreviation. |
+
+Both guards are also stated, with their identifiers, in
+[business-rules.md](business-rules.md#12-protection-of-attribution-records).
+
+### 12.9 Attachment (`ir.attachment`)
+
+No field is added. One index is added: a trigram index over the extracted text content of
+attachments whose owning model is the Application entity, created only when the database
+offers trigram indexing, and built over the accent-stripped form of the content when the
+database offers an indexable accent-stripping function. It is what makes the
+*Resume's content* search of the application search bar fast.
+
+### 12.10 Menu Entry (`ir.ui.menu`)
+
+No field is added. One visibility rule is added, evaluated per reader:
+
+| Reader | Menu hidden |
+|---|---|
+| Does not hold the Interviewer privilege | The general job position menu of the people register |
+| Holds the Interviewer privilege but not the Officer privilege | The ordinary *By Job Positions* entry of this domain |
+| Every other reader | The interviewer variant of *By Job Positions* |
+
+The effect is that each reader sees exactly one *By Job Positions* entry, pointing at the
+list they are allowed to work with.
+
+### 12.11 Activity Plan (`mail.activity.plan`) and Activity Scheduling dialog (`mail.activity.schedule`)
+
+No field is added. Two behaviours are added:
+
+- An activity plan whose target entity is the Application entity becomes
+  **department-assignable**, so that its steps may be assigned to the department manager.
+- The activity scheduling dialog, when it is scheduling on applications, makes those plans
+  **department-filterable**.
+
+### 12.12 Company (`res.company`)
+
+| Field (storage name) | Type | Meaning and rules |
+|---|---|---|
+| Job Properties (`job_properties_definition`) | custom properties definition | The definition of the extra fields every Job Position of this company carries in `job_properties`. |
+
+### 12.13 Website (`website`) and Website Page (`website.page`)
+
+Present when the public job pages companion is installed. No field is added. Three
+behaviours are added:
+
+- The public job list is offered among the suggested pages when a site is being built,
+  under the name *Jobs*, pointing at the path `/jobs`.
+- Job Positions join the site-wide search under the search kind `jobs`; the searchable
+  fields are the position name and, when the caller asks for descriptions, the job
+  description. The result carries the position name and its relative public address.
+- The thank-you page at `/job-thank-you` is never served from the page cache, because it
+  renders information about the application the visitor has just submitted.
 
 ---
 
@@ -1040,7 +1187,7 @@ offer the same inputs and apply the same rules.
 | Duplicate Applications (`duplicate_applicant_ids`) | link to many Applications | Computed from the flag and writable. Association table `applicant_get_refuse_reason_duplicate_applicants_rel`. When the flag is set it holds every matching application; when it is clear it is empty. |
 | Duplicate domain (`duplicate_applicant_ids_domain`) | binary | Derived. The search condition described in [calculations.md](calculations.md#42-refusal-duplicate-set). |
 | Attachments (`attachment_ids`) | link to many Attachments | Copied from the template; writable. Search access bypassed so that template attachments remain reachable. |
-| Scheduled Date (`scheduled_date`) | single line text | Copied from the template; writable. Help text: *send emails after that date. This date is considered as being in UTC timezone.* |
+| Scheduled Date (`scheduled_date`) | single line text | Copied from the template; writable. Its help text states that messages are sent only after that moment and that the value is read as coordinated universal time. |
 | Subject / Body | single line text / rich text | From the shared message-composition definition. Copied from the template and, when exactly one application is selected, rendered against it so the user sees the final text. |
 
 ### 13.2 Message dialog (`applicant.send.mail`)
@@ -1075,12 +1222,47 @@ offer the same inputs and apply the same rules.
 |---|---|---|
 | Online Posting (`module_website_hr_recruitment`) | true or false | Whether the public job pages companion is installed. |
 | Interview Forms (`module_hr_recruitment_survey`) | true or false | Whether the written interview companion is installed. |
-| Send CV to OCR to fill applications (`module_hr_recruitment_extract`) | true or false | Whether the optical character recognition companion, which reads uploaded curricula vitae and fills the application fields, is installed. |
+| Curriculum vitae digitisation (`module_hr_recruitment_extract`) | true or false | Whether the optical character recognition companion, which reads uploaded curricula vitae and fills the applicant's name, telephone number and electronic mail address automatically, is installed. Its interface label is reproduced in [configuration.md](configuration.md#2-settings). |
 
 These three live on the platform-wide settings record; toggling one installs or removes the
 corresponding companion. They are described further in
-[configuration.md](configuration.md#2-settings).
+[configuration.md](configuration.md#2-settings). The Company-level custom-property
+definition that positions read is listed in §12.12.
 
-| Field (storage name) | Type | Owner | Meaning |
-|---|---|---|---|
-| Job Properties (`job_properties_definition`) | custom properties definition | Company | The definition of the extra fields every Job Position of the company carries. |
+---
+
+## 15. Record lifecycle of every configuration entity
+
+The lifecycle of the Application itself is given in §2.5 to §2.8. The table below states,
+for every other entity of the folder, how a record comes into being, what duplicating it
+does, whether it can be archived, and when it can be deleted.
+
+| Entity | Creation | Duplication | Archival | Deletion |
+|---|---|---|---|---|
+| Recruitment Stage | From the pipeline, where it is global by default (§4.4), or from the stage list of the configuration menu | Copies every field, including the position restriction and the message template; names need not be unique | None: stages carry no active flag | Refused while any Application points at the stage; allowed otherwise |
+| Refusal Reason | From its configuration list, which is edited in place | Copies the description and the template; the sequence is **not** copied and falls back to 10 | Through `active`; an archived reason disappears from the refusal dialog but stays on the applications already refused for it | Allowed; applications that carried the reason are left with an empty reason and therefore read as *archived* rather than *refused* |
+| Application Tag | From its configuration list, or directly from the tag field of an application, which any internal user may do | Copies the name, which then breaks the uniqueness rule, so the copy is refused | None | Officer privilege only |
+| Degree | From its configuration list, edited in place with a drag handle for the order | Copies the name, which breaks the uniqueness rule, so the copy is refused | None | Allowed; applications keep an empty degree |
+| Recruitment Source | From the sources tab of a position, or from the sources action with a position in the reading context; creating one also creates the underlying Tracking Source | Copies the name, the medium, the campaign and the position; does **not** copy the alias | None | Allowed; the alias is deleted with it. Deleting the position deletes its sources |
+| Job Board | From the job-board configuration list, Administrator privilege only; the address is normalised on the way in | Copies the name, the address and the pattern; the address then breaks the uniqueness rule, so the copy is refused | None | Administrator privilege only; applications already created keep their values |
+| Talent Pool | From the talent pool screen; the manager defaults to the acting user, the company to the acting user's company and the colour to a pseudo-random value | Copies every field including the talent list, so the copy shares the same talents | Through `active`; pool and talents stay linked | Allowed, but see §10.4: talents left with no pool violate the pooling rule |
+| Application Skill | Only through the versioning operations of §11.2, never typed directly as a stored line | Not duplicated on its own; duplicating an Application copies its skill lines | None; a superseded line receives a past validity end instead | Deleted with the Application; deleted outright when the line was created today or has already expired |
+| The four transient dialogs | Created by the operation that opens them, with their defaults computed from the selection | Not duplicated | None | Removed by the platform's periodic cleanup of transient records; nothing of business value is lost, because a dialog record holds only the parameters of an operation that either ran or was abandoned |
+
+---
+
+## 16. Reconciliation notes
+
+Two independently written descriptions of this domain were merged into this file. The
+points where they differed, and the resolution checked against the behaviour of the system,
+are recorded here.
+
+| Point | Resolution |
+|---|---|
+| Name of the four-value readiness field | One version called it a progress marker with the names `label_in_progress`, `label_ready_for_next_stage`, `label_waiting` and `label_blocked`. The stored identifiers are `kanban_state` on the Application and `legend_normal`, `legend_done`, `legend_waiting` and `legend_blocked` on both the Application and the stage. The stored identifiers are used throughout this folder, because they are contractual; the descriptive wording of the other version is kept as the meaning column. |
+| Telephone fields | One version listed only `partner_phone_sanitized`; the other also listed `phone_sanitized`, `phone_blacklisted` and `phone_mobile_search`. All four exist and all four are now documented, together with the difference between the two sanitised numbers: `partner_phone_sanitized` falls back to the raw number, `phone_sanitized` stays empty when the number cannot be formatted. |
+| Whether an Application with no address, no telephone number and no professional network profile counts itself | One version said the application counter always includes the record itself. The counter is built from the values the record carries; a record carrying none of the three keys and no canonical pool copy matches nothing and reports **zero**. The rule and its worked example are in [calculations.md](calculations.md#41-application-count). |
+| Copy behaviour of the refusal reason's sequence | One version said the sequence is copied. It is not: duplicating a Refusal Reason leaves the sequence at its default of 10. Recorded in §15. |
+| Ordering of Degrees | One version stated an ordering by sequence, the other by identifier. The stored default ordering is by identifier; the configuration list re-orders by sequence through its drag handle, which is a screen behaviour, not the entity's ordering. Both statements are now given, in §7.2 and §15. |
+| Default of the favourites list on a Job Position | One version said the creator becomes a favourite. The field's own default does name the acting user, but the creation rule overwrites the list with whatever was submitted, or with the empty list when nothing was submitted, so a position created through the interface starts with **no** favourite. Recorded in §3.4. |
+| Public form writable fields | Both versions list the same seven entries. Confirmed: the electronic mail address, the applicant's name, the telephone number, the Job Position, the Department, the professional network profile address and the custom application properties. |

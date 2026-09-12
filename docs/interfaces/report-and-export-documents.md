@@ -390,9 +390,9 @@ contents.
 
 #### Return slip
 
-Entity: Transfer. Output: portable document. Print menu: transfers. Prints the return instructions, the address to
-return to, the original transfer reference and the products with the quantities to return, with the return code of the
-carrier when one was generated.
+Entity: Transfer. Output: portable document. Print menu: transfers. Prints the return instructions, the address the
+goods must be returned to, the original transfer reference, the products with the quantities to return, and the
+carrier's return code when one was generated.
 
 #### Package contents
 
@@ -808,8 +808,8 @@ component \"&lt;component&gt;\"" (a replacement states its own equivalent).
 
 1. The header is compared with the field labels and the field names of the entity, case-insensitively, including nested
    paths written with a separator.
-2. When a previous import of the same entity mapped the same header, that mapping is proposed again. Every successful
-   import stores or updates the mapping of each header, which is how a recurring import from the same outside system
+2. When a previous import of the same entity mapped the same header, that mapping is proposed again. Each successful
+   run stores or updates the mapping of every header, which is how a recurring import from the same outside system
    becomes one click.
 3. When nothing matches exactly, the closest field by string distance is proposed, restricted to fields whose type can
    hold the sampled values: a column whose values parse as dates proposes only date fields, one whose values parse as
@@ -901,8 +901,8 @@ they describe; they are also transmitted over the document exchange networks. Th
 and their validation rules are specified in
 [`../domains/electronic-invoicing-and-document-exchange/README.md`](../domains/electronic-invoicing-and-document-exchange/README.md);
 the transport contract is in [`external-integrations.md`](external-integrations.md). The download endpoints that serve
-them are catalogued in [`endpoint-catalog.md`](endpoint-catalog.md): one invoice returns one file, several invoices
-return a compressed archive, and a request that cannot produce the structured form for a single invoice fails with
+them are catalogued in [`endpoint-catalog.md`](endpoint-catalog.md): one invoice returns one file, several invoices are
+returned as a compressed archive, and a request that cannot produce the structured form for a single invoice fails with
 "Error while creating Markup Document:" followed by the list of reasons.
 
 ### Accounting audit file

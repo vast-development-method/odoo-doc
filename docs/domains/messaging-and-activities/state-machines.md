@@ -27,6 +27,9 @@ Contents:
 19. [Scheduled message and deferred notification](#19-scheduled-message-and-deferred-notification)
 20. [Digest activation and periodicity](#20-digest-activation-and-periodicity)
 21. [Call session lifecycle](#21-call-session-lifecycle)
+22. [Suppression-list entry activation](#22-suppression-list-entry-activation)
+23. [Rating consumption](#23-rating-consumption)
+24. [Sending account registration](#24-sending-account-registration)
 
 ---
 
@@ -242,6 +245,24 @@ The database form of the same computation, used for searching and grouping, take
 
 A second derived indicator, the exception decoration, is computed over the **types** of the live activities: a type decorated "Error" wins immediately; otherwise the last type decorated "Alert" encountered is used; otherwise the indicator is empty.
 
+### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> empty: no live activity
+    empty --> planned: an activity due in the future is created
+    empty --> today: an activity due today is created
+    empty --> overdue: an activity due in the past is created
+    planned --> today: the earliest activity becomes due today
+    today --> overdue: the earliest activity passes its due date
+    planned --> overdue: an activity is moved into the past
+    overdue --> today: the last overdue activity is completed or rescheduled
+    today --> planned: the last activity due today is completed or rescheduled
+    planned --> empty: the last live activity is completed or cancelled
+    today --> empty: the last live activity is completed or cancelled
+    overdue --> empty: the last live activity is completed or cancelled
+```
+
 ---
 
 ## 5. Alias validity
@@ -299,6 +320,21 @@ Field: `state` on Incoming Mail Server (`fetchmail.server`). Stored, read-only, 
 | `done` | `draft` | The user resets the server, or any connection parameter is changed | — | — |
 | unchanged | unchanged | A poll fails | — | The last-error moment and text are written; the server stays confirmed so the next poll retries. |
 | unchanged | unchanged | A poll succeeds | — | The last-fetch moment is written and the error fields are cleared. |
+
+### Connection failures
+
+Confirming the connection reports, in order of what went wrong: "Invalid server name!\n <details>", "No response received. Check server information.\n <details>", "Server replied with following exception:\n <details>", "An SSL exception occurred. Check SSL/TLS configuration on server port.\n <details>". Using an archived server aborts with "The server "<name>" cannot be used because it is archived." Confirming the first server of the installation activates the polling job and sets its interval.
+
+### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft: created
+    draft --> done: the connection test succeeded
+    draft --> draft: the connection test failed
+    done --> draft: reset, or a connection parameter changed
+    done --> done: a poll succeeded or failed
+```
 
 ---
 
@@ -476,6 +512,15 @@ Field: `is_closed` on Mailing Group (`mail.group`). A two-valued flag rather tha
 While closed: joining is refused with "You can not join a closed group."; sending guidelines is refused with "You can not send guidelines for a closed group."; and the incoming router returns no route at all after sending the bounce.
 
 The list ordering places open lists before closed ones.
+
+### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> open: created
+    open --> closed: the close action
+    closed --> open: the open action
+```
 
 ---
 
@@ -745,6 +790,27 @@ A user may force one of three values: away, do-not-disturb, offline. The value s
 
 Two distinct moments are recorded: the last poll (any contact with the server, including a mere keep-alive) and the last presence (a real interaction). The away decision uses the last presence; the offline decision uses the last poll.
 
+The away decision itself is:
+
+```formula
+status = "away"    when the inactivity since the last presence exceeds the away threshold
+status = "online"  otherwise
+```
+
+Every change of status is pushed on the presence broadcast channel of the user or the guest concerned. Closing the connection writes the offline status and pushes it.
+
+### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> offline
+    offline --> online: the party connects and interacts
+    online --> away: no interaction for longer than the away threshold
+    away --> online: the party interacts again
+    online --> offline: the connection closes, or the last poll ages out
+    away --> offline: the connection closes, or the last poll ages out
+```
+
 ---
 
 ## 17. Channel membership pin (derived)
@@ -773,6 +839,17 @@ is_pinned = ( unpin_moment is empty )
 | pinned | not pinned | A maintenance routine, for a **sub-thread** only | Requires: both the member's and the channel's last-interest moments older than two days, and no message at or after the member's new-message separator that is not a notification. The unpin moment is stamped and the client is told to close the window. |
 
 A direct conversation that is created but never used is deliberately unpinned for the correspondent: the correspondent's member row is created with an unpin moment set to a moment strictly after the last-interest moment, so the conversation stays invisible until the first message.
+
+### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> pinned: the member is created with no unpin moment
+    pinned --> not_pinned: the member unpins
+    pinned --> not_pinned: the maintenance routine unpins an idle sub-thread
+    not_pinned --> pinned: the member pins, joins or opens the conversation
+    not_pinned --> pinned: a message raises the channel's last-interest moment
+```
 
 ---
 
@@ -805,6 +882,28 @@ Fields: `new_message_separator` and `seen_message_id` on Channel Member.
 | separator at *s* | separator at *m*+1 | The member marks the conversation read up to message *m* | The last seen message becomes *m* (only if the current one is lower), the fetched message becomes the maximum of its current value and *m*, and the last-seen moment is stamped. When the channel type broadcasts read receipts (direct chat, group, live chat session), the new last-seen value is broadcast to the whole channel; otherwise only to the member. |
 | separator at *s* | separator at *m*+1 | The member posts message *m* themselves | Done silently in the posting hook: the author never sees their own message as unread. |
 | unchanged | unchanged | The member marks read a message identifier that is already behind the separator | The member is simply re-broadcast with the current counters, so a client that was out of step re-synchronizes. |
+
+### Diagrams
+
+```mermaid
+stateDiagram-v2
+    state "notification read flag" as flag {
+        [*] --> unread: an inbox notification is created
+        [*] --> read: an electronic-mail or postal notification is created
+        unread --> read: the recipient marks it done, or marks everything read
+    }
+```
+
+```mermaid
+stateDiagram-v2
+    state "channel unread separator" as sep {
+        [*] --> behind: the member has unread messages
+        behind --> caught_up: the member marks read up to the last message
+        caught_up --> behind: a new message is posted by somebody else
+        caught_up --> caught_up: the member posts a message themselves
+        caught_up --> behind: the member moves the separator back by hand
+    }
+```
 
 ---
 
@@ -843,6 +942,29 @@ Record: Scheduled Message (`mail.scheduled.message`).
 | pending | — | The author cancels | The row is deleted; nothing is posted. |
 | pending | posted | The scheduled job reaches the moment, or the author sends it now | The captured payload is used to post the message on the target record; the row is deleted. |
 | pending | — | The target record is deleted | Every scheduled message of that record is deleted with it. |
+
+### Diagrams
+
+```mermaid
+stateDiagram-v2
+    state "deferred notification pass" as defer {
+        [*] --> pending: a message is posted with a future moment
+        pending --> pending: the author changes the moment
+        pending --> released: the job reaches the moment, or a caller forces the release
+        released --> [*]: the schedule row is deleted
+    }
+```
+
+```mermaid
+stateDiagram-v2
+    state "message not yet posted" as sched {
+        [*] --> pending: the composer schedules it
+        pending --> pending: the author edits the entry
+        pending --> posted: the job reaches the moment, or the author sends it now
+        pending --> [*]: the author cancels, or the target record is deleted
+        posted --> [*]: the row is deleted and a Message exists
+    }
+```
 
 ---
 
@@ -942,3 +1064,120 @@ stateDiagram-v2
     in_call --> not_in_call: left
     in_call --> not_in_call: heartbeat lapsed
 ```
+
+---
+
+## 22. Suppression-list entry activation
+
+Field: `active` on Blacklist Entry (`mail.blacklist`) and on Blocked Number (`phone.blacklist`). Both records adopt the Thread behavior and track both of their fields, so every transition is itself an entry in the record's own conversation.
+
+### States
+
+| Value | Meaning |
+|---|---|
+| true | The address, or the number, is suppressed: no mass sending reaches it. |
+| false | The row is archived. The address or number is no longer suppressed; the history of the suppression is preserved. |
+
+### Transitions
+
+| From | To | Trigger | Guards | Side effects |
+|---|---|---|---|---|
+| — | true | An address or a number is added to the suppression list | It normalizes, and no active row already holds it | A tracked creation entry appears in the row's own conversation. |
+| false | true | The same address or number is added again | — | The archived row is re-activated rather than duplicated; the change is tracked. |
+| true | false | A settings administrator removes it through the removal window | The caller holds the right | The row is archived and the reason typed in the window is logged as an internal note on the row. |
+| true | true | A duplicate is offered | — | Refused with "Email address already exists!" or "Number already exists". |
+
+Two confirmations are shown before the removal, depending on the entry point: "Are you sure you want to unblacklist this Email Address?" and "Are you sure you want to unblacklist this email address?". A caller without the right sees "You do not have the access right to unblacklist emails. Please contact your administrator." or, for a number, "You do not have the access right to unblacklist phone numbers. Please contact your administrator."
+
+### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> active: added to the suppression list
+    active --> archived: removed with a reason
+    archived --> active: added again
+```
+
+---
+
+## 23. Rating consumption
+
+Field: `consumed` on Rating (`rating.rating`), with the value and the textual grade as companions. The record is owned by [../learning-surveys-and-gamification/](../learning-surveys-and-gamification/); the machine is reproduced here because live chat drives it and because the outcome of a session depends on it.
+
+### States
+
+| Derived state | Condition | Meaning |
+|---|---|---|
+| requested | The row exists, the consumed flag is false and the value is zero. | A rating link was issued and nobody has answered. |
+| answered | The consumed flag is true. | A value between one and five was applied. |
+| reset | The consumed flag is false again and the value is zero. | The row is reusable for a new request. |
+
+### Transitions
+
+| From | To | Trigger | Guards | Side effects |
+|---|---|---|---|---|
+| — | requested | A rating is requested for a record and a party | No unconsumed rating already exists for that pair; otherwise the existing row is reused and its token returned | A row is created with an access token and the moment of the request. |
+| requested | answered | The party follows the rating link, or submits the feedback form | The token resolves; the value lies between zero and five | The value, the textual grade and the comment are written, the consumed flag is set, and a message is posted in the rated record's conversation showing the face for the value and the comment. |
+| answered | answered | The party submits a different value | The token still resolves | The **same** message is updated rather than a second one posted. |
+| answered | reset | A caller resets the rating | — | The value, the comment, the consumed flag and the grade are cleared so a new request can reuse the row. |
+
+When the caller asks to delay the notification, the notification of the rating message is deferred by two hours, so the party may still change their answer before anybody is told.
+
+### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> requested: a rating link is issued
+    requested --> answered: the party applies a value
+    answered --> answered: the party changes the value
+    answered --> reset: the row is reset for a new request
+    reset --> requested: a new link is issued on the same row
+```
+
+---
+
+## 24. Sending account registration
+
+Field: the registration state of the text-message sending account, held by the external service rather than in the database. The platform observes it through the three registration windows.
+
+### States
+
+| Derived state | Meaning |
+|---|---|
+| unregistered | No account exists for this installation. Sending is refused with the unregistered-account failure type. |
+| awaiting verification | A telephone number was submitted and a code was texted to it. |
+| registered | The code was confirmed. Sending works; the sender name may still be missing. |
+| named | A sender name of three to eleven letters and digits was set. It can never be changed afterwards. |
+
+### Transitions
+
+| From | To | Trigger | Guards | Side effects |
+|---|---|---|---|---|
+| unregistered | awaiting verification | A telephone number is submitted | The number is usable and the service accepts new registrations | A code is texted. A refusal carries the service's own explanation. |
+| awaiting verification | registered | The code is confirmed | The code matches and the attempt count is not exhausted | The account is marked registered and the sender-name window opens. |
+| awaiting verification | awaiting verification | A wrong code is entered | — | "The verification code is incorrect."; too many attempts give "You tried too many times. Please retry later." |
+| registered | named | A sender name is set | Three to eleven letters and digits | A second attempt gives "This account already has an existing sender name and it cannot be changed." |
+| unregistered | unregistered | A sender name is set before registration | — | "Your text message account has not been activated yet." |
+
+With the external telephony provider there is no registration machine at all: the company stores an account identifier and a token, and the sending numbers are fetched from the provider.
+
+### Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> unregistered
+    unregistered --> awaiting_verification: a number is submitted
+    awaiting_verification --> awaiting_verification: a wrong code is entered
+    awaiting_verification --> registered: the code is confirmed
+    registered --> named: a sender name is set
+```
+
+---
+
+## Reconciliation notes
+
+1. **Which machines exist.** One source version kept the state tables inside its workflow document and listed eleven machines; the other kept a dedicated document with twenty-one. This document keeps all of them and adds three more that neither version isolated: the suppression-list activation, the rating consumption and the sending-account registration. No machine of either version was dropped.
+2. **The notification status on the text-message channel.** One version drew the statuses as a straight line from ready to delivered. The real machine is guarded by the monotonic rule, so a late report can never move a notification backwards. Section 2 states the guard and [business-rules.md](business-rules.md), rule MSG-336, gives the ignore sets.
+3. **The live chat session status when the session is closed.** One version left the status unchanged on closing; the observable behaviour forces it empty, which the database check enforces. Section 12 states the forced transition.
+4. **The alias validity machine.** One version wrote that a policy refusal sets the alias to invalid. It does not: only a configuration error does. Section 5 states the distinction and shows both bounce bodies.
+5. **Missing diagrams.** One version carried no diagram for the record activity indicator, the incoming server, the mailing-list openness, the presence, the membership pin, the read state and the two deferrals. Diagrams have been added for all of them, so every machine in this document now carries one.

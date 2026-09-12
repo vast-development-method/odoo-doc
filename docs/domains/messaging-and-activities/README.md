@@ -56,8 +56,8 @@ Out of scope, specified in a neighbouring folder:
 | Users, groups as an access-control concept, authentication, the portal access token | `../identity-and-access/` |
 | Automated actions and server actions in general (this folder describes only the four message- and activity-related server-action kinds) | `../automation-and-integration/` |
 | Meetings and calendar events, including the meeting activity category | `../calendar-and-scheduling/` |
-| Ratings as a generic behavior (this folder describes only how live chat uses them) | `../surveys-and-ratings/` |
-| Mass mailing campaigns, mailing lists used for marketing, and their statistics | `../marketing-automation-and-mass-mailing/` |
+| Ratings as a generic behavior (this folder describes only how live chat uses them) | `../learning-surveys-and-gamification/` |
+| Mass mailing campaigns, mailing lists used for marketing, and their statistics | `../marketing-and-mass-mailing/` |
 | The accounting and stock consequences of the documents that use this domain | the respective accounting and supply-chain folders |
 
 ## Entities
@@ -205,19 +205,72 @@ The domain defines the following records. Names are given in full words; the tra
 | Server Action | `ir.actions.server` | The four message- and activity-related action kinds |
 | Scheduled Job | `ir.cron` | Made a thread with activities so failures are logged and assigned |
 | Attachment | `ir.attachment` | The thumbnail, the voice marker and the broadcast on deletion |
+| Websocket handler | `ir.websocket` | The list of broadcast channels a client may subscribe to, the presence update and the presence clearing on disconnection |
+| Report definition | `ir.actions.report` | The retrieval of a generated document and the page-format check used by postal mail |
+| User Settings | `res.users.settings` | The conversation preferences, the push-to-talk key, the per-correspondent volumes and the live chat identity |
+
+### Records used here but owned elsewhere
+
+| Record | Transport name | Owning folder | What this folder relies on |
+|---|---|---|---|
+| Rating | `rating.rating` | [../learning-surveys-and-gamification/](../learning-surveys-and-gamification/) | The satisfaction answer a live chat session collects, its token, its value, its grade and its roll-up to the entry point. Specified here only to that extent, in `entities.md`, section 48.3. |
+| Contact | `res.partner` | [../contacts-and-organizations/](../contacts-and-organizations/) | The universal author, recipient and follower. |
+| User, Access Group | `res.users` | [../identity-and-access/](../identity-and-access/) | The identity behind a contact and the groups every access rule is written against. |
+| Attachment, Model registry entry, Field registry entry, Server Action, Scheduled Job, Report definition, Websocket handler, Window action | various | [../platform-foundation/](../platform-foundation/) | The files, the registry flags, the automation kinds and the transport this folder extends. |
+| Website, Website Visitor, Website Page | various | [../website-and-storefront/](../website-and-storefront/) | The site that serves the live chat widget and the visitor a session is attached to. |
+| Calendar Event | `calendar.event` | [../calendar-and-scheduling/](../calendar-and-scheduling/) | The meeting an activity of the meeting category opens. |
+
+Two records have no other home and are therefore owned here even though a neighbouring folder also reads them: the **Blocked Number** (`phone.blacklist`), which the text-message channel cannot work without and which [../marketing-and-mass-mailing/](../marketing-and-mass-mailing/) also consults, and the **Contact Enrichment** side table (`res.partner.iap`), which exists only for the electronic-mail client plugin of this folder.
+
+Entities whose transport name begins with `ir.`, `base.` or `report.` belong to the platform foundation; this folder specifies only the fields it adds to them, and the reader is sent to [../platform-foundation/](../platform-foundation/) for the rest.
+
+## Actors
+
+| Actor | What they do in this domain |
+|---|---|
+| Internal user | Posts messages and internal notes, schedules activities, follows records, manages the canned responses and templates they created, operates channels. |
+| Portal user | An external party with a login. Sees only the non-internal messages of the records shared with them, and may comment on a record they follow. |
+| Public visitor | An unauthenticated web visitor. May open a live chat session and act as a Guest, and may read a public mailing-list archive. |
+| Guest | A named, token-identified participant of a Channel with no user account. |
+| Live chat operator | An internal user who is a member of one or more Live Chat Channels and is assigned conversations. |
+| Live chat administrator | Configures entry points, chatbot scripts, expertise, tags and the reports. |
+| Moderator | Accepts, rejects, whitelists and bans on a moderated Mailing Group. |
+| Settings administrator | Configures alias domains, incoming and outgoing relays, activity types, message subtypes, the template-rendering restriction, the traversal and forwarding servers, the suppression lists and the sending accounts. |
+| The platform's scheduler | Drains the outgoing queue, the text-message queue and the postal queue; releases deferred notifications; posts scheduled messages; ships digests; notifies moderators; collects what has expired. |
+| External services | The relay, the mailbox, the browser push service, the text-message service, the telephony provider, the printing service, the enrichment service, the animated-image service, the translation service, the traversal servers, the forwarding unit and the publisher announcement service. |
+
+## Capability packages
+
+The domain ships as seventeen capability packages, listed with what each one adds in [configuration.md](configuration.md), section 1. The core is the notification bus plus the discussion and messaging package; everything else — the assistant bot, mailing groups and their public pages, follow buttons on public pages, live chat and its website widget, text messages and the external telephony provider, text messages on calendar events, postal mail and its accounting bridge, prepaid service notices, the periodic digest and the electronic-mail client plugin — is optional and is marked as such wherever it appears.
 
 ## Reading order
 
-1. `glossary.md` — the vocabulary: thread, subtype, follower, notification, tracking value, alias, catch-all, bounce, activity state, channel member, unread separator, operator assignment.
-2. `entities.md` — the data model, field by field, entity by entity.
-3. `state-machines.md` — the outgoing mail states, the notification states, the activity state derivation, the moderation states, the postal letter states, the live chat session states, the assistant-bot onboarding states.
-4. `calculations.md` — the recipient computation, the tracking comparison, the deadline arithmetic, the unread counters, the operator ranking, the digest indicators, the number sanitizing, the rendering.
-5. `business-rules.md` — every constraint, every access check, every exact error message.
-6. `workflows.md` — posting, notifying, sending, receiving, bouncing, scheduling an activity, running a plan, opening a channel, routing a live chat visitor, moderating a list post, shipping a digest.
-7. `accounting-effects.md` — why this domain posts nothing to the ledger, and what it does instead.
-8. `configuration.md` — settings, parameters, sequences, shipped records, groups, access rights, record rules, scheduled jobs.
-9. `interfaces.md` — menus, views, named operations, routes, printable documents, templates, external services, import and export.
-10. `acceptance-criteria.md` — the scenarios an implementation must pass.
+1. [glossary.md](glossary.md) — the vocabulary: thread, subtype, follower, notification, tracking value, alias, catch-all, bounce, activity state, channel member, unread separator, operator assignment.
+2. [entities.md](entities.md) — the data model, field by field, entity by entity, with a link to the generated reference page of every entity.
+3. [state-machines.md](state-machines.md) — the outgoing mail states, the notification states, the activity state derivation, the moderation states, the postal letter states, the live chat session states, the assistant-bot onboarding states, the suppression-list activation, the rating consumption and the sending-account registration.
+4. [calculations.md](calculations.md) — the recipient computation, the tracking comparison, the deadline arithmetic, the unread counters, the operator ranking, the digest indicators, the number formatting, the rating aggregation, the rendering.
+5. [business-rules.md](business-rules.md) — every constraint, every access check, every exact error message, numbered `MSG-nnn`, with the mapping from the identifiers the two source versions used.
+6. [workflows.md](workflows.md) — posting, notifying, sending, receiving, bouncing, scheduling an activity, running a plan, opening a channel, routing a live chat visitor, moderating a list post, shipping a digest, registering a sending account, exchanging with the announcement service.
+7. [accounting-effects.md](accounting-effects.md) — why this domain posts nothing to the ledger, and what it does instead.
+8. [configuration.md](configuration.md) — capability packages, settings, system parameters, fixed constants, shipped records, scheduled jobs, groups, access rights, record rules and the declarations a thread-enabled model must make.
+9. [interfaces.md](interfaces.md) — named operations, routes, the event bus, the client data contract, menus and screens, printable documents, shipped bodies, external services, the electronic-mail client plugin contract, import and export.
+10. [acceptance-criteria.md](acceptance-criteria.md) — the numbered scenarios an implementation must pass.
+
+## Files in this folder
+
+| File | Contents |
+|---|---|
+| [README.md](README.md) | This page: scope, entities, actors, reading order, dependencies and conventions. |
+| [entities.md](entities.md) | Every entity in full: purpose, lifecycle, complete field table, relations, uniqueness, ordering, display name, archival, company behaviour and the extensions other capability packages contribute. |
+| [state-machines.md](state-machines.md) | Every state field with its stored values, its transition table, its guards and a diagram. |
+| [workflows.md](workflows.md) | The end-to-end operational procedures, step by step, with the records each step touches and the failures it can produce. |
+| [business-rules.md](business-rules.md) | The numbered rule catalogue with the exact refusal texts, plus the identifier mapping. |
+| [calculations.md](calculations.md) | Every formula and algorithm with its rounding, its precision and at least one worked numeric example. |
+| [accounting-effects.md](accounting-effects.md) | The reasoned statement that the domain posts nothing to the ledger, and the seven points at which it touches the accounting folders. |
+| [configuration.md](configuration.md) | Settings, parameters, constants, master data, jobs, groups, rights and rules. |
+| [interfaces.md](interfaces.md) | Operations, routes, the event bus, the client data contract, screens, documents and external services. |
+| [acceptance-criteria.md](acceptance-criteria.md) | The Given, When and Then scenarios. |
+| [glossary.md](glossary.md) | Every term of the domain, defined. |
 
 ## Dependencies on other domains
 
@@ -227,7 +280,7 @@ The domain defines the following records. Names are given in full words; the tra
 | `../identity-and-access/` | Users, their groups, their companies and their language. The notification channel choice is a field of the User. The access rules of this domain are written against the shipped groups. |
 | `../automation-and-integration/` | Server actions may post a message, add followers or schedule an activity. Automated rules fire on tracked field changes. |
 | `../calendar-and-scheduling/` | An activity whose type category is "meeting" opens a calendar view and is completed when the meeting is over. |
-| `../surveys-and-ratings/` | A live chat session asks the visitor for a rating; the rating record belongs to that domain. |
+| `../learning-surveys-and-gamification/` | A live chat session asks the visitor for a rating; the rating record belongs to that domain. |
 | All business domains | Every document model that carries a conversation inherits the thread behavior specified here, and every tracked field on such a model produces the tracking entries specified here. |
 
 ## Conventions used in this folder
@@ -238,3 +291,10 @@ The domain defines the following records. Names are given in full words; the tra
 - Dates and times are stored without a time zone and are understood as coordinated universal time unless the text says otherwise. Deadlines of activities are calendar dates without a time component and are compared in the time zone of the assignee.
 - Identifiers reproduced in code font (for example `partner_id`, `mail.message`, `mail.mt_note`) are exact contract names that an implementation must preserve because external callers, stored data or shipped records depend on them. Each is given with its full name in words on first use in a document.
 - Wherever the behavior of the code leaves a detail unspecified and this document fills it with the common practice of messaging software, the sentence is marked with the phrase **industry-standard default**.
+- A reproduced route path, stored selection value, sequence code or verbatim message is written exactly as the system produces it, because an embedded widget, an external callback or a support procedure depends on it character for character.
+
+## How the two source drafts were merged
+
+This folder was consolidated from two independently written drafts of the same domain. The merge kept every entity, field, state value, transition, rule, message, formula, worked example, algorithm step, workflow, setting, access rule, interface contract, report, scenario and glossary term that either draft carried. Where both stated the same fact, the more precise wording was kept once. Where they contradicted each other, the source tree decided, and the decision is recorded in a "Reconciliation notes" section at the end of the affected file. Those sections exist in [entities.md](entities.md), [state-machines.md](state-machines.md), [workflows.md](workflows.md), [business-rules.md](business-rules.md), [calculations.md](calculations.md), [accounting-effects.md](accounting-effects.md), [configuration.md](configuration.md), [interfaces.md](interfaces.md) and [acceptance-criteria.md](acceptance-criteria.md).
+
+Two of the drafts organised the same material differently: one kept the incoming gateway, the activities, the channels with live chat, and the text messages with postal mail in four separate topic files. Their content is preserved here inside the eleven documents — the gateway algorithm in [calculations.md](calculations.md), section 16, and its procedures in [workflows.md](workflows.md), sections 10, 11 and 28 to 30; the activities across [entities.md](entities.md), sections 17 to 20, [calculations.md](calculations.md), sections 13 to 15, and [workflows.md](workflows.md), sections 13, 14 and 31; the channels and live chat across [entities.md](entities.md), sections 34 to 42, [calculations.md](calculations.md), sections 23 to 26 and 34, and [workflows.md](workflows.md), sections 15 to 17 and 32; and the text messages and postal mail across [entities.md](entities.md), sections 44 and 46, [calculations.md](calculations.md), sections 28 and 31, and [workflows.md](workflows.md), sections 19, 21, 26 and 27. No extra topic file is therefore needed, and nothing was dropped.

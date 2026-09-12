@@ -363,7 +363,7 @@ only where a matching constraint exists.
 
 **Time-based processing runs only unattended.**
 
-- **Applies to** Automation Rule, the historic entry point of the time-based processor.
+- **Applies to** Automation Rule, the secondary entry point of the time-based processor, which other packages may still call.
 - **Kind** Guard.
 - **Condition** The processor is called without the unattended flag.
 - **Message** "can run time-based automations only in automatic mode" — a technical failure, not a
